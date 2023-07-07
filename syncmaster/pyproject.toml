@@ -1,0 +1,52 @@
+[tool.poetry]
+name = "syncmaster"
+version = "0.1.0"
+description = ""
+authors = ["DataOps.ETL <onetools@mts.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.99.1"
+sqlalchemy = "^2.0.18"
+uvicorn = "^0.22.0"
+
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.0"
+httpx = "^0.24.1"
+pytest-asyncio = "^0.21.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.3.3"
+mypy = "^1.4.1"
+black = "^23.3.0"
+isort = "^5.12.0"
+flake8 = "^6.0.0"
+bandit = "^1.7.5"
+platformdirs = "3.8.0"
+
+
+[[tool.poetry.source]]
+name = "nexus"
+url = "https://nexus.services.mts.ru/repository/pip/simple"
+priority = "primary"
+
+[[tool.poetry.source]]
+name = "artifactory"
+url = "https://artifactory.mts.ru/artifactory/api/pypi/pip-bigdata/simple/"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
+py_version = "311"
+known_first_party = ["app"]
+
+[tool.mypy]
+python_version = "3.11"
+plugins = ["pydantic.mypy"]
