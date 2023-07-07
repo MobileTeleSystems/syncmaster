@@ -1,0 +1,116 @@
+default:
+  tags:
+    - bigdata
+    - dmz
+    - docker
+
+stages:
+  - build test image
+  - static analysis
+  - tests
+
+include:
+  - project: DevOps/cicd-store/gitlabci/docker
+    ref: v8
+    file:
+      - .base_docker_build.yml
+      - .base_docker_cleaner.yml
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+
+    - if: $CI_COMMIT_BRANCH =~ /^(master|main)$/
+      when: never
+
+    - when: always
+
+.build_test_image:
+  extends: .base_docker_build
+  stage: build test image
+  variables:
+    CICD_DOCKER__IMAGE_TAG: ${CI_COMMIT_REF_SLUG}
+    CICD_DOCKER__STOP_IF_EXISTS: 'false'
+    CICD_DOCKER__BUILD_EXTRA_ARGS: --pull --force-rm
+    CICD_STORE_DEBUG: 'true'
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - when: on_success
+  interruptible: true
+
+backend_test_image:
+  extends: .build_test_image
+  variables:
+    CICD_DOCKER__FILE_PATH: ./docker/backend.dockerfile
+    CICD_DOCKER__IMAGE_NAME: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend
+    CICD_DOCKER__CACHE_FROM: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend:develop
+
+mypy:
+  image: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend:${CI_COMMIT_REF_SLUG}
+  stage: static analysis
+  script:
+    - python -m mypy ./syncmaster/app
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - when: on_success
+  interruptible: true
+
+flake8:
+  image: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend:${CI_COMMIT_REF_SLUG}
+  stage: static analysis
+  script:
+    - python -m flake8 --format=default ./syncmaster/app 2>&1 | tee flake8.txt
+  artifacts:
+    when: always
+    paths: [flake8.txt]
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - when: on_success
+  interruptible: true
+
+black:
+  image: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend:${CI_COMMIT_REF_SLUG}
+  stage: static analysis
+  script:
+    - python -m black ./syncmaster/app --check
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - when: on_success
+  interruptible: true
+
+bandit:
+  image: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend:${CI_COMMIT_REF_SLUG}
+  stage: static analysis
+  script:
+    - python -m bandit -ll -iii -r ./syncmaster/app -f json -o ./bandit.json
+  artifacts:
+    when: always
+    paths: [./bandit.json]
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - when: on_success
+  interruptible: true
+
+tests:
+  image: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend:${CI_COMMIT_REF_SLUG}
+  stage: tests
+  variables:
+    JUNIT_FILE: junitxml.xml
+  script:
+    - python -m pytest -v ./syncmaster/tests -v -s --junitxml=${JUNIT_FILE}
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - ${JUNIT_FILE}
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - when: on_success
+  interruptible: true
