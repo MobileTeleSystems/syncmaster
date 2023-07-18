@@ -1,9 +1,10 @@
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.router import api_router
 from app.config import get_settings
+from app.handler import http_exception_handler
 
 
 def get_application() -> FastAPI:
@@ -20,6 +21,7 @@ def get_application() -> FastAPI:
     )
 
     application.include_router(api_router)
+    application.exception_handler(HTTPException)(http_exception_handler)
 
     return application
 

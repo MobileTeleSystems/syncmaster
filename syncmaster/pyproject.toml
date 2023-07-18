@@ -3,19 +3,26 @@ name = "syncmaster"
 version = "0.1.0"
 description = ""
 authors = ["DataOps.ETL <onetools@mts.ru>"]
-readme = "README.md"
+readme = "README.rst"
 
 [tool.poetry.dependencies]
 python = "^3.11"
 fastapi = "^0.99.1"
 sqlalchemy = "^2.0.18"
 uvicorn = "^0.22.0"
+pydantic = "^1.10.11"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+python-multipart = "^0.0.6"
+alembic = "^1.11.1"
+asyncpg = "^0.28.0"
 
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
 httpx = "^0.24.1"
 pytest-asyncio = "^0.21.0"
+sqlalchemy-utils = "^0.41.1"
+psycopg2-binary = "^2.9.6"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -26,6 +33,8 @@ isort = "^5.12.0"
 flake8 = "^6.0.0"
 bandit = "^1.7.5"
 platformdirs = "3.8.0"
+sqlalchemy = {extras = ["mypy"], version = "^2.0.18"}
+types-python-jose = "^3.3.4.7"
 
 
 [[tool.poetry.source]]
@@ -49,4 +58,4 @@ known_first_party = ["app"]
 
 [tool.mypy]
 python_version = "3.11"
-plugins = ["pydantic.mypy"]
+plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]

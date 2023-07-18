@@ -62,7 +62,7 @@ flake8:
   image: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend:${CI_COMMIT_REF_SLUG}
   stage: static analysis
   script:
-    - python -m flake8 --format=default ./syncmaster/app 2>&1 | tee flake8.txt
+    - python -m flake8 --max-line-length 120 --format=default ./syncmaster/app 2>&1 | tee flake8.txt
   artifacts:
     when: always
     paths: [flake8.txt]
@@ -102,6 +102,18 @@ tests:
   stage: tests
   variables:
     JUNIT_FILE: junitxml.xml
+    POSTGRES_HOST: db
+    POSTGRES_PORT: 5432
+    POSTGRES_DB: syncmaster
+    POSTGRES_USER: backend
+    POSTGRES_PASSWORD: backend
+  services:
+    - name: central-mirror.services.mts.ru/postgres:15-alpine
+      alias: db
+      variables:
+        POSTGRES_DB: syncmaster
+        POSTGRES_USER: backend
+        POSTGRES_PASSWORD: backend
   script:
     - python -m pytest -v ./syncmaster/tests -v -s --junitxml=${JUNIT_FILE}
   artifacts:
