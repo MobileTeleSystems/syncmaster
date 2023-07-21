@@ -1,6 +1,6 @@
 FROM sregistry.mts.ru/bigdata/platform/docker-images/python:3.11-slim
 
-RUN pip install --no-cache-dir --timeout 5 --retries 5 poetry \
+RUN pip install --no-cache-dir --timeout 3 --retries 3 poetry \
     && poetry config virtualenvs.create false
 
 WORKDIR /syncmaster

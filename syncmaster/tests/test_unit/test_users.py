@@ -7,12 +7,12 @@ from tests.utils import MockUser
 
 @pytest.mark.asyncio
 async def test_get_users(
-    async_client: AsyncClient,
+    client: AsyncClient,
     simple_user: MockUser,
     inactive_user: MockUser,
     deleted_user: MockUser,
 ):
-    response = await async_client.get("v1/users")
+    response = await client.get("v1/users")
     assert response.status_code == 401
     assert response.json() == {
         "ok": False,
@@ -20,7 +20,7 @@ async def test_get_users(
         "message": "Not authenticated",
     }
 
-    response = await async_client.get(
+    response = await client.get(
         "v1/users",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
@@ -41,7 +41,7 @@ async def test_get_users(
     for user_data in result["items"]:
         assert user_data["username"] != deleted_user.username
 
-    response = await async_client.get(
+    response = await client.get(
         "v1/users",
         headers={"Authorization": f"Bearer {inactive_user.token}"},
     )
@@ -55,12 +55,12 @@ async def test_get_users(
 
 @pytest.mark.asyncio
 async def test_get_user(
-    async_client: AsyncClient,
+    client: AsyncClient,
     simple_user: MockUser,
     inactive_user: MockUser,
     deleted_user: MockUser,
 ):
-    response = await async_client.get(f"/v1/users/{simple_user.id}")
+    response = await client.get(f"/v1/users/{simple_user.id}")
     assert response.status_code == 401
     assert response.json() == {
         "ok": False,
@@ -69,7 +69,7 @@ async def test_get_user(
     }
 
     # check from simple user
-    response = await async_client.get(
+    response = await client.get(
         f"v1/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
@@ -81,7 +81,7 @@ async def test_get_user(
     }
 
     # check from simple user deleted user
-    response = await async_client.get(
+    response = await client.get(
         f"v1/users/{deleted_user.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
@@ -93,7 +93,7 @@ async def test_get_user(
     }
 
     # check from inactive user
-    response = await async_client.get(
+    response = await client.get(
         f"v1/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {inactive_user.token}"},
     )
@@ -107,18 +107,16 @@ async def test_get_user(
 
 @pytest.mark.asyncio
 async def test_post_user(
-    async_client: AsyncClient,
+    client: AsyncClient,
     simple_user: MockUser,
     inactive_user: MockUser,
     deleted_user: MockUser,
     superuser: MockUser,
 ):
     # not auth
-    response = await async_client.post(
+    response = await client.post(
         f"v1/users/{simple_user.id}",
-        data={
-            "username": "new_username",
-        },
+        json={"username": "new_username"},
     )
     assert response.status_code == 401
     assert response.json() == {
@@ -128,7 +126,7 @@ async def test_post_user(
     }
 
     # check correct update
-    response = await async_client.post(
+    response = await client.post(
         f"v1/users/{simple_user.id}",
         json={"username": "new_username"},
         headers={"Authorization": f"Bearer {simple_user.token}"},
@@ -141,7 +139,7 @@ async def test_post_user(
     }
 
     # check incorrect username
-    response = await async_client.post(
+    response = await client.post(
         f"v1/users/{simple_user.id}",
         json={"username": "new            username"},
         headers={"Authorization": f"Bearer {simple_user.token}"},
@@ -158,7 +156,7 @@ async def test_post_user(
     }
 
     # check change other user from simple
-    response = await async_client.post(
+    response = await client.post(
         f"v1/users/{inactive_user.id}",
         json={"username": "username"},
         headers={"Authorization": f"Bearer {simple_user.token}"},
@@ -171,7 +169,7 @@ async def test_post_user(
     }
 
     # check change other user from superuser
-    response = await async_client.post(
+    response = await client.post(
         f"v1/users/{inactive_user.id}",
         json={"username": "username"},
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -184,7 +182,7 @@ async def test_post_user(
     }
 
     # check change deleted user form superuser
-    response = await async_client.post(
+    response = await client.post(
         f"v1/users/{deleted_user.id}",
         json={"username": "username"},
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -199,7 +197,7 @@ async def test_post_user(
 
 @pytest.mark.asyncio
 async def test_activate_user(
-    async_client: AsyncClient,
+    client: AsyncClient,
     simple_user: MockUser,
     inactive_user: MockUser,
     superuser: MockUser,
@@ -207,7 +205,7 @@ async def test_activate_user(
     session: AsyncSession,
 ):
     # check not auth
-    response = await async_client.post(f"v1/users/{inactive_user.id}/activate")
+    response = await client.post(f"v1/users/{inactive_user.id}/activate")
     assert response.status_code == 401
     assert response.json() == {
         "ok": False,
@@ -216,7 +214,7 @@ async def test_activate_user(
     }
 
     # check simple user
-    response = await async_client.post(
+    response = await client.post(
         f"v1/users/{inactive_user.id}/activate",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
@@ -228,7 +226,7 @@ async def test_activate_user(
     }
 
     # check superuser
-    response = await async_client.post(
+    response = await client.post(
         f"v1/users/{inactive_user.id}/activate",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
@@ -243,7 +241,7 @@ async def test_activate_user(
     assert inactive_user.is_active
 
     # check activate activated user
-    response = await async_client.post(
+    response = await client.post(
         f"v1/users/{simple_user.id}/activate",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
@@ -258,7 +256,7 @@ async def test_activate_user(
     assert simple_user.is_active
 
     # check activate deleted user
-    response = await async_client.post(
+    response = await client.post(
         f"v1/users/{deleted_user.id}/activate",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
@@ -272,7 +270,7 @@ async def test_activate_user(
 
 @pytest.mark.asyncio
 async def test_deactivate_user(
-    async_client: AsyncClient,
+    client: AsyncClient,
     simple_user: MockUser,
     inactive_user: MockUser,
     deleted_user: MockUser,
@@ -280,7 +278,7 @@ async def test_deactivate_user(
     session: AsyncSession,
 ):
     # check no auth
-    response = await async_client.post(f"v1/users/{simple_user.id}/deactivate")
+    response = await client.post(f"v1/users/{simple_user.id}/deactivate")
     assert response.status_code == 401
     assert response.json() == {
         "ok": False,
@@ -289,7 +287,7 @@ async def test_deactivate_user(
     }
 
     # check simple user
-    response = await async_client.post(
+    response = await client.post(
         f"v1/users/{simple_user.id}/deactivate",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
@@ -301,7 +299,7 @@ async def test_deactivate_user(
     }
 
     # check superuser
-    response = await async_client.post(
+    response = await client.post(
         f"v1/users/{simple_user.id}/deactivate",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
@@ -316,7 +314,7 @@ async def test_deactivate_user(
     assert not simple_user.is_active
 
     # check deactivate inactive user
-    response = await async_client.post(
+    response = await client.post(
         f"v1/users/{inactive_user.id}/deactivate",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
@@ -331,7 +329,7 @@ async def test_deactivate_user(
     assert not inactive_user.is_active
 
     # check deactivate deleted user
-    response = await async_client.post(
+    response = await client.post(
         f"v1/users/{deleted_user.id}/deactivate",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )

@@ -1,15 +1,10 @@
 import time
 
-from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from pydantic import ValidationError
 
 from app.api.v1.auth.schemas import TokenPayloadSchema
 from app.config import Settings
-
-AUTH_TOKEN_URL = "v1/auth/token"
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=AUTH_TOKEN_URL)
 
 
 def sign_jwt(user_id: int, settings: Settings) -> str:

@@ -65,4 +65,4 @@ test: ##@Test Run tests
 	POSTGRES_USER=${POSTGRES_USER} \
 	POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
 	PYTHONPATH=. \
-	../${POETRY} run pytest -x -vv ./tests
+	../${POETRY} run pytest -x -vv  ./tests
