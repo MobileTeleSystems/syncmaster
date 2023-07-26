@@ -1,15 +1,15 @@
 """empty message
 
-Revision ID: 06697969f9cd
+Revision ID: 963fbdffac8f
 Revises:
-Create Date: 2023-07-21 15:04:18.065324
+Create Date: 2023-07-26 07:54:25.947293
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "06697969f9cd"
+revision = "963fbdffac8f"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -47,7 +47,10 @@ def upgrade() -> None:
         ),
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
         sa.ForeignKeyConstraint(
-            ["admin_id"], ["user.id"], name=op.f("fk__group__admin_id__user")
+            ["admin_id"],
+            ["user.id"],
+            name=op.f("fk__group__admin_id__user"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk__group")),
         sa.UniqueConstraint("name", name=op.f("uq__group__name")),
@@ -58,10 +61,16 @@ def upgrade() -> None:
         sa.Column("user_id", sa.BigInteger(), nullable=False),
         sa.Column("group_id", sa.BigInteger(), nullable=False),
         sa.ForeignKeyConstraint(
-            ["group_id"], ["group.id"], name=op.f("fk__user_group__group_id__group")
+            ["group_id"],
+            ["group.id"],
+            name=op.f("fk__user_group__group_id__group"),
+            ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
-            ["user_id"], ["user.id"], name=op.f("fk__user_group__user_id__user")
+            ["user_id"],
+            ["user.id"],
+            name=op.f("fk__user_group__user_id__user"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("user_id", "group_id", name=op.f("pk__user_group")),
     )
