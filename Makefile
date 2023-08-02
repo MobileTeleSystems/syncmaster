@@ -65,4 +65,14 @@ test: ##@Test Run tests
 	POSTGRES_USER=${POSTGRES_USER} \
 	POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
 	PYTHONPATH=. \
-	../${POETRY} run pytest -x -vv  ./tests
+	../${POETRY} run pytest -x -vv  ./tests/
+
+check-fixtures: ##@Test Check declared fixtures without using
+	@cd ./${APP_PATH} && \
+	POSTGRES_HOST=${POSTGRES_HOST} \
+	POSTGRES_PORT=${POSTGRES_PORT} \
+	POSTGRES_DB=${POSTGRES_DB} \
+	POSTGRES_USER=${POSTGRES_USER} \
+	POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
+	PYTHONPATH=. \
+	../${POETRY} run pytest --dead-fixtures  ./tests/

@@ -1,10 +1,10 @@
 from typing import NoReturn
 
-from sqlalchemy import ScalarResult, insert, or_, select
+from sqlalchemy import ScalarResult, and_, insert, or_, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Group, User, UserGroup
+from app.db.models import Acl, Connection, Group, ObjectType, User, UserGroup
 from app.db.repositories.base import Repository
 from app.db.utils import Pagination
 from app.exceptions import (
@@ -14,6 +14,7 @@ from app.exceptions import (
     EntityNotFound,
     GroupAdminNotFound,
     GroupAlreadyExists,
+    GroupNotFound,
     SyncmasterException,
 )
 
@@ -59,7 +60,7 @@ class GroupRepository(Repository[Group]):
         try:
             return result.one()
         except NoResultFound as e:
-            raise EntityNotFound from e
+            raise GroupNotFound from e
 
     async def create(self, name: str, description: str, admin_id: int) -> Group:
         stmt = (
@@ -91,13 +92,15 @@ class GroupRepository(Repository[Group]):
         description: str,
         admin_id: int,
     ) -> Group:
-        args = [Group.id == group_id]
+        args = [Group.id == group_id, Group.is_deleted.is_(False)]
         if not is_superuser:
             args.append(Group.admin_id == current_user_id)
         try:
             return await self._update(
                 *args, name=name, description=description, admin_id=admin_id
             )
+        except EntityNotFound as e:
+            raise GroupNotFound from e
         except IntegrityError as e:
             await self._session.rollback()
             self._raise_error(e)
@@ -128,7 +131,10 @@ class GroupRepository(Repository[Group]):
         return await self._paginate(stmt, page=page, page_size=page_size)
 
     async def delete(self, group_id: int) -> None:
-        await self._delete(group_id)
+        try:
+            await self._delete(group_id)
+        except EntityNotFound as e:
+            raise GroupNotFound from e
 
     async def add_user(
         self,
@@ -153,6 +159,22 @@ class GroupRepository(Repository[Group]):
             self._raise_error(err)
         else:
             await self._session.commit()
+
+    async def is_admin(self, group_id: int, user_id: int) -> bool:
+        return (
+            await self._session.scalar(
+                select(Group.admin_id == user_id).where(Group.id == group_id)
+            )
+        ) or False
+
+    async def is_member(self, group_id: int, user_id: int) -> bool:
+        stmt = (
+            select(UserGroup)
+            .where(UserGroup.group_id == group_id, UserGroup.user_id == user_id)
+            .exists()
+            .select()
+        )
+        return await self._session.scalar(stmt)
 
     async def delete_user(
         self,
@@ -185,8 +207,37 @@ class GroupRepository(Repository[Group]):
         await self._session.delete(ug)
         await self._session.commit()
 
+    async def paginate_rules(
+        self,
+        current_user_id: int,
+        is_superuser: bool,
+        group_id: int,
+        page: int,
+        page_size: int,
+    ) -> Pagination:
+        is_admin = await self.is_admin(group_id=group_id, user_id=current_user_id)
+        if not (is_admin or is_superuser):
+            raise ActionNotAllowed
+        stmt = (
+            select(Acl)
+            .join(
+                Connection,
+                and_(
+                    Acl.object_id == Connection.id,
+                    Acl.object_type == ObjectType.CONNECTION,
+                ),
+            )
+            .where(Connection.group_id == group_id)
+            .order_by(Acl.user_id, Acl.object_id)
+        )
+        return await self._paginate(
+            query=stmt,
+            page=page,
+            page_size=page_size,
+        )
+
     def _raise_error(self, err: DBAPIError) -> NoReturn:
-        constraint = err.__cause__.__cause__.constraint_name  # type: ignore
+        constraint = err.__cause__.__cause__.constraint_name  # type: ignore[union-attr]
         if constraint == "fk__group__admin_id__user":
             raise GroupAdminNotFound from err
         if constraint == "uq__group__name":

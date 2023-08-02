@@ -1358,6 +1358,44 @@ url = "https://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
+name = "pytest-deadfixtures"
+version = "2.2.1"
+description = "A simple plugin to list unused fixtures in pytest"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pytest-deadfixtures-2.2.1.tar.gz", hash = "sha256:ca15938a4e8330993ccec9c6c847383d88b3cd574729530647dc6b492daa9c1e"},
+    {file = "pytest_deadfixtures-2.2.1-py2.py3-none-any.whl", hash = "sha256:db71533f2d9456227084e00a1231e732973e299ccb7c37ab92e95032ab6c083e"},
+]
+
+[package.dependencies]
+pytest = ">=3.0.0"
+
+[package.source]
+type = "legacy"
+url = "https://nexus.services.mts.ru/repository/pip/simple"
+reference = "nexus"
+
+[[package]]
+name = "pytest-randomly"
+version = "3.13.0"
+description = "Pytest plugin to randomly order tests and control random.seed."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "pytest_randomly-3.13.0-py3-none-any.whl", hash = "sha256:e78d898ef4066f89744e5075083aa7fb6f0de07ffd70ca9c4435cda590cf1eac"},
+    {file = "pytest_randomly-3.13.0.tar.gz", hash = "sha256:079c78b94693189879fbd7304de4e147304f0811fa96249ea5619f2f1cd33df0"},
+]
+
+[package.dependencies]
+pytest = "*"
+
+[package.source]
+type = "legacy"
+url = "https://nexus.services.mts.ru/repository/pip/simple"
+reference = "nexus"
+
+[[package]]
 name = "python-jose"
 version = "3.3.0"
 description = "JOSE implementation in Python"
@@ -1828,4 +1866,4 @@ reference = "nexus"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "3f366035cf91cfd6de50e6426195f1adc88435b69e6ae0cea48741d289b9a21f"
+content-hash = "4fa83469ce58db1ad9c339e4fe71ea63b2ba2b8b08331b5dec7ce74ba18677b9"

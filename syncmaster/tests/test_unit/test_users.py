@@ -106,7 +106,7 @@ async def test_get_user(
 
 
 @pytest.mark.asyncio
-async def test_post_user(
+async def test_update_user(
     client: AsyncClient,
     simple_user: MockUser,
     inactive_user: MockUser,
@@ -114,7 +114,7 @@ async def test_post_user(
     superuser: MockUser,
 ):
     # not auth
-    response = await client.post(
+    response = await client.patch(
         f"v1/users/{simple_user.id}",
         json={"username": "new_username"},
     )
@@ -126,7 +126,7 @@ async def test_post_user(
     }
 
     # check correct update
-    response = await client.post(
+    response = await client.patch(
         f"v1/users/{simple_user.id}",
         json={"username": "new_username"},
         headers={"Authorization": f"Bearer {simple_user.token}"},
@@ -139,7 +139,7 @@ async def test_post_user(
     }
 
     # check incorrect username
-    response = await client.post(
+    response = await client.patch(
         f"v1/users/{simple_user.id}",
         json={"username": "new            username"},
         headers={"Authorization": f"Bearer {simple_user.token}"},
@@ -156,7 +156,7 @@ async def test_post_user(
     }
 
     # check change other user from simple
-    response = await client.post(
+    response = await client.patch(
         f"v1/users/{inactive_user.id}",
         json={"username": "username"},
         headers={"Authorization": f"Bearer {simple_user.token}"},
@@ -165,11 +165,11 @@ async def test_post_user(
     assert response.json() == {
         "ok": False,
         "status_code": 403,
-        "message": "You cannot change other user",
+        "message": "You have no power here",
     }
 
     # check change other user from superuser
-    response = await client.post(
+    response = await client.patch(
         f"v1/users/{inactive_user.id}",
         json={"username": "username"},
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -182,7 +182,7 @@ async def test_post_user(
     }
 
     # check change deleted user form superuser
-    response = await client.post(
+    response = await client.patch(
         f"v1/users/{deleted_user.id}",
         json={"username": "username"},
         headers={"Authorization": f"Bearer {superuser.token}"},
