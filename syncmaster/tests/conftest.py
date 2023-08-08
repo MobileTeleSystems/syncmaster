@@ -79,6 +79,5 @@ async def session(sessionmaker: async_sessionmaker[AsyncSession]):
 @pytest_asyncio.fixture(scope="session")
 async def client(fxtr_settings, async_engine) -> AsyncGenerator:
     app = get_application(settings=fxtr_settings)
-
     async with AsyncClient(app=app, base_url="http://testserver") as client:
         yield client

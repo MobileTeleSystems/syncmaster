@@ -14,13 +14,13 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 @router.post("/token")
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
-    holder: DatabaseProvider = Depends(DatabaseProviderMarker),
+    provider: DatabaseProvider = Depends(DatabaseProviderMarker),
     settings: Settings = Depends(SettingsMarker),
 ) -> AuthTokenSchema:
     """This is test auth method!!! not for production!!!!"""
     try:
-        user = await holder.user.read_by_username(username=form_data.username)
+        user = await provider.user.read_by_username(username=form_data.username)
     except EntityNotFound:
-        user = await holder.user.create(username=form_data.username, is_active=True)
+        user = await provider.user.create(username=form_data.username, is_active=True)
     token = sign_jwt(user_id=user.id, settings=settings)
     return AuthTokenSchema(access_token=token, refresh_token="refresh_token")

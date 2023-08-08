@@ -8,7 +8,7 @@ from tests.utils import MockGroup, MockUser
 async def test_not_authorized_user_cannot_update_group(
     client: AsyncClient, empty_group: MockGroup
 ):
-    result = await client.post(f"v1/groups/{empty_group.id}")
+    result = await client.patch(f"v1/groups/{empty_group.id}")
     assert result.status_code == 401
     assert result.json() == {
         "ok": False,
@@ -21,7 +21,7 @@ async def test_not_authorized_user_cannot_update_group(
 async def test_not_member_of_group_cannot_update_group(
     client: AsyncClient, empty_group: MockGroup, simple_user: MockUser
 ):
-    result = await client.post(
+    result = await client.patch(
         f"v1/groups/{empty_group.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
@@ -39,7 +39,7 @@ async def test_not_member_of_group_cannot_update_group(
         "name": "new_group_name",
         "description": " asdf",
     }
-    result = await client.post(
+    result = await client.patch(
         f"v1/groups/{empty_group.id}",
         json=group_data,
         headers={"Authorization": f"Bearer {simple_user.token}"},
@@ -58,7 +58,7 @@ async def test_member_of_group_cannot_update_group(
 ):
     user = not_empty_group.members[0]
     group_data = {"admin_id": user.id, "name": "new_group_name", "description": " asdf"}
-    result = await client.post(
+    result = await client.patch(
         f"v1/groups/{not_empty_group.id}",
         json=group_data,
         headers={"Authorization": f"Bearer {user.token}"},
@@ -80,7 +80,7 @@ async def test_admin_of_group_can_update_group(
         "name": "new_group_name",
         "description": "some description",
     }
-    result = await client.post(
+    result = await client.patch(
         f"v1/groups/{empty_group.id}",
         json=group_data,
         headers={"Authorization": f"Bearer {empty_group.admin.token}"},
@@ -107,7 +107,7 @@ async def test_superuser_can_update_group(
         "name": "new_group_name",
         "description": "some description",
     }
-    result = await client.post(
+    result = await client.patch(
         f"v1/groups/{empty_group.id}",
         json=group_data,
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -132,7 +132,7 @@ async def test_validation_on_update_group(
     not_empty_group: MockGroup,
     superuser: MockUser,
 ):
-    result = await client.post(
+    result = await client.patch(
         f"v1/groups/{empty_group.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
@@ -148,7 +148,7 @@ async def test_validation_on_update_group(
         "name": "new_group_name",
         "description": "some description",
     }
-    result = await client.post(
+    result = await client.patch(
         f"v1/groups/{empty_group.id}",
         json=group_data,
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -165,7 +165,7 @@ async def test_validation_on_update_group(
         "name": not_empty_group.name,
         "description": "some description",
     }
-    result = await client.post(
+    result = await client.patch(
         f"v1/groups/{empty_group.id}",
         json=group_data,
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -194,7 +194,7 @@ async def test_change_group_admin(
         "description": empty_group.description,
     }
 
-    result = await client.post(
+    result = await client.patch(
         f"v1/groups/{empty_group.id}",
         headers={"Authorization": f"Bearer {empty_group.admin.token}"},
         json={

@@ -7,7 +7,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import User
 from app.db.repositories.base import Repository
 from app.db.utils import Pagination
-from app.exceptions import EntityNotFound, SyncmasterException, UsernameAlreadyExists
+from app.exceptions import (
+    EntityNotFound,
+    SyncmasterException,
+    UsernameAlreadyExists,
+    UserNotFound,
+)
 
 
 class UserRepository(Repository[User]):
@@ -26,7 +31,10 @@ class UserRepository(Repository[User]):
         )
 
     async def read_by_id(self, user_id: int, **kwargs: Any) -> User:
-        return await self._read_by_id(id=user_id, **kwargs)
+        try:
+            return await self._read_by_id(id=user_id, **kwargs)
+        except EntityNotFound as e:
+            raise UserNotFound from e
 
     async def read_by_username(self, username: str) -> User:
         result: ScalarResult[User] = await self._session.scalars(
@@ -42,6 +50,8 @@ class UserRepository(Repository[User]):
             return await self._update(
                 User.id == user_id, User.is_deleted.is_(False), **data
             )
+        except EntityNotFound as e:
+            raise UserNotFound from e
         except IntegrityError as e:
             await self._session.rollback()
             self._raise_error(e)

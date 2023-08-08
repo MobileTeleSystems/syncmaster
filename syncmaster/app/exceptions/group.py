@@ -19,3 +19,7 @@ class AlreadyIsGroupMember(SyncmasterException):
 
 class AlreadyIsNotGroupMember(SyncmasterException):
     pass
+
+
+class GroupNotFound(SyncmasterException):
+    pass

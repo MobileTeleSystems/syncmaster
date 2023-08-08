@@ -5,8 +5,8 @@ from alembic.config import Config
 from alembic.runtime.environment import EnvironmentContext
 from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
-from sqlalchemy import Connection, MetaData, pool, text
-from sqlalchemy.engine import Connection
+from sqlalchemy import Connection as AlchConnection
+from sqlalchemy import MetaData, pool, text
 from sqlalchemy.ext.asyncio import (
     AsyncConnection,
     async_engine_from_config,
@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.config import Settings
-from app.db.models import Group, User
+from app.db.models import Acl, Connection, Group, User
 
 
 class MockUser:
@@ -36,9 +36,36 @@ class MockGroup:
         return getattr(self.group, attr)
 
 
+class MockAcl:
+    def __init__(self, acl: Acl, user: MockUser, to_object: "MockConnection"):
+        self.acl = acl
+        self.user = user
+        self.to_object = to_object
+
+    def __getattr__(self, attr: str) -> Any:
+        return getattr(self.acl, attr)
+
+
+class MockConnection:
+    def __init__(
+        self,
+        connection: Connection,
+        owner_user: MockUser | None,
+        owner_group: MockGroup | None,
+        acls: list[MockAcl] | None = None,
+    ):
+        self.connection = connection
+        self.owner_user = owner_user
+        self.owner_group = owner_group
+        self.acls = acls or []
+
+    def __getattr__(self, attr: str) -> Any:
+        return getattr(self.connection, attr)
+
+
 async def database_exists(connection: AsyncConnection, db_name: str) -> bool:
     query = f"SELECT 1 from pg_database where datname='{db_name}'"
-    if (await connection.execute(text(query))).scalar():
+    if await connection.scalar(text(query)):
         return True
     return False
 
@@ -70,7 +97,7 @@ async def prepare_new_database(settings: Settings) -> None:
 
 
 def do_run_migrations(
-    connection: Connection, target_metadata: MetaData, context: EnvironmentContext
+    connection: AlchConnection, target_metadata: MetaData, context: EnvironmentContext
 ) -> None:
     context.configure(connection=connection, target_metadata=target_metadata)
 
@@ -108,6 +135,6 @@ async def run_async_migrations(
         await connectable.dispose()
 
 
-def get_diff_db_metadata(connection: Connection, metadata: MetaData):
+def get_diff_db_metadata(connection: AlchConnection, metadata: MetaData):
     migration_ctx = MigrationContext.configure(connection)
     return compare_metadata(context=migration_ctx, metadata=metadata)

@@ -18,7 +18,7 @@ def get_user(
     async def wrapper(
         token: str = Depends(AuthMarker),
         settings: Settings = Depends(SettingsMarker),
-        holder: DatabaseProvider = Depends(DatabaseProviderMarker),
+        provider: DatabaseProvider = Depends(DatabaseProviderMarker),
     ) -> User:
         token_data = decode_jwt(token, settings=settings)
         if token_data is None:
@@ -26,7 +26,7 @@ def get_user(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="You are not authorized",
             )
-        user = await holder.user.read_by_id(user_id=token_data.user_id)
+        user = await provider.user.read_by_id(user_id=token_data.user_id)
         if user is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

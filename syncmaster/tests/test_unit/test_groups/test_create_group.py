@@ -71,10 +71,8 @@ async def test_superuser_can_create_group(
     )
     assert result.status_code == 200
     group = (
-        (await session.execute(select(Group).where(Group.name == group_data["name"])))
-        .scalars()
-        .one()
-    )
+        await session.scalars(select(Group).where(Group.name == group_data["name"]))
+    ).one()
     assert result.json() == {
         "id": group.id,
         "name": group_data["name"],

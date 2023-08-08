@@ -15,6 +15,7 @@ python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 python-multipart = "^0.0.6"
 alembic = "^1.11.1"
 asyncpg = "^0.28.0"
+sqlalchemy-utils = "^0.41.1"
 
 
 [tool.poetry.group.test.dependencies]
@@ -23,6 +24,8 @@ httpx = "^0.24.1"
 pytest-asyncio = "^0.21.0"
 sqlalchemy-utils = "^0.41.1"
 psycopg2-binary = "^2.9.6"
+pytest-randomly = "^3.13.0"
+pytest-deadfixtures = "^2.2.1"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -59,3 +62,7 @@ known_first_party = ["app"]
 [tool.mypy]
 python_version = "3.11"
 plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
+
+[[tool.mypy.overrides]]
+module = "sqlalchemy_utils.*"
+ignore_missing_imports = true

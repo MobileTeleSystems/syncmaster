@@ -156,7 +156,7 @@ async def test_cannot_delete_someone_twice_from_group(
     assert result.json() == {
         "ok": False,
         "status_code": 400,
-        "message": "User already not group member",
+        "message": "User already is not group member",
     }
 
 
