@@ -3,8 +3,9 @@ from httpx import AsyncClient
 
 from tests.utils import MockGroup, MockUser
 
+pytestmark = [pytest.mark.asyncio]
 
-@pytest.mark.asyncio
+
 async def test_not_authorized_user_cannot_read_group_members(
     client: AsyncClient, not_empty_group: MockGroup
 ):
@@ -17,7 +18,6 @@ async def test_not_authorized_user_cannot_read_group_members(
     }
 
 
-@pytest.mark.asyncio
 async def test_not_member_of_group_cannot_read_group_members(
     client: AsyncClient, not_empty_group: MockGroup, simple_user: MockUser
 ):
@@ -33,7 +33,6 @@ async def test_not_member_of_group_cannot_read_group_members(
     }
 
 
-@pytest.mark.asyncio
 async def test_member_of_group_can_read_group_members(
     client: AsyncClient, not_empty_group: MockGroup
 ):
@@ -69,7 +68,6 @@ async def test_member_of_group_can_read_group_members(
     }
 
 
-@pytest.mark.asyncio
 async def test_admin_of_group_can_read_group_members(
     client: AsyncClient, empty_group: MockGroup, not_empty_group: MockGroup
 ):
@@ -108,7 +106,6 @@ async def test_admin_of_group_can_read_group_members(
     }
 
 
-@pytest.mark.asyncio
 async def test_admin_of_group_can_read_group_members(
     client: AsyncClient,
     empty_group: MockGroup,

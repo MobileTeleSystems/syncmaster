@@ -6,8 +6,9 @@ from app.db.models import ObjectType, Rule
 from tests.test_unit.utils import create_acl, create_connection
 from tests.utils import MockGroup, MockUser
 
+pytestmark = [pytest.mark.asyncio]
 
-@pytest.mark.asyncio
+
 async def test_unauthorized_user_cannot_get_group_rules(
     client: AsyncClient, empty_group: MockGroup
 ) -> None:
@@ -20,7 +21,6 @@ async def test_unauthorized_user_cannot_get_group_rules(
     }
 
 
-@pytest.mark.asyncio
 async def test_simple_user_cannot_get_group_rules(
     client: AsyncClient,
     empty_group: MockGroup,
@@ -38,7 +38,6 @@ async def test_simple_user_cannot_get_group_rules(
     }
 
 
-@pytest.mark.asyncio
 async def test_group_member_cannot_get_group_rules(
     client: AsyncClient,
     not_empty_group: MockGroup,
@@ -55,7 +54,6 @@ async def test_group_member_cannot_get_group_rules(
     }
 
 
-@pytest.mark.asyncio
 async def test_group_admin_and_superuser_can_get_group_rules(
     client: AsyncClient,
     not_empty_group: MockGroup,
@@ -84,7 +82,9 @@ async def test_group_admin_and_superuser_can_get_group_rules(
         assert result.json() == answer
 
     connection = await create_connection(
-        session=session, name="test_read_acl", group_id=not_empty_group.id, user_id=None
+        session=session,
+        name="test_read_acl",
+        group_id=not_empty_group.id,
     )
 
     acl = await create_acl(

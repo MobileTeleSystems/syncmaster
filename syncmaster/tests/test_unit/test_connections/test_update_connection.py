@@ -5,8 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import Acl, ObjectType, Rule
 from tests.utils import MockConnection, MockGroup, MockUser
 
+pytestmark = [pytest.mark.asyncio]
 
-@pytest.mark.asyncio
+
 async def test_unauthorized_user_cannot_update_connection(
     client: AsyncClient, user_connection: MockConnection
 ):
@@ -21,7 +22,6 @@ async def test_unauthorized_user_cannot_update_connection(
     }
 
 
-@pytest.mark.asyncio
 async def test_simple_user_cannot_update_connection_other_user(
     client: AsyncClient, user_connection: MockConnection, simple_user: MockUser
 ):
@@ -38,7 +38,6 @@ async def test_simple_user_cannot_update_connection_other_user(
     }
 
 
-@pytest.mark.asyncio
 async def test_user_can_update_own_connection(
     client: AsyncClient, user_connection: MockConnection
 ):
@@ -65,7 +64,6 @@ async def test_user_can_update_own_connection(
     }
 
 
-@pytest.mark.asyncio
 async def test_superuser_can_update_user_connection(
     client: AsyncClient, user_connection: MockConnection, superuser: MockUser
 ):
@@ -92,7 +90,6 @@ async def test_superuser_can_update_user_connection(
     }
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("rule", (Rule.WRITE, Rule.DELETE))
 async def test_member_can_update_connection_with_write_or_delete_rule(
     rule: Rule,
@@ -148,7 +145,6 @@ async def test_member_can_update_connection_with_write_or_delete_rule(
     await session.commit()
 
 
-@pytest.mark.asyncio
 async def test_group_admin_can_update_own_group_connection(
     client: AsyncClient, group_connection: MockConnection
 ):
@@ -176,7 +172,6 @@ async def test_group_admin_can_update_own_group_connection(
     }
 
 
-@pytest.mark.asyncio
 async def test_group_admin_cannot_update_other_group_connection(
     client: AsyncClient, empty_group: MockGroup, group_connection: MockConnection
 ):
@@ -194,7 +189,6 @@ async def test_group_admin_cannot_update_other_group_connection(
     }
 
 
-@pytest.mark.asyncio
 async def test_superuser_can_update_group_connection(
     client: AsyncClient, group_connection: MockConnection, superuser: MockUser
 ):
@@ -221,7 +215,6 @@ async def test_superuser_can_update_group_connection(
     }
 
 
-@pytest.mark.asyncio
 async def test_can_update_connection_data_fields(
     client: AsyncClient,
     user_connection: MockConnection,

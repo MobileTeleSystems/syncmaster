@@ -1,12 +1,6 @@
-from typing import Literal
-
 from pydantic import BaseModel, Field, SecretStr, root_validator
 
-from app.api.v1.schemas import PageSchema
-from app.db.models import Rule
-
-POSTGRES_TYPE = Literal["postgres"]
-ORACLE_TYPE = Literal["oracle"]
+from app.api.v1.schemas import ORACLE_TYPE, POSTGRES_TYPE, PageSchema
 
 
 class ReadPostgresConnectionData(BaseModel):
@@ -67,8 +61,6 @@ class UpdateOracleConnectionData(BaseModel):
 
 
 class UpdateConnectionSchema(BaseModel):
-    user_id: int | None = None
-    group_id: int | None = None
     name: str | None = None
     description: str | None = None
     data: UpdatePostgresConnectionData | UpdateOracleConnectionData | None = Field(
@@ -122,8 +114,3 @@ class NewOwnerSchema(BaseModel):
         if (user_id is None) == (group_id is None):
             raise ValueError("Connection must have one owner: group or user")
         return values
-
-
-class SetRuleSchema(BaseModel):
-    user_id: int
-    rule: Rule

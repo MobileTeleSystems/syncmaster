@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 
 from app.api.v1.schemas import PageSchema
-from app.db.models import ObjectType, Rule
 
 
 class UpdateGroupSchema(BaseModel):
@@ -22,17 +21,3 @@ class ReadGroupSchema(BaseModel):
 
 class GroupPageSchema(PageSchema):
     items: list[ReadGroupSchema]
-
-
-class ReadAclSchema(BaseModel):
-    object_id: int
-    object_type: ObjectType
-    user_id: int
-    rule: Rule
-
-    class Config:
-        orm_mode = True
-
-
-class AclPageSchema(PageSchema):
-    items: list[ReadAclSchema]

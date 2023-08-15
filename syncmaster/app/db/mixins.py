@@ -1,7 +1,16 @@
 from datetime import datetime
 
-from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    String,
+    UniqueConstraint,
+    func,
+)
+from sqlalchemy.orm import Mapped, declared_attr, mapped_column
 
 
 class TimestampMixin:
@@ -35,3 +44,14 @@ class ResourceMixin:
         nullable=True,
         index=True,
     )
+    name: Mapped[str] = mapped_column(String(128), nullable=False, default="")
+    description: Mapped[str] = mapped_column(String(512), nullable=False, default="")
+
+    @declared_attr  # type: ignore
+    def __table_args__(cls) -> tuple:
+        return (
+            CheckConstraint(
+                "(user_id IS NULL) <> (group_id IS NULL)", name="owner_constraint"
+            ),
+            UniqueConstraint("name", "user_id", "group_id"),
+        )

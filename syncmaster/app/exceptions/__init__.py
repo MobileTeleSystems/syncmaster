@@ -9,21 +9,31 @@ from app.exceptions.group import (
     GroupNameAlreadyExists,
     GroupNotFound,
 )
+from app.exceptions.transfer import (
+    DifferentConnectionsOwners,
+    DifferentTypeConnectionsAndParams,
+    TransferNotFound,
+    TransferOwnerException,
+)
 from app.exceptions.user import UsernameAlreadyExists, UserNotFound
 
 __all__ = [
-    "SyncmasterException",
-    "EntityNotFound",
-    "UsernameAlreadyExists",
-    "GroupNameAlreadyExists",
-    "GroupAdminNotFound",
-    "GroupAlreadyExists",
-    "AlreadyIsNotGroupMember",
-    "AlreadyIsGroupMember",
+    "AclNotFound",
     "ActionNotAllowed",
-    "GroupNotFound",
-    "UserNotFound",
+    "AlreadyIsGroupMember",
+    "AlreadyIsNotGroupMember",
     "ConnectionNotFound",
     "ConnectionOwnerException",
-    "AclNotFound",
+    "DifferentConnectionsOwners",
+    "DifferentTypeConnectionsAndParams",
+    "EntityNotFound",
+    "GroupAdminNotFound",
+    "GroupAlreadyExists",
+    "GroupNameAlreadyExists",
+    "GroupNotFound",
+    "SyncmasterException",
+    "TransferNotFound",
+    "TransferOwnerException",
+    "UsernameAlreadyExists",
+    "UserNotFound",
 ]

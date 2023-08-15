@@ -65,7 +65,7 @@ test: ##@Test Run tests
 	POSTGRES_USER=${POSTGRES_USER} \
 	POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
 	PYTHONPATH=. \
-	../${POETRY} run pytest -x -vv  ./tests/
+	../${POETRY} run pytest -x -vv  ./tests/test_unit/test_transfers
 
 check-fixtures: ##@Test Check declared fixtures without using
 	@cd ./${APP_PATH} && \

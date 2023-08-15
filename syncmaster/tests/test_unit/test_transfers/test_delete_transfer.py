@@ -3,16 +3,17 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Acl, ObjectType, Rule
-from tests.utils import MockConnection, MockGroup, MockUser
+from tests.utils import MockGroup, MockTransfer, MockUser
 
 pytestmark = [pytest.mark.asyncio]
 
 
 async def test_unauthorized_user_cannot_delete_connection(
-    client: AsyncClient, user_connection: MockConnection
+    client: AsyncClient,
+    user_transfer: MockTransfer,
 ):
     result = await client.delete(
-        f"v1/connections/{user_connection.id}",
+        f"v1/transfers/{user_transfer.id}",
     )
     assert result.status_code == 401
     assert result.json() == {
@@ -22,78 +23,80 @@ async def test_unauthorized_user_cannot_delete_connection(
     }
 
 
-async def test_simple_user_cannot_delete_connection_other_user(
-    client: AsyncClient, user_connection: MockConnection, simple_user: MockUser
+async def test_simple_user_cannot_delete_transfer_other_user(
+    client: AsyncClient, user_transfer: MockTransfer, simple_user: MockUser
 ):
     result = await client.delete(
-        f"v1/connections/{user_connection.id}",
+        f"v1/transfers/{user_transfer.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
     assert result.status_code == 404
     assert result.json() == {
         "ok": False,
         "status_code": 404,
-        "message": "Connection not found",
+        "message": "Transfer not found",
     }
 
 
-async def test_user_can_delete_own_connection(
-    client: AsyncClient, user_connection: MockConnection, session: AsyncSession
+async def test_user_can_delete_own_transfer(
+    client: AsyncClient,
+    user_transfer: MockTransfer,
+    session: AsyncSession,
 ):
     result = await client.delete(
-        f"v1/connections/{user_connection.id}",
-        headers={"Authorization": f"Bearer {user_connection.owner_user.token}"},
+        f"v1/transfers/{user_transfer.id}",
+        headers={"Authorization": f"Bearer {user_transfer.owner_user.token}"},
     )
     assert result.status_code == 200
     assert result.json() == {
         "ok": True,
         "status_code": 200,
-        "message": "Connection was deleted",
+        "message": "Transfer was deleted",
     }
-    await session.refresh(user_connection.connection)
-    assert user_connection.connection.is_deleted
+    await session.refresh(user_transfer.transfer)
+    assert user_transfer.is_deleted
 
     result = await client.delete(
-        f"v1/connections/{user_connection.id}",
-        headers={"Authorization": f"Bearer {user_connection.owner_user.token}"},
+        f"v1/transfers/{user_transfer.id}",
+        headers={"Authorization": f"Bearer {user_transfer.owner_user.token}"},
     )
     assert result.status_code == 404
     assert result.json() == {
         "ok": False,
         "status_code": 404,
-        "message": "Connection not found",
+        "message": "Transfer not found",
     }
 
 
-async def test_superuser_can_delete_user_connection(
+async def test_superuser_can_delete_user_transfer(
     client: AsyncClient,
-    user_connection: MockConnection,
+    user_transfer: MockTransfer,
     superuser: MockUser,
     session: AsyncSession,
 ):
     result = await client.delete(
-        f"v1/connections/{user_connection.id}",
+        f"v1/transfers/{user_transfer.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
     assert result.status_code == 200
     assert result.json() == {
         "ok": True,
         "status_code": 200,
-        "message": "Connection was deleted",
+        "message": "Transfer was deleted",
     }
-    await session.refresh(user_connection.connection)
-    assert user_connection.connection.is_deleted
+    await session.refresh(user_transfer.transfer)
+    assert user_transfer.is_deleted
 
     # try delete twice
     result = await client.delete(
-        f"v1/connections/{user_connection.id}",
+        f"v1/transfers/{user_transfer.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
     assert result.status_code == 404
     assert result.json() == {
         "ok": False,
         "status_code": 404,
-        "message": "Connection not found",
+        "message": "Transfer not found",
     }
 
 
@@ -104,14 +107,14 @@ async def test_superuser_can_delete_user_connection(
 async def test_member_cannot_delete_connection_without_delete_rule(
     rule: Rule | None,
     client: AsyncClient,
-    group_connection: MockConnection,
+    group_transfer: MockTransfer,
     session: AsyncSession,
 ):
-    member = group_connection.owner_group.members[0]
+    member = group_transfer.owner_group.members[0]
     if rule is not None:
         acl = Acl(
-            object_id=group_connection.id,
-            object_type=ObjectType.CONNECTION,
+            object_id=group_transfer.id,
+            object_type=ObjectType.TRANSFER,
             user_id=member.id,
             rule=rule,
         )
@@ -119,26 +122,26 @@ async def test_member_cannot_delete_connection_without_delete_rule(
         await session.commit()
 
     result = await client.delete(
-        f"v1/connections/{group_connection.id}",
+        f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {member.token}"},
     )
     assert result.status_code == 404
     assert result.json() == {
         "ok": False,
         "status_code": 404,
-        "message": "Connection not found",
+        "message": "Transfer not found",
     }
 
 
-async def test_member_can_delete_connection_with_delete_rule(
+async def test_member_can_delete_transfer_with_delete_rule(
     client: AsyncClient,
-    group_connection: MockConnection,
+    group_transfer: MockTransfer,
     session: AsyncSession,
 ):
-    member = group_connection.owner_group.members[0]
+    member = group_transfer.owner_group.members[0]
     acl = Acl(
-        object_id=group_connection.id,
-        object_type=ObjectType.CONNECTION,
+        object_id=group_transfer.id,
+        object_type=ObjectType.TRANSFER,
         user_id=member.id,
         rule=Rule.DELETE,
     )
@@ -146,62 +149,62 @@ async def test_member_can_delete_connection_with_delete_rule(
     await session.commit()
 
     result = await client.delete(
-        f"v1/connections/{group_connection.id}",
+        f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {member.token}"},
     )
     assert result.status_code == 200
     assert result.json() == {
         "ok": True,
         "status_code": 200,
-        "message": "Connection was deleted",
+        "message": "Transfer was deleted",
     }
 
     await session.delete(acl)
     await session.commit()
 
 
-async def test_group_admin_can_delete_own_group_connection(
-    client: AsyncClient, group_connection: MockConnection
+async def test_group_admin_can_delete_own_group_transfer(
+    client: AsyncClient, group_transfer: MockTransfer
 ):
-    admin = group_connection.owner_group.admin
+    admin = group_transfer.owner_group.admin
     result = await client.delete(
-        f"v1/connections/{group_connection.id}",
+        f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {admin.token}"},
     )
     assert result.status_code == 200
     assert result.json() == {
         "ok": True,
         "status_code": 200,
-        "message": "Connection was deleted",
+        "message": "Transfer was deleted",
     }
 
 
-async def test_group_admin_cannot_delete_other_group_connection(
-    client: AsyncClient, empty_group: MockGroup, group_connection: MockConnection
+async def test_group_admin_cannot_delete_other_group_transfer(
+    client: AsyncClient, empty_group: MockGroup, group_transfer: MockTransfer
 ):
     other_admin = empty_group.admin
     result = await client.delete(
-        f"v1/connections/{group_connection.id}",
+        f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {other_admin.token}"},
     )
     assert result.status_code == 404
     assert result.json() == {
         "ok": False,
         "status_code": 404,
-        "message": "Connection not found",
+        "message": "Transfer not found",
     }
 
 
-async def test_superuser_can_delete_group_connection(
-    client: AsyncClient, group_connection: MockConnection, superuser: MockUser
+async def test_superuser_can_delete_group_transfer(
+    client: AsyncClient, group_transfer: MockTransfer, superuser: MockUser
 ):
     result = await client.delete(
-        f"v1/connections/{group_connection.id}",
+        f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
     assert result.status_code == 200
     assert result.json() == {
         "ok": True,
         "status_code": 200,
-        "message": "Connection was deleted",
+        "message": "Transfer was deleted",
     }

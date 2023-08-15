@@ -3,12 +3,11 @@ from fastapi import APIRouter, Depends, Query
 from app.api.deps import DatabaseProviderMarker
 from app.api.services import get_user
 from app.api.v1.groups.schemas import (
-    AclPageSchema,
     GroupPageSchema,
     ReadGroupSchema,
     UpdateGroupSchema,
 )
-from app.api.v1.schemas import StatusResponseSchema
+from app.api.v1.schemas import AclPageSchema, StatusResponseSchema
 from app.api.v1.users.schemas import UserPageSchema
 from app.db.models import User
 from app.db.provider import DatabaseProvider

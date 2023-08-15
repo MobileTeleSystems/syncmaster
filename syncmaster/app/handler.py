@@ -10,10 +10,15 @@ from app.exceptions import (
     AlreadyIsGroupMember,
     AlreadyIsNotGroupMember,
     ConnectionNotFound,
+    ConnectionOwnerException,
+    DifferentConnectionsOwners,
+    DifferentTypeConnectionsAndParams,
     GroupAdminNotFound,
     GroupAlreadyExists,
     GroupNotFound,
     SyncmasterException,
+    TransferNotFound,
+    TransferOwnerException,
     UsernameAlreadyExists,
     UserNotFound,
 )
@@ -76,6 +81,36 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterExceptio
         return exception_json_response(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Connection not found",
+        )
+
+    if isinstance(exc, ConnectionOwnerException):
+        return exception_json_response(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot create connection with that user_id and group_id values",
+        )
+
+    if isinstance(exc, TransferNotFound):
+        return exception_json_response(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Transfer not found",
+        )
+
+    if isinstance(exc, TransferOwnerException):
+        return exception_json_response(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot create transfer with that user_id and group_id values",
+        )
+
+    if isinstance(exc, DifferentConnectionsOwners):
+        return exception_json_response(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Transfer connections should belong to only one user or group",
+        )
+
+    if isinstance(exc, DifferentTypeConnectionsAndParams):
+        return exception_json_response(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=exc.message,
         )
 
     if isinstance(exc, AclNotFound):

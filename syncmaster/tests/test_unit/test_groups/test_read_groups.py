@@ -6,8 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import UserGroup
 from tests.utils import MockGroup, MockUser
 
+pytestmark = [pytest.mark.asyncio]
 
-@pytest.mark.asyncio
+
 async def test_unauthorized_user_cannot_read_groups(
     client: AsyncClient,
 ):
@@ -20,7 +21,6 @@ async def test_unauthorized_user_cannot_read_groups(
     }
 
 
-@pytest.mark.asyncio
 async def test_regular_user_cannot_get_any_groups(
     client: AsyncClient,
     simple_user: MockUser,
@@ -46,7 +46,6 @@ async def test_regular_user_cannot_get_any_groups(
     }
 
 
-@pytest.mark.asyncio
 async def test_regular_user_can_get_groups_if_member(
     client: AsyncClient,
     session: AsyncSession,
@@ -82,7 +81,6 @@ async def test_regular_user_can_get_groups_if_member(
     }
 
 
-@pytest.mark.asyncio
 async def test_empty_groups_list_after_remove_from_group(
     client: AsyncClient,
     session: AsyncSession,
@@ -141,7 +139,6 @@ async def test_empty_groups_list_after_remove_from_group(
     }
 
 
-@pytest.mark.asyncio
 async def test_superuser_can_read_all_groups(
     client: AsyncClient,
     superuser: MockUser,

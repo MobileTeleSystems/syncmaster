@@ -20,8 +20,7 @@ from app.exceptions.base import EntityNotFound
 
 
 class ConnectionRepository(RepositoryWithAcl[Connection]):
-    def __init__(self, session: AsyncSession, provider):
-        self.provider = provider
+    def __init__(self, session: AsyncSession):
         self._object_type = ObjectType.CONNECTION
         super().__init__(model=Connection, session=session)
 
