@@ -4,8 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.utils import MockUser
 
+pytestmark = [pytest.mark.asyncio]
 
-@pytest.mark.asyncio
+
 async def test_get_users(
     client: AsyncClient,
     simple_user: MockUser,
@@ -53,7 +54,6 @@ async def test_get_users(
     }
 
 
-@pytest.mark.asyncio
 async def test_get_user(
     client: AsyncClient,
     simple_user: MockUser,
@@ -105,7 +105,6 @@ async def test_get_user(
     }
 
 
-@pytest.mark.asyncio
 async def test_update_user(
     client: AsyncClient,
     simple_user: MockUser,
@@ -195,7 +194,6 @@ async def test_update_user(
     }
 
 
-@pytest.mark.asyncio
 async def test_activate_user(
     client: AsyncClient,
     simple_user: MockUser,
@@ -268,7 +266,6 @@ async def test_activate_user(
     }
 
 
-@pytest.mark.asyncio
 async def test_deactivate_user(
     client: AsyncClient,
     simple_user: MockUser,

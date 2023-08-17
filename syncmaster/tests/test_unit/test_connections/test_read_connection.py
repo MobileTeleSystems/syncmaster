@@ -6,8 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import UserGroup
 from tests.utils import MockConnection, MockGroup, MockUser
 
+pytestmark = [pytest.mark.asyncio]
 
-@pytest.mark.asyncio
+
 async def test_unauthorized_user_cannot_read_connection(
     client: AsyncClient, user_connection: MockConnection
 ):
@@ -20,7 +21,6 @@ async def test_unauthorized_user_cannot_read_connection(
     }
 
 
-@pytest.mark.asyncio
 async def test_owner_can_read_connection_of_self(
     client: AsyncClient, user_connection: MockConnection, simple_user: MockUser
 ):
@@ -57,7 +57,6 @@ async def test_owner_can_read_connection_of_self(
     }
 
 
-@pytest.mark.asyncio
 async def test_group_admin_can_read_connection_of_his_group(
     client: AsyncClient, group_connection: MockConnection, simple_user: MockUser
 ):
@@ -94,7 +93,6 @@ async def test_group_admin_can_read_connection_of_his_group(
     }
 
 
-@pytest.mark.asyncio
 async def test_group_admin_cannot_read_connection_of_other(
     client: AsyncClient,
     group_connection: MockConnection,
@@ -114,8 +112,7 @@ async def test_group_admin_cannot_read_connection_of_other(
         }
 
 
-@pytest.mark.asyncio
-async def test_group_member_without_acl_cann_read_connection_of_group(
+async def test_group_member_without_acl_can_read_connection_of_group(
     client: AsyncClient, group_connection: MockConnection, session: AsyncSession
 ):
     group = group_connection.owner_group
@@ -166,7 +163,6 @@ async def test_group_member_without_acl_cann_read_connection_of_group(
     }
 
 
-@pytest.mark.asyncio
 async def test_superuser_can_read_all_connections(
     client: AsyncClient,
     superuser: MockUser,

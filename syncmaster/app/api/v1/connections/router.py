@@ -12,11 +12,9 @@ from app.api.v1.connections.schemas import (
     CreateConnectionSchema,
     NewOwnerSchema,
     ReadConnectionSchema,
-    SetRuleSchema,
     UpdateConnectionSchema,
 )
-from app.api.v1.groups.schemas import ReadAclSchema
-from app.api.v1.schemas import StatusResponseSchema
+from app.api.v1.schemas import ReadAclSchema, SetRuleSchema, StatusResponseSchema
 from app.db.models import Rule, User
 from app.db.provider import DatabaseProvider
 from app.exceptions import ActionNotAllowed

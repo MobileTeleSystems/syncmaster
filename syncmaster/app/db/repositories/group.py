@@ -1,10 +1,11 @@
 from typing import NoReturn
 
-from sqlalchemy import ScalarResult, and_, insert, or_, select
+from sqlalchemy import ScalarResult, and_, insert, or_, select, union
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
-from app.db.models import Acl, Connection, Group, ObjectType, User, UserGroup
+from app.db.models import Acl, Connection, Group, ObjectType, Transfer, User, UserGroup
 from app.db.repositories.base import Repository
 from app.db.utils import Pagination
 from app.exceptions import (
@@ -218,7 +219,7 @@ class GroupRepository(Repository[Group]):
         is_admin = await self.is_admin(group_id=group_id, user_id=current_user_id)
         if not (is_admin or is_superuser):
             raise ActionNotAllowed
-        stmt = (
+        sub_connection = (
             select(Acl)
             .join(
                 Connection,
@@ -228,10 +229,21 @@ class GroupRepository(Repository[Group]):
                 ),
             )
             .where(Connection.group_id == group_id)
-            .order_by(Acl.user_id, Acl.object_id)
         )
+        sub_transfer = (
+            select(Acl)
+            .join(
+                Transfer,
+                and_(
+                    Acl.object_id == Transfer.id,
+                    Acl.object_type == ObjectType.TRANSFER,
+                ),
+            )
+            .where(Transfer.group_id == group_id)
+        )
+        stmt = union(sub_connection, sub_transfer).subquery()
         return await self._paginate(
-            query=stmt,
+            query=select(aliased(Acl, stmt)),
             page=page,
             page_size=page_size,
         )
@@ -240,9 +252,10 @@ class GroupRepository(Repository[Group]):
         constraint = err.__cause__.__cause__.constraint_name  # type: ignore[union-attr]
         if constraint == "fk__group__admin_id__user":
             raise GroupAdminNotFound from err
+
         if constraint == "uq__group__name":
-            raise GroupAlreadyExists
+            raise GroupAlreadyExists from err
 
         if constraint == "pk__user_group":
-            raise AlreadyIsGroupMember
+            raise AlreadyIsGroupMember from err
         raise SyncmasterException from err

@@ -3,8 +3,9 @@ from httpx import AsyncClient
 
 from tests.utils import MockGroup, MockUser
 
+pytestmark = [pytest.mark.asyncio]
 
-@pytest.mark.asyncio
+
 async def test_not_authorized_user_cannot_read_by_id(
     client: AsyncClient,
     empty_group: MockGroup,
@@ -19,7 +20,6 @@ async def test_not_authorized_user_cannot_read_by_id(
     }
 
 
-@pytest.mark.asyncio
 async def test_not_member_of_group_cannot_read_by_id(
     client: AsyncClient,
     empty_group: MockGroup,
@@ -37,7 +37,6 @@ async def test_not_member_of_group_cannot_read_by_id(
     }
 
 
-@pytest.mark.asyncio
 async def test_member_of_group_can_read_by_id(
     client: AsyncClient,
     not_empty_group: MockGroup,
@@ -56,7 +55,6 @@ async def test_member_of_group_can_read_by_id(
     }
 
 
-@pytest.mark.asyncio
 async def test_admin_of_group_can_read_by_id(
     client: AsyncClient,
     empty_group: MockGroup,
@@ -74,7 +72,6 @@ async def test_admin_of_group_can_read_by_id(
     }
 
 
-@pytest.mark.asyncio
 async def test_superuser_can_read_any_group_by_id(
     client: AsyncClient,
     empty_group: MockGroup,
@@ -95,7 +92,6 @@ async def test_superuser_can_read_any_group_by_id(
         }
 
 
-@pytest.mark.asyncio
 async def test_superuser_cannot_read_group_by_incorrect_id(
     client: AsyncClient,
     superuser: MockUser,

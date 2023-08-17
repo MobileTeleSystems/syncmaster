@@ -4,17 +4,18 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Acl
-from tests.utils import MockConnection, MockGroup, MockUser
+from tests.utils import MockGroup, MockTransfer, MockUser
 
 pytestmark = [pytest.mark.asyncio]
 
 
 async def test_unauthorized_user_cannot_delete_rule(
-    client: AsyncClient, group_connection: MockConnection
+    client: AsyncClient,
+    group_transfer: MockTransfer,
 ):
-    acl = group_connection.acls[0]
+    acl = group_transfer.acls[0]
     result = await client.delete(
-        f"v1/connections/{group_connection.id}/rules/{acl.user_id}"
+        f"v1/transfers/{group_transfer.id}/rules/{acl.user_id}",
     )
     assert result.status_code == 401
     assert result.json() == {
@@ -26,71 +27,67 @@ async def test_unauthorized_user_cannot_delete_rule(
 
 async def test_simple_user_cannot_delete_rule(
     client: AsyncClient,
-    group_connection: MockConnection,
+    group_transfer: MockTransfer,
     simple_user: MockUser,
 ):
-    acl = group_connection.acls[0]
-
+    acl = group_transfer.acls[0]
     result = await client.delete(
-        f"v1/connections/{group_connection.id}/rules/{acl.user_id}",
+        f"v1/transfers/{group_transfer.id}/rules/{acl.user_id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
     assert result.status_code == 404
     assert result.json() == {
         "ok": False,
         "status_code": 404,
-        "message": "Connection not found",
+        "message": "Transfer not found",
     }
 
 
-async def test_other_group_admin_cannot_delete_rule(
+async def test_other_group_admin_cannot_delete_transfer_rule(
     client: AsyncClient,
-    group_connection: MockConnection,
+    group_transfer: MockTransfer,
     empty_group: MockGroup,
 ):
-    acl = group_connection.acls[0]
-
+    acl = group_transfer.acls[0]
     result = await client.delete(
-        f"v1/connections/{group_connection.id}/rules/{acl.user_id}",
+        f"v1/transfers/{group_transfer.id}/rules/{acl.user_id}",
         headers={"Authorization": f"Bearer {empty_group.admin.token}"},
     )
     assert result.status_code == 404
     assert result.json() == {
         "ok": False,
         "status_code": 404,
-        "message": "Connection not found",
+        "message": "Transfer not found",
     }
 
 
-async def test_group_member_cannot_delete_rule(
+async def test_group_member_cannot_delete_transfer_rule(
     client: AsyncClient,
-    group_connection: MockConnection,
+    group_transfer: MockTransfer,
 ):
-    member = group_connection.owner_group.members[0]
-    acl = group_connection.acls[0]
+    member = group_transfer.owner_group.members[1]
+    acl = group_transfer.acls[0]
 
     result = await client.delete(
-        f"v1/connections/{group_connection.id}/rules/{acl.user_id}",
+        f"v1/transfers/{group_transfer.id}/rules/{acl.user_id}",
         headers={"Authorization": f"Bearer {member.token}"},
     )
     assert result.status_code == 404
     assert result.json() == {
         "ok": False,
         "status_code": 404,
-        "message": "Connection not found",
+        "message": "Transfer not found",
     }
 
 
-async def test_group_admin_can_delete_rule(
-    client: AsyncClient,
-    group_connection: MockConnection,
-    session: AsyncSession,
+async def test_group_admin_can_delete_transfer_rule(
+    client: AsyncClient, group_transfer: MockTransfer, session: AsyncSession
 ):
-    admin = group_connection.owner_group.admin
-    acl = group_connection.acls[0]
+    admin = group_transfer.owner_group.admin
+    acl = group_transfer.acls[0]
 
     result = await client.delete(
-        f"v1/connections/{group_connection.id}/rules/{acl.user_id}",
+        f"v1/transfers/{group_transfer.id}/rules/{acl.user_id}",
         headers={"Authorization": f"Bearer {admin.token}"},
     )
     assert result.status_code == 200
@@ -113,16 +110,16 @@ async def test_group_admin_can_delete_rule(
     assert acl is None
 
 
-async def test_superuser_can_delete_rule(
+async def test_superuser_can_delete_transfer_rule(
     client: AsyncClient,
-    group_connection: MockConnection,
+    group_transfer: MockTransfer,
     superuser: MockUser,
     session: AsyncSession,
 ):
-    acl = group_connection.acls[0]
+    acl = group_transfer.acls[0]
 
     result = await client.delete(
-        f"v1/connections/{group_connection.id}/rules/{acl.user_id}",
+        f"v1/transfers/{group_transfer.id}/rules/{acl.user_id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
     assert result.status_code == 200
@@ -145,13 +142,13 @@ async def test_superuser_can_delete_rule(
     assert acl is None
 
 
-async def test_cannot_delete_rule_from_user_connection(
+async def test_cannot_delete_rule_from_user_transfer(
     client: AsyncClient,
-    user_connection: MockConnection,
+    user_transfer: MockTransfer,
     superuser: MockUser,
 ):
     result = await client.delete(
-        f"v1/connections/{user_connection.id}/rules/{superuser.id}",
+        f"v1/transfers/{user_transfer.id}/rules/{superuser.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
     assert result.status_code == 403

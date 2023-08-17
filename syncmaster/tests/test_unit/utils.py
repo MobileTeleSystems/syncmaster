@@ -3,7 +3,7 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Acl, Connection, Group, ObjectType, Rule, User
+from app.db.models import Acl, Connection, Group, ObjectType, Rule, Transfer, User
 
 
 @asynccontextmanager
@@ -58,8 +58,8 @@ async def create_group(session: AsyncSession, name: str, admin_id: int) -> Group
 async def create_connection(
     session: AsyncSession,
     name: str,
-    user_id: int | None,
-    group_id: int | None,
+    user_id: int | None = None,
+    group_id: int | None = None,
     description: str = "",
     type: str = "postgres",
     host: str = "127.0.0.1",
@@ -107,3 +107,36 @@ async def create_acl(
     await session.commit()
     await session.refresh(acl)
     return acl
+
+
+async def create_transfer(
+    session: AsyncSession,
+    name: str,
+    source_connection_id: int,
+    target_connection_id: int,
+    group_id: int | None = None,
+    user_id: int | None = None,
+    source_params: dict | None = None,
+    target_params: dict | None = None,
+    is_scheduled: bool = True,
+    schedule: str = "0 0 * * *",
+    strategy_params: dict | None = None,
+    description: str = "",
+) -> Transfer:
+    t = Transfer(
+        name=name,
+        description=description,
+        user_id=user_id,
+        group_id=group_id,
+        source_connection_id=source_connection_id,
+        source_params=source_params or {"type": "postgres", "table_name": "table1"},
+        target_connection_id=target_connection_id,
+        target_params=target_params or {"type": "postgres", "table_name": "table1"},
+        is_scheduled=is_scheduled,
+        schedule=schedule,
+        strategy_params=strategy_params or {"type": "full"},
+    )
+    session.add(t)
+    await session.commit()
+    await session.refresh(t)
+    return t

@@ -4,8 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.utils import MockConnection, MockGroup, MockUser
 
+pytestmark = [pytest.mark.asyncio]
 
-@pytest.mark.asyncio
+
 async def test_unauthorized_user_cannot_change_owner_of_connection(
     client: AsyncClient,
     user_connection: MockConnection,
@@ -27,7 +28,6 @@ async def test_unauthorized_user_cannot_change_owner_of_connection(
         }
 
 
-@pytest.mark.asyncio
 async def test_simple_user_cannot_change_owner_of_connection(
     client: AsyncClient,
     user_connection: MockConnection,
@@ -50,7 +50,6 @@ async def test_simple_user_cannot_change_owner_of_connection(
         }
 
 
-@pytest.mark.asyncio
 async def test_group_member_cannot_change_owner_of_connection(
     client: AsyncClient,
     user_connection: MockConnection,
@@ -73,7 +72,6 @@ async def test_group_member_cannot_change_owner_of_connection(
         }
 
 
-@pytest.mark.asyncio
 async def test_group_admin_cannot_change_owner_of_user_connection(
     client: AsyncClient,
     group_connection: MockConnection,
@@ -96,7 +94,6 @@ async def test_group_admin_cannot_change_owner_of_user_connection(
     }
 
 
-@pytest.mark.asyncio
 async def test_admin_can_change_owner_of_group_connection(
     client: AsyncClient,
     group_connection: MockConnection,
@@ -122,7 +119,6 @@ async def test_admin_can_change_owner_of_group_connection(
     assert group_connection.connection.group_id is None
 
 
-@pytest.mark.asyncio
 async def test_other_admin_cannot_change_owner_of_group_connection(
     client: AsyncClient, group_connection: MockConnection, empty_group: MockGroup
 ):
@@ -141,7 +137,6 @@ async def test_other_admin_cannot_change_owner_of_group_connection(
     }
 
 
-@pytest.mark.asyncio
 async def test_superuser_can_change_owner_of_user_connection(
     client: AsyncClient,
     user_connection: MockConnection,
@@ -167,7 +162,6 @@ async def test_superuser_can_change_owner_of_user_connection(
     assert user_connection.connection.group_id == empty_group.id
 
 
-@pytest.mark.asyncio
 async def test_superuser_can_change_owner_of_group_connection(
     client: AsyncClient,
     group_connection: MockConnection,

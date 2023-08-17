@@ -1,9 +1,19 @@
 import abc
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel
 
+from app.db.models import ObjectType, Rule
 from app.db.utils import Pagination
+
+# transfer types
+FULL_TYPE = Literal["full"]
+INCREMENTAL_TYPE = Literal["incremental"]
+
+
+# connection types
+POSTGRES_TYPE = Literal["postgres"]
+ORACLE_TYPE = Literal["oracle"]
 
 
 class StatusResponseSchema(BaseModel):
@@ -42,3 +52,22 @@ class PageSchema(BaseModel, abc.ABC):
             ),
             items=pagination.items,
         )
+
+
+class SetRuleSchema(BaseModel):
+    user_id: int
+    rule: Rule
+
+
+class ReadAclSchema(BaseModel):
+    object_id: int
+    object_type: ObjectType
+    user_id: int
+    rule: Rule
+
+    class Config:
+        orm_mode = True
+
+
+class AclPageSchema(PageSchema):
+    items: list[ReadAclSchema]

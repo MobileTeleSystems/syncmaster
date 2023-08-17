@@ -3,8 +3,9 @@ from httpx import AsyncClient
 
 from tests.utils import MockGroup, MockUser
 
+pytestmark = [pytest.mark.asyncio]
 
-@pytest.mark.asyncio
+
 async def test_not_authorized_user_cannot_delete_group(
     client: AsyncClient, empty_group: MockGroup
 ):
@@ -17,7 +18,6 @@ async def test_not_authorized_user_cannot_delete_group(
     }
 
 
-@pytest.mark.asyncio
 async def test_not_member_of_group_cannot_delete_group(
     client: AsyncClient, empty_group: MockGroup, simple_user: MockUser
 ):
@@ -33,7 +33,6 @@ async def test_not_member_of_group_cannot_delete_group(
     }
 
 
-@pytest.mark.asyncio
 async def test_member_of_group_cannot_delete_group(
     client: AsyncClient, not_empty_group: MockGroup
 ):
@@ -51,7 +50,6 @@ async def test_member_of_group_cannot_delete_group(
     }
 
 
-@pytest.mark.asyncio
 async def test_admin_of_group_cannot_delete_group(
     client: AsyncClient, empty_group: MockGroup
 ):
@@ -69,7 +67,6 @@ async def test_admin_of_group_cannot_delete_group(
     }
 
 
-@pytest.mark.asyncio
 async def test_superuser_can_delete_group(
     client: AsyncClient, empty_group: MockGroup, superuser: MockUser
 ):
@@ -121,7 +118,6 @@ async def test_superuser_can_delete_group(
     }
 
 
-@pytest.mark.asyncio
 async def test_cannot_delete_group_twice(
     client: AsyncClient, empty_group: MockGroup, superuser: MockUser
 ):

@@ -5,8 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from tests.test_unit.utils import create_connection
 from tests.utils import MockConnection, MockUser
 
+pytestmark = [pytest.mark.asyncio]
 
-@pytest.mark.asyncio
+
 async def test_unauthorized_user_cannot_read_connections(client: AsyncClient):
     result = await client.get("v1/connections")
     assert result.status_code == 401
@@ -17,7 +18,6 @@ async def test_unauthorized_user_cannot_read_connections(client: AsyncClient):
     }
 
 
-@pytest.mark.asyncio
 async def test_user_can_read_own_connections(
     client: AsyncClient,
     simple_user: MockUser,
@@ -42,7 +42,9 @@ async def test_user_can_read_own_connections(
     }
 
     simple_user_connection = await create_connection(
-        session=session, name="new_connection", user_id=simple_user.id, group_id=None
+        session=session,
+        name="new_connection",
+        user_id=simple_user.id,
     )
     result_witn_connection = await client.get(
         "v1/connections", headers={"Authorization": f"Bearer {simple_user.token}"}
@@ -81,7 +83,6 @@ async def test_user_can_read_own_connections(
     }
 
 
-@pytest.mark.asyncio
 async def test_group_admin_can_read_connections(
     client: AsyncClient, simple_user: MockUser, group_connection: MockConnection
 ):
@@ -139,7 +140,6 @@ async def test_group_admin_can_read_connections(
     }
 
 
-@pytest.mark.asyncio
 async def test_superuser_can_read_all_connections(
     client: AsyncClient,
     superuser: MockUser,

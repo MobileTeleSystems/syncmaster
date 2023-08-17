@@ -6,8 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import Acl, Connection, ObjectType, Rule
 from tests.utils import MockGroup, MockUser
 
+pytestmark = [pytest.mark.asyncio]
 
-@pytest.mark.asyncio
+
 async def test_unauthorized_user_cannot_create_connection(client: AsyncClient):
     result = await client.post(
         "v1/connections",
@@ -34,7 +35,6 @@ async def test_unauthorized_user_cannot_create_connection(client: AsyncClient):
     }
 
 
-@pytest.mark.asyncio
 async def test_simple_user_can_create_connection(
     client: AsyncClient, simple_user: MockUser, session: AsyncSession
 ):
@@ -93,7 +93,6 @@ async def test_simple_user_can_create_connection(
     assert acl is None
 
 
-@pytest.mark.asyncio
 async def test_user_cannot_create_connection_to_other_user(
     client: AsyncClient,
     simple_user: MockUser,
@@ -125,7 +124,6 @@ async def test_user_cannot_create_connection_to_other_user(
     }
 
 
-@pytest.mark.asyncio
 async def test_check_fields_validation_on_create_connection(
     client: AsyncClient, simple_user: MockUser
 ):
@@ -251,7 +249,6 @@ async def test_check_fields_validation_on_create_connection(
     }
 
 
-@pytest.mark.asyncio
 async def test_simple_user_cannot_create_group_connection(
     client: AsyncClient, simple_user: MockUser, empty_group: MockGroup
 ):
@@ -281,7 +278,6 @@ async def test_simple_user_cannot_create_group_connection(
     }
 
 
-@pytest.mark.asyncio
 async def test_group_member_can_create_group_connection(
     client: AsyncClient,
     not_empty_group: MockGroup,
@@ -343,7 +339,6 @@ async def test_group_member_can_create_group_connection(
     assert acl.rule == Rule.DELETE
 
 
-@pytest.mark.asyncio
 async def test_other_group_admin_cannot_create_group_connection(
     client: AsyncClient, empty_group: MockGroup, not_empty_group: MockGroup
 ):
@@ -374,7 +369,6 @@ async def test_other_group_admin_cannot_create_group_connection(
     }
 
 
-@pytest.mark.asyncio
 async def test_group_admin_can_create_group_connection(
     client: AsyncClient,
     empty_group: MockGroup,
@@ -436,7 +430,6 @@ async def test_group_admin_can_create_group_connection(
     assert acl is None
 
 
-@pytest.mark.asyncio
 async def test_superuser_can_create_group_connection(
     client: AsyncClient,
     superuser: MockUser,
@@ -501,7 +494,6 @@ async def test_superuser_can_create_group_connection(
         assert acl is None
 
 
-@pytest.mark.asyncio
 async def test_superuser_can_create_other_user_connection(
     client: AsyncClient,
     superuser: MockUser,

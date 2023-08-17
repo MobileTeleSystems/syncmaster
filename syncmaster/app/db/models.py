@@ -5,14 +5,12 @@ from sqlalchemy import (
     JSON,
     BigInteger,
     Boolean,
-    CheckConstraint,
     ForeignKey,
     PrimaryKeyConstraint,
     SmallInteger,
     String,
-    UniqueConstraint,
 )
-from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy_utils import ChoiceType
 
 from app.db.base import Base
@@ -62,8 +60,6 @@ class UserGroup(Base):
 
 
 class Connection(Base, DeletableMixin, TimestampMixin, ResourceMixin):
-    name: Mapped[str] = mapped_column(String(128), nullable=False, default="")
-    description: Mapped[str] = mapped_column(String(512), nullable=False, default="")
     data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
 
     def __repr__(self):
@@ -75,18 +71,36 @@ class Connection(Base, DeletableMixin, TimestampMixin, ResourceMixin):
             f"user_id={self.user_id}>"
         )
 
-    @declared_attr  # type: ignore
-    def __table_args__(cls) -> tuple:
-        return (
-            CheckConstraint(
-                "(user_id IS NULL) <> (group_id IS NULL)", name="owner_constraint"
-            ),
-            UniqueConstraint("name", "user_id", "group_id"),
-        )
+
+class Transfer(Base, DeletableMixin, TimestampMixin, ResourceMixin):
+    source_connection_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("connection.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    target_connection_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("connection.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    strategy_params: Mapped[dict[str, Any]] = mapped_column(
+        JSON, nullable=False, default={}
+    )
+    source_params: Mapped[dict[str, Any]] = mapped_column(
+        JSON, nullable=False, default={}
+    )
+    target_params: Mapped[dict[str, Any]] = mapped_column(
+        JSON, nullable=False, default={}
+    )
+    is_scheduled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    schedule: Mapped[str] = mapped_column(String(32), nullable=False, default="")
 
 
 class ObjectType(enum.StrEnum):
     CONNECTION = "connection"
+    TRANSFER = "transfer"
 
 
 class Rule(enum.IntFlag):

@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.config import Settings
-from app.db.models import Acl, Connection, Group, User
+from app.db.models import Acl, Connection, Group, Transfer, User
 
 
 class MockUser:
@@ -61,6 +61,27 @@ class MockConnection:
 
     def __getattr__(self, attr: str) -> Any:
         return getattr(self.connection, attr)
+
+
+class MockTransfer:
+    def __init__(
+        self,
+        transfer: Transfer,
+        source_connection: MockConnection,
+        target_connection: MockConnection,
+        owner_user: MockUser | None,
+        owner_group: MockGroup | None,
+        acls: list[MockAcl] | None = None,
+    ):
+        self.transfer = transfer
+        self.source_connection = source_connection
+        self.target_connection = target_connection
+        self.owner_user = owner_user
+        self.owner_group = owner_group
+        self.acls = acls or []
+
+    def __getattr__(self, attr: str) -> Any:
+        return getattr(self.transfer, attr)
 
 
 async def database_exists(connection: AsyncConnection, db_name: str) -> bool:

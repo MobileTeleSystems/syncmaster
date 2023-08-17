@@ -6,8 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import Group
 from tests.utils import MockUser
 
+pytestmark = [pytest.mark.asyncio]
 
-@pytest.mark.asyncio
+
 async def test_not_authorized_user_cannot_create_group(
     client: AsyncClient,
     simple_user: MockUser,
@@ -27,7 +28,6 @@ async def test_not_authorized_user_cannot_create_group(
     }
 
 
-@pytest.mark.asyncio
 async def test_regular_user_cannot_create_group(
     client: AsyncClient,
     simple_user: MockUser,
@@ -51,7 +51,6 @@ async def test_regular_user_cannot_create_group(
     }
 
 
-@pytest.mark.asyncio
 async def test_superuser_can_create_group(
     client: AsyncClient,
     session: AsyncSession,
@@ -81,7 +80,6 @@ async def test_superuser_can_create_group(
     }
 
 
-@pytest.mark.asyncio
 async def test_superuser_cannot_create_group_twice(
     client: AsyncClient,
     simple_user: MockUser,
@@ -113,7 +111,6 @@ async def test_superuser_cannot_create_group_twice(
     }
 
 
-@pytest.mark.asyncio
 async def test_superuser_cannot_create_group_with_incorrect_admin_id(
     client: AsyncClient,
     superuser: MockUser,
