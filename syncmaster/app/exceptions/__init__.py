@@ -10,8 +10,10 @@ from app.exceptions.group import (
     GroupNotFound,
 )
 from app.exceptions.transfer import (
+    CannotStopRunException,
     DifferentConnectionsOwners,
     DifferentTypeConnectionsAndParams,
+    RunNotFoundException,
     TransferNotFound,
     TransferOwnerException,
 )
@@ -22,6 +24,7 @@ __all__ = [
     "ActionNotAllowed",
     "AlreadyIsGroupMember",
     "AlreadyIsNotGroupMember",
+    "CannotStopRunException",
     "ConnectionNotFound",
     "ConnectionOwnerException",
     "DifferentConnectionsOwners",
@@ -31,6 +34,7 @@ __all__ = [
     "GroupAlreadyExists",
     "GroupNameAlreadyExists",
     "GroupNotFound",
+    "RunNotFoundException",
     "SyncmasterException",
     "TransferNotFound",
     "TransferOwnerException",

@@ -5,7 +5,9 @@ from app.api.services import get_user
 from app.api.v1.schemas import ReadAclSchema, SetRuleSchema, StatusResponseSchema
 from app.api.v1.transfers.schemas import (
     CreateTransferSchema,
+    ReadRunSchema,
     ReadTransferSchema,
+    RunPageSchema,
     TransferPageSchema,
     UpdateTransferSchema,
 )
@@ -258,3 +260,70 @@ async def delete_rule(
         status_code=status.HTTP_200_OK,
         message="Rule was deleted",
     )
+
+
+@router.get("/transfers/{transfer_id}/runs")
+async def read_runs(
+    transfer_id: int,
+    page: int = Query(gt=0, default=1),
+    page_size: int = Query(gt=0, le=200, default=20),
+    current_user: User = Depends(get_user(is_active=True)),
+    provider: DatabaseProvider = Depends(DatabaseProviderMarker),
+) -> RunPageSchema:
+    """Return runs of transfer with pagination"""
+    pagination = await provider.transfer.paginate_runs(
+        transfer_id=transfer_id,
+        page=page,
+        page_size=page_size,
+        current_user_id=current_user.id,
+        is_superuser=current_user.is_superuser,
+    )
+    return RunPageSchema.from_pagination(pagination=pagination)
+
+
+@router.get("/transfers/{transfer_id}/runs/{run_id}")
+async def read_run(
+    transfer_id: int,
+    run_id: int,
+    current_user: User = Depends(get_user(is_active=True)),
+    provider: DatabaseProvider = Depends(DatabaseProviderMarker),
+) -> ReadRunSchema:
+    run = await provider.transfer.read_run_by_id(
+        run_id=run_id,
+        transfer_id=transfer_id,
+        current_user_id=current_user.id,
+        is_superuser=current_user.is_superuser,
+    )
+    return ReadRunSchema.from_orm(run)
+
+
+@router.post("/transfers/{transfer_id}/runs")
+async def start_transfer(
+    transfer_id: int,
+    current_user: User = Depends(get_user(is_active=True)),
+    provider: DatabaseProvider = Depends(DatabaseProviderMarker),
+) -> ReadRunSchema:
+    run = await provider.transfer.create_run(
+        transfer_id=transfer_id,
+        current_user_id=current_user.id,
+        is_superuser=current_user.is_superuser,
+    )
+    # TODO add immediate start transfer after create Run
+    return ReadRunSchema.from_orm(run)
+
+
+@router.post("/transfers/{transfer_id}/runs/{run_id}/stop")
+async def stop_run(
+    transfer_id: int,
+    run_id: int,
+    current_user: User = Depends(get_user(is_active=True)),
+    provider: DatabaseProvider = Depends(DatabaseProviderMarker),
+) -> ReadRunSchema:
+    run = await provider.transfer.stop_run(
+        run_id=run_id,
+        transfer_id=transfer_id,
+        current_user_id=current_user.id,
+        is_superuser=current_user.is_superuser,
+    )
+    # TODO add immdiate stop transfer after stop Run
+    return ReadRunSchema.from_orm(run)

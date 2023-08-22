@@ -1,10 +1,12 @@
 import enum
+from datetime import datetime
 from typing import Any
 
 from sqlalchemy import (
     JSON,
     BigInteger,
     Boolean,
+    DateTime,
     ForeignKey,
     PrimaryKeyConstraint,
     SmallInteger,
@@ -96,6 +98,63 @@ class Transfer(Base, DeletableMixin, TimestampMixin, ResourceMixin):
     )
     is_scheduled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     schedule: Mapped[str] = mapped_column(String(32), nullable=False, default="")
+
+    source_connection: Mapped[Connection] = relationship(
+        "Connection", foreign_keys=[source_connection_id]
+    )
+    target_connection: Mapped[Connection] = relationship(
+        "Connection", foreign_keys=[target_connection_id]
+    )
+
+
+class Status(enum.StrEnum):
+    CREATED = "CREATED"
+    STARTED = "STARTED"
+    FAILED = "FAILED"
+    SEND_STOP_SIGNAL = "SEND_STOP_SIGNAL"
+    STOPPED = "STOPPED"
+    FINISHED = "FINISHED"
+
+
+class Run(Base, TimestampMixin):
+    id: Mapped[int] = mapped_column(
+        BigInteger,
+        primary_key=True,
+    )
+    transfer_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("transfer.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    started_at: Mapped[datetime | None] = mapped_column(
+        DateTime,
+        nullable=True,
+        default=None,
+    )
+    finished_at: Mapped[datetime | None] = mapped_column(
+        DateTime,
+        nullable=True,
+        default=None,
+    )
+    status: Mapped[Status] = mapped_column(
+        ChoiceType(Status),
+        nullable=False,
+        default=Status.CREATED,
+        index=True,
+    )
+    log_url: Mapped[str] = mapped_column(String(512), nullable=True)
+    transfer_dump: Mapped[dict[str, Any]] = mapped_column(
+        JSON, nullable=False, default={}
+    )
+
+    def __repr__(self):
+        return (
+            f"<Run"
+            f" id={self.id}"
+            f" transfer_id={self.transfer_id}"
+            f" created_at={self.created_at:%Y-%m-%d %H:%M:%S}>"
+        )
 
 
 class ObjectType(enum.StrEnum):
