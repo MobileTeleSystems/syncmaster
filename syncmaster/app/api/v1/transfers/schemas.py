@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field, root_validator
 
+from app.api.v1.connections.schemas import ReadConnectionSchema
 from app.api.v1.schemas import (
     FULL_TYPE,
     INCREMENTAL_TYPE,
@@ -7,6 +10,7 @@ from app.api.v1.schemas import (
     POSTGRES_TYPE,
     PageSchema,
 )
+from app.db.models import Status
 
 
 class FullStrategy(BaseModel):
@@ -105,3 +109,34 @@ class UpdateTransferSchema(BaseModel):
     strategy_params: FullStrategy | IncrementalStrategy | None = Field(
         discriminator="type", default=None
     )
+
+
+class ShortRunSchema(BaseModel):
+    id: int
+    transfer_id: int
+    started_at: datetime
+    finished_at: datetime
+    status: Status
+    log_url: str
+
+    class Config:
+        orm_mode = True
+
+
+class RunPageSchema(PageSchema):
+    items: list[ShortRunSchema]
+
+
+class ReadRunSchema(ShortRunSchema):
+    transfer_dump: dict
+
+    class Config:
+        orm_mode = True
+
+
+class ReadFullTransferSchema(ReadTransferSchema):
+    source_connection: ReadConnectionSchema
+    target_connection: ReadConnectionSchema
+
+    class Config:
+        orm_mode = True
