@@ -7,3 +7,7 @@ class ConnectionNotFound(EntityNotFound):
 
 class ConnectionOwnerException(SyncmasterException):
     pass
+
+
+class ConnectionTypeNotRecognizedException(SyncmasterException):
+    pass

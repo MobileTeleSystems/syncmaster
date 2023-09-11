@@ -2,6 +2,7 @@ import asyncio
 from logging.config import fileConfig
 
 from alembic import context
+from celery.backends.database.session import ResultModelBase
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
@@ -17,7 +18,10 @@ if config.config_file_name is not None:
 
 config.set_main_option("sqlalchemy.url", Settings().build_db_connection_uri())
 
-target_metadata = Base.metadata
+target_metadata = (
+    Base.metadata,
+    ResultModelBase.metadata,
+)
 
 
 def run_migrations_offline() -> None:
@@ -35,7 +39,7 @@ def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
-        target_metadata=target_metadata,
+        target_metadata=target_metadata,  # type: ignore[arg-type]
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
     )
@@ -45,7 +49,7 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(connection=connection, target_metadata=target_metadata)  # type: ignore[arg-type]
 
     with context.begin_transaction():
         context.run_migrations()

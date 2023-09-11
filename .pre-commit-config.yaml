@@ -73,7 +73,7 @@ repos:
     hooks:
       - id: mypy
         name: mypy
-        entry: mypy ./syncmaster/app --config-file ./syncmaster/pyproject.toml
+        entry: mypy ./syncmaster/app --config-file ./pyproject.toml
         language: python
         language_version: python3.11
         require_serial: true

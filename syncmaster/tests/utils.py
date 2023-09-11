@@ -84,27 +84,6 @@ class MockTransfer:
         return getattr(self.transfer, attr)
 
 
-async def database_exists(connection: AsyncConnection, db_name: str) -> bool:
-    query = f"SELECT 1 from pg_database where datname='{db_name}'"
-    if await connection.scalar(text(query)):
-        return True
-    return False
-
-
-async def create_database(connection: AsyncConnection, db_name: str) -> None:
-    await connection.execute(text("commit"))
-    query = "CREATE DATABASE {} ENCODING {} TEMPLATE {}".format(
-        db_name, "utf8", "template1"
-    )
-    await connection.execute(text(query))
-
-
-async def drop_database(connection: AsyncConnection, db_name: str) -> None:
-    await connection.execute(text("commit"))
-    query = f"DROP DATABASE {db_name}"
-    await connection.execute(text(query))
-
-
 async def prepare_new_database(settings: Settings) -> None:
     """Using default postgres db for creating new test db"""
     connection_url = settings.build_db_connection_uri(database="postgres")
@@ -159,3 +138,24 @@ async def run_async_migrations(
 def get_diff_db_metadata(connection: AlchConnection, metadata: MetaData):
     migration_ctx = MigrationContext.configure(connection)
     return compare_metadata(context=migration_ctx, metadata=metadata)
+
+
+async def database_exists(connection: AsyncConnection, db_name: str) -> bool:
+    query = f"SELECT 1 from pg_database where datname='{db_name}'"
+    if await connection.scalar(text(query)):
+        return True
+    return False
+
+
+async def create_database(connection: AsyncConnection, db_name: str) -> None:
+    await connection.execute(text("commit"))
+    query = "CREATE DATABASE {} ENCODING {} TEMPLATE {}".format(
+        db_name, "utf8", "template1"
+    )
+    await connection.execute(text(query))
+
+
+async def drop_database(connection: AsyncConnection, db_name: str) -> None:
+    await connection.execute(text("commit"))
+    query = f"DROP DATABASE {db_name}"
+    await connection.execute(text(query))

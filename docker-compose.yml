@@ -14,6 +14,29 @@ services:
     networks:
       - network
 
+  rabbitmq:
+    image: rabbitmq
+    restart: unless-stopped
+
+  worker:
+    image: syncmaster_worker
+    restart: unless-stopped
+    build:
+      dockerfile: docker/worker.dockerfile
+    networks:
+      - network
+    environment:
+      POSTGRES_HOST: db
+      POSGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+
   backend:
     image: syncmaster_back
     restart: unless-stopped
@@ -30,8 +53,40 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+
+
+  test_postgres:
+    image: postgres:15
+    restart: unless-stopped
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_DB: test_postgres
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+    networks:
+      - network
+
+  test_oracle:
+    image: gvenzl/oracle-xe:slim-faststart
+    restart: unless-stopped
+    ports:
+      - 1522:1521
+    environment:
+      TZ: UTC
+      ORACLE_PASSWORD: test_password
+      ORACLE_DATABASE: test_oracle
+      APP_USER: test_user
+      APP_USER_PASSWORD: test_password
+
 networks:
   network:
 
 volumes:
   postgres_data:
+
+

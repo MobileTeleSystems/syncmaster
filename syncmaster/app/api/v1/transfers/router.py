@@ -11,6 +11,7 @@ from app.api.v1.transfers.schemas import (
     TransferPageSchema,
     UpdateTransferSchema,
 )
+from app.celery.tasks import run_transfer_task
 from app.db.models import Rule, User
 from app.db.provider import DatabaseProvider
 from app.exceptions import DifferentConnectionsOwners, DifferentTypeConnectionsAndParams
@@ -308,7 +309,7 @@ async def start_transfer(
         current_user_id=current_user.id,
         is_superuser=current_user.is_superuser,
     )
-    # TODO add immediate start transfer after create Run
+    run_transfer_task.delay(run_id=run.id)
     return ReadRunSchema.from_orm(run)
 
 

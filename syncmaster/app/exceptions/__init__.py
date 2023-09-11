@@ -1,6 +1,10 @@
 from app.exceptions.acl import AclNotFound
 from app.exceptions.base import ActionNotAllowed, EntityNotFound, SyncmasterException
-from app.exceptions.connection import ConnectionNotFound, ConnectionOwnerException
+from app.exceptions.connection import (
+    ConnectionNotFound,
+    ConnectionOwnerException,
+    ConnectionTypeNotRecognizedException,
+)
 from app.exceptions.group import (
     AlreadyIsGroupMember,
     AlreadyIsNotGroupMember,
@@ -9,11 +13,10 @@ from app.exceptions.group import (
     GroupNameAlreadyExists,
     GroupNotFound,
 )
+from app.exceptions.run import CannotStopRunException, RunNotFoundException
 from app.exceptions.transfer import (
-    CannotStopRunException,
     DifferentConnectionsOwners,
     DifferentTypeConnectionsAndParams,
-    RunNotFoundException,
     TransferNotFound,
     TransferOwnerException,
 )
@@ -25,6 +28,7 @@ __all__ = [
     "AlreadyIsGroupMember",
     "AlreadyIsNotGroupMember",
     "CannotStopRunException",
+    "ConnectionTypeNotRecognizedException",
     "ConnectionNotFound",
     "ConnectionOwnerException",
     "DifferentConnectionsOwners",

@@ -16,6 +16,8 @@ python-multipart = "^0.0.6"
 alembic = "^1.11.1"
 asyncpg = "^0.28.0"
 sqlalchemy-utils = "^0.41.1"
+celery = "^5.3.3"
+onetl = {extras = ["spark"], version = "^0.9.1"}
 
 
 [tool.poetry.group.test.dependencies]
@@ -64,4 +66,12 @@ plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
 
 [[tool.mypy.overrides]]
 module = "sqlalchemy_utils.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "celery.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "onetl.*"
 ignore_missing_imports = true

@@ -20,7 +20,7 @@ from app.db.mixins import DeletableMixin, ResourceMixin, TimestampMixin
 
 
 class User(Base, TimestampMixin, DeletableMixin):
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, nullable=False)
     username: Mapped[str] = mapped_column(
         String(256), nullable=False, unique=True, index=True
     )
@@ -40,6 +40,7 @@ class Group(Base, TimestampMixin, DeletableMixin):
     )
 
     admin: Mapped[User] = relationship("User")
+    members: Mapped[list[User]] = relationship("User", secondary="user_group")
 
     def __repr__(self) -> str:
         return f"Group(name={self.name}, admin_id={self.admin_id})"

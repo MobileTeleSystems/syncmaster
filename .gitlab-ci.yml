@@ -114,6 +114,24 @@ tests:
         POSTGRES_DB: syncmaster
         POSTGRES_USER: backend
         POSTGRES_PASSWORD: backend
+
+    - name: rabbitmq
+
+    - name: central-mirror.services.mts.ru/postgres:15-alpine
+      alias: test_postgres
+      variables:
+        POSTGRES_DB: test_db
+        POSTGRES_USER: test_user
+        POSTGRES_PASSWORD: test_password
+
+    - name: gvenzl/oracle-xe:slim-faststart
+      alias: test_oracle
+      variables:
+        TZ: UTC
+        ORACLE_PASSWORD: test_password
+        ORACLE_DATABASE: test_oracle
+        APP_USER: test_user
+        APP_USER_PASSWORD: test_password
   script:
     - python -m pytest -v ./syncmaster/tests -v -s --junitxml=${JUNIT_FILE}
   artifacts:
