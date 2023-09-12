@@ -76,7 +76,7 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
         description: str,
         data: dict[str, Any],
     ) -> Connection:
-        stmt = (
+        query = (
             insert(Connection)
             .values(
                 user_id=user_id,
@@ -88,9 +88,7 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
             .returning(Connection)
         )
         try:
-            result: ScalarResult[Connection] = await self._session.scalars(
-                select(Connection).from_statement(stmt)
-            )
+            result: ScalarResult[Connection] = await self._session.scalars(query)
         except IntegrityError as e:
             await self._session.rollback()
             self._raise_error(e)

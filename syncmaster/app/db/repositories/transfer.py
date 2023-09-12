@@ -85,7 +85,7 @@ class TransferRepository(RepositoryWithAcl[Transfer]):
         target_params: dict[str, Any],
         strategy_params: dict[str, Any],
     ) -> Transfer:
-        stmt = (
+        query = (
             insert(Transfer)
             .values(
                 user_id=user_id,
@@ -101,9 +101,7 @@ class TransferRepository(RepositoryWithAcl[Transfer]):
             .returning(Transfer)
         )
         try:
-            result: ScalarResult[Transfer] = await self._session.scalars(
-                select(Transfer).from_statement(stmt)
-            )
+            result: ScalarResult[Transfer] = await self._session.scalars(query)
         except IntegrityError as e:
             await self._session.rollback()
             self._raise_error(e)

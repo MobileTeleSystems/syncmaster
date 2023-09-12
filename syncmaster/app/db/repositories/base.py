@@ -30,7 +30,7 @@ class Repository(ABC, Generic[Model]):
 
     async def _update(self, *args: Any, **kwargs: Any) -> Model:
         query = update(self._model).where(*args).values(**kwargs).returning(self._model)
-        result = await self._session.scalars(select(self._model).from_statement(query))
+        result = await self._session.scalars(query)
         await self._session.commit()
         try:
             obj = result.one()
@@ -46,8 +46,8 @@ class Repository(ABC, Generic[Model]):
                 is_deleted=True,
             )
 
-        stmt = delete(self._model).filter_by(id=id).returning(self._model)
-        result = await self._session.scalars(select(self._model).from_statement(stmt))
+        query = delete(self._model).filter_by(id=id).returning(self._model)
+        result = await self._session.scalars(query)
         await self._session.commit()
         return result.one()
 
