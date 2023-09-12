@@ -2,15 +2,16 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from tests.utils import MockGroup, MockTransfer, MockUser
 
 from app.db.models import UserGroup
-from tests.utils import MockGroup, MockTransfer, MockUser
 
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_unauthorized_user_cannot_read_connection(
-    client: AsyncClient, user_transfer: MockTransfer
+async def test_unauthorized_user_cannot_read_transfer(
+    client: AsyncClient,
+    user_transfer: MockTransfer,
 ):
     result = await client.get(f"v1/transfers/{user_transfer.id}")
     assert result.status_code == 401

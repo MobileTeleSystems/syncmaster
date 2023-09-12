@@ -13,7 +13,11 @@ from app.exceptions.group import (
     GroupNameAlreadyExists,
     GroupNotFound,
 )
-from app.exceptions.run import CannotStopRunException, RunNotFoundException
+from app.exceptions.run import (
+    CannotConnectToTaskQueueError,
+    CannotStopRunException,
+    RunNotFoundException,
+)
 from app.exceptions.transfer import (
     DifferentConnectionsOwners,
     DifferentTypeConnectionsAndParams,
@@ -27,6 +31,7 @@ __all__ = [
     "ActionNotAllowed",
     "AlreadyIsGroupMember",
     "AlreadyIsNotGroupMember",
+    "CannotConnectToTaskQueueError",
     "CannotStopRunException",
     "ConnectionTypeNotRecognizedException",
     "ConnectionNotFound",

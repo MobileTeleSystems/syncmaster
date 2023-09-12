@@ -240,8 +240,14 @@ class GroupRepository(Repository[Group]):
             .where(Transfer.group_id == group_id)
         )
         stmt = union(sub_connection, sub_transfer).subquery()
+        acl_aliased = aliased(Acl, stmt)
         return await self._paginate(
-            query=select(aliased(Acl, stmt)),
+            query=select(acl_aliased).order_by(
+                acl_aliased.object_type,
+                acl_aliased.object_id,
+                acl_aliased.user_id,
+                acl_aliased.rule,
+            ),
             page=page,
             page_size=page_size,
         )

@@ -18,20 +18,20 @@ class Handler(ABC):
         self.spark = spark
         self.reader: DBReader | None = None
         self.writer: DBWriter | None = None
-        self.connection = connection
+        self.connection_dto = connection
         self.transfer_params = transfer_params
 
     def init_connection(self):
         pass
 
     def init_reader(self):
-        if self.connection is None:
+        if self.connection_dto is None:
             raise ValueError(
                 "At first you need to initialize connection. " "Run `init_connection"
             )
 
     def init_writer(self):
-        if self.connection is None:
+        if self.connection_dto is None:
             raise ValueError(
                 "At first you need to initialize connection. " "Run `init_connection"
             )

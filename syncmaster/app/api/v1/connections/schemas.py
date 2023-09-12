@@ -84,6 +84,7 @@ class CreateOracleConnectionData(BaseModel):
     user: str
     password: SecretStr
     sid: str | None = None
+    service_name: str | None = None
     additional_params: dict = Field(default_factory=dict)
 
 

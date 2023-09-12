@@ -75,8 +75,18 @@ test: ##@Test Run tests
 	RABBITMQ_PORT=${RABBITMQ_PORT} \
 	RABBITMQ_USER=${RABBITMQ_USER} \
 	RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD} \
+	TEST_POSTGRES_USER=${TEST_POSTGRES_USER} \
+	TEST_POSTGRES_PASSWORD=${TEST_POSTGRES_PASSWORD} \
+	TEST_POSTGRES_HOST=${TEST_POSTGRES_HOST} \
+	TEST_POSTGRES_PORT=${TEST_POSTGRES_PORT} \
+	TEST_POSTGRES_DB=${TEST_POSTGRES_DB} \
+	TEST_ORACLE_HOST=${TEST_ORACLE_HOST} \
+	TEST_ORACLE_PORT=${TEST_ORACLE_PORT} \
+	TEST_ORACLE_USER=${TEST_ORACLE_USER} \
+	TEST_ORACLE_PASSWORD=${TEST_ORACLE_PASSWORD} \
+	TEST_ORACLE_SERVICE_NAME=${TEST_ORACLE_SERVICE_NAME} \
 	PYTHONPATH=${APP_PATH} \
-	${POETRY} run pytest -x -vv  ./syncmaster/tests/
+	${POETRY} run pytest -vvvvxls --log-cli-level=INFO ./syncmaster/tests/
 
 check-fixtures: ##@Test Check declared fixtures without using
 	@POSTGRES_HOST=${POSTGRES_HOST} \
@@ -89,4 +99,4 @@ check-fixtures: ##@Test Check declared fixtures without using
 	RABBITMQ_USER=${RABBITMQ_USER} \
 	RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD} \
 	PYTHONPATH=${APP_PATH} \
-	${POETRY} run pytest --dead-fixtures  ./syncmaster/tests/
+	${POETRY} run pytest --dead-fixtures  ./syncmaster/tests/test_integration

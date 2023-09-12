@@ -1,9 +1,5 @@
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.api.v1.auth.utils import sign_jwt
-from app.config import Settings
-from app.db.models import ObjectType, Rule, UserGroup
 from tests.test_unit.utils import (
     create_acl,
     create_connection,
@@ -12,6 +8,10 @@ from tests.test_unit.utils import (
     create_user_cm,
 )
 from tests.utils import MockAcl, MockConnection, MockGroup, MockUser
+
+from app.api.v1.auth.utils import sign_jwt
+from app.config import Settings
+from app.db.models import ObjectType, Rule, UserGroup
 
 
 @pytest_asyncio.fixture

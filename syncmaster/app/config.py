@@ -1,8 +1,20 @@
-from pydantic import BaseSettings
+from enum import StrEnum
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+from pydantic import BaseSettings, PyObject, root_validator
+
+if TYPE_CHECKING:
+    pass
+
+
+class EnvTypes(StrEnum):
+    LOCAL = "LOCAL"
+    GITLAB = "GITLAB"
 
 
 class Settings(BaseSettings):
-    TEST: bool = False
+    ENV: EnvTypes = EnvTypes.LOCAL
     DEBUG: bool = True
 
     PROJECT_NAME: str = "SyncMaster"
@@ -57,3 +69,29 @@ class Settings(BaseSettings):
         )
 
     TOKEN_EXPIRED_TIME: int = 60 * 60 * 10  # 10 hours
+
+    IVYSETTINGS_PATH = Path(__file__).parent.parent / "config" / "ivysettings.xml"
+    CREATE_SPARK_SESSION_FUNCTION: PyObject = "app.tasks.utils.get_worker_spark_session"  # type: ignore[assignment]
+
+
+class TestSettings(BaseSettings):
+    TEST_POSTGRES_HOST: str
+    TEST_POSTGRES_PORT: int
+    TEST_POSTGRES_DB: str
+    TEST_POSTGRES_USER: str
+    TEST_POSTGRES_PASSWORD: str
+
+    TEST_ORACLE_HOST: str
+    TEST_ORACLE_PORT: int
+    TEST_ORACLE_USER: str
+    TEST_ORACLE_PASSWORD: str
+    TEST_ORACLE_SID: str | None = None
+    TEST_ORACLE_SERVICE_NAME: str | None = None
+
+    @root_validator
+    def check_sid_and_service_name(cls, values):
+        sid = values.get("TEST_ORACLE_SID")
+        service_name = values.get("TEST_ORACLE_SERVICE_NAME")
+        if (sid is None) == (service_name is None):
+            raise ValueError("Connection must have one param: sid or service name")
+        return values

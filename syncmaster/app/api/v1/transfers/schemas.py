@@ -114,10 +114,10 @@ class UpdateTransferSchema(BaseModel):
 class ShortRunSchema(BaseModel):
     id: int
     transfer_id: int
-    started_at: datetime
-    finished_at: datetime
+    started_at: datetime | None
+    ended_at: datetime | None
     status: Status
-    log_url: str
+    log_url: str | None
 
     class Config:
         orm_mode = True

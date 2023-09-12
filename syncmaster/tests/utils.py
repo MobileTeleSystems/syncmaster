@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any
 
 from alembic.autogenerate import compare_metadata
@@ -5,6 +6,7 @@ from alembic.config import Config
 from alembic.runtime.environment import EnvironmentContext
 from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
+from httpx import AsyncClient
 from sqlalchemy import Connection as AlchConnection
 from sqlalchemy import MetaData, pool, text
 from sqlalchemy.ext.asyncio import (
@@ -14,7 +16,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.config import Settings
-from app.db.models import Acl, Connection, Group, Transfer, User
+from app.db.models import Acl, Connection, Group, Run, Status, Transfer, User
 
 
 class MockUser:
@@ -84,15 +86,27 @@ class MockTransfer:
         return getattr(self.transfer, attr)
 
 
+class MockRun:
+    def __init__(
+        self,
+        run: Run,
+        transfer: MockTransfer,
+    ):
+        self.run = run
+        self.transfer = transfer
+
+    def __getattr__(self, attr: str) -> Any:
+        return getattr(self.run, attr)
+
+
 async def prepare_new_database(settings: Settings) -> None:
     """Using default postgres db for creating new test db"""
     connection_url = settings.build_db_connection_uri(database="postgres")
 
     engine = create_async_engine(connection_url, echo=True)
     async with engine.begin() as conn:
-        if await database_exists(conn, settings.POSTGRES_DB):
-            await drop_database(conn, settings.POSTGRES_DB)
-        await create_database(conn, settings.POSTGRES_DB)
+        if not await database_exists(conn, settings.POSTGRES_DB):
+            await create_database(conn, settings.POSTGRES_DB)
     await engine.dispose()
 
 
@@ -106,17 +120,20 @@ def do_run_migrations(
 
 
 async def run_async_migrations(
-    config: Config, target_metadata: MetaData, revision: str
+    config: Config, target_metadata: MetaData, revision: str, action="up"
 ) -> None:
     script = ScriptDirectory.from_config(config)
 
     def upgrade(rev, context):
         return script._upgrade_revs(revision, rev)
 
+    def downgrade(rev, context):
+        return script._downgrade_revs(revision, rev)
+
     with EnvironmentContext(
         config,
         script=script,
-        fn=upgrade,
+        fn=upgrade if action == "up" else downgrade,
         as_sql=False,
         starting_rev=None,
         destination_rev=revision,
@@ -159,3 +176,17 @@ async def drop_database(connection: AsyncConnection, db_name: str) -> None:
     await connection.execute(text("commit"))
     query = f"DROP DATABASE {db_name}"
     await connection.execute(text(query))
+
+
+async def get_run_on_end(
+    client: AsyncClient, transfer_id: int, run_id: int, token: str
+) -> dict[str, Any]:
+    while True:
+        result = await client.get(
+            f"v1/transfers/{transfer_id}/runs/{run_id}",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        data = result.json()
+        if data["status"] in [Status.FINISHED, Status.FAILED]:
+            return data
+        await asyncio.sleep(1)

@@ -1,22 +1,18 @@
 from typing import Any, NoReturn
 
-from sqlalchemy import ScalarResult, desc, insert, select
+from sqlalchemy import ScalarResult, insert, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
 
-from app.api.v1.transfers.schemas import ReadFullTransferSchema
-from app.db.models import Acl, ObjectType, Rule, Run, Status, Transfer
+from app.db.models import Acl, ObjectType, Rule, Transfer
 from app.db.repositories.base import RepositoryWithAcl
 from app.db.utils import Pagination
 from app.exceptions import (
     AclNotFound,
     ActionNotAllowed,
-    CannotStopRunException,
     ConnectionNotFound,
     EntityNotFound,
     GroupNotFound,
-    RunNotFoundException,
     SyncmasterException,
     TransferNotFound,
     TransferOwnerException,
@@ -218,84 +214,6 @@ class TransferRepository(RepositoryWithAcl[Transfer]):
         except EntityNotFound as e:
             raise AclNotFound from e
         return
-
-    async def paginate_runs(
-        self,
-        transfer_id: int,
-        page: int,
-        page_size: int,
-        current_user_id: int,
-        is_superuser: bool,
-    ) -> Pagination:
-        await self.read_by_id(
-            transfer_id=transfer_id,
-            current_user_id=current_user_id,
-            is_superuser=is_superuser,
-        )
-        query = (
-            select(Run)
-            .where(Run.transfer_id == transfer_id)
-            .order_by(desc(Run.created_at))
-        )
-        return await self._paginate(query=query, page=page, page_size=page_size)
-
-    async def read_run_by_id(
-        self, run_id: int, transfer_id: int, current_user_id: int, is_superuser: bool
-    ) -> Run:
-        await self.read_by_id(
-            transfer_id=transfer_id,
-            current_user_id=current_user_id,
-            is_superuser=is_superuser,
-        )
-        run = await self._session.get(Run, run_id)
-        if run is None:
-            raise RunNotFoundException
-        return run
-
-    async def create_run(
-        self, transfer_id: int, current_user_id: int, is_superuser: bool
-    ) -> Run:
-        await self.read_by_id(
-            transfer_id=transfer_id,
-            current_user_id=current_user_id,
-            is_superuser=is_superuser,
-            rule=Rule.WRITE,
-        )
-
-        run = Run()
-        run.transfer_id = transfer_id
-        run.transfer_dump = await self.read_full_serialized_transfer(transfer_id)
-        self._session.add(run)
-        await self._session.commit()
-        await self._session.refresh(run)
-        return run
-
-    async def stop_run(
-        self, run_id: int, transfer_id: int, current_user_id: int, is_superuser: bool
-    ) -> Run:
-        run = await self.read_run_by_id(
-            run_id=run_id,
-            transfer_id=transfer_id,
-            current_user_id=current_user_id,
-            is_superuser=is_superuser,
-        )
-        if run.status not in [Status.CREATED, Status.STARTED]:
-            raise CannotStopRunException
-        run.status = Status.SEND_STOP_SIGNAL
-        await self._session.commit()
-        await self._session.refresh(run)
-        return run
-
-    async def read_full_serialized_transfer(self, transfer_id: int) -> dict[str, Any]:
-        transfer = await self._session.get(
-            Transfer,
-            transfer_id,
-            options=(
-                joinedload(Transfer.source_connection),
-                joinedload(Transfer.target_connection),
-            ),
-        )
-        return ReadFullTransferSchema.from_orm(transfer).dict()
 
     def _raise_error(self, err: DBAPIError) -> NoReturn:
         constraint = err.__cause__.__cause__.constraint_name  # type: ignore[union-attr]

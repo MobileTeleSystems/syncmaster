@@ -20,7 +20,7 @@ from app.db.mixins import DeletableMixin, ResourceMixin, TimestampMixin
 
 
 class User(Base, TimestampMixin, DeletableMixin):
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, nullable=False)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     username: Mapped[str] = mapped_column(
         String(256), nullable=False, unique=True, index=True
     )
@@ -66,7 +66,7 @@ class Connection(Base, DeletableMixin, TimestampMixin, ResourceMixin):
     data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
 
     user: Mapped[User | None] = relationship("User")
-    group: Mapped[Group | None] = relationship("User")
+    group: Mapped[Group | None] = relationship("Group")
 
     def __repr__(self):
         return (
@@ -104,7 +104,7 @@ class Transfer(Base, DeletableMixin, TimestampMixin, ResourceMixin):
     schedule: Mapped[str] = mapped_column(String(32), nullable=False, default="")
 
     user: Mapped[User | None] = relationship("User")
-    group: Mapped[Group | None] = relationship("User")
+    group: Mapped[Group | None] = relationship("Group")
     source_connection: Mapped[Connection] = relationship(
         "Connection", foreign_keys=[source_connection_id]
     )
@@ -138,7 +138,7 @@ class Run(Base, TimestampMixin):
         nullable=True,
         default=None,
     )
-    finished_at: Mapped[datetime | None] = mapped_column(
+    ended_at: Mapped[datetime | None] = mapped_column(
         DateTime,
         nullable=True,
         default=None,

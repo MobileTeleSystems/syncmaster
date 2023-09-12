@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class ConnectionDTO:
-    type: str
+    pass
 
 
 @dataclass
@@ -14,6 +14,7 @@ class PostgresConnectionDTO(ConnectionDTO):
     password: str
     database_name: str
     additional_params: dict
+    type: str = "postgres"
 
 
 @dataclass
@@ -22,5 +23,7 @@ class OracleConnectionDTO(ConnectionDTO):
     port: int
     user: str
     password: str
-    sid: str
+    sid: str | None
+    service_name: str | None
     additional_params: dict
+    type: str = "oracle"

@@ -17,6 +17,8 @@ services:
   rabbitmq:
     image: rabbitmq
     restart: unless-stopped
+    ports:
+      - 5672:5672
 
   worker:
     image: syncmaster_worker
@@ -57,7 +59,6 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: guest
       RABBITMQ_PASSWORD: guest
-
 
   test_postgres:
     image: postgres:15
