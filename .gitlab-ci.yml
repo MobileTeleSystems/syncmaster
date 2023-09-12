@@ -47,6 +47,13 @@ backend_test_image:
     CICD_DOCKER__IMAGE_NAME: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend
     CICD_DOCKER__CACHE_FROM: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend:develop
 
+worker_test_image:
+  extends: .build_test_image
+  variables:
+    CICD_DOCKER__FILE_PATH: ./docker/worker.dockerfile
+    CICD_DOCKER__IMAGE_NAME: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/worker
+    CICD_DOCKER__CACHE_FROM: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/worker:develop
+
 mypy:
   image: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend:${CI_COMMIT_REF_SLUG}
   stage: static analysis
@@ -107,6 +114,10 @@ tests:
     POSTGRES_DB: syncmaster
     POSTGRES_USER: backend
     POSTGRES_PASSWORD: backend
+    RABBITMQ_HOST: rabbitmq
+    RABBITMQ_PORT: 5672
+    RABBITMQ_USER: guest
+    RABBITMQ_PASSWORD: guest
   services:
     - name: central-mirror.services.mts.ru/postgres:15-alpine
       alias: db
@@ -117,6 +128,19 @@ tests:
 
     - name: rabbitmq
 
+    - name: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/worker:${CI_COMMIT_REF_SLUG}
+      alias: worker
+      variables:
+        POSTGRES_HOST: db
+        POSTGRES_PORT: 5432
+        POSTGRES_DB: syncmaster
+        POSTGRES_USER: backend
+        POSTGRES_PASSWORD: backend
+        RABBITMQ_HOST: rabbitmq
+        RABBITMQ_PORT: 5672
+        RABBITMQ_USER: guest
+        RABBITMQ_PASSWORD: guest
+
     - name: central-mirror.services.mts.ru/postgres:15-alpine
       alias: test_postgres
       variables:
@@ -124,7 +148,7 @@ tests:
         POSTGRES_USER: test_user
         POSTGRES_PASSWORD: test_password
 
-    - name: gvenzl/oracle-xe:slim-faststart
+    - name: central-mirror.services.mts.ru/gvenzl/oracle-xe:slim-faststart
       alias: test_oracle
       variables:
         TZ: UTC
