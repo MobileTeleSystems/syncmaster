@@ -1,18 +1,14 @@
+from typing import Any
+
 from pyspark.sql import SparkSession
 
-from app.api.v1.connections.schemas import (
-    ReadOracleConnectionData,
-    ReadPostgresConnectionData,
-)
 from app.api.v1.schemas import ORACLE_TYPE, POSTGRES_TYPE
-from app.api.v1.transfers.schemas import (
-    ReadFullTransferSchema,
-    ReadOracleTransferData,
-    ReadPostgresTransferData,
-)
 from app.celery.handlers.base import Handler
 from app.celery.handlers.oracle import OracleHandler
 from app.celery.handlers.postgres import PostgresHandler
+from app.db.models import Connection, Transfer
+from app.dto.connections import OracleConnectionDTO, PostgresConnectionDTO
+from app.dto.transfers import OracleTransferParamsDTO, PostgresTransferParamsDTO
 from app.exceptions import ConnectionTypeNotRecognizedException
 
 
@@ -20,14 +16,18 @@ class TransferController:
     source: Handler
     target: Handler
 
-    def __init__(self, transfer_data, spark: SparkSession):
-        transfer = ReadFullTransferSchema(transfer_data)
-        transfer.source_connection.data
+    def __init__(
+        self,
+        transfer: Transfer,
+        source_connection: Connection,
+        target_connection: Connection,
+        spark: SparkSession,
+    ):
         self.source = self.get_handler(
-            transfer.source_connection.data, transfer.source_params, spark
+            source_connection.data, transfer.source_params, spark
         )
         self.target = self.get_handler(
-            transfer.target_connection.data, transfer.target_params, spark
+            target_connection.data, transfer.target_params, spark
         )
 
     def make_transfer(self) -> None:
@@ -41,20 +41,21 @@ class TransferController:
         self.target.write(df)
 
     def get_handler(
-        connection_data: ReadPostgresConnectionData | ReadOracleConnectionData,
-        transfer_params: ReadOracleTransferData | ReadPostgresTransferData,
+        self,
+        connection_data: dict[str, Any],
+        transfer_params: dict[str, Any],
         spark: SparkSession,
     ) -> Handler:
-        if connection_data.type == ORACLE_TYPE:
+        if connection_data.get("type") == ORACLE_TYPE:
             return OracleHandler(
-                connection=connection_data,
-                transfer_params=transfer_params,
+                connection=OracleConnectionDTO(**connection_data),
+                transfer_params=OracleTransferParamsDTO(**transfer_params),
                 spark=spark,
             )
-        if connection_data.type == POSTGRES_TYPE:
+        if connection_data.get("type") == POSTGRES_TYPE:
             return PostgresHandler(
-                connection=connection_data,
-                transfer_params=transfer_params,
+                connection=PostgresConnectionDTO(**connection_data),
+                transfer_params=PostgresTransferParamsDTO(**transfer_params),
                 spark=spark,
             )
         raise ConnectionTypeNotRecognizedException

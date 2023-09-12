@@ -249,7 +249,6 @@ def upgrade() -> None:
         sa.Column("result", sa.PickleType(), nullable=True),
         sa.Column("date_done", sa.DateTime(), nullable=True),
         sa.Column("traceback", sa.Text(), nullable=True),
-        sa.Column("children", sa.PickleType(), nullable=True),
         sa.Column("name", sa.String(length=155), nullable=True),
         sa.Column("args", sa.LargeBinary(), nullable=True),
         sa.Column("kwargs", sa.LargeBinary(), nullable=True),

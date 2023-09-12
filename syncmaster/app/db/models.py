@@ -65,6 +65,9 @@ class UserGroup(Base):
 class Connection(Base, DeletableMixin, TimestampMixin, ResourceMixin):
     data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
 
+    user: Mapped[User | None] = relationship("User")
+    group: Mapped[Group | None] = relationship("User")
+
     def __repr__(self):
         return (
             f"<Connection "
@@ -100,6 +103,8 @@ class Transfer(Base, DeletableMixin, TimestampMixin, ResourceMixin):
     is_scheduled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     schedule: Mapped[str] = mapped_column(String(32), nullable=False, default="")
 
+    user: Mapped[User | None] = relationship("User")
+    group: Mapped[Group | None] = relationship("User")
     source_connection: Mapped[Connection] = relationship(
         "Connection", foreign_keys=[source_connection_id]
     )
@@ -148,6 +153,8 @@ class Run(Base, TimestampMixin):
     transfer_dump: Mapped[dict[str, Any]] = mapped_column(
         JSON, nullable=False, default={}
     )
+
+    transfer: Mapped[Transfer] = relationship("Transfer")
 
     def __repr__(self):
         return (

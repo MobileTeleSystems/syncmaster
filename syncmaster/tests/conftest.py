@@ -13,11 +13,11 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+from tests.utils import prepare_new_database, run_async_migrations
 
 from app.config import Settings
 from app.db.models import Base
 from app.main import get_application
-from tests.utils import prepare_new_database, run_async_migrations
 
 PROJECT_PATH = Path(__file__).parent.parent.resolve()
 
@@ -51,7 +51,7 @@ def alembic_config(settings: Settings) -> AlembicConfig:
 async def async_engine(settings: Settings, alembic_config: AlembicConfig):
     await prepare_new_database(settings=settings)
     await run_async_migrations(alembic_config, Base.metadata, "head")
-    engine = create_async_engine(settings.build_db_connection_uri(), echo=True)
+    engine = create_async_engine(settings.build_db_connection_uri())
     yield engine
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)

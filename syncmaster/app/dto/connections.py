@@ -2,7 +2,12 @@ from dataclasses import dataclass
 
 
 @dataclass
-class PostgresConnectionDTO:
+class ConnectionDTO:
+    type: str
+
+
+@dataclass
+class PostgresConnectionDTO(ConnectionDTO):
     host: str
     port: int
     user: str
@@ -12,7 +17,7 @@ class PostgresConnectionDTO:
 
 
 @dataclass
-class OracleConnectionDTO:
+class OracleConnectionDTO(ConnectionDTO):
     host: str
     port: int
     user: str
