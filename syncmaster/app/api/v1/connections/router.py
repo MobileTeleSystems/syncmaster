@@ -8,9 +8,9 @@ from app.api.services import get_user
 from app.api.v1.connections.schemas import (
     ORACLE_TYPE,
     POSTGRES_TYPE,
+    ConnectionCopySchema,
     ConnectionPageSchema,
     CreateConnectionSchema,
-    NewOwnerSchema,
     ReadConnectionSchema,
     UpdateConnectionSchema,
 )
@@ -70,15 +70,19 @@ async def create_connection(
     else:
         is_member = False
     data = connection_data.data.dict()
-    for k, v in data.items():
+    auth_data = connection_data.auth_data.dict()
+
+    # Trick to serialize SecretStr to JSON
+    for k, v in auth_data.items():
         if isinstance(v, SecretStr):
-            data[k] = v.get_secret_value()
+            auth_data[k] = v.get_secret_value()
     connection = await provider.connection.create(
         name=connection_data.name,
         description=connection_data.description,
         user_id=connection_data.user_id,
         group_id=connection_data.group_id,
         data=data,
+        auth_data=auth_data,
     )
     if connection_data.group_id is not None and is_member:
         await provider.connection.add_or_update_rule(
@@ -146,24 +150,25 @@ async def delete_connection(
     )
 
 
-@router.post("/connections/{connection_id}/change_owner")
-async def change_owner_of_connection(
+@router.post("/connections/{connection_id}/copy_connection")
+async def copy_connection(
     connection_id: int,
-    new_owner_data: NewOwnerSchema,
+    new_owner_data: ConnectionCopySchema,
     current_user: User = Depends(get_user(is_active=True)),
     provider: DatabaseProvider = Depends(DatabaseProviderMarker),
 ) -> StatusResponseSchema:
-    await provider.connection.change_owner(
+    await provider.connection.copy_connection(
         connection_id=connection_id,
         new_group_id=new_owner_data.new_group_id,
         new_user_id=new_owner_data.new_user_id,
+        remove_source=new_owner_data.remove_source,
         current_user_id=current_user.id,
         is_superuser=current_user.is_superuser,
     )
     return StatusResponseSchema(
         ok=True,
         status_code=status.HTTP_200_OK,
-        message="Owner was changed",
+        message="Connection was copied.",
     )
 
 
