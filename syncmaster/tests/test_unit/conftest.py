@@ -112,7 +112,7 @@ async def group_connection(session: AsyncSession, settings: Settings) -> MockCon
     )
     members: list[MockUser] = []
     for username in (
-        "acl_connection_group_member_1",  # with read   rule
+        "acl_connection_group_member_1",  # with read rule
         "acl_connection_group_member_2",  # with write rule
         "acl_connection_group_member_3",  # with delete rule
     ):

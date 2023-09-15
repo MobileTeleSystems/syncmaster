@@ -75,6 +75,7 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
         name: str,
         description: str,
         data: dict[str, Any],
+        auth_data: dict[str, Any],
     ) -> Connection:
         stmt = (
             insert(Connection)
@@ -84,6 +85,7 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
                 name=name,
                 description=description,
                 data=data,
+                auth_data=auth_data,
             )
             .returning(Connection)
         )
@@ -143,11 +145,12 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
         except (NoResultFound, EntityNotFound) as e:
             raise ConnectionNotFound from e
 
-    async def change_owner(
+    async def copy_connection(
         self,
         connection_id: int,
         new_group_id: int | None,
         new_user_id: int | None,
+        remove_source: bool,
         current_user_id: int,
         is_superuser: bool,
     ) -> None:
@@ -155,9 +158,20 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
             connection_id, current_user_id
         ):
             raise ConnectionNotFound
-        kwargs = dict(user_id=new_user_id, group_id=new_group_id)
         try:
-            await self._update(Connection.id == connection_id, **kwargs)
+            kwargs_for_copy = dict(
+                user_id=new_user_id,
+                group_id=new_group_id,
+                auth_data=None,  # remove auth_data in the origin
+            )
+            await self._copy(
+                Connection.id == connection_id,
+                **kwargs_for_copy,
+            )
+
+            if remove_source:
+                await self._delete(connection_id)
+
         except IntegrityError as e:
             await self._session.rollback()
             self._raise_error(e)

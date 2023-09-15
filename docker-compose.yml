@@ -3,10 +3,7 @@ services:
   db:
     image: postgres:15
     restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    env_file: .env.dev
     ports:
       - 5432:5432
     volumes:

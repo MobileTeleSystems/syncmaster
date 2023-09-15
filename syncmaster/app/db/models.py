@@ -63,6 +63,7 @@ class UserGroup(Base):
 
 class Connection(Base, DeletableMixin, TimestampMixin, ResourceMixin):
     data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
+    auth_data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=True, default=None)
 
     def __repr__(self):
         return (

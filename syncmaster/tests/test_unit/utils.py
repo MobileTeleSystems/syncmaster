@@ -76,12 +76,14 @@ async def create_connection(
         description=description,
         data=dict(
             type=type,
-            host=host,
-            port=port,
-            user=user,
-            password=password,
             database_name=database_name,
             additional_params=additional_params,
+            host=host,
+            port=port,
+        ),
+        auth_data=dict(
+            user=user,
+            password=password,
         ),
     )
     session.add(c)

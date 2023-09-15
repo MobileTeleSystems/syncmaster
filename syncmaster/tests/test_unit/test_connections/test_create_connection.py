@@ -21,9 +21,11 @@ async def test_unauthorized_user_cannot_create_connection(client: AsyncClient):
                 "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
+                "database_name": "postgres",
+            },
+            "auth_data": {
                 "user": "user",
                 "password": "secret",
-                "database_name": "postgres",
             },
         },
     )
@@ -50,9 +52,11 @@ async def test_simple_user_can_create_connection(
                 "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
+                "database_name": "postgres",
+            },
+            "auth_data": {
                 "user": "user",
                 "password": "secret",
-                "database_name": "postgres",
             },
         },
     )
@@ -75,9 +79,11 @@ async def test_simple_user_can_create_connection(
             "type": connection.data["type"],
             "host": connection.data["host"],
             "port": connection.data["port"],
-            "user": connection.data["user"],
             "database_name": connection.data["database_name"],
             "additional_params": connection.data["additional_params"],
+        },
+        "auth_data": {
+            "user": connection.auth_data["user"],
         },
     }
     # check that acl not created for user on own connection
@@ -110,9 +116,11 @@ async def test_user_cannot_create_connection_to_other_user(
                 "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
+                "database_name": "postgres",
+            },
+            "auth_data": {
                 "user": "user",
                 "password": "secret",
-                "database_name": "postgres",
             },
         },
     )
@@ -139,9 +147,11 @@ async def test_check_fields_validation_on_create_connection(
                 "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
+                "database_name": "postgres",
+            },
+            "auth_data": {
                 "user": "user",
                 "password": "secret",
-                "database_name": "postgres",
             },
         },
     )
@@ -168,9 +178,11 @@ async def test_check_fields_validation_on_create_connection(
                 "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
+                "database_name": "postgres",
+            },
+            "auth_data": {
                 "user": "user",
                 "password": "secret",
-                "database_name": "postgres",
             },
         },
     )
@@ -197,9 +209,11 @@ async def test_check_fields_validation_on_create_connection(
                 "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
+                "database_name": "postgres",
+            },
+            "auth_data": {
                 "user": "user",
                 "password": "secret",
-                "database_name": "postgres",
             },
         },
     )
@@ -227,8 +241,11 @@ async def test_check_fields_validation_on_create_connection(
                 "host": "127.0.0.1",
                 "port": 5432,
                 "user": "user",
-                "password": "secret",
                 "database_name": "postgres",
+            },
+            "auth_data": {
+                "user": "user",
+                "password": "secret",
             },
         },
     )
@@ -264,9 +281,11 @@ async def test_simple_user_cannot_create_group_connection(
                 "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
+                "database_name": "postgres",
+            },
+            "auth_data": {
                 "user": "user",
                 "password": "secret",
-                "database_name": "postgres",
             },
         },
     )
@@ -296,9 +315,11 @@ async def test_group_member_can_create_group_connection(
                 "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
+                "database_name": "postgres",
+            },
+            "auth_data": {
                 "user": "user",
                 "password": "secret",
-                "database_name": "postgres",
             },
         },
     )
@@ -321,9 +342,11 @@ async def test_group_member_can_create_group_connection(
             "type": connection.data["type"],
             "host": connection.data["host"],
             "port": connection.data["port"],
-            "user": connection.data["user"],
             "database_name": connection.data["database_name"],
             "additional_params": connection.data["additional_params"],
+        },
+        "auth_data": {
+            "user": connection.auth_data["user"],
         },
     }
     acl = (
@@ -355,9 +378,11 @@ async def test_other_group_admin_cannot_create_group_connection(
                 "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
+                "database_name": "postgres",
+            },
+            "auth_data": {
                 "user": "user",
                 "password": "secret",
-                "database_name": "postgres",
             },
         },
     )
@@ -387,9 +412,11 @@ async def test_group_admin_can_create_group_connection(
                 "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
+                "database_name": "postgres",
+            },
+            "auth_data": {
                 "user": "user",
                 "password": "secret",
-                "database_name": "postgres",
             },
         },
     )
@@ -412,9 +439,11 @@ async def test_group_admin_can_create_group_connection(
             "type": connection.data["type"],
             "host": connection.data["host"],
             "port": connection.data["port"],
-            "user": connection.data["user"],
             "database_name": connection.data["database_name"],
             "additional_params": connection.data["additional_params"],
+        },
+        "auth_data": {
+            "user": connection.auth_data["user"],
         },
     }
     # check that acl not created for superuser
@@ -450,9 +479,11 @@ async def test_superuser_can_create_group_connection(
                     "type": "postgres",
                     "host": "127.0.0.1",
                     "port": 5432,
+                    "database_name": "postgres",
+                },
+                "auth_data": {
                     "user": "user",
                     "password": "secret",
-                    "database_name": "postgres",
                 },
             },
         )
@@ -475,9 +506,11 @@ async def test_superuser_can_create_group_connection(
                 "type": connection.data["type"],
                 "host": connection.data["host"],
                 "port": connection.data["port"],
-                "user": connection.data["user"],
                 "database_name": connection.data["database_name"],
                 "additional_params": connection.data["additional_params"],
+            },
+            "auth_data": {
+                "user": connection.auth_data["user"],
             },
         }
 
@@ -512,9 +545,11 @@ async def test_superuser_can_create_other_user_connection(
                 "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
+                "database_name": "postgres",
+            },
+            "auth_data": {
                 "user": "user",
                 "password": "secret",
-                "database_name": "postgres",
             },
         },
     )
@@ -537,8 +572,10 @@ async def test_superuser_can_create_other_user_connection(
             "type": connection.data["type"],
             "host": connection.data["host"],
             "port": connection.data["port"],
-            "user": connection.data["user"],
             "database_name": connection.data["database_name"],
             "additional_params": connection.data["additional_params"],
+        },
+        "auth_data": {
+            "user": connection.auth_data["user"],
         },
     }

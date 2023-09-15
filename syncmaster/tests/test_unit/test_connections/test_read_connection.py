@@ -51,8 +51,10 @@ async def test_owner_can_read_connection_of_self(
             "database_name": user_connection.data["database_name"],
             "host": user_connection.data["host"],
             "port": user_connection.data["port"],
-            "user": user_connection.data["user"],
             "additional_params": user_connection.data["additional_params"],
+        },
+        "auth_data": {
+            "user": user_connection.auth_data["user"],
         },
     }
 
@@ -87,8 +89,10 @@ async def test_group_admin_can_read_connection_of_his_group(
             "database_name": group_connection.data["database_name"],
             "host": group_connection.data["host"],
             "port": group_connection.data["port"],
-            "user": group_connection.data["user"],
             "additional_params": group_connection.data["additional_params"],
+        },
+        "auth_data": {
+            "user": group_connection.auth_data["user"],
         },
     }
 
@@ -134,8 +138,10 @@ async def test_group_member_without_acl_can_read_connection_of_group(
             "database_name": group_connection.data["database_name"],
             "host": group_connection.data["host"],
             "port": group_connection.data["port"],
-            "user": group_connection.data["user"],
             "additional_params": group_connection.data["additional_params"],
+        },
+        "auth_data": {
+            "user": group_connection.auth_data["user"],
         },
     }
 
@@ -185,8 +191,10 @@ async def test_superuser_can_read_all_connections(
             "database_name": group_connection.data["database_name"],
             "host": group_connection.data["host"],
             "port": group_connection.data["port"],
-            "user": group_connection.data["user"],
             "additional_params": group_connection.data["additional_params"],
+        },
+        "auth_data": {
+            "user": group_connection.auth_data["user"],
         },
     }
 
@@ -206,8 +214,10 @@ async def test_superuser_can_read_all_connections(
             "database_name": user_connection.data["database_name"],
             "host": user_connection.data["host"],
             "port": user_connection.data["port"],
-            "user": user_connection.data["user"],
             "additional_params": user_connection.data["additional_params"],
+        },
+        "auth_data": {
+            "user": group_connection.auth_data["user"],
         },
     }
 
