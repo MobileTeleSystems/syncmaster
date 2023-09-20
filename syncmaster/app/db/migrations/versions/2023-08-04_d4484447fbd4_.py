@@ -87,6 +87,7 @@ def upgrade() -> None:
         sa.Column("name", sa.String(length=128), nullable=False),
         sa.Column("description", sa.String(length=512), nullable=False),
         sa.Column("data", sa.JSON(), nullable=False),
+        sa.Column("auth_data", sa.JSON(), nullable=True),
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
         sa.Column(
             "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False

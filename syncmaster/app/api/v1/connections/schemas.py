@@ -7,17 +7,23 @@ class ReadPostgresConnectionData(BaseModel):
     type: POSTGRES_TYPE
     host: str
     port: int = Field(gt=0, le=65535)
-    user: str
     database_name: str
     additional_params: dict = Field(default_factory=dict)
+
+
+class ReadPostgresAuthData(BaseModel):
+    user: str
+
+
+class ReadOracleAuthData(BaseModel):
+    user: str
+    sid: str | None = None
+    service_name: str | None = None
 
 
 class ReadOracleConnectionData(BaseModel):
     type: ORACLE_TYPE
     host: str
-    user: str
-    sid: str | None = None
-    service_name: str | None = None
     additional_params: dict = Field(default_factory=dict)
 
 
@@ -30,6 +36,7 @@ class ReadConnectionSchema(BaseModel):
     data: ReadPostgresConnectionData | ReadOracleConnectionData = Field(
         ..., discriminator="type", alias="connection_data"
     )
+    auth_data: ReadPostgresAuthData | ReadOracleAuthData
 
     class Config:
         orm_mode = True
@@ -72,20 +79,26 @@ class CreatePostgresConnectionData(BaseModel):
     type: POSTGRES_TYPE
     host: str
     port: int
-    user: str
-    password: SecretStr
     database_name: str
     additional_params: dict = Field(default_factory=dict)
+
+
+class CreatePostgresConnectionAuthData(BaseModel):
+    user: str
+    password: SecretStr
 
 
 class CreateOracleConnectionData(BaseModel):
     type: ORACLE_TYPE
     host: str
+    service_name: str | None = None
+    sid: str | None = None
+    additional_params: dict = Field(default_factory=dict)
+
+
+class CreateOracleConnectionAuthData(BaseModel):
     user: str
     password: SecretStr
-    sid: str | None = None
-    service_name: str | None = None
-    additional_params: dict = Field(default_factory=dict)
 
 
 class CreateConnectionSchema(BaseModel):
@@ -96,6 +109,7 @@ class CreateConnectionSchema(BaseModel):
     data: CreatePostgresConnectionData | CreateOracleConnectionData = Field(
         ..., discriminator="type", alias="connection_data"
     )
+    auth_data: CreatePostgresConnectionAuthData | CreateOracleConnectionAuthData
 
     @root_validator
     def check_owner_id(cls, values):
@@ -105,9 +119,10 @@ class CreateConnectionSchema(BaseModel):
         return values
 
 
-class NewOwnerSchema(BaseModel):
+class ConnectionCopySchema(BaseModel):
     new_user_id: int | None = None
     new_group_id: int | None = None
+    remove_source: bool = False
 
     @root_validator
     def check_new_owner_id(cls, values):

@@ -75,16 +75,20 @@ async def create_connection(
     group_id: int | None = None,
     description: str = "",
     data: dict[str, Any] | None = None,
+    auth_data: dict[str, Any] | None = None,
 ) -> Connection:
     if data is None:
         data = {
             "type": "postgres",
             "host": "127.0.0.1",
             "port": 5432,
-            "user": "user",
-            "password": "password",
             "database_name": "db",
             "additional_params": {},
+        }
+    if auth_data is None:
+        auth_data = {
+            "user": "user",
+            "password": "password",
         }
     c = Connection(
         user_id=user_id,
@@ -92,6 +96,7 @@ async def create_connection(
         name=name,
         description=description,
         data=data,
+        auth_data=auth_data,
     )
     session.add(c)
     await session.commit()

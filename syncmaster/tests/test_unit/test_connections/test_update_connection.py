@@ -57,9 +57,11 @@ async def test_user_can_update_own_connection(
             "type": user_connection.data["type"],
             "host": user_connection.data["host"],
             "port": user_connection.data["port"],
-            "user": user_connection.data["user"],
             "additional_params": user_connection.data["additional_params"],
             "database_name": user_connection.data["database_name"],
+        },
+        "auth_data": {
+            "user": user_connection.auth_data["user"],
         },
     }
 
@@ -83,9 +85,11 @@ async def test_superuser_can_update_user_connection(
             "type": user_connection.data["type"],
             "host": user_connection.data["host"],
             "port": user_connection.data["port"],
-            "user": user_connection.data["user"],
             "additional_params": user_connection.data["additional_params"],
             "database_name": user_connection.data["database_name"],
+        },
+        "auth_data": {
+            "user": user_connection.auth_data["user"],
         },
     }
 
@@ -135,9 +139,11 @@ async def test_member_can_update_connection_with_write_or_delete_rule(
             "type": group_connection.data["type"],
             "host": group_connection.data["host"],
             "port": group_connection.data["port"],
-            "user": group_connection.data["user"],
             "additional_params": group_connection.data["additional_params"],
             "database_name": group_connection.data["database_name"],
+        },
+        "auth_data": {
+            "user": group_connection.auth_data["user"],
         },
     }
 
@@ -165,9 +171,11 @@ async def test_group_admin_can_update_own_group_connection(
             "type": group_connection.data["type"],
             "host": group_connection.data["host"],
             "port": group_connection.data["port"],
-            "user": group_connection.data["user"],
             "additional_params": group_connection.data["additional_params"],
             "database_name": group_connection.data["database_name"],
+        },
+        "auth_data": {
+            "user": group_connection.auth_data["user"],
         },
     }
 
@@ -208,9 +216,11 @@ async def test_superuser_can_update_group_connection(
             "type": group_connection.data["type"],
             "host": group_connection.data["host"],
             "port": group_connection.data["port"],
-            "user": group_connection.data["user"],
             "additional_params": group_connection.data["additional_params"],
             "database_name": group_connection.data["database_name"],
+        },
+        "auth_data": {
+            "user": group_connection.auth_data["user"],
         },
     }
 
@@ -252,8 +262,10 @@ async def test_can_update_connection_data_fields(
             "type": user_connection.data["type"],
             "host": "localhost",
             "port": user_connection.data["port"],
-            "user": user_connection.data["user"],
             "additional_params": user_connection.data["additional_params"],
             "database_name": user_connection.data["database_name"],
+        },
+        "auth_data": {
+            "user": user_connection.auth_data["user"],
         },
     }

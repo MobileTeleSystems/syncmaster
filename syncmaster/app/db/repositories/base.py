@@ -1,7 +1,17 @@
 from abc import ABC
 from typing import Any, Generic, TypeVar
 
-from sqlalchemy import ScalarResult, Select, and_, delete, func, or_, select, update
+from sqlalchemy import (
+    ScalarResult,
+    Select,
+    and_,
+    delete,
+    func,
+    insert,
+    or_,
+    select,
+    update,
+)
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -26,6 +36,37 @@ class Repository(ABC, Generic[Model]):
             obj = await self._session.get(self._model, id)
         if obj is None:
             raise EntityNotFound
+        return obj
+
+    @staticmethod
+    def _model_as_dict(model: Model) -> dict[str, Any]:
+        d = []
+        for c in model.__table__.columns:  # type: ignore[attr-defined]
+            if c.name == "id":  # 'id' is PK autoincrement
+                continue
+            d.append(c.name)
+
+        return {key: getattr(model, key) for key in d}
+
+    async def _copy(self, *args: Any, **kwargs: Any) -> Model:
+        query_prev_row = select(self._model).where(*args)
+        result_prev_row = await self._session.scalars(query_prev_row)
+        origin_model = result_prev_row.one()
+
+        d = self._model_as_dict(origin_model)
+
+        d.update(
+            kwargs
+        )  # Process kwargs in order to keep only what needs to be updated
+        query_insert_new_row = insert(self._model).values(**d).returning(self._model)
+        new_row = await self._session.scalars(query_insert_new_row)
+
+        try:
+            obj = new_row.one()
+        except NoResultFound as e:
+            raise EntityNotFound from e
+        await self._session.commit()
+        await self._session.refresh(obj)
         return obj
 
     async def _update(self, *args: Any, **kwargs: Any) -> Model:
