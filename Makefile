@@ -16,8 +16,7 @@ venv: ##@Env Init venv and install poetry dependencies
 	@rm -rf .venv || true && \
 	python3.11 -m venv .venv && \
 	.venv/bin/pip install poetry && \
-	cd ${APP_PATH} && \
-	../${POETRY} install --no-root
+	${POETRY} install --no-root
 
 env: ##@Env Create .env file
 	@cp .env.dev .env
@@ -28,51 +27,76 @@ help: ##@Help Show this help
 	@perl -e '$(HELP_FUN)' $(MAKEFILE_LIST)
 
 run: ##@Application Run backend locally (without docker)
-	@cd ./${APP_PATH} && \
-	POSTGRES_HOST=${POSTGRES_HOST} \
+	@POSTGRES_HOST=${POSTGRES_HOST} \
 	POSTGRES_PORT=${POSTGRES_PORT} \
 	POSTGRES_DB=${POSTGRES_DB} \
 	POSTGRES_USER=${POSTGRES_USER} \
 	POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
-	PYTHONPATH=. \
-	../${POETRY} run python app/main.py
+	RABBITMQ_HOST=${RABIITMQ_HOST} \
+	RABBITMQ_PORT=${RABBITMQ_PORT} \
+	RABBITMQ_USER=${RABBITMQ_USER} \
+	RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD} \
+	PYTHONPATH=${APP_PATH} \
+	${POETRY} run python ./syncmaster/app/main.py
 
 revision: ##@Database Create new revision of migrations
-	@cd ./${APP_PATH} && \
-	POSTGRES_HOST=${POSTGRES_HOST} \
+	@POSTGRES_HOST=${POSTGRES_HOST} \
 	POSTGRES_PORT=${POSTGRES_PORT} \
 	POSTGRES_DB=${POSTGRES_DB} \
 	POSTGRES_USER=${POSTGRES_USER} \
 	POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
-	PYTHONPATH=. \
-	../${POETRY} run alembic revision --autogenerate
+	RABBITMQ_HOST=${RABIITMQ_HOST} \
+	RABBITMQ_PORT=${RABBITMQ_PORT} \
+	RABBITMQ_USER=${RABBITMQ_USER} \
+	RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD} \
+	PYTHONPATH=${APP_PATH} \
+	${POETRY} run alembic -c ${APP_PATH}/alembic.ini revision --autogenerate
 
 migrate: ##@Database Upgdade database to last migration
-	@cd ./${APP_PATH} && \
-	POSTGRES_HOST=${POSTGRES_HOST} \
+	@POSTGRES_HOST=${POSTGRES_HOST} \
 	POSTGRES_PORT=${POSTGRES_PORT} \
 	POSTGRES_DB=${POSTGRES_DB} \
 	POSTGRES_USER=${POSTGRES_USER} \
 	POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
-	PYTHONPATH=. \
-	../${POETRY} run alembic upgrade head
+	RABBITMQ_HOST=${RABIITMQ_HOST} \
+	RABBITMQ_PORT=${RABBITMQ_PORT} \
+	RABBITMQ_USER=${RABBITMQ_USER} \
+	RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD} \
+	PYTHONPATH=${APP_PATH} \
+	${POETRY} run alembic -c ${APP_PATH}/alembic.ini upgrade head
 
 test: ##@Test Run tests
-	@cd ./${APP_PATH} && \
-	POSTGRES_HOST=${POSTGRES_HOST} \
+	@POSTGRES_HOST=${POSTGRES_HOST} \
 	POSTGRES_PORT=${POSTGRES_PORT} \
 	POSTGRES_DB=${POSTGRES_DB} \
 	POSTGRES_USER=${POSTGRES_USER} \
 	POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
-	PYTHONPATH=. \
-	../${POETRY} run pytest -x -vv  ./tests/
+	RABBITMQ_HOST=${RABIITMQ_HOST} \
+	RABBITMQ_PORT=${RABBITMQ_PORT} \
+	RABBITMQ_USER=${RABBITMQ_USER} \
+	RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD} \
+	TEST_POSTGRES_USER=${TEST_POSTGRES_USER} \
+	TEST_POSTGRES_PASSWORD=${TEST_POSTGRES_PASSWORD} \
+	TEST_POSTGRES_HOST=${TEST_POSTGRES_HOST} \
+	TEST_POSTGRES_PORT=${TEST_POSTGRES_PORT} \
+	TEST_POSTGRES_DB=${TEST_POSTGRES_DB} \
+	TEST_ORACLE_HOST=${TEST_ORACLE_HOST} \
+	TEST_ORACLE_PORT=${TEST_ORACLE_PORT} \
+	TEST_ORACLE_USER=${TEST_ORACLE_USER} \
+	TEST_ORACLE_PASSWORD=${TEST_ORACLE_PASSWORD} \
+	TEST_ORACLE_SERVICE_NAME=${TEST_ORACLE_SERVICE_NAME} \
+	PYTHONPATH=${APP_PATH} \
+	${POETRY} run pytest -vvvvxls --log-cli-level=INFO ./syncmaster/tests/
 
 check-fixtures: ##@Test Check declared fixtures without using
-	@cd ./${APP_PATH} && \
-	POSTGRES_HOST=${POSTGRES_HOST} \
+	@POSTGRES_HOST=${POSTGRES_HOST} \
 	POSTGRES_PORT=${POSTGRES_PORT} \
 	POSTGRES_DB=${POSTGRES_DB} \
 	POSTGRES_USER=${POSTGRES_USER} \
 	POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
-	PYTHONPATH=. \
-	../${POETRY} run pytest --dead-fixtures  ./tests/
+	RABBITMQ_HOST=${RABIITMQ_HOST} \
+	RABBITMQ_PORT=${RABBITMQ_PORT} \
+	RABBITMQ_USER=${RABBITMQ_USER} \
+	RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD} \
+	PYTHONPATH=${APP_PATH} \
+	${POETRY} run pytest --dead-fixtures  ./syncmaster/tests/test_integration

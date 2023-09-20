@@ -9,6 +9,8 @@ from app.exceptions import (
     ActionNotAllowed,
     AlreadyIsGroupMember,
     AlreadyIsNotGroupMember,
+    CannotConnectToTaskQueueError,
+    CannotStopRunException,
     ConnectionNotFound,
     ConnectionOwnerException,
     DifferentConnectionsOwners,
@@ -117,6 +119,18 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterExceptio
         return exception_json_response(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Rule was already deleted",
+        )
+
+    if isinstance(exc, CannotConnectToTaskQueueError):
+        return exception_json_response(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Syncmaster not connected to task queue. Run {exc.run_id} was failed",
+        )
+
+    if isinstance(exc, CannotStopRunException):
+        return exception_json_response(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot stop run {exc.run_id}. Current status is {exc.current_status}",
         )
 
     logger.exception("Got unhandled error")

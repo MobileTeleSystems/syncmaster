@@ -40,6 +40,7 @@ class Group(Base, TimestampMixin, DeletableMixin):
     )
 
     admin: Mapped[User] = relationship("User")
+    members: Mapped[list[User]] = relationship("User", secondary="user_group")
 
     def __repr__(self) -> str:
         return f"Group(name={self.name}, admin_id={self.admin_id})"
@@ -64,6 +65,9 @@ class UserGroup(Base):
 class Connection(Base, DeletableMixin, TimestampMixin, ResourceMixin):
     data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
     auth_data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=True, default=None)
+
+    user: Mapped[User | None] = relationship("User")
+    group: Mapped[Group | None] = relationship("Group")
 
     def __repr__(self):
         return (
@@ -100,6 +104,8 @@ class Transfer(Base, DeletableMixin, TimestampMixin, ResourceMixin):
     is_scheduled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     schedule: Mapped[str] = mapped_column(String(32), nullable=False, default="")
 
+    user: Mapped[User | None] = relationship("User")
+    group: Mapped[Group | None] = relationship("Group")
     source_connection: Mapped[Connection] = relationship(
         "Connection", foreign_keys=[source_connection_id]
     )
@@ -133,7 +139,7 @@ class Run(Base, TimestampMixin):
         nullable=True,
         default=None,
     )
-    finished_at: Mapped[datetime | None] = mapped_column(
+    ended_at: Mapped[datetime | None] = mapped_column(
         DateTime,
         nullable=True,
         default=None,
@@ -148,6 +154,8 @@ class Run(Base, TimestampMixin):
     transfer_dump: Mapped[dict[str, Any]] = mapped_column(
         JSON, nullable=False, default={}
     )
+
+    transfer: Mapped[Transfer] = relationship("Transfer")
 
     def __repr__(self):
         return (

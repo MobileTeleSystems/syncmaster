@@ -91,13 +91,14 @@ class CreatePostgresConnectionAuthData(BaseModel):
 class CreateOracleConnectionData(BaseModel):
     type: ORACLE_TYPE
     host: str
+    service_name: str | None = None
+    sid: str | None = None
     additional_params: dict = Field(default_factory=dict)
 
 
 class CreateOracleConnectionAuthData(BaseModel):
     user: str
-    password: str
-    sid: str | None = None
+    password: SecretStr
 
 
 class CreateConnectionSchema(BaseModel):

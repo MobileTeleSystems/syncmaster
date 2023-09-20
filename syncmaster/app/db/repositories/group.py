@@ -64,7 +64,7 @@ class GroupRepository(Repository[Group]):
             raise GroupNotFound from e
 
     async def create(self, name: str, description: str, admin_id: int) -> Group:
-        stmt = (
+        query = (
             insert(Group)
             .values(
                 name=name,
@@ -74,9 +74,7 @@ class GroupRepository(Repository[Group]):
             .returning(Group)
         )
         try:
-            result: ScalarResult[Group] = await self._session.scalars(
-                select(Group).from_statement(stmt)
-            )
+            result: ScalarResult[Group] = await self._session.scalars(query)
             await self._session.commit()
         except IntegrityError as err:
             await self._session.rollback()
@@ -242,8 +240,14 @@ class GroupRepository(Repository[Group]):
             .where(Transfer.group_id == group_id)
         )
         stmt = union(sub_connection, sub_transfer).subquery()
+        acl_aliased = aliased(Acl, stmt)
         return await self._paginate(
-            query=select(aliased(Acl, stmt)),
+            query=select(acl_aliased).order_by(
+                acl_aliased.object_type,
+                acl_aliased.object_id,
+                acl_aliased.user_id,
+                acl_aliased.rule,
+            ),
             page=page,
             page_size=page_size,
         )

@@ -1,9 +1,22 @@
 from contextlib import asynccontextmanager
+from datetime import datetime
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
-from app.db.models import Acl, Connection, Group, ObjectType, Rule, Transfer, User
+from app.api.v1.transfers.schemas import ReadFullTransferSchema
+from app.db.models import (
+    Acl,
+    Connection,
+    Group,
+    ObjectType,
+    Rule,
+    Run,
+    Status,
+    Transfer,
+    User,
+)
 
 
 @asynccontextmanager
@@ -61,30 +74,29 @@ async def create_connection(
     user_id: int | None = None,
     group_id: int | None = None,
     description: str = "",
-    type: str = "postgres",
-    host: str = "127.0.0.1",
-    port: int = 5432,
-    user: str = "user",
-    password: str = "password",
-    database_name: str | None = "db",
-    additional_params: dict[str, Any] = {},
+    data: dict[str, Any] | None = None,
+    auth_data: dict[str, Any] | None = None,
 ) -> Connection:
+    if data is None:
+        data = {
+            "type": "postgres",
+            "host": "127.0.0.1",
+            "port": 5432,
+            "database_name": "db",
+            "additional_params": {},
+        }
+    if auth_data is None:
+        auth_data = {
+            "user": "user",
+            "password": "password",
+        }
     c = Connection(
         user_id=user_id,
         group_id=group_id,
         name=name,
         description=description,
-        data=dict(
-            type=type,
-            database_name=database_name,
-            additional_params=additional_params,
-            host=host,
-            port=port,
-        ),
-        auth_data=dict(
-            user=user,
-            password=password,
-        ),
+        data=data,
+        auth_data=auth_data,
     )
     session.add(c)
     await session.commit()
@@ -142,3 +154,32 @@ async def create_transfer(
     await session.commit()
     await session.refresh(t)
     return t
+
+
+async def create_run(
+    session: AsyncSession,
+    transfer_id: int,
+    started_at: datetime | None = None,
+    ended_at: datetime | None = None,
+    status: Status = Status.CREATED,
+) -> Run:
+    transfer = await session.get(
+        Transfer,
+        transfer_id,
+        options=(
+            joinedload(Transfer.source_connection),
+            joinedload(Transfer.target_connection),
+        ),
+    )
+    dump = ReadFullTransferSchema.from_orm(transfer).dict()
+    r = Run(
+        transfer_id=transfer_id,
+        started_at=started_at,
+        ended_at=ended_at,
+        status=status,
+        transfer_dump=dump,
+    )
+    session.add(r)
+    await session.commit()
+    await session.refresh(r)
+    return r

@@ -59,7 +59,7 @@ class UserRepository(Repository[User]):
     async def create(
         self, username: str, is_active: bool, is_superuser: bool = False
     ) -> User:
-        stmt = (
+        query = (
             insert(User)
             .values(
                 username=username,
@@ -69,9 +69,7 @@ class UserRepository(Repository[User]):
             .returning(User)
         )
         try:
-            result: ScalarResult[User] = await self._session.scalars(
-                select(User).from_statement(stmt)
-            )
+            result: ScalarResult[User] = await self._session.scalars(query)
             await self._session.commit()
         except IntegrityError as err:
             await self._session.rollback()

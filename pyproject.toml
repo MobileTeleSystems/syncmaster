@@ -7,25 +7,32 @@ readme = "README.rst"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = "^0.99.1"
 sqlalchemy = "^2.0.18"
-uvicorn = "^0.22.0"
+sqlalchemy-utils = "^0.41.1"
 pydantic = "^1.10.11"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 python-multipart = "^0.0.6"
+celery = "^5.3.3"
+
+[tool.poetry.group.worker.dependencies]
+onetl = {extras = ["spark"], version = "^0.9.3"}
+psycopg2-binary = "^2.9.7"
+
+[tool.poetry.group.backend.dependencies]
+fastapi = "^0.99.1"
+uvicorn = "^0.22.0"
 alembic = "^1.11.1"
 asyncpg = "^0.28.0"
-sqlalchemy-utils = "^0.41.1"
-
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
 httpx = "^0.24.1"
 pytest-asyncio = "^0.21.0"
-psycopg2-binary = "^2.9.6"
+psycopg2-binary = "^2.9.7"
 pytest-randomly = "^3.13.0"
 pytest-deadfixtures = "^2.2.1"
-
+pytest-mock = "^3.11.1"
+onetl = {extras = ["spark"], version = "^0.9.3"}
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.3.3"
@@ -37,7 +44,6 @@ bandit = "^1.7.5"
 platformdirs = "3.8.0"
 sqlalchemy = {extras = ["mypy"], version = "^2.0.18"}
 types-python-jose = "^3.3.4.7"
-
 
 [[tool.poetry.source]]
 name = "nexus"
@@ -63,5 +69,37 @@ python_version = "3.11"
 plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
 
 [[tool.mypy.overrides]]
+module = "alembic.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "celery.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "fastapi.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "kombu.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "onetl.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pyspark.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
 module = "sqlalchemy_utils.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "starlette.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "uvicorn.*"
 ignore_missing_imports = true
