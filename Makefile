@@ -85,8 +85,12 @@ test: ##@Test Run tests
 	TEST_ORACLE_USER=${TEST_ORACLE_USER} \
 	TEST_ORACLE_PASSWORD=${TEST_ORACLE_PASSWORD} \
 	TEST_ORACLE_SERVICE_NAME=${TEST_ORACLE_SERVICE_NAME} \
+	TEST_HIVE_CLUSTER=${TEST_HIVE_CLUSTER} \
+	SPARK_CONF_DIR=${SPARK_CONF_DIR} \
+	HADOOP_CONF_DIR=${HADOOP_CONF_DIR} \
+	HIVE_CONF_DIR=${HIVE_CONF_DIR} \
 	PYTHONPATH=${APP_PATH} \
-	${POETRY} run pytest -vvvvxls --log-cli-level=INFO ./syncmaster/tests/
+	${POETRY}  run pytest -vx ./syncmaster/tests/
 
 check-fixtures: ##@Test Check declared fixtures without using
 	@POSTGRES_HOST=${POSTGRES_HOST} \
@@ -99,4 +103,4 @@ check-fixtures: ##@Test Check declared fixtures without using
 	RABBITMQ_USER=${RABBITMQ_USER} \
 	RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD} \
 	PYTHONPATH=${APP_PATH} \
-	${POETRY} run pytest --dead-fixtures  ./syncmaster/tests/test_integration
+	${POETRY} run pytest --dead-fixtures ./syncmaster/tests/

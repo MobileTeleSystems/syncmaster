@@ -108,6 +108,7 @@ tests:
   image: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend:${CI_COMMIT_REF_SLUG}
   stage: tests
   variables:
+    # CI_DEBUG_SERVICES: 'true'
     FF_NETWORK_PER_BUILD: 1
     JUNIT_FILE: junitxml.xml
     ENV: GITLAB
@@ -123,17 +124,23 @@ tests:
     RABBITMQ_USER: guest
     RABBITMQ_PASSWORD: guest
 
-    TEST_POSTGRES_HOST: test_postgres
+    TEST_POSTGRES_HOST: test-postgres
     TEST_POSTGRES_PORT: 5432
     TEST_POSTGRES_USER: test_user
     TEST_POSTGRES_PASSWORD: test_password
     TEST_POSTGRES_DB: test_db
 
-    TEST_ORACLE_HOST: test_oracle
+    TEST_ORACLE_HOST: test-oracle
     TEST_ORACLE_PORT: 1521
     TEST_ORACLE_USER: test_user
     TEST_ORACLE_PASSWORD: test_password
     TEST_ORACLE_SERVICE_NAME: test_oracle
+
+    TEST_HIVE_CLUSTER: test-hive
+
+    SPARK_CONF_DIR: /syncmaster/tests/spark/hive/conf/
+    HADOOP_CONF_DIR: /syncmaster/tests/spark/hadoop/
+    HIVE_CONF_DIR: /syncmaster/tests/spark/hive/conf/
 
   services:
     - name: central-mirror.services.mts.ru/postgres:15-alpine
@@ -161,15 +168,19 @@ tests:
         RABBITMQ_PASSWORD: guest
         ENV: GITLAB
 
+        SPARK_CONF_DIR: /syncmaster/tests/spark/hive/conf/
+        HADOOP_CONF_DIR: /syncmaster/tests/spark/hadoop/
+        HIVE_CONF_DIR: /syncmaster/tests/spark/hive/conf/
+
     - name: central-mirror.services.mts.ru/postgres:15-alpine
-      alias: test_postgres
+      alias: test-postgres
       variables:
         POSTGRES_DB: test_db
         POSTGRES_USER: test_user
         POSTGRES_PASSWORD: test_password
 
     - name: central-mirror.services.mts.ru/gvenzl/oracle-xe:slim-faststart
-      alias: test_oracle
+      alias: test-oracle
       variables:
         TZ: UTC
         ORACLE_PASSWORD: test_password
@@ -177,9 +188,27 @@ tests:
         APP_USER: test_user
         APP_USER_PASSWORD: test_password
 
+    - name: central-mirror.services.mts.ru/postgres:15-alpine
+      alias: metastore-hive
+      variables:
+        POSTGRES_DB: metastore
+        POSTGRES_USER: test_hive
+        POSTGRES_PASSWORD: test_hive
+
+    - name: central-mirror.services.mts.ru/mtsrus/hadoop:hadoop2.7.3-hive2.3.9
+      alias: test-hive
+      variables:
+        HADOOP_CONF_DIR: /etc/hadoop
+        HIVE_CONF_DIR: /opt/hive/conf
+        WITH_HIVE_SERVER: 'false'  # оставляем только сервер метастора, сам Hive нам не требуется, не тратим на него ресурсы
+        HIVE_METASTORE_DB_URL: jdbc:postgresql://metastore-hive:5432/metastore
+        HIVE_METASTORE_DB_DRIVER: org.postgresql.Driver
+        HIVE_METASTORE_DB_USER: test_hive
+        HIVE_METASTORE_DB_PASSWORD: test_hive
+
   script:
     - python ./syncmaster/app/pre_start.py
-    - python -m pytest -v ./syncmaster/tests -v -s --junitxml=${JUNIT_FILE}
+    - python -m pytest -v ./syncmaster/tests/ -v --log-cli-level=INFO -s --junitxml=${JUNIT_FILE}
   artifacts:
     when: always
     reports:

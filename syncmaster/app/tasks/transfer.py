@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 def run_transfer_task(self: WorkerTask, run_id: int) -> None:
     onetl.log.setup_logging(level=logging.INFO)
     """Task for make transfer data"""
+    logger.info("Before spark initializing")
     spark = self.settings.CREATE_SPARK_SESSION_FUNCTION(self.settings)
     logger.info("Spark initialized")
     with Session(self.engine) as session:

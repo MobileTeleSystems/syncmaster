@@ -31,7 +31,7 @@ from tests.utils import (
 )
 
 from app.api.v1.auth.utils import sign_jwt
-from app.config import Settings
+from app.config import Settings, TestSettings
 from app.db.models import Base, ObjectType, Rule, UserGroup
 from app.main import get_application
 
@@ -48,9 +48,12 @@ def event_loop():
 
 @pytest.fixture(scope="session")
 def settings():
-    settings = Settings()
-    settings.POSTGRES_DB = settings.POSTGRES_DB
-    return settings
+    return Settings()
+
+
+@pytest.fixture(scope="session")
+def test_settings():
+    return TestSettings()
 
 
 @pytest.fixture(scope="session")

@@ -11,3 +11,9 @@ class PostgresTransferParamsDTO:
 class OracleTransferParamsDTO:
     table_name: str
     type: str = "oracle"
+
+
+@dataclass
+class HiveTransferParamsDTO:
+    table_name: str
+    type: str = "hive"

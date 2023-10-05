@@ -61,6 +61,7 @@ async def test_user_can_update_own_connection(
             "database_name": user_connection.data["database_name"],
         },
         "auth_data": {
+            "type": user_connection.auth_data["type"],
             "user": user_connection.auth_data["user"],
         },
     }
@@ -89,6 +90,7 @@ async def test_superuser_can_update_user_connection(
             "database_name": user_connection.data["database_name"],
         },
         "auth_data": {
+            "type": user_connection.auth_data["type"],
             "user": user_connection.auth_data["user"],
         },
     }
@@ -143,6 +145,7 @@ async def test_member_can_update_connection_with_write_or_delete_rule(
             "database_name": group_connection.data["database_name"],
         },
         "auth_data": {
+            "type": group_connection.auth_data["type"],
             "user": group_connection.auth_data["user"],
         },
     }
@@ -175,6 +178,7 @@ async def test_group_admin_can_update_own_group_connection(
             "database_name": group_connection.data["database_name"],
         },
         "auth_data": {
+            "type": group_connection.auth_data["type"],
             "user": group_connection.auth_data["user"],
         },
     }
@@ -220,6 +224,7 @@ async def test_superuser_can_update_group_connection(
             "database_name": group_connection.data["database_name"],
         },
         "auth_data": {
+            "type": group_connection.auth_data["type"],
             "user": group_connection.auth_data["user"],
         },
     }
@@ -266,6 +271,7 @@ async def test_can_update_connection_data_fields(
             "database_name": user_connection.data["database_name"],
         },
         "auth_data": {
+            "type": user_connection.auth_data["type"],
             "user": user_connection.auth_data["user"],
         },
     }

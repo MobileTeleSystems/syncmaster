@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field, root_validator
 from app.api.v1.connections.schemas import ReadConnectionSchema
 from app.api.v1.schemas import (
     FULL_TYPE,
+    HIVE_TYPE,
     INCREMENTAL_TYPE,
     ORACLE_TYPE,
     POSTGRES_TYPE,
@@ -21,13 +22,18 @@ class IncrementalStrategy(BaseModel):
     type: INCREMENTAL_TYPE
 
 
-class ReadPostgresTransferData(BaseModel):
-    type: POSTGRES_TYPE
+class ReadHiveTransferData(BaseModel):
+    type: HIVE_TYPE
     table_name: str
 
 
 class ReadOracleTransferData(BaseModel):
     type: ORACLE_TYPE
+    table_name: str
+
+
+class ReadPostgresTransferData(BaseModel):
+    type: POSTGRES_TYPE
     table_name: str
 
 
@@ -41,11 +47,11 @@ class ReadTransferSchema(BaseModel):
     description: str
     is_scheduled: bool
     schedule: str
-    source_params: ReadPostgresTransferData | ReadOracleTransferData = Field(
+    source_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData = Field(
         ...,
         discriminator="type",
     )
-    target_params: ReadPostgresTransferData | ReadOracleTransferData = Field(
+    target_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData = Field(
         ...,
         discriminator="type",
     )
@@ -77,11 +83,11 @@ class CreateTransferSchema(BaseModel):
     description: str
     is_scheduled: bool
     schedule: str | None = None
-    source_params: ReadPostgresTransferData | ReadOracleTransferData = Field(
+    source_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData = Field(
         ...,
         discriminator="type",
     )
-    target_params: ReadPostgresTransferData | ReadOracleTransferData = Field(
+    target_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData = Field(
         ...,
         discriminator="type",
     )
@@ -106,10 +112,10 @@ class UpdateTransferSchema(BaseModel):
     description: str | None
     is_scheduled: bool | None
     schedule: str | None
-    source_params: ReadPostgresTransferData | ReadOracleTransferData | None = Field(
+    source_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData | None = Field(
         discriminator="type", default=None
     )
-    target_params: ReadPostgresTransferData | ReadOracleTransferData | None = Field(
+    target_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData | None = Field(
         discriminator="type", default=None
     )
     strategy_params: FullStrategy | IncrementalStrategy | None = Field(

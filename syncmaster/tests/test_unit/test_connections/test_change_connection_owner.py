@@ -114,7 +114,11 @@ async def test_admin_can_copy_connection(
     curr_id = current.id
 
     assert current.user_id is None
-    assert current.auth_data == {"user": "user", "password": "password"}
+    assert current.auth_data == {
+        "type": "postgres",
+        "user": "user",
+        "password": "password",
+    }
     assert not current.is_deleted
 
     query_copy_not_exist = select(Connection).filter(
@@ -158,10 +162,14 @@ async def test_admin_can_copy_connection(
 
     assert origin.id == curr_id
     assert origin.user_id is None
-    assert origin.auth_data == {"user": "user", "password": "password"}
+    assert origin.auth_data == {
+        "type": "postgres",
+        "user": "user",
+        "password": "password",
+    }
     assert origin.is_deleted == is_delete_source
     assert not new.is_deleted
-    assert new.auth_data is None
+    assert new.auth_data == {"type": "postgres", "user": None, "password": None}
 
 
 async def test_other_admin_cannot_change_owner_of_group_connection(
@@ -199,7 +207,11 @@ async def test_superuser_can_copy_user_connection(
     curr_id = current.id
 
     assert current.group_id is None
-    assert current.auth_data == {"user": "user", "password": "password"}
+    assert current.auth_data == {
+        "type": "postgres",
+        "user": "user",
+        "password": "password",
+    }
     assert not current.is_deleted
 
     query_copy_not_exist = select(Connection).filter(
@@ -244,10 +256,14 @@ async def test_superuser_can_copy_user_connection(
 
     assert origin.id == curr_id
     assert origin.group_id == None
-    assert origin.auth_data == {"user": "user", "password": "password"}
+    assert origin.auth_data == {
+        "type": "postgres",
+        "user": "user",
+        "password": "password",
+    }
     assert origin.is_deleted == is_delete_source
     assert not new.is_deleted
-    assert new.auth_data is None
+    assert new.auth_data == {"type": "postgres", "user": None, "password": None}
 
 
 @pytest.mark.parametrize("is_delete_source", [True, False])
@@ -267,7 +283,11 @@ async def test_superuser_can_change_owner_of_group_connection(
     curr_id = current.id
     curr_group_id = current.group_id
 
-    assert current.auth_data == {"user": "user", "password": "password"}
+    assert current.auth_data == {
+        "type": "postgres",
+        "user": "user",
+        "password": "password",
+    }
     assert not current.is_deleted
 
     query_copy_not_exist = select(Connection).filter(
@@ -312,7 +332,11 @@ async def test_superuser_can_change_owner_of_group_connection(
 
     assert origin.id == curr_id
     assert origin.group_id == curr_group_id
-    assert origin.auth_data == {"user": "user", "password": "password"}
+    assert origin.auth_data == {
+        "type": "postgres",
+        "user": "user",
+        "password": "password",
+    }
     assert origin.is_deleted == is_delete_source
     assert not new.is_deleted
-    assert new.auth_data is None
+    assert new.auth_data == {"password": None, "type": "postgres", "user": None}

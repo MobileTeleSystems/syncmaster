@@ -1,4 +1,6 @@
 import asyncio
+import logging
+from datetime import datetime
 from typing import Any
 
 from alembic.autogenerate import compare_metadata
@@ -17,6 +19,8 @@ from sqlalchemy.ext.asyncio import (
 
 from app.config import Settings
 from app.db.models import Acl, Connection, Group, Run, Status, Transfer, User
+
+logger = logging.getLogger(__name__)
 
 
 class MockUser:
@@ -189,4 +193,5 @@ async def get_run_on_end(
         data = result.json()
         if data["status"] in [Status.FINISHED, Status.FAILED]:
             return data
+        logger.info("%s Try get end of run", datetime.now().isoformat())
         await asyncio.sleep(1)
