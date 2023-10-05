@@ -151,9 +151,10 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
         remove_source: bool,
         current_user_id: int,
         is_superuser: bool,
-    ) -> None:
+    ) -> Connection:
         if not is_superuser and not await self.has_owner_access(
-            connection_id, current_user_id
+            connection_id,
+            current_user_id,
         ):
             raise ConnectionNotFound
         try:
@@ -162,13 +163,15 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
                 group_id=new_group_id,
                 auth_data=None,  # remove auth_data in the origin
             )
-            await self._copy(
+            new_connection = await self._copy(
                 Connection.id == connection_id,
                 **kwargs_for_copy,
             )
 
             if remove_source:
                 await self._delete(connection_id)
+
+            return new_connection
 
         except IntegrityError as e:
             await self._session.rollback()

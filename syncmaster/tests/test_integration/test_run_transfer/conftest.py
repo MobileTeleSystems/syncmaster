@@ -118,7 +118,9 @@ def init_df(spark: SparkSession) -> DataFrame:
 
 @pytest.fixture
 def prepare_postgres(
-    spark: SparkSession, postgres: PostgresConnectionDTO, init_df: DataFrame
+    spark: SparkSession,
+    postgres: PostgresConnectionDTO,
+    init_df: DataFrame,
 ) -> Postgres:
     postgres_connection = Postgres(
         host=postgres.host,
@@ -141,7 +143,9 @@ def prepare_postgres(
 
 @pytest.fixture
 def prepare_oracle(
-    spark: SparkSession, oracle: OracleConnectionDTO, init_df: DataFrame
+    spark: SparkSession,
+    oracle: OracleConnectionDTO,
+    init_df: DataFrame,
 ) -> Oracle:
     oracle_connection = Oracle(
         host=oracle.host,
@@ -179,7 +183,9 @@ async def transfers(
     settings: Settings,
 ):
     user = await create_user(
-        session=session, username="connection_owner", is_active=True
+        session=session,
+        username="connection_owner",
+        is_active=True,
     )
     postgres_connection = await create_connection(
         session=session,

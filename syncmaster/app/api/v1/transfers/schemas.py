@@ -62,6 +62,12 @@ class TransferPageSchema(PageSchema):
     items: list[ReadTransferSchema]
 
 
+class CopyTransferSchema(BaseModel):
+    new_user_id: int | None
+    new_group_id: int | None
+    remove_source: bool = False
+
+
 class CreateTransferSchema(BaseModel):
     user_id: int | None
     group_id: int | None

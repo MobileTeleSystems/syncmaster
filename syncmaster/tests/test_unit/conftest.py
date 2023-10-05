@@ -90,7 +90,9 @@ async def user_connection(session: AsyncSession, settings: Settings) -> MockConn
         session=session, username="connection_username", is_active=True
     )
     connection = await create_connection(
-        session=session, name="user_connection", user_id=user.id
+        session=session,
+        name="user_connection",
+        user_id=user.id,
     )
     yield MockConnection(
         connection=connection,

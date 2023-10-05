@@ -34,5 +34,6 @@ class PostgresHandler(Handler):
     def init_writer(self):
         super().init_writer()
         self.writer = DBWriter(
-            connection=self.connection, table=self.transfer_params.table_name
+            connection=self.connection,
+            table=self.transfer_params.table_name,
         )

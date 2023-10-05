@@ -34,9 +34,11 @@ class ReadConnectionSchema(BaseModel):
     name: str
     description: str
     data: ReadPostgresConnectionData | ReadOracleConnectionData = Field(
-        ..., discriminator="type", alias="connection_data"
+        ...,
+        discriminator="type",
+        alias="connection_data",
     )
-    auth_data: ReadPostgresAuthData | ReadOracleAuthData
+    auth_data: ReadPostgresAuthData | ReadOracleAuthData | None
 
     class Config:
         orm_mode = True

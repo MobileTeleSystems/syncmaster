@@ -22,6 +22,12 @@ class StatusResponseSchema(BaseModel):
     message: str
 
 
+class StatusCopyTransferResponseSchema(StatusResponseSchema):
+    source_connection_id: int
+    target_connection_id: int
+    copied_transfer_id: int
+
+
 class MetaPageSchema(BaseModel):
     page: int
     pages: int

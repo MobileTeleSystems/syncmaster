@@ -3,8 +3,14 @@ from kombu.exceptions import KombuError
 
 from app.api.deps import DatabaseProviderMarker
 from app.api.services import get_user
-from app.api.v1.schemas import ReadAclSchema, SetRuleSchema, StatusResponseSchema
+from app.api.v1.schemas import (
+    ReadAclSchema,
+    SetRuleSchema,
+    StatusCopyTransferResponseSchema,
+    StatusResponseSchema,
+)
 from app.api.v1.transfers.schemas import (
+    CopyTransferSchema,
     CreateTransferSchema,
     ReadRunSchema,
     ReadTransferSchema,
@@ -143,6 +149,67 @@ async def read_transfer(
         is_superuser=current_user.is_superuser,
     )
     return ReadTransferSchema.from_orm(transfer)
+
+
+@router.post("/transfers/{transfer_id}/copy_transfer")
+async def copy_transfer(
+    transfer_id: int,
+    transfer_data: CopyTransferSchema,
+    current_user: User = Depends(get_user(is_active=True)),
+    provider: DatabaseProvider = Depends(DatabaseProviderMarker),
+) -> StatusCopyTransferResponseSchema:
+    rule = Rule.DELETE if transfer_data.remove_source else Rule.READ
+    transfer = await provider.transfer.read_by_id(
+        transfer_id=transfer_id,
+        current_user_id=current_user.id,
+        is_superuser=current_user.is_superuser,
+        rule=rule,
+    )
+
+    copied_source_connection = await provider.connection.copy_connection(
+        connection_id=transfer.source_connection_id,
+        new_group_id=transfer_data.new_group_id,
+        new_user_id=transfer_data.new_user_id,
+        remove_source=transfer_data.remove_source,
+        current_user_id=current_user.id,
+        is_superuser=current_user.is_superuser,
+    )
+
+    copied_target_connection = (
+        copied_source_connection  # source and target are the same (it's possible ?)
+    )
+
+    if (
+        transfer.source_connection_id != transfer.target_connection_id
+    ):  # Source and target are not the same
+        copied_target_connection = await provider.connection.copy_connection(
+            connection_id=transfer.target_connection_id,
+            new_group_id=transfer_data.new_group_id,
+            new_user_id=transfer_data.new_user_id,
+            remove_source=transfer_data.remove_source,
+            current_user_id=current_user.id,
+            is_superuser=current_user.is_superuser,
+        )
+
+    copied_transfer = await provider.transfer.copy_transfer(
+        transfer_id=transfer_id,
+        new_group_id=transfer_data.new_group_id,
+        new_user_id=transfer_data.new_user_id,
+        new_source_connection=copied_source_connection.id,
+        new_target_connection=copied_target_connection.id,
+        remove_source=transfer_data.remove_source,
+        current_user_id=current_user.id,
+        is_superuser=current_user.is_superuser,
+    )
+
+    return StatusCopyTransferResponseSchema(
+        ok=True,
+        status_code=status.HTTP_200_OK,
+        message="Transfer was copied.",
+        source_connection_id=copied_source_connection.id,
+        target_connection_id=copied_target_connection.id,
+        copied_transfer_id=copied_transfer.id,
+    )
 
 
 @router.patch("/transfers/{transfer_id}")

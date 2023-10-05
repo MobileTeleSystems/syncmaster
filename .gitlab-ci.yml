@@ -133,7 +133,7 @@ tests:
     TEST_ORACLE_PORT: 1521
     TEST_ORACLE_USER: test_user
     TEST_ORACLE_PASSWORD: test_password
-    TEST_ORACLE_SERVICE_NAME: XEPDB1
+    TEST_ORACLE_SERVICE_NAME: test_oracle
 
   services:
     - name: central-mirror.services.mts.ru/postgres:15-alpine
