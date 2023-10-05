@@ -4,10 +4,19 @@ from typing import Any
 from pyspark.sql import SparkSession
 
 from app.db.models import Connection, Transfer
-from app.dto.connections import OracleConnectionDTO, PostgresConnectionDTO
-from app.dto.transfers import OracleTransferParamsDTO, PostgresTransferParamsDTO
+from app.dto.connections import (
+    HiveConnectionDTO,
+    OracleConnectionDTO,
+    PostgresConnectionDTO,
+)
+from app.dto.transfers import (
+    HiveTransferParamsDTO,
+    OracleTransferParamsDTO,
+    PostgresTransferParamsDTO,
+)
 from app.exceptions import ConnectionTypeNotRecognizedException
 from app.tasks.handlers.base import Handler
+from app.tasks.handlers.hive import HiveHandler
 from app.tasks.handlers.oracle import OracleHandler
 from app.tasks.handlers.postgres import PostgresHandler
 
@@ -26,10 +35,16 @@ class TransferController:
         spark: SparkSession,
     ):
         self.source = self.get_handler(
-            source_connection.data, transfer.source_params, spark
+            source_connection.data,
+            source_connection.auth_data,
+            transfer.source_params,
+            spark,
         )
         self.target = self.get_handler(
-            target_connection.data, transfer.target_params, spark
+            target_connection.data,
+            target_connection.auth_data,
+            transfer.target_params,
+            spark,
         )
         logger.info("source connection = %s", self.source)
         logger.info("target connection = %s", self.target)
@@ -47,9 +62,18 @@ class TransferController:
     def get_handler(
         self,
         connection_data: dict[str, Any],
+        connection_auth_data: dict[str, Any],
         transfer_params: dict[str, Any],
         spark: SparkSession,
     ) -> Handler:
+        connection_data.update(connection_auth_data)
+        if connection_data.get("type") == "hive":
+            return HiveHandler(
+                connection=HiveConnectionDTO(**connection_data),
+                transfer_params=HiveTransferParamsDTO(**transfer_params),
+                spark=spark,
+            )
+
         if connection_data.get("type") == "oracle":
             return OracleHandler(
                 connection=OracleConnectionDTO(**connection_data),

@@ -24,6 +24,7 @@ async def test_unauthorized_user_cannot_create_connection(client: AsyncClient):
                 "database_name": "postgres",
             },
             "auth_data": {
+                "type": "postgres",
                 "user": "user",
                 "password": "secret",
             },
@@ -55,6 +56,7 @@ async def test_simple_user_can_create_connection(
                 "database_name": "postgres",
             },
             "auth_data": {
+                "type": "postgres",
                 "user": "user",
                 "password": "secret",
             },
@@ -83,6 +85,7 @@ async def test_simple_user_can_create_connection(
             "additional_params": connection.data["additional_params"],
         },
         "auth_data": {
+            "type": connection.auth_data["type"],
             "user": connection.auth_data["user"],
         },
     }
@@ -119,6 +122,7 @@ async def test_user_cannot_create_connection_to_other_user(
                 "database_name": "postgres",
             },
             "auth_data": {
+                "type": "postgres",
                 "user": "user",
                 "password": "secret",
             },
@@ -150,6 +154,7 @@ async def test_check_fields_validation_on_create_connection(
                 "database_name": "postgres",
             },
             "auth_data": {
+                "type": "postgres",
                 "user": "user",
                 "password": "secret",
             },
@@ -181,6 +186,7 @@ async def test_check_fields_validation_on_create_connection(
                 "database_name": "postgres",
             },
             "auth_data": {
+                "type": "postgres",
                 "user": "user",
                 "password": "secret",
             },
@@ -212,6 +218,7 @@ async def test_check_fields_validation_on_create_connection(
                 "database_name": "postgres",
             },
             "auth_data": {
+                "type": "postgres",
                 "user": "user",
                 "password": "secret",
             },
@@ -244,6 +251,7 @@ async def test_check_fields_validation_on_create_connection(
                 "database_name": "postgres",
             },
             "auth_data": {
+                "type": "postgres",
                 "user": "user",
                 "password": "secret",
             },
@@ -254,12 +262,12 @@ async def test_check_fields_validation_on_create_connection(
         "detail": [
             {
                 "loc": ["body", "connection_data"],
-                "msg": "No match for discriminator 'type' and value 'POSTGRESQL' (allowed values: 'postgres', 'oracle')",
+                "msg": "No match for discriminator 'type' and value 'POSTGRESQL' (allowed values: 'hive', 'oracle', 'postgres')",
                 "type": "value_error.discriminated_union.invalid_discriminator",
                 "ctx": {
                     "discriminator_key": "type",
                     "discriminator_value": "POSTGRESQL",
-                    "allowed_values": "'postgres', 'oracle'",
+                    "allowed_values": "'hive', 'oracle', 'postgres'",
                 },
             }
         ]
@@ -284,6 +292,7 @@ async def test_simple_user_cannot_create_group_connection(
                 "database_name": "postgres",
             },
             "auth_data": {
+                "type": "postgres",
                 "user": "user",
                 "password": "secret",
             },
@@ -318,6 +327,7 @@ async def test_group_member_can_create_group_connection(
                 "database_name": "postgres",
             },
             "auth_data": {
+                "type": "postgres",
                 "user": "user",
                 "password": "secret",
             },
@@ -346,6 +356,7 @@ async def test_group_member_can_create_group_connection(
             "additional_params": connection.data["additional_params"],
         },
         "auth_data": {
+            "type": connection.auth_data["type"],
             "user": connection.auth_data["user"],
         },
     }
@@ -381,6 +392,7 @@ async def test_other_group_admin_cannot_create_group_connection(
                 "database_name": "postgres",
             },
             "auth_data": {
+                "type": "postgres",
                 "user": "user",
                 "password": "secret",
             },
@@ -415,6 +427,7 @@ async def test_group_admin_can_create_group_connection(
                 "database_name": "postgres",
             },
             "auth_data": {
+                "type": "postgres",
                 "user": "user",
                 "password": "secret",
             },
@@ -443,6 +456,7 @@ async def test_group_admin_can_create_group_connection(
             "additional_params": connection.data["additional_params"],
         },
         "auth_data": {
+            "type": connection.auth_data["type"],
             "user": connection.auth_data["user"],
         },
     }
@@ -482,6 +496,7 @@ async def test_superuser_can_create_group_connection(
                     "database_name": "postgres",
                 },
                 "auth_data": {
+                    "type": "postgres",
                     "user": "user",
                     "password": "secret",
                 },
@@ -510,6 +525,7 @@ async def test_superuser_can_create_group_connection(
                 "additional_params": connection.data["additional_params"],
             },
             "auth_data": {
+                "type": connection.auth_data["type"],
                 "user": connection.auth_data["user"],
             },
         }
@@ -548,6 +564,7 @@ async def test_superuser_can_create_other_user_connection(
                 "database_name": "postgres",
             },
             "auth_data": {
+                "type": "postgres",
                 "user": "user",
                 "password": "secret",
             },
@@ -576,6 +593,7 @@ async def test_superuser_can_create_other_user_connection(
             "additional_params": connection.data["additional_params"],
         },
         "auth_data": {
+            "type": connection.auth_data["type"],
             "user": connection.auth_data["user"],
         },
     }

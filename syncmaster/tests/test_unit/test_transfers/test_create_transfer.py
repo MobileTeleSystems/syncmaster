@@ -517,12 +517,12 @@ async def test_superuser_can_create_group_transfer(
             },
             {
                 "loc": ["body", "source_params"],
-                "msg": "No match for discriminator 'type' and value 'new some connection type' (allowed values: 'postgres', 'oracle')",
+                "msg": "No match for discriminator 'type' and value 'new some connection type' (allowed values: 'postgres', 'oracle', 'hive')",
                 "type": "value_error.discriminated_union.invalid_discriminator",
                 "ctx": {
                     "discriminator_key": "type",
                     "discriminator_value": "new some connection type",
-                    "allowed_values": "'postgres', 'oracle'",
+                    "allowed_values": "'postgres', 'oracle', 'hive'",
                 },
             },
         ),

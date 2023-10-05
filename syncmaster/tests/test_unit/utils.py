@@ -87,6 +87,7 @@ async def create_connection(
         }
     if auth_data is None:
         auth_data = {
+            "type": "postgres",
             "user": "user",
             "password": "password",
         }

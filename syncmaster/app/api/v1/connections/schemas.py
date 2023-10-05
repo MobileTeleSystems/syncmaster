@@ -1,9 +1,19 @@
 from pydantic import BaseModel, Field, SecretStr, root_validator
 
-from app.api.v1.schemas import ORACLE_TYPE, POSTGRES_TYPE, PageSchema
+from app.api.v1.schemas import HIVE_TYPE, ORACLE_TYPE, POSTGRES_TYPE, PageSchema
 
 
-class ReadPostgresConnectionData(BaseModel):
+class ReadHiveConnectionSchema(BaseModel):
+    type: HIVE_TYPE
+    cluster: str
+    additional_params: dict = Field(default_factory=dict)
+
+
+class ReadHiveAuthSchema(BaseModel):
+    type: HIVE_TYPE
+
+
+class ReadPostgresConnectionSchema(BaseModel):
     type: POSTGRES_TYPE
     host: str
     port: int = Field(gt=0, le=65535)
@@ -11,20 +21,20 @@ class ReadPostgresConnectionData(BaseModel):
     additional_params: dict = Field(default_factory=dict)
 
 
-class ReadPostgresAuthData(BaseModel):
-    user: str
+class ReadPostgresAuthSchema(BaseModel):
+    type: POSTGRES_TYPE
+    user: str | None
 
 
-class ReadOracleAuthData(BaseModel):
-    user: str
-    sid: str | None = None
-    service_name: str | None = None
-
-
-class ReadOracleConnectionData(BaseModel):
+class ReadOracleConnectionSchema(BaseModel):
     type: ORACLE_TYPE
     host: str
     additional_params: dict = Field(default_factory=dict)
+
+
+class ReadOracleAuthSchema(BaseModel):
+    type: ORACLE_TYPE
+    user: str | None
 
 
 class ReadConnectionSchema(BaseModel):
@@ -33,12 +43,15 @@ class ReadConnectionSchema(BaseModel):
     group_id: int | None = None
     name: str
     description: str
-    data: ReadPostgresConnectionData | ReadOracleConnectionData = Field(
-        ...,
-        discriminator="type",
-        alias="connection_data",
+    data: ReadHiveConnectionSchema | ReadOracleConnectionSchema | ReadPostgresConnectionSchema = Field(
+        ..., discriminator="type", alias="connection_data"
     )
-    auth_data: ReadPostgresAuthData | ReadOracleAuthData | None
+    auth_data: ReadHiveAuthSchema | ReadOracleAuthSchema | ReadPostgresAuthSchema = (
+        Field(
+            ...,
+            discriminator="type",
+        )
+    )
 
     class Config:
         orm_mode = True
@@ -49,35 +62,86 @@ class ConnectionPageSchema(PageSchema):
     items: list[ReadConnectionSchema]
 
 
-class UpdatePostgresConnectionData(BaseModel):
-    type: POSTGRES_TYPE
-    host: str | None = None
-    port: int | None = None
-    user: str | None = None
-    password: SecretStr | None = None
-    database_name: str | None
-    additional_params: dict | None = Field(default_factory=dict)
-
-
-class UpdateOracleConnectionData(BaseModel):
+class UpdateOracleConnectionSchema(BaseModel):
     type: ORACLE_TYPE
     host: str | None = None
-    user: str | None = None
-    password: SecretStr | None = None
     sid: str | None = None
     service_name: str | None = None
     additional_params: dict | None = Field(default_factory=dict)
 
 
+class UpdateOracleAuthSchema(BaseModel):
+    type: ORACLE_TYPE
+    user: str | None = None
+    password: SecretStr | None = None
+
+
+class UpdatePostgresConnectionSchema(BaseModel):
+    type: POSTGRES_TYPE
+    host: str | None = None
+    port: int | None = None
+    database_name: str | None
+    additional_params: dict | None = Field(default_factory=dict)
+
+
+class UpdatePostgresAuthSchema(BaseModel):
+    type: POSTGRES_TYPE
+    user: str | None = None
+    password: SecretStr | None = None
+
+
+class UpdateHiveConnectionSchema(BaseModel):
+    type: HIVE_TYPE
+    cluster: str | None
+    additional_params: dict | None = Field(default_factory=dict)
+
+
+class UpdateHiveAuthSchema(BaseModel):
+    type: HIVE_TYPE
+
+
 class UpdateConnectionSchema(BaseModel):
     name: str | None = None
     description: str | None = None
-    data: UpdatePostgresConnectionData | UpdateOracleConnectionData | None = Field(
+    auth_data: UpdateHiveAuthSchema | UpdateOracleAuthSchema | UpdatePostgresAuthSchema | None = Field(
+        discriminator="type", default=None
+    )
+    data: UpdateHiveConnectionSchema | UpdatePostgresConnectionSchema | UpdateOracleConnectionSchema | None = Field(
         discriminator="type", alias="connection_data", default=None
     )
 
+    @root_validator
+    def check_types(cls, values):
+        data, auth_data = values.get("connection_data"), values.get("auth_data")
+        if data and auth_data and data.get("type") != auth_data.get("type"):
+            raise ValueError("Connection data and auth data must have same types")
+        return values
 
-class CreatePostgresConnectionData(BaseModel):
+
+class CreateHiveConnectionSchema(BaseModel):
+    type: HIVE_TYPE
+    cluster: str
+
+
+class CreateHiveAuthSchema(BaseModel):
+    type: HIVE_TYPE
+
+
+class CreateOracleConnectionSchema(BaseModel):
+    type: ORACLE_TYPE
+    host: str
+    service_name: str | None = None
+    sid: str | None = None
+    additional_params: dict = Field(default_factory=dict)
+
+
+class CreateOracleAuthSchema(BaseModel):
+    type: ORACLE_TYPE
+    user: str
+    password: SecretStr
+
+
+class CreatePostgresConnectionSchema(BaseModel):
     type: POSTGRES_TYPE
     host: str
     port: int
@@ -85,20 +149,8 @@ class CreatePostgresConnectionData(BaseModel):
     additional_params: dict = Field(default_factory=dict)
 
 
-class CreatePostgresConnectionAuthData(BaseModel):
-    user: str
-    password: SecretStr
-
-
-class CreateOracleConnectionData(BaseModel):
-    type: ORACLE_TYPE
-    host: str
-    service_name: str | None = None
-    sid: str | None = None
-    additional_params: dict = Field(default_factory=dict)
-
-
-class CreateOracleConnectionAuthData(BaseModel):
+class CreatePostgresAuthSchema(BaseModel):
+    type: POSTGRES_TYPE
     user: str
     password: SecretStr
 
@@ -108,16 +160,25 @@ class CreateConnectionSchema(BaseModel):
     group_id: int | None
     name: str
     description: str
-    data: CreatePostgresConnectionData | CreateOracleConnectionData = Field(
+    data: CreateHiveConnectionSchema | CreateOracleConnectionSchema | CreatePostgresConnectionSchema = Field(
         ..., discriminator="type", alias="connection_data"
     )
-    auth_data: CreatePostgresConnectionAuthData | CreateOracleConnectionAuthData
+    auth_data: CreateHiveAuthSchema | CreateOracleAuthSchema | CreatePostgresAuthSchema = Field(
+        ..., discriminator="type"
+    )
 
     @root_validator
     def check_owner_id(cls, values):
         user_id, group_id = values.get("user_id"), values.get("group_id")
         if (user_id is None) == (group_id is None):
             raise ValueError("Connection must have one owner: group or user")
+        return values
+
+    @root_validator
+    def check_types(cls, values):
+        data, auth_data = values.get("data"), values.get("auth_data")
+        if data and auth_data and data.type != auth_data.type:
+            raise ValueError("Connection data and auth data must have same types")
         return values
 
 

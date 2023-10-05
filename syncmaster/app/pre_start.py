@@ -9,7 +9,7 @@ COUNT = 12
 logger = logging.getLogger(__name__)
 
 
-def check_test_postgres(settings: Settings, test_settings: TestSettings):
+def check_test_postgres(settings: Settings, test_settings: TestSettings) -> None:
     from onetl.connection import Postgres
 
     spark = settings.CREATE_SPARK_SESSION_FUNCTION(settings)
@@ -29,13 +29,13 @@ def check_test_postgres(settings: Settings, test_settings: TestSettings):
             return
         except Exception:
             count -= 1
-            logger.info("Got exception. Will try after %d sec", TIMEOUT)
+            logger.info("Got exception on postgres. Will try after %d sec", TIMEOUT)
             sleep(TIMEOUT)
     if exception:
         raise exception
 
 
-def check_test_oracle(settings: Settings, test_settings: TestSettings):
+def check_test_oracle(settings: Settings, test_settings: TestSettings) -> None:
     from onetl.connection import Oracle
 
     spark = settings.CREATE_SPARK_SESSION_FUNCTION(settings)
@@ -56,7 +56,30 @@ def check_test_oracle(settings: Settings, test_settings: TestSettings):
             return
         except Exception:
             count -= 1
-            logger.info("Got exception. Will try after %d sec", TIMEOUT)
+            logger.info("Got exception on oracle. Will try after %d sec", TIMEOUT)
+            sleep(TIMEOUT)
+    if exception:
+        raise exception
+
+
+def check_test_hive(settings: Settings, test_settings: TestSettings) -> None:
+    from onetl.connection import Hive
+
+    spark = settings.CREATE_SPARK_SESSION_FUNCTION(settings)
+    count = COUNT
+    connection = Hive(
+        cluster=test_settings.TEST_HIVE_CLUSTER,
+        spark=spark,
+    )
+    exception = None
+    while count > 0:
+        try:
+            connection.check()
+            connection.execute("SHOW DATABASES")
+            return
+        except Exception:
+            count -= 1
+            logger.info("Got exception on hive. will try after %d sec", TIMEOUT)
             sleep(TIMEOUT)
     if exception:
         raise exception
@@ -65,6 +88,8 @@ def check_test_oracle(settings: Settings, test_settings: TestSettings):
 settings = Settings()
 
 if settings.ENV == EnvTypes.GITLAB:
+    logging.basicConfig(level=logging.INFO)
     test_settings = TestSettings()
     check_test_oracle(settings, test_settings)
     check_test_postgres(settings, test_settings)
+    check_test_hive(settings, test_settings)

@@ -1354,13 +1354,13 @@ reference = "nexus"
 
 [[package]]
 name = "onetl"
-version = "0.9.3"
+version = "0.9.4"
 description = "One ETL tool to rule them all"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "onetl-0.9.3-py3-none-any.whl", hash = "sha256:e7c96eb0552736e5b1da59912f90e011c3922f035e0c4273c3dac6ada8d74465"},
-    {file = "onetl-0.9.3.tar.gz", hash = "sha256:7446bdea984941394cc00657937ae3366fd180c0d1549642afb7449b1f419549"},
+    {file = "onetl-0.9.4-py3-none-any.whl", hash = "sha256:c51531921b5ae049da85796242de344eb9295e2238ad97dc2b4b0b6ffc171f63"},
+    {file = "onetl-0.9.4.tar.gz", hash = "sha256:7a29147b59040fde61393ccd367a3bc38bb03b6cc53eb3a44ec7231610eb4a64"},
 ]
 
 [package.dependencies]
@@ -1385,14 +1385,10 @@ ftps = ["ftputil (>=5.0.4)"]
 hdfs = ["hdfs (>2)"]
 kerberos = ["requests-kerberos (>=0.7.0)"]
 s3 = ["minio"]
+samba = ["pysmb"]
 sftp = ["paramiko"]
 spark = ["pyspark"]
 webdav = ["webdavclient3"]
-
-[package.source]
-type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
-reference = "nexus"
 
 [[package]]
 name = "ordered-set"
@@ -2584,4 +2580,4 @@ reference = "nexus"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "dfb1b6ef714b4a12942a0490121beef10f9b8a17436c173457c5506dd747f7cf"
+content-hash = "48c767d2221d256c60df0757171801645beff93e169008d69d5bf787246803de"

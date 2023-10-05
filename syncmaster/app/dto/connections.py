@@ -27,3 +27,10 @@ class OracleConnectionDTO(ConnectionDTO):
     service_name: str | None
     additional_params: dict
     type: str = "oracle"
+
+
+@dataclass
+class HiveConnectionDTO(ConnectionDTO):
+    cluster: str
+    additional_params: dict
+    type: str = "hive"

@@ -54,6 +54,7 @@ async def test_owner_can_read_connection_of_self(
             "additional_params": user_connection.data["additional_params"],
         },
         "auth_data": {
+            "type": user_connection.auth_data["type"],
             "user": user_connection.auth_data["user"],
         },
     }
@@ -92,6 +93,7 @@ async def test_group_admin_can_read_connection_of_his_group(
             "additional_params": group_connection.data["additional_params"],
         },
         "auth_data": {
+            "type": group_connection.auth_data["type"],
             "user": group_connection.auth_data["user"],
         },
     }
@@ -141,6 +143,7 @@ async def test_group_member_without_acl_can_read_connection_of_group(
             "additional_params": group_connection.data["additional_params"],
         },
         "auth_data": {
+            "type": group_connection.auth_data["type"],
             "user": group_connection.auth_data["user"],
         },
     }
@@ -194,6 +197,7 @@ async def test_superuser_can_read_all_connections(
             "additional_params": group_connection.data["additional_params"],
         },
         "auth_data": {
+            "type": group_connection.auth_data["type"],
             "user": group_connection.auth_data["user"],
         },
     }
@@ -217,6 +221,7 @@ async def test_superuser_can_read_all_connections(
             "additional_params": user_connection.data["additional_params"],
         },
         "auth_data": {
+            "type": group_connection.auth_data["type"],
             "user": group_connection.auth_data["user"],
         },
     }

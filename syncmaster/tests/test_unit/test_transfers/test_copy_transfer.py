@@ -67,7 +67,9 @@ async def test_simple_user_can_copy_transfer(
         new_connection_source_response.json()["connection_data"]
         == user_transfer.source_connection.connection.data
     )
-    assert not new_connection_source_response.json()["auth_data"]
+    assert {"type": "postgres", "user": None} == new_connection_source_response.json()[
+        "auth_data"
+    ]
 
     new_connection_target_response = await client.get(
         f"v1/connections/{result_json['target_connection_id']}",
@@ -78,7 +80,9 @@ async def test_simple_user_can_copy_transfer(
         new_connection_target_response.json()["connection_data"]
         == user_transfer.target_connection.connection.data
     )
-    assert not new_connection_target_response.json()["auth_data"]
+    assert {"type": "postgres", "user": None} == new_connection_target_response.json()[
+        "auth_data"
+    ]
 
     assert (
         copied_transfer_response.json()["source_connection_id"]
@@ -154,7 +158,9 @@ async def test_simple_user_can_copy_transfer_remove_source_transfer(
         new_connection_source_response.json()["connection_data"]
         == user_transfer.source_connection.connection.data
     )
-    assert not new_connection_source_response.json()["auth_data"]
+    assert {"type": "postgres", "user": None} == new_connection_source_response.json()[
+        "auth_data"
+    ]
 
     new_connection_target_response = await client.get(
         f"v1/connections/{result_json['target_connection_id']}",
@@ -165,7 +171,9 @@ async def test_simple_user_can_copy_transfer_remove_source_transfer(
         new_connection_target_response.json()["connection_data"]
         == user_transfer.target_connection.connection.data
     )
-    assert not new_connection_target_response.json()["auth_data"]
+    assert {"type": "postgres", "user": None} == new_connection_target_response.json()[
+        "auth_data"
+    ]
 
     assert (
         copied_transfer_response.json()["source_connection_id"]

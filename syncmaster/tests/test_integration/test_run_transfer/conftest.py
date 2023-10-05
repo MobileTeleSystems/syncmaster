@@ -1,9 +1,9 @@
-import os
 from datetime import date, datetime
+from itertools import permutations
 
 import pytest
 import pytest_asyncio
-from onetl.connection import Oracle, Postgres
+from onetl.connection import Hive, Oracle, Postgres
 from onetl.db import DBWriter
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import (
@@ -20,38 +20,51 @@ from tests.test_unit.utils import create_connection, create_transfer, create_use
 from tests.utils import MockUser
 
 from app.api.v1.auth.utils import sign_jwt
-from app.config import Settings
-from app.dto.connections import OracleConnectionDTO, PostgresConnectionDTO
+from app.config import Settings, TestSettings
+from app.dto.connections import (
+    HiveConnectionDTO,
+    OracleConnectionDTO,
+    PostgresConnectionDTO,
+)
 
 
 @pytest.fixture
-def spark(settings: Settings):
+def spark(settings: Settings) -> SparkSession:
     return settings.CREATE_SPARK_SESSION_FUNCTION(settings)
 
 
 @pytest.fixture
-def postgres() -> PostgresConnectionDTO:
-    return PostgresConnectionDTO(
-        type="postgres",
-        host=os.environ.get("TEST_POSTGRES_HOST", "127.0.0.1"),
-        port=int(os.environ.get("TEST_POSTGRES_PORT", 5432)),
-        user=os.environ.get("TEST_POSTGRES_USER", "user"),
-        password=os.environ.get("TEST_POSTGRES_PASSWORD", "password"),
-        database_name=os.environ.get("TEST_POSTGRES_DB", "test_db"),
+def hive(test_settings: TestSettings) -> HiveConnectionDTO:
+    return HiveConnectionDTO(
+        type="hive",
+        cluster=test_settings.TEST_HIVE_CLUSTER,
         additional_params={},
     )
 
 
 @pytest.fixture
-def oracle() -> OracleConnectionDTO:
+def oracle(test_settings: TestSettings) -> OracleConnectionDTO:
     return OracleConnectionDTO(
         type="oracle",
-        host=os.environ.get("TEST_ORACLE_HOST", "127.0.0.1"),
-        port=int(os.environ.get("TEST_ORACLE_PORT", 1521)),
-        user=os.environ.get("TEST_ORACLE_USER", "user"),
-        password=os.environ.get("TEST_ORACLE_PASSWORD", "password"),
-        service_name=os.environ.get("TEST_ORACLE_SERVICE_NAME", "XEPDB1"),
-        sid=None,
+        host=test_settings.TEST_ORACLE_HOST,
+        port=test_settings.TEST_ORACLE_PORT,
+        user=test_settings.TEST_ORACLE_USER,
+        password=test_settings.TEST_ORACLE_PASSWORD,
+        service_name=test_settings.TEST_ORACLE_SERVICE_NAME,
+        sid=test_settings.TEST_ORACLE_SID,
+        additional_params={},
+    )
+
+
+@pytest.fixture
+def postgres(test_settings: TestSettings) -> PostgresConnectionDTO:
+    return PostgresConnectionDTO(
+        type="postgres",
+        host=test_settings.TEST_POSTGRES_HOST,
+        port=test_settings.TEST_POSTGRES_PORT,
+        user=test_settings.TEST_POSTGRES_USER,
+        password=test_settings.TEST_POSTGRES_PASSWORD,
+        database_name=test_settings.TEST_POSTGRES_DB,
         additional_params={},
     )
 
@@ -130,8 +143,8 @@ def prepare_postgres(
         database=postgres.database_name,
         spark=spark,
     ).check()
-    postgres_connection.execute(f"DROP TABLE IF EXISTS public.source_table")
-    postgres_connection.execute(f"DROP TABLE IF EXISTS public.target_table")
+    postgres_connection.execute("DROP TABLE IF EXISTS public.source_table")
+    postgres_connection.execute("DROP TABLE IF EXISTS public.target_table")
     db_writer = DBWriter(
         connection=postgres_connection,
         target="public.source_table",
@@ -139,6 +152,26 @@ def prepare_postgres(
     )
     db_writer.run(init_df)
     return postgres_connection
+
+
+@pytest.fixture
+def prepare_hive(
+    spark: SparkSession, hive: HiveConnectionDTO, init_df: DataFrame
+) -> Hive:
+    hive_connection = Hive(
+        cluster=hive.cluster,
+        spark=spark,
+    ).check()
+    hive_connection.execute("DROP TABLE IF EXISTS public.source_table")
+    hive_connection.execute("DROP TABLE IF EXISTS public.target_table")
+    hive_connection.execute("CREATE DATABASE IF NOT EXISTS public")
+    db_writer = DBWriter(
+        connection=hive_connection,
+        target="public.source_table",
+    )
+    db_writer.run(init_df)
+    spark.catalog.refreshTable("public.source_table")
+    return hive_connection
 
 
 @pytest.fixture
@@ -177,8 +210,10 @@ def prepare_oracle(
 async def transfers(
     prepare_postgres,
     prepare_oracle,
+    prepare_hive,
     postgres: PostgresConnectionDTO,
     oracle: OracleConnectionDTO,
+    hive: HiveConnectionDTO,
     session: AsyncSession,
     settings: Settings,
 ):
@@ -186,6 +221,17 @@ async def transfers(
         session=session,
         username="connection_owner",
         is_active=True,
+    )
+    hive_connection = await create_connection(
+        session=session,
+        name="integration_hive",
+        user_id=user.id,
+        data=dict(
+            type=hive.type,
+            cluster=hive.cluster,
+            additional_params={},
+        ),
+        auth_data=dict(type="hive"),
     )
     postgres_connection = await create_connection(
         session=session,
@@ -195,10 +241,13 @@ async def transfers(
             type=postgres.type,
             host=postgres.host,
             port=postgres.port,
-            user=postgres.user,
-            password=postgres.password,
             database_name=postgres.database_name,
             additional_params={},
+        ),
+        auth_data=dict(
+            type="postgres",
+            user=postgres.user,
+            password=postgres.password,
         ),
     )
     oracle_connection = await create_connection(
@@ -209,55 +258,50 @@ async def transfers(
             type=oracle.type,
             host=oracle.host,
             port=oracle.port,
-            user=oracle.user,
-            password=oracle.password,
             sid=oracle.sid,
             service_name=oracle.service_name,
             additional_params={},
         ),
+        auth_data=dict(
+            type="oracle",
+            user=oracle.user,
+            password=oracle.password,
+        ),
     )
+    transfers = {}
+    for source, target in permutations(
+        [hive_connection, oracle_connection, postgres_connection], 2
+    ):
+        source_type = source.data["type"]
+        target_type = target.data["type"]
+        transfer = await create_transfer(
+            session=session,
+            name=f"integration_transfer_{source_type}_{target_type}",
+            source_connection_id=source.id,
+            target_connection_id=target.id,
+            user_id=user.id,
+            source_params={
+                "type": source_type,
+                "table_name": (oracle.user if source_type == "oracle" else "public")
+                + ".source_table",
+            },
+            target_params={
+                "type": target_type,
+                "table_name": (oracle.user if target_type == "oracle" else "public")
+                + ".target_table",
+            },
+        )
+        transfers[f"{source_type}_{target_type}"] = transfer
 
-    postgres_oracle_transfer = await create_transfer(
-        session=session,
-        name="integration_transfer_postgres_oracle",
-        source_connection_id=postgres_connection.id,
-        target_connection_id=oracle_connection.id,
-        user_id=user.id,
-        source_params={
-            "type": "postgres",
-            "table_name": "public.source_table",
-        },
-        target_params={
-            "type": "oracle",
-            "table_name": f"{oracle.user}.target_table",
-        },
-    )
-
-    oracle_postgres_transfer = await create_transfer(
-        session=session,
-        name="integration_transfer_oracle_postgres",
-        source_connection_id=oracle_connection.id,
-        target_connection_id=postgres_connection.id,
-        user_id=user.id,
-        source_params={
-            "type": "oracle",
-            "table_name": f"{oracle.user}.source_table",
-        },
-        target_params={
-            "type": "postgres",
-            "table_name": "public.target_table",
-        },
-    )
-
-    yield {
+    data = {
         "owner": MockUser(user=user, auth_token=sign_jwt(user.id, settings)),
-        "postgres_oracle": postgres_oracle_transfer,
-        "oracle_postgres": oracle_postgres_transfer,
     }
-
-    await session.delete(postgres_oracle_transfer)
-    await session.delete(oracle_postgres_transfer)
+    data.update(transfers)
+    yield data
+    for transfer in transfers.values():
+        await session.delete(transfer)
     await session.delete(postgres_connection)
     await session.delete(oracle_connection)
+    await session.delete(hive_connection)
     await session.delete(user)
     await session.commit()

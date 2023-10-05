@@ -77,6 +77,7 @@ async def test_user_can_read_own_connections(
                     ],
                 },
                 "auth_data": {
+                    "type": simple_user_connection.auth_data["type"],
                     "user": simple_user_connection.auth_data["user"],
                 },
             },
@@ -136,6 +137,7 @@ async def test_group_admin_can_read_connections(
                     "additional_params": group_connection.data["additional_params"],
                 },
                 "auth_data": {
+                    "type": group_connection.auth_data["type"],
                     "user": group_connection.auth_data["user"],
                 },
             },
@@ -179,6 +181,7 @@ async def test_superuser_can_read_all_connections(
                     "additional_params": group_connection.data["additional_params"],
                 },
                 "auth_data": {
+                    "type": group_connection.auth_data["type"],
                     "user": group_connection.auth_data["user"],
                 },
             },
@@ -196,6 +199,7 @@ async def test_superuser_can_read_all_connections(
                     "additional_params": user_connection.data["additional_params"],
                 },
                 "auth_data": {
+                    "type": user_connection.auth_data["type"],
                     "user": user_connection.auth_data["user"],
                 },
             },

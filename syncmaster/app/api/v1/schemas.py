@@ -12,8 +12,9 @@ INCREMENTAL_TYPE = Literal["incremental"]
 
 
 # connection types
-POSTGRES_TYPE = Literal["postgres"]
+HIVE_TYPE = Literal["hive"]
 ORACLE_TYPE = Literal["oracle"]
+POSTGRES_TYPE = Literal["postgres"]
 
 
 class StatusResponseSchema(BaseModel):

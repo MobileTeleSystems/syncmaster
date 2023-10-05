@@ -24,6 +24,8 @@ services:
     restart: unless-stopped
     build:
       dockerfile: docker/worker.dockerfile
+      context: .
+      network: host
     networks:
       - network
     environment:
@@ -45,17 +47,19 @@ services:
     restart: unless-stopped
     build:
       dockerfile: docker/backend.dockerfile
+      context: .
+      network: host
     ports:
       - 8000:8000
     networks:
       - network
-    command: pytest
     depends_on:
       - db
       - rabbitmq
       - worker
-      - test_oracle
-      - test_postgres
+      - test-oracle
+      - test-postgres
+      - test-hive
     environment:
       POSTGRES_HOST: db
       POSGRES_PORT: 5432
@@ -68,8 +72,7 @@ services:
       RABBITMQ_USER: guest
       RABBITMQ_PASSWORD: guest
 
-
-  test_postgres:
+  test-postgres:
     image: postgres:15
     restart: unless-stopped
     ports:
@@ -81,7 +84,7 @@ services:
     networks:
       - network
 
-  test_oracle:
+  test-oracle:
     image: gvenzl/oracle-xe:slim-faststart
     restart: unless-stopped
     ports:
@@ -92,6 +95,41 @@ services:
       ORACLE_DATABASE: test_oracle
       APP_USER: test_user
       APP_USER_PASSWORD: test_password
+    networks:
+      - network
+
+  metastore-hive:
+    image: central-mirror.services.mts.ru/postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: metastore
+      POSTGRES_USER: test_hive
+      POSTGRES_PASSWORD: test_hive
+    ports:
+      - 5440:5432
+    networks:
+      - network
+
+  test-hive:
+    image: mtsrus/hadoop:hadoop2.7.3-hive2.3.9
+    restart: unless-stopped
+    depends_on:
+      - metastore-hive
+    ports:
+      - 9820:9820  # HDFS IPC
+      - 9870:9870  # HDFS WebHDFS
+      - 8088:8088  # Yarn UI
+      - 8042:8042  # NodeManager UI
+      - 10000:10000  # Hive server
+      - 10002:10002  # Hive server Admin UI
+      - 19888:19888  # MapReduce JobServer History UI
+      - 9083:9083  # Hive Metastore server
+    environment:
+      WITH_HIVE_SERVER: 'false'  # оставляем только сервер метастора, сам Hive нам не требуется, не тратим на него ресурсы
+      HIVE_METASTORE_DB_URL: jdbc:postgresql://metastore-hive:5432/metastore
+      HIVE_METASTORE_DB_DRIVER: org.postgresql.Driver
+      HIVE_METASTORE_DB_USER: test_hive
+      HIVE_METASTORE_DB_PASSWORD: test_hive
     networks:
       - network
 
