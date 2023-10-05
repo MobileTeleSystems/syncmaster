@@ -18,6 +18,7 @@ from app.api.v1.schemas import ReadAclSchema, SetRuleSchema, StatusResponseSchem
 from app.db.models import Rule, User
 from app.db.provider import DatabaseProvider
 from app.exceptions import ActionNotAllowed
+from app.exceptions.connection import ConnectionDeleteException
 
 router = APIRouter(tags=["Connections"])
 
@@ -140,13 +141,30 @@ async def delete_connection(
     current_user: User = Depends(get_user(is_active=True)),
     provider: DatabaseProvider = Depends(DatabaseProviderMarker),
 ) -> StatusResponseSchema:
-    await provider.connection.delete(
+    connection = await provider.connection.read_by_id(
         connection_id=connection_id,
-        current_user_id=current_user.id,
         is_superuser=current_user.is_superuser,
+        current_user_id=current_user.id,
     )
-    return StatusResponseSchema(
-        ok=True, status_code=status.HTTP_200_OK, message="Connection was deleted"
+
+    transfers = await provider.transfer.list_by_connection_id(
+        conn_id=connection.id,
+    )
+
+    if not transfers:
+        await provider.connection.delete(
+            connection_id=connection_id,
+            current_user_id=current_user.id,
+            is_superuser=current_user.is_superuser,
+        )
+        return StatusResponseSchema(
+            ok=True,
+            status_code=status.HTTP_200_OK,
+            message="Connection was deleted",
+        )
+
+    raise ConnectionDeleteException(
+        f"The connection has an associated transfers. Number of the connected transfers: {len(transfers)}",
     )
 
 

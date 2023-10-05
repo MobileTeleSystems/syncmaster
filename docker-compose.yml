@@ -16,6 +16,8 @@ services:
     restart: unless-stopped
     ports:
       - 5672:5672
+    networks:
+      - network
 
   worker:
     image: syncmaster_worker
@@ -36,6 +38,8 @@ services:
       RABBITMQ_USER: guest
       RABBITMQ_PASSWORD: guest
 
+
+
   backend:
     image: syncmaster_back
     restart: unless-stopped
@@ -45,6 +49,13 @@ services:
       - 8000:8000
     networks:
       - network
+    command: pytest
+    depends_on:
+      - db
+      - rabbitmq
+      - worker
+      - test_oracle
+      - test_postgres
     environment:
       POSTGRES_HOST: db
       POSGRES_PORT: 5432
@@ -56,6 +67,7 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: guest
       RABBITMQ_PASSWORD: guest
+
 
   test_postgres:
     image: postgres:15
@@ -80,6 +92,8 @@ services:
       ORACLE_DATABASE: test_oracle
       APP_USER: test_user
       APP_USER_PASSWORD: test_password
+    networks:
+      - network
 
 networks:
   network:

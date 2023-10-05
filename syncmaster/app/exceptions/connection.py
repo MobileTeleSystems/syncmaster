@@ -11,3 +11,8 @@ class ConnectionOwnerException(SyncmasterException):
 
 class ConnectionTypeNotRecognizedException(SyncmasterException):
     pass
+
+
+class ConnectionDeleteException(SyncmasterException):
+    def __init__(self, message: str) -> None:
+        self.message = message

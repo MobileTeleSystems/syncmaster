@@ -1,6 +1,7 @@
+from collections.abc import Sequence
 from typing import Any, NoReturn
 
-from sqlalchemy import ScalarResult, insert, select
+from sqlalchemy import ScalarResult, insert, or_, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -59,7 +60,8 @@ class TransferRepository(RepositoryWithAcl[Transfer]):
         rule: Rule = Rule.READ,
     ) -> Transfer:
         stmt = select(Transfer).where(
-            Transfer.id == transfer_id, Transfer.is_deleted.is_(False)
+            Transfer.id == transfer_id,
+            Transfer.is_deleted.is_(False),
         )
         if not is_superuser:
             stmt = self.apply_acl(stmt, current_user_id, rule=rule)
@@ -184,7 +186,9 @@ class TransferRepository(RepositoryWithAcl[Transfer]):
             raise ActionNotAllowed
         try:
             return await self._add_or_update_rule(
-                object_id=transfer_id, user_id=target_user_id, rule=rule
+                object_id=transfer_id,
+                user_id=target_user_id,
+                rule=rule,
             )
         except IntegrityError as e:
             await self._session.rollback()
@@ -210,10 +214,59 @@ class TransferRepository(RepositoryWithAcl[Transfer]):
         if transfer.group_id is None:
             raise ActionNotAllowed
         try:
-            await self._delete_acl_rule(object_id=transfer_id, user_id=target_user_id)
+            await self._delete_acl_rule(
+                object_id=transfer_id,
+                user_id=target_user_id,
+            )
         except EntityNotFound as e:
             raise AclNotFound from e
         return
+
+    async def copy_transfer(
+        self,
+        transfer_id: int,
+        new_group_id: int | None,
+        new_user_id: int | None,
+        new_source_connection: int | None,
+        new_target_connection: int | None,
+        remove_source: bool,
+        is_superuser: bool,
+        current_user_id,
+    ) -> Transfer:
+        if not is_superuser:
+            if not await self.has_owner_access(
+                transfer_id,
+                current_user_id,
+            ):
+                raise TransferNotFound
+
+        try:
+            kwargs = dict(
+                user_id=new_user_id,
+                group_id=new_group_id,
+                source_connection_id=new_source_connection,
+                target_connection_id=new_target_connection,
+            )
+            new_transfer = await self._copy(Transfer.id == transfer_id, **kwargs)
+
+            if remove_source:
+                await self._delete(transfer_id)
+
+            return new_transfer
+
+        except IntegrityError as e:
+            await self._session.rollback()
+            self._raise_error(e)
+
+    async def list_by_connection_id(self, conn_id: int) -> Sequence[Transfer]:
+        query = select(Transfer).where(
+            or_(
+                Transfer.source_connection_id == conn_id,
+                Transfer.target_connection_id == conn_id,
+            )
+        )
+        result = await self._session.scalars(query)
+        return result.fetchall()
 
     def _raise_error(self, err: DBAPIError) -> NoReturn:
         constraint = err.__cause__.__cause__.constraint_name  # type: ignore[union-attr]

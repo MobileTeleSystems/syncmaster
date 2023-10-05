@@ -107,10 +107,12 @@ class Transfer(Base, DeletableMixin, TimestampMixin, ResourceMixin):
     user: Mapped[User | None] = relationship("User")
     group: Mapped[Group | None] = relationship("Group")
     source_connection: Mapped[Connection] = relationship(
-        "Connection", foreign_keys=[source_connection_id]
+        "Connection",
+        foreign_keys=[source_connection_id],
     )
     target_connection: Mapped[Connection] = relationship(
-        "Connection", foreign_keys=[target_connection_id]
+        "Connection",
+        foreign_keys=[target_connection_id],
     )
 
 

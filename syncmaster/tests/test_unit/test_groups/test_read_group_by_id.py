@@ -1,6 +1,5 @@
 import pytest
 from httpx import AsyncClient
-
 from tests.utils import MockGroup, MockUser
 
 pytestmark = [pytest.mark.asyncio]

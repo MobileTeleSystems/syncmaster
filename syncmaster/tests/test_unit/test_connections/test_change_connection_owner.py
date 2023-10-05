@@ -2,9 +2,9 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from tests.utils import MockConnection, MockGroup, MockUser
 
 from app.db.models import Connection
-from tests.utils import MockConnection, MockGroup, MockUser
 
 pytestmark = [pytest.mark.asyncio]
 
