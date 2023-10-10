@@ -1,9 +1,12 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from kombu.exceptions import KombuError
 
 from app.api.deps import DatabaseProviderMarker
 from app.api.services import get_user
 from app.api.v1.schemas import (
+    AclPageSchema,
     ReadAclSchema,
     SetRuleSchema,
     StatusCopyTransferResponseSchema,
@@ -431,3 +434,33 @@ async def stop_run(
     run = await provider.run.stop(run_id=run_id)
     # TODO add immdiate stop transfer after stop Run
     return ReadRunSchema.from_orm(run)
+
+
+@router.get("/transfers/{transfer_id}/rules")
+async def get_rules(
+    transfer_id: int,
+    user_id: Annotated[int | None, Query()] = None,
+    page: Annotated[int, Query(gt=0)] = 1,
+    page_size: Annotated[int, Query(gt=0, le=200)] = 20,
+    current_user: User = Depends(get_user(is_active=True)),
+    provider: DatabaseProvider = Depends(DatabaseProviderMarker),
+) -> AclPageSchema:
+    """Getting a list of users with their rights for a given transfer"""
+
+    transfer = await provider.transfer.read_by_id(
+        transfer_id=transfer_id,
+        is_superuser=current_user.is_superuser,
+        current_user_id=current_user.id,
+    )
+    group_id: int = transfer.group_id  # type: ignore[assignment]
+
+    pagination = await provider.transfer.paginate_rules(
+        object_id=transfer_id,
+        group_id=group_id,
+        page=page,
+        page_size=page_size,
+        current_user_id=current_user.id,
+        is_superuser=current_user.is_superuser,
+        user_id=user_id,
+    )
+    return AclPageSchema.from_pagination(pagination)
