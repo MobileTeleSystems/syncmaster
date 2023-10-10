@@ -14,11 +14,12 @@ from sqlalchemy import (
 )
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
 from app.db.base import Base
 from app.db.models import Acl, Group, ObjectType, Rule, UserGroup
 from app.db.utils import Pagination
-from app.exceptions import EntityNotFound
+from app.exceptions import ActionNotAllowed, EntityNotFound
 
 Model = TypeVar("Model", bound=Base)
 
@@ -96,9 +97,7 @@ class Repository(ABC, Generic[Model]):
         items_result: ScalarResult[Model] = await self._session.scalars(
             query.limit(page_size).offset((page - 1) * page_size)
         )
-        total: int = await self._session.scalar(
-            select(func.count()).select_from(query.subquery())
-        )  # type: ignore
+        total: int = await self._session.scalar(select(func.count()).select_from(query.subquery()))  # type: ignore
         return Pagination(
             items=items_result.all(),
             total=total,
@@ -112,8 +111,14 @@ class RepositoryWithAcl(Repository, Generic[Model]):
 
     def apply_acl(self, query: Select, user_id: int, rule: Rule = Rule.READ) -> Select:
         """Add to query filter access user to resource"""
-        query = query.join(Group, Group.id == self._model.group_id, full=True).join(
-            UserGroup, UserGroup.group_id == Group.id, full=True
+        query = query.join(
+            Group,
+            Group.id == self._model.group_id,
+            full=True,
+        ).join(
+            UserGroup,
+            UserGroup.group_id == Group.id,
+            full=True,
         )
         args = [
             Group.admin_id == user_id,
@@ -153,6 +158,55 @@ class RepositoryWithAcl(Repository, Generic[Model]):
             .select()
         )
         return await self._session.scalar(obj)
+
+    async def paginate_rules(
+        self,
+        is_superuser: bool,
+        current_user_id: int,
+        group_id: int,
+        page: int,
+        page_size: int,
+        object_id: int,
+        user_id: int | None,
+    ) -> Pagination:
+        is_admin = await self.has_owner_access(
+            object_id=object_id,
+            user_id=current_user_id,
+        )
+        if not (is_admin or is_superuser):
+            raise ActionNotAllowed
+
+        query = select(Acl).join(
+            self._model,
+            and_(
+                Acl.object_id == self._model.id,
+                Acl.object_type == self._object_type,
+            ),
+        )
+        where_clause = [
+            self._model.group_id == group_id,
+        ]
+
+        if user_id:
+            where_clause.append(Acl.user_id == user_id)
+            result_query = query.where(and_(*where_clause))
+        else:
+            result_query = query.where(*where_clause)
+
+        # Necessary in order to then work as with Acl and not as with Select
+        result_aliased = aliased(Acl, result_query.subquery())
+
+        # Sorting in the return is necessary because the _paginate method processes the LIMIT and OFFSET methods
+        return await self._paginate(
+            query=select(result_aliased).order_by(
+                result_aliased.object_type,
+                result_aliased.object_id,
+                result_aliased.user_id,
+                result_aliased.rule,
+            ),
+            page=page,
+            page_size=page_size,
+        )
 
     async def _add_or_update_rule(
         self, object_id: int, user_id: int, rule: Rule

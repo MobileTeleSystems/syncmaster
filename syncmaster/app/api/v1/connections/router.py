@@ -1,4 +1,4 @@
-from typing import get_args
+from typing import Annotated, get_args
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import SecretStr
@@ -14,7 +14,12 @@ from app.api.v1.connections.schemas import (
     ReadConnectionSchema,
     UpdateConnectionSchema,
 )
-from app.api.v1.schemas import ReadAclSchema, SetRuleSchema, StatusResponseSchema
+from app.api.v1.schemas import (
+    AclPageSchema,
+    ReadAclSchema,
+    SetRuleSchema,
+    StatusResponseSchema,
+)
 from app.db.models import Rule, User
 from app.db.provider import DatabaseProvider
 from app.exceptions import ActionNotAllowed
@@ -225,3 +230,33 @@ async def delete_rule(
     return StatusResponseSchema(
         ok=True, status_code=status.HTTP_200_OK, message="Rule was deleted"
     )
+
+
+@router.get("/connections/{connection_id}/rules")
+async def get_rules(
+    connection_id: int,
+    user_id: Annotated[int | None, Query()] = None,
+    page: Annotated[int, Query(gt=0)] = 1,
+    page_size: Annotated[int, Query(gt=0, le=200)] = 20,
+    current_user: User = Depends(get_user(is_active=True)),
+    provider: DatabaseProvider = Depends(DatabaseProviderMarker),
+) -> AclPageSchema:
+    """Getting a list of users with their rights for a given connection"""
+
+    connection = await provider.connection.read_by_id(
+        connection_id=connection_id,
+        is_superuser=current_user.is_superuser,
+        current_user_id=current_user.id,
+    )
+    group_id: int = connection.group_id  # type: ignore[assignment]
+
+    pagination = await provider.connection.paginate_rules(
+        object_id=connection_id,
+        group_id=group_id,
+        page=page,
+        page_size=page_size,
+        current_user_id=current_user.id,
+        is_superuser=current_user.is_superuser,
+        user_id=user_id,
+    )
+    return AclPageSchema.from_pagination(pagination)
