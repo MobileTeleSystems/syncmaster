@@ -1,9 +1,10 @@
 import abc
+from enum import Enum
 from typing import Any, Literal
 
 from pydantic import BaseModel
 
-from app.db.models import ObjectType, Rule
+from app.db.models import Acl, ObjectType
 from app.db.utils import Pagination
 
 # transfer types
@@ -61,20 +62,62 @@ class PageSchema(BaseModel, abc.ABC):
         )
 
 
+class UserRule(str, Enum):
+    READ = "READ"
+    WRITE = "WRITE"
+    DELETE = "DELETE"
+
+    @classmethod
+    def from_int(cls, item: Any):
+        rule = item.rule
+
+        if rule == 0:
+            item.rule = UserRule.READ
+        if rule == 1:
+            item.rule = UserRule.WRITE
+        if rule == 2:
+            item.rule = UserRule.DELETE
+
+        return item
+
+
 class SetRuleSchema(BaseModel):
     user_id: int
-    rule: Rule
+    rule: UserRule
 
 
-class ReadAclSchema(BaseModel):
+class ReadRuleSchema(BaseModel):
     object_id: int
     object_type: ObjectType
     user_id: int
-    rule: Rule
+    rule: UserRule
 
     class Config:
         orm_mode = True
 
+    @classmethod
+    def from_acl(cls, acl: Acl):
+        """Convert rule from int to str"""
+        acl = UserRule.from_int(acl)
+
+        return ReadRuleSchema.from_orm(acl)
+
 
 class AclPageSchema(PageSchema):
-    items: list[ReadAclSchema]
+    items: list[ReadRuleSchema]
+
+    @classmethod
+    def from_pagination(cls, pagination: Pagination):
+        return cls(
+            meta=MetaPageSchema(
+                page=pagination.page,
+                pages=pagination.pages,
+                page_size=pagination.page_size,
+                total=pagination.total,
+                has_next=pagination.has_next,
+                has_previous=pagination.has_previous,
+                next_page=pagination.next_page,
+                previous_page=pagination.previous_page,
+            ),
+            items=[UserRule.from_int(item) for item in pagination.items],
+        )

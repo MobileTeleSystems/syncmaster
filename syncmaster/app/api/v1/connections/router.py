@@ -16,7 +16,7 @@ from app.api.v1.connections.schemas import (
 )
 from app.api.v1.schemas import (
     AclPageSchema,
-    ReadAclSchema,
+    ReadRuleSchema,
     SetRuleSchema,
     StatusResponseSchema,
 )
@@ -201,16 +201,18 @@ async def add_or_update_rule(
     rule_data: SetRuleSchema,
     current_user: User = Depends(get_user(is_active=True)),
     provider: DatabaseProvider = Depends(DatabaseProviderMarker),
-) -> ReadAclSchema:
+) -> ReadRuleSchema:
     """Add rule for user on connection in group or update if exists"""
+    rule = Rule.from_str(rule_data.rule)
+
     acl = await provider.connection.add_or_update_rule(
         connection_id=connection_id,
-        rule=rule_data.rule,
+        rule=rule,
         target_user_id=rule_data.user_id,
         current_user_id=current_user.id,
         is_superuser=current_user.is_superuser,
     )
-    return ReadAclSchema.from_orm(acl)
+    return ReadRuleSchema.from_acl(acl)
 
 
 @router.delete("/connections/{connection_id}/rules/{user_id}")

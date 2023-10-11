@@ -18,6 +18,7 @@ from tests.utils import (
 )
 
 from app.api.v1.auth.utils import sign_jwt
+from app.api.v1.schemas import UserRule
 from app.config import Settings
 from app.db.models import ObjectType, Rule, UserGroup
 
@@ -136,8 +137,18 @@ async def group_run(session: AsyncSession, settings: Settings) -> MockTransfer:
         owner_user=None,
         owner_group=mock_group,
         acls=[
-            MockAcl(acl=acl_write, user=members[1], to_object=transfer),
-            MockAcl(acl=acl_delete, user=members[2], to_object=transfer),
+            MockAcl(
+                acl=acl_write,
+                user=members[1],
+                to_object=transfer,
+                acl_as_str=UserRule.WRITE,
+            ),
+            MockAcl(
+                acl=acl_delete,
+                user=members[2],
+                to_object=transfer,
+                acl_as_str=UserRule.DELETE,
+            ),
         ],
     )
     run = await create_run(session=session, transfer_id=transfer.id)

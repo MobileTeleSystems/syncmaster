@@ -2,6 +2,8 @@ import pytest
 from httpx import AsyncClient
 from tests.utils import MockConnection, MockUser
 
+from app.api.v1.schemas import UserRule
+
 pytestmark = [pytest.mark.asyncio]
 
 
@@ -36,13 +38,13 @@ async def test_superuser_read_acl_of_connection(
             "object_id": group_connection.connection.id,
             "object_type": "connection",
             "user_id": group_connection.acls[0].user.user.id,
-            "rule": 1,
+            "rule": UserRule.WRITE,
         },
         {
             "object_id": group_connection.connection.id,
             "object_type": "connection",
             "user_id": group_connection.acls[1].user.user.id,
-            "rule": 2,
+            "rule": UserRule.DELETE,
         },
     ]
 
@@ -89,7 +91,7 @@ async def test_groupowner_read_acl_of_connection_with_user_id(
             "object_id": group_connection.connection.id,
             "object_type": "connection",
             "user_id": group_connection.acls[0].user.user.id,
-            "rule": 1,
+            "rule": UserRule.WRITE,
         },
     ]
 
@@ -110,13 +112,13 @@ async def test_groupowner_read_acl_of_connection(
             "object_id": group_connection.connection.id,
             "object_type": "connection",
             "user_id": group_connection.acls[0].user.user.id,
-            "rule": 1,
+            "rule": UserRule.WRITE,
         },
         {
             "object_id": group_connection.connection.id,
             "object_type": "connection",
             "user_id": group_connection.acls[1].user.user.id,
-            "rule": 2,
+            "rule": UserRule.DELETE,
         },
     ]
 

@@ -178,6 +178,15 @@ class Rule(enum.IntFlag):
     WRITE = 1
     DELETE = 2
 
+    @classmethod
+    def from_str(cls, rule):
+        if rule == "READ":
+            return Rule.READ
+        if rule == "WRITE":
+            return Rule.WRITE
+        if rule == "DELETE":
+            return Rule.DELETE
+
 
 class OwnerType(enum.StrEnum):
     GROUP = "group"

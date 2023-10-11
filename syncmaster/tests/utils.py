@@ -17,6 +17,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+from app.api.v1.schemas import UserRule
 from app.config import Settings
 from app.db.models import Acl, Connection, Group, Run, Status, Transfer, User
 
@@ -43,10 +44,17 @@ class MockGroup:
 
 
 class MockAcl:
-    def __init__(self, acl: Acl, user: MockUser, to_object: "MockConnection"):
+    def __init__(
+        self,
+        acl: Acl,
+        user: MockUser,
+        to_object: "MockConnection",
+        acl_as_str: UserRule,
+    ):
         self.acl = acl
         self.user = user
         self.to_object = to_object
+        self.acl_as_str = acl_as_str
 
     def __getattr__(self, attr: str) -> Any:
         return getattr(self.acl, attr)

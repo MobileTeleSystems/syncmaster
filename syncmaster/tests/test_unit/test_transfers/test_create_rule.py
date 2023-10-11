@@ -4,7 +4,8 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests.utils import MockGroup, MockTransfer, MockUser
 
-from app.db.models import Acl, ObjectType, Rule
+from app.api.v1.schemas import UserRule
+from app.db.models import Acl, ObjectType
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -15,7 +16,7 @@ async def test_unauthorized_user_cannot_create_rule_on_group_transfer(
     member = group_transfer.owner_group.members[0]
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/rules",
-        json={"user_id": member.id, "rule": Rule.WRITE},
+        json={"user_id": member.id, "rule": UserRule.WRITE},
     )
     assert result.status_code == 401
     assert result.json() == {
@@ -34,7 +35,7 @@ async def test_simple_user_cannot_create_rule_on_group_transfer(
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/rules",
         headers={"Authorization": f"Bearer {simple_user.token}"},
-        json={"user_id": member.id, "rule": Rule.WRITE},
+        json={"user_id": member.id, "rule": UserRule.WRITE},
     )
     assert result.status_code == 404
     assert result.json() == {
@@ -51,7 +52,7 @@ async def test_group_member_cannot_create_rule_on_group_transfer(
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/rules",
         headers={"Authorization": f"Bearer {member.token}"},
-        json={"user_id": member.id, "rule": Rule.WRITE},
+        json={"user_id": member.id, "rule": UserRule.WRITE},
     )
     assert result.status_code == 404
     assert result.json() == {
@@ -70,28 +71,28 @@ async def test_group_admin_can_set_any_rule_on_group_transfer(
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/rules",
         headers={"Authorization": f"Bearer {admin.token}"},
-        json={"user_id": member.id, "rule": Rule.WRITE},
+        json={"user_id": member.id, "rule": UserRule.WRITE},
     )
     assert result.status_code == 200
     assert result.json() == {
         "object_id": group_transfer.id,
         "object_type": ObjectType.TRANSFER.value,
         "user_id": member.id,
-        "rule": Rule.WRITE.value,
+        "rule": UserRule.WRITE,
     }
 
     # check that does'nt create new rule for pair object-user
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/rules",
         headers={"Authorization": f"Bearer {admin.token}"},
-        json={"user_id": member.id, "rule": Rule.DELETE},
+        json={"user_id": member.id, "rule": UserRule.DELETE},
     )
     assert result.status_code == 200
     assert result.json() == {
         "object_id": group_transfer.id,
         "object_type": ObjectType.TRANSFER.value,
         "user_id": member.id,
-        "rule": Rule.DELETE.value,
+        "rule": UserRule.DELETE,
     }
 
     query = select(Acl).filter_by(
@@ -112,19 +113,19 @@ async def test_group_admin_can_set_any_rule_on_group_transfer(
             {
                 "object_id": group_transfer.id,
                 "object_type": ObjectType.TRANSFER.value,
-                "rule": Rule.DELETE.value,
+                "rule": UserRule.DELETE,
                 "user_id": member.id,
             },
             {
                 "object_id": group_transfer.id,
                 "object_type": ObjectType.TRANSFER.value,
-                "rule": group_transfer.acls[0].rule.value,
+                "rule": group_transfer.acls[0].acl_as_str,
                 "user_id": group_transfer.acls[0].user_id,
             },
             {
                 "object_id": group_transfer.id,
                 "object_type": ObjectType.TRANSFER.value,
-                "rule": group_transfer.acls[1].rule.value,
+                "rule": group_transfer.acls[1].acl_as_str,
                 "user_id": group_transfer.acls[1].user_id,
             },
         ],
@@ -148,14 +149,14 @@ async def test_superuser_can_set_any_rule_on_group_transfer(
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/rules",
         headers={"Authorization": f"Bearer {superuser.token}"},
-        json={"user_id": member.id, "rule": Rule.WRITE},
+        json={"user_id": member.id, "rule": UserRule.WRITE},
     )
     assert result.status_code == 200
     assert result.json() == {
         "object_id": group_transfer.id,
         "object_type": ObjectType.TRANSFER.value,
         "user_id": member.id,
-        "rule": Rule.WRITE.value,
+        "rule": UserRule.WRITE,
     }
 
     result = await client.get(
@@ -168,19 +169,19 @@ async def test_superuser_can_set_any_rule_on_group_transfer(
             {
                 "object_id": group_transfer.id,
                 "object_type": ObjectType.TRANSFER.value,
-                "rule": Rule.WRITE.value,
+                "rule": UserRule.WRITE,
                 "user_id": member.id,
             },
             {
                 "object_id": group_transfer.id,
                 "object_type": ObjectType.TRANSFER.value,
-                "rule": group_transfer.acls[0].rule.value,
+                "rule": group_transfer.acls[0].acl_as_str,
                 "user_id": group_transfer.acls[0].user_id,
             },
             {
                 "object_id": group_transfer.id,
                 "object_type": ObjectType.TRANSFER.value,
-                "rule": group_transfer.acls[1].rule.value,
+                "rule": group_transfer.acls[1].acl_as_str,
                 "user_id": group_transfer.acls[1].user_id,
             },
         ],
@@ -204,7 +205,7 @@ async def test_other_group_admin_cannot_create_rule_on_group_transfer(
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/rules",
         headers={"Authorization": f"Bearer {empty_group.admin.token}"},
-        json={"user_id": member.id, "rule": Rule.WRITE},
+        json={"user_id": member.id, "rule": UserRule.WRITE},
     )
     assert result.status_code == 404
     assert result.json() == {
@@ -223,7 +224,7 @@ async def test_cannot_set_any_rule_on_user_transfer(
     result = await client.post(
         f"v1/transfers/{user_transfer.id}/rules",
         headers={"Authorization": f"Bearer {superuser.token}"},
-        json={"user_id": simple_user.id, "rule": Rule.WRITE},
+        json={"user_id": simple_user.id, "rule": UserRule.WRITE},
     )
     assert result.status_code == 403
     assert result.json() == {

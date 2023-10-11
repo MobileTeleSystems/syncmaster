@@ -10,6 +10,7 @@ from tests.test_unit.utils import (
 from tests.utils import MockAcl, MockConnection, MockGroup, MockUser
 
 from app.api.v1.auth.utils import sign_jwt
+from app.api.v1.schemas import UserRule
 from app.config import Settings
 from app.db.models import ObjectType, Rule, UserGroup
 
@@ -150,8 +151,18 @@ async def group_connection(session: AsyncSession, settings: Settings) -> MockCon
         ),
         owner_user=None,
         acls=[
-            MockAcl(acl=acl_write, user=members[1], to_object=connection),
-            MockAcl(acl=acl_delete, user=members[2], to_object=connection),
+            MockAcl(
+                acl=acl_write,
+                user=members[1],
+                to_object=connection,
+                acl_as_str=UserRule.WRITE,
+            ),
+            MockAcl(
+                acl=acl_delete,
+                user=members[2],
+                to_object=connection,
+                acl_as_str=UserRule.DELETE,
+            ),
         ],
     )
     await session.delete(connection)
