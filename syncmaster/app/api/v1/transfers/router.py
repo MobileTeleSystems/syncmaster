@@ -7,7 +7,7 @@ from app.api.deps import DatabaseProviderMarker
 from app.api.services import get_user
 from app.api.v1.schemas import (
     AclPageSchema,
-    ReadAclSchema,
+    ReadRuleSchema,
     SetRuleSchema,
     StatusCopyTransferResponseSchema,
     StatusResponseSchema,
@@ -307,15 +307,17 @@ async def add_or_update_rule(
     rule_data: SetRuleSchema,
     current_user: User = Depends(get_user(is_active=True)),
     provider: DatabaseProvider = Depends(DatabaseProviderMarker),
-) -> ReadAclSchema:
+) -> ReadRuleSchema:
+    rule = Rule.from_str(rule_data.rule)
+
     acl = await provider.transfer.add_or_update_rule(
         transfer_id=transfer_id,
-        rule=rule_data.rule,
+        rule=rule,
         target_user_id=rule_data.user_id,
         current_user_id=current_user.id,
         is_superuser=current_user.is_superuser,
     )
-    return ReadAclSchema.from_orm(acl)
+    return ReadRuleSchema.from_acl(acl)
 
 
 @router.delete("/transfers/{transfer_id}/rules/{user_id}")

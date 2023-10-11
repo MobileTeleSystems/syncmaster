@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from tests.test_unit.utils import create_acl, create_connection
 from tests.utils import MockGroup, MockUser
 
+from app.api.v1.schemas import UserRule
 from app.db.models import ObjectType, Rule
 
 pytestmark = [pytest.mark.asyncio]
@@ -115,7 +116,7 @@ async def test_group_admin_and_superuser_can_get_group_rules(
                 {
                     "object_id": connection.id,
                     "object_type": ObjectType.CONNECTION.value,
-                    "rule": Rule.WRITE.value,
+                    "rule": UserRule.WRITE,
                     "user_id": not_empty_group.members[0].id,
                 },
             ],

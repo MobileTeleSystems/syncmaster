@@ -2,6 +2,8 @@ import pytest
 from httpx import AsyncClient
 from tests.utils import MockTransfer, MockUser
 
+from app.api.v1.schemas import UserRule
+
 pytestmark = [pytest.mark.asyncio]
 
 
@@ -37,13 +39,13 @@ async def test_superuser_read_acl_of_transfer(
             "object_id": group_transfer.transfer.id,
             "object_type": "transfer",
             "user_id": group_transfer.acls[0].user.user.id,
-            "rule": 1,
+            "rule": UserRule.WRITE,
         },
         {
             "object_id": group_transfer.transfer.id,
             "object_type": "transfer",
             "user_id": group_transfer.acls[1].user.user.id,
-            "rule": 2,
+            "rule": UserRule.DELETE,
         },
     ]
 
@@ -90,7 +92,7 @@ async def test_groupowner_read_acl_of_transfer_with_user_id(
             "object_id": group_transfer.id,
             "object_type": "transfer",
             "user_id": group_transfer.acls[0].user.user.id,
-            "rule": 1,
+            "rule": UserRule.WRITE,
         },
     ]
 
@@ -111,13 +113,13 @@ async def test_groupowner_read_acl_of_transfer(
             "object_id": group_transfer.id,
             "object_type": "transfer",
             "user_id": group_transfer.acls[0].user.user.id,
-            "rule": 1,
+            "rule": UserRule.WRITE,
         },
         {
             "object_id": group_transfer.id,
             "object_type": "transfer",
             "user_id": group_transfer.acls[1].user.user.id,
-            "rule": 2,
+            "rule": UserRule.DELETE,
         },
     ]
 
