@@ -13,4 +13,4 @@ RUN poetry export -f requirements.txt --with worker --output /syncmaster/require
     && pip install --timeout 5 --retries 5 --no-cache-dir -r /syncmaster/requirements.txt
 
 COPY ./syncmaster/ /syncmaster/
-CMD ["celery", "-A" ,"app.tasks.config.celery" ,"worker", "--loglevel=info", "--logfile=celery.log"]
+CMD ["celery", "-A" ,"app.tasks.config.celery" ,"worker", "--loglevel=info"]

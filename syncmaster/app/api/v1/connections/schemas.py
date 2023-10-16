@@ -11,6 +11,7 @@ class ReadHiveConnectionSchema(BaseModel):
 
 class ReadHiveAuthSchema(BaseModel):
     type: HIVE_TYPE
+    user: str
 
 
 class ReadPostgresConnectionSchema(BaseModel):
@@ -29,6 +30,9 @@ class ReadPostgresAuthSchema(BaseModel):
 class ReadOracleConnectionSchema(BaseModel):
     type: ORACLE_TYPE
     host: str
+    port: int
+    service_name: str | None = None
+    sid: str | None = None
     additional_params: dict = Field(default_factory=dict)
 
 
@@ -119,20 +123,31 @@ class UpdateConnectionSchema(BaseModel):
 
 
 class CreateHiveConnectionSchema(BaseModel):
+    additional_params: dict = Field(default_factory=dict)
     type: HIVE_TYPE
     cluster: str
 
 
 class CreateHiveAuthSchema(BaseModel):
     type: HIVE_TYPE
+    user: str
+    password: SecretStr
 
 
 class CreateOracleConnectionSchema(BaseModel):
     type: ORACLE_TYPE
     host: str
+    port: int
     service_name: str | None = None
     sid: str | None = None
     additional_params: dict = Field(default_factory=dict)
+
+    @root_validator
+    def check_owner_id(cls, values):
+        sid, service_name = values.get("sid"), values.get("service_name")
+        if sid and service_name:
+            raise ValueError("You must specify either sid or service_name but not both")
+        return values
 
 
 class CreateOracleAuthSchema(BaseModel):

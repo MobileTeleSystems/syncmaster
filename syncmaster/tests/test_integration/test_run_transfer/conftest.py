@@ -39,6 +39,8 @@ def hive(test_settings: TestSettings) -> HiveConnectionDTO:
         type="hive",
         cluster=test_settings.TEST_HIVE_CLUSTER,
         additional_params={},
+        user=test_settings.TEST_HIVE_USER,
+        password=test_settings.TEST_HIVE_PASSWORD,
     )
 
 
@@ -231,7 +233,11 @@ async def transfers(
             cluster=hive.cluster,
             additional_params={},
         ),
-        auth_data=dict(type="hive"),
+        auth_data=dict(
+            type="hive",
+            user=hive.user,
+            password=hive.password,
+        ),
     )
     postgres_connection = await create_connection(
         session=session,

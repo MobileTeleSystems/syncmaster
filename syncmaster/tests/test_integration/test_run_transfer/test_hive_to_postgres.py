@@ -25,7 +25,10 @@ async def test_run_simple_transfer(
     assert result.status_code == 200
 
     run_data = await get_run_on_end(
-        client, transfer.id, result.json()["id"], user.token
+        client,
+        transfer.id,
+        result.json()["id"],
+        user.token,
     )
     assert run_data["status"] == Status.FINISHED.value
     reader = DBReader(

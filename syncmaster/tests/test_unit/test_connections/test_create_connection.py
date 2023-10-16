@@ -9,35 +9,6 @@ from app.db.models import Acl, Connection, ObjectType, Rule
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_unauthorized_user_cannot_create_connection(client: AsyncClient):
-    result = await client.post(
-        "v1/connections",
-        json={
-            "user_id": 1,
-            "group_id": None,
-            "name": "New connection",
-            "description": "",
-            "connection_data": {
-                "type": "postgres",
-                "host": "127.0.0.1",
-                "port": 5432,
-                "database_name": "postgres",
-            },
-            "auth_data": {
-                "type": "postgres",
-                "user": "user",
-                "password": "secret",
-            },
-        },
-    )
-    assert result.status_code == 401
-    assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
-    }
-
-
 async def test_simple_user_can_create_connection(
     client: AsyncClient, simple_user: MockUser, session: AsyncSession
 ):
@@ -100,6 +71,35 @@ async def test_simple_user_can_create_connection(
         )
     ).first()
     assert acl is None
+
+
+async def test_unauthorized_user_cannot_create_connection(client: AsyncClient):
+    result = await client.post(
+        "v1/connections",
+        json={
+            "user_id": 1,
+            "group_id": None,
+            "name": "New connection",
+            "description": "",
+            "connection_data": {
+                "type": "postgres",
+                "host": "127.0.0.1",
+                "port": 5432,
+                "database_name": "postgres",
+            },
+            "auth_data": {
+                "type": "postgres",
+                "user": "user",
+                "password": "secret",
+            },
+        },
+    )
+    assert result.status_code == 401
+    assert result.json() == {
+        "ok": False,
+        "status_code": 401,
+        "message": "Not authenticated",
+    }
 
 
 async def test_user_cannot_create_connection_to_other_user(
