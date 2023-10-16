@@ -89,6 +89,8 @@ class TestSettings(BaseSettings):
     TEST_ORACLE_SERVICE_NAME: str | None = None
 
     TEST_HIVE_CLUSTER: str
+    TEST_HIVE_USER: str
+    TEST_HIVE_PASSWORD: str
 
     @root_validator
     def check_sid_and_service_name(cls, values):

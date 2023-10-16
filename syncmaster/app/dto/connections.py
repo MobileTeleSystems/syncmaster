@@ -33,4 +33,6 @@ class OracleConnectionDTO(ConnectionDTO):
 class HiveConnectionDTO(ConnectionDTO):
     cluster: str
     additional_params: dict
+    user: str
+    password: str
     type: str = "hive"
