@@ -107,7 +107,9 @@ async def client(settings: Settings, async_engine: AsyncEngine) -> AsyncGenerato
 
 
 @pytest_asyncio.fixture
-async def user_transfer(session: AsyncSession, settings: Settings) -> MockTransfer:
+async def user_transfer(
+    session: AsyncSession, settings: Settings
+) -> AsyncGenerator[MockTransfer, None]:
     user = await create_user(
         session=session, username="transfer_username", is_active=True
     )
@@ -149,7 +151,9 @@ async def user_transfer(session: AsyncSession, settings: Settings) -> MockTransf
 
 
 @pytest_asyncio.fixture
-async def group_transfer(session: AsyncSession, settings: Settings) -> MockTransfer:
+async def group_transfer(
+    session: AsyncSession, settings: Settings
+) -> AsyncGenerator[MockTransfer, None]:
     group_admin = await create_user(
         session=session, username="group_admin_connection", is_active=True
     )

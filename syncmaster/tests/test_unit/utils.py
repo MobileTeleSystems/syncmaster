@@ -1,3 +1,4 @@
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Any
@@ -26,7 +27,7 @@ async def create_user_cm(
     is_active: bool = False,
     is_superuser: bool = False,
     is_deleted: bool = False,
-) -> User:
+) -> AsyncGenerator[User, None]:
     u = User(
         username=username,
         is_active=is_active,

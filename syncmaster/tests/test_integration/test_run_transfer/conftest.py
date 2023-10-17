@@ -1,3 +1,4 @@
+import os
 from datetime import date, datetime
 from itertools import permutations
 
@@ -20,7 +21,7 @@ from tests.test_unit.utils import create_connection, create_transfer, create_use
 from tests.utils import MockUser
 
 from app.api.v1.auth.utils import sign_jwt
-from app.config import Settings, TestSettings
+from app.config import EnvTypes, Settings, TestSettings
 from app.dto.connections import (
     HiveConnectionDTO,
     OracleConnectionDTO,
@@ -30,7 +31,27 @@ from app.dto.connections import (
 
 @pytest.fixture
 def spark(settings: Settings) -> SparkSession:
-    return settings.CREATE_SPARK_SESSION_FUNCTION(settings)
+    return get_spark_session(settings)
+
+
+def get_spark_session(connection_settings: Settings) -> SparkSession:
+    maven_packages = [
+        p for connection in (Postgres, Oracle) for p in connection.get_packages()
+    ]
+
+    spark = (
+        SparkSession.builder.appName("celery_worker")
+        .config("spark.jars.packages", ",".join(maven_packages))
+        .config("spark.sql.pyspark.jvmStacktrace.enabled", "true")
+        .enableHiveSupport()
+    )
+
+    if connection_settings.ENV == EnvTypes.GITLAB:
+        spark = spark.config(
+            "spark.jars.ivySettings", os.fspath(connection_settings.IVYSETTINGS_PATH)
+        )
+
+    return spark.getOrCreate()
 
 
 @pytest.fixture
@@ -302,7 +323,7 @@ async def transfers(
     data = {
         "owner": MockUser(user=user, auth_token=sign_jwt(user.id, settings)),
     }
-    data.update(transfers)
+    data.update(transfers)  # type: ignore
     yield data
     for transfer in transfers.values():
         await session.delete(transfer)

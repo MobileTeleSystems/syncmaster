@@ -1,7 +1,7 @@
 import re
 
 from sqlalchemy import MetaData
-from sqlalchemy.orm import as_declarative, declared_attr
+from sqlalchemy.orm import DeclarativeBase, declared_attr
 
 convention = {
     "all_column_names": lambda constraint, table: "_".join(
@@ -14,13 +14,13 @@ convention = {
     "pk": "pk__%(table_name)s",
 }
 
-metadata = MetaData(naming_convention=convention)  # type: ignore
+model_metadata = MetaData(naming_convention=convention)  # type: ignore
 
 
-@as_declarative(metadata=metadata)
-class Base:
-    __name__: str
-    metadata: MetaData
+# as_declarative decorator causes mypy errors.
+# Use inheritance from DeclarativeBase.
+class Base(DeclarativeBase):
+    metadata = model_metadata
 
     @declared_attr  # type: ignore
     def __tablename__(cls) -> str:
