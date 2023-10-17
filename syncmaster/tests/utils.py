@@ -48,7 +48,7 @@ class MockAcl:
         self,
         acl: Acl,
         user: MockUser,
-        to_object: "MockConnection",
+        to_object: Transfer,
         acl_as_str: UserRule,
     ):
         self.acl = acl

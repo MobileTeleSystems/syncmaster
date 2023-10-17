@@ -1,6 +1,8 @@
 import logging
 from time import sleep
 
+from tests.test_integration.test_run_transfer.conftest import get_spark_session
+
 from app.config import EnvTypes, Settings, TestSettings
 
 TIMEOUT = 5
@@ -12,7 +14,8 @@ logger = logging.getLogger(__name__)
 def check_test_postgres(settings: Settings, test_settings: TestSettings) -> None:
     from onetl.connection import Postgres
 
-    spark = settings.CREATE_SPARK_SESSION_FUNCTION(settings)
+    spark_session = get_spark_session(settings)
+
     count = COUNT
     connection = Postgres(
         host=test_settings.TEST_POSTGRES_HOST,
@@ -20,7 +23,7 @@ def check_test_postgres(settings: Settings, test_settings: TestSettings) -> None
         user=test_settings.TEST_POSTGRES_USER,
         password=test_settings.TEST_POSTGRES_PASSWORD,
         database=test_settings.TEST_POSTGRES_DB,
-        spark=spark,
+        spark=spark_session,
     )
     exception = None
     while count > 0:
@@ -38,7 +41,8 @@ def check_test_postgres(settings: Settings, test_settings: TestSettings) -> None
 def check_test_oracle(settings: Settings, test_settings: TestSettings) -> None:
     from onetl.connection import Oracle
 
-    spark = settings.CREATE_SPARK_SESSION_FUNCTION(settings)
+    spark_session = get_spark_session(settings)
+
     count = COUNT
     connection = Oracle(
         host=test_settings.TEST_ORACLE_HOST,
@@ -47,7 +51,7 @@ def check_test_oracle(settings: Settings, test_settings: TestSettings) -> None:
         password=test_settings.TEST_ORACLE_PASSWORD,
         service_name=test_settings.TEST_ORACLE_SERVICE_NAME,
         sid=test_settings.TEST_ORACLE_SID,
-        spark=spark,
+        spark=spark_session,
     )
     exception = None
     while count > 0:
@@ -65,11 +69,12 @@ def check_test_oracle(settings: Settings, test_settings: TestSettings) -> None:
 def check_test_hive(settings: Settings, test_settings: TestSettings) -> None:
     from onetl.connection import Hive
 
-    spark = settings.CREATE_SPARK_SESSION_FUNCTION(settings)
+    spark_session = get_spark_session(settings)
+
     count = COUNT
     connection = Hive(
         cluster=test_settings.TEST_HIVE_CLUSTER,
-        spark=spark,
+        spark=spark_session,
     )
     exception = None
     while count > 0:

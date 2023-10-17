@@ -23,7 +23,7 @@ class Handler(ABC):
         transfer_params: OracleTransferParamsDTO
         | PostgresTransferParamsDTO
         | HiveTransferParamsDTO,
-        spark: SparkSession,
+        spark: SparkSession | None = None,
     ) -> None:
         self.spark = spark
         self.reader: DBReader | None = None
@@ -33,6 +33,9 @@ class Handler(ABC):
 
     def init_connection(self):
         pass
+
+    def set_spark(self, spark: SparkSession):
+        self.spark = spark
 
     def init_reader(self):
         if self.connection_dto is None:

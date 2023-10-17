@@ -1,8 +1,7 @@
 import logging
 from typing import Any
 
-from pyspark.sql import SparkSession
-
+from app.config import Settings
 from app.db.models import Connection, Transfer
 from app.dto.connections import (
     HiveConnectionDTO,
@@ -32,20 +31,25 @@ class TransferController:
         transfer: Transfer,
         source_connection: Connection,
         target_connection: Connection,
-        spark: SparkSession,
+        settings: Settings,
     ):
         self.source = self.get_handler(
             source_connection.data,
             source_connection.auth_data,
             transfer.source_params,
-            spark,
         )
         self.target = self.get_handler(
             target_connection.data,
             target_connection.auth_data,
             transfer.target_params,
-            spark,
         )
+        spark = settings.CREATE_SPARK_SESSION_FUNCTION(
+            settings,
+            target=self.target.connection_dto,
+            source=self.source.connection_dto,
+        )
+        self.source.set_spark(spark)
+        self.target.set_spark(spark)
         logger.info("source connection = %s", self.source)
         logger.info("target connection = %s", self.target)
 
@@ -64,26 +68,22 @@ class TransferController:
         connection_data: dict[str, Any],
         connection_auth_data: dict[str, Any],
         transfer_params: dict[str, Any],
-        spark: SparkSession,
     ) -> Handler:
         connection_data.update(connection_auth_data)
         if connection_data.get("type") == "hive":
             return HiveHandler(
                 connection=HiveConnectionDTO(**connection_data),
                 transfer_params=HiveTransferParamsDTO(**transfer_params),
-                spark=spark,
             )
 
         if connection_data.get("type") == "oracle":
             return OracleHandler(
                 connection=OracleConnectionDTO(**connection_data),
                 transfer_params=OracleTransferParamsDTO(**transfer_params),
-                spark=spark,
             )
         if connection_data.get("type") == "postgres":
             return PostgresHandler(
                 connection=PostgresConnectionDTO(**connection_data),
                 transfer_params=PostgresTransferParamsDTO(**transfer_params),
-                spark=spark,
             )
         raise ConnectionTypeNotRecognizedException
