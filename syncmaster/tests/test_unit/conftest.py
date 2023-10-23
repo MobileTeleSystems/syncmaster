@@ -4,10 +4,11 @@ from tests.test_unit.utils import (
     create_acl,
     create_connection,
     create_group,
+    create_queue,
     create_user,
     create_user_cm,
 )
-from tests.utils import MockAcl, MockConnection, MockGroup, MockUser
+from tests.utils import MockAcl, MockConnection, MockGroup, MockQueue, MockUser
 
 from app.api.v1.auth.utils import sign_jwt
 from app.api.v1.schemas import UserRule
@@ -106,6 +107,24 @@ async def user_connection(session: AsyncSession, settings: Settings) -> MockConn
 
 
 @pytest_asyncio.fixture
+async def new_queue(
+    session: AsyncSession,
+    settings: Settings,
+) -> MockQueue:
+    queue = await create_queue(
+        session=session,
+        name="new_queue",
+        is_active=True,
+    )
+
+    yield MockQueue(
+        queue=queue,
+    )
+    await session.delete(queue)
+    await session.commit()
+
+
+@pytest_asyncio.fixture
 async def group_connection(session: AsyncSession, settings: Settings) -> MockConnection:
     group_admin = await create_user(
         session=session, username="group_admin_connection", is_active=True
@@ -167,6 +186,98 @@ async def group_connection(session: AsyncSession, settings: Settings) -> MockCon
     )
     await session.delete(connection)
     await session.delete(group)
+    await session.delete(group_admin)
+    for member in members:
+        await session.delete(member.user)
+    await session.commit()
+
+
+@pytest_asyncio.fixture
+async def group_queue_connection(
+    session: AsyncSession, settings: Settings
+) -> MockConnection:
+    group_admin = await create_user(
+        session=session,
+        username="group_admin_connection",
+        is_active=True,
+    )
+    group = await create_group(
+        session=session,
+        name="connection_group",
+        admin_id=group_admin.id,
+    )
+    members: list[MockUser] = []
+    for username in (
+        "acl_connection_group_member_1",  # with read rule
+        "acl_connection_group_member_2",  # with write rule
+        "acl_connection_group_member_3",  # with delete rule
+    ):
+        u = await create_user(
+            session,
+            username,
+            is_active=True,
+        )
+        members.append(
+            MockUser(
+                user=u,
+                auth_token=sign_jwt(u.id, settings),
+            )
+        )
+        session.add(UserGroup(group_id=group.id, user_id=u.id))
+    await session.commit()
+    queue = await create_queue(
+        session=session,
+        name="group_queue_connection",
+        is_active=False,
+    )
+    connection = await create_connection(
+        session=session,
+        name="group_connection",
+        group_id=group.id,
+        queue_id=queue.id,
+    )
+    acl_write = await create_acl(
+        session=session,
+        object_id=connection.id,
+        object_type=ObjectType.CONNECTION,
+        user_id=members[1].id,
+        rule=Rule.WRITE,
+    )
+    acl_delete = await create_acl(
+        session=session,
+        object_id=connection.id,
+        object_type=ObjectType.CONNECTION,
+        user_id=members[2].id,
+        rule=Rule.DELETE,
+    )
+    yield MockConnection(
+        connection=connection,
+        owner_group=MockGroup(
+            group=group,
+            admin=MockUser(
+                user=group_admin, auth_token=sign_jwt(group_admin.id, settings)
+            ),
+            members=members,
+        ),
+        owner_user=None,
+        acls=[
+            MockAcl(
+                acl=acl_write,
+                user=members[1],
+                to_object=connection,
+                acl_as_str=UserRule.WRITE,
+            ),
+            MockAcl(
+                acl=acl_delete,
+                user=members[2],
+                to_object=connection,
+                acl_as_str=UserRule.DELETE,
+            ),
+        ],
+    )
+    await session.delete(connection)
+    await session.delete(group)
+    await session.delete(queue)
     await session.delete(group_admin)
     for member in members:
         await session.delete(member.user)

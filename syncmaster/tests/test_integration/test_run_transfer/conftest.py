@@ -17,7 +17,12 @@ from pyspark.sql.types import (
     TimestampType,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.test_unit.utils import create_connection, create_transfer, create_user
+from tests.test_unit.utils import (
+    create_connection,
+    create_queue,
+    create_transfer,
+    create_user,
+)
 from tests.utils import MockUser
 
 from app.api.v1.auth.utils import sign_jwt
@@ -330,5 +335,122 @@ async def transfers(
     await session.delete(postgres_connection)
     await session.delete(oracle_connection)
     await session.delete(hive_connection)
+    await session.delete(user)
+    await session.commit()
+
+
+@pytest_asyncio.fixture
+async def create_transfers_with_queue(
+    prepare_postgres,
+    prepare_oracle,
+    prepare_hive,
+    postgres: PostgresConnectionDTO,
+    oracle: OracleConnectionDTO,
+    hive: HiveConnectionDTO,
+    session: AsyncSession,
+    settings: Settings,
+):
+    queue = await create_queue(
+        session=session,
+        name="test_tasks",
+        is_active=True,
+    )
+
+    queue_id = queue.id
+
+    user = await create_user(
+        session=session,
+        username="connection_owner",
+        is_active=True,
+    )
+    hive_connection = await create_connection(
+        session=session,
+        name="integration_hive",
+        user_id=user.id,
+        data=dict(
+            type=hive.type,
+            cluster=hive.cluster,
+            additional_params={},
+        ),
+        auth_data=dict(
+            type="hive",
+            user=hive.user,
+            password=hive.password,
+        ),
+        queue_id=queue_id,
+    )
+    postgres_connection = await create_connection(
+        session=session,
+        name="integration_postgres",
+        user_id=user.id,
+        data=dict(
+            type=postgres.type,
+            host=postgres.host,
+            port=postgres.port,
+            database_name=postgres.database_name,
+            additional_params={},
+        ),
+        auth_data=dict(
+            type="postgres",
+            user=postgres.user,
+            password=postgres.password,
+        ),
+        queue_id=queue_id,
+    )
+    oracle_connection = await create_connection(
+        session=session,
+        name="integration_oracle",
+        user_id=user.id,
+        data=dict(
+            type=oracle.type,
+            host=oracle.host,
+            port=oracle.port,
+            sid=oracle.sid,
+            service_name=oracle.service_name,
+            additional_params={},
+        ),
+        auth_data=dict(
+            type="oracle",
+            user=oracle.user,
+            password=oracle.password,
+        ),
+        queue_id=queue_id,
+    )
+    transfers = {}
+    for source, target in permutations(
+        [hive_connection, oracle_connection, postgres_connection], 2
+    ):
+        source_type = source.data["type"]
+        target_type = target.data["type"]
+        transfer = await create_transfer(
+            session=session,
+            name=f"integration_transfer_{source_type}_{target_type}",
+            source_connection_id=source.id,
+            target_connection_id=target.id,
+            user_id=user.id,
+            source_params={
+                "type": source_type,
+                "table_name": (oracle.user if source_type == "oracle" else "public")
+                + ".source_table",
+            },
+            target_params={
+                "type": target_type,
+                "table_name": (oracle.user if target_type == "oracle" else "public")
+                + ".target_table",
+            },
+        )
+        transfers[f"{source_type}_{target_type}"] = transfer
+
+    data = {
+        "owner": MockUser(user=user, auth_token=sign_jwt(user.id, settings)),
+    }
+    data.update(transfers)  # type: ignore
+    yield data
+    for transfer in transfers.values():
+        await session.delete(transfer)
+    await session.delete(postgres_connection)
+    await session.delete(oracle_connection)
+    await session.delete(hive_connection)
+    await session.delete(queue)
     await session.delete(user)
     await session.commit()

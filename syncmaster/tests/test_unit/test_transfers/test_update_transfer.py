@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.test_unit.utils import create_connection
+from tests.test_unit.utils import create_connection, create_queue
 from tests.utils import MockGroup, MockTransfer, MockUser
 
 pytestmark = [pytest.mark.asyncio]
@@ -279,3 +279,51 @@ async def test_check_different_connection_owners_for_transfer(
 
     await session.delete(new_connection)
     await session.commit()
+
+
+async def test_update_transfer_connection_id_with_different_queue_error(
+    client: AsyncClient,
+    session: AsyncSession,
+    group_transfer_with_queue: MockTransfer,
+    event_loop,
+    request,
+):
+    queue = await create_queue(
+        session=session,
+        name="test_update_transfer_connection",
+        is_active=True,
+    )
+
+    connection = await create_connection(
+        session=session,
+        name="test_update_transfer_connection",
+        queue_id=queue.id,
+        group_id=group_transfer_with_queue.owner_group.group.id,
+    )
+
+    def finalizer() -> None:
+        async def async_finalizer() -> None:
+            await session.delete(connection)
+            await session.delete(queue)
+            await session.commit()
+
+        event_loop.run_until_complete(async_finalizer())
+
+    request.addfinalizer(finalizer)
+
+    result = await client.patch(
+        f"v1/transfers/{group_transfer_with_queue.id}",
+        headers={
+            "Authorization": f"Bearer {group_transfer_with_queue.owner_group.admin.token}"
+        },
+        json={
+            "source_connection_id": group_transfer_with_queue.source_connection.connection.id,
+            "target_connection_id": connection.id,
+        },
+    )
+    assert result.status_code == 409
+    assert result.json() == {
+        "message": "The source and destination connection queue must match",
+        "ok": False,
+        "status_code": 409,
+    }

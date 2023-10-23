@@ -4,8 +4,9 @@ from typing import Any, NoReturn
 from sqlalchemy import ScalarResult, insert, or_, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from app.db.models import Acl, ObjectType, Rule, Transfer
+from app.db.models import Acl, Connection, ObjectType, Rule, Transfer
 from app.db.repositories.base import RepositoryWithAcl
 from app.db.utils import Pagination
 from app.exceptions import (
@@ -59,9 +60,18 @@ class TransferRepository(RepositoryWithAcl[Transfer]):
         is_superuser: bool,
         rule: Rule = Rule.READ,
     ) -> Transfer:
-        stmt = select(Transfer).where(
-            Transfer.id == transfer_id,
-            Transfer.is_deleted.is_(False),
+        stmt = (
+            select(Transfer)
+            .where(
+                Transfer.id == transfer_id,
+                Transfer.is_deleted.is_(False),
+            )
+            .options(
+                selectinload(Transfer.source_connection).selectinload(Connection.queue)
+            )
+            .options(
+                selectinload(Transfer.target_connection).selectinload(Connection.queue)
+            )
         )
         if not is_superuser:
             stmt = self.apply_acl(stmt, current_user_id, rule=rule)
