@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.test_unit.utils import create_connection
+from tests.test_unit.utils import create_connection, create_queue
 from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser
 
 from app.db.models import Acl, ObjectType, Rule, Transfer
@@ -636,3 +636,60 @@ async def test_check_different_connection_owners_on_create_transfer(
     }
     await session.delete(new_connection)
     await session.commit()
+
+
+async def test_can_not_create_transfer_with_different_source_target_connection_queue_error(
+    client: AsyncClient,
+    group_queue_connection: MockConnection,
+    session: AsyncSession,
+    event_loop,
+    request,
+):
+    token = group_queue_connection.owner_group.admin.token
+    user_id = group_queue_connection.owner_group.admin.user.id
+
+    target_queue = await create_queue(
+        session=session,
+        name="test_can_not_create_transfer",
+        is_active=True,
+    )
+
+    target_connection = await create_connection(
+        session=session,
+        name="test_can_not_create_transfer",
+        group_id=group_queue_connection.owner_group.group.id,
+        queue_id=target_queue.id,
+    )
+
+    def finalizer() -> None:
+        async def async_finalizer() -> None:
+            await session.delete(target_connection)
+            await session.delete(target_queue)
+            await session.commit()
+
+        event_loop.run_until_complete(async_finalizer())
+
+    request.addfinalizer(finalizer)
+
+    result = await client.post(
+        "v1/transfers",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "user_id": user_id,
+            "name": "new test user transfer",
+            "description": "",
+            "is_scheduled": False,
+            "schedule": "",
+            "source_connection_id": group_queue_connection.id,
+            "target_connection_id": target_connection.id,
+            "source_params": {"type": "postgres", "table_name": "source_table"},
+            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "strategy_params": {"type": "full"},
+        },
+    )
+    assert result.status_code == 409
+    assert result.json() == {
+        "ok": False,
+        "status_code": 409,
+        "message": "The source and destination connection queue must match",
+    }

@@ -39,3 +39,35 @@ async def test_run_simple_transfer(
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
 
     assert df.sort("ID").collect() == init_df.sort("ID").collect()
+
+
+async def test_run_transfer_with_custom_queue(
+    client: AsyncClient,
+    create_transfers_with_queue: dict[str, MockUser | Transfer],
+    prepare_oracle,
+    init_df: DataFrame,
+):
+    user: MockUser = create_transfers_with_queue["owner"]
+    transfer: Transfer = create_transfers_with_queue["postgres_oracle"]
+
+    result = await client.post(
+        f"v1/transfers/{transfer.id}/runs",
+        headers={"Authorization": f"Bearer {user.token}"},
+    )
+    assert result.status_code == 200
+
+    run_data = await get_run_on_end(
+        client, transfer.id, result.json()["id"], user.token
+    )
+    assert run_data["status"] == Status.FINISHED.value
+    reader = DBReader(
+        connection=prepare_oracle,
+        table=f"{prepare_oracle.user}.target_table",
+        columns=list(map(lambda x: f'"{x}"'.upper(), init_df.columns)),
+    )
+    # TODO: после фикса бага https://jira.mts.ru/browse/DOP-8666 в onetl, пофиксить тесты
+    df = reader.run()
+    for field in init_df.schema:
+        df = df.withColumn(field.name, df[field.name].cast(field.dataType))
+
+    assert df.sort("ID").collect() == init_df.sort("ID").collect()

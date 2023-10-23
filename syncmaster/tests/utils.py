@@ -19,7 +19,7 @@ from sqlalchemy.ext.asyncio import (
 
 from app.api.v1.schemas import UserRule
 from app.config import Settings
-from app.db.models import Acl, Connection, Group, Run, Status, Transfer, User
+from app.db.models import Acl, Connection, Group, Queue, Run, Status, Transfer, User
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +75,17 @@ class MockConnection:
 
     def __getattr__(self, attr: str) -> Any:
         return getattr(self.connection, attr)
+
+
+class MockQueue:
+    def __init__(
+        self,
+        queue: Queue,
+    ):
+        self.queue = queue
+
+    def __getattr__(self, attr: str) -> Any:
+        return getattr(self.queue, attr)
 
 
 class MockTransfer:

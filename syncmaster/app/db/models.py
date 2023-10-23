@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import enum
 from datetime import datetime
 from typing import Any
@@ -65,9 +67,16 @@ class UserGroup(Base):
 class Connection(Base, DeletableMixin, TimestampMixin, ResourceMixin):
     data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
     auth_data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=True, default=None)
+    queue_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("queue.id"), default=None
+    )
 
     user: Mapped[User | None] = relationship("User")
     group: Mapped[Group | None] = relationship("Group")
+    queue: Mapped[Queue | None] = relationship(
+        "Queue",
+        back_populates="connections",
+    )
 
     def __repr__(self):
         return (
@@ -75,7 +84,8 @@ class Connection(Base, DeletableMixin, TimestampMixin, ResourceMixin):
             f"name={self.name} "
             f"description={self.description} "
             f"group_id={self.group_id} "
-            f"user_id={self.user_id}>"
+            f"user_id={self.user_id} "
+            f"queue_id={self.queue_id}>"
         )
 
 
@@ -171,6 +181,7 @@ class Run(Base, TimestampMixin):
 class ObjectType(enum.StrEnum):
     CONNECTION = "connection"
     TRANSFER = "transfer"
+    QUEUE = "queue"
 
 
 class Rule(enum.IntFlag):
@@ -208,3 +219,19 @@ class Acl(Base):
     rule: Mapped[Rule] = mapped_column(
         ChoiceType(Rule, impl=SmallInteger()), nullable=False, default=Rule.READ
     )
+
+
+class Queue(Base, TimestampMixin, DeletableMixin):
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    name: Mapped[str] = mapped_column(
+        String(256),
+        unique=True,
+        nullable=False,
+    )
+    description: Mapped[str] = mapped_column(String(512), nullable=False, default="")
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    connections: Mapped[list[Connection]] = relationship(back_populates="queue")
+
+    def __repr__(self):
+        return f"<Queue name={self.name} description={self.description}>"

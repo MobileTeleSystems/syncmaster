@@ -32,3 +32,7 @@ class DifferentTypeConnectionsAndParams(SyncmasterException):
             f"{self.conn} connection has type `{self.connection_type}` "
             f"but its params has `{self.params_type}` type"
         )
+
+
+class DifferentSourceAndTargetQueueException(SyncmasterException):
+    pass
