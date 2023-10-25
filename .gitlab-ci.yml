@@ -108,7 +108,7 @@ tests:
   image: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend:${CI_COMMIT_REF_SLUG}
   stage: tests
   variables:
-    # CI_DEBUG_SERVICES: 'true'
+    CI_DEBUG_SERVICES: 'true'
     FF_NETWORK_PER_BUILD: 1
     JUNIT_FILE: junitxml.xml
     ENV: GITLAB
