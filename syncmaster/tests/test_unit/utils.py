@@ -12,7 +12,6 @@ from app.db.models import (
     Connection,
     Group,
     ObjectType,
-    Queue,
     Rule,
     Run,
     Status,
@@ -62,23 +61,6 @@ async def create_user(
     return u
 
 
-async def create_queue(
-    session: AsyncSession,
-    name: str,
-    description: str | None = None,
-    is_active: bool = False,
-) -> Queue:
-    queue = Queue(
-        name=name,
-        description=description,
-        is_active=is_active,
-    )
-    session.add(queue)
-    await session.commit()
-    await session.refresh(queue)
-    return queue
-
-
 async def create_group(session: AsyncSession, name: str, admin_id: int) -> Group:
     g = Group(name=name, admin_id=admin_id)
     session.add(g)
@@ -95,7 +77,6 @@ async def create_connection(
     description: str = "",
     data: dict[str, Any] | None = None,
     auth_data: dict[str, Any] | None = None,
-    queue_id: int | None = None,
 ) -> Connection:
     if data is None:
         data = {
@@ -118,7 +99,6 @@ async def create_connection(
         description=description,
         data=data,
         auth_data=auth_data,
-        queue_id=queue_id,
     )
     session.add(c)
     await session.commit()

@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from kombu.exceptions import KombuError
 
-from app.api.deps import DatabaseProviderMarker, SettingsMarker
+from app.api.deps import DatabaseProviderMarker
 from app.api.services import get_user
 from app.api.v1.schemas import (
     AclPageSchema,
@@ -21,13 +21,11 @@ from app.api.v1.transfers.schemas import (
     TransferPageSchema,
     UpdateTransferSchema,
 )
-from app.config import Settings
 from app.db.models import Rule, Status, User
 from app.db.provider import DatabaseProvider
 from app.exceptions import (
     CannotConnectToTaskQueueError,
     DifferentConnectionsOwners,
-    DifferentSourceAndTargetQueueException,
     DifferentTypeConnectionsAndParams,
     TransferNotFound,
 )
@@ -95,18 +93,7 @@ async def create_transfer(
         current_user_id=current_user.id,
         is_superuser=current_user.is_superuser,
     )
-
-    source_queue_id = source_connection.queue_id
-    target_queue_id = target_connection.queue_id
-
-    if source_queue_id is not None and target_queue_id is not None:
-        if source_queue_id != target_queue_id:
-            raise DifferentSourceAndTargetQueueException
-
-    if (
-        target_connection.group_id,
-        target_connection.user_id,
-    ) != (
+    if (target_connection.group_id, target_connection.user_id) != (
         source_connection.group_id,
         source_connection.user_id,
     ):
@@ -253,14 +240,6 @@ async def update_transfer(
         current_user_id=current_user.id,
         is_superuser=current_user.is_superuser,
     )
-
-    source_queue_id = source_connection.queue_id
-    target_queue_id = target_connection.queue_id
-
-    if source_queue_id is not None and target_queue_id is not None:
-        if source_queue_id != target_queue_id:
-            raise DifferentSourceAndTargetQueueException
-
     if (target_connection.group_id, target_connection.user_id) != (
         source_connection.group_id,
         source_connection.user_id,
@@ -405,15 +384,15 @@ async def start_transfer(
     transfer_id: int,
     current_user: User = Depends(get_user(is_active=True)),
     provider: DatabaseProvider = Depends(DatabaseProviderMarker),
-    settings: Settings = Depends(SettingsMarker),
 ) -> ReadRunSchema:
     await provider.transfer.read_by_id(
         transfer_id=transfer_id,
         current_user_id=current_user.id,
         is_superuser=current_user.is_superuser,
+        rule=Rule.READ,
     )
     try:
-        transfer = await provider.transfer.read_by_id(
+        await provider.transfer.read_by_id(
             transfer_id=transfer_id,
             current_user_id=current_user.id,
             is_superuser=current_user.is_superuser,
@@ -422,26 +401,8 @@ async def start_transfer(
     except TransferNotFound as e:
         raise ActionNotAllowed from e
     run = await provider.run.create(transfer_id=transfer_id)
-
-    source_queue = (
-        transfer.source_connection.queue.name
-        if transfer.source_connection.queue
-        else None
-    )
-    target_queue = (
-        transfer.target_connection.queue.name
-        if transfer.target_connection.queue
-        else None
-    )
-
-    queue = source_queue or target_queue or settings.DEFAULT_QUEUE
-
     try:
-        celery.send_task(
-            "run_transfer_task",
-            kwargs={"run_id": run.id},
-            queue=queue,
-        )
+        celery.send_task("run_transfer_task", kwargs={"run_id": run.id})
     except KombuError as e:
         run = await provider.run.update(
             run_id=run.id,

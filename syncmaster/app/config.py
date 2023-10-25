@@ -33,7 +33,6 @@ class Settings(BaseSettings):
     RABBITMQ_PORT: int
     RABBITMQ_USER: str
     RABBITMQ_PASSWORD: str
-    DEFAULT_QUEUE: str = "celery"
 
     def build_db_connection_uri(
         self,

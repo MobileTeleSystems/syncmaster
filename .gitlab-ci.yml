@@ -123,7 +123,6 @@ tests:
     RABBITMQ_PORT: 5672
     RABBITMQ_USER: guest
     RABBITMQ_PASSWORD: guest
-    DEFAULT_QUEUE: celery
 
     TEST_POSTGRES_HOST: test-postgres
     TEST_POSTGRES_PORT: 5432
@@ -170,7 +169,6 @@ tests:
         RABBITMQ_USER: guest
         RABBITMQ_PASSWORD: guest
         ENV: GITLAB
-        DEFAULT_QUEUE: celery
 
         SPARK_CONF_DIR: /syncmaster/tests/spark/hive/conf/
         HADOOP_CONF_DIR: /syncmaster/tests/spark/hadoop/
