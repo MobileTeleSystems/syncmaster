@@ -13,4 +13,7 @@ RUN poetry export -f requirements.txt --with worker --output /syncmaster/require
     && pip install --timeout 5 --retries 5 --no-cache-dir -r /syncmaster/requirements.txt
 
 COPY ./syncmaster/ /syncmaster/
-CMD ["celery", "-A" ,"app.tasks.config.celery" ,"worker", "--loglevel=info"]
+
+# https://docs.celeryq.dev/en/stable/userguide/workers.html#max-tasks-per-child-setting
+# Required to start each Celery task in separated process, avoiding issues with global Spark session object
+CMD ["celery", "-A" ,"app.tasks.config.celery" ,"worker", "--loglevel=info", "--max-tasks-per-child=1"]
