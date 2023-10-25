@@ -18,9 +18,10 @@ def get_worker_spark_session(
 ) -> SparkSession:
     """Through the source and target parameters you can get credentials for authorization at the source"""
 
-    maven_packages: list[str] = []
-    for db_type in source, target:
-        maven_packages.extend(get_packages(db_type=db_type.type))
+    maven_packages = [
+        *Postgres.get_packages(),
+        *Oracle.get_packages(),
+    ]
 
     spark = (
         SparkSession.builder.appName("celery_worker")
@@ -35,13 +36,3 @@ def get_worker_spark_session(
             "spark.jars.ivySettings", os.fspath(settings.IVYSETTINGS_PATH)
         )
     return spark.getOrCreate()
-
-
-def get_packages(db_type: str) -> list[str]:
-    if db_type == "postgres":
-        return Postgres.get_packages()
-    if db_type == "oracle":
-        return Oracle.get_packages()
-
-    # If the database type does not require downloading .jar packages
-    return []
