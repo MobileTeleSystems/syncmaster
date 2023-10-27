@@ -2,10 +2,12 @@ import logging
 from datetime import datetime
 
 import onetl
+from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.config import Settings
-from app.db.models import Run, Status, Transfer
+from app.db.models import AuthData, Run, Status, Transfer
+from app.db.repositories.utilites import decrypt_auth_data
 from app.exceptions.run import RunNotFoundException
 from app.tasks.base import WorkerTask
 from app.tasks.config import celery
@@ -47,11 +49,27 @@ def run_transfer(session: Session, run_id: int, settings: Settings):
 
     controller = None
 
+    q_source_auth_data = select(AuthData).where(
+        AuthData.connection_id == run.transfer.source_connection.id
+    )
+    q_target_auth_data = select(AuthData).where(
+        AuthData.connection_id == run.transfer.target_connection.id
+    )
+
+    target_auth_data = decrypt_auth_data(
+        session.scalars(q_target_auth_data).one().value, settings
+    )
+    source_auth_data = decrypt_auth_data(
+        session.scalars(q_source_auth_data).one().value, settings
+    )
+
     try:
         controller = TransferController(
             transfer=run.transfer,
             source_connection=run.transfer.source_connection,
             target_connection=run.transfer.target_connection,
+            source_auth_data=source_auth_data,
+            target_auth_data=target_auth_data,
             settings=settings,
         )
         controller.make_transfer()

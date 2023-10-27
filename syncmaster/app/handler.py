@@ -9,6 +9,7 @@ from app.exceptions import (
     ActionNotAllowed,
     AlreadyIsGroupMember,
     AlreadyIsNotGroupMember,
+    AuthDataNotFound,
     CannotConnectToTaskQueueError,
     CannotStopRunException,
     ConnectionDeleteException,
@@ -34,6 +35,12 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 
 async def syncmsater_exception_handler(request: Request, exc: SyncmasterException):
+    if isinstance(exc, AuthDataNotFound):
+        return exception_json_response(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Credentials not found. {exc.message}",
+        )
+
     if isinstance(exc, ConnectionDeleteException):
         return exception_json_response(
             status_code=status.HTTP_409_CONFLICT, detail=exc.message

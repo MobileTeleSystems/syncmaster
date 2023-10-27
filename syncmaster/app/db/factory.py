@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+from app.config import Settings
 from app.db.provider import DatabaseProvider
 
 
@@ -25,9 +26,10 @@ def create_session_factory(engine: AsyncEngine) -> async_sessionmaker[AsyncSessi
 
 def create_holder(
     session_factory: async_sessionmaker[AsyncSession],
+    settings: Settings,
 ) -> Callable[[], AsyncGenerator[DatabaseProvider, None]]:
     async def wrapper():
         async with session_factory() as session:
-            yield DatabaseProvider(session=session)
+            yield DatabaseProvider(session=session, settings=settings)
 
     return wrapper

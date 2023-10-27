@@ -1,8 +1,11 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.test_unit.utils import create_connection
+from tests.test_unit.utils import create_connection, create_credentials
 from tests.utils import MockConnection, MockUser
+
+from app.config import Settings
+from app.db.repositories.utilites import decrypt_auth_data
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -21,6 +24,7 @@ async def test_user_can_read_own_connections(
     client: AsyncClient,
     simple_user: MockUser,
     session: AsyncSession,
+    settings: Settings,
 ):
     result = await client.get(
         "v1/connections", headers={"Authorization": f"Bearer {simple_user.token}"}
@@ -45,6 +49,13 @@ async def test_user_can_read_own_connections(
         name="new_connection",
         user_id=simple_user.id,
     )
+
+    creds = await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=simple_user_connection.id,
+    )
+
     result_witn_connection = await client.get(
         "v1/connections", headers={"Authorization": f"Bearer {simple_user.token}"}
     )
@@ -77,8 +88,8 @@ async def test_user_can_read_own_connections(
                     ],
                 },
                 "auth_data": {
-                    "type": simple_user_connection.auth_data["type"],
-                    "user": simple_user_connection.auth_data["user"],
+                    "type": decrypt_auth_data(creds.value, settings=settings)["type"],
+                    "user": decrypt_auth_data(creds.value, settings=settings)["user"],
                 },
             },
         ],
@@ -86,7 +97,10 @@ async def test_user_can_read_own_connections(
 
 
 async def test_group_admin_can_read_connections(
-    client: AsyncClient, simple_user: MockUser, group_connection: MockConnection
+    client: AsyncClient,
+    simple_user: MockUser,
+    group_connection: MockConnection,
+    settings: Settings,
 ):
     result = await client.get(
         "v1/connections", headers={"Authorization": f"Bearer {simple_user.token}"}
@@ -137,8 +151,8 @@ async def test_group_admin_can_read_connections(
                     "additional_params": group_connection.data["additional_params"],
                 },
                 "auth_data": {
-                    "type": group_connection.auth_data["type"],
-                    "user": group_connection.auth_data["user"],
+                    "type": group_connection.credentials.value["type"],
+                    "user": group_connection.credentials.value["user"],
                 },
             },
         ],
@@ -181,8 +195,8 @@ async def test_superuser_can_read_all_connections(
                     "additional_params": group_connection.data["additional_params"],
                 },
                 "auth_data": {
-                    "type": group_connection.auth_data["type"],
-                    "user": group_connection.auth_data["user"],
+                    "type": group_connection.credentials.value["type"],
+                    "user": group_connection.credentials.value["user"],
                 },
             },
             {
@@ -199,8 +213,8 @@ async def test_superuser_can_read_all_connections(
                     "additional_params": user_connection.data["additional_params"],
                 },
                 "auth_data": {
-                    "type": user_connection.auth_data["type"],
-                    "user": user_connection.auth_data["user"],
+                    "type": group_connection.credentials.value["type"],
+                    "user": group_connection.credentials.value["user"],
                 },
             },
         ],

@@ -24,7 +24,7 @@ class ReadPostgresConnectionSchema(BaseModel):
 
 class ReadPostgresAuthSchema(BaseModel):
     type: POSTGRES_TYPE
-    user: str | None
+    user: str
 
 
 class ReadOracleConnectionSchema(BaseModel):
@@ -38,7 +38,7 @@ class ReadOracleConnectionSchema(BaseModel):
 
 class ReadOracleAuthSchema(BaseModel):
     type: ORACLE_TYPE
-    user: str | None
+    user: str
 
 
 class ReadConnectionSchema(BaseModel):
@@ -47,14 +47,11 @@ class ReadConnectionSchema(BaseModel):
     group_id: int | None = None
     name: str
     description: str
+    auth_data: ReadHiveAuthSchema | ReadOracleAuthSchema | ReadPostgresAuthSchema | None
     data: ReadHiveConnectionSchema | ReadOracleConnectionSchema | ReadPostgresConnectionSchema = Field(
-        ..., discriminator="type", alias="connection_data"
-    )
-    auth_data: ReadHiveAuthSchema | ReadOracleAuthSchema | ReadPostgresAuthSchema = (
-        Field(
-            ...,
-            discriminator="type",
-        )
+        ...,
+        discriminator="type",
+        alias="connection_data",
     )
 
     class Config:
@@ -176,10 +173,13 @@ class CreateConnectionSchema(BaseModel):
     name: str
     description: str
     data: CreateHiveConnectionSchema | CreateOracleConnectionSchema | CreatePostgresConnectionSchema = Field(
-        ..., discriminator="type", alias="connection_data"
+        ...,
+        discriminator="type",
+        alias="connection_data",
     )
     auth_data: CreateHiveAuthSchema | CreateOracleAuthSchema | CreatePostgresAuthSchema = Field(
-        ..., discriminator="type"
+        ...,
+        discriminator="type",
     )
 
     @root_validator

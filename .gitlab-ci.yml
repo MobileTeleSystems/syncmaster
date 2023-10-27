@@ -113,6 +113,8 @@ tests:
     JUNIT_FILE: junitxml.xml
     ENV: GITLAB
 
+    CRYPTO_KEY: UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94=
+
     POSTGRES_HOST: db
     POSTGRES_PORT: 5432
     POSTGRES_DB: syncmaster
@@ -157,22 +159,6 @@ tests:
 
     - name: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/worker:${CI_COMMIT_REF_SLUG}
       alias: worker
-      variables:
-        POSTGRES_HOST: db
-        POSTGRES_PORT: 5432
-        POSTGRES_DB: syncmaster
-        POSTGRES_USER: backend
-        POSTGRES_PASSWORD: backend
-
-        RABBITMQ_HOST: rabbitmq
-        RABBITMQ_PORT: 5672
-        RABBITMQ_USER: guest
-        RABBITMQ_PASSWORD: guest
-        ENV: GITLAB
-
-        SPARK_CONF_DIR: /syncmaster/tests/spark/hive/conf/
-        HADOOP_CONF_DIR: /syncmaster/tests/spark/hadoop/
-        HIVE_CONF_DIR: /syncmaster/tests/spark/hive/conf/
 
     - name: central-mirror.services.mts.ru/postgres:15-alpine
       alias: test-postgres

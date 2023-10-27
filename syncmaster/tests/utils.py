@@ -48,7 +48,7 @@ class MockAcl:
         self,
         acl: Acl,
         user: MockUser,
-        to_object: Transfer,
+        to_object: Transfer | Connection,
         acl_as_str: UserRule,
     ):
         self.acl = acl
@@ -60,6 +60,16 @@ class MockAcl:
         return getattr(self.acl, attr)
 
 
+class MockCredentials:
+    def __init__(
+        self,
+        value: dict,
+        connection_id: int,
+    ):
+        self.value = value
+        self.connection_id = connection_id
+
+
 class MockConnection:
     def __init__(
         self,
@@ -67,11 +77,13 @@ class MockConnection:
         owner_user: MockUser | None,
         owner_group: MockGroup | None,
         acls: list[MockAcl] | None = None,
+        credentials: MockCredentials | None = None,
     ):
         self.connection = connection
         self.owner_user = owner_user
         self.owner_group = owner_group
         self.acls = acls or []
+        self.credentials = credentials
 
     def __getattr__(self, attr: str) -> Any:
         return getattr(self.connection, attr)

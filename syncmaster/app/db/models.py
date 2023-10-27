@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import enum
 from datetime import datetime
 from typing import Any
@@ -64,7 +66,6 @@ class UserGroup(Base):
 
 class Connection(Base, DeletableMixin, TimestampMixin, ResourceMixin):
     data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
-    auth_data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=True, default=None)
 
     user: Mapped[User | None] = relationship("User")
     group: Mapped[Group | None] = relationship("Group")
@@ -77,6 +78,15 @@ class Connection(Base, DeletableMixin, TimestampMixin, ResourceMixin):
             f"group_id={self.group_id} "
             f"user_id={self.user_id}>"
         )
+
+
+class AuthData(Base, TimestampMixin):
+    connection_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("connection.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    value: Mapped[str] = mapped_column(nullable=False)
 
 
 class Transfer(Base, DeletableMixin, TimestampMixin, ResourceMixin):

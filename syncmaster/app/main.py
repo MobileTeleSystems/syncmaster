@@ -44,7 +44,9 @@ def get_application(settings: Settings) -> FastAPI:
             SettingsMarker: lambda: settings,
             DatabaseEngineMarker: lambda: engine,
             DatabaseSessionMarker: lambda: session_factory,
-            DatabaseProviderMarker: create_holder(session_factory=session_factory),
+            DatabaseProviderMarker: create_holder(
+                session_factory=session_factory, settings=settings
+            ),
             AuthMarker: auth_scheme,
         }
     )

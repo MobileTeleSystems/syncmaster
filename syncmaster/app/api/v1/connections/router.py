@@ -1,3 +1,4 @@
+import asyncio
 from typing import Annotated, get_args
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -16,13 +17,14 @@ from app.api.v1.connections.schemas import (
 )
 from app.api.v1.schemas import (
     AclPageSchema,
+    MetaPageSchema,
     ReadRuleSchema,
     SetRuleSchema,
     StatusResponseSchema,
 )
 from app.db.models import Rule, User
 from app.db.provider import DatabaseProvider
-from app.exceptions import ActionNotAllowed
+from app.exceptions import ActionNotAllowed, AuthDataNotFound
 from app.exceptions.connection import ConnectionDeleteException
 
 router = APIRouter(tags=["Connections"])
@@ -51,7 +53,44 @@ async def read_connections(
         group_id=group_id,
         user_id=user_id,
     )
-    return ConnectionPageSchema.from_pagination(pagination=pagination)
+
+    items = []
+    if pagination.items:
+        creds = await asyncio.gather(
+            *[
+                provider.credentials_repository.get_for_connection(
+                    connection_id=item.id
+                )
+                for item in pagination.items
+            ]
+        )
+
+        items = [
+            ReadConnectionSchema(
+                id=item.id,
+                user_id=item.user_id,
+                group_id=item.group_id,
+                name=item.name,
+                description=item.description,
+                auth_data=creds[n_item],
+                data=item.data,
+            )
+            for n_item, item in enumerate(pagination.items)
+        ]
+
+    return ConnectionPageSchema(
+        meta=MetaPageSchema(
+            page=pagination.page,
+            pages=pagination.pages,
+            total=pagination.total,
+            page_size=pagination.page_size,
+            has_next=pagination.has_next,
+            has_previous=pagination.has_previous,
+            next_page=pagination.next_page,
+            previous_page=pagination.previous_page,
+        ),
+        items=items,
+    )
 
 
 @router.post("/connections")
@@ -82,14 +121,24 @@ async def create_connection(
     for k, v in auth_data.items():
         if isinstance(v, SecretStr):
             auth_data[k] = v.get_secret_value()
+
+    # TODO: implement the Unit of Work pattern.
+    # below two commits occur when creating connection and creds. this could potentially lead to data inconsistency
+    # we need an abstraction one level above the level of repositories that will make only one commit.
+
     connection = await provider.connection.create(
         name=connection_data.name,
         description=connection_data.description,
         user_id=connection_data.user_id,
         group_id=connection_data.group_id,
         data=data,
-        auth_data=auth_data,
     )
+
+    await provider.credentials_repository.add_to_connection(
+        connection_id=connection.id,
+        data=auth_data,
+    )
+
     if connection_data.group_id is not None and is_member:
         await provider.connection.add_or_update_rule(
             connection_id=connection.id,
@@ -98,7 +147,15 @@ async def create_connection(
             target_user_id=current_user.id,
             rule=Rule.DELETE,
         )
-    return ReadConnectionSchema.from_orm(connection)
+    return ReadConnectionSchema(
+        id=connection.id,
+        user_id=connection.user_id,
+        group_id=connection.group_id,
+        name=connection.name,
+        description=connection.description,
+        data=connection.data,
+        auth_data=auth_data,
+    )
 
 
 @router.get(
@@ -119,7 +176,22 @@ async def read_connection(
         is_superuser=current_user.is_superuser,
         current_user_id=current_user.id,
     )
-    return ReadConnectionSchema.from_orm(connection)
+    try:
+        credentials = await provider.credentials_repository.get_for_connection(
+            connection_id=connection.id
+        )
+    except AuthDataNotFound:
+        credentials = None
+
+    return ReadConnectionSchema(
+        id=connection.id,
+        user_id=connection.user_id,
+        group_id=connection.group_id,
+        name=connection.name,
+        description=connection.description,
+        data=connection.data,
+        auth_data=credentials,
+    )
 
 
 @router.patch("/connections/{connection_id}")
@@ -135,9 +207,36 @@ async def update_connection(
         is_superuser=current_user.is_superuser,
         name=connection_data.name,
         description=connection_data.description,
-        connection_data=connection_data.data.dict() if connection_data.data else {},
+        connection_data=connection_data.data.dict(exclude={"auth_data"})
+        if connection_data.data
+        else {},
     )
-    return ReadConnectionSchema.from_orm(connection)
+    auth_data = None
+    if connection_data.auth_data:
+        await provider.credentials_repository.update(
+            connection_id=connection_id,
+            credential_data=connection_data.auth_data.dict(),
+        )
+        auth_data = await provider.credentials_repository.get_for_connection(
+            connection_id=connection_id,
+        )
+
+    if not auth_data:
+        auth_data = await provider.credentials_repository.get_for_connection(
+            connection_id
+        )
+    return ReadConnectionSchema(
+        id=connection.id,
+        user_id=connection.user_id,
+        group_id=connection.group_id,
+        name=connection.name,
+        description=connection.description,
+        data=connection.data,
+        auth_data={
+            "type": auth_data["type"],
+            "user": auth_data["user"],
+        },
+    )
 
 
 @router.delete("/connections/{connection_id}")
@@ -152,16 +251,19 @@ async def delete_connection(
         current_user_id=current_user.id,
     )
 
-    transfers = await provider.transfer.list_by_connection_id(
-        conn_id=connection.id,
-    )
+    transfers = await provider.transfer.list_by_connection_id(conn_id=connection.id)
 
     if not transfers:
+        await provider.credentials_repository.delete_from_connection(
+            connection_id=connection_id
+        )
+
         await provider.connection.delete(
             connection_id=connection_id,
             current_user_id=current_user.id,
             is_superuser=current_user.is_superuser,
         )
+
         return StatusResponseSchema(
             ok=True,
             status_code=status.HTTP_200_OK,

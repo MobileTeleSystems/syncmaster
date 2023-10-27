@@ -17,7 +17,12 @@ from pyspark.sql.types import (
     TimestampType,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.test_unit.utils import create_connection, create_transfer, create_user
+from tests.test_unit.utils import (
+    create_connection,
+    create_credentials,
+    create_transfer,
+    create_user,
+)
 from tests.utils import MockUser
 
 from app.api.v1.auth.utils import sign_jwt
@@ -254,12 +259,19 @@ async def transfers(
             cluster=hive.cluster,
             additional_params={},
         ),
+    )
+
+    await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=hive_connection.id,
         auth_data=dict(
             type="hive",
             user=hive.user,
             password=hive.password,
         ),
     )
+
     postgres_connection = await create_connection(
         session=session,
         name="integration_postgres",
@@ -271,12 +283,19 @@ async def transfers(
             database_name=postgres.database_name,
             additional_params={},
         ),
+    )
+
+    await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=postgres_connection.id,
         auth_data=dict(
             type="postgres",
             user=postgres.user,
             password=postgres.password,
         ),
     )
+
     oracle_connection = await create_connection(
         session=session,
         name="integration_oracle",
@@ -289,15 +308,27 @@ async def transfers(
             service_name=oracle.service_name,
             additional_params={},
         ),
+    )
+
+    await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=oracle_connection.id,
         auth_data=dict(
             type="oracle",
             user=oracle.user,
             password=oracle.password,
         ),
     )
+
     transfers = {}
     for source, target in permutations(
-        [hive_connection, oracle_connection, postgres_connection], 2
+        [
+            hive_connection,
+            oracle_connection,
+            postgres_connection,
+        ],
+        2,
     ):
         source_type = source.data["type"]
         target_type = target.data["type"]

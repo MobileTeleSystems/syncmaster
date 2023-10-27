@@ -7,8 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from app.api.v1.transfers.schemas import ReadFullTransferSchema
+from app.config import Settings
 from app.db.models import (
     Acl,
+    AuthData,
     Connection,
     Group,
     ObjectType,
@@ -18,6 +20,7 @@ from app.db.models import (
     Transfer,
     User,
 )
+from app.db.repositories.utilites import encrypt_auth_data
 
 
 @asynccontextmanager
@@ -69,6 +72,30 @@ async def create_group(session: AsyncSession, name: str, admin_id: int) -> Group
     return g
 
 
+async def create_credentials(
+    session: AsyncSession,
+    settings: Settings,
+    connection_id: int,
+    auth_data: dict[str, Any] | None = None,
+) -> AuthData:
+    if auth_data is None:
+        auth_data = {
+            "type": "postgres",
+            "user": "user",
+            "password": "password",
+        }
+
+    ad = AuthData(
+        connection_id=connection_id,
+        value=encrypt_auth_data(auth_data, settings=settings),
+    )
+
+    session.add(ad)
+    await session.commit()
+    await session.refresh(ad)
+    return ad
+
+
 async def create_connection(
     session: AsyncSession,
     name: str,
@@ -76,7 +103,6 @@ async def create_connection(
     group_id: int | None = None,
     description: str = "",
     data: dict[str, Any] | None = None,
-    auth_data: dict[str, Any] | None = None,
 ) -> Connection:
     if data is None:
         data = {
@@ -86,19 +112,13 @@ async def create_connection(
             "database_name": "db",
             "additional_params": {},
         }
-    if auth_data is None:
-        auth_data = {
-            "type": "postgres",
-            "user": "user",
-            "password": "password",
-        }
+
     c = Connection(
         user_id=user_id,
         group_id=group_id,
         name=name,
         description=description,
         data=data,
-        auth_data=auth_data,
     )
     session.add(c)
     await session.commit()

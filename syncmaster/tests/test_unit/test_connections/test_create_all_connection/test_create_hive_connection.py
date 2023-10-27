@@ -4,7 +4,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests.utils import MockUser
 
-from app.db.models import Connection
+from app.config import Settings
+from app.db.models import AuthData, Connection
+from app.db.repositories.utilites import decrypt_auth_data
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -13,6 +15,7 @@ async def test_create_hive_connection(
     client: AsyncClient,
     simple_user: MockUser,
     session: AsyncSession,
+    settings: Settings,
 ):
     result = await client.post(
         "v1/connections",
@@ -41,6 +44,15 @@ async def test_create_hive_connection(
             )
         )
     ).first()
+
+    creds = (
+        await session.scalars(
+            select(AuthData).filter_by(
+                connection_id=connection.id,
+            )
+        )
+    ).one()
+
     assert result.status_code == 200
     assert result.json() == {
         "id": connection.id,
@@ -54,7 +66,7 @@ async def test_create_hive_connection(
             "additional_params": connection.data["additional_params"],
         },
         "auth_data": {
-            "type": connection.auth_data["type"],
-            "user": connection.auth_data["user"],
+            "type": decrypt_auth_data(creds.value, settings=settings)["type"],
+            "user": decrypt_auth_data(creds.value, settings=settings)["user"],
         },
     }

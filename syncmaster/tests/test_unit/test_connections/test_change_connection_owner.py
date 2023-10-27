@@ -4,7 +4,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests.utils import MockConnection, MockGroup, MockUser
 
-from app.db.models import Connection
+from app.config import Settings
+from app.db.models import AuthData, Connection
+from app.db.repositories.utilites import decrypt_auth_data
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -103,6 +105,7 @@ async def test_admin_can_copy_connection(
     simple_user: MockUser,
     session: AsyncSession,
     is_delete_source: bool,
+    settings: Settings,
 ):
     # Arrange
     admin = group_connection.owner_group.admin
@@ -111,10 +114,16 @@ async def test_admin_can_copy_connection(
     result_current_row = await session.scalars(query_current_row)
     current = result_current_row.one()
 
+    query_current_creds = select(AuthData).where(
+        AuthData.connection_id == group_connection.id
+    )
+    result_current_creds = await session.scalars(query_current_creds)
+    current_cred = result_current_creds.one()
+
     curr_id = current.id
 
     assert current.user_id is None
-    assert current.auth_data == {
+    assert decrypt_auth_data(current_cred.value, settings) == {
         "type": "postgres",
         "user": "user",
         "password": "password",
@@ -144,6 +153,11 @@ async def test_admin_can_copy_connection(
     query_prev_row = select(Connection).where(Connection.id == curr_id)
     result_prev_row = await session.scalars(query_prev_row)
     origin = result_prev_row.one()
+
+    q_creds_origin = select(AuthData).where(AuthData.connection_id == curr_id)
+    creds_origin = await session.scalars(q_creds_origin)
+    creds_origin = creds_origin.one()
+
     query_new_row = select(Connection).filter(
         Connection.user_id == simple_user.id,
         Connection.group_id.is_(None),
@@ -151,6 +165,10 @@ async def test_admin_can_copy_connection(
     )
     result_new_row = await session.scalars(query_new_row)
     new = result_new_row.one()
+
+    q_creds_new = select(AuthData).where(AuthData.connection_id == new.id)
+    creds_new = await session.scalars(q_creds_new)
+    creds_new = creds_new.one_or_none()
 
     # Assert
     assert result.status_code == 200
@@ -162,14 +180,14 @@ async def test_admin_can_copy_connection(
 
     assert origin.id == curr_id
     assert origin.user_id is None
-    assert origin.auth_data == {
+    assert decrypt_auth_data(creds_origin.value, settings) == {
         "type": "postgres",
         "user": "user",
         "password": "password",
     }
     assert origin.is_deleted == is_delete_source
     assert not new.is_deleted
-    assert new.auth_data == {"type": "postgres", "user": None, "password": None}
+    assert not creds_new
 
 
 async def test_other_admin_cannot_change_owner_of_group_connection(
@@ -198,16 +216,22 @@ async def test_superuser_can_copy_user_connection(
     empty_group: MockGroup,
     session: AsyncSession,
     is_delete_source: bool,
+    settings: Settings,
 ):
     # Arrange
     query_current_row = select(Connection).where(Connection.id == user_connection.id)
+    query_current_creds = select(AuthData).where(
+        AuthData.connection_id == user_connection.id
+    )
+    result_current_creds = await session.scalars(query_current_creds)
+    current_cred = result_current_creds.one()
     result_current_row = await session.scalars(query_current_row)
     current = result_current_row.one()
 
     curr_id = current.id
 
     assert current.group_id is None
-    assert current.auth_data == {
+    assert decrypt_auth_data(current_cred.value, settings) == {
         "type": "postgres",
         "user": "user",
         "password": "password",
@@ -256,14 +280,23 @@ async def test_superuser_can_copy_user_connection(
 
     assert origin.id == curr_id
     assert origin.group_id == None
-    assert origin.auth_data == {
+
+    q_creds_origin = select(AuthData).where(AuthData.connection_id == origin.id)
+    creds_origin = await session.scalars(q_creds_origin)
+    creds_origin = creds_origin.one()
+
+    q_creds_new = select(AuthData).where(AuthData.connection_id == new.id)
+    creds_new = await session.scalars(q_creds_new)
+    creds_new = creds_new.one_or_none()
+
+    assert decrypt_auth_data(creds_origin.value, settings) == {
         "type": "postgres",
         "user": "user",
         "password": "password",
     }
     assert origin.is_deleted == is_delete_source
     assert not new.is_deleted
-    assert new.auth_data == {"type": "postgres", "user": None, "password": None}
+    assert not creds_new
 
 
 @pytest.mark.parametrize("is_delete_source", [True, False])
@@ -274,16 +307,23 @@ async def test_superuser_can_change_owner_of_group_connection(
     empty_group: MockGroup,
     session: AsyncSession,
     is_delete_source: str,
+    settings: Settings,
 ):
     # Arrange
     query_current_row = select(Connection).where(Connection.id == group_connection.id)
     result_current_row = await session.scalars(query_current_row)
     current = result_current_row.one()
 
+    query_current_creds = select(AuthData).where(
+        AuthData.connection_id == group_connection.id
+    )
+    result_current_creds = await session.scalars(query_current_creds)
+    current_cred = result_current_creds.one()
+
     curr_id = current.id
     curr_group_id = current.group_id
 
-    assert current.auth_data == {
+    assert decrypt_auth_data(current_cred.value, settings) == {
         "type": "postgres",
         "user": "user",
         "password": "password",
@@ -330,13 +370,21 @@ async def test_superuser_can_change_owner_of_group_connection(
     }
     await session.refresh(group_connection.connection)
 
+    q_creds_origin = select(AuthData).where(AuthData.connection_id == origin.id)
+    creds_origin = await session.scalars(q_creds_origin)
+    creds_origin = creds_origin.one()
+
+    q_creds_new = select(AuthData).where(AuthData.connection_id == new.id)
+    creds_new = await session.scalars(q_creds_new)
+    creds_new = creds_new.one_or_none()
+
     assert origin.id == curr_id
     assert origin.group_id == curr_group_id
-    assert origin.auth_data == {
+    assert decrypt_auth_data(creds_origin.value, settings) == {
         "type": "postgres",
         "user": "user",
         "password": "password",
     }
     assert origin.is_deleted == is_delete_source
     assert not new.is_deleted
-    assert new.auth_data == {"password": None, "type": "postgres", "user": None}
+    assert not creds_new

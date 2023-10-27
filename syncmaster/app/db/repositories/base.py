@@ -24,7 +24,7 @@ from app.exceptions import ActionNotAllowed, EntityNotFound
 Model = TypeVar("Model", bound=Base)
 
 
-class Repository(ABC, Generic[Model]):
+class Repository(Generic[Model], ABC):
     def __init__(self, model: type[Model], session: AsyncSession):
         self._model = model
         self._session = session

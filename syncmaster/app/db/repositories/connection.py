@@ -75,7 +75,6 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
         name: str,
         description: str,
         data: dict[str, Any],
-        auth_data: dict[str, Any],
     ) -> Connection:
         query = (
             insert(Connection)
@@ -85,7 +84,6 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
                 name=name,
                 description=description,
                 data=data,
-                auth_data=auth_data,
             )
             .returning(Connection)
         )
@@ -157,14 +155,10 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
             current_user_id,
         ):
             raise ConnectionNotFound
-        connection = await self._read_by_id(connection_id)
-        new_auth_data = {key: None for key in connection.auth_data}
-        new_auth_data["type"] = connection.auth_data["type"]
         try:
             kwargs_for_copy = dict(
                 user_id=new_user_id,
                 group_id=new_group_id,
-                auth_data=new_auth_data,  # remove auth_data in the origin
             )
             new_connection = await self._copy(
                 Connection.id == connection_id,

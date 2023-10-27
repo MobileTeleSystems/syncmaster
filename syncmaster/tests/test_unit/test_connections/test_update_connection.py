@@ -61,8 +61,8 @@ async def test_user_can_update_own_connection(
             "database_name": user_connection.data["database_name"],
         },
         "auth_data": {
-            "type": user_connection.auth_data["type"],
-            "user": user_connection.auth_data["user"],
+            "type": user_connection.credentials.value["type"],
+            "user": user_connection.credentials.value["user"],
         },
     }
 
@@ -90,8 +90,8 @@ async def test_superuser_can_update_user_connection(
             "database_name": user_connection.data["database_name"],
         },
         "auth_data": {
-            "type": user_connection.auth_data["type"],
-            "user": user_connection.auth_data["user"],
+            "type": user_connection.credentials.value["type"],
+            "user": user_connection.credentials.value["user"],
         },
     }
 
@@ -145,8 +145,8 @@ async def test_member_can_update_connection_with_write_or_delete_rule(
             "database_name": group_connection.data["database_name"],
         },
         "auth_data": {
-            "type": group_connection.auth_data["type"],
-            "user": group_connection.auth_data["user"],
+            "type": group_connection.credentials.value["type"],
+            "user": group_connection.credentials.value["user"],
         },
     }
 
@@ -155,7 +155,8 @@ async def test_member_can_update_connection_with_write_or_delete_rule(
 
 
 async def test_group_admin_can_update_own_group_connection(
-    client: AsyncClient, group_connection: MockConnection
+    client: AsyncClient,
+    group_connection: MockConnection,
 ):
     admin = group_connection.owner_group.admin
     result = await client.patch(
@@ -178,8 +179,8 @@ async def test_group_admin_can_update_own_group_connection(
             "database_name": group_connection.data["database_name"],
         },
         "auth_data": {
-            "type": group_connection.auth_data["type"],
-            "user": group_connection.auth_data["user"],
+            "type": group_connection.credentials.value["type"],
+            "user": group_connection.credentials.value["user"],
         },
     }
 
@@ -224,8 +225,8 @@ async def test_superuser_can_update_group_connection(
             "database_name": group_connection.data["database_name"],
         },
         "auth_data": {
-            "type": group_connection.auth_data["type"],
-            "user": group_connection.auth_data["user"],
+            "type": group_connection.credentials.value["type"],
+            "user": group_connection.credentials.value["user"],
         },
     }
 
@@ -271,7 +272,37 @@ async def test_can_update_connection_data_fields(
             "database_name": user_connection.data["database_name"],
         },
         "auth_data": {
-            "type": user_connection.auth_data["type"],
-            "user": user_connection.auth_data["user"],
+            "type": user_connection.credentials.value["type"],
+            "user": user_connection.credentials.value["user"],
+        },
+    }
+
+
+async def test_can_update_connection_auth_data_fields(
+    client: AsyncClient,
+    user_connection: MockConnection,
+):
+    result = await client.patch(
+        f"v1/connections/{user_connection.id}",
+        headers={"Authorization": f"Bearer {user_connection.owner_user.token}"},
+        json={"auth_data": {"type": "postgres", "user": "new_user"}},
+    )
+    assert result.status_code == 200
+    assert result.json() == {
+        "id": user_connection.id,
+        "name": user_connection.name,
+        "description": user_connection.description,
+        "user_id": user_connection.user_id,
+        "group_id": user_connection.group_id,
+        "connection_data": {
+            "type": user_connection.data["type"],
+            "host": "127.0.0.1",
+            "port": user_connection.data["port"],
+            "additional_params": user_connection.data["additional_params"],
+            "database_name": user_connection.data["database_name"],
+        },
+        "auth_data": {
+            "type": user_connection.credentials.value["type"],
+            "user": "new_user",
         },
     }

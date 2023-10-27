@@ -30,18 +30,20 @@ class TransferController:
         self,
         transfer: Transfer,
         source_connection: Connection,
+        source_auth_data: dict,
         target_connection: Connection,
+        target_auth_data: dict,
         settings: Settings,
     ):
         self.source = self.get_handler(
-            source_connection.data,
-            source_connection.auth_data,
-            transfer.source_params,
+            connection_data=source_connection.data,
+            transfer_params=transfer.source_params,
+            connection_auth_data=source_auth_data,
         )
         self.target = self.get_handler(
-            target_connection.data,
-            target_connection.auth_data,
-            transfer.target_params,
+            connection_data=target_connection.data,
+            transfer_params=transfer.target_params,
+            connection_auth_data=target_auth_data,
         )
         spark = settings.CREATE_SPARK_SESSION_FUNCTION(
             settings,
@@ -66,7 +68,7 @@ class TransferController:
     def get_handler(
         self,
         connection_data: dict[str, Any],
-        connection_auth_data: dict[str, Any],
+        connection_auth_data: dict,
         transfer_params: dict[str, Any],
     ) -> Handler:
         connection_data.update(connection_auth_data)
