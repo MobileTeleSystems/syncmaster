@@ -22,7 +22,9 @@ async def test_unauthorized_user_cannot_read_connection(
 
 
 async def test_owner_can_read_connection_of_self(
-    client: AsyncClient, user_connection: MockConnection, simple_user: MockUser
+    client: AsyncClient,
+    user_connection: MockConnection,
+    simple_user: MockUser,
 ):
     result = await client.get(
         f"v1/connections/{user_connection.id}",
@@ -54,8 +56,8 @@ async def test_owner_can_read_connection_of_self(
             "additional_params": user_connection.data["additional_params"],
         },
         "auth_data": {
-            "type": user_connection.auth_data["type"],
-            "user": user_connection.auth_data["user"],
+            "type": user_connection.credentials.value["type"],
+            "user": user_connection.credentials.value["user"],
         },
     }
 
@@ -93,8 +95,8 @@ async def test_group_admin_can_read_connection_of_his_group(
             "additional_params": group_connection.data["additional_params"],
         },
         "auth_data": {
-            "type": group_connection.auth_data["type"],
-            "user": group_connection.auth_data["user"],
+            "type": group_connection.credentials.value["type"],
+            "user": group_connection.credentials.value["user"],
         },
     }
 
@@ -119,7 +121,9 @@ async def test_group_admin_cannot_read_connection_of_other(
 
 
 async def test_group_member_without_acl_can_read_connection_of_group(
-    client: AsyncClient, group_connection: MockConnection, session: AsyncSession
+    client: AsyncClient,
+    group_connection: MockConnection,
+    session: AsyncSession,
 ):
     group = group_connection.owner_group
     group_member = group_connection.owner_group.members[0]
@@ -143,8 +147,8 @@ async def test_group_member_without_acl_can_read_connection_of_group(
             "additional_params": group_connection.data["additional_params"],
         },
         "auth_data": {
-            "type": group_connection.auth_data["type"],
-            "user": group_connection.auth_data["user"],
+            "type": group_connection.credentials.value["type"],
+            "user": group_connection.credentials.value["user"],
         },
     }
 
@@ -197,8 +201,8 @@ async def test_superuser_can_read_all_connections(
             "additional_params": group_connection.data["additional_params"],
         },
         "auth_data": {
-            "type": group_connection.auth_data["type"],
-            "user": group_connection.auth_data["user"],
+            "type": group_connection.credentials.value["type"],
+            "user": group_connection.credentials.value["user"],
         },
     }
 
@@ -221,8 +225,8 @@ async def test_superuser_can_read_all_connections(
             "additional_params": user_connection.data["additional_params"],
         },
         "auth_data": {
-            "type": group_connection.auth_data["type"],
-            "user": group_connection.auth_data["user"],
+            "type": group_connection.credentials.value["type"],
+            "user": group_connection.credentials.value["user"],
         },
     }
 

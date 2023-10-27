@@ -3,16 +3,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from tests.test_unit.utils import (
     create_acl,
     create_connection,
+    create_credentials,
     create_group,
     create_user,
     create_user_cm,
 )
-from tests.utils import MockAcl, MockConnection, MockGroup, MockUser
+from tests.utils import MockAcl, MockConnection, MockCredentials, MockGroup, MockUser
 
 from app.api.v1.auth.utils import sign_jwt
 from app.api.v1.schemas import UserRule
 from app.config import Settings
 from app.db.models import ObjectType, Rule, UserGroup
+from app.db.repositories.utilites import decrypt_auth_data
 
 
 @pytest_asyncio.fixture
@@ -38,7 +40,9 @@ async def inactive_user(session: AsyncSession, settings: Settings):
 @pytest_asyncio.fixture
 async def deleted_user(session: AsyncSession, settings: Settings):
     async with create_user_cm(
-        session, username="deleted_user", is_deleted=True
+        session,
+        username="deleted_user",
+        is_deleted=True,
     ) as user:
         yield MockUser(user=user, auth_token=sign_jwt(user.id, settings))
 
@@ -88,20 +92,35 @@ async def not_empty_group(session: AsyncSession, settings) -> MockGroup:
 @pytest_asyncio.fixture
 async def user_connection(session: AsyncSession, settings: Settings) -> MockConnection:
     user = await create_user(
-        session=session, username="connection_username", is_active=True
+        session=session,
+        username="connection_username",
+        is_active=True,
     )
+
     connection = await create_connection(
         session=session,
         name="user_connection",
         user_id=user.id,
     )
+
+    credentials = await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=connection.id,
+    )
+
     yield MockConnection(
         connection=connection,
         owner_user=MockUser(user=user, auth_token=sign_jwt(user.id, settings)),
         owner_group=None,
+        credentials=MockCredentials(
+            value=decrypt_auth_data(credentials.value, settings=settings),
+            connection_id=connection.id,
+        ),
     )
-    await session.delete(connection)
+    await session.delete(credentials)
     await session.delete(user)
+    await session.delete(connection)
     await session.commit()
 
 
@@ -126,6 +145,13 @@ async def group_connection(session: AsyncSession, settings: Settings) -> MockCon
     connection = await create_connection(
         session=session, name="group_connection", group_id=group.id
     )
+
+    credentials = await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=connection.id,
+    )
+
     acl_write = await create_acl(
         session=session,
         object_id=connection.id,
@@ -141,6 +167,10 @@ async def group_connection(session: AsyncSession, settings: Settings) -> MockCon
         rule=Rule.DELETE,
     )
     yield MockConnection(
+        credentials=MockCredentials(
+            value=decrypt_auth_data(credentials.value, settings=settings),
+            connection_id=connection.id,
+        ),
         connection=connection,
         owner_group=MockGroup(
             group=group,
@@ -165,9 +195,10 @@ async def group_connection(session: AsyncSession, settings: Settings) -> MockCon
             ),
         ],
     )
+    await session.delete(credentials)
     await session.delete(connection)
-    await session.delete(group)
     await session.delete(group_admin)
+    await session.delete(group)
     for member in members:
         await session.delete(member.user)
     await session.commit()

@@ -15,7 +15,7 @@ async def test_unauthorized_user_cannot_read_transfers(client: AsyncClient):
     }
 
 
-async def test_user_can_read_own_connections(
+async def test_user_can_read_own_transfers(
     client: AsyncClient,
     simple_user: MockUser,
     user_transfer: MockTransfer,

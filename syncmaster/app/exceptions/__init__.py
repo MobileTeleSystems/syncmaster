@@ -6,6 +6,7 @@ from app.exceptions.connection import (
     ConnectionOwnerException,
     ConnectionTypeNotRecognizedException,
 )
+from app.exceptions.credentials import AuthDataNotFound
 from app.exceptions.group import (
     AlreadyIsGroupMember,
     AlreadyIsNotGroupMember,
@@ -32,6 +33,7 @@ __all__ = [
     "ActionNotAllowed",
     "AlreadyIsGroupMember",
     "AlreadyIsNotGroupMember",
+    "AuthDataNotFound",
     "CannotConnectToTaskQueueError",
     "CannotStopRunException",
     "ConnectionDeleteException",

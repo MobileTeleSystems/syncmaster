@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import (
 from tests.test_unit.utils import (
     create_acl,
     create_connection,
+    create_credentials,
     create_group,
     create_transfer,
     create_user,
@@ -23,6 +24,7 @@ from tests.test_unit.utils import (
 from tests.utils import (
     MockAcl,
     MockConnection,
+    MockCredentials,
     MockGroup,
     MockTransfer,
     MockUser,
@@ -34,6 +36,7 @@ from app.api.v1.auth.utils import sign_jwt
 from app.api.v1.schemas import UserRule
 from app.config import Settings, TestSettings
 from app.db.models import Base, ObjectType, Rule, UserGroup
+from app.db.repositories.utilites import decrypt_auth_data
 from app.main import get_application
 
 PROJECT_PATH = Path(__file__).parent.parent.resolve()
@@ -118,10 +121,23 @@ async def user_transfer(
         name="user_transfer_source_connection",
         user_id=user.id,
     )
+
+    source_connection_creds = await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=source_connection.id,
+    )
+
     target_connection = await create_connection(
         session=session,
         name="user_transfer_target_connection",
         user_id=user.id,
+    )
+
+    target_connection_creds = await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=target_connection.id,
     )
 
     transfer = await create_transfer(
@@ -135,10 +151,26 @@ async def user_transfer(
     yield MockTransfer(
         transfer=transfer,
         source_connection=MockConnection(
-            connection=source_connection, owner_user=mock_user, owner_group=None
+            connection=source_connection,
+            owner_user=mock_user,
+            owner_group=None,
+            credentials=MockCredentials(
+                value=decrypt_auth_data(
+                    source_connection_creds.value, settings=settings
+                ),
+                connection_id=source_connection.id,
+            ),
         ),
         target_connection=MockConnection(
-            connection=target_connection, owner_user=mock_user, owner_group=None
+            connection=target_connection,
+            owner_user=mock_user,
+            owner_group=None,
+            credentials=MockCredentials(
+                value=decrypt_auth_data(
+                    target_connection_creds.value, settings=settings
+                ),
+                connection_id=target_connection.id,
+            ),
         ),
         owner_user=mock_user,
         owner_group=None,
@@ -181,10 +213,20 @@ async def group_transfer(
         name="group_transfer_source_connection",
         group_id=group.id,
     )
+    source_connection_creds = await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=source_connection.id,
+    )
     target_connection = await create_connection(
         session=session,
         name="group_transfer_target_connection",
         group_id=group.id,
+    )
+    target_connection_creds = await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=target_connection.id,
     )
 
     transfer = await create_transfer(
@@ -211,10 +253,26 @@ async def group_transfer(
     yield MockTransfer(
         transfer=transfer,
         source_connection=MockConnection(
-            connection=source_connection, owner_user=None, owner_group=mock_group
+            connection=source_connection,
+            owner_user=None,
+            owner_group=mock_group,
+            credentials=MockCredentials(
+                value=decrypt_auth_data(
+                    source_connection_creds.value, settings=settings
+                ),
+                connection_id=source_connection.id,
+            ),
         ),
         target_connection=MockConnection(
-            connection=target_connection, owner_user=None, owner_group=mock_group
+            connection=target_connection,
+            owner_user=None,
+            owner_group=mock_group,
+            credentials=MockCredentials(
+                value=decrypt_auth_data(
+                    target_connection_creds.value, settings=settings
+                ),
+                connection_id=target_connection.id,
+            ),
         ),
         owner_user=None,
         owner_group=mock_group,

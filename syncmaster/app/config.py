@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "secret"
     SECURITY_ALGORITHM: str = "HS256"
     AUTH_TOKEN_URL: str = "v1/auth/token"
+    CRYPTO_KEY: str = "UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94="
 
     POSTGRES_HOST: str
     POSTGRES_PORT: int

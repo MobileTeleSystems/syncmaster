@@ -4,13 +4,20 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests.utils import MockGroup, MockUser
 
-from app.db.models import Acl, Connection, ObjectType, Rule
+from app.config import Settings
+from app.db.models import Acl, AuthData, Connection, ObjectType, Rule
+from app.db.repositories.utilites import decrypt_auth_data
 
 pytestmark = [pytest.mark.asyncio]
 
 
 async def test_simple_user_can_create_connection(
-    client: AsyncClient, simple_user: MockUser, session: AsyncSession
+    client: AsyncClient,
+    simple_user: MockUser,
+    session: AsyncSession,
+    settings: Settings,
+    event_loop,
+    request,
 ):
     result = await client.post(
         "v1/connections",
@@ -33,6 +40,7 @@ async def test_simple_user_can_create_connection(
             },
         },
     )
+
     connection = (
         await session.scalars(
             select(Connection).filter_by(
@@ -41,6 +49,25 @@ async def test_simple_user_can_create_connection(
             )
         )
     ).first()
+
+    creds = (
+        await session.scalars(
+            select(AuthData).filter_by(
+                connection_id=connection.id,
+            )
+        )
+    ).one()
+
+    def delete_rows():
+        async def afin():
+            await session.delete(creds)
+            await session.delete(connection)
+            await session.commit()
+
+        event_loop.run_until_complete(afin())
+
+    request.addfinalizer(delete_rows)
+
     assert result.status_code == 200
     assert result.json() == {
         "id": connection.id,
@@ -56,8 +83,8 @@ async def test_simple_user_can_create_connection(
             "additional_params": connection.data["additional_params"],
         },
         "auth_data": {
-            "type": connection.auth_data["type"],
-            "user": connection.auth_data["user"],
+            "type": decrypt_auth_data(creds.value, settings=settings)["type"],
+            "user": decrypt_auth_data(creds.value, settings=settings)["user"],
         },
     }
     # check that acl not created for user on own connection
@@ -310,6 +337,9 @@ async def test_group_member_can_create_group_connection(
     client: AsyncClient,
     not_empty_group: MockGroup,
     session: AsyncSession,
+    settings: Settings,
+    event_loop,
+    request,
 ):
     member = not_empty_group.members[0]
     result = await client.post(
@@ -341,6 +371,25 @@ async def test_group_member_can_create_group_connection(
             )
         )
     ).first()
+
+    creds = (
+        await session.scalars(
+            select(AuthData).filter_by(
+                connection_id=connection.id,
+            )
+        )
+    ).one()
+
+    def delete_rows():
+        async def afin():
+            await session.delete(creds)
+            await session.delete(connection)
+            await session.commit()
+
+        event_loop.run_until_complete(afin())
+
+    request.addfinalizer(delete_rows)
+
     assert result.status_code == 200
     assert result.json() == {
         "id": connection.id,
@@ -356,8 +405,8 @@ async def test_group_member_can_create_group_connection(
             "additional_params": connection.data["additional_params"],
         },
         "auth_data": {
-            "type": connection.auth_data["type"],
-            "user": connection.auth_data["user"],
+            "type": decrypt_auth_data(creds.value, settings=settings)["type"],
+            "user": decrypt_auth_data(creds.value, settings=settings)["user"],
         },
     }
     acl = (
@@ -410,6 +459,9 @@ async def test_group_admin_can_create_group_connection(
     client: AsyncClient,
     empty_group: MockGroup,
     session: AsyncSession,
+    settings: Settings,
+    event_loop,
+    request,
 ):
     admin = empty_group.admin
     result = await client.post(
@@ -441,6 +493,25 @@ async def test_group_admin_can_create_group_connection(
             )
         )
     ).first()
+
+    creds = (
+        await session.scalars(
+            select(AuthData).filter_by(
+                connection_id=connection.id,
+            )
+        )
+    ).one()
+
+    def delete_rows():
+        async def afin():
+            await session.delete(creds)
+            await session.delete(connection)
+            await session.commit()
+
+        event_loop.run_until_complete(afin())
+
+    request.addfinalizer(delete_rows)
+
     assert result.status_code == 200
     assert result.json() == {
         "id": connection.id,
@@ -456,8 +527,8 @@ async def test_group_admin_can_create_group_connection(
             "additional_params": connection.data["additional_params"],
         },
         "auth_data": {
-            "type": connection.auth_data["type"],
-            "user": connection.auth_data["user"],
+            "type": decrypt_auth_data(creds.value, settings=settings)["type"],
+            "user": decrypt_auth_data(creds.value, settings=settings)["user"],
         },
     }
     # check that acl not created for superuser
@@ -479,6 +550,7 @@ async def test_superuser_can_create_group_connection(
     empty_group: MockGroup,
     not_empty_group: MockGroup,
     session: AsyncSession,
+    settings: Settings,
 ):
     for group in empty_group, not_empty_group:
         result = await client.post(
@@ -510,6 +582,15 @@ async def test_superuser_can_create_group_connection(
                 )
             )
         ).first()
+
+        creds = (
+            await session.scalars(
+                select(AuthData).filter_by(
+                    connection_id=connection.id,
+                )
+            )
+        ).one()
+
         assert result.status_code == 200
         assert result.json() == {
             "id": connection.id,
@@ -525,8 +606,8 @@ async def test_superuser_can_create_group_connection(
                 "additional_params": connection.data["additional_params"],
             },
             "auth_data": {
-                "type": connection.auth_data["type"],
-                "user": connection.auth_data["user"],
+                "type": decrypt_auth_data(creds.value, settings=settings)["type"],
+                "user": decrypt_auth_data(creds.value, settings=settings)["user"],
             },
         }
 
@@ -548,6 +629,9 @@ async def test_superuser_can_create_other_user_connection(
     superuser: MockUser,
     simple_user: MockUser,
     session: AsyncSession,
+    settings: Settings,
+    event_loop,
+    request,
 ):
     result = await client.post(
         "v1/connections",
@@ -578,6 +662,25 @@ async def test_superuser_can_create_other_user_connection(
             )
         )
     ).first()
+
+    creds = (
+        await session.scalars(
+            select(AuthData).filter_by(
+                connection_id=connection.id,
+            )
+        )
+    ).one()
+
+    def delete_rows():
+        async def afin():
+            await session.delete(creds)
+            await session.delete(connection)
+            await session.commit()
+
+        event_loop.run_until_complete(afin())
+
+    request.addfinalizer(delete_rows)
+
     assert result.status_code == 200
     assert result.json() == {
         "id": connection.id,
@@ -593,7 +696,7 @@ async def test_superuser_can_create_other_user_connection(
             "additional_params": connection.data["additional_params"],
         },
         "auth_data": {
-            "type": connection.auth_data["type"],
-            "user": connection.auth_data["user"],
+            "type": decrypt_auth_data(creds.value, settings=settings)["type"],
+            "user": decrypt_auth_data(creds.value, settings=settings)["user"],
         },
     }
