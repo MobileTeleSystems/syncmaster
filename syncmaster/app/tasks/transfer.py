@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.config import Settings
 from app.db.models import AuthData, Run, Status, Transfer
-from app.db.repositories.utilites import decrypt_auth_data
+from app.db.repositories.utils import decrypt_auth_data
 from app.exceptions.run import RunNotFoundException
 from app.tasks.base import WorkerTask
 from app.tasks.config import celery

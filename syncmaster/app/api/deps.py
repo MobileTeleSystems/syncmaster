@@ -14,5 +14,5 @@ class DatabaseSessionMarker:
     pass
 
 
-class DatabaseProviderMarker:
+class UnitOfWorkMarker:
     pass

@@ -57,8 +57,8 @@ class GroupRepository(Repository[Group]):
                 )
                 .distinct(Group.id)
             )
-        result: ScalarResult[Group] = await self._session.scalars(stmt)
         try:
+            result: ScalarResult[Group] = await self._session.scalars(stmt)
             return result.one()
         except NoResultFound as e:
             raise GroupNotFound from e
@@ -75,9 +75,8 @@ class GroupRepository(Repository[Group]):
         )
         try:
             result: ScalarResult[Group] = await self._session.scalars(query)
-            await self._session.commit()
+            await self._session.flush()
         except IntegrityError as err:
-            await self._session.rollback()
             self._raise_error(err)
         else:
             return result.one()
@@ -101,7 +100,6 @@ class GroupRepository(Repository[Group]):
         except EntityNotFound as e:
             raise GroupNotFound from e
         except IntegrityError as e:
-            await self._session.rollback()
             self._raise_error(e)
 
     async def get_member_paginate(
@@ -154,10 +152,9 @@ class GroupRepository(Repository[Group]):
                 insert(UserGroup).values(group_id=group_id, user_id=target_user_id)
             )
         except IntegrityError as err:
-            await self._session.rollback()
             self._raise_error(err)
         else:
-            await self._session.commit()
+            await self._session.flush()
 
     async def is_admin(self, group_id: int, user_id: int) -> bool:
         return (
@@ -204,7 +201,7 @@ class GroupRepository(Repository[Group]):
         if ug is None:
             raise AlreadyIsNotGroupMember
         await self._session.delete(ug)
-        await self._session.commit()
+        await self._session.flush()
 
     async def paginate_rules(
         self,

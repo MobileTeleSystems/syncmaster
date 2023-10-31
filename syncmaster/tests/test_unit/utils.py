@@ -20,7 +20,7 @@ from app.db.models import (
     Transfer,
     User,
 )
-from app.db.repositories.utilites import encrypt_auth_data
+from app.db.repositories.utils import encrypt_auth_data
 
 
 @asynccontextmanager

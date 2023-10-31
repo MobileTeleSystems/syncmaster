@@ -10,15 +10,29 @@ from app.db.repositories.transfer import TransferRepository
 from app.db.repositories.user import UserRepository
 
 
-class DatabaseProvider:
-    def __init__(self, session: AsyncSession, settings: Settings):
+class UnitOfWork:
+    def __init__(
+        self,
+        session: AsyncSession,
+        settings: Settings,
+    ):
+        self._session = session
         self.user = UserRepository(session=session)
         self.group = GroupRepository(session=session)
         self.connection = ConnectionRepository(session=session)
         self.transfer = TransferRepository(session=session)
         self.run = RunRepository(session=session)
-        self.credentials_repository = CredentialsRepository(
+        self.credentials = CredentialsRepository(
             session=session,
             settings=settings,
             model=AuthData,
         )
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        if exc_type:
+            await self._session.rollback()
+        else:
+            await self._session.commit()

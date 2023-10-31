@@ -65,8 +65,8 @@ class TransferRepository(RepositoryWithAcl[Transfer]):
         )
         if not is_superuser:
             stmt = self.apply_acl(stmt, current_user_id, rule=rule)
-        result: ScalarResult[Transfer] = await self._session.scalars(stmt)
         try:
+            result: ScalarResult[Transfer] = await self._session.scalars(stmt)
             return result.one()
         except NoResultFound as e:
             raise TransferNotFound from e
@@ -101,10 +101,9 @@ class TransferRepository(RepositoryWithAcl[Transfer]):
         try:
             result: ScalarResult[Transfer] = await self._session.scalars(query)
         except IntegrityError as e:
-            await self._session.rollback()
             self._raise_error(e)
         else:
-            await self._session.commit()
+            await self._session.flush()
             return result.one()
 
     async def update(
@@ -146,7 +145,6 @@ class TransferRepository(RepositoryWithAcl[Transfer]):
                 target_params=target_params,
             )
         except IntegrityError as e:
-            await self._session.rollback()
             self._raise_error(e)
 
     async def delete(
@@ -191,7 +189,6 @@ class TransferRepository(RepositoryWithAcl[Transfer]):
                 rule=rule,
             )
         except IntegrityError as e:
-            await self._session.rollback()
             self._raise_error(e)
 
     async def delete_rule(
@@ -255,7 +252,6 @@ class TransferRepository(RepositoryWithAcl[Transfer]):
             return new_transfer
 
         except IntegrityError as e:
-            await self._session.rollback()
             self._raise_error(e)
 
     async def list_by_connection_id(self, conn_id: int) -> Sequence[Transfer]:

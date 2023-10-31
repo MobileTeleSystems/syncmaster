@@ -5,7 +5,7 @@ from tests.test_unit.utils import create_connection, create_credentials
 from tests.utils import MockConnection, MockUser
 
 from app.config import Settings
-from app.db.repositories.utilites import decrypt_auth_data
+from app.db.repositories.utils import decrypt_auth_data
 
 pytestmark = [pytest.mark.asyncio]
 
