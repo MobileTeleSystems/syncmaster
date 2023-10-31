@@ -60,25 +60,22 @@ class Repository(Generic[Model], ABC):
             kwargs
         )  # Process kwargs in order to keep only what needs to be updated
         query_insert_new_row = insert(self._model).values(**d).returning(self._model)
-        new_row = await self._session.scalars(query_insert_new_row)
-
         try:
+            new_row = await self._session.scalars(query_insert_new_row)
+            await self._session.flush()
             obj = new_row.one()
         except NoResultFound as e:
             raise EntityNotFound from e
-        await self._session.commit()
-        await self._session.refresh(obj)
         return obj
 
     async def _update(self, *args: Any, **kwargs: Any) -> Model:
         query = update(self._model).where(*args).values(**kwargs).returning(self._model)
-        result = await self._session.scalars(query)
-        await self._session.commit()
         try:
+            result = await self._session.scalars(query)
+            await self._session.flush()
             obj = result.one()
         except NoResultFound as e:
             raise EntityNotFound from e
-        await self._session.refresh(obj)
         return obj
 
     async def _delete(self, id: int) -> Model:
@@ -90,7 +87,7 @@ class Repository(Generic[Model], ABC):
 
         query = delete(self._model).filter_by(id=id).returning(self._model)
         result = await self._session.scalars(query)
-        await self._session.commit()
+        await self._session.flush()
         return result.one()
 
     async def _paginate(self, query: Select, page: int, page_size: int) -> Pagination:
@@ -229,8 +226,7 @@ class RepositoryWithAcl(Repository, Generic[Model]):
             acl.user_id = user_id
             acl.rule = rule
             self._session.add(acl)
-        await self._session.commit()
-        await self._session.refresh(acl)
+        await self._session.flush()
         return acl
 
     async def _delete_acl_rule(self, object_id: int, user_id: int) -> None:
@@ -245,6 +241,6 @@ class RepositoryWithAcl(Repository, Generic[Model]):
                 )
             ).one()
             await self._session.delete(acl)
-            await self._session.commit()
+            await self._session.flush()
         except NoResultFound as e:
             raise EntityNotFound from e

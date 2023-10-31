@@ -37,10 +37,10 @@ class UserRepository(Repository[User]):
             raise UserNotFound from e
 
     async def read_by_username(self, username: str) -> User:
-        result: ScalarResult[User] = await self._session.scalars(
-            select(User).where(User.username == username)
-        )
         try:
+            result: ScalarResult[User] = await self._session.scalars(
+                select(User).where(User.username == username)
+            )
             return result.one()
         except NoResultFound as e:
             raise EntityNotFound from e
@@ -53,7 +53,6 @@ class UserRepository(Repository[User]):
         except EntityNotFound as e:
             raise UserNotFound from e
         except IntegrityError as e:
-            await self._session.rollback()
             self._raise_error(e)
 
     async def create(
@@ -70,9 +69,8 @@ class UserRepository(Repository[User]):
         )
         try:
             result: ScalarResult[User] = await self._session.scalars(query)
-            await self._session.commit()
+            await self._session.flush()
         except IntegrityError as err:
-            await self._session.rollback()
             self._raise_error(err)
         else:
             return result.one()

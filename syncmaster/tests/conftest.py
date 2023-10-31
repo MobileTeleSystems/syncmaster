@@ -36,7 +36,7 @@ from app.api.v1.auth.utils import sign_jwt
 from app.api.v1.schemas import UserRule
 from app.config import Settings, TestSettings
 from app.db.models import Base, ObjectType, Rule, UserGroup
-from app.db.repositories.utilites import decrypt_auth_data
+from app.db.repositories.utils import decrypt_auth_data
 from app.main import get_application
 
 PROJECT_PATH = Path(__file__).parent.parent.resolve()

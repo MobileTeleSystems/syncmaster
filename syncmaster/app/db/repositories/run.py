@@ -46,18 +46,15 @@ class RunRepository(Repository[Run]):
         run.transfer_dump = await self.read_full_serialized_transfer(transfer_id)
         try:
             self._session.add(run)
-            await self._session.commit()
-            await self._session.refresh(run)
+            await self._session.flush()
             return run
         except IntegrityError as e:
-            await self._session.rollback()
             self._raise_error(e)
 
     async def update(self, run_id: int, **kwargs: Any) -> Run:
         try:
             return await self._update(Run.id == run_id, **kwargs)
         except IntegrityError as e:
-            await self._session.rollback()
             self._raise_error(e)
 
     async def stop(self, run_id: int) -> Run:
@@ -65,8 +62,7 @@ class RunRepository(Repository[Run]):
         if run.status not in [Status.CREATED, Status.STARTED]:
             raise CannotStopRunException(run_id=run_id, current_status=run.status)
         run.status = Status.SEND_STOP_SIGNAL
-        await self._session.commit()
-        await self._session.refresh(run)
+        await self._session.flush()
         return run
 
     async def read_full_serialized_transfer(self, transfer_id: int) -> dict[str, Any]:

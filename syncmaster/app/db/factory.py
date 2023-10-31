@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+from app.api.services.unit_of_work import UnitOfWork
 from app.config import Settings
-from app.db.provider import DatabaseProvider
 
 
 def create_engine(connection_uri: str, **engine_kwargs: Any) -> AsyncEngine:
@@ -24,12 +24,12 @@ def create_session_factory(engine: AsyncEngine) -> async_sessionmaker[AsyncSessi
     )
 
 
-def create_holder(
+def get_uow(
     session_factory: async_sessionmaker[AsyncSession],
     settings: Settings,
-) -> Callable[[], AsyncGenerator[DatabaseProvider, None]]:
+) -> Callable[[], AsyncGenerator[UnitOfWork, None]]:
     async def wrapper():
         async with session_factory() as session:
-            yield DatabaseProvider(session=session, settings=settings)
+            yield UnitOfWork(session=session, settings=settings)
 
     return wrapper

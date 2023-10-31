@@ -5,14 +5,14 @@ from starlette.middleware.cors import CORSMiddleware
 from app.api.deps import (
     AuthMarker,
     DatabaseEngineMarker,
-    DatabaseProviderMarker,
     DatabaseSessionMarker,
     SettingsMarker,
+    UnitOfWorkMarker,
 )
 from app.api.router import api_router
 from app.api.services import get_auth_scheme
 from app.config import Settings
-from app.db.factory import create_engine, create_holder, create_session_factory
+from app.db.factory import create_engine, create_session_factory, get_uow
 from app.exceptions import SyncmasterException
 from app.handler import http_exception_handler, syncmsater_exception_handler
 
@@ -44,9 +44,7 @@ def get_application(settings: Settings) -> FastAPI:
             SettingsMarker: lambda: settings,
             DatabaseEngineMarker: lambda: engine,
             DatabaseSessionMarker: lambda: session_factory,
-            DatabaseProviderMarker: create_holder(
-                session_factory=session_factory, settings=settings
-            ),
+            UnitOfWorkMarker: get_uow(session_factory, settings),
             AuthMarker: auth_scheme,
         }
     )

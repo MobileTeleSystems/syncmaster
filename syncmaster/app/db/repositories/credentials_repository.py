@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import Settings
 from app.db.models import AuthData
 from app.db.repositories.base import Repository
-from app.db.repositories.utilites import decrypt_auth_data, encrypt_auth_data
+from app.db.repositories.utils import decrypt_auth_data, encrypt_auth_data
 from app.exceptions import AuthDataNotFound, SyncmasterException
 
 
@@ -28,8 +28,8 @@ class CredentialsRepository(Repository[AuthData]):
         connection_id: int,
     ) -> dict:
         query = select(AuthData).where(AuthData.connection_id == connection_id)
-        result: ScalarResult[AuthData] = await self._session.scalars(query)
         try:
+            result: ScalarResult[AuthData] = await self._session.scalars(query)
             return decrypt_auth_data(result.one().value, settings=self._settings)
         except NoResultFound as e:
             raise AuthDataNotFound(f"Connection id = {connection_id}") from e
@@ -46,10 +46,9 @@ class CredentialsRepository(Repository[AuthData]):
         try:
             result: ScalarResult[AuthData] = await self._session.scalars(query)
         except IntegrityError as e:
-            await self._session.rollback()
             self._raise_error(e)
         else:
-            await self._session.commit()
+            await self._session.flush()
             return result.one()
 
     async def delete_from_connection(self, connection_id: int) -> AuthData:
@@ -64,7 +63,7 @@ class CredentialsRepository(Repository[AuthData]):
         except IntegrityError as e:
             self._raise_error(e)
         else:
-            await self._session.commit()
+            await self._session.flush()
             return result.one()
 
     async def update(
@@ -83,7 +82,6 @@ class CredentialsRepository(Repository[AuthData]):
                 value=encrypt_auth_data(value=credential_data, settings=self._settings),
             )
         except IntegrityError as e:
-            await self._session.rollback()
             self._raise_error(e)
 
     def _raise_error(self, err: DBAPIError) -> NoReturn:

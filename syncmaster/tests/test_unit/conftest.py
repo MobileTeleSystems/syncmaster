@@ -14,7 +14,7 @@ from app.api.v1.auth.utils import sign_jwt
 from app.api.v1.schemas import UserRule
 from app.config import Settings
 from app.db.models import ObjectType, Rule, UserGroup
-from app.db.repositories.utilites import decrypt_auth_data
+from app.db.repositories.utils import decrypt_auth_data
 
 
 @pytest_asyncio.fixture

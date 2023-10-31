@@ -90,10 +90,9 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
         try:
             result: ScalarResult[Connection] = await self._session.scalars(query)
         except IntegrityError as e:
-            await self._session.rollback()
             self._raise_error(e)
         else:
-            await self._session.commit()
+            await self._session.flush()
             return result.one()
 
     async def update(
@@ -123,7 +122,6 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
                 data=connection_data,
             )
         except IntegrityError as e:
-            await self._session.rollback()
             self._raise_error(e)
 
     async def delete(
@@ -171,7 +169,6 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
             return new_connection
 
         except IntegrityError as e:
-            await self._session.rollback()
             self._raise_error(e)
 
     async def add_or_update_rule(
@@ -196,10 +193,11 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
             raise ActionNotAllowed
         try:
             return await self._add_or_update_rule(
-                object_id=connection_id, user_id=target_user_id, rule=rule
+                object_id=connection_id,
+                user_id=target_user_id,
+                rule=rule,
             )
         except IntegrityError as e:
-            await self._session.rollback()
             self._raise_error(e)
 
     async def delete_rule(
@@ -222,7 +220,10 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
         if connection.group_id is None:
             raise ActionNotAllowed
         try:
-            await self._delete_acl_rule(object_id=connection_id, user_id=target_user_id)
+            await self._delete_acl_rule(
+                object_id=connection_id,
+                user_id=target_user_id,
+            )
         except EntityNotFound as e:
             raise AclNotFound from e
         return

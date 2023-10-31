@@ -6,7 +6,7 @@ from tests.utils import MockGroup, MockUser
 
 from app.config import Settings
 from app.db.models import Acl, AuthData, Connection, ObjectType, Rule
-from app.db.repositories.utilites import decrypt_auth_data
+from app.db.repositories.utils import decrypt_auth_data
 
 pytestmark = [pytest.mark.asyncio]
 
