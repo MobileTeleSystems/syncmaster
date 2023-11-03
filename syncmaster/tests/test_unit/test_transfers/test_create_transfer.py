@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from tests.test_unit.utils import create_connection
 from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser
 
-from app.db.models import Acl, ObjectType, Rule, Transfer
+from app.db.models import Transfer
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -83,17 +83,6 @@ async def test_simple_user_can_create_transfer(
         "target_params": transfer.target_params,
         "strategy_params": transfer.strategy_params,
     }
-
-    acl = (
-        await session.scalars(
-            select(Acl).filter_by(
-                user_id=simple_user.id,
-                object_id=transfer.id,
-                object_type=ObjectType.TRANSFER,
-            )
-        )
-    ).one_or_none()
-    assert acl is None
 
     await session.delete(other_connection)
     await session.commit()
@@ -226,17 +215,6 @@ async def test_group_member_can_create_group_transfer(
         "strategy_params": transfer.strategy_params,
     }
 
-    acl = (
-        await session.scalars(
-            select(Acl).filter_by(
-                user_id=member.id,
-                object_id=transfer.id,
-                object_type=ObjectType.TRANSFER,
-            )
-        )
-    ).one()
-    assert acl.rule == Rule.DELETE
-
     await session.delete(other_connection)
     await session.commit()
 
@@ -328,17 +306,6 @@ async def test_group_admin_can_create_own_group_transfer(
         "strategy_params": transfer.strategy_params,
     }
 
-    acl = (
-        await session.scalars(
-            select(Acl).filter_by(
-                user_id=admin.id,
-                object_id=transfer.id,
-                object_type=ObjectType.TRANSFER,
-            )
-        )
-    ).one_or_none()
-    assert acl is None
-
     await session.delete(other_connection)
     await session.commit()
 
@@ -392,17 +359,6 @@ async def test_superuser_can_create_other_user_transfer(
         "target_params": transfer.target_params,
         "strategy_params": transfer.strategy_params,
     }
-
-    acl = (
-        await session.scalars(
-            select(Acl).filter_by(
-                user_id=user_connection.owner_user.id,
-                object_id=transfer.id,
-                object_type=ObjectType.TRANSFER,
-            )
-        )
-    ).one_or_none()
-    assert acl is None
 
     await session.delete(other_connection)
     await session.commit()
@@ -458,17 +414,6 @@ async def test_superuser_can_create_group_transfer(
         "target_params": transfer.target_params,
         "strategy_params": transfer.strategy_params,
     }
-
-    acl = (
-        await session.scalars(
-            select(Acl).filter_by(
-                user_id=group_connection.owner_group.admin_id,
-                object_id=transfer.id,
-                object_type=ObjectType.TRANSFER,
-            )
-        )
-    ).one_or_none()
-    assert acl is None
 
     await session.delete(other_connection)
     await session.commit()

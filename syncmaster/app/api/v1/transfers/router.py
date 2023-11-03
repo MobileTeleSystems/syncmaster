@@ -1,18 +1,8 @@
-from typing import Annotated
-
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from kombu.exceptions import KombuError
 
 from app.api.deps import UnitOfWorkMarker
-from app.api.services import get_user
-from app.api.services.unit_of_work import UnitOfWork
-from app.api.v1.schemas import (
-    AclPageSchema,
-    ReadRuleSchema,
-    SetRuleSchema,
-    StatusCopyTransferResponseSchema,
-    StatusResponseSchema,
-)
+from app.api.v1.schemas import StatusCopyTransferResponseSchema, StatusResponseSchema
 from app.api.v1.transfers.schemas import (
     CopyTransferSchema,
     CreateTransferSchema,
@@ -22,7 +12,7 @@ from app.api.v1.transfers.schemas import (
     TransferPageSchema,
     UpdateTransferSchema,
 )
-from app.db.models import Rule, Status, User
+from app.db.models import Status, User
 from app.exceptions import (
     CannotConnectToTaskQueueError,
     DifferentConnectionsOwners,
@@ -30,6 +20,7 @@ from app.exceptions import (
     TransferNotFound,
 )
 from app.exceptions.base import ActionNotAllowed
+from app.services import UnitOfWork, get_user
 from app.tasks.config import celery
 
 router = APIRouter(tags=["Transfers"])
@@ -113,11 +104,6 @@ async def create_transfer(
             conn="source",
             params_type=transfer_data.source_params.type,
         )
-    is_member = False
-    if transfer_data.group_id is not None and not current_user.is_superuser:
-        is_member = await unit_of_work.group.is_member(
-            transfer_data.group_id, current_user.id
-        )
 
     async with unit_of_work:
         transfer = await unit_of_work.transfer.create(
@@ -131,14 +117,6 @@ async def create_transfer(
             target_params=transfer_data.target_params.dict(),
             strategy_params=transfer_data.strategy_params.dict(),
         )
-        if transfer_data.group_id is not None and is_member:
-            await unit_of_work.transfer.add_or_update_rule(
-                transfer_id=transfer.id,
-                current_user_id=current_user.id,
-                is_superuser=True,
-                target_user_id=current_user.id,
-                rule=Rule.DELETE,
-            )
     return ReadTransferSchema.from_orm(transfer)
 
 
@@ -164,12 +142,10 @@ async def copy_transfer(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> StatusCopyTransferResponseSchema:
-    rule = Rule.DELETE if transfer_data.remove_source else Rule.READ
     transfer = await unit_of_work.transfer.read_by_id(
         transfer_id=transfer_id,
         current_user_id=current_user.id,
         is_superuser=current_user.is_superuser,
-        rule=rule,
     )
 
     async with unit_of_work:
@@ -230,7 +206,6 @@ async def update_transfer(
         transfer_id=transfer_id,
         current_user_id=current_user.id,
         is_superuser=current_user.is_superuser,
-        rule=Rule.WRITE,
     )
     target_connection = await unit_of_work.connection.read_by_id(
         connection_id=transfer_data.target_connection_id
@@ -308,47 +283,6 @@ async def delete_transfer(
     )
 
 
-@router.post("/transfers/{transfer_id}/rules")
-async def add_or_update_rule(
-    transfer_id: int,
-    rule_data: SetRuleSchema,
-    current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
-) -> ReadRuleSchema:
-    rule = Rule.from_str(rule_data.rule)
-    async with unit_of_work:
-        acl = await unit_of_work.transfer.add_or_update_rule(
-            transfer_id=transfer_id,
-            rule=rule,
-            target_user_id=rule_data.user_id,
-            current_user_id=current_user.id,
-            is_superuser=current_user.is_superuser,
-        )
-    return ReadRuleSchema.from_acl(acl)
-
-
-@router.delete("/transfers/{transfer_id}/rules/{user_id}")
-async def delete_rule(
-    transfer_id: int,
-    user_id: int,
-    current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
-) -> StatusResponseSchema:
-    """Delete rule for user on transfer in group if exists"""
-    async with unit_of_work:
-        await unit_of_work.transfer.delete_rule(
-            transfer_id=transfer_id,
-            target_user_id=user_id,
-            current_user_id=current_user.id,
-            is_superuser=current_user.is_superuser,
-        )
-    return StatusResponseSchema(
-        ok=True,
-        status_code=status.HTTP_200_OK,
-        message="Rule was deleted",
-    )
-
-
 @router.get("/transfers/{transfer_id}/runs")
 async def read_runs(
     transfer_id: int,
@@ -397,14 +331,12 @@ async def start_transfer(
         transfer_id=transfer_id,
         current_user_id=current_user.id,
         is_superuser=current_user.is_superuser,
-        rule=Rule.READ,
     )
     try:
         await unit_of_work.transfer.read_by_id(
             transfer_id=transfer_id,
             current_user_id=current_user.id,
             is_superuser=current_user.is_superuser,
-            rule=Rule.WRITE,
         )
     except TransferNotFound as e:
         raise ActionNotAllowed from e
@@ -439,7 +371,6 @@ async def stop_run(
             transfer_id=transfer_id,
             current_user_id=current_user.id,
             is_superuser=current_user.is_superuser,
-            rule=Rule.WRITE,
         )
     except TransferNotFound as e:
         raise ActionNotAllowed from e
@@ -447,32 +378,3 @@ async def stop_run(
         run = await unit_of_work.run.stop(run_id=run_id)
         # TODO add immdiate stop transfer after stop Run
     return ReadRunSchema.from_orm(run)
-
-
-@router.get("/transfers/{transfer_id}/rules")
-async def get_rules(
-    transfer_id: int,
-    user_id: Annotated[int | None, Query()] = None,
-    page: Annotated[int, Query(gt=0)] = 1,
-    page_size: Annotated[int, Query(gt=0, le=200)] = 20,
-    current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
-) -> AclPageSchema:
-    """Getting a list of users with their rights for a given transfer"""
-    transfer = await unit_of_work.transfer.read_by_id(
-        transfer_id=transfer_id,
-        is_superuser=current_user.is_superuser,
-        current_user_id=current_user.id,
-    )
-    group_id: int = transfer.group_id  # type: ignore[assignment]
-
-    pagination = await unit_of_work.transfer.paginate_rules(
-        object_id=transfer_id,
-        group_id=group_id,
-        page=page,
-        page_size=page_size,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
-        user_id=user_id,
-    )
-    return AclPageSchema.from_pagination(pagination)

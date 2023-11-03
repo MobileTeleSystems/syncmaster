@@ -3,12 +3,11 @@ import logging
 from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import UnitOfWorkMarker
-from app.api.services import get_user
-from app.api.services.unit_of_work import UnitOfWork
 from app.api.v1.schemas import StatusResponseSchema
 from app.api.v1.users.schemas import ReadUserSchema, UpdateUserSchema, UserPageSchema
 from app.db.models import User
 from app.exceptions import ActionNotAllowed
+from app.services import UnitOfWork, get_user
 
 logger = logging.getLogger(__name__)
 

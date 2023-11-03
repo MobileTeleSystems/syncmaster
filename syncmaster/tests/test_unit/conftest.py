@@ -1,19 +1,17 @@
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests.test_unit.utils import (
-    create_acl,
     create_connection,
     create_credentials,
     create_group,
     create_user,
     create_user_cm,
 )
-from tests.utils import MockAcl, MockConnection, MockCredentials, MockGroup, MockUser
+from tests.utils import MockConnection, MockCredentials, MockGroup, MockUser
 
 from app.api.v1.auth.utils import sign_jwt
-from app.api.v1.schemas import UserRule
 from app.config import Settings
-from app.db.models import ObjectType, Rule, UserGroup
+from app.db.models import UserGroup
 from app.db.repositories.utils import decrypt_auth_data
 
 
@@ -152,20 +150,6 @@ async def group_connection(session: AsyncSession, settings: Settings) -> MockCon
         connection_id=connection.id,
     )
 
-    acl_write = await create_acl(
-        session=session,
-        object_id=connection.id,
-        object_type=ObjectType.CONNECTION,
-        user_id=members[1].id,
-        rule=Rule.WRITE,
-    )
-    acl_delete = await create_acl(
-        session=session,
-        object_id=connection.id,
-        object_type=ObjectType.CONNECTION,
-        user_id=members[2].id,
-        rule=Rule.DELETE,
-    )
     yield MockConnection(
         credentials=MockCredentials(
             value=decrypt_auth_data(credentials.value, settings=settings),
@@ -180,20 +164,6 @@ async def group_connection(session: AsyncSession, settings: Settings) -> MockCon
             members=members,
         ),
         owner_user=None,
-        acls=[
-            MockAcl(
-                acl=acl_write,
-                user=members[1],
-                to_object=connection,
-                acl_as_str=UserRule.WRITE,
-            ),
-            MockAcl(
-                acl=acl_delete,
-                user=members[2],
-                to_object=connection,
-                acl_as_str=UserRule.DELETE,
-            ),
-        ],
     )
     await session.delete(credentials)
     await session.delete(connection)

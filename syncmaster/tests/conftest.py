@@ -14,7 +14,6 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from tests.test_unit.utils import (
-    create_acl,
     create_connection,
     create_credentials,
     create_group,
@@ -22,7 +21,6 @@ from tests.test_unit.utils import (
     create_user,
 )
 from tests.utils import (
-    MockAcl,
     MockConnection,
     MockCredentials,
     MockGroup,
@@ -33,9 +31,8 @@ from tests.utils import (
 )
 
 from app.api.v1.auth.utils import sign_jwt
-from app.api.v1.schemas import UserRule
 from app.config import Settings, TestSettings
-from app.db.models import Base, ObjectType, Rule, UserGroup
+from app.db.models import Base, UserGroup
 from app.db.repositories.utils import decrypt_auth_data
 from app.main import get_application
 
@@ -236,20 +233,6 @@ async def group_transfer(
         source_connection_id=source_connection.id,
         target_connection_id=target_connection.id,
     )
-    acl_write = await create_acl(
-        session=session,
-        object_id=transfer.id,
-        object_type=ObjectType.TRANSFER,
-        user_id=members[1].id,
-        rule=Rule.WRITE,
-    )
-    acl_delete = await create_acl(
-        session=session,
-        object_id=transfer.id,
-        object_type=ObjectType.TRANSFER,
-        user_id=members[2].id,
-        rule=Rule.DELETE,
-    )
     yield MockTransfer(
         transfer=transfer,
         source_connection=MockConnection(
@@ -276,20 +259,6 @@ async def group_transfer(
         ),
         owner_user=None,
         owner_group=mock_group,
-        acls=[
-            MockAcl(
-                acl=acl_write,
-                user=members[1],
-                to_object=transfer,
-                acl_as_str=UserRule.WRITE,
-            ),
-            MockAcl(
-                acl=acl_delete,
-                user=members[2],
-                to_object=transfer,
-                acl_as_str=UserRule.DELETE,
-            ),
-        ],
     )
     await session.delete(transfer)
     await session.delete(source_connection)

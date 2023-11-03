@@ -1,10 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from tests.utils import MockConnection, MockGroup, MockUser
-
-from app.db.models import UserGroup
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -63,7 +59,9 @@ async def test_owner_can_read_connection_of_self(
 
 
 async def test_group_admin_can_read_connection_of_his_group(
-    client: AsyncClient, group_connection: MockConnection, simple_user: MockUser
+    client: AsyncClient,
+    group_connection: MockConnection,
+    simple_user: MockUser,
 ):
     result = await client.get(
         f"v1/connections/{group_connection.id}",
@@ -118,62 +116,6 @@ async def test_group_admin_cannot_read_connection_of_other(
             "status_code": 404,
             "message": "Connection not found",
         }
-
-
-async def test_group_member_without_acl_can_read_connection_of_group(
-    client: AsyncClient,
-    group_connection: MockConnection,
-    session: AsyncSession,
-):
-    group = group_connection.owner_group
-    group_member = group_connection.owner_group.members[0]
-
-    result = await client.get(
-        f"v1/connections/{group_connection.id}",
-        headers={"Authorization": f"Bearer {group_member.token}"},
-    )
-    assert result.status_code == 200
-    assert result.json() == {
-        "id": group_connection.id,
-        "description": group_connection.description,
-        "group_id": group_connection.group_id,
-        "user_id": group_connection.user_id,
-        "name": group_connection.name,
-        "connection_data": {
-            "type": group_connection.data["type"],
-            "database_name": group_connection.data["database_name"],
-            "host": group_connection.data["host"],
-            "port": group_connection.data["port"],
-            "additional_params": group_connection.data["additional_params"],
-        },
-        "auth_data": {
-            "type": group_connection.credentials.value["type"],
-            "user": group_connection.credentials.value["user"],
-        },
-    }
-
-    # check after delete from group
-    ug = (
-        await session.scalars(
-            select(UserGroup).where(
-                UserGroup.group_id == group.id, UserGroup.user_id == group_member.id
-            )
-        )
-    ).one()
-
-    await session.delete(ug)
-    await session.commit()
-
-    result = await client.get(
-        f"v1/connections/{group_connection.id}",
-        headers={"Authorization": f"Bearer {group_member.token}"},
-    )
-    assert result.status_code == 404
-    assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Connection not found",
-    }
 
 
 async def test_superuser_can_read_all_connections(

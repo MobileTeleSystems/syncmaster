@@ -1,26 +1,17 @@
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests.test_unit.utils import (
-    create_acl,
     create_connection,
     create_group,
     create_run,
     create_transfer,
     create_user,
 )
-from tests.utils import (
-    MockAcl,
-    MockConnection,
-    MockGroup,
-    MockRun,
-    MockTransfer,
-    MockUser,
-)
+from tests.utils import MockConnection, MockGroup, MockRun, MockTransfer, MockUser
 
 from app.api.v1.auth.utils import sign_jwt
-from app.api.v1.schemas import UserRule
 from app.config import Settings
-from app.db.models import ObjectType, Rule, UserGroup
+from app.db.models import UserGroup
 
 
 @pytest_asyncio.fixture
@@ -112,20 +103,6 @@ async def group_run(session: AsyncSession, settings: Settings) -> MockTransfer:
         source_connection_id=source_connection.id,
         target_connection_id=target_connection.id,
     )
-    acl_write = await create_acl(
-        session=session,
-        object_id=transfer.id,
-        object_type=ObjectType.TRANSFER,
-        user_id=members[1].id,
-        rule=Rule.WRITE,
-    )
-    acl_delete = await create_acl(
-        session=session,
-        object_id=transfer.id,
-        object_type=ObjectType.TRANSFER,
-        user_id=members[2].id,
-        rule=Rule.DELETE,
-    )
     mock_transfer = MockTransfer(
         transfer=transfer,
         source_connection=MockConnection(
@@ -136,20 +113,6 @@ async def group_run(session: AsyncSession, settings: Settings) -> MockTransfer:
         ),
         owner_user=None,
         owner_group=mock_group,
-        acls=[
-            MockAcl(
-                acl=acl_write,
-                user=members[1],
-                to_object=transfer,
-                acl_as_str=UserRule.WRITE,
-            ),
-            MockAcl(
-                acl=acl_delete,
-                user=members[2],
-                to_object=transfer,
-                acl_as_str=UserRule.DELETE,
-            ),
-        ],
     )
     run = await create_run(session=session, transfer_id=transfer.id)
 

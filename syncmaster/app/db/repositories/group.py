@@ -1,11 +1,10 @@
 from typing import NoReturn
 
-from sqlalchemy import ScalarResult, and_, insert, or_, select, union
+from sqlalchemy import ScalarResult, insert, or_, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import aliased
 
-from app.db.models import Acl, Connection, Group, ObjectType, Transfer, User, UserGroup
+from app.db.models import Group, User, UserGroup
 from app.db.repositories.base import Repository
 from app.db.utils import Pagination
 from app.exceptions import (
@@ -202,52 +201,6 @@ class GroupRepository(Repository[Group]):
             raise AlreadyIsNotGroupMember
         await self._session.delete(ug)
         await self._session.flush()
-
-    async def paginate_rules(
-        self,
-        current_user_id: int,
-        is_superuser: bool,
-        group_id: int,
-        page: int,
-        page_size: int,
-    ) -> Pagination:
-        is_admin = await self.is_admin(group_id=group_id, user_id=current_user_id)
-        if not (is_admin or is_superuser):
-            raise ActionNotAllowed
-        sub_connection = (
-            select(Acl)
-            .join(
-                Connection,
-                and_(
-                    Acl.object_id == Connection.id,
-                    Acl.object_type == ObjectType.CONNECTION,
-                ),
-            )
-            .where(Connection.group_id == group_id)
-        )
-        sub_transfer = (
-            select(Acl)
-            .join(
-                Transfer,
-                and_(
-                    Acl.object_id == Transfer.id,
-                    Acl.object_type == ObjectType.TRANSFER,
-                ),
-            )
-            .where(Transfer.group_id == group_id)
-        )
-        stmt = union(sub_connection, sub_transfer).subquery()
-        acl_aliased = aliased(Acl, stmt)
-        return await self._paginate(
-            query=select(acl_aliased).order_by(
-                acl_aliased.object_type,
-                acl_aliased.object_id,
-                acl_aliased.user_id,
-                acl_aliased.rule,
-            ),
-            page=page,
-            page_size=page_size,
-        )
 
     def _raise_error(self, err: DBAPIError) -> NoReturn:
         constraint = err.__cause__.__cause__.constraint_name  # type: ignore[union-attr]

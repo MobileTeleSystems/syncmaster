@@ -17,9 +17,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from app.api.v1.schemas import UserRule
 from app.config import Settings
-from app.db.models import Acl, Connection, Group, Run, Status, Transfer, User
+from app.db.models import Connection, Group, Run, Status, Transfer, User
 
 logger = logging.getLogger(__name__)
 
@@ -43,23 +42,6 @@ class MockGroup:
         return getattr(self.group, attr)
 
 
-class MockAcl:
-    def __init__(
-        self,
-        acl: Acl,
-        user: MockUser,
-        to_object: Transfer | Connection,
-        acl_as_str: UserRule,
-    ):
-        self.acl = acl
-        self.user = user
-        self.to_object = to_object
-        self.acl_as_str = acl_as_str
-
-    def __getattr__(self, attr: str) -> Any:
-        return getattr(self.acl, attr)
-
-
 class MockCredentials:
     def __init__(
         self,
@@ -76,13 +58,11 @@ class MockConnection:
         connection: Connection,
         owner_user: MockUser | None,
         owner_group: MockGroup | None,
-        acls: list[MockAcl] | None = None,
         credentials: MockCredentials | None = None,
     ):
         self.connection = connection
         self.owner_user = owner_user
         self.owner_group = owner_group
-        self.acls = acls or []
         self.credentials = credentials
 
     def __getattr__(self, attr: str) -> Any:
@@ -97,14 +77,12 @@ class MockTransfer:
         target_connection: MockConnection,
         owner_user: MockUser | None,
         owner_group: MockGroup | None,
-        acls: list[MockAcl] | None = None,
     ):
         self.transfer = transfer
         self.source_connection = source_connection
         self.target_connection = target_connection
         self.owner_user = owner_user
         self.owner_group = owner_group
-        self.acls = acls or []
 
     def __getattr__(self, attr: str) -> Any:
         return getattr(self.transfer, attr)

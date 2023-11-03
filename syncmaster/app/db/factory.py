@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from app.api.services.unit_of_work import UnitOfWork
 from app.config import Settings
+from app.services import UnitOfWork
 
 
 def create_engine(connection_uri: str, **engine_kwargs: Any) -> AsyncEngine:

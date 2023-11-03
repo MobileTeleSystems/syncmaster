@@ -11,7 +11,6 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     PrimaryKeyConstraint,
-    SmallInteger,
     String,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -176,45 +175,3 @@ class Run(Base, TimestampMixin):
             f" transfer_id={self.transfer_id}"
             f" created_at={self.created_at:%Y-%m-%d %H:%M:%S}>"
         )
-
-
-class ObjectType(enum.StrEnum):
-    CONNECTION = "connection"
-    TRANSFER = "transfer"
-
-
-class Rule(enum.IntFlag):
-    READ = 0
-    WRITE = 1
-    DELETE = 2
-
-    @classmethod
-    def from_str(cls, rule):
-        if rule == "READ":
-            return Rule.READ
-        if rule == "WRITE":
-            return Rule.WRITE
-        if rule == "DELETE":
-            return Rule.DELETE
-
-
-class OwnerType(enum.StrEnum):
-    GROUP = "group"
-    USER = "user"
-
-
-class Acl(Base):
-    __table_args__ = (PrimaryKeyConstraint("object_id", "user_id", "object_type"),)
-    object_id: Mapped[int] = mapped_column(
-        BigInteger,
-        nullable=False,
-    )
-    object_type: Mapped[ObjectType] = mapped_column(
-        ChoiceType(ObjectType), nullable=False
-    )
-    user_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey("user.id", ondelete="CASCADE"), nullable=False
-    )
-    rule: Mapped[Rule] = mapped_column(
-        ChoiceType(Rule, impl=SmallInteger()), nullable=False, default=Rule.READ
-    )

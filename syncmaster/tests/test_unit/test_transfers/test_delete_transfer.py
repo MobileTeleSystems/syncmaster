@@ -3,8 +3,6 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests.utils import MockGroup, MockTransfer, MockUser
 
-from app.db.models import Acl, ObjectType, Rule
-
 pytestmark = [pytest.mark.asyncio]
 
 
@@ -98,69 +96,6 @@ async def test_superuser_can_delete_user_transfer(
         "status_code": 404,
         "message": "Transfer not found",
     }
-
-
-@pytest.mark.parametrize(
-    "rule",
-    (None, Rule.WRITE),
-)
-async def test_member_cannot_delete_connection_without_delete_rule(
-    rule: Rule | None,
-    client: AsyncClient,
-    group_transfer: MockTransfer,
-    session: AsyncSession,
-):
-    member = group_transfer.owner_group.members[0]
-    if rule is not None:
-        acl = Acl(
-            object_id=group_transfer.id,
-            object_type=ObjectType.TRANSFER,
-            user_id=member.id,
-            rule=rule,
-        )
-        session.add(acl)
-        await session.commit()
-
-    result = await client.delete(
-        f"v1/transfers/{group_transfer.id}",
-        headers={"Authorization": f"Bearer {member.token}"},
-    )
-    assert result.status_code == 404
-    assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Transfer not found",
-    }
-
-
-async def test_member_can_delete_transfer_with_delete_rule(
-    client: AsyncClient,
-    group_transfer: MockTransfer,
-    session: AsyncSession,
-):
-    member = group_transfer.owner_group.members[0]
-    acl = Acl(
-        object_id=group_transfer.id,
-        object_type=ObjectType.TRANSFER,
-        user_id=member.id,
-        rule=Rule.DELETE,
-    )
-    session.add(acl)
-    await session.commit()
-
-    result = await client.delete(
-        f"v1/transfers/{group_transfer.id}",
-        headers={"Authorization": f"Bearer {member.token}"},
-    )
-    assert result.status_code == 200
-    assert result.json() == {
-        "ok": True,
-        "status_code": 200,
-        "message": "Transfer was deleted",
-    }
-
-    await session.delete(acl)
-    await session.commit()
 
 
 async def test_group_admin_can_delete_own_group_transfer(

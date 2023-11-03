@@ -1,16 +1,15 @@
 from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import UnitOfWorkMarker
-from app.api.services import get_user
-from app.api.services.unit_of_work import UnitOfWork
 from app.api.v1.groups.schemas import (
     GroupPageSchema,
     ReadGroupSchema,
     UpdateGroupSchema,
 )
-from app.api.v1.schemas import AclPageSchema, StatusResponseSchema
+from app.api.v1.schemas import StatusResponseSchema
 from app.api.v1.users.schemas import UserPageSchema
 from app.db.models import User
+from app.services import UnitOfWork, get_user
 
 router = APIRouter(tags=["Groups"])
 
@@ -144,21 +143,3 @@ async def delete_user_from_group(
     return StatusResponseSchema(
         ok=True, status_code=200, message="User was successfully removed from group"
     )
-
-
-@router.get("/groups/{group_id}/rules")
-async def get_rules(
-    group_id: int,
-    page: int = Query(gt=0, default=1),
-    page_size: int = Query(gt=0, le=200, default=20),
-    current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
-) -> AclPageSchema:
-    pagination = await unit_of_work.group.paginate_rules(
-        group_id=group_id,
-        page=page,
-        page_size=page_size,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
-    )
-    return AclPageSchema.from_pagination(pagination)
