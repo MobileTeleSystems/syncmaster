@@ -10,11 +10,11 @@ from app.api.deps import (
     UnitOfWorkMarker,
 )
 from app.api.router import api_router
-from app.api.services import get_auth_scheme
 from app.config import Settings
 from app.db.factory import create_engine, create_session_factory, get_uow
 from app.exceptions import SyncmasterException
 from app.handler import http_exception_handler, syncmsater_exception_handler
+from app.services import get_auth_scheme
 
 
 def get_application(settings: Settings) -> FastAPI:

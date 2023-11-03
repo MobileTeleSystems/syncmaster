@@ -121,53 +121,6 @@ async def test_group_admin_cannot_stop_run_of_other_group_transfer(
         assert run.status != Status.SEND_STOP_SIGNAL
 
 
-async def test_group_member_with_read_acl_cannot_stop_run(
-    client: AsyncClient,
-    group_run: MockRun,
-    session: AsyncSession,
-) -> None:
-    member_with_read_rule = group_run.transfer.owner_group.members[0]
-    result = await client.post(
-        f"v1/transfers/{group_run.transfer.id}/runs/{group_run.id}/stop",
-        headers={"Authorization": f"Bearer {member_with_read_rule.token}"},
-    )
-    assert result.status_code == 403
-    assert result.json() == {
-        "ok": False,
-        "status_code": 403,
-        "message": "You have no power here",
-    }
-    await session.refresh(group_run.run)
-    assert group_run.status != Status.SEND_STOP_SIGNAL
-
-
-@pytest.mark.parametrize("member_index", (1, 2))
-async def test_group_member_with_write_delete_acl_can_stop_run(
-    member_index: int,
-    client: AsyncClient,
-    group_run: MockRun,
-    session: AsyncSession,
-) -> None:
-    member = group_run.transfer.owner_group.members[member_index]
-    result = await client.post(
-        f"v1/transfers/{group_run.transfer.id}/runs/{group_run.id}/stop",
-        headers={"Authorization": f"Bearer {member.token}"},
-    )
-    await session.refresh(group_run.run)
-    assert group_run.status == Status.SEND_STOP_SIGNAL
-
-    assert result.status_code == 200
-    assert result.json() == {
-        "id": group_run.id,
-        "transfer_id": group_run.transfer_id,
-        "status": group_run.status.value,
-        "log_url": group_run.log_url,
-        "started_at": group_run.started_at,
-        "ended_at": group_run.ended_at,
-        "transfer_dump": group_run.transfer_dump,
-    }
-
-
 async def test_superuser_can_stop_run_for_any_transfer(
     client: AsyncClient,
     superuser: MockUser,

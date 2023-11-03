@@ -8,18 +8,7 @@ from sqlalchemy.orm import joinedload
 
 from app.api.v1.transfers.schemas import ReadFullTransferSchema
 from app.config import Settings
-from app.db.models import (
-    Acl,
-    AuthData,
-    Connection,
-    Group,
-    ObjectType,
-    Rule,
-    Run,
-    Status,
-    Transfer,
-    User,
-)
+from app.db.models import AuthData, Connection, Group, Run, Status, Transfer, User
 from app.db.repositories.utils import encrypt_auth_data
 
 
@@ -124,25 +113,6 @@ async def create_connection(
     await session.commit()
     await session.refresh(c)
     return c
-
-
-async def create_acl(
-    session: AsyncSession,
-    object_id: int,
-    object_type: ObjectType,
-    user_id: int,
-    rule: Rule,
-):
-    acl = Acl(
-        object_id=object_id,
-        object_type=object_type,
-        user_id=user_id,
-        rule=rule,
-    )
-    session.add(acl)
-    await session.commit()
-    await session.refresh(acl)
-    return acl
 
 
 async def create_transfer(

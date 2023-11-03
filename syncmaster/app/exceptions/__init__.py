@@ -1,4 +1,3 @@
-from app.exceptions.acl import AclNotFound
 from app.exceptions.base import ActionNotAllowed, EntityNotFound, SyncmasterException
 from app.exceptions.connection import (
     ConnectionDeleteException,
@@ -29,7 +28,6 @@ from app.exceptions.transfer import (
 from app.exceptions.user import UsernameAlreadyExists, UserNotFound
 
 __all__ = [
-    "AclNotFound",
     "ActionNotAllowed",
     "AlreadyIsGroupMember",
     "AlreadyIsNotGroupMember",

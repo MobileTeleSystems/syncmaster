@@ -5,11 +5,10 @@ from sqlalchemy import ScalarResult, insert, or_, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Acl, ObjectType, Rule, Transfer
-from app.db.repositories.base import RepositoryWithAcl
+from app.db.models import Transfer
+from app.db.repositories.base import RepositoryWithOwner
 from app.db.utils import Pagination
 from app.exceptions import (
-    AclNotFound,
     ActionNotAllowed,
     ConnectionNotFound,
     EntityNotFound,
@@ -21,9 +20,8 @@ from app.exceptions import (
 )
 
 
-class TransferRepository(RepositoryWithAcl[Transfer]):
+class TransferRepository(RepositoryWithOwner[Transfer]):
     def __init__(self, session: AsyncSession):
-        self._object_type = ObjectType.TRANSFER
         super().__init__(model=Transfer, session=session)
 
     async def paginate(
@@ -45,7 +43,7 @@ class TransferRepository(RepositoryWithAcl[Transfer]):
             args.append(Transfer.group_id == group_id)
 
         if not is_superuser:
-            stmt = self.apply_acl(stmt, current_user_id)
+            stmt = self.check_permission(stmt, current_user_id)
         return await self._paginate(
             query=stmt.where(*args).order_by(Transfer.name),
             page=page,
@@ -57,14 +55,13 @@ class TransferRepository(RepositoryWithAcl[Transfer]):
         transfer_id: int,
         current_user_id: int,
         is_superuser: bool,
-        rule: Rule = Rule.READ,
     ) -> Transfer:
         stmt = select(Transfer).where(
             Transfer.id == transfer_id,
             Transfer.is_deleted.is_(False),
         )
         if not is_superuser:
-            stmt = self.apply_acl(stmt, current_user_id, rule=rule)
+            stmt = self.check_permission(stmt, current_user_id)
         try:
             result: ScalarResult[Transfer] = await self._session.scalars(stmt)
             return result.one()
@@ -148,76 +145,21 @@ class TransferRepository(RepositoryWithAcl[Transfer]):
             self._raise_error(e)
 
     async def delete(
-        self, transfer_id: int, current_user_id: int, is_superuser: bool
+        self,
+        transfer_id: int,
+        current_user_id: int,
+        is_superuser: bool,
     ) -> None:
         if not is_superuser:
             await self.read_by_id(
                 transfer_id=transfer_id,
                 current_user_id=current_user_id,
                 is_superuser=False,
-                rule=Rule.DELETE,
             )
         try:
             await self._delete(transfer_id)
         except (NoResultFound, EntityNotFound) as e:
             raise TransferNotFound from e
-
-    async def add_or_update_rule(
-        self,
-        transfer_id: int,
-        current_user_id: int,
-        is_superuser: bool,
-        rule: Rule,
-        target_user_id: int,
-    ) -> Acl:
-        if not is_superuser and not await self.has_owner_access(
-            object_id=transfer_id,
-            user_id=current_user_id,
-        ):
-            raise TransferNotFound
-        transfer = await self.read_by_id(
-            transfer_id=transfer_id,
-            current_user_id=current_user_id,
-            is_superuser=is_superuser,
-        )
-        if transfer.group_id is None:
-            raise ActionNotAllowed
-        try:
-            return await self._add_or_update_rule(
-                object_id=transfer_id,
-                user_id=target_user_id,
-                rule=rule,
-            )
-        except IntegrityError as e:
-            self._raise_error(e)
-
-    async def delete_rule(
-        self,
-        current_user_id: int,
-        is_superuser: bool,
-        transfer_id: int,
-        target_user_id: int,
-    ):
-        if not is_superuser and not await self.has_owner_access(
-            object_id=transfer_id,
-            user_id=current_user_id,
-        ):
-            raise TransferNotFound
-        transfer = await self.read_by_id(
-            transfer_id=transfer_id,
-            current_user_id=current_user_id,
-            is_superuser=is_superuser,
-        )
-        if transfer.group_id is None:
-            raise ActionNotAllowed
-        try:
-            await self._delete_acl_rule(
-                object_id=transfer_id,
-                user_id=target_user_id,
-            )
-        except EntityNotFound as e:
-            raise AclNotFound from e
-        return
 
     async def copy_transfer(
         self,

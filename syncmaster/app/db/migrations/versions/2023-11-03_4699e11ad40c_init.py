@@ -1,15 +1,15 @@
 """init
 
-Revision ID: 395520ca6a3e
+Revision ID: 4699e11ad40c
 Revises:
-Create Date: 2023-10-26 09:59:14.175297
+Create Date: 2023-11-03 10:10:02.608461
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "395520ca6a3e"
+revision = "4699e11ad40c"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -40,22 +40,6 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name=op.f("pk__user")),
     )
     op.create_index(op.f("ix__user__username"), "user", ["username"], unique=True)
-    op.create_table(
-        "acl",
-        sa.Column("object_id", sa.BigInteger(), nullable=False),
-        sa.Column("object_type", sa.String(length=32), nullable=False),
-        sa.Column("user_id", sa.BigInteger(), nullable=False),
-        sa.Column("rule", sa.SmallInteger(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["user_id"],
-            ["user.id"],
-            name=op.f("fk__acl__user_id__user"),
-            ondelete="CASCADE",
-        ),
-        sa.PrimaryKeyConstraint(
-            "object_id", "user_id", "object_type", name=op.f("pk__acl")
-        ),
-    )
     op.create_table(
         "group",
         sa.Column("id", sa.BigInteger(), nullable=False),
@@ -168,6 +152,11 @@ def upgrade() -> None:
     )
     op.create_table(
         "transfer",
+        sa.Column("id", sa.BigInteger(), nullable=False),
+        sa.Column("user_id", sa.BigInteger(), nullable=True),
+        sa.Column("group_id", sa.BigInteger(), nullable=True),
+        sa.Column("name", sa.String(length=128), nullable=False),
+        sa.Column("description", sa.String(length=512), nullable=False),
         sa.Column("source_connection_id", sa.BigInteger(), nullable=False),
         sa.Column("target_connection_id", sa.BigInteger(), nullable=False),
         sa.Column("strategy_params", sa.JSON(), nullable=False),
@@ -182,11 +171,6 @@ def upgrade() -> None:
         sa.Column(
             "updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
         ),
-        sa.Column("id", sa.BigInteger(), nullable=False),
-        sa.Column("user_id", sa.BigInteger(), nullable=True),
-        sa.Column("group_id", sa.BigInteger(), nullable=True),
-        sa.Column("name", sa.String(length=128), nullable=False),
-        sa.Column("description", sa.String(length=512), nullable=False),
         sa.CheckConstraint(
             "(user_id IS NULL) <> (group_id IS NULL)",
             name=op.f("ck__transfer__owner_constraint"),
@@ -332,7 +316,6 @@ def downgrade() -> None:
     op.drop_table("connection")
     op.drop_index(op.f("ix__group__admin_id"), table_name="group")
     op.drop_table("group")
-    op.drop_table("acl")
     op.drop_index(op.f("ix__user__username"), table_name="user")
     op.drop_table("user")
     op.execute("drop sequence task_id_sequence")

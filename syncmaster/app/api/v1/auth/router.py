@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.deps import SettingsMarker, UnitOfWorkMarker
-from app.api.services.unit_of_work import UnitOfWork
 from app.api.v1.auth.schemas import AuthTokenSchema
 from app.api.v1.auth.utils import sign_jwt
 from app.config import Settings
 from app.exceptions import EntityNotFound
+from app.services import UnitOfWork
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 

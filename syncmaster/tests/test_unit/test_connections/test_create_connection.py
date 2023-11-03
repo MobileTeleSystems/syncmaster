@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from tests.utils import MockGroup, MockUser
 
 from app.config import Settings
-from app.db.models import Acl, AuthData, Connection, ObjectType, Rule
+from app.db.models import AuthData, Connection
 from app.db.repositories.utils import decrypt_auth_data
 
 pytestmark = [pytest.mark.asyncio]
@@ -87,17 +87,6 @@ async def test_simple_user_can_create_connection(
             "user": decrypt_auth_data(creds.value, settings=settings)["user"],
         },
     }
-    # check that acl not created for user on own connection
-    acl = (
-        await session.scalars(
-            select(Acl).filter_by(
-                user_id=simple_user.id,
-                object_id=connection.id,
-                object_type=ObjectType.CONNECTION,
-            )
-        )
-    ).first()
-    assert acl is None
 
 
 async def test_unauthorized_user_cannot_create_connection(client: AsyncClient):
@@ -409,17 +398,6 @@ async def test_group_member_can_create_group_connection(
             "user": decrypt_auth_data(creds.value, settings=settings)["user"],
         },
     }
-    acl = (
-        await session.scalars(
-            select(Acl).filter_by(
-                user_id=member.id,
-                object_id=connection.id,
-                object_type=ObjectType.CONNECTION,
-            )
-        )
-    ).first()
-    assert acl is not None
-    assert acl.rule == Rule.DELETE
 
 
 async def test_other_group_admin_cannot_create_group_connection(
@@ -531,17 +509,6 @@ async def test_group_admin_can_create_group_connection(
             "user": decrypt_auth_data(creds.value, settings=settings)["user"],
         },
     }
-    # check that acl not created for superuser
-    acl = (
-        await session.scalars(
-            select(Acl).filter_by(
-                user_id=admin.id,
-                object_id=connection.id,
-                object_type=ObjectType.CONNECTION,
-            )
-        )
-    ).first()
-    assert acl is None
 
 
 async def test_superuser_can_create_group_connection(
@@ -610,18 +577,6 @@ async def test_superuser_can_create_group_connection(
                 "user": decrypt_auth_data(creds.value, settings=settings)["user"],
             },
         }
-
-        # check that acl not created for superuser
-        acl = (
-            await session.scalars(
-                select(Acl).filter_by(
-                    user_id=superuser.id,
-                    object_id=connection.id,
-                    object_type=ObjectType.CONNECTION,
-                )
-            )
-        ).first()
-        assert acl is None
 
 
 async def test_superuser_can_create_other_user_connection(

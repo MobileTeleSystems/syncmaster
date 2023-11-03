@@ -5,7 +5,6 @@ from fastapi.responses import JSONResponse
 
 from app.api.v1.schemas import StatusResponseSchema
 from app.exceptions import (
-    AclNotFound,
     ActionNotAllowed,
     AlreadyIsGroupMember,
     AlreadyIsNotGroupMember,
@@ -126,12 +125,6 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterExceptio
         return exception_json_response(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=exc.message,
-        )
-
-    if isinstance(exc, AclNotFound):
-        return exception_json_response(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Rule was already deleted",
         )
 
     if isinstance(exc, CannotConnectToTaskQueueError):

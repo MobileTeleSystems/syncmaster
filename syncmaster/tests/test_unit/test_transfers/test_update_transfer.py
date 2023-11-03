@@ -91,53 +91,6 @@ async def test_superuser_can_update_user_transfer(
     }
 
 
-async def test_member_cannot_update_transfer_with_read_rule(
-    client: AsyncClient,
-    group_transfer: MockTransfer,
-):
-    member_with_read_rule = group_transfer.owner_group.members[0]
-    result = await client.patch(
-        f"v1/transfers/{group_transfer.id}",
-        headers={"Authorization": f"Bearer {member_with_read_rule.token}"},
-        json={"name": "New transfer name"},
-    )
-    assert result.status_code == 404
-    assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Transfer not found",
-    }
-
-
-@pytest.mark.parametrize("member_index", (1, 2))
-async def test_member_can_update_transfer_with_write_or_delete_rule(
-    member_index: int,
-    client: AsyncClient,
-    group_transfer: MockTransfer,
-):
-    member = group_transfer.owner_group.members[member_index]
-    result = await client.patch(
-        f"v1/transfers/{group_transfer.id}",
-        headers={"Authorization": f"Bearer {member.token}"},
-        json={"name": "New transfer name"},
-    )
-    assert result.status_code == 200
-    assert result.json() == {
-        "id": group_transfer.id,
-        "user_id": group_transfer.user_id,
-        "group_id": group_transfer.group_id,
-        "name": "New transfer name",
-        "description": group_transfer.description,
-        "schedule": group_transfer.schedule,
-        "is_scheduled": group_transfer.is_scheduled,
-        "source_connection_id": group_transfer.source_connection_id,
-        "target_connection_id": group_transfer.target_connection_id,
-        "source_params": group_transfer.source_params,
-        "target_params": group_transfer.target_params,
-        "strategy_params": group_transfer.strategy_params,
-    }
-
-
 async def test_group_admin_can_update_own_group_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,

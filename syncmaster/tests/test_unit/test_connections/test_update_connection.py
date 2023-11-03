@@ -1,9 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
 from tests.utils import MockConnection, MockGroup, MockUser
-
-from app.db.models import Acl, ObjectType, Rule
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -96,64 +93,6 @@ async def test_superuser_can_update_user_connection(
     }
 
 
-@pytest.mark.parametrize("rule", (Rule.WRITE, Rule.DELETE))
-async def test_member_can_update_connection_with_write_or_delete_rule(
-    rule: Rule,
-    client: AsyncClient,
-    group_connection: MockConnection,
-    session: AsyncSession,
-):
-    member = group_connection.owner_group.members[0]
-    result = await client.patch(
-        f"v1/connections/{group_connection.id}",
-        headers={"Authorization": f"Bearer {member.token}"},
-        json={"name": "New connection name"},
-    )
-    assert result.status_code == 404
-    assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Connection not found",
-    }
-
-    acl = Acl(
-        object_id=group_connection.id,
-        object_type=ObjectType.CONNECTION,
-        user_id=member.id,
-        rule=rule,
-    )
-    session.add(acl)
-    await session.commit()
-
-    result = await client.patch(
-        f"v1/connections/{group_connection.id}",
-        headers={"Authorization": f"Bearer {member.token}"},
-        json={"name": "New connection name"},
-    )
-    assert result.status_code == 200
-    assert result.json() == {
-        "id": group_connection.id,
-        "name": "New connection name",
-        "description": group_connection.description,
-        "user_id": group_connection.user_id,
-        "group_id": group_connection.group_id,
-        "connection_data": {
-            "type": group_connection.data["type"],
-            "host": group_connection.data["host"],
-            "port": group_connection.data["port"],
-            "additional_params": group_connection.data["additional_params"],
-            "database_name": group_connection.data["database_name"],
-        },
-        "auth_data": {
-            "type": group_connection.credentials.value["type"],
-            "user": group_connection.credentials.value["user"],
-        },
-    }
-
-    await session.delete(acl)
-    await session.commit()
-
-
 async def test_group_admin_can_update_own_group_connection(
     client: AsyncClient,
     group_connection: MockConnection,
@@ -231,7 +170,7 @@ async def test_superuser_can_update_group_connection(
     }
 
 
-async def test_can_update_connection_data_fields(
+async def test_update_connection_data_fields(
     client: AsyncClient,
     user_connection: MockConnection,
 ):
@@ -278,7 +217,7 @@ async def test_can_update_connection_data_fields(
     }
 
 
-async def test_can_update_connection_auth_data_fields(
+async def test_update_connection_auth_data_fields(
     client: AsyncClient,
     user_connection: MockConnection,
 ):

@@ -236,23 +236,3 @@ async def test_user_not_an_owner_of_the_transfer_error(
 
     assert result.status_code == 404
     assert result.json()["message"] == "Transfer not found"
-
-
-async def test_copy_without_rules_to_delete_error(
-    client: AsyncClient,
-    session: AsyncSession,
-    group_transfer: MockTransfer,
-):
-    user = group_transfer.owner_group.members[0]
-
-    result = await client.post(
-        f"v1/transfers/{group_transfer.id}/copy_transfer",
-        headers={"Authorization": f"Bearer {user.token}"},
-        json={
-            "new_user_id": group_transfer.owner_group.members[1].id,
-            "remove_source": True,
-        },
-    )
-
-    assert result.status_code == 404
-    assert result.json()["message"] == "Transfer not found"

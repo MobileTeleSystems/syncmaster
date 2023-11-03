@@ -5,10 +5,10 @@ from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
 from app.api.deps import AuthMarker, SettingsMarker, UnitOfWorkMarker
-from app.api.services.unit_of_work import UnitOfWork
 from app.api.v1.auth.utils import decode_jwt
 from app.config import Settings
 from app.db.models import User
+from app.services.unit_of_work import UnitOfWork
 
 
 def get_user(

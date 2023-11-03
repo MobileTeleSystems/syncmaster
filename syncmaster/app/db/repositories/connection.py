@@ -4,11 +4,10 @@ from sqlalchemy import ScalarResult, insert, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Acl, Connection, ObjectType, Rule
-from app.db.repositories.base import RepositoryWithAcl
+from app.db.models import Connection
+from app.db.repositories.base import RepositoryWithOwner
 from app.db.utils import Pagination
 from app.exceptions import (
-    AclNotFound,
     ActionNotAllowed,
     ConnectionNotFound,
     ConnectionOwnerException,
@@ -19,9 +18,8 @@ from app.exceptions import (
 from app.exceptions.base import EntityNotFound
 
 
-class ConnectionRepository(RepositoryWithAcl[Connection]):
+class ConnectionRepository(RepositoryWithOwner[Connection]):
     def __init__(self, session: AsyncSession):
-        self._object_type = ObjectType.CONNECTION
         super().__init__(model=Connection, session=session)
 
     async def paginate(
@@ -43,7 +41,7 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
             args.append(Connection.group_id == group_id)
 
         if not is_superuser:
-            stmt = self.apply_acl(stmt, current_user_id)
+            stmt = self.check_permission(stmt, current_user_id)
         return await self._paginate(
             query=stmt.where(*args).order_by(Connection.name),
             page=page,
@@ -55,13 +53,12 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
         connection_id: int,
         current_user_id: int,
         is_superuser: bool,
-        rule: Rule = Rule.READ,
     ) -> Connection:
         stmt = select(Connection).where(
             Connection.id == connection_id, Connection.is_deleted.is_(False)
         )
         if not is_superuser:
-            stmt = self.apply_acl(stmt, current_user_id, rule=rule)
+            stmt = self.check_permission(stmt, current_user_id)
         result: ScalarResult[Connection] = await self._session.scalars(stmt)
         try:
             return result.one()
@@ -109,7 +106,6 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
                 connection_id=connection_id,
                 current_user_id=current_user_id,
                 is_superuser=is_superuser,
-                rule=Rule.WRITE,
             )
             for key in connection.data:
                 if key not in connection_data or connection_data[key] is None:
@@ -125,14 +121,16 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
             self._raise_error(e)
 
     async def delete(
-        self, connection_id: int, current_user_id: int, is_superuser: bool
+        self,
+        connection_id: int,
+        is_superuser: bool,
+        current_user_id: int,
     ) -> None:
         if not is_superuser:
             await self.read_by_id(
                 connection_id=connection_id,
                 current_user_id=current_user_id,
                 is_superuser=False,
-                rule=Rule.DELETE,
             )
         try:
             await self._delete(connection_id)
@@ -170,63 +168,6 @@ class ConnectionRepository(RepositoryWithAcl[Connection]):
 
         except IntegrityError as e:
             self._raise_error(e)
-
-    async def add_or_update_rule(
-        self,
-        connection_id: int,
-        current_user_id: int,
-        is_superuser: bool,
-        rule: Rule,
-        target_user_id: int,
-    ) -> Acl:
-        if not is_superuser and not await self.has_owner_access(
-            object_id=connection_id,
-            user_id=current_user_id,
-        ):
-            raise ConnectionNotFound
-        connection = await self.read_by_id(
-            connection_id=connection_id,
-            current_user_id=current_user_id,
-            is_superuser=is_superuser,
-        )
-        if connection.group_id is None:
-            raise ActionNotAllowed
-        try:
-            return await self._add_or_update_rule(
-                object_id=connection_id,
-                user_id=target_user_id,
-                rule=rule,
-            )
-        except IntegrityError as e:
-            self._raise_error(e)
-
-    async def delete_rule(
-        self,
-        current_user_id: int,
-        is_superuser: bool,
-        connection_id: int,
-        target_user_id: int,
-    ):
-        if not is_superuser and not await self.has_owner_access(
-            object_id=connection_id,
-            user_id=current_user_id,
-        ):
-            raise ConnectionNotFound
-        connection = await self.read_by_id(
-            connection_id=connection_id,
-            current_user_id=current_user_id,
-            is_superuser=is_superuser,
-        )
-        if connection.group_id is None:
-            raise ActionNotAllowed
-        try:
-            await self._delete_acl_rule(
-                object_id=connection_id,
-                user_id=target_user_id,
-            )
-        except EntityNotFound as e:
-            raise AclNotFound from e
-        return
 
     def _raise_error(self, err: DBAPIError) -> NoReturn:
         constraint = err.__cause__.__cause__.constraint_name  # type: ignore[union-attr]
