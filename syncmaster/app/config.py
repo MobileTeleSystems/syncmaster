@@ -55,12 +55,7 @@ class Settings(BaseSettings):
         )
 
     def build_rabbit_connection_uri(
-        self,
-        *,
-        host: str | None = None,
-        port: int | None = None,
-        user: str | None = None,
-        password: str | None = None
+        self, *, host: str | None = None, port: int | None = None, user: str | None = None, password: str | None = None
     ) -> str:
         return "amqp://{}:{}@{}:{}//".format(
             user or self.RABBITMQ_USER,

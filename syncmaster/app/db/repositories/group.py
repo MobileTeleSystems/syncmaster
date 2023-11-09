@@ -23,27 +23,19 @@ class GroupRepository(Repository[Group]):
     def __init__(self, session: AsyncSession):
         super().__init__(model=Group, session=session)
 
-    async def paginate(
-        self, page: int, page_size: int, current_user_id: int, is_superuser: bool
-    ) -> Pagination:
+    async def paginate(self, page: int, page_size: int, current_user_id: int, is_superuser: bool) -> Pagination:
         stmt = select(Group).where(Group.is_deleted.is_(False))
         if not is_superuser:
-            stmt = stmt.join(
-                UserGroup, UserGroup.group_id == Group.id, full=True
-            ).where(
+            stmt = stmt.join(UserGroup, UserGroup.group_id == Group.id, full=True).where(
                 or_(
                     UserGroup.user_id == current_user_id,
                     Group.admin_id == current_user_id,
                 )
             )
 
-        return await self._paginate(
-            query=stmt.order_by(Group.name), page=page, page_size=page_size
-        )
+        return await self._paginate(query=stmt.order_by(Group.name), page=page, page_size=page_size)
 
-    async def read_by_id(
-        self, group_id: int, is_superuser: bool, current_user_id: int
-    ) -> Group:
+    async def read_by_id(self, group_id: int, is_superuser: bool, current_user_id: int) -> Group:
         stmt = select(Group).where(Group.id == group_id, Group.is_deleted.is_(False))
         if not is_superuser:
             stmt = (
@@ -93,9 +85,7 @@ class GroupRepository(Repository[Group]):
         if not is_superuser:
             args.append(Group.admin_id == current_user_id)
         try:
-            return await self._update(
-                *args, name=name, description=description, admin_id=admin_id
-            )
+            return await self._update(*args, name=name, description=description, admin_id=admin_id)
         except EntityNotFound as e:
             raise GroupNotFound from e
         except IntegrityError as e:
@@ -147,28 +137,17 @@ class GroupRepository(Repository[Group]):
         if not (group.admin_id == current_user_id or is_superuser):
             raise ActionNotAllowed
         try:
-            await self._session.execute(
-                insert(UserGroup).values(group_id=group_id, user_id=target_user_id)
-            )
+            await self._session.execute(insert(UserGroup).values(group_id=group_id, user_id=target_user_id))
         except IntegrityError as err:
             self._raise_error(err)
         else:
             await self._session.flush()
 
     async def is_admin(self, group_id: int, user_id: int) -> bool:
-        return (
-            await self._session.scalar(
-                select(Group.admin_id == user_id).where(Group.id == group_id)
-            )
-        ) or False
+        return (await self._session.scalar(select(Group.admin_id == user_id).where(Group.id == group_id))) or False
 
     async def is_member(self, group_id: int, user_id: int) -> bool:
-        stmt = (
-            select(UserGroup)
-            .where(UserGroup.group_id == group_id, UserGroup.user_id == user_id)
-            .exists()
-            .select()
-        )
+        stmt = select(UserGroup).where(UserGroup.group_id == group_id, UserGroup.user_id == user_id).exists().select()
         return await self._session.scalar(stmt)
 
     async def delete_user(
@@ -183,11 +162,7 @@ class GroupRepository(Repository[Group]):
             is_superuser=is_superuser,
             current_user_id=current_user_id,
         )
-        if not (
-            group.admin_id == current_user_id
-            or is_superuser
-            or target_user_id == current_user_id
-        ):
+        if not (group.admin_id == current_user_id or is_superuser or target_user_id == current_user_id):
             raise ActionNotAllowed
 
         ug = await self._session.get(

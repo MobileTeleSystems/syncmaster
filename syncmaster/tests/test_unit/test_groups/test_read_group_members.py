@@ -5,10 +5,8 @@ from tests.utils import MockGroup, MockUser
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_not_authorized_user_cannot_read_group_members(
-    client: AsyncClient, not_empty_group: MockGroup
-):
-    result = await client.get(f"v1/groups/{not_empty_group.id}/users")
+async def test_not_authorized_user_cannot_read_group_members(client: AsyncClient, group: MockGroup):
+    result = await client.get(f"v1/groups/{group.id}/users")
     assert result.status_code == 401
     assert result.json() == {
         "ok": False,
@@ -18,10 +16,10 @@ async def test_not_authorized_user_cannot_read_group_members(
 
 
 async def test_not_member_of_group_cannot_read_group_members(
-    client: AsyncClient, not_empty_group: MockGroup, simple_user: MockUser
+    client: AsyncClient, group: MockGroup, simple_user: MockUser
 ):
     result = await client.get(
-        f"v1/groups/{not_empty_group.id}/users",
+        f"v1/groups/{group.id}/users",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
     assert result.status_code == 404
@@ -32,12 +30,10 @@ async def test_not_member_of_group_cannot_read_group_members(
     }
 
 
-async def test_member_of_group_can_read_group_members(
-    client: AsyncClient, not_empty_group: MockGroup
-):
-    user = not_empty_group.members[0]
+async def test_member_of_group_can_read_group_members(client: AsyncClient, group: MockGroup):
+    user = group.members[0]
     result = await client.get(
-        f"v1/groups/{not_empty_group.id}/users",
+        f"v1/groups/{group.id}/users",
         headers={
             "Authorization": f"Bearer {user.token}",
         },
@@ -49,7 +45,7 @@ async def test_member_of_group_can_read_group_members(
             "is_superuser": user.is_superuser,
             "username": user.username,
         }
-        for user in not_empty_group.members
+        for user in group.members
     ]
     members.sort(key=lambda x: x["username"])
     assert result.json() == {
@@ -67,9 +63,7 @@ async def test_member_of_group_can_read_group_members(
     }
 
 
-async def test_admin_of_group_can_read_group_members(
-    client: AsyncClient, empty_group: MockGroup, not_empty_group: MockGroup
-):
+async def test_admin_of_group_can_read_group_members(client: AsyncClient, empty_group: MockGroup, group: MockGroup):
     result = await client.get(
         f"v1/groups/{empty_group.id}/users",
         headers={
@@ -92,7 +86,7 @@ async def test_admin_of_group_can_read_group_members(
     }
 
     result = await client.get(
-        f"v1/groups/{not_empty_group.id}/users",
+        f"v1/groups/{group.id}/users",
         headers={
             "Authorization": f"Bearer {empty_group.admin.token}",
         },
@@ -108,7 +102,7 @@ async def test_admin_of_group_can_read_group_members(
 async def test_admin_of_group_can_read_group_members(
     client: AsyncClient,
     empty_group: MockGroup,
-    not_empty_group: MockGroup,
+    group: MockGroup,
     superuser: MockUser,
 ):
     result = await client.get(
@@ -133,7 +127,7 @@ async def test_admin_of_group_can_read_group_members(
     }
 
     result = await client.get(
-        f"v1/groups/{not_empty_group.id}/users",
+        f"v1/groups/{group.id}/users",
         headers={
             "Authorization": f"Bearer {superuser.token}",
         },
@@ -145,7 +139,7 @@ async def test_admin_of_group_can_read_group_members(
             "is_superuser": user.is_superuser,
             "username": user.username,
         }
-        for user in not_empty_group.members
+        for user in group.members
     ]
     members.sort(key=lambda x: x["username"])
     assert result.json() == {

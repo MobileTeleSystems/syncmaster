@@ -14,7 +14,7 @@ from app.exceptions import (
     ConnectionDeleteException,
     ConnectionNotFound,
     ConnectionOwnerException,
-    DifferentConnectionsOwners,
+    DifferentTransferAndConnectionsGroups,
     DifferentTypeConnectionsAndParams,
     GroupAdminNotFound,
     GroupAlreadyExists,
@@ -41,14 +41,10 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterExceptio
         )
 
     if isinstance(exc, ConnectionDeleteException):
-        return exception_json_response(
-            status_code=status.HTTP_409_CONFLICT, detail=exc.message
-        )
+        return exception_json_response(status_code=status.HTTP_409_CONFLICT, detail=exc.message)
 
     if isinstance(exc, ActionNotAllowed):
-        return exception_json_response(
-            status_code=status.HTTP_403_FORBIDDEN, detail="You have no power here"
-        )
+        return exception_json_response(status_code=status.HTTP_403_FORBIDDEN, detail="You have no power here")
 
     if isinstance(exc, GroupNotFound):
         return exception_json_response(
@@ -112,13 +108,13 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterExceptio
     if isinstance(exc, TransferOwnerException):
         return exception_json_response(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cannot create transfer with that user_id and group_id values",
+            detail="Cannot create transfer with that group_id value",
         )
 
-    if isinstance(exc, DifferentConnectionsOwners):
+    if isinstance(exc, DifferentTransferAndConnectionsGroups):
         return exception_json_response(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Transfer connections should belong to only one user or group",
+            detail="Connections should belong to the transfer group",
         )
 
     if isinstance(exc, DifferentTypeConnectionsAndParams):

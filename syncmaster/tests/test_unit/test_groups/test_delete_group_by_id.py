@@ -5,9 +5,7 @@ from tests.utils import MockGroup, MockUser
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_not_authorized_user_cannot_delete_group(
-    client: AsyncClient, empty_group: MockGroup
-):
+async def test_not_authorized_user_cannot_delete_group(client: AsyncClient, empty_group: MockGroup):
     result = await client.delete(f"v1/groups/{empty_group.id}")
     assert result.status_code == 401
     assert result.json() == {
@@ -32,13 +30,11 @@ async def test_not_member_of_group_cannot_delete_group(
     }
 
 
-async def test_member_of_group_cannot_delete_group(
-    client: AsyncClient, not_empty_group: MockGroup
-):
-    user = not_empty_group.members[0]
+async def test_member_of_group_cannot_delete_group(client: AsyncClient, group: MockGroup):
+    user = group.members[0]
 
     result = await client.delete(
-        f"v1/groups/{not_empty_group.id}",
+        f"v1/groups/{group.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
     assert result.status_code == 403
@@ -49,9 +45,7 @@ async def test_member_of_group_cannot_delete_group(
     }
 
 
-async def test_admin_of_group_cannot_delete_group(
-    client: AsyncClient, empty_group: MockGroup
-):
+async def test_admin_of_group_cannot_delete_group(client: AsyncClient, empty_group: MockGroup):
     result = await client.delete(
         f"v1/groups/{empty_group.id}",
         headers={
@@ -66,9 +60,7 @@ async def test_admin_of_group_cannot_delete_group(
     }
 
 
-async def test_superuser_can_delete_group(
-    client: AsyncClient, empty_group: MockGroup, superuser: MockUser
-):
+async def test_superuser_can_delete_group(client: AsyncClient, empty_group: MockGroup, superuser: MockUser):
     result = await client.delete(
         f"v1/groups/{empty_group.id}",
         headers={
@@ -117,9 +109,7 @@ async def test_superuser_can_delete_group(
     }
 
 
-async def test_cannot_delete_group_twice(
-    client: AsyncClient, empty_group: MockGroup, superuser: MockUser
-):
+async def test_cannot_delete_group_twice(client: AsyncClient, empty_group: MockGroup, superuser: MockUser):
     result = await client.delete(
         f"v1/groups/{empty_group.id}",
         headers={

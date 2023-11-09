@@ -56,12 +56,10 @@ class MockConnection:
     def __init__(
         self,
         connection: Connection,
-        owner_user: MockUser | None,
-        owner_group: MockGroup | None,
+        owner_group: MockGroup,
         credentials: MockCredentials | None = None,
     ):
         self.connection = connection
-        self.owner_user = owner_user
         self.owner_group = owner_group
         self.credentials = credentials
 
@@ -75,13 +73,11 @@ class MockTransfer:
         transfer: Transfer,
         source_connection: MockConnection,
         target_connection: MockConnection,
-        owner_user: MockUser | None,
-        owner_group: MockGroup | None,
+        owner_group: MockGroup,
     ):
         self.transfer = transfer
         self.source_connection = source_connection
         self.target_connection = target_connection
-        self.owner_user = owner_user
         self.owner_group = owner_group
 
     def __getattr__(self, attr: str) -> Any:
@@ -112,18 +108,14 @@ async def prepare_new_database(settings: Settings) -> None:
     await engine.dispose()
 
 
-def do_run_migrations(
-    connection: AlchConnection, target_metadata: MetaData, context: EnvironmentContext
-) -> None:
+def do_run_migrations(connection: AlchConnection, target_metadata: MetaData, context: EnvironmentContext) -> None:
     context.configure(connection=connection, target_metadata=target_metadata)
 
     with context.begin_transaction():
         context.run_migrations()
 
 
-async def run_async_migrations(
-    config: Config, target_metadata: MetaData, revision: str, action="up"
-) -> None:
+async def run_async_migrations(config: Config, target_metadata: MetaData, revision: str, action="up") -> None:
     script = ScriptDirectory.from_config(config)
 
     def upgrade(rev, context):
@@ -147,9 +139,7 @@ async def run_async_migrations(
         )
 
         async with connectable.connect() as connection:
-            await connection.run_sync(
-                do_run_migrations, target_metadata=target_metadata, context=context
-            )
+            await connection.run_sync(do_run_migrations, target_metadata=target_metadata, context=context)
 
         await connectable.dispose()
 
@@ -168,9 +158,7 @@ async def database_exists(connection: AsyncConnection, db_name: str) -> bool:
 
 async def create_database(connection: AsyncConnection, db_name: str) -> None:
     await connection.execute(text("commit"))
-    query = "CREATE DATABASE {} ENCODING {} TEMPLATE {}".format(
-        db_name, "utf8", "template1"
-    )
+    query = "CREATE DATABASE {} ENCODING {} TEMPLATE {}".format(db_name, "utf8", "template1")
     await connection.execute(text(query))
 
 
@@ -180,9 +168,7 @@ async def drop_database(connection: AsyncConnection, db_name: str) -> None:
     await connection.execute(text(query))
 
 
-async def get_run_on_end(
-    client: AsyncClient, transfer_id: int, run_id: int, token: str
-) -> dict[str, Any]:
+async def get_run_on_end(client: AsyncClient, transfer_id: int, run_id: int, token: str) -> dict[str, Any]:
     while True:
         result = await client.get(
             f"v1/transfers/{transfer_id}/runs/{run_id}",

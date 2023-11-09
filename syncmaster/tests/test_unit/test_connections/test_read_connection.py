@@ -5,10 +5,8 @@ from tests.utils import MockConnection, MockGroup, MockUser
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_unauthorized_user_cannot_read_connection(
-    client: AsyncClient, user_connection: MockConnection
-):
-    result = await client.get(f"v1/connections/{user_connection.id}")
+async def test_unauthorized_user_cannot_read_connection(client: AsyncClient, group_connection: MockConnection):
+    result = await client.get(f"v1/connections/{group_connection.id}")
     assert result.status_code == 401
     assert result.json() == {
         "ok": False,
@@ -17,13 +15,13 @@ async def test_unauthorized_user_cannot_read_connection(
     }
 
 
-async def test_owner_can_read_connection_of_self(
+async def test_groupless_user_cannot_read_connection(
     client: AsyncClient,
-    user_connection: MockConnection,
+    group_connection: MockConnection,
     simple_user: MockUser,
 ):
     result = await client.get(
-        f"v1/connections/{user_connection.id}",
+        f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
     assert result.status_code == 404
@@ -33,27 +31,32 @@ async def test_owner_can_read_connection_of_self(
         "message": "Connection not found",
     }
 
+
+async def test_in_group_user_can_read_connection(
+    client: AsyncClient,
+    group_connection: MockConnection,
+    simple_user: MockUser,
+):
     result = await client.get(
-        f"v1/connections/{user_connection.id}",
-        headers={"Authorization": f"Bearer {user_connection.owner_user.token}"},
+        f"v1/connections/{group_connection.id}",
+        headers={"Authorization": f"Bearer {group_connection.owner_group.members[0].token}"},
     )
     assert result.status_code == 200
     assert result.json() == {
-        "id": user_connection.id,
-        "description": user_connection.description,
-        "group_id": user_connection.group_id,
-        "user_id": user_connection.user_id,
-        "name": user_connection.name,
+        "id": group_connection.id,
+        "description": group_connection.description,
+        "group_id": group_connection.group_id,
+        "name": group_connection.name,
         "connection_data": {
-            "type": user_connection.data["type"],
-            "database_name": user_connection.data["database_name"],
-            "host": user_connection.data["host"],
-            "port": user_connection.data["port"],
-            "additional_params": user_connection.data["additional_params"],
+            "type": group_connection.data["type"],
+            "database_name": group_connection.data["database_name"],
+            "host": group_connection.data["host"],
+            "port": group_connection.data["port"],
+            "additional_params": group_connection.data["additional_params"],
         },
         "auth_data": {
-            "type": user_connection.credentials.value["type"],
-            "user": user_connection.credentials.value["user"],
+            "type": group_connection.credentials.value["type"],
+            "user": group_connection.credentials.value["user"],
         },
     }
 
@@ -83,7 +86,6 @@ async def test_group_admin_can_read_connection_of_his_group(
         "id": group_connection.id,
         "description": group_connection.description,
         "group_id": group_connection.group_id,
-        "user_id": group_connection.user_id,
         "name": group_connection.name,
         "connection_data": {
             "type": group_connection.data["type"],
@@ -102,26 +104,23 @@ async def test_group_admin_can_read_connection_of_his_group(
 async def test_group_admin_cannot_read_connection_of_other(
     client: AsyncClient,
     group_connection: MockConnection,
-    user_connection: MockConnection,
     empty_group: MockGroup,
 ):
-    for connection in group_connection, user_connection:
-        result = await client.get(
-            f"v1/connections/{connection.id}",
-            headers={"Authorization": f"Bearer {empty_group.admin.token}"},
-        )
-        assert result.status_code == 404
-        assert result.json() == {
-            "ok": False,
-            "status_code": 404,
-            "message": "Connection not found",
-        }
+    result = await client.get(
+        f"v1/connections/{group_connection.id}",
+        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+    )
+    assert result.status_code == 404
+    assert result.json() == {
+        "ok": False,
+        "status_code": 404,
+        "message": "Connection not found",
+    }
 
 
 async def test_superuser_can_read_all_connections(
     client: AsyncClient,
     superuser: MockUser,
-    user_connection: MockConnection,
     group_connection: MockConnection,
 ):
     result = await client.get(
@@ -133,7 +132,6 @@ async def test_superuser_can_read_all_connections(
         "id": group_connection.id,
         "description": group_connection.description,
         "group_id": group_connection.group_id,
-        "user_id": group_connection.user_id,
         "name": group_connection.name,
         "connection_data": {
             "type": group_connection.data["type"],
@@ -148,30 +146,12 @@ async def test_superuser_can_read_all_connections(
         },
     }
 
-    result = await client.get(
-        f"v1/connections/{user_connection.id}",
-        headers={"Authorization": f"Bearer {superuser.token}"},
-    )
-    assert result.status_code == 200
-    assert result.json() == {
-        "id": user_connection.id,
-        "description": user_connection.description,
-        "group_id": user_connection.group_id,
-        "user_id": user_connection.user_id,
-        "name": user_connection.name,
-        "connection_data": {
-            "type": user_connection.data["type"],
-            "database_name": user_connection.data["database_name"],
-            "host": user_connection.data["host"],
-            "port": user_connection.data["port"],
-            "additional_params": user_connection.data["additional_params"],
-        },
-        "auth_data": {
-            "type": group_connection.credentials.value["type"],
-            "user": group_connection.credentials.value["user"],
-        },
-    }
 
+async def test_superuser_can_not_read_unknown_connection_error(
+    client: AsyncClient,
+    superuser: MockUser,
+    group_connection: MockConnection,
+):
     result = await client.get(
         f"v1/connections/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},

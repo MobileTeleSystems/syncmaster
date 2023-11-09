@@ -19,16 +19,12 @@ class UserRepository(Repository[User]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(model=User, session=session)
 
-    async def paginate(
-        self, page: int, page_size: int, is_superuser: bool
-    ) -> Pagination:
+    async def paginate(self, page: int, page_size: int, is_superuser: bool) -> Pagination:
         stmt = select(User).where(User.is_deleted.is_(False))
 
         if not is_superuser:
             stmt = stmt.where(User.is_active.is_(True))
-        return await self._paginate(
-            query=stmt.order_by(User.username), page=page, page_size=page_size
-        )
+        return await self._paginate(query=stmt.order_by(User.username), page=page, page_size=page_size)
 
     async def read_by_id(self, user_id: int, **kwargs: Any) -> User:
         try:
@@ -38,26 +34,20 @@ class UserRepository(Repository[User]):
 
     async def read_by_username(self, username: str) -> User:
         try:
-            result: ScalarResult[User] = await self._session.scalars(
-                select(User).where(User.username == username)
-            )
+            result: ScalarResult[User] = await self._session.scalars(select(User).where(User.username == username))
             return result.one()
         except NoResultFound as e:
             raise EntityNotFound from e
 
     async def update(self, user_id: int, data: dict) -> User:
         try:
-            return await self._update(
-                User.id == user_id, User.is_deleted.is_(False), **data
-            )
+            return await self._update(User.id == user_id, User.is_deleted.is_(False), **data)
         except EntityNotFound as e:
             raise UserNotFound from e
         except IntegrityError as e:
             self._raise_error(e)
 
-    async def create(
-        self, username: str, is_active: bool, is_superuser: bool = False
-    ) -> User:
+    async def create(self, username: str, is_active: bool, is_superuser: bool = False) -> User:
         query = (
             insert(User)
             .values(

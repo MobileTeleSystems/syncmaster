@@ -5,17 +5,17 @@ from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Connection
-from app.db.repositories.base import RepositoryWithOwner
+from app.db.repositories.repository_with_owner import RepositoryWithOwner
 from app.db.utils import Pagination
 from app.exceptions import (
     ActionNotAllowed,
     ConnectionNotFound,
     ConnectionOwnerException,
+    EntityNotFound,
     GroupNotFound,
     SyncmasterException,
     UserNotFound,
 )
-from app.exceptions.base import EntityNotFound
 
 
 class ConnectionRepository(RepositoryWithOwner[Connection]):
@@ -28,22 +28,18 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         page_size: int,
         current_user_id: int,
         is_superuser: bool,
-        group_id: int | None = None,
-        user_id: int | None = None,
+        group_id: int,
     ) -> Pagination:
-        if not is_superuser and user_id and current_user_id != user_id:
-            raise ActionNotAllowed
-        stmt = select(Connection).where(Connection.is_deleted.is_(False))
-        args = []
-        if user_id is not None:
-            args.append(Connection.user_id == user_id)
-        if group_id is not None:
-            args.append(Connection.group_id == group_id)
+        stmt = select(Connection).where(
+            Connection.is_deleted.is_(False),
+            Connection.group_id == group_id,
+        )
 
         if not is_superuser:
-            stmt = self.check_permission(stmt, current_user_id)
+            stmt = self.apply_user_permission(stmt, current_user_id)
+
         return await self._paginate(
-            query=stmt.where(*args).order_by(Connection.name),
+            query=stmt.order_by(Connection.name),
             page=page,
             page_size=page_size,
         )
@@ -54,11 +50,9 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         current_user_id: int,
         is_superuser: bool,
     ) -> Connection:
-        stmt = select(Connection).where(
-            Connection.id == connection_id, Connection.is_deleted.is_(False)
-        )
+        stmt = select(Connection).where(Connection.id == connection_id, Connection.is_deleted.is_(False))
         if not is_superuser:
-            stmt = self.check_permission(stmt, current_user_id)
+            stmt = self.apply_user_permission(stmt, current_user_id)
         result: ScalarResult[Connection] = await self._session.scalars(stmt)
         try:
             return result.one()
@@ -67,8 +61,7 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
 
     async def create(
         self,
-        user_id: int | None,
-        group_id: int | None,
+        group_id: int,
         name: str,
         description: str,
         data: dict[str, Any],
@@ -76,7 +69,6 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         query = (
             insert(Connection)
             .values(
-                user_id=user_id,
                 group_id=group_id,
                 name=name,
                 description=description,
@@ -125,44 +117,30 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         connection_id: int,
         is_superuser: bool,
         current_user_id: int,
+        group_id: int,
     ) -> None:
-        if not is_superuser:
-            await self.read_by_id(
-                connection_id=connection_id,
-                current_user_id=current_user_id,
-                is_superuser=False,
-            )
+        if not is_superuser and not await self.check_admin_rights(
+            user_id=current_user_id,
+            group_id=group_id,
+        ):
+            raise ActionNotAllowed
+
         try:
             await self._delete(connection_id)
         except (NoResultFound, EntityNotFound) as e:
             raise ConnectionNotFound from e
 
-    async def copy_connection(
+    async def copy(
         self,
         connection_id: int,
-        new_group_id: int | None,
-        new_user_id: int | None,
-        remove_source: bool,
-        current_user_id: int,
-        is_superuser: bool,
+        new_group_id: int,
     ) -> Connection:
-        if not is_superuser and not await self.has_owner_access(
-            connection_id,
-            current_user_id,
-        ):
-            raise ConnectionNotFound
         try:
-            kwargs_for_copy = dict(
-                user_id=new_user_id,
-                group_id=new_group_id,
-            )
+            kwargs_for_copy = dict(group_id=new_group_id)
             new_connection = await self._copy(
                 Connection.id == connection_id,
                 **kwargs_for_copy,
             )
-
-            if remove_source:
-                await self._delete(connection_id)
 
             return new_connection
 

@@ -47,15 +47,11 @@ async def update_user(
     if user_id != current_user.id and not current_user.is_superuser:
         raise ActionNotAllowed
     async with unit_of_work:
-        change_user = await unit_of_work.user.update(
-            user_id=user_id, data=user_data.dict()
-        )
+        change_user = await unit_of_work.user.update(user_id=user_id, data=user_data.dict())
     return ReadUserSchema.from_orm(change_user)
 
 
-@router.post(
-    "/users/{user_id}/activate", dependencies=[Depends(get_user(is_superuser=True))]
-)
+@router.post("/users/{user_id}/activate", dependencies=[Depends(get_user(is_superuser=True))])
 async def activate_user(
     user_id: int,
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
@@ -66,18 +62,12 @@ async def activate_user(
     return StatusResponseSchema(ok=True, status_code=200, message="User was activated")
 
 
-@router.post(
-    "/users/{user_id}/deactivate", dependencies=[Depends(get_user(is_superuser=True))]
-)
+@router.post("/users/{user_id}/deactivate", dependencies=[Depends(get_user(is_superuser=True))])
 async def deactivate_user(
     user_id: int,
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ):
     async with unit_of_work:
-        user = await unit_of_work.user.update(
-            user_id=user_id, data={"is_active": False}
-        )
+        user = await unit_of_work.user.update(user_id=user_id, data={"is_active": False})
     logger.info("User %s active=%s id=%d", user, user.is_active, user.id)
-    return StatusResponseSchema(
-        ok=True, status_code=200, message="User was deactivated"
-    )
+    return StatusResponseSchema(ok=True, status_code=200, message="User was deactivated")

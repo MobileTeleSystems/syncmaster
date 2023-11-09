@@ -20,9 +20,7 @@ class Handler(ABC):
     def __init__(
         self,
         connection: PostgresConnectionDTO | OracleConnectionDTO | HiveConnectionDTO,
-        transfer_params: OracleTransferParamsDTO
-        | PostgresTransferParamsDTO
-        | HiveTransferParamsDTO,
+        transfer_params: OracleTransferParamsDTO | PostgresTransferParamsDTO | HiveTransferParamsDTO,
         spark: SparkSession | None = None,
     ) -> None:
         self.spark = spark
@@ -39,15 +37,11 @@ class Handler(ABC):
 
     def init_reader(self):
         if self.connection_dto is None:
-            raise ValueError(
-                "At first you need to initialize connection. " "Run `init_connection"
-            )
+            raise ValueError("At first you need to initialize connection. " "Run `init_connection")
 
     def init_writer(self):
         if self.connection_dto is None:
-            raise ValueError(
-                "At first you need to initialize connection. " "Run `init_connection"
-            )
+            raise ValueError("At first you need to initialize connection. " "Run `init_connection")
 
     def read(self) -> DataFrame:
         if self.reader is None:

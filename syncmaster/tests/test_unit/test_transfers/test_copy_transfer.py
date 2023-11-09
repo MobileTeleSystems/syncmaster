@@ -4,31 +4,36 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockTransfer, MockUser
+from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser
 
 from app.db.models import Connection
 
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_simple_user_can_copy_transfer(
+# TODO: implent tests for: from group to same group
+async def test_group_member_can_copy_transfer(
     client: AsyncClient,
-    user_transfer: MockTransfer,
+    group_transfer: MockTransfer,
+    empty_group: MockGroup,
     session: AsyncSession,
-    simple_user: MockUser,  # TODO: implent tests for user -> user, user -> group, group -> user, group -> group.
     request,
     event_loop,
 ):
     # Arrange
-    user = user_transfer.owner_user
+    user = group_transfer.owner_group.admin
+    await client.post(
+        f"v1/groups/{empty_group.id}/users/{user.user.id}",
+        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+    )
 
     # Act
     result_response = await client.post(
-        f"v1/transfers/{user_transfer.id}/copy_transfer",
+        f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "new_user_id": simple_user.id,
             "remove_source": False,
+            "new_group_id": empty_group.id,
         },
     )
 
@@ -53,61 +58,87 @@ async def test_simple_user_can_copy_transfer(
 
     copied_transfer_response = await client.get(
         f"v1/transfers/{result_json['copied_transfer_id']}",
-        headers={"Authorization": f"Bearer {simple_user.token}"},
+        headers={"Authorization": f"Bearer {user.token}"},
     )
 
     assert copied_transfer_response.status_code == 200
 
     new_connection_source_response = await client.get(
         f"v1/connections/{result_json['source_connection_id']}",
-        headers={"Authorization": f"Bearer {simple_user.token}"},
+        headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    assert (
-        new_connection_source_response.json()["connection_data"]
-        == user_transfer.source_connection.connection.data
-    )
+    assert new_connection_source_response.json()["connection_data"] == group_transfer.source_connection.connection.data
     assert not new_connection_source_response.json()["auth_data"]
 
     new_connection_target_response = await client.get(
         f"v1/connections/{result_json['target_connection_id']}",
-        headers={"Authorization": f"Bearer {simple_user.token}"},
+        headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    assert (
-        new_connection_target_response.json()["connection_data"]
-        == user_transfer.target_connection.connection.data
-    )
+    assert new_connection_target_response.json()["connection_data"] == group_transfer.target_connection.connection.data
     assert not new_connection_target_response.json()["auth_data"]
 
-    assert (
-        copied_transfer_response.json()["source_connection_id"]
-        == new_connection_source_response.json()["id"]
-    )
-    assert (
-        copied_transfer_response.json()["target_connection_id"]
-        == new_connection_target_response.json()["id"]
-    )
+    assert copied_transfer_response.json()["source_connection_id"] == new_connection_source_response.json()["id"]
+    assert copied_transfer_response.json()["target_connection_id"] == new_connection_target_response.json()["id"]
 
 
-async def test_simple_user_can_copy_transfer_remove_source_transfer(
+async def test_group_member_can_not_copy_transfer_with_remove_source(
     client: AsyncClient,
-    user_transfer: MockTransfer,
+    group_transfer: MockTransfer,
+    empty_group: MockGroup,
     session: AsyncSession,
-    simple_user: MockUser,
+    event_loop,
+):
+    # Arrange
+    user = group_transfer.owner_group.members[0]
+    await client.post(
+        f"v1/groups/{empty_group.id}/users/{user.user.id}",
+        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+    )
+
+    # Act
+    result_response = await client.post(
+        f"v1/transfers/{group_transfer.id}/copy_transfer",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "remove_source": True,
+            "new_group_id": empty_group.id,
+        },
+    )
+
+    # Assert
+    result_json = result_response.json()
+    assert result_response.status_code == 403
+    assert result_json == {
+        "ok": False,
+        "status_code": 403,
+        "message": "You have no power here",
+    }
+
+
+async def test_group_admin_can_copy_transfer_with_remove_source_transfer(
+    client: AsyncClient,
+    group_transfer: MockTransfer,
+    empty_group: MockGroup,
+    session: AsyncSession,
     request,
     event_loop,
 ):
     # Arrange
-    user = user_transfer.owner_user
+    user = group_transfer.owner_group.admin
+    await client.post(
+        f"v1/groups/{empty_group.id}/users/{user.user.id}",
+        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+    )
 
     # Act
     result_response = await client.post(
-        f"v1/transfers/{user_transfer.id}/copy_transfer",
+        f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "new_user_id": simple_user.id,
             "remove_source": True,
+            "new_group_id": empty_group.id,
         },
     )
 
@@ -131,7 +162,7 @@ async def test_simple_user_can_copy_transfer_remove_source_transfer(
     request.addfinalizer(delete_rows)
 
     source_transfer_response = await client.get(
-        f"v1/transfers/{user_transfer.id}",
+        f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
@@ -140,99 +171,126 @@ async def test_simple_user_can_copy_transfer_remove_source_transfer(
 
     copied_transfer_response = await client.get(
         f"v1/transfers/{result_json['copied_transfer_id']}",
-        headers={"Authorization": f"Bearer {simple_user.token}"},
+        headers={"Authorization": f"Bearer {user.token}"},
     )
 
     assert copied_transfer_response.status_code == 200
 
     new_connection_source_response = await client.get(
         f"v1/connections/{result_json['source_connection_id']}",
-        headers={"Authorization": f"Bearer {simple_user.token}"},
+        headers={"Authorization": f"Bearer {user.token}"},
     )
-    assert (
-        new_connection_source_response.json()["connection_data"]
-        == user_transfer.source_connection.connection.data
-    )
+    assert new_connection_source_response.json()["connection_data"] == group_transfer.source_connection.connection.data
     assert not new_connection_source_response.json()["auth_data"]
 
     new_connection_target_response = await client.get(
         f"v1/connections/{result_json['target_connection_id']}",
-        headers={"Authorization": f"Bearer {simple_user.token}"},
+        headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    assert (
-        new_connection_target_response.json()["connection_data"]
-        == user_transfer.target_connection.connection.data
-    )
+    assert new_connection_target_response.json()["connection_data"] == group_transfer.target_connection.connection.data
     assert not new_connection_target_response.json()["auth_data"]
 
-    assert (
-        copied_transfer_response.json()["source_connection_id"]
-        == new_connection_source_response.json()["id"]
-    )
-    assert (
-        copied_transfer_response.json()["target_connection_id"]
-        == new_connection_target_response.json()["id"]
-    )
+    assert copied_transfer_response.json()["source_connection_id"] == new_connection_source_response.json()["id"]
+    assert copied_transfer_response.json()["target_connection_id"] == new_connection_target_response.json()["id"]
 
 
-async def test_copy_transfer_with_non_existing_recipient_error(
+async def test_copy_transfer_with_non_existing_recipient_group_error(
     client: AsyncClient,
-    user_transfer: MockTransfer,
+    group_transfer: MockTransfer,
     session: AsyncSession,
 ):
-    simple_user = user_transfer.owner_user
-
+    # Arrange
+    admin = group_transfer.owner_group.admin
+    # Act
     result = await client.post(
-        f"v1/transfers/{user_transfer.id}/copy_transfer",
-        headers={"Authorization": f"Bearer {simple_user.token}"},
+        f"v1/transfers/{group_transfer.id}/copy_transfer",
+        headers={"Authorization": f"Bearer {admin.token}"},
         json={
-            "new_user_id": 100500,
             "remove_source": False,
+            "new_group_id": -1,
         },
     )
 
     assert result.status_code == 404
-    assert result.json()["message"] == "User not found"
+    assert result.json()["message"] == "Group not found"
 
 
 async def test_copy_non_existing_transfer_error(
     client: AsyncClient,
     session: AsyncSession,
-    user_transfer: MockTransfer,
-    superuser,
+    group_transfer: MockTransfer,
+    empty_group: MockGroup,
 ):
-    simple_user = user_transfer.owner_user
+    # Arrnage
+    user = group_transfer.owner_group.admin
+    await client.post(
+        f"v1/groups/{empty_group.id}/users/{user.user.id}",
+        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+    )
 
+    # Act
     result = await client.post(
-        "v1/transfers/100500/copy_transfer",
+        "v1/transfers/-1/copy_transfer",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "remove_source": False,
+            "new_group_id": empty_group.id,
+        },
+    )
+
+    # Assert
+    assert result.status_code == 404
+    assert result.json()["message"] == "Transfer not found"
+
+
+async def test_groupless_user_can_not_copy_transfer_error(
+    client: AsyncClient,
+    session: AsyncSession,
+    simple_user: MockUser,
+    group_transfer: MockTransfer,
+    empty_group: MockGroup,
+):
+    # Act
+    result = await client.post(
+        f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={
-            "new_user_id": superuser.id,
             "remove_source": False,
+            "new_group_id": empty_group.id,
         },
     )
 
+    # Assert
     assert result.status_code == 404
     assert result.json()["message"] == "Transfer not found"
 
 
-async def test_user_not_an_owner_of_the_transfer_error(
+async def test_other_group_member_can_not_copy_transfer(
     client: AsyncClient,
-    user_transfer: MockTransfer,
-    session: AsyncSession,
     group_transfer: MockTransfer,
+    group_connection: MockConnection,
+    session: AsyncSession,
+    event_loop,
 ):
-    result = await client.post(
-        f"v1/transfers/{user_transfer.id}/copy_transfer",
-        headers={
-            "Authorization": f"Bearer {group_transfer.owner_group.members[0].token}"
-        },
+    # Arrange
+    group_member = group_connection.owner_group.members[0]
+
+    # Act
+    result_response = await client.post(
+        f"v1/transfers/{group_transfer.id}/copy_transfer",
+        headers={"Authorization": f"Bearer {group_member.token}"},
         json={
-            "new_user_id": group_transfer.owner_group.members[1].id,
-            "remove_source": False,
+            "remove_source": True,
+            "new_group_id": group_connection.owner_group.group.id,
         },
     )
 
-    assert result.status_code == 404
-    assert result.json()["message"] == "Transfer not found"
+    # Assert
+    result_json = result_response.json()
+    assert result_response.status_code == 404
+    assert result_json == {
+        "ok": False,
+        "status_code": 404,
+        "message": "Transfer not found",
+    }

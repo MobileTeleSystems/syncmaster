@@ -39,8 +39,7 @@ class ReadPostgresTransferData(BaseModel):
 
 class ReadTransferSchema(BaseModel):
     id: int
-    user_id: int | None = None
-    group_id: int | None = None
+    group_id: int
     source_connection_id: int
     target_connection_id: int
     name: str
@@ -69,14 +68,12 @@ class TransferPageSchema(PageSchema):
 
 
 class CopyTransferSchema(BaseModel):
-    new_user_id: int | None
-    new_group_id: int | None
+    new_group_id: int
     remove_source: bool = False
 
 
 class CreateTransferSchema(BaseModel):
-    user_id: int | None
-    group_id: int | None
+    group_id: int
     source_connection_id: int
     target_connection_id: int
     name: str
@@ -118,9 +115,7 @@ class UpdateTransferSchema(BaseModel):
     target_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData | None = Field(
         discriminator="type", default=None
     )
-    strategy_params: FullStrategy | IncrementalStrategy | None = Field(
-        discriminator="type", default=None
-    )
+    strategy_params: FullStrategy | IncrementalStrategy | None = Field(discriminator="type", default=None)
 
 
 class ShortRunSchema(BaseModel):

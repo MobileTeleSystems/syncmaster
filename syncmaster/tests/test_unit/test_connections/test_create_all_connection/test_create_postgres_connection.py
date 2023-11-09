@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockUser
+from tests.utils import MockGroup
 
 from app.config import Settings
 from app.db.models import AuthData, Connection
@@ -13,16 +13,15 @@ pytestmark = [pytest.mark.asyncio]
 
 async def test_create_postgres_connection(
     client: AsyncClient,
-    simple_user: MockUser,
+    group: MockGroup,
     session: AsyncSession,
     settings: Settings,
 ):
     result = await client.post(
         "v1/connections",
-        headers={"Authorization": f"Bearer {simple_user.token}"},
+        headers={"Authorization": f"Bearer {group.admin.token}"},
         json={
-            "user_id": simple_user.id,
-            "group_id": None,
+            "group_id": group.id,
             "name": "New connection",
             "description": "",
             "connection_data": {
@@ -42,7 +41,6 @@ async def test_create_postgres_connection(
         await session.scalars(
             select(Connection).filter_by(
                 name="New connection",
-                user_id=simple_user.id,
             )
         )
     ).first()
@@ -61,7 +59,6 @@ async def test_create_postgres_connection(
         "name": connection.name,
         "description": connection.description,
         "group_id": connection.group_id,
-        "user_id": connection.user_id,
         "connection_data": {
             "type": connection.data["type"],
             "host": connection.data["host"],

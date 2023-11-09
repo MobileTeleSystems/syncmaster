@@ -4,9 +4,7 @@ from typing import Any
 
 
 class Pagination:
-    def __init__(
-        self, items: Sequence[Any], page: int, page_size: int, total: int
-    ) -> None:
+    def __init__(self, items: Sequence[Any], page: int, page_size: int, total: int) -> None:
         self.items = items
         self.total = total
         self.page_size = page_size

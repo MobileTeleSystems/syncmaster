@@ -32,12 +32,10 @@ async def test_not_member_group_cannot_add_user_to_group(
     }
 
 
-async def test_member_group_cannot_add_user_to_group(
-    client: AsyncClient, not_empty_group: MockGroup, simple_user: MockUser
-):
-    user = not_empty_group.members[0]
+async def test_member_group_cannot_add_user_to_group(client: AsyncClient, group: MockGroup, simple_user: MockUser):
+    user = group.members[0]
     result = await client.post(
-        f"v1/groups/{not_empty_group.id}/users/{simple_user.id}",
+        f"v1/groups/{group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
     assert result.status_code == 403
@@ -48,9 +46,7 @@ async def test_member_group_cannot_add_user_to_group(
     }
 
 
-async def test_admin_of_group_can_add_user_to_group(
-    client: AsyncClient, empty_group: MockGroup, simple_user: MockUser
-):
+async def test_admin_of_group_can_add_user_to_group(client: AsyncClient, empty_group: MockGroup, simple_user: MockUser):
     result = await client.post(
         f"v1/groups/{empty_group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {empty_group.admin.token}"},
@@ -131,9 +127,7 @@ async def test_superuser_can_add_user_to_group(
     }
 
 
-async def test_cannot_add_user_to_group_twice(
-    client: AsyncClient, empty_group: MockGroup, simple_user: MockUser
-):
+async def test_cannot_add_user_to_group_twice(client: AsyncClient, empty_group: MockGroup, simple_user: MockUser):
     result = await client.post(
         f"v1/groups/{empty_group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {empty_group.admin.token}"},

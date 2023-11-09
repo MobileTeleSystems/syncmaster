@@ -60,9 +60,7 @@ def test_settings():
 @pytest.fixture(scope="session")
 def alembic_config(settings: Settings) -> AlembicConfig:
     alembic_cfg = AlembicConfig(PROJECT_PATH / "alembic.ini")
-    alembic_cfg.set_main_option(
-        "script_location", os.fspath(PROJECT_PATH / "app/db/migrations")
-    )
+    alembic_cfg.set_main_option("script_location", os.fspath(PROJECT_PATH / "app/db/migrations"))
     alembic_cfg.set_main_option("sqlalchemy.url", settings.build_db_connection_uri())
     return alembic_cfg
 
@@ -100,100 +98,26 @@ async def session(sessionmaker: async_sessionmaker[AsyncSession]):
 
 
 @pytest_asyncio.fixture(scope="session")
-async def client(settings: Settings, async_engine: AsyncEngine) -> AsyncGenerator:
+async def client(
+    settings: Settings,
+    async_engine: AsyncEngine,
+) -> AsyncGenerator:
     app = get_application(settings=settings)
     async with AsyncClient(app=app, base_url="http://testserver") as client:
         yield client
 
 
 @pytest_asyncio.fixture
-async def user_transfer(
-    session: AsyncSession, settings: Settings
-) -> AsyncGenerator[MockTransfer, None]:
-    user = await create_user(
-        session=session, username="transfer_username", is_active=True
-    )
-    source_connection = await create_connection(
-        session=session,
-        name="user_transfer_source_connection",
-        user_id=user.id,
-    )
-
-    source_connection_creds = await create_credentials(
-        session=session,
-        settings=settings,
-        connection_id=source_connection.id,
-    )
-
-    target_connection = await create_connection(
-        session=session,
-        name="user_transfer_target_connection",
-        user_id=user.id,
-    )
-
-    target_connection_creds = await create_credentials(
-        session=session,
-        settings=settings,
-        connection_id=target_connection.id,
-    )
-
-    transfer = await create_transfer(
-        session=session,
-        name="user_transfer",
-        user_id=user.id,
-        source_connection_id=source_connection.id,
-        target_connection_id=target_connection.id,
-    )
-    mock_user = MockUser(user=user, auth_token=sign_jwt(user.id, settings))
-    yield MockTransfer(
-        transfer=transfer,
-        source_connection=MockConnection(
-            connection=source_connection,
-            owner_user=mock_user,
-            owner_group=None,
-            credentials=MockCredentials(
-                value=decrypt_auth_data(
-                    source_connection_creds.value, settings=settings
-                ),
-                connection_id=source_connection.id,
-            ),
-        ),
-        target_connection=MockConnection(
-            connection=target_connection,
-            owner_user=mock_user,
-            owner_group=None,
-            credentials=MockCredentials(
-                value=decrypt_auth_data(
-                    target_connection_creds.value, settings=settings
-                ),
-                connection_id=target_connection.id,
-            ),
-        ),
-        owner_user=mock_user,
-        owner_group=None,
-    )
-    await session.delete(transfer)
-    await session.delete(source_connection)
-    await session.delete(target_connection)
-    await session.delete(user)
-    await session.commit()
-
-
-@pytest_asyncio.fixture
 async def group_transfer(
-    session: AsyncSession, settings: Settings
+    session: AsyncSession,
+    settings: Settings,
 ) -> AsyncGenerator[MockTransfer, None]:
-    group_admin = await create_user(
-        session=session, username="group_admin_connection", is_active=True
-    )
-    group = await create_group(
-        session=session, name="connection_group", admin_id=group_admin.id
-    )
+    group_admin = await create_user(session=session, username="group_transfer_admin", is_active=True)
+    group = await create_group(session=session, name="group_for_group_transfer", admin_id=group_admin.id)
     members: list[MockUser] = []
     for username in (
-        "connection_group_member_1",  # with read rule
-        "connection_group_member_2",  # with write rule
-        "connection_group_member_3",  # with delete rule
+        "transfer_group_member_1",
+        "transfer_group_member_2",
     ):
         u = await create_user(session, username, is_active=True)
         members.append(MockUser(user=u, auth_token=sign_jwt(u.id, settings)))
@@ -237,27 +161,20 @@ async def group_transfer(
         transfer=transfer,
         source_connection=MockConnection(
             connection=source_connection,
-            owner_user=None,
             owner_group=mock_group,
             credentials=MockCredentials(
-                value=decrypt_auth_data(
-                    source_connection_creds.value, settings=settings
-                ),
+                value=decrypt_auth_data(source_connection_creds.value, settings=settings),
                 connection_id=source_connection.id,
             ),
         ),
         target_connection=MockConnection(
             connection=target_connection,
-            owner_user=None,
             owner_group=mock_group,
             credentials=MockCredentials(
-                value=decrypt_auth_data(
-                    target_connection_creds.value, settings=settings
-                ),
+                value=decrypt_auth_data(target_connection_creds.value, settings=settings),
                 connection_id=target_connection.id,
             ),
         ),
-        owner_user=None,
         owner_group=mock_group,
     )
     await session.delete(transfer)

@@ -27,11 +27,7 @@ class RunRepository(Repository[Run]):
         page: int,
         page_size: int,
     ) -> Pagination:
-        query = (
-            select(Run)
-            .where(Run.transfer_id == transfer_id)
-            .order_by(desc(Run.created_at))
-        )
+        query = select(Run).where(Run.transfer_id == transfer_id).order_by(desc(Run.created_at))
         return await self._paginate(query=query, page=page, page_size=page_size)
 
     async def read_by_id(self, run_id: int) -> Run:

@@ -49,19 +49,11 @@ def run_transfer(session: Session, run_id: int, settings: Settings):
 
     controller = None
 
-    q_source_auth_data = select(AuthData).where(
-        AuthData.connection_id == run.transfer.source_connection.id
-    )
-    q_target_auth_data = select(AuthData).where(
-        AuthData.connection_id == run.transfer.target_connection.id
-    )
+    q_source_auth_data = select(AuthData).where(AuthData.connection_id == run.transfer.source_connection.id)
+    q_target_auth_data = select(AuthData).where(AuthData.connection_id == run.transfer.target_connection.id)
 
-    target_auth_data = decrypt_auth_data(
-        session.scalars(q_target_auth_data).one().value, settings
-    )
-    source_auth_data = decrypt_auth_data(
-        session.scalars(q_source_auth_data).one().value, settings
-    )
+    target_auth_data = decrypt_auth_data(session.scalars(q_target_auth_data).one().value, settings)
+    source_auth_data = decrypt_auth_data(session.scalars(q_source_auth_data).one().value, settings)
 
     try:
         controller = TransferController(
