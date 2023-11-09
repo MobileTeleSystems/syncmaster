@@ -11,7 +11,7 @@ class TransferNotFound(SyncmasterException):
     pass
 
 
-class DifferentConnectionsOwners(SyncmasterException):
+class DifferentTransferAndConnectionsGroups(SyncmasterException):
     pass
 
 
@@ -29,6 +29,5 @@ class DifferentTypeConnectionsAndParams(SyncmasterException):
     @property
     def message(self) -> str:
         return (
-            f"{self.conn} connection has type `{self.connection_type}` "
-            f"but its params has `{self.params_type}` type"
+            f"{self.conn} connection has type `{self.connection_type}` " f"but its params has `{self.params_type}` type"
         )

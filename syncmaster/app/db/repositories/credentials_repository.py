@@ -52,11 +52,7 @@ class CredentialsRepository(Repository[AuthData]):
             return result.one()
 
     async def delete_from_connection(self, connection_id: int) -> AuthData:
-        query = (
-            delete(AuthData)
-            .where(AuthData.connection_id == connection_id)
-            .returning(AuthData)
-        )
+        query = delete(AuthData).where(AuthData.connection_id == connection_id).returning(AuthData)
 
         try:
             result: ScalarResult[AuthData] = await self._session.scalars(query)

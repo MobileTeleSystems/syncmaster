@@ -15,60 +15,9 @@ from app.db.models import UserGroup
 
 
 @pytest_asyncio.fixture
-async def user_run(session: AsyncSession, settings: Settings) -> MockTransfer:
-    user = await create_user(
-        session=session, username="transfer_username", is_active=True
-    )
-    source_connection = await create_connection(
-        session=session,
-        name="user_transfer_source_connection",
-        user_id=user.id,
-    )
-    target_connection = await create_connection(
-        session=session,
-        name="user_transfer_target_connection",
-        user_id=user.id,
-    )
-
-    transfer = await create_transfer(
-        session=session,
-        name="user_transfer",
-        user_id=user.id,
-        source_connection_id=source_connection.id,
-        target_connection_id=target_connection.id,
-    )
-    mock_user = MockUser(user=user, auth_token=sign_jwt(user.id, settings))
-    mock_transfer = MockTransfer(
-        transfer=transfer,
-        source_connection=MockConnection(
-            connection=source_connection, owner_user=mock_user, owner_group=None
-        ),
-        target_connection=MockConnection(
-            connection=target_connection, owner_user=mock_user, owner_group=None
-        ),
-        owner_user=mock_user,
-        owner_group=None,
-    )
-    run = await create_run(session=session, transfer_id=transfer.id)
-
-    yield MockRun(run=run, transfer=mock_transfer)
-
-    await session.delete(run)
-    await session.delete(transfer)
-    await session.delete(source_connection)
-    await session.delete(target_connection)
-    await session.delete(user)
-    await session.commit()
-
-
-@pytest_asyncio.fixture
 async def group_run(session: AsyncSession, settings: Settings) -> MockTransfer:
-    group_admin = await create_user(
-        session=session, username="group_admin_connection", is_active=True
-    )
-    group = await create_group(
-        session=session, name="connection_group", admin_id=group_admin.id
-    )
+    group_admin = await create_user(session=session, username="group_admin_connection", is_active=True)
+    group = await create_group(session=session, name="connection_group", admin_id=group_admin.id)
     members: list[MockUser] = []
     for username in (
         "connection_group_member_1",  # with read rule
@@ -105,13 +54,8 @@ async def group_run(session: AsyncSession, settings: Settings) -> MockTransfer:
     )
     mock_transfer = MockTransfer(
         transfer=transfer,
-        source_connection=MockConnection(
-            connection=source_connection, owner_user=None, owner_group=mock_group
-        ),
-        target_connection=MockConnection(
-            connection=target_connection, owner_user=None, owner_group=mock_group
-        ),
-        owner_user=None,
+        source_connection=MockConnection(connection=source_connection, owner_group=mock_group),
+        target_connection=MockConnection(connection=target_connection, owner_group=mock_group),
         owner_group=mock_group,
     )
     run = await create_run(session=session, transfer_id=transfer.id)

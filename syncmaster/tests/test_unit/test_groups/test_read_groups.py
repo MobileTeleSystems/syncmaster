@@ -84,13 +84,11 @@ async def test_regular_user_can_get_groups_if_member(
 async def test_empty_groups_list_after_remove_from_group(
     client: AsyncClient,
     session: AsyncSession,
-    not_empty_group: MockGroup,
+    group: MockGroup,
     simple_user: MockUser,
 ):
-    user = not_empty_group.members[0]
-    result = await client.get(
-        "v1/groups", headers={"Authorization": f"Bearer {user.token}"}
-    )
+    user = group.members[0]
+    result = await client.get("v1/groups", headers={"Authorization": f"Bearer {user.token}"})
     assert result.status_code == 200
     assert result.json() == {
         "meta": {
@@ -105,19 +103,15 @@ async def test_empty_groups_list_after_remove_from_group(
         },
         "items": [
             {
-                "id": not_empty_group.id,
-                "name": not_empty_group.name,
-                "description": not_empty_group.description,
-                "admin_id": not_empty_group.admin_id,
+                "id": group.id,
+                "name": group.name,
+                "description": group.description,
+                "admin_id": group.admin_id,
             }
         ],
     }
 
-    await session.execute(
-        delete(UserGroup).where(
-            UserGroup.user_id == user.id, UserGroup.group_id == not_empty_group.id
-        )
-    )
+    await session.execute(delete(UserGroup).where(UserGroup.user_id == user.id, UserGroup.group_id == group.id))
     await session.commit()
     result = await client.get(
         "v1/groups",
@@ -143,7 +137,7 @@ async def test_superuser_can_read_all_groups(
     client: AsyncClient,
     superuser: MockUser,
     empty_group: MockGroup,
-    not_empty_group: MockGroup,
+    group: MockGroup,
 ):
     result = await client.get(
         "v1/groups",
@@ -169,10 +163,10 @@ async def test_superuser_can_read_all_groups(
                 "admin_id": empty_group.admin_id,
             },
             {
-                "id": not_empty_group.id,
-                "name": not_empty_group.name,
-                "description": not_empty_group.description,
-                "admin_id": not_empty_group.admin_id,
+                "id": group.id,
+                "name": group.name,
+                "description": group.description,
+                "admin_id": group.admin_id,
             },
         ],
     }

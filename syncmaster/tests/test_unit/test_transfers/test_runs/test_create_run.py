@@ -11,12 +11,12 @@ pytestmark = [pytest.mark.asyncio]
 
 async def test_unauthorized_user_cannot_create_run(
     client: AsyncClient,
-    user_transfer: MockTransfer,
+    group_transfer: MockTransfer,
     mocker,
 ) -> None:
     mocker.patch("app.tasks.config.celery.send_task")
 
-    result = await client.post(f"v1/transfers/{user_transfer.id}/runs")
+    result = await client.post(f"v1/transfers/{group_transfer.id}/runs")
     assert result.status_code == 401
     assert result.json() == {
         "ok": False,
@@ -25,17 +25,17 @@ async def test_unauthorized_user_cannot_create_run(
     }
 
 
-async def test_transfer_owner_can_create_run(
+async def test_groupless_user_user_can_not_create_run(
     client: AsyncClient,
     simple_user: MockUser,
-    user_transfer: MockTransfer,
+    group_transfer: MockTransfer,
     session: AsyncSession,
     mocker,
 ) -> None:
     mocker.patch("app.tasks.config.celery.send_task")
 
     result = await client.post(
-        f"v1/transfers/{user_transfer.id}/runs",
+        f"v1/transfers/{group_transfer.id}/runs",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
     assert result.status_code == 404
@@ -43,30 +43,6 @@ async def test_transfer_owner_can_create_run(
         "ok": False,
         "status_code": 404,
         "message": "Transfer not found",
-    }
-
-    result = await client.post(
-        f"v1/transfers/{user_transfer.id}/runs",
-        headers={"Authorization": f"Bearer {user_transfer.owner_user.token}"},
-    )
-
-    run = (
-        await session.scalars(
-            select(Run)
-            .filter_by(transfer_id=user_transfer.id, status=Status.CREATED)
-            .order_by(desc(Run.created_at))
-        )
-    ).first()
-
-    assert result.status_code == 200
-    assert result.json() == {
-        "id": run.id,
-        "transfer_id": run.transfer_id,
-        "status": run.status.value,
-        "log_url": run.log_url,
-        "started_at": run.started_at,
-        "ended_at": run.ended_at,
-        "transfer_dump": run.transfer_dump,
     }
 
 
@@ -97,9 +73,7 @@ async def test_group_admin_can_create_run_of_transfer_his_group(
 
     run = (
         await session.scalars(
-            select(Run)
-            .filter_by(transfer_id=group_transfer.id, status=Status.CREATED)
-            .order_by(desc(Run.created_at))
+            select(Run).filter_by(transfer_id=group_transfer.id, status=Status.CREATED).order_by(desc(Run.created_at))
         )
     ).first()
 
@@ -118,63 +92,55 @@ async def test_group_admin_can_create_run_of_transfer_his_group(
 async def test_group_admin_cannot_create_run_of_other_group_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
-    user_transfer: MockTransfer,
     empty_group: MockGroup,
     session: AsyncSession,
     mocker,
 ) -> None:
     mocker.patch("app.tasks.config.celery.send_task")
 
-    for transfer in (user_transfer, group_transfer):
-        result = await client.post(
-            f"v1/transfers/{transfer.id}/runs",
-            headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+    result = await client.post(
+        f"v1/transfers/{group_transfer.id}/runs",
+        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+    )
+    assert result.status_code == 404
+    assert result.json() == {
+        "ok": False,
+        "status_code": 404,
+        "message": "Transfer not found",
+    }
+    assert (
+        await session.scalars(
+            select(Run).filter_by(transfer_id=group_transfer.id, status=Status.CREATED).order_by(desc(Run.created_at))
         )
-        assert result.status_code == 404
-        assert result.json() == {
-            "ok": False,
-            "status_code": 404,
-            "message": "Transfer not found",
-        }
-        assert (
-            await session.scalars(
-                select(Run)
-                .filter_by(transfer_id=transfer.id, status=Status.CREATED)
-                .order_by(desc(Run.created_at))
-            )
-        ).first() is None
+    ).first() is None
 
 
-async def test_superuser_can_create_run_for_any_transfer(
+async def test_superuser_can_create_run(
     client: AsyncClient,
     superuser: MockUser,
-    user_transfer: MockTransfer,
     group_transfer: MockTransfer,
     session: AsyncSession,
     mocker,
 ) -> None:
     mocker.patch("app.tasks.config.celery.send_task")
 
-    for transfer in (user_transfer, group_transfer):
-        result = await client.post(
-            f"v1/transfers/{transfer.id}/runs",
-            headers={"Authorization": f"Bearer {superuser.token}"},
+    result = await client.post(
+        f"v1/transfers/{group_transfer.id}/runs",
+        headers={"Authorization": f"Bearer {superuser.token}"},
+    )
+    run = (
+        await session.scalars(
+            select(Run).filter_by(transfer_id=group_transfer.id, status=Status.CREATED).order_by(desc(Run.created_at))
         )
-        run = (
-            await session.scalars(
-                select(Run)
-                .filter_by(transfer_id=transfer.id, status=Status.CREATED)
-                .order_by(desc(Run.created_at))
-            )
-        ).first()
+    ).first()
 
-        assert result.status_code == 200
-        assert result.json() == {
-            "id": run.id,
-            "transfer_id": run.transfer_id,
-            "status": run.status.value,
-            "log_url": run.log_url,
-            "started_at": run.started_at,
-            "ended_at": run.ended_at,
-            "transfer_dump": run.transfer_dump,
-        }
+    assert result.status_code == 200
+    assert result.json() == {
+        "id": run.id,
+        "transfer_id": run.transfer_id,
+        "status": run.status.value,
+        "log_url": run.log_url,
+        "started_at": run.started_at,
+        "ended_at": run.ended_at,
+        "transfer_dump": run.transfer_dump,
+    }

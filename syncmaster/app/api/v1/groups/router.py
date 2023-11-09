@@ -77,9 +77,7 @@ async def update_group(
     return ReadGroupSchema.from_orm(group)
 
 
-@router.delete(
-    "/groups/{group_id}", dependencies=[Depends(get_user(is_superuser=True))]
-)
+@router.delete("/groups/{group_id}", dependencies=[Depends(get_user(is_superuser=True))])
 async def delete_group(
     group_id: int,
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
@@ -121,9 +119,7 @@ async def add_user_to_group(
             current_user_id=current_user.id,
             is_superuser=current_user.is_superuser,
         )
-    return StatusResponseSchema(
-        ok=True, status_code=200, message="User was successfully added to group"
-    )
+    return StatusResponseSchema(ok=True, status_code=200, message="User was successfully added to group")
 
 
 @router.delete("/groups/{group_id}/users/{user_id}")
@@ -140,6 +136,4 @@ async def delete_user_from_group(
             current_user_id=current_user.id,
             is_superuser=current_user.is_superuser,
         )
-    return StatusResponseSchema(
-        ok=True, status_code=200, message="User was successfully removed from group"
-    )
+    return StatusResponseSchema(ok=True, status_code=200, message="User was successfully removed from group")

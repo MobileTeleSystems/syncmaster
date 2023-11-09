@@ -1,15 +1,15 @@
 """init
 
-Revision ID: 4699e11ad40c
+Revision ID: bc9c0c4ca652
 Revises:
-Create Date: 2023-11-03 10:10:02.608461
+Create Date: 2023-11-03 13:13:51.798850
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "4699e11ad40c"
+revision = "bc9c0c4ca652"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -30,12 +30,8 @@ def upgrade() -> None:
         sa.Column("username", sa.String(length=256), nullable=False),
         sa.Column("is_superuser", sa.Boolean(), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False),
-        sa.Column(
-            "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
-        ),
-        sa.Column(
-            "updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
-        ),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk__user")),
     )
@@ -46,12 +42,8 @@ def upgrade() -> None:
         sa.Column("name", sa.String(length=256), nullable=False),
         sa.Column("description", sa.String(length=512), nullable=False),
         sa.Column("admin_id", sa.BigInteger(), nullable=False),
-        sa.Column(
-            "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
-        ),
-        sa.Column(
-            "updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
-        ),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
         sa.ForeignKeyConstraint(
             ["admin_id"],
@@ -66,48 +58,23 @@ def upgrade() -> None:
     op.create_table(
         "connection",
         sa.Column("id", sa.BigInteger(), nullable=False),
-        sa.Column("user_id", sa.BigInteger(), nullable=True),
-        sa.Column("group_id", sa.BigInteger(), nullable=True),
+        sa.Column("group_id", sa.BigInteger(), nullable=False),
         sa.Column("name", sa.String(length=128), nullable=False),
         sa.Column("description", sa.String(length=512), nullable=False),
         sa.Column("data", sa.JSON(), nullable=False),
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
-        sa.Column(
-            "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
-        ),
-        sa.Column(
-            "updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
-        ),
-        sa.CheckConstraint(
-            "(user_id IS NULL) <> (group_id IS NULL)",
-            name=op.f("ck__connection__owner_constraint"),
-        ),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.ForeignKeyConstraint(
             ["group_id"],
             ["group.id"],
             name=op.f("fk__connection__group_id__group"),
             ondelete="CASCADE",
         ),
-        sa.ForeignKeyConstraint(
-            ["user_id"],
-            ["user.id"],
-            name=op.f("fk__connection__user_id__user"),
-            ondelete="CASCADE",
-        ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk__connection")),
-        sa.UniqueConstraint(
-            "name",
-            "user_id",
-            "group_id",
-            name=op.f("uq__connection__name_user_id_group_id"),
-        ),
+        sa.UniqueConstraint("name", "group_id", name=op.f("uq__connection__name_group_id")),
     )
-    op.create_index(
-        op.f("ix__connection__group_id"), "connection", ["group_id"], unique=False
-    )
-    op.create_index(
-        op.f("ix__connection__user_id"), "connection", ["user_id"], unique=False
-    )
+    op.create_index(op.f("ix__connection__group_id"), "connection", ["group_id"], unique=False)
     op.create_table(
         "user_group",
         sa.Column("user_id", sa.BigInteger(), nullable=False),
@@ -126,22 +93,14 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("user_id", "group_id", name=op.f("pk__user_group")),
     )
-    op.create_index(
-        op.f("ix__user_group__group_id"), "user_group", ["group_id"], unique=False
-    )
-    op.create_index(
-        op.f("ix__user_group__user_id"), "user_group", ["user_id"], unique=False
-    )
+    op.create_index(op.f("ix__user_group__group_id"), "user_group", ["group_id"], unique=False)
+    op.create_index(op.f("ix__user_group__user_id"), "user_group", ["user_id"], unique=False)
     op.create_table(
         "auth_data",
         sa.Column("connection_id", sa.BigInteger(), nullable=False),
         sa.Column("value", sa.String(), nullable=False),
-        sa.Column(
-            "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
-        ),
-        sa.Column(
-            "updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
-        ),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.ForeignKeyConstraint(
             ["connection_id"],
             ["connection.id"],
@@ -153,8 +112,7 @@ def upgrade() -> None:
     op.create_table(
         "transfer",
         sa.Column("id", sa.BigInteger(), nullable=False),
-        sa.Column("user_id", sa.BigInteger(), nullable=True),
-        sa.Column("group_id", sa.BigInteger(), nullable=True),
+        sa.Column("group_id", sa.BigInteger(), nullable=False),
         sa.Column("name", sa.String(length=128), nullable=False),
         sa.Column("description", sa.String(length=512), nullable=False),
         sa.Column("source_connection_id", sa.BigInteger(), nullable=False),
@@ -165,16 +123,8 @@ def upgrade() -> None:
         sa.Column("is_scheduled", sa.Boolean(), nullable=False),
         sa.Column("schedule", sa.String(length=32), nullable=False),
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
-        sa.Column(
-            "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
-        ),
-        sa.Column(
-            "updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
-        ),
-        sa.CheckConstraint(
-            "(user_id IS NULL) <> (group_id IS NULL)",
-            name=op.f("ck__transfer__owner_constraint"),
-        ),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.ForeignKeyConstraint(
             ["group_id"],
             ["group.id"],
@@ -193,23 +143,10 @@ def upgrade() -> None:
             name=op.f("fk__transfer__target_connection_id__connection"),
             ondelete="CASCADE",
         ),
-        sa.ForeignKeyConstraint(
-            ["user_id"],
-            ["user.id"],
-            name=op.f("fk__transfer__user_id__user"),
-            ondelete="CASCADE",
-        ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk__transfer")),
-        sa.UniqueConstraint(
-            "name",
-            "user_id",
-            "group_id",
-            name=op.f("uq__transfer__name_user_id_group_id"),
-        ),
+        sa.UniqueConstraint("name", "group_id", name=op.f("uq__transfer__name_group_id")),
     )
-    op.create_index(
-        op.f("ix__transfer__group_id"), "transfer", ["group_id"], unique=False
-    )
+    op.create_index(op.f("ix__transfer__group_id"), "transfer", ["group_id"], unique=False)
     op.create_index(
         op.f("ix__transfer__source_connection_id"),
         "transfer",
@@ -222,9 +159,6 @@ def upgrade() -> None:
         ["target_connection_id"],
         unique=False,
     )
-    op.create_index(
-        op.f("ix__transfer__user_id"), "transfer", ["user_id"], unique=False
-    )
     op.create_table(
         "run",
         sa.Column("id", sa.BigInteger(), nullable=False),
@@ -234,12 +168,8 @@ def upgrade() -> None:
         sa.Column("status", sa.String(32), nullable=False),
         sa.Column("log_url", sa.String(length=512), nullable=True),
         sa.Column("transfer_dump", sa.JSON(), nullable=False),
-        sa.Column(
-            "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
-        ),
-        sa.Column(
-            "updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
-        ),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.ForeignKeyConstraint(
             ["transfer_id"],
             ["transfer.id"],
@@ -258,9 +188,7 @@ def upgrade() -> None:
 
     op.create_table(
         "celery_taskmeta",
-        sa.Column(
-            "id", sa.Integer(), task_id_sequence, autoincrement=True, nullable=False
-        ),
+        sa.Column("id", sa.Integer(), task_id_sequence, autoincrement=True, nullable=False),
         sa.Column("task_id", sa.String(length=155), nullable=True),
         sa.Column("status", sa.String(length=50), nullable=True),
         sa.Column("result", sa.PickleType(), nullable=True),
@@ -282,9 +210,7 @@ def upgrade() -> None:
 
     op.create_table(
         "celery_tasksetmeta",
-        sa.Column(
-            "id", sa.Integer(), taskset_id_sequence, autoincrement=True, nullable=False
-        ),
+        sa.Column("id", sa.Integer(), taskset_id_sequence, autoincrement=True, nullable=False),
         sa.Column("taskset_id", sa.String(length=155), nullable=True),
         sa.Column("result", sa.PickleType(), nullable=True),
         sa.Column("date_done", sa.DateTime(), nullable=True),
@@ -302,7 +228,6 @@ def downgrade() -> None:
     op.drop_index(op.f("ix__run__transfer_id"), table_name="run")
     op.drop_index(op.f("ix__run__status"), table_name="run")
     op.drop_table("run")
-    op.drop_index(op.f("ix__transfer__user_id"), table_name="transfer")
     op.drop_index(op.f("ix__transfer__target_connection_id"), table_name="transfer")
     op.drop_index(op.f("ix__transfer__source_connection_id"), table_name="transfer")
     op.drop_index(op.f("ix__transfer__group_id"), table_name="transfer")
@@ -311,7 +236,6 @@ def downgrade() -> None:
     op.drop_index(op.f("ix__user_group__user_id"), table_name="user_group")
     op.drop_index(op.f("ix__user_group__group_id"), table_name="user_group")
     op.drop_table("user_group")
-    op.drop_index(op.f("ix__connection__user_id"), table_name="connection")
     op.drop_index(op.f("ix__connection__group_id"), table_name="connection")
     op.drop_table("connection")
     op.drop_index(op.f("ix__group__admin_id"), table_name="group")

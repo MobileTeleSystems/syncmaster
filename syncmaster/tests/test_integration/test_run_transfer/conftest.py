@@ -20,6 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from tests.test_unit.utils import (
     create_connection,
     create_credentials,
+    create_group,
     create_transfer,
     create_user,
 )
@@ -40,9 +41,7 @@ def spark(settings: Settings) -> SparkSession:
 
 
 def get_spark_session(connection_settings: Settings) -> SparkSession:
-    maven_packages = [
-        p for connection in (Postgres, Oracle) for p in connection.get_packages()
-    ]
+    maven_packages = [p for connection in (Postgres, Oracle) for p in connection.get_packages()]
 
     spark = (
         SparkSession.builder.appName("celery_worker")
@@ -53,7 +52,8 @@ def get_spark_session(connection_settings: Settings) -> SparkSession:
 
     if connection_settings.ENV == EnvTypes.GITLAB:
         spark = spark.config(
-            "spark.jars.ivySettings", os.fspath(connection_settings.IVYSETTINGS_PATH)
+            "spark.jars.ivySettings",
+            os.fspath(connection_settings.IVYSETTINGS_PATH),
         )
 
     return spark.getOrCreate()
@@ -183,9 +183,7 @@ def prepare_postgres(
 
 
 @pytest.fixture
-def prepare_hive(
-    spark: SparkSession, hive: HiveConnectionDTO, init_df: DataFrame
-) -> Hive:
+def prepare_hive(spark: SparkSession, hive: HiveConnectionDTO, init_df: DataFrame) -> Hive:
     hive_connection = Hive(
         cluster=hive.cluster,
         spark=spark,
@@ -247,18 +245,19 @@ async def transfers(
 ):
     user = await create_user(
         session=session,
-        username="connection_owner",
+        username="admin_group",
         is_active=True,
     )
+    group = await create_group(session=session, name="connection_group", admin_id=user.id)
     hive_connection = await create_connection(
         session=session,
         name="integration_hive",
-        user_id=user.id,
         data=dict(
             type=hive.type,
             cluster=hive.cluster,
             additional_params={},
         ),
+        group_id=group.id,
     )
 
     await create_credentials(
@@ -275,7 +274,6 @@ async def transfers(
     postgres_connection = await create_connection(
         session=session,
         name="integration_postgres",
-        user_id=user.id,
         data=dict(
             type=postgres.type,
             host=postgres.host,
@@ -283,6 +281,7 @@ async def transfers(
             database_name=postgres.database_name,
             additional_params={},
         ),
+        group_id=group.id,
     )
 
     await create_credentials(
@@ -299,7 +298,6 @@ async def transfers(
     oracle_connection = await create_connection(
         session=session,
         name="integration_oracle",
-        user_id=user.id,
         data=dict(
             type=oracle.type,
             host=oracle.host,
@@ -308,6 +306,7 @@ async def transfers(
             service_name=oracle.service_name,
             additional_params={},
         ),
+        group_id=group.id,
     )
 
     await create_credentials(
@@ -334,19 +333,17 @@ async def transfers(
         target_type = target.data["type"]
         transfer = await create_transfer(
             session=session,
+            group_id=group.id,
             name=f"integration_transfer_{source_type}_{target_type}",
             source_connection_id=source.id,
             target_connection_id=target.id,
-            user_id=user.id,
             source_params={
                 "type": source_type,
-                "table_name": (oracle.user if source_type == "oracle" else "public")
-                + ".source_table",
+                "table_name": (oracle.user if source_type == "oracle" else "public") + ".source_table",
             },
             target_params={
                 "type": target_type,
-                "table_name": (oracle.user if target_type == "oracle" else "public")
-                + ".target_table",
+                "table_name": (oracle.user if target_type == "oracle" else "public") + ".target_table",
             },
         )
         transfers[f"{source_type}_{target_type}"] = transfer

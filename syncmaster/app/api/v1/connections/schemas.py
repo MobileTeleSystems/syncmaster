@@ -43,8 +43,7 @@ class ReadOracleAuthSchema(BaseModel):
 
 class ReadConnectionSchema(BaseModel):
     id: int
-    user_id: int | None = None
-    group_id: int | None = None
+    group_id: int
     name: str
     description: str
     auth_data: ReadHiveAuthSchema | ReadOracleAuthSchema | ReadPostgresAuthSchema | None
@@ -168,8 +167,7 @@ class CreatePostgresAuthSchema(BaseModel):
 
 
 class CreateConnectionSchema(BaseModel):
-    user_id: int | None
-    group_id: int | None
+    group_id: int
     name: str
     description: str
     data: CreateHiveConnectionSchema | CreateOracleConnectionSchema | CreatePostgresConnectionSchema = Field(
@@ -183,13 +181,6 @@ class CreateConnectionSchema(BaseModel):
     )
 
     @root_validator
-    def check_owner_id(cls, values):
-        user_id, group_id = values.get("user_id"), values.get("group_id")
-        if (user_id is None) == (group_id is None):
-            raise ValueError("Connection must have one owner: group or user")
-        return values
-
-    @root_validator
     def check_types(cls, values):
         data, auth_data = values.get("data"), values.get("auth_data")
         if data and auth_data and data.type != auth_data.type:
@@ -198,13 +189,5 @@ class CreateConnectionSchema(BaseModel):
 
 
 class ConnectionCopySchema(BaseModel):
-    new_user_id: int | None = None
-    new_group_id: int | None = None
+    new_group_id: int
     remove_source: bool = False
-
-    @root_validator
-    def check_new_owner_id(cls, values):
-        user_id, group_id = values.get("new_user_id"), values.get("new_group_id")
-        if (user_id is None) == (group_id is None):
-            raise ValueError("Connection must have one owner: group or user")
-        return values

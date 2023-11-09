@@ -88,7 +88,6 @@ async def create_credentials(
 async def create_connection(
     session: AsyncSession,
     name: str,
-    user_id: int | None = None,
     group_id: int | None = None,
     description: str = "",
     data: dict[str, Any] | None = None,
@@ -103,7 +102,6 @@ async def create_connection(
         }
 
     c = Connection(
-        user_id=user_id,
         group_id=group_id,
         name=name,
         description=description,
@@ -121,7 +119,6 @@ async def create_transfer(
     source_connection_id: int,
     target_connection_id: int,
     group_id: int | None = None,
-    user_id: int | None = None,
     source_params: dict | None = None,
     target_params: dict | None = None,
     is_scheduled: bool = True,
@@ -132,7 +129,6 @@ async def create_transfer(
     t = Transfer(
         name=name,
         description=description,
-        user_id=user_id,
         group_id=group_id,
         source_connection_id=source_connection_id,
         source_params=source_params or {"type": "postgres", "table_name": "table1"},

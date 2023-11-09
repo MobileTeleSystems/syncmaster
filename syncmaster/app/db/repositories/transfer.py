@@ -6,10 +6,9 @@ from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Transfer
-from app.db.repositories.base import RepositoryWithOwner
+from app.db.repositories.repository_with_owner import RepositoryWithOwner
 from app.db.utils import Pagination
 from app.exceptions import (
-    ActionNotAllowed,
     ConnectionNotFound,
     EntityNotFound,
     GroupNotFound,
@@ -31,21 +30,14 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         current_user_id: int,
         is_superuser: bool,
         group_id: int | None = None,
-        user_id: int | None = None,
     ) -> Pagination:
-        if not is_superuser and user_id and current_user_id != user_id:
-            raise ActionNotAllowed
         stmt = select(Transfer).where(Transfer.is_deleted.is_(False))
-        args = []
-        if user_id is not None:
-            args.append(Transfer.user_id == user_id)
-        if group_id is not None:
-            args.append(Transfer.group_id == group_id)
 
         if not is_superuser:
-            stmt = self.check_permission(stmt, current_user_id)
+            stmt = self.apply_user_permission(stmt, current_user_id)
+
         return await self._paginate(
-            query=stmt.where(*args).order_by(Transfer.name),
+            query=stmt.where(Transfer.group_id == group_id).order_by(Transfer.name),
             page=page,
             page_size=page_size,
         )
@@ -61,7 +53,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
             Transfer.is_deleted.is_(False),
         )
         if not is_superuser:
-            stmt = self.check_permission(stmt, current_user_id)
+            stmt = self.apply_user_permission(stmt, current_user_id)
         try:
             result: ScalarResult[Transfer] = await self._session.scalars(stmt)
             return result.one()
@@ -70,7 +62,6 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
 
     async def create(
         self,
-        user_id: int | None,
         group_id: int | None,
         source_connection_id: int,
         target_connection_id: int,
@@ -83,7 +74,6 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         query = (
             insert(Transfer)
             .values(
-                user_id=user_id,
                 group_id=group_id,
                 source_connection_id=source_connection_id,
                 target_connection_id=target_connection_id,
@@ -134,10 +124,8 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
                 strategy_params=strategy_params,
                 is_scheduled=is_scheduled or transfer.is_scheduled,
                 schedule=schedule or transfer.schedule,
-                source_connection_id=source_connection_id
-                or transfer.source_connection_id,
-                target_connection_id=target_connection_id
-                or transfer.target_connection_id,
+                source_connection_id=source_connection_id or transfer.source_connection_id,
+                target_connection_id=target_connection_id or transfer.target_connection_id,
                 source_params=source_params,
                 target_params=target_params,
             )
@@ -147,49 +135,26 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
     async def delete(
         self,
         transfer_id: int,
-        current_user_id: int,
-        is_superuser: bool,
     ) -> None:
-        if not is_superuser:
-            await self.read_by_id(
-                transfer_id=transfer_id,
-                current_user_id=current_user_id,
-                is_superuser=False,
-            )
         try:
             await self._delete(transfer_id)
         except (NoResultFound, EntityNotFound) as e:
             raise TransferNotFound from e
 
-    async def copy_transfer(
+    async def copy(
         self,
         transfer_id: int,
         new_group_id: int | None,
-        new_user_id: int | None,
         new_source_connection: int | None,
         new_target_connection: int | None,
-        remove_source: bool,
-        is_superuser: bool,
-        current_user_id,
     ) -> Transfer:
-        if not is_superuser:
-            if not await self.has_owner_access(
-                transfer_id,
-                current_user_id,
-            ):
-                raise TransferNotFound
-
         try:
             kwargs = dict(
-                user_id=new_user_id,
                 group_id=new_group_id,
                 source_connection_id=new_source_connection,
                 target_connection_id=new_target_connection,
             )
             new_transfer = await self._copy(Transfer.id == transfer_id, **kwargs)
-
-            if remove_source:
-                await self._delete(transfer_id)
 
             return new_transfer
 

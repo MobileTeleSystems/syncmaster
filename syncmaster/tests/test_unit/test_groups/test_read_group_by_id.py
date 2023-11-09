@@ -38,19 +38,19 @@ async def test_not_member_of_group_cannot_read_by_id(
 
 async def test_member_of_group_can_read_by_id(
     client: AsyncClient,
-    not_empty_group: MockGroup,
+    group: MockGroup,
 ):
-    member = not_empty_group.members[0]
+    member = group.members[0]
     result = await client.get(
-        f"v1/groups/{not_empty_group.id}",
+        f"v1/groups/{group.id}",
         headers={"Authorization": f"Bearer {member.token}"},
     )
     assert result.status_code == 200
     assert result.json() == {
-        "id": not_empty_group.id,
-        "name": not_empty_group.name,
-        "description": not_empty_group.description,
-        "admin_id": not_empty_group.admin_id,
+        "id": group.id,
+        "name": group.name,
+        "description": group.description,
+        "admin_id": group.admin_id,
     }
 
 
@@ -74,10 +74,10 @@ async def test_admin_of_group_can_read_by_id(
 async def test_superuser_can_read_any_group_by_id(
     client: AsyncClient,
     empty_group: MockGroup,
-    not_empty_group: MockGroup,
+    group: MockGroup,
     superuser: MockUser,
 ):
-    for group in empty_group, not_empty_group:
+    for group in empty_group, group:
         result = await client.get(
             f"v1/groups/{group.id}",
             headers={"Authorization": f"Bearer {superuser.token}"},

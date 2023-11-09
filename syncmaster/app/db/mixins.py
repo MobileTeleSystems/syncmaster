@@ -3,7 +3,6 @@ from datetime import datetime
 from sqlalchemy import (
     BigInteger,
     Boolean,
-    CheckConstraint,
     DateTime,
     ForeignKey,
     String,
@@ -14,9 +13,7 @@ from sqlalchemy.orm import Mapped, declared_attr, mapped_column
 
 
 class TimestampMixin:
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
         server_default=func.now(),
@@ -32,16 +29,10 @@ class DeletableMixin:
 
 class ResourceMixin:
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    user_id: Mapped[int | None] = mapped_column(
-        BigInteger,
-        ForeignKey("user.id", ondelete="CASCADE"),
-        nullable=True,
-        index=True,
-    )
-    group_id: Mapped[int | None] = mapped_column(
+    group_id: Mapped[int] = mapped_column(
         BigInteger,
         ForeignKey("group.id", ondelete="CASCADE"),
-        nullable=True,
+        nullable=False,
         index=True,
     )
     name: Mapped[str] = mapped_column(String(128), nullable=False, default="")
@@ -49,9 +40,4 @@ class ResourceMixin:
 
     @declared_attr  # type: ignore
     def __table_args__(cls) -> tuple:
-        return (
-            CheckConstraint(
-                "(user_id IS NULL) <> (group_id IS NULL)", name="owner_constraint"
-            ),
-            UniqueConstraint("name", "user_id", "group_id"),
-        )
+        return (UniqueConstraint("name", "group_id"),)

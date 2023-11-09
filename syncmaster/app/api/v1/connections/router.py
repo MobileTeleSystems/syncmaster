@@ -1,7 +1,7 @@
 import asyncio
 from typing import get_args
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from pydantic import SecretStr
 
 from app.api.deps import UnitOfWorkMarker
@@ -17,7 +17,7 @@ from app.api.v1.connections.schemas import (
 from app.api.v1.schemas import MetaPageSchema, StatusResponseSchema
 from app.db.models import User
 from app.exceptions import ActionNotAllowed, AuthDataNotFound
-from app.exceptions.connection import ConnectionDeleteException
+from app.exceptions.connection import ConnectionDeleteException, ConnectionNotFound
 from app.services import UnitOfWork, get_user
 
 router = APIRouter(tags=["Connections"])
@@ -25,41 +25,30 @@ router = APIRouter(tags=["Connections"])
 
 @router.get("/connections")
 async def read_connections(
+    group_id: int,
     page: int = Query(gt=0, default=1),
     page_size: int = Query(gt=0, le=200, default=20),
-    user_id: int | None = None,
-    group_id: int | None = None,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ConnectionPageSchema:
     """Return connections in page format"""
-    if user_id and group_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You have to set user_id or group, or none. Not both at once",
-        )
     pagination = await unit_of_work.connection.paginate(
         page=page,
         page_size=page_size,
         current_user_id=current_user.id,
         is_superuser=current_user.is_superuser,
         group_id=group_id,
-        user_id=user_id,
     )
 
     items = []
     if pagination.items:
         creds = await asyncio.gather(
-            *[
-                unit_of_work.credentials.get_for_connection(connection_id=item.id)
-                for item in pagination.items
-            ]
+            *[unit_of_work.credentials.get_for_connection(connection_id=item.id) for item in pagination.items]
         )
 
         items = [
             ReadConnectionSchema(
                 id=item.id,
-                user_id=item.user_id,
                 group_id=item.group_id,
                 name=item.name,
                 description=item.description,
@@ -92,17 +81,10 @@ async def create_connection(
 ) -> ReadConnectionSchema:
     """Create new connection"""
     if not current_user.is_superuser:
-        if connection_data.user_id and current_user.id != connection_data.user_id:
+        is_member = await unit_of_work.group.is_member(connection_data.group_id, current_user.id)
+        is_admin = await unit_of_work.group.is_admin(connection_data.group_id, current_user.id)
+        if not is_member and not is_admin:
             raise ActionNotAllowed
-        if connection_data.group_id:
-            is_member = await unit_of_work.group.is_member(
-                connection_data.group_id, current_user.id
-            )
-            is_admin = await unit_of_work.group.is_admin(
-                connection_data.group_id, current_user.id
-            )
-            if not is_member and not is_admin:
-                raise ActionNotAllowed
 
     data = connection_data.data.dict()
     auth_data = connection_data.auth_data.dict()
@@ -115,7 +97,6 @@ async def create_connection(
         connection = await unit_of_work.connection.create(
             name=connection_data.name,
             description=connection_data.description,
-            user_id=connection_data.user_id,
             group_id=connection_data.group_id,
             data=data,
         )
@@ -127,7 +108,6 @@ async def create_connection(
 
     return ReadConnectionSchema(
         id=connection.id,
-        user_id=connection.user_id,
         group_id=connection.group_id,
         name=connection.name,
         description=connection.description,
@@ -136,9 +116,7 @@ async def create_connection(
     )
 
 
-@router.get(
-    "/connections/known_types", dependencies=[Depends(get_user(is_active=True))]
-)
+@router.get("/connections/known_types", dependencies=[Depends(get_user(is_active=True))])
 async def read_connection_types() -> list[str]:
     return [get_args(type_)[0] for type_ in (ORACLE_TYPE, POSTGRES_TYPE)]
 
@@ -163,7 +141,6 @@ async def read_connection(
 
     return ReadConnectionSchema(
         id=connection.id,
-        user_id=connection.user_id,
         group_id=connection.group_id,
         name=connection.name,
         description=connection.description,
@@ -186,9 +163,7 @@ async def update_connection(
             is_superuser=current_user.is_superuser,
             name=connection_data.name,
             description=connection_data.description,
-            connection_data=connection_data.data.dict(exclude={"auth_data"})
-            if connection_data.data
-            else {},
+            connection_data=connection_data.data.dict(exclude={"auth_data"}) if connection_data.data else {},
         )
 
         if connection_data.auth_data:
@@ -201,7 +176,6 @@ async def update_connection(
 
     return ReadConnectionSchema(
         id=connection.id,
-        user_id=connection.user_id,
         group_id=connection.group_id,
         name=connection.name,
         description=connection.description,
@@ -232,6 +206,7 @@ async def delete_connection(
                 connection_id=connection_id,
                 current_user_id=current_user.id,
                 is_superuser=current_user.is_superuser,
+                group_id=connection.group_id,
             )
 
             return StatusResponseSchema(
@@ -252,15 +227,39 @@ async def copy_connection(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> StatusResponseSchema:
+    connection = await unit_of_work.connection.read_by_id(
+        connection_id=connection_id,
+        is_superuser=current_user.is_superuser,
+        current_user_id=current_user.id,
+    )
+    # Check: The user can manage the resource
+    if not current_user.is_superuser and not await unit_of_work.connection.check_user_rights(
+        user_id=current_user.id,
+        group_id=connection.group_id,
+    ):
+        raise ConnectionNotFound
+
+    # Check: The user can perform actions in the target group
+    if not current_user.is_superuser and not await unit_of_work.connection.check_user_rights(
+        user_id=current_user.id,
+        group_id=new_owner_data.new_group_id,
+    ):
+        raise ActionNotAllowed
+
     async with unit_of_work:
-        await unit_of_work.connection.copy_connection(
+        await unit_of_work.connection.copy(
             connection_id=connection_id,
             new_group_id=new_owner_data.new_group_id,
-            new_user_id=new_owner_data.new_user_id,
-            remove_source=new_owner_data.remove_source,
-            current_user_id=current_user.id,
-            is_superuser=current_user.is_superuser,
         )
+
+        if new_owner_data.remove_source:
+            await unit_of_work.connection.delete(
+                connection_id=connection_id,
+                is_superuser=current_user.is_superuser,
+                current_user_id=current_user.id,
+                group_id=connection.group_id,
+            )
+
     return StatusResponseSchema(
         ok=True,
         status_code=status.HTTP_200_OK,

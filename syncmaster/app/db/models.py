@@ -22,9 +22,7 @@ from app.db.mixins import DeletableMixin, ResourceMixin, TimestampMixin
 
 class User(Base, TimestampMixin, DeletableMixin):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    username: Mapped[str] = mapped_column(
-        String(256), nullable=False, unique=True, index=True
-    )
+    username: Mapped[str] = mapped_column(String(256), nullable=False, unique=True, index=True)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
@@ -36,9 +34,7 @@ class Group(Base, TimestampMixin, DeletableMixin):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     name: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(String(512), nullable=False, default="")
-    admin_id: Mapped[int] = mapped_column(
-        ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True
-    )
+    admin_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
 
     admin: Mapped[User] = relationship("User")
     members: Mapped[list[User]] = relationship("User", secondary="user_group")
@@ -63,20 +59,13 @@ class UserGroup(Base):
     )
 
 
-class Connection(Base, DeletableMixin, TimestampMixin, ResourceMixin):
+class Connection(Base, ResourceMixin, DeletableMixin, TimestampMixin):
     data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
 
-    user: Mapped[User | None] = relationship("User")
-    group: Mapped[Group | None] = relationship("Group")
+    group: Mapped[Group] = relationship("Group")
 
     def __repr__(self):
-        return (
-            f"<Connection "
-            f"name={self.name} "
-            f"description={self.description} "
-            f"group_id={self.group_id} "
-            f"user_id={self.user_id}>"
-        )
+        return f"<Connection " f"name={self.name} " f"description={self.description} " f"group_id={self.group_id}>"
 
 
 class AuthData(Base, TimestampMixin):
@@ -88,7 +77,12 @@ class AuthData(Base, TimestampMixin):
     value: Mapped[str] = mapped_column(nullable=False)
 
 
-class Transfer(Base, DeletableMixin, TimestampMixin, ResourceMixin):
+class Transfer(
+    Base,
+    ResourceMixin,
+    DeletableMixin,
+    TimestampMixin,
+):
     source_connection_id: Mapped[int] = mapped_column(
         BigInteger,
         ForeignKey("connection.id", ondelete="CASCADE"),
@@ -101,20 +95,13 @@ class Transfer(Base, DeletableMixin, TimestampMixin, ResourceMixin):
         nullable=False,
         index=True,
     )
-    strategy_params: Mapped[dict[str, Any]] = mapped_column(
-        JSON, nullable=False, default={}
-    )
-    source_params: Mapped[dict[str, Any]] = mapped_column(
-        JSON, nullable=False, default={}
-    )
-    target_params: Mapped[dict[str, Any]] = mapped_column(
-        JSON, nullable=False, default={}
-    )
+    strategy_params: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
+    source_params: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
+    target_params: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
     is_scheduled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     schedule: Mapped[str] = mapped_column(String(32), nullable=False, default="")
 
-    user: Mapped[User | None] = relationship("User")
-    group: Mapped[Group | None] = relationship("Group")
+    group: Mapped[Group] = relationship("Group")
     source_connection: Mapped[Connection] = relationship(
         "Connection",
         foreign_keys=[source_connection_id],
@@ -162,16 +149,14 @@ class Run(Base, TimestampMixin):
         index=True,
     )
     log_url: Mapped[str] = mapped_column(String(512), nullable=True)
-    transfer_dump: Mapped[dict[str, Any]] = mapped_column(
-        JSON, nullable=False, default={}
-    )
+    transfer_dump: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
 
     transfer: Mapped[Transfer] = relationship("Transfer")
 
     def __repr__(self):
         return (
-            f"<Run"
-            f" id={self.id}"
-            f" transfer_id={self.transfer_id}"
-            f" created_at={self.created_at:%Y-%m-%d %H:%M:%S}>"
+            f"<Run "
+            f"id={self.id} "
+            f"transfer_id={self.transfer_id} "
+            f"created_at={self.created_at:%Y-%m-%d %H:%M:%S}>"
         )

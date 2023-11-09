@@ -20,7 +20,7 @@ from app.exceptions.run import (
     RunNotFoundException,
 )
 from app.exceptions.transfer import (
-    DifferentConnectionsOwners,
+    DifferentTransferAndConnectionsGroups,
     DifferentTypeConnectionsAndParams,
     TransferNotFound,
     TransferOwnerException,
@@ -38,7 +38,7 @@ __all__ = [
     "ConnectionNotFound",
     "ConnectionOwnerException",
     "ConnectionTypeNotRecognizedException",
-    "DifferentConnectionsOwners",
+    "DifferentTransferAndConnectionsGroups",
     "DifferentTypeConnectionsAndParams",
     "EntityNotFound",
     "GroupAdminNotFound",

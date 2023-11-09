@@ -13,6 +13,10 @@ class ConnectionTypeNotRecognizedException(SyncmasterException):
     pass
 
 
+class UserDoNotHaveRightsInTheTargetGroup(SyncmasterException):
+    pass
+
+
 class ConnectionDeleteException(SyncmasterException):
     def __init__(self, message: str) -> None:
         self.message = message

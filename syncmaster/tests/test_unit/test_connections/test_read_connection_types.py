@@ -15,9 +15,7 @@ async def test_unauthorized_user_cannot_read_connection_types(client: AsyncClien
     }
 
 
-async def test_simple_user_read_connection_types(
-    client: AsyncClient, simple_user: MockUser
-):
+async def test_simple_user_read_connection_types(client: AsyncClient, simple_user: MockUser):
     result = await client.get(
         "v1/connections/known_types",
         headers={"Authorization": f"Bearer {simple_user.token}"},

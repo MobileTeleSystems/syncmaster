@@ -1,22 +1,11 @@
 from abc import ABC
 from typing import Any, Generic, TypeVar
 
-from sqlalchemy import (
-    ScalarResult,
-    Select,
-    and_,
-    delete,
-    func,
-    insert,
-    or_,
-    select,
-    update,
-)
+from sqlalchemy import ScalarResult, Select, and_, delete, func, insert, select, update
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.base import Base
-from app.db.models import Group, UserGroup
 from app.db.utils import Pagination
 from app.exceptions import EntityNotFound
 
@@ -55,9 +44,7 @@ class Repository(Generic[Model], ABC):
 
         d = self._model_as_dict(origin_model)
 
-        d.update(
-            kwargs
-        )  # Process kwargs in order to keep only what needs to be updated
+        d.update(kwargs)  # Process kwargs in order to keep only what needs to be updated
         query_insert_new_row = insert(self._model).values(**d).returning(self._model)
         try:
             new_row = await self._session.scalars(query_insert_new_row)
@@ -100,41 +87,3 @@ class Repository(Generic[Model], ABC):
             page=page,
             page_size=page_size,
         )
-
-
-class RepositoryWithOwner(Repository, Generic[Model]):
-    def check_permission(
-        self,
-        query: Select,
-        user_id: int,
-    ) -> Select:
-        """Add to query filter access user to resource"""
-        query = query.join(
-            Group,
-            Group.id == self._model.group_id,
-            full=True,
-        ).join(
-            UserGroup,
-            UserGroup.group_id == Group.id,
-            full=True,
-        )
-        args = [
-            Group.admin_id == user_id,
-            self._model.user_id == user_id,
-        ]
-        args.append(UserGroup.user_id == user_id)
-        return query.where(or_(*args)).group_by(self._model.id)
-
-    async def has_owner_access(self, object_id: int, user_id: int) -> bool:
-        """Check if user is owner of resource or if resource belong to group and user is group admin"""
-        obj = (
-            select(self._model.id)
-            .join(Group, Group.id == self._model.group_id, full=True)
-            .where(
-                self._model.id == object_id,
-                or_(Group.admin_id == user_id, self._model.user_id == user_id),
-            )
-            .exists()
-            .select()
-        )
-        return await self._session.scalar(obj)

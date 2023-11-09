@@ -37,9 +37,7 @@ def get_worker_spark_session(
 
     if settings.ENV == EnvTypes.GITLAB:
         log.debug("Passing custom ivysettings.xml")
-        spark = spark.config(
-            "spark.jars.ivySettings", os.fspath(settings.IVYSETTINGS_PATH)
-        )
+        spark = spark.config("spark.jars.ivySettings", os.fspath(settings.IVYSETTINGS_PATH))
     return spark.getOrCreate()
 
 

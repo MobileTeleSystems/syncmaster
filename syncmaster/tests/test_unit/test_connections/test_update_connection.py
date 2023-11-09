@@ -6,11 +6,10 @@ pytestmark = [pytest.mark.asyncio]
 
 
 async def test_unauthorized_user_cannot_update_connection(
-    client: AsyncClient, user_connection: MockConnection
+    client: AsyncClient,
+    group_connection: MockConnection,
 ):
-    result = await client.patch(
-        f"v1/connections/{user_connection.id}", json={"name": "New connection name"}
-    )
+    result = await client.patch(f"v1/connections/{group_connection.id}", json={"name": "New connection name"})
     assert result.status_code == 401
     assert result.json() == {
         "ok": False,
@@ -19,11 +18,13 @@ async def test_unauthorized_user_cannot_update_connection(
     }
 
 
-async def test_simple_user_cannot_update_connection_other_user(
-    client: AsyncClient, user_connection: MockConnection, simple_user: MockUser
+async def test_groupless_user_cannot_update_connection_error(
+    client: AsyncClient,
+    group_connection: MockConnection,
+    simple_user: MockUser,
 ):
     result = await client.patch(
-        f"v1/connections/{user_connection.id}",
+        f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={"name": "New connection name"},
     )
@@ -35,65 +36,66 @@ async def test_simple_user_cannot_update_connection_other_user(
     }
 
 
-async def test_user_can_update_own_connection(
-    client: AsyncClient, user_connection: MockConnection
+async def test_in_group_user_can_update_connection(
+    client: AsyncClient,
+    group_connection: MockConnection,
 ):
     result = await client.patch(
-        f"v1/connections/{user_connection.id}",
-        headers={"Authorization": f"Bearer {user_connection.owner_user.token}"},
+        f"v1/connections/{group_connection.id}",
+        headers={"Authorization": f"Bearer {group_connection.owner_group.members[0].token}"},
         json={"name": "New connection name"},
     )
     assert result.status_code == 200
     assert result.json() == {
-        "id": user_connection.id,
+        "id": group_connection.id,
         "name": "New connection name",
-        "description": user_connection.description,
-        "user_id": user_connection.user_id,
-        "group_id": user_connection.group_id,
+        "description": group_connection.description,
+        "group_id": group_connection.group_id,
         "connection_data": {
-            "type": user_connection.data["type"],
-            "host": user_connection.data["host"],
-            "port": user_connection.data["port"],
-            "additional_params": user_connection.data["additional_params"],
-            "database_name": user_connection.data["database_name"],
+            "type": group_connection.data["type"],
+            "host": group_connection.data["host"],
+            "port": group_connection.data["port"],
+            "additional_params": group_connection.data["additional_params"],
+            "database_name": group_connection.data["database_name"],
         },
         "auth_data": {
-            "type": user_connection.credentials.value["type"],
-            "user": user_connection.credentials.value["user"],
+            "type": group_connection.credentials.value["type"],
+            "user": group_connection.credentials.value["user"],
         },
     }
 
 
 async def test_superuser_can_update_user_connection(
-    client: AsyncClient, user_connection: MockConnection, superuser: MockUser
+    client: AsyncClient,
+    group_connection: MockConnection,
+    superuser: MockUser,
 ):
     result = await client.patch(
-        f"v1/connections/{user_connection.id}",
+        f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={"name": "New connection name"},
     )
     assert result.status_code == 200
     assert result.json() == {
-        "id": user_connection.id,
+        "id": group_connection.id,
         "name": "New connection name",
-        "description": user_connection.description,
-        "user_id": user_connection.user_id,
-        "group_id": user_connection.group_id,
+        "description": group_connection.description,
+        "group_id": group_connection.group_id,
         "connection_data": {
-            "type": user_connection.data["type"],
-            "host": user_connection.data["host"],
-            "port": user_connection.data["port"],
-            "additional_params": user_connection.data["additional_params"],
-            "database_name": user_connection.data["database_name"],
+            "type": group_connection.data["type"],
+            "host": group_connection.data["host"],
+            "port": group_connection.data["port"],
+            "additional_params": group_connection.data["additional_params"],
+            "database_name": group_connection.data["database_name"],
         },
         "auth_data": {
-            "type": user_connection.credentials.value["type"],
-            "user": user_connection.credentials.value["user"],
+            "type": group_connection.credentials.value["type"],
+            "user": group_connection.credentials.value["user"],
         },
     }
 
 
-async def test_group_admin_can_update_own_group_connection(
+async def test_group_admin_can_update_connection(
     client: AsyncClient,
     group_connection: MockConnection,
 ):
@@ -108,7 +110,6 @@ async def test_group_admin_can_update_own_group_connection(
         "id": group_connection.id,
         "name": "New connection name",
         "description": group_connection.description,
-        "user_id": group_connection.user_id,
         "group_id": group_connection.group_id,
         "connection_data": {
             "type": group_connection.data["type"],
@@ -154,7 +155,6 @@ async def test_superuser_can_update_group_connection(
         "id": group_connection.id,
         "name": "New connection name",
         "description": group_connection.description,
-        "user_id": group_connection.user_id,
         "group_id": group_connection.group_id,
         "connection_data": {
             "type": group_connection.data["type"],
@@ -172,11 +172,11 @@ async def test_superuser_can_update_group_connection(
 
 async def test_update_connection_data_fields(
     client: AsyncClient,
-    user_connection: MockConnection,
+    group_connection: MockConnection,
 ):
     result = await client.patch(
-        f"v1/connections/{user_connection.id}",
-        headers={"Authorization": f"Bearer {user_connection.owner_user.token}"},
+        f"v1/connections/{group_connection.id}",
+        headers={"Authorization": f"Bearer {group_connection.owner_group.members[0].token}"},
         json={"connection_data": {"host": "localhost"}},
     )
     assert result.status_code == 422
@@ -192,56 +192,54 @@ async def test_update_connection_data_fields(
     }
 
     result = await client.patch(
-        f"v1/connections/{user_connection.id}",
-        headers={"Authorization": f"Bearer {user_connection.owner_user.token}"},
+        f"v1/connections/{group_connection.id}",
+        headers={"Authorization": f"Bearer {group_connection.owner_group.members[0].token}"},
         json={"connection_data": {"type": "postgres", "host": "localhost"}},
     )
     assert result.status_code == 200
     assert result.json() == {
-        "id": user_connection.id,
-        "name": user_connection.name,
-        "description": user_connection.description,
-        "user_id": user_connection.user_id,
-        "group_id": user_connection.group_id,
+        "id": group_connection.id,
+        "name": group_connection.name,
+        "description": group_connection.description,
+        "group_id": group_connection.group_id,
         "connection_data": {
-            "type": user_connection.data["type"],
+            "type": group_connection.data["type"],
             "host": "localhost",
-            "port": user_connection.data["port"],
-            "additional_params": user_connection.data["additional_params"],
-            "database_name": user_connection.data["database_name"],
+            "port": group_connection.data["port"],
+            "additional_params": group_connection.data["additional_params"],
+            "database_name": group_connection.data["database_name"],
         },
         "auth_data": {
-            "type": user_connection.credentials.value["type"],
-            "user": user_connection.credentials.value["user"],
+            "type": group_connection.credentials.value["type"],
+            "user": group_connection.credentials.value["user"],
         },
     }
 
 
 async def test_update_connection_auth_data_fields(
     client: AsyncClient,
-    user_connection: MockConnection,
+    group_connection: MockConnection,
 ):
     result = await client.patch(
-        f"v1/connections/{user_connection.id}",
-        headers={"Authorization": f"Bearer {user_connection.owner_user.token}"},
+        f"v1/connections/{group_connection.id}",
+        headers={"Authorization": f"Bearer {group_connection.owner_group.members[0].token}"},
         json={"auth_data": {"type": "postgres", "user": "new_user"}},
     )
     assert result.status_code == 200
     assert result.json() == {
-        "id": user_connection.id,
-        "name": user_connection.name,
-        "description": user_connection.description,
-        "user_id": user_connection.user_id,
-        "group_id": user_connection.group_id,
+        "id": group_connection.id,
+        "name": group_connection.name,
+        "description": group_connection.description,
+        "group_id": group_connection.group_id,
         "connection_data": {
-            "type": user_connection.data["type"],
+            "type": group_connection.data["type"],
             "host": "127.0.0.1",
-            "port": user_connection.data["port"],
-            "additional_params": user_connection.data["additional_params"],
-            "database_name": user_connection.data["database_name"],
+            "port": group_connection.data["port"],
+            "additional_params": group_connection.data["additional_params"],
+            "database_name": group_connection.data["database_name"],
         },
         "auth_data": {
-            "type": user_connection.credentials.value["type"],
+            "type": group_connection.credentials.value["type"],
             "user": "new_user",
         },
     }
