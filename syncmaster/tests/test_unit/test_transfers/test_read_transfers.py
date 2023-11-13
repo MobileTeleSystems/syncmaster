@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockTransfer, MockUser
+from tests.utils import MockTransfer, MockUser, TestUserRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -46,7 +46,7 @@ async def test_group_member_can_read_transfers(
 ):
     result = await client.get(
         f"v1/transfers?group_id={group_transfer.owner_group.group.id}",
-        headers={"Authorization": f"Bearer {group_transfer.owner_group.members[0].token}"},
+        headers={"Authorization": f"Bearer {group_transfer.owner_group.get_member_of_role(TestUserRoles.User).token}"},
     )
 
     assert result.status_code == 200
@@ -83,7 +83,7 @@ async def test_group_admin_can_read_transfers(
     client: AsyncClient,
     group_transfer: MockTransfer,
 ):
-    admin = group_transfer.owner_group.admin
+    admin = group_transfer.owner_group.get_member_of_role(TestUserRoles.Owner)
     result = await client.get(
         f"v1/transfers?group_id={group_transfer.owner_group.group.id}",
         headers={"Authorization": f"Bearer {admin.token}"},

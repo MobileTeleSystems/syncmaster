@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests.test_unit.utils import create_connection
-from tests.utils import MockGroup, MockTransfer, MockUser
+from tests.utils import MockGroup, MockTransfer, MockUser, TestUserRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -47,7 +47,7 @@ async def test_group_member_can_update_transfer(
 ):
     result = await client.patch(
         f"v1/transfers/{group_transfer.id}",
-        headers={"Authorization": f"Bearer {group_transfer.owner_group.members[0].token}"},
+        headers={"Authorization": f"Bearer {group_transfer.owner_group.get_member_of_role(TestUserRoles.User).token}"},
         json={"name": "New transfer name"},
     )
     assert result.status_code == 200
@@ -97,7 +97,7 @@ async def test_group_admin_cannot_update_other_group_transfer(
     empty_group: MockGroup,
     group_transfer: MockTransfer,
 ):
-    other_admin = empty_group.admin
+    other_admin = empty_group.get_member_of_role("Owner")
     result = await client.patch(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {other_admin.token}"},
@@ -117,7 +117,7 @@ async def test_check_connection_types_and_its_params_transfer(
 ):
     result = await client.patch(
         f"v1/transfers/{group_transfer.id}",
-        headers={"Authorization": f"Bearer {group_transfer.owner_group.admin.token}"},
+        headers={"Authorization": f"Bearer {group_transfer.owner_group.get_member_of_role(TestUserRoles.Owner).token}"},
         json={
             "name": "New transfer name",
             "source_params": {"type": "oracle", "table_name": "New table name"},
@@ -132,7 +132,7 @@ async def test_check_connection_types_and_its_params_transfer(
 
     result = await client.patch(
         f"v1/transfers/{group_transfer.id}",
-        headers={"Authorization": f"Bearer {group_transfer.owner_group.admin.token}"},
+        headers={"Authorization": f"Bearer {group_transfer.owner_group.get_member_of_role(TestUserRoles.Owner).token}"},
         json={
             "name": "New transfer name",
             "source_params": {"type": "postgres", "table_name": "New table name"},
@@ -163,11 +163,14 @@ async def test_check_different_connection_groups_for_transfer(
     empty_group: MockGroup,
     session: AsyncSession,
 ):
-    admin = group_transfer.owner_group.admin
+    admin = group_transfer.owner_group.get_member_of_role("Owner")
 
     await client.post(
         f"v1/groups/{empty_group.id}/users/{admin.id}",
-        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
+        json={
+            "role": TestUserRoles.User,
+        },
     )
 
     new_connection = await create_connection(
@@ -199,7 +202,7 @@ async def test_user_not_in_new_connection_group_can_not_update_transfer(
     empty_group: MockGroup,
     session: AsyncSession,
 ):
-    admin = group_transfer.owner_group.admin
+    admin = group_transfer.owner_group.get_member_of_role("Owner")
 
     new_connection = await create_connection(
         session=session,

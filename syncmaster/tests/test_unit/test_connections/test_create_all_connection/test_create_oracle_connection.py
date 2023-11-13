@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockGroup
+from tests.utils import MockGroup, TestUserRoles
 
 from app.config import Settings
 from app.db.models import AuthData, Connection
@@ -19,7 +19,7 @@ async def test_create_oracle_connection_with_service_name(
 ):
     result = await client.post(
         "v1/connections",
-        headers={"Authorization": f"Bearer {group.admin.token}"},
+        headers={"Authorization": f"Bearer {group.get_member_of_role(TestUserRoles.Owner).token}"},
         json={
             "group_id": group.id,
             "name": "New connection",
@@ -82,7 +82,7 @@ async def test_create_oracle_connection_with_sid(
 ):
     result = await client.post(
         "v1/connections",
-        headers={"Authorization": f"Bearer {group.admin.token}"},
+        headers={"Authorization": f"Bearer {group.get_member_of_role(TestUserRoles.Owner).token}"},
         json={
             "group_id": group.id,
             "name": "New connection",
@@ -142,7 +142,7 @@ async def test_create_oracle_connection_with_sid_and_service_name_error(
 ):
     result = await client.post(
         "v1/connections",
-        headers={"Authorization": f"Bearer {group.admin.token}"},
+        headers={"Authorization": f"Bearer {group.get_member_of_role(TestUserRoles.Owner).token}"},
         json={
             "group_id": group.id,
             "name": "New connection",

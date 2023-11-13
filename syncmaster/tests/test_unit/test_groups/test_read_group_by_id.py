@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockGroup, MockUser
+from tests.utils import MockGroup, MockUser, TestUserRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -40,7 +40,7 @@ async def test_member_of_group_can_read_by_id(
     client: AsyncClient,
     group: MockGroup,
 ):
-    member = group.members[0]
+    member = group.get_member_of_role(TestUserRoles.User)
     result = await client.get(
         f"v1/groups/{group.id}",
         headers={"Authorization": f"Bearer {member.token}"},
@@ -60,7 +60,7 @@ async def test_admin_of_group_can_read_by_id(
 ):
     result = await client.get(
         f"v1/groups/{empty_group.id}",
-        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
     )
     assert result.status_code == 200
     assert result.json() == {

@@ -15,7 +15,7 @@ async def test_run_simple_transfer(
     prepare_oracle,
     init_df: DataFrame,
 ):
-    user: MockUser = transfers["owner"]
+    user: MockUser = transfers["group_admin"]
     transfer: Transfer = transfers["postgres_oracle"]
 
     result = await client.post(

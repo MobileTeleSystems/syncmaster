@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockGroup, MockUser
+from tests.utils import MockGroup, MockUser, TestUserRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -31,7 +31,7 @@ async def test_not_member_of_group_cannot_delete_group(
 
 
 async def test_member_of_group_cannot_delete_group(client: AsyncClient, group: MockGroup):
-    user = group.members[0]
+    user = group.get_member_of_role(TestUserRoles.User)
 
     result = await client.delete(
         f"v1/groups/{group.id}",
@@ -49,7 +49,7 @@ async def test_admin_of_group_cannot_delete_group(client: AsyncClient, empty_gro
     result = await client.delete(
         f"v1/groups/{empty_group.id}",
         headers={
-            "Authorization": f"Bearer {empty_group.admin.token}",
+            "Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}",
         },
     )
     assert result.status_code == 403

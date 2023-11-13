@@ -3,7 +3,7 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests.test_unit.utils import create_connection
-from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser
+from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser, TestUserRoles
 
 from app.db.models import Transfer
 
@@ -38,7 +38,7 @@ async def test_group_member_can_create_transfer(
     group_connection: MockConnection,
     session: AsyncSession,
 ):
-    user = group_connection.owner_group.members[0]
+    user = group_connection.owner_group.get_member_of_role(TestUserRoles.User)
     other_connection = await create_connection(
         session=session,
         name="other_connection",
@@ -133,7 +133,7 @@ async def test_other_group_admin_cannot_create_group_transfer(
     session: AsyncSession,
     empty_group: MockGroup,
 ):
-    other_admin = empty_group.admin
+    other_admin = empty_group.get_member_of_role("Owner")
     other_connection = await create_connection(
         session=session,
         name="other_connection",
@@ -168,7 +168,7 @@ async def test_group_admin_can_create_own_group_transfer(
     group_connection: MockConnection,
     session: AsyncSession,
 ):
-    admin = group_connection.owner_group.admin
+    admin = group_connection.owner_group.get_member_of_role("Owner")
     other_connection = await create_connection(
         session=session,
         name="other_connection",
@@ -332,7 +332,7 @@ async def test_check_fields_validation_on_create_transfer(
     group_connection: MockConnection,
     session: AsyncSession,
 ):
-    admin_user = group_connection.owner_group.admin
+    admin_user = group_connection.owner_group.get_member_of_role("Owner")
 
     other_connection = await create_connection(
         session=session,
@@ -367,7 +367,7 @@ async def test_check_connection_types_and_its_params_on_create_transfer(
     group_connection: MockConnection,
     session: AsyncSession,
 ):
-    admin_user = group_connection.owner_group.admin
+    admin_user = group_connection.owner_group.get_member_of_role("Owner")
 
     other_connection = await create_connection(
         session=session,
@@ -409,11 +409,14 @@ async def test_check_different_connection_owners_on_create_transfer(
     session: AsyncSession,
 ):
     # Arrange
-    user = group_connection.owner_group.members[0]
+    user = group_connection.owner_group.get_member_of_role(TestUserRoles.User)
 
     await client.post(
         f"v1/groups/{empty_group.id}/users/{user.user.id}",
-        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
+        json={
+            "role": TestUserRoles.User,
+        },
     )
 
     new_connection = await create_connection(
@@ -457,7 +460,7 @@ async def test_group_member_can_not_create_transfer_with_another_group_connectio
     session: AsyncSession,
 ):
     # Arrange
-    admin = group_connection.owner_group.admin
+    admin = group_connection.owner_group.get_member_of_role(TestUserRoles.Owner)
     new_connection = await create_connection(
         session=session,
         name="New group admin connection",

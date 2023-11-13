@@ -1,4 +1,5 @@
 import asyncio
+import enum
 import logging
 from datetime import datetime
 from typing import Any
@@ -23,20 +24,49 @@ from app.db.models import Connection, Group, Run, Status, Transfer, User
 logger = logging.getLogger(__name__)
 
 
+class TestUserRoles(enum.StrEnum):
+    Owner = "Owner"
+    Maintainer = "Maintainer"
+    User = "User"
+    Guest = "Guest"
+
+
 class MockUser:
-    def __init__(self, user: User, auth_token: str) -> None:
+    def __init__(self, user: User, auth_token: str, role: str) -> None:
         self.user = user
         self.token = auth_token
+        self.role = role
 
     def __getattr__(self, attr: str) -> Any:
         return getattr(self.user, attr)
 
 
 class MockGroup:
-    def __init__(self, group: Group, admin: MockUser, members: list[MockUser]):
+    def __init__(
+        self,
+        group: Group,
+        admin: MockUser,
+        members: list[MockUser],
+    ):
         self.group = group
-        self.admin = admin
-        self.members = members
+        self._admin = admin
+
+        if members:
+            self._maintainer = members[0]
+            self._user = members[1]
+            self._guest = members[2]
+
+    def get_member_of_role(self, role_name: str) -> MockUser:
+        if role_name == "Maintainer":
+            return self._maintainer
+        if role_name == "User":
+            return self._user
+        if role_name == "Guest":
+            return self._guest
+        if role_name == "Owner":
+            return self._admin
+
+        raise ValueError(f"Unknown role name: {role_name}.")
 
     def __getattr__(self, attr: str) -> Any:
         return getattr(self.group, attr)

@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockConnection, MockGroup, MockUser
+from tests.utils import MockConnection, MockGroup, MockUser, TestUserRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -42,7 +42,9 @@ async def test_in_group_user_can_update_connection(
 ):
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
-        headers={"Authorization": f"Bearer {group_connection.owner_group.members[0].token}"},
+        headers={
+            "Authorization": f"Bearer {group_connection.owner_group.get_member_of_role(TestUserRoles.User).token}"
+        },
         json={"name": "New connection name"},
     )
     assert result.status_code == 200
@@ -99,7 +101,7 @@ async def test_group_admin_can_update_connection(
     client: AsyncClient,
     group_connection: MockConnection,
 ):
-    admin = group_connection.owner_group.admin
+    admin = group_connection.owner_group.get_member_of_role(TestUserRoles.Owner)
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {admin.token}"},
@@ -128,7 +130,7 @@ async def test_group_admin_can_update_connection(
 async def test_group_admin_cannot_update_other_group_connection(
     client: AsyncClient, empty_group: MockGroup, group_connection: MockConnection
 ):
-    other_admin = empty_group.admin
+    other_admin = empty_group.get_member_of_role("Owner")
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {other_admin.token}"},
@@ -176,7 +178,9 @@ async def test_update_connection_data_fields(
 ):
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
-        headers={"Authorization": f"Bearer {group_connection.owner_group.members[0].token}"},
+        headers={
+            "Authorization": f"Bearer {group_connection.owner_group.get_member_of_role(TestUserRoles.User).token}"
+        },
         json={"connection_data": {"host": "localhost"}},
     )
     assert result.status_code == 422
@@ -193,7 +197,9 @@ async def test_update_connection_data_fields(
 
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
-        headers={"Authorization": f"Bearer {group_connection.owner_group.members[0].token}"},
+        headers={
+            "Authorization": f"Bearer {group_connection.owner_group.get_member_of_role(TestUserRoles.User).token}"
+        },
         json={"connection_data": {"type": "postgres", "host": "localhost"}},
     )
     assert result.status_code == 200
@@ -222,7 +228,9 @@ async def test_update_connection_auth_data_fields(
 ):
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
-        headers={"Authorization": f"Bearer {group_connection.owner_group.members[0].token}"},
+        headers={
+            "Authorization": f"Bearer {group_connection.owner_group.get_member_of_role(TestUserRoles.User).token}"
+        },
         json={"auth_data": {"type": "postgres", "user": "new_user"}},
     )
     assert result.status_code == 200

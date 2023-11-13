@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockGroup, MockTransfer, MockUser
+from tests.utils import MockGroup, MockTransfer, MockUser, TestUserRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -41,7 +41,7 @@ async def test_group_member_can_read_transfer(
 ):
     result = await client.get(
         f"v1/transfers/{group_transfer.id}",
-        headers={"Authorization": f"Bearer {group_transfer.owner_group.members[0].token}"},
+        headers={"Authorization": f"Bearer {group_transfer.owner_group.get_member_of_role(TestUserRoles.User).token}"},
     )
     assert result.status_code == 200
     assert result.json() == {
@@ -65,7 +65,7 @@ async def test_group_admin_can_read_transfer_of_his_group(
 ):
     result = await client.get(
         f"v1/transfers/{group_transfer.id}",
-        headers={"Authorization": f"Bearer {group_transfer.owner_group.admin.token}"},
+        headers={"Authorization": f"Bearer {group_transfer.owner_group.get_member_of_role(TestUserRoles.Owner).token}"},
     )
     assert result.status_code == 200
     assert result.json() == {
@@ -90,7 +90,7 @@ async def test_group_admin_cannot_read_transfer_of_other_group(
 ):
     result = await client.get(
         f"v1/transfers/{group_transfer.id}",
-        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
     )
     assert result.status_code == 404
     assert result.json() == {

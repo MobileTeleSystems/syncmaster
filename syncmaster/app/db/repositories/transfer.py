@@ -36,7 +36,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         if not is_superuser:
             stmt = self.apply_user_permission(stmt, current_user_id)
 
-        return await self._paginate(
+        return await self._paginate_scalar_result(
             query=stmt.where(Transfer.group_id == group_id).order_by(Transfer.name),
             page=page,
             page_size=page_size,

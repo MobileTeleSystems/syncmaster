@@ -24,7 +24,7 @@ class UserRepository(Repository[User]):
 
         if not is_superuser:
             stmt = stmt.where(User.is_active.is_(True))
-        return await self._paginate(query=stmt.order_by(User.username), page=page, page_size=page_size)
+        return await self._paginate_scalar_result(query=stmt.order_by(User.username), page=page, page_size=page_size)
 
     async def read_by_id(self, user_id: int, **kwargs: Any) -> User:
         try:
