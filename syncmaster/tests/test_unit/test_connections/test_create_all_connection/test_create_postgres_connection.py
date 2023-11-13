@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockGroup
+from tests.utils import MockGroup, TestUserRoles
 
 from app.config import Settings
 from app.db.models import AuthData, Connection
@@ -19,7 +19,7 @@ async def test_create_postgres_connection(
 ):
     result = await client.post(
         "v1/connections",
-        headers={"Authorization": f"Bearer {group.admin.token}"},
+        headers={"Authorization": f"Bearer {group.get_member_of_role(TestUserRoles.Owner).token}"},
         json={
             "group_id": group.id,
             "name": "New connection",

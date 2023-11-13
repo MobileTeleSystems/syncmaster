@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockConnection, MockUser
+from tests.utils import MockConnection, MockUser, TestUserRoles
 
 from app.config import Settings
 
@@ -53,7 +53,9 @@ async def test_group_admin_can_read_connections(
 ):
     result = await client.get(
         f"v1/connections?group_id={group_connection.connection.group_id}",
-        headers={"Authorization": f"Bearer {group_connection.owner_group.admin.token}"},
+        headers={
+            "Authorization": f"Bearer {group_connection.owner_group.get_member_of_role(TestUserRoles.Owner).token}"
+        },
     )
 
     assert result.status_code == 200
@@ -96,7 +98,7 @@ async def test_group_member_can_read_connections(
     settings: Settings,
 ):
     # Arrange
-    group_member = group_connection.owner_group.members[0]
+    group_member = group_connection.owner_group.get_member_of_role(TestUserRoles.User)
 
     # Act
     result = await client.get(

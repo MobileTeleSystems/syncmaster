@@ -1,12 +1,12 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockGroup, MockUser
+from tests.utils import MockGroup, MockUser, TestUserRoles
 
 pytestmark = [pytest.mark.asyncio]
 
 
 async def test_not_authorized_user_cannot_remove_user_from_group(client: AsyncClient, group: MockGroup):
-    member = group.members[0]
+    member = group.get_member_of_role(TestUserRoles.User)
     result = await client.delete(f"v1/groups/{group.id}/users/{member.id}")
     assert result.status_code == 401
     assert result.json() == {
@@ -19,7 +19,7 @@ async def test_not_authorized_user_cannot_remove_user_from_group(client: AsyncCl
 async def test_not_member_group_cannot_remove_user_from_group(
     client: AsyncClient, group: MockGroup, simple_user: MockUser
 ):
-    member = group.members[0]
+    member = group.get_member_of_role(TestUserRoles.User)
     result = await client.delete(
         f"v1/groups/{group.id}/users/{member.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
@@ -33,7 +33,7 @@ async def test_not_member_group_cannot_remove_user_from_group(
 
 
 async def test_member_of_group_can_delete_self_from_group(client: AsyncClient, group: MockGroup):
-    member = group.members[0]
+    member = group.get_member_of_role(TestUserRoles.User)
     result = await client.delete(
         f"v1/groups/{group.id}/users/{member.id}",
         headers={"Authorization": f"Bearer {member.token}"},
@@ -58,8 +58,8 @@ async def test_member_of_group_can_delete_self_from_group(client: AsyncClient, g
 
 
 async def test_member_of_group_cannot_delete_others_from_group(client: AsyncClient, group: MockGroup):
-    first_member = group.members[0]
-    second_member = group.members[1]
+    first_member = group.get_member_of_role(TestUserRoles.User)
+    second_member = group.get_member_of_role(TestUserRoles.Maintainer)
 
     result = await client.delete(
         f"v1/groups/{group.id}/users/{first_member.id}",
@@ -86,10 +86,14 @@ async def test_member_of_group_cannot_delete_others_from_group(client: AsyncClie
 
 
 async def test_admin_of_group_can_delete_anyone_from_group(client: AsyncClient, group: MockGroup):
-    for member in group.members:
+    for member in (
+        group.get_member_of_role(TestUserRoles.Maintainer),
+        group.get_member_of_role(TestUserRoles.User),
+        group.get_member_of_role(TestUserRoles.Guest),
+    ):
         result = await client.delete(
             f"v1/groups/{group.id}/users/{member.id}",
-            headers={"Authorization": f"Bearer {group.admin.token}"},
+            headers={"Authorization": f"Bearer {group.get_member_of_role(TestUserRoles.Owner).token}"},
         )
         assert result.status_code == 200
         assert result.json() == {
@@ -100,7 +104,7 @@ async def test_admin_of_group_can_delete_anyone_from_group(client: AsyncClient, 
 
     result = await client.get(
         f"v1/groups/{group.id}/users",
-        headers={"Authorization": f"Bearer {group.admin.token}"},
+        headers={"Authorization": f"Bearer {group.get_member_of_role(TestUserRoles.Owner).token}"},
     )
     assert result.status_code == 200
     assert result.json() == {
@@ -119,10 +123,10 @@ async def test_admin_of_group_can_delete_anyone_from_group(client: AsyncClient, 
 
 
 async def test_cannot_delete_someone_twice_from_group(client: AsyncClient, group: MockGroup):
-    member = group.members[0]
+    member = group.get_member_of_role(TestUserRoles.User)
     result = await client.delete(
         f"v1/groups/{group.id}/users/{member.id}",
-        headers={"Authorization": f"Bearer {group.admin.token}"},
+        headers={"Authorization": f"Bearer {group.get_member_of_role(TestUserRoles.Owner).token}"},
     )
     assert result.status_code == 200
     assert result.json() == {
@@ -133,7 +137,7 @@ async def test_cannot_delete_someone_twice_from_group(client: AsyncClient, group
 
     result = await client.delete(
         f"v1/groups/{group.id}/users/{member.id}",
-        headers={"Authorization": f"Bearer {group.admin.token}"},
+        headers={"Authorization": f"Bearer {group.get_member_of_role(TestUserRoles.Owner).token}"},
     )
     assert result.status_code == 400
     assert result.json() == {
@@ -149,7 +153,7 @@ async def test_superuser_can_delete_from_any_group(
     empty_group: MockGroup,
     superuser: MockUser,
 ):
-    member = group.members[0]
+    member = group.get_member_of_role(TestUserRoles.User)
     result = await client.delete(
         f"v1/groups/{group.id}/users/{member.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -164,8 +168,11 @@ async def test_superuser_can_delete_from_any_group(
     result = await client.post(
         f"v1/groups/{empty_group.id}/users/{member.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
+        json={
+            "role": TestUserRoles.User,
+        },
     )
-    result.status_code == 200
+    assert result.status_code == 200
     assert result.json() == {
         "ok": True,
         "status_code": 200,

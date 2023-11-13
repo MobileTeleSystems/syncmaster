@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockGroup, MockRun, MockUser
+from tests.utils import MockGroup, MockRun, MockUser, TestUserRoles
 
 from app.db.models import Status
 
@@ -58,7 +58,9 @@ async def test_group_admin_can_stop_run_of_transfer_his_group(
 
     result = await client.post(
         f"v1/transfers/{group_run.transfer.id}/runs/{group_run.id}/stop",
-        headers={"Authorization": f"Bearer {group_run.transfer.owner_group.admin.token}"},
+        headers={
+            "Authorization": f"Bearer {group_run.transfer.owner_group.get_member_of_role(TestUserRoles.Owner).token}"
+        },
     )
 
     await session.refresh(group_run.run)
@@ -84,7 +86,7 @@ async def test_other_group_admin_cannot_stop_run_of_other_group_transfer(
 ) -> None:
     result = await client.post(
         f"v1/transfers/{group_run.transfer.id}/runs/{group_run.id}/stop",
-        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
     )
     assert result.status_code == 404
     assert result.json() == {
@@ -134,7 +136,9 @@ async def test_cannot_stop_run_in_status_except_started_created(
 
     result = await client.post(
         f"v1/transfers/{group_run.transfer.id}/runs/{group_run.id}/stop",
-        headers={"Authorization": f"Bearer {group_run.transfer.owner_group.admin.token}"},
+        headers={
+            "Authorization": f"Bearer {group_run.transfer.owner_group.get_member_of_role(TestUserRoles.Owner).token}"
+        },
     )
     assert result.status_code == 400
     assert result.json() == {

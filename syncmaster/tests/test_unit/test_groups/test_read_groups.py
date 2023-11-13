@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockGroup, MockUser
+from tests.utils import MockGroup, MockUser, TestUserRoles
 
 from app.db.models import UserGroup
 
@@ -52,7 +52,13 @@ async def test_regular_user_can_get_groups_if_member(
     empty_group: MockGroup,
     simple_user: MockUser,
 ):
-    session.add(UserGroup(group_id=empty_group.id, user_id=simple_user.id))
+    session.add(
+        UserGroup(
+            group_id=empty_group.id,
+            user_id=simple_user.id,
+            role=simple_user.role,
+        )
+    )
     await session.commit()
     result = await client.get(
         "v1/groups",
@@ -87,7 +93,7 @@ async def test_empty_groups_list_after_remove_from_group(
     group: MockGroup,
     simple_user: MockUser,
 ):
-    user = group.members[0]
+    user = group.get_member_of_role(TestUserRoles.User)
     result = await client.get("v1/groups", headers={"Authorization": f"Bearer {user.token}"})
     assert result.status_code == 200
     assert result.json() == {

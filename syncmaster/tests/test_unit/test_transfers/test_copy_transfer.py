@@ -4,7 +4,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser
+from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser, TestUserRoles
 
 from app.db.models import Connection
 
@@ -21,10 +21,13 @@ async def test_group_member_can_copy_transfer(
     event_loop,
 ):
     # Arrange
-    user = group_transfer.owner_group.admin
+    user = group_transfer.owner_group.get_member_of_role(TestUserRoles.Owner)
     await client.post(
         f"v1/groups/{empty_group.id}/users/{user.user.id}",
-        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
+        json={
+            "role": TestUserRoles.User,
+        },
     )
 
     # Act
@@ -91,10 +94,13 @@ async def test_group_member_can_not_copy_transfer_with_remove_source(
     event_loop,
 ):
     # Arrange
-    user = group_transfer.owner_group.members[0]
+    user = group_transfer.owner_group.get_member_of_role(TestUserRoles.User)
     await client.post(
         f"v1/groups/{empty_group.id}/users/{user.user.id}",
-        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
+        json={
+            "role": TestUserRoles.User,
+        },
     )
 
     # Act
@@ -126,10 +132,13 @@ async def test_group_admin_can_copy_transfer_with_remove_source_transfer(
     event_loop,
 ):
     # Arrange
-    user = group_transfer.owner_group.admin
+    user = group_transfer.owner_group.get_member_of_role(TestUserRoles.Owner)
     await client.post(
         f"v1/groups/{empty_group.id}/users/{user.user.id}",
-        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
+        json={
+            "role": TestUserRoles.User,
+        },
     )
 
     # Act
@@ -201,7 +210,7 @@ async def test_copy_transfer_with_non_existing_recipient_group_error(
     session: AsyncSession,
 ):
     # Arrange
-    admin = group_transfer.owner_group.admin
+    admin = group_transfer.owner_group.get_member_of_role("Owner")
     # Act
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
@@ -223,10 +232,13 @@ async def test_copy_non_existing_transfer_error(
     empty_group: MockGroup,
 ):
     # Arrnage
-    user = group_transfer.owner_group.admin
+    user = group_transfer.owner_group.get_member_of_role("Owner")
     await client.post(
         f"v1/groups/{empty_group.id}/users/{user.user.id}",
-        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
+        json={
+            "role": TestUserRoles.User,
+        },
     )
 
     # Act
@@ -274,7 +286,7 @@ async def test_other_group_member_can_not_copy_transfer(
     event_loop,
 ):
     # Arrange
-    group_member = group_connection.owner_group.members[0]
+    group_member = group_connection.owner_group.get_member_of_role(TestUserRoles.User)
 
     # Act
     result_response = await client.post(

@@ -2,13 +2,15 @@ from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import UnitOfWorkMarker
 from app.api.v1.groups.schemas import (
+    AddUserSchema,
     GroupPageSchema,
     ReadGroupSchema,
     UpdateGroupSchema,
 )
 from app.api.v1.schemas import StatusResponseSchema
-from app.api.v1.users.schemas import UserPageSchema
+from app.api.v1.users.schemas import UserPageSchemaAsGroupMember
 from app.db.models import User
+from app.exceptions import ActionNotAllowed
 from app.services import UnitOfWork, get_user
 
 router = APIRouter(tags=["Groups"])
@@ -65,11 +67,20 @@ async def update_group(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadGroupSchema:
+    is_superuser = current_user.is_superuser
+    cur_user_id = current_user.id
+
+    group = await unit_of_work.group.read_by_id(
+        group_id=group_id,
+        is_superuser=is_superuser,
+        current_user_id=cur_user_id,
+    )
+    if not (group.admin_id == cur_user_id or is_superuser):
+        raise ActionNotAllowed
+
     async with unit_of_work:
         group = await unit_of_work.group.update(
             group_id=group_id,
-            current_user_id=current_user.id,
-            is_superuser=current_user.is_superuser,
             admin_id=group_data.admin_id,
             name=group_data.name,
             description=group_data.description,
@@ -94,7 +105,7 @@ async def get_group_users(
     page_size: int = Query(gt=0, le=200, default=20),
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
-) -> UserPageSchema:
+) -> UserPageSchemaAsGroupMember:
     pagination = await unit_of_work.group.get_member_paginate(
         group_id=group_id,
         page=page,
@@ -102,24 +113,69 @@ async def get_group_users(
         current_user_id=current_user.id,
         is_superuser=current_user.is_superuser,
     )
-    return UserPageSchema.from_pagination(pagination=pagination)
+    return UserPageSchemaAsGroupMember.from_pagination(pagination=pagination)
+
+
+@router.patch("/groups/{group_id}/users/{user_id}")
+async def update_user_role_group(
+    group_id: int,
+    user_id: int,
+    update_user_data: AddUserSchema,
+    current_user: User = Depends(get_user(is_active=True)),
+    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+) -> AddUserSchema:
+    is_superuser = current_user.is_superuser
+    cur_user_id = current_user.id
+
+    group = await unit_of_work.group.read_by_id(
+        group_id=group_id,
+        is_superuser=is_superuser,
+        current_user_id=cur_user_id,
+    )
+    if not is_superuser and not group.admin_id == cur_user_id:
+        raise ActionNotAllowed
+
+    async with unit_of_work:
+        result = await unit_of_work.group.update_member_role(
+            group_id=group_id,
+            user_id=user_id,
+            role=update_user_data.role,
+        )
+
+    return AddUserSchema.from_orm(result)
 
 
 @router.post("/groups/{group_id}/users/{user_id}")
 async def add_user_to_group(
     group_id: int,
     user_id: int,
+    add_user_data: AddUserSchema,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> StatusResponseSchema:
+    is_superuser = current_user.is_superuser
+    cur_user_id = current_user.id
+
+    group = await unit_of_work.group.read_by_id(
+        group_id=group_id,
+        is_superuser=is_superuser,
+        current_user_id=cur_user_id,
+    )
+
+    if not (group.admin_id == cur_user_id or is_superuser):
+        raise ActionNotAllowed
+
     async with unit_of_work:
         await unit_of_work.group.add_user(
             group_id=group_id,
-            target_user_id=user_id,
-            current_user_id=current_user.id,
-            is_superuser=current_user.is_superuser,
+            new_user_id=user_id,
+            role=add_user_data.role,
         )
-    return StatusResponseSchema(ok=True, status_code=200, message="User was successfully added to group")
+    return StatusResponseSchema(
+        ok=True,
+        status_code=200,
+        message="User was successfully added to group",
+    )
 
 
 @router.delete("/groups/{group_id}/users/{user_id}")

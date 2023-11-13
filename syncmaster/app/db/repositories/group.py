@@ -1,6 +1,6 @@
 from typing import NoReturn
 
-from sqlalchemy import ScalarResult, insert, or_, select
+from sqlalchemy import ScalarResult, insert, or_, select, update
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -33,13 +33,17 @@ class GroupRepository(Repository[Group]):
                 )
             )
 
-        return await self._paginate(query=stmt.order_by(Group.name), page=page, page_size=page_size)
+        return await self._paginate_scalar_result(query=stmt.order_by(Group.name), page=page, page_size=page_size)
 
     async def read_by_id(self, group_id: int, is_superuser: bool, current_user_id: int) -> Group:
         stmt = select(Group).where(Group.id == group_id, Group.is_deleted.is_(False))
         if not is_superuser:
             stmt = (
-                stmt.join(UserGroup, UserGroup.group_id == Group.id, full=True)
+                stmt.join(
+                    UserGroup,
+                    UserGroup.group_id == Group.id,
+                    full=True,
+                )
                 .where(
                     or_(
                         UserGroup.user_id == current_user_id,
@@ -48,6 +52,7 @@ class GroupRepository(Repository[Group]):
                 )
                 .distinct(Group.id)
             )
+
         try:
             result: ScalarResult[Group] = await self._session.scalars(stmt)
             return result.one()
@@ -75,21 +80,49 @@ class GroupRepository(Repository[Group]):
     async def update(
         self,
         group_id: int,
-        current_user_id: int,
-        is_superuser: bool,
         name: str,
         description: str,
         admin_id: int,
     ) -> Group:
         args = [Group.id == group_id, Group.is_deleted.is_(False)]
-        if not is_superuser:
-            args.append(Group.admin_id == current_user_id)
         try:
-            return await self._update(*args, name=name, description=description, admin_id=admin_id)
+            return await self._update(
+                *args,
+                name=name,
+                description=description,
+                admin_id=admin_id,
+            )
         except EntityNotFound as e:
             raise GroupNotFound from e
         except IntegrityError as e:
             self._raise_error(e)
+
+    async def update_member_role(
+        self,
+        group_id: int,
+        user_id: int,
+        role: str,
+    ):
+        try:
+            row_res = await self._session.scalars(
+                update(UserGroup)
+                .where(
+                    UserGroup.group_id == group_id,
+                    UserGroup.user_id == user_id,
+                )
+                .values(
+                    group_id=group_id,
+                    user_id=user_id,
+                    role=role,
+                )
+                .returning(UserGroup)
+            )
+            await self._session.flush()
+            obj = row_res.one()
+        except IntegrityError as err:
+            self._raise_error(err)
+
+        return obj
 
     async def get_member_paginate(
         self,
@@ -105,8 +138,11 @@ class GroupRepository(Repository[Group]):
             current_user_id=current_user_id,
         )
         stmt = (
-            select(User)
-            .join(UserGroup, UserGroup.user_id == User.id)
+            select(User, UserGroup.role)
+            .join(
+                UserGroup,
+                UserGroup.user_id == User.id,
+            )
             .where(
                 User.is_deleted.is_(False),
                 User.is_active.is_(True),
@@ -114,7 +150,7 @@ class GroupRepository(Repository[Group]):
             )
             .order_by(User.username)
         )
-        return await self._paginate(stmt, page=page, page_size=page_size)
+        return await self._paginate_raw_result(stmt, page=page, page_size=page_size)
 
     async def delete(self, group_id: int) -> None:
         try:
@@ -125,19 +161,17 @@ class GroupRepository(Repository[Group]):
     async def add_user(
         self,
         group_id: int,
-        target_user_id: int,
-        current_user_id: int,
-        is_superuser: bool,
+        new_user_id: int,
+        role: str,
     ) -> None:
-        group = await self.read_by_id(
-            group_id=group_id,
-            is_superuser=is_superuser,
-            current_user_id=current_user_id,
-        )
-        if not (group.admin_id == current_user_id or is_superuser):
-            raise ActionNotAllowed
         try:
-            await self._session.execute(insert(UserGroup).values(group_id=group_id, user_id=target_user_id))
+            await self._session.execute(
+                insert(UserGroup).values(
+                    group_id=group_id,
+                    user_id=new_user_id,
+                    role=role,
+                )
+            )
         except IntegrityError as err:
             self._raise_error(err)
         else:

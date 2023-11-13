@@ -76,7 +76,21 @@ class Repository(Generic[Model], ABC):
         await self._session.flush()
         return result.one()
 
-    async def _paginate(self, query: Select, page: int, page_size: int) -> Pagination:
+    async def _paginate_raw_result(self, query: Select, page: int, page_size: int) -> Pagination:
+        items_result = await self._session.execute(query.limit(page_size).offset((page - 1) * page_size))
+        total: int = await self._session.scalar(select(func.count()).select_from(query.subquery()))  # type: ignore
+        return Pagination(
+            items=items_result.all(),
+            total=total,
+            page=page,
+            page_size=page_size,
+        )
+
+    async def _paginate_scalar_result(self, query: Select, page: int, page_size: int) -> Pagination:
+        """
+        This method is needed for those queries where all fields are needed,
+        the scalars method discards all fields except the first
+        """
         items_result: ScalarResult[Model] = await self._session.scalars(
             query.limit(page_size).offset((page - 1) * page_size)
         )

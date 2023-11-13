@@ -349,7 +349,11 @@ async def transfers(
         transfers[f"{source_type}_{target_type}"] = transfer
 
     data = {
-        "owner": MockUser(user=user, auth_token=sign_jwt(user.id, settings)),
+        "group_admin": MockUser(
+            user=user,
+            auth_token=sign_jwt(user.id, settings),
+            role="Owner",
+        ),
     }
     data.update(transfers)  # type: ignore
     yield data

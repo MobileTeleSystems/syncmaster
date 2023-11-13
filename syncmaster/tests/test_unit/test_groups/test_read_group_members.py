@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockGroup, MockUser
+from tests.utils import MockGroup, MockUser, TestUserRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -30,23 +30,32 @@ async def test_not_member_of_group_cannot_read_group_members(
     }
 
 
-async def test_member_of_group_can_read_group_members(client: AsyncClient, group: MockGroup):
-    user = group.members[0]
+async def test_member_of_group_can_read_group_members(
+    client: AsyncClient,
+    group: MockGroup,
+):
+    user = group.get_member_of_role(TestUserRoles.User)
     result = await client.get(
         f"v1/groups/{group.id}/users",
         headers={
             "Authorization": f"Bearer {user.token}",
         },
     )
+
     assert result.status_code == 200
     members = [
         {
             "id": user.id,
-            "is_superuser": user.is_superuser,
             "username": user.username,
+            "role": user.role,
         }
-        for user in group.members
+        for user in (
+            group.get_member_of_role(TestUserRoles.Maintainer),
+            group.get_member_of_role(TestUserRoles.User),
+            group.get_member_of_role(TestUserRoles.Guest),
+        )
     ]
+
     members.sort(key=lambda x: x["username"])
     assert result.json() == {
         "meta": {
@@ -63,11 +72,15 @@ async def test_member_of_group_can_read_group_members(client: AsyncClient, group
     }
 
 
-async def test_admin_of_group_can_read_group_members(client: AsyncClient, empty_group: MockGroup, group: MockGroup):
+async def test_admin_of_group_can_read_group_members(
+    client: AsyncClient,
+    empty_group: MockGroup,
+    group: MockGroup,
+):
     result = await client.get(
         f"v1/groups/{empty_group.id}/users",
         headers={
-            "Authorization": f"Bearer {empty_group.admin.token}",
+            "Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}",
         },
     )
     assert result.status_code == 200
@@ -88,7 +101,7 @@ async def test_admin_of_group_can_read_group_members(client: AsyncClient, empty_
     result = await client.get(
         f"v1/groups/{group.id}/users",
         headers={
-            "Authorization": f"Bearer {empty_group.admin.token}",
+            "Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}",
         },
     )
     assert result.status_code == 404
@@ -99,7 +112,7 @@ async def test_admin_of_group_can_read_group_members(client: AsyncClient, empty_
     }
 
 
-async def test_admin_of_group_can_read_group_members(
+async def test_superuser_can_read_group_members(
     client: AsyncClient,
     empty_group: MockGroup,
     group: MockGroup,
@@ -136,10 +149,14 @@ async def test_admin_of_group_can_read_group_members(
     members = [
         {
             "id": user.id,
-            "is_superuser": user.is_superuser,
             "username": user.username,
+            "role": user.role,
         }
-        for user in group.members
+        for user in (
+            group.get_member_of_role(TestUserRoles.Maintainer),
+            group.get_member_of_role(TestUserRoles.User),
+            group.get_member_of_role(TestUserRoles.Guest),
+        )
     ]
     members.sort(key=lambda x: x["username"])
     assert result.json() == {

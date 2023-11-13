@@ -20,6 +20,12 @@ from app.db.base import Base
 from app.db.mixins import DeletableMixin, ResourceMixin, TimestampMixin
 
 
+class GroupMemberRole(enum.StrEnum):
+    Maintainer = "Maintainer"
+    User = "User"
+    Guest = "Guest"
+
+
 class User(Base, TimestampMixin, DeletableMixin):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     username: Mapped[str] = mapped_column(String(256), nullable=False, unique=True, index=True)
@@ -56,6 +62,10 @@ class UserGroup(Base):
         ForeignKey("group.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
+    )
+    role: Mapped[GroupMemberRole] = mapped_column(
+        ChoiceType(GroupMemberRole),
+        nullable=False,
     )
 
 

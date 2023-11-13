@@ -39,13 +39,11 @@ async def read_connections(
         is_superuser=current_user.is_superuser,
         group_id=group_id,
     )
-
     items = []
     if pagination.items:
         creds = await asyncio.gather(
             *[unit_of_work.credentials.get_for_connection(connection_id=item.id) for item in pagination.items]
         )
-
         items = [
             ReadConnectionSchema(
                 id=item.id,

@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockGroup, MockTransfer, MockUser
+from tests.utils import MockGroup, MockTransfer, MockUser, TestUserRoles
 
 from app.db.models import Run, Status
 
@@ -68,7 +68,7 @@ async def test_group_admin_can_create_run_of_transfer_his_group(
 
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/runs",
-        headers={"Authorization": f"Bearer {group_transfer.owner_group.admin.token}"},
+        headers={"Authorization": f"Bearer {group_transfer.owner_group.get_member_of_role(TestUserRoles.Owner).token}"},
     )
 
     run = (
@@ -100,7 +100,7 @@ async def test_group_admin_cannot_create_run_of_other_group_transfer(
 
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/runs",
-        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
     )
     assert result.status_code == 404
     assert result.json() == {

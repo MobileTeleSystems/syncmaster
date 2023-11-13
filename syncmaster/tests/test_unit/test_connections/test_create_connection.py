@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockConnection, MockGroup, MockUser
+from tests.utils import MockConnection, MockGroup, MockUser, TestUserRoles
 
 from app.config import Settings
 from app.db.models import AuthData, Connection
@@ -21,7 +21,7 @@ async def test_user_in_group_can_create_connection(
 ):
     result = await client.post(
         "v1/connections",
-        headers={"Authorization": f"Bearer {group.members[0].token}"},
+        headers={"Authorization": f"Bearer {group.get_member_of_role(TestUserRoles.User).token}"},
         json={
             "group_id": group.id,
             "name": "New connection",
@@ -157,7 +157,9 @@ async def test_check_fields_validation_on_create_connection(
 ):
     result = await client.post(
         "v1/connections",
-        headers={"Authorization": f"Bearer {group_connection.owner_group.members[0].token}"},
+        headers={
+            "Authorization": f"Bearer {group_connection.owner_group.get_member_of_role(TestUserRoles.User).token}"
+        },
         json={
             "group_id": group_connection.id,
             "name": None,
@@ -188,7 +190,9 @@ async def test_check_fields_validation_on_create_connection(
 
     result = await client.post(
         "v1/connections",
-        headers={"Authorization": f"Bearer {group_connection.owner_group.members[0].token}"},
+        headers={
+            "Authorization": f"Bearer {group_connection.owner_group.get_member_of_role(TestUserRoles.User).token}"
+        },
         json={
             "group_id": group_connection.id,
             "name": "None",
@@ -219,7 +223,9 @@ async def test_check_fields_validation_on_create_connection(
 
     result = await client.post(
         "v1/connections",
-        headers={"Authorization": f"Bearer {group_connection.owner_group.members[0].token}"},
+        headers={
+            "Authorization": f"Bearer {group_connection.owner_group.get_member_of_role(TestUserRoles.User).token}"
+        },
         json={
             "group_id": group_connection.id,
             "name": "None",
@@ -265,7 +271,7 @@ async def test_group_member_can_create_group_connection(
 ):
     result = await client.post(
         "v1/connections",
-        headers={"Authorization": f"Bearer {group.members[0].token}"},
+        headers={"Authorization": f"Bearer {group.get_member_of_role(TestUserRoles.User).token}"},
         json={
             "group_id": group.id,
             "name": "Member connection",
@@ -333,7 +339,7 @@ async def test_group_member_can_create_group_connection(
 async def test_other_group_admin_cannot_create_group_connection(
     client: AsyncClient, empty_group: MockGroup, group: MockGroup
 ):
-    admin = empty_group.admin
+    admin = empty_group.get_member_of_role(TestUserRoles.Owner)
     result = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {admin.token}"},
@@ -370,7 +376,7 @@ async def test_group_admin_can_create_group_connection(
     event_loop,
     request,
 ):
-    admin = empty_group.admin
+    admin = empty_group.get_member_of_role(TestUserRoles.Owner)
     result = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {admin.token}"},

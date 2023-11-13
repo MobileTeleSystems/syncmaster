@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser
+from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser, TestUserRoles
 
 from app.config import Settings
 from app.db.models import AuthData, Connection
@@ -59,7 +59,7 @@ async def test_other_group_member_cannot_copy_connection(
     session: AsyncSession,
     settings: Settings,
 ):
-    group_member = group_transfer.owner_group.members[0]
+    group_member = group_transfer.owner_group.get_member_of_role(TestUserRoles.User)
 
     result = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
@@ -82,7 +82,7 @@ async def test_other_group_admin_cannot_copy_connection(
     empty_group: MockGroup,
     simple_user: MockUser,
 ):
-    admin = empty_group.admin
+    admin = empty_group.get_member_of_role(TestUserRoles.Owner)
     result = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {admin.token}"},
@@ -109,7 +109,7 @@ async def test_not_in_both_groups_user_can_not_copy_connection(
     settings: Settings,
 ):
     # Arrange
-    admin = group_connection.owner_group.admin
+    admin = group_connection.owner_group.get_member_of_role("Owner")
 
     query_current_row = select(Connection).where(Connection.id == group_connection.id)
 
@@ -166,7 +166,7 @@ async def test_groupless_user_can_not_copy_connection(
     settings: Settings,
 ):
     # Arrange
-    user = empty_group.admin
+    user = empty_group.get_member_of_role("Owner")
 
     query_current_row = select(Connection).where(Connection.id == group_connection.id)
 
@@ -223,11 +223,14 @@ async def test_admin_can_copy_connection(
     settings: Settings,
 ):
     # Arrange
-    admin = group_connection.owner_group.admin
+    admin = group_connection.owner_group.get_member_of_role("Owner")
 
     await client.post(
         f"v1/groups/{empty_group.id}/users/{admin.user.id}",
-        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
+        json={
+            "role": TestUserRoles.User,
+        },
     )
 
     query_current_row = select(Connection).where(Connection.id == group_connection.id)
@@ -399,12 +402,15 @@ async def test_group_member_can_copy_connection(
     empty_group: MockGroup,
 ):
     # Arrange
-    group_member = group_connection.owner_group.members[0]
-    other_group_admin = empty_group.admin
+    group_member = group_connection.owner_group.get_member_of_role(TestUserRoles.User)
+    other_group_admin = empty_group.get_member_of_role("Owner")
 
     await client.post(
         f"v1/groups/{empty_group.id}/users/{group_member.user.id}",
         headers={"Authorization": f"Bearer {other_group_admin.token}"},
+        json={
+            "role": TestUserRoles.User,
+        },
     )
 
     # Act
@@ -431,12 +437,15 @@ async def test_not_admin_group_member_can_not_copy_connection_with_remove_source
     empty_group: MockGroup,
 ):
     # Arrange
-    group_member = group_connection.owner_group.members[0]
-    other_group_admin = empty_group.admin
+    group_member = group_connection.owner_group.get_member_of_role(TestUserRoles.User)
+    other_group_admin = empty_group.get_member_of_role("Owner")
 
     await client.post(
         f"v1/groups/{empty_group.id}/users/{group_member.user.id}",
         headers={"Authorization": f"Bearer {other_group_admin.token}"},
+        json={
+            "role": TestUserRoles.User,
+        },
     )
 
     # Act

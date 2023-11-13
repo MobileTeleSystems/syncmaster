@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockConnection, MockGroup, MockUser
+from tests.utils import MockConnection, MockGroup, MockUser, TestUserRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -39,7 +39,9 @@ async def test_in_group_user_can_read_connection(
 ):
     result = await client.get(
         f"v1/connections/{group_connection.id}",
-        headers={"Authorization": f"Bearer {group_connection.owner_group.members[0].token}"},
+        headers={
+            "Authorization": f"Bearer {group_connection.owner_group.get_member_of_role(TestUserRoles.User).token}"
+        },
     )
     assert result.status_code == 200
     assert result.json() == {
@@ -79,7 +81,9 @@ async def test_group_admin_can_read_connection_of_his_group(
 
     result = await client.get(
         f"v1/connections/{group_connection.id}",
-        headers={"Authorization": f"Bearer {group_connection.owner_group.admin.token}"},
+        headers={
+            "Authorization": f"Bearer {group_connection.owner_group.get_member_of_role(TestUserRoles.Owner).token}"
+        },
     )
     assert result.status_code == 200
     assert result.json() == {
@@ -108,7 +112,7 @@ async def test_group_admin_cannot_read_connection_of_other(
 ):
     result = await client.get(
         f"v1/connections/{group_connection.id}",
-        headers={"Authorization": f"Bearer {empty_group.admin.token}"},
+        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
     )
     assert result.status_code == 404
     assert result.json() == {

@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser
+from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser, TestUserRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -46,7 +46,7 @@ async def test_group_user_can_not_delete_connection_with_linked_transfer(
 ):
     result = await client.delete(
         f"v1/connections/{group_transfer.source_connection.id}",
-        headers={"Authorization": f"Bearer {group_transfer.owner_group.members[0].token}"},
+        headers={"Authorization": f"Bearer {group_transfer.owner_group.get_member_of_role(TestUserRoles.User).token}"},
     )
     assert result.status_code == 409
     assert result.json() == {
@@ -62,7 +62,7 @@ async def test_group_admin_can_delete_own_group_connection(
     client: AsyncClient,
     group_connection: MockConnection,
 ):
-    admin = group_connection.owner_group.admin
+    admin = group_connection.owner_group.get_member_of_role(TestUserRoles.Owner)
     result = await client.delete(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {admin.token}"},
@@ -76,9 +76,11 @@ async def test_group_admin_can_delete_own_group_connection(
 
 
 async def test_group_admin_cannot_delete_other_group_connection(
-    client: AsyncClient, empty_group: MockGroup, group_connection: MockConnection
+    client: AsyncClient,
+    empty_group: MockGroup,
+    group_connection: MockConnection,
 ):
-    other_admin = empty_group.admin
+    other_admin = empty_group.get_member_of_role(TestUserRoles.Owner)
     result = await client.delete(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {other_admin.token}"},
@@ -113,7 +115,7 @@ async def test_not_admin_group_member_can_not_delete_connection(
     group_connection: MockConnection,
 ):
     # Arrange
-    group_member = group_connection.owner_group.members[0]
+    group_member = group_connection.owner_group.get_member_of_role(TestUserRoles.User)
 
     # Act
     result = await client.delete(
