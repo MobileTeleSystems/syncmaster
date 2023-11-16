@@ -97,7 +97,7 @@ async def test_superuser_can_update_user_connection(
     }
 
 
-async def test_group_admin_can_update_connection(
+async def test_group_owner_can_update_connection(
     client: AsyncClient,
     group_connection: MockConnection,
 ):
@@ -127,7 +127,7 @@ async def test_group_admin_can_update_connection(
     }
 
 
-async def test_group_admin_cannot_update_other_group_connection(
+async def test_group_owner_cannot_update_other_group_connection(
     client: AsyncClient, empty_group: MockGroup, group_connection: MockConnection
 ):
     other_admin = empty_group.get_member_of_role("Owner")

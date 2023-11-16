@@ -38,12 +38,12 @@ async def test_member_of_group_can_delete_self_from_group(client: AsyncClient, g
         f"v1/groups/{group.id}/users/{member.id}",
         headers={"Authorization": f"Bearer {member.token}"},
     )
-    assert result.status_code == 200
     assert result.json() == {
         "ok": True,
         "status_code": 200,
         "message": "User was successfully removed from group",
     }
+    assert result.status_code == 200
 
     result = await client.get(
         f"v1/groups/{group.id}",
@@ -58,34 +58,35 @@ async def test_member_of_group_can_delete_self_from_group(client: AsyncClient, g
 
 
 async def test_member_of_group_cannot_delete_others_from_group(client: AsyncClient, group: MockGroup):
-    first_member = group.get_member_of_role(TestUserRoles.User)
-    second_member = group.get_member_of_role(TestUserRoles.Maintainer)
+    first_member = group.get_member_of_role(TestUserRoles.Maintainer)
+    second_member = group.get_member_of_role(TestUserRoles.User)
 
     result = await client.delete(
         f"v1/groups/{group.id}/users/{first_member.id}",
         headers={"Authorization": f"Bearer {second_member.token}"},
     )
-    assert result.status_code == 403
     assert result.json() == {
         "ok": False,
         "status_code": 403,
         "message": "You have no power here",
     }
+    assert result.status_code == 403
 
     result = await client.get(
         f"v1/groups/{group.id}",
         headers={"Authorization": f"Bearer {first_member.token}"},
     )
-    assert result.status_code == 200
+
     assert result.json() == {
         "id": group.id,
         "name": group.name,
         "description": group.description,
         "admin_id": group.admin_id,
     }
+    assert result.status_code == 200
 
 
-async def test_admin_of_group_can_delete_anyone_from_group(client: AsyncClient, group: MockGroup):
+async def test_owner_of_group_can_delete_anyone_from_group(client: AsyncClient, group: MockGroup):
     for member in (
         group.get_member_of_role(TestUserRoles.Maintainer),
         group.get_member_of_role(TestUserRoles.User),

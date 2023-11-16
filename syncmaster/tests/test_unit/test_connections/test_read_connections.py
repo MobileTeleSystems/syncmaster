@@ -30,23 +30,15 @@ async def test_other_group_user_can_not_read_group_connections(
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
 
-    assert result.status_code == 200
     assert result.json() == {
-        "items": [],
-        "meta": {
-            "has_next": False,
-            "has_previous": False,
-            "next_page": None,
-            "page": 1,
-            "page_size": 20,
-            "pages": 1,
-            "previous_page": None,
-            "total": 0,
-        },
+        "message": "Group not found",
+        "ok": False,
+        "status_code": 404,
     }
+    assert result.status_code == 404
 
 
-async def test_group_admin_can_read_connections(
+async def test_group_owner_can_read_connections(
     client: AsyncClient,
     group_connection: MockConnection,
     settings: Settings,

@@ -39,7 +39,7 @@ async def test_groupless_user_can_not_stop_run(
     }
 
 
-async def test_group_admin_can_stop_run_of_transfer_his_group(
+async def test_group_owner_can_stop_run_of_transfer_his_group(
     client: AsyncClient,
     simple_user: MockUser,
     group_run: MockRun,
@@ -78,7 +78,7 @@ async def test_group_admin_can_stop_run_of_transfer_his_group(
     }
 
 
-async def test_other_group_admin_cannot_stop_run_of_other_group_transfer(
+async def test_other_group_owner_cannot_stop_run_of_other_group_transfer(
     client: AsyncClient,
     group_run: MockRun,
     empty_group: MockGroup,

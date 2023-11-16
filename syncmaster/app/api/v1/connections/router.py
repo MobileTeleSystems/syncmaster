@@ -16,7 +16,8 @@ from app.api.v1.connections.schemas import (
 )
 from app.api.v1.schemas import MetaPageSchema, StatusResponseSchema
 from app.db.models import User
-from app.exceptions import ActionNotAllowed, AuthDataNotFound
+from app.db.utils import Permission
+from app.exceptions import ActionNotAllowed, AuthDataNotFound, GroupNotFound
 from app.exceptions.connection import ConnectionDeleteException, ConnectionNotFound
 from app.services import UnitOfWork, get_user
 
@@ -32,14 +33,21 @@ async def read_connections(
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ConnectionPageSchema:
     """Return connections in page format"""
+    resource_role = await unit_of_work.group.get_permission(
+        user=current_user,
+        group_id=group_id,
+    )
+
+    if resource_role == Permission.NONE:
+        raise GroupNotFound
+
     pagination = await unit_of_work.connection.paginate(
         page=page,
         page_size=page_size,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
         group_id=group_id,
     )
-    items = []
+    items: list[ReadConnectionSchema] = []
+
     if pagination.items:
         creds = await asyncio.gather(
             *[unit_of_work.credentials.get_for_connection(connection_id=item.id) for item in pagination.items]
@@ -78,11 +86,15 @@ async def create_connection(
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadConnectionSchema:
     """Create new connection"""
-    if not current_user.is_superuser:
-        is_member = await unit_of_work.group.is_member(connection_data.group_id, current_user.id)
-        is_admin = await unit_of_work.group.is_admin(connection_data.group_id, current_user.id)
-        if not is_member and not is_admin:
-            raise ActionNotAllowed
+    group_permission = await unit_of_work.group.get_permission(
+        user=current_user,
+        group_id=connection_data.group_id,
+    )
+    if group_permission == Permission.NONE:
+        raise GroupNotFound
+
+    if group_permission < Permission.WRITE:
+        raise ActionNotAllowed
 
     data = connection_data.data.dict()
     auth_data = connection_data.auth_data.dict()
@@ -125,11 +137,16 @@ async def read_connection(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadConnectionSchema:
-    connection = await unit_of_work.connection.read_by_id(
-        connection_id=connection_id,
-        is_superuser=current_user.is_superuser,
-        current_user_id=current_user.id,
+    resource_role = await unit_of_work.connection.get_permission(
+        user=current_user,
+        resource_id=connection_id,
     )
+
+    if resource_role == Permission.NONE:
+        raise ConnectionNotFound
+
+    connection = await unit_of_work.connection.read_by_id(connection_id=connection_id)
+
     try:
         credentials = await unit_of_work.credentials.get_for_connection(
             connection_id=connection.id,
@@ -154,11 +171,20 @@ async def update_connection(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadConnectionSchema:
+    resource_role = await unit_of_work.connection.get_permission(
+        user=current_user,
+        resource_id=connection_id,
+    )
+
+    if resource_role == Permission.NONE:
+        raise ConnectionNotFound
+
+    if resource_role < Permission.WRITE:
+        raise ActionNotAllowed
+
     async with unit_of_work:
         connection = await unit_of_work.connection.update(
             connection_id=connection_id,
-            current_user_id=current_user.id,
-            is_superuser=current_user.is_superuser,
             name=connection_data.name,
             description=connection_data.description,
             connection_data=connection_data.data.dict(exclude={"auth_data"}) if connection_data.data else {},
@@ -191,21 +217,23 @@ async def delete_connection(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> StatusResponseSchema:
-    connection = await unit_of_work.connection.read_by_id(
-        connection_id=connection_id,
-        is_superuser=current_user.is_superuser,
-        current_user_id=current_user.id,
+    resource_role = await unit_of_work.connection.get_permission(
+        user=current_user,
+        resource_id=connection_id,
     )
+
+    if resource_role == Permission.NONE:
+        raise ConnectionNotFound
+
+    if resource_role < Permission.DELETE:
+        raise ActionNotAllowed
+
+    connection = await unit_of_work.connection.read_by_id(connection_id=connection_id)
 
     transfers = await unit_of_work.transfer.list_by_connection_id(conn_id=connection.id)
     async with unit_of_work:
         if not transfers:
-            await unit_of_work.connection.delete(
-                connection_id=connection_id,
-                current_user_id=current_user.id,
-                is_superuser=current_user.is_superuser,
-                group_id=connection.group_id,
-            )
+            await unit_of_work.connection.delete(connection_id=connection_id)
 
             return StatusResponseSchema(
                 ok=True,
@@ -221,45 +249,45 @@ async def delete_connection(
 @router.post("/connections/{connection_id}/copy_connection")
 async def copy_connection(
     connection_id: int,
-    new_owner_data: ConnectionCopySchema,
+    copy_connection_data: ConnectionCopySchema,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> StatusResponseSchema:
-    connection = await unit_of_work.connection.read_by_id(
-        connection_id=connection_id,
-        is_superuser=current_user.is_superuser,
-        current_user_id=current_user.id,
+    target_source_rules = await asyncio.gather(
+        unit_of_work.connection.get_permission(
+            user=current_user,
+            resource_id=connection_id,
+        ),
+        unit_of_work.group.get_permission(
+            user=current_user,
+            group_id=copy_connection_data.new_group_id,
+        ),
     )
-    # Check: The user can manage the resource
-    if not current_user.is_superuser and not await unit_of_work.connection.check_user_rights(
-        user_id=current_user.id,
-        group_id=connection.group_id,
-    ):
+    resource_role, target_group_role = target_source_rules
+
+    if resource_role == Permission.NONE:
         raise ConnectionNotFound
 
-    # Check: The user can perform actions in the target group
-    if not current_user.is_superuser and not await unit_of_work.connection.check_user_rights(
-        user_id=current_user.id,
-        group_id=new_owner_data.new_group_id,
-    ):
+    if target_group_role == Permission.NONE:
+        raise GroupNotFound
+
+    if target_group_role < Permission.WRITE:
+        raise ActionNotAllowed
+
+    if copy_connection_data.remove_source and resource_role < Permission.DELETE:
         raise ActionNotAllowed
 
     async with unit_of_work:
         await unit_of_work.connection.copy(
             connection_id=connection_id,
-            new_group_id=new_owner_data.new_group_id,
+            new_group_id=copy_connection_data.new_group_id,
         )
 
-        if new_owner_data.remove_source:
-            await unit_of_work.connection.delete(
-                connection_id=connection_id,
-                is_superuser=current_user.is_superuser,
-                current_user_id=current_user.id,
-                group_id=connection.group_id,
-            )
+        if copy_connection_data.remove_source:
+            await unit_of_work.connection.delete(connection_id=connection_id)
 
     return StatusResponseSchema(
         ok=True,
         status_code=status.HTTP_200_OK,
-        message="Connection was copied.",
+        message="Connection was copied",
     )

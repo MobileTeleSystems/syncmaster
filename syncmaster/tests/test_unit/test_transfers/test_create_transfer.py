@@ -127,7 +127,7 @@ async def test_groupless_user_cannot_create_transfer(
     await session.commit()
 
 
-async def test_other_group_admin_cannot_create_group_transfer(
+async def test_other_group_owner_cannot_create_group_transfer(
     client: AsyncClient,
     group_connection: MockConnection,
     session: AsyncSession,
@@ -163,7 +163,7 @@ async def test_other_group_admin_cannot_create_group_transfer(
     }
 
 
-async def test_group_admin_can_create_own_group_transfer(
+async def test_group_owner_can_create_own_group_transfer(
     client: AsyncClient,
     group_connection: MockConnection,
     session: AsyncSession,
@@ -486,11 +486,11 @@ async def test_group_member_can_not_create_transfer_with_another_group_connectio
     )
 
     # Assert
-    assert result.status_code == 404
     assert result.json() == {
+        "message": "Connections should belong to the transfer group",
         "ok": False,
-        "status_code": 404,
-        "message": "Connection not found",
+        "status_code": 400,
     }
+    assert result.status_code == 400
     await session.delete(new_connection)
     await session.commit()

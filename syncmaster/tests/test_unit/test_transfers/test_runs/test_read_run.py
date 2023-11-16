@@ -35,7 +35,7 @@ async def test_groupless_user_can_not_read_run_of_the_transfer(
     }
 
 
-async def test_group_admin_can_read_run_of_transfer_his_group(
+async def test_group_owner_can_read_run_of_transfer_his_group(
     client: AsyncClient,
     group_run: MockRun,
     simple_user: MockUser,
@@ -69,7 +69,7 @@ async def test_group_admin_can_read_run_of_transfer_his_group(
     }
 
 
-async def test_group_admin_cannot_read_run_of_other_transfer(
+async def test_group_owner_cannot_read_run_of_other_transfer(
     client: AsyncClient,
     empty_group: MockGroup,
     group_run: MockRun,

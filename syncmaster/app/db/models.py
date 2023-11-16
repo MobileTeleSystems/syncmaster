@@ -112,14 +112,8 @@ class Transfer(
     schedule: Mapped[str] = mapped_column(String(32), nullable=False, default="")
 
     group: Mapped[Group] = relationship("Group")
-    source_connection: Mapped[Connection] = relationship(
-        "Connection",
-        foreign_keys=[source_connection_id],
-    )
-    target_connection: Mapped[Connection] = relationship(
-        "Connection",
-        foreign_keys=[target_connection_id],
-    )
+    source_connection: Mapped[Connection] = relationship(foreign_keys=source_connection_id)
+    target_connection: Mapped[Connection] = relationship(foreign_keys=target_connection_id)
 
 
 class Status(enum.StrEnum):

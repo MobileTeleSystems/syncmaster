@@ -45,7 +45,7 @@ async def test_member_of_group_cannot_delete_group(client: AsyncClient, group: M
     }
 
 
-async def test_admin_of_group_cannot_delete_group(client: AsyncClient, empty_group: MockGroup):
+async def test_owner_of_group_cannot_delete_group(client: AsyncClient, empty_group: MockGroup):
     result = await client.delete(
         f"v1/groups/{empty_group.id}",
         headers={

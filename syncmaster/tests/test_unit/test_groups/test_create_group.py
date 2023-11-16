@@ -109,7 +109,7 @@ async def test_superuser_cannot_create_group_twice(
     }
 
 
-async def test_superuser_cannot_create_group_with_incorrect_admin_id(
+async def test_superuser_cannot_create_group_with_incorrect_owner_id(
     client: AsyncClient,
     superuser: MockUser,
 ):

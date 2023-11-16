@@ -24,19 +24,11 @@ async def test_groupless_user_can_not_read_transfers(
         f"v1/transfers?group_id={group_transfer.owner_group.group.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
-    assert result.status_code == 200
+    assert result.status_code == 404
     assert result.json() == {
-        "meta": {
-            "page": 1,
-            "pages": 1,
-            "total": 0,
-            "page_size": 20,
-            "has_next": False,
-            "has_previous": False,
-            "next_page": None,
-            "previous_page": None,
-        },
-        "items": [],
+        "message": "Group not found",
+        "ok": False,
+        "status_code": 404,
     }
 
 
@@ -79,7 +71,7 @@ async def test_group_member_can_read_transfers(
     }
 
 
-async def test_group_admin_can_read_transfers(
+async def test_group_owner_can_read_transfers(
     client: AsyncClient,
     group_transfer: MockTransfer,
 ):

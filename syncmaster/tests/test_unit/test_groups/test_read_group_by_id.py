@@ -54,7 +54,7 @@ async def test_member_of_group_can_read_by_id(
     }
 
 
-async def test_admin_of_group_can_read_by_id(
+async def test_owner_of_group_can_read_by_id(
     client: AsyncClient,
     empty_group: MockGroup,
 ):
