@@ -59,7 +59,7 @@ async def test_group_member_can_read_transfer(
     }
 
 
-async def test_group_admin_can_read_transfer_of_his_group(
+async def test_group_owner_can_read_transfer_of_his_group(
     client: AsyncClient,
     group_transfer: MockTransfer,
 ):
@@ -83,7 +83,7 @@ async def test_group_admin_can_read_transfer_of_his_group(
     }
 
 
-async def test_group_admin_cannot_read_transfer_of_other_group(
+async def test_group_owner_cannot_read_transfer_of_other_group(
     client: AsyncClient,
     group_transfer: MockTransfer,
     empty_group: MockGroup,

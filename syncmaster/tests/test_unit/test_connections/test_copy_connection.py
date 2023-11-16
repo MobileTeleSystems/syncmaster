@@ -76,7 +76,7 @@ async def test_other_group_member_cannot_copy_connection(
     }
 
 
-async def test_other_group_admin_cannot_copy_connection(
+async def test_other_group_owner_cannot_copy_connection(
     client: AsyncClient,
     group_connection: MockConnection,
     empty_group: MockGroup,
@@ -147,12 +147,12 @@ async def test_not_in_both_groups_user_can_not_copy_connection(
     )
 
     # Assert
-    assert result.status_code == 403
     assert result.json() == {
-        "status_code": 403,
+        "message": "Group not found",
         "ok": False,
-        "message": "You have no power here",
+        "status_code": 404,
     }
+    assert result.status_code == 404
 
 
 @pytest.mark.parametrize("is_delete_source", [True, False])
@@ -213,18 +213,16 @@ async def test_groupless_user_can_not_copy_connection(
 
 
 @pytest.mark.parametrize("is_delete_source", [True, False])
-async def test_admin_can_copy_connection(
+async def test_owner_can_copy_connection(
     client: AsyncClient,
     group_connection: MockConnection,
     empty_group: MockGroup,
-    simple_user: MockUser,
     session: AsyncSession,
     is_delete_source: bool,
     settings: Settings,
 ):
     # Arrange
-    admin = group_connection.owner_group.get_member_of_role("Owner")
-
+    admin = group_connection.owner_group.get_member_of_role(TestUserRoles.Maintainer)
     await client.post(
         f"v1/groups/{empty_group.id}/users/{admin.user.id}",
         headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
@@ -295,7 +293,7 @@ async def test_admin_can_copy_connection(
     assert result.json() == {
         "ok": True,
         "status_code": 200,
-        "message": "Connection was copied.",
+        "message": "Connection was copied",
     }
 
     assert origin.id == curr_id
@@ -372,7 +370,7 @@ async def test_superuser_can_copy_connection(
     assert result.json() == {
         "ok": True,
         "status_code": 200,
-        "message": "Connection was copied.",
+        "message": "Connection was copied",
     }
     await session.refresh(group_connection.connection)
 
@@ -403,7 +401,7 @@ async def test_group_member_can_copy_connection(
 ):
     # Arrange
     group_member = group_connection.owner_group.get_member_of_role(TestUserRoles.User)
-    other_group_admin = empty_group.get_member_of_role("Owner")
+    other_group_admin = empty_group.get_member_of_role(TestUserRoles.Owner)
 
     await client.post(
         f"v1/groups/{empty_group.id}/users/{group_member.user.id}",
@@ -427,18 +425,18 @@ async def test_group_member_can_copy_connection(
     assert result.json() == {
         "ok": True,
         "status_code": 200,
-        "message": "Connection was copied.",
+        "message": "Connection was copied",
     }
 
 
-async def test_not_admin_group_member_can_not_copy_connection_with_remove_source(
+async def test_not_maintainer_group_member_can_not_copy_connection_with_remove_source(
     client: AsyncClient,
     group_connection: MockConnection,
     empty_group: MockGroup,
 ):
     # Arrange
     group_member = group_connection.owner_group.get_member_of_role(TestUserRoles.User)
-    other_group_admin = empty_group.get_member_of_role("Owner")
+    other_group_admin = empty_group.get_member_of_role(TestUserRoles.Owner)
 
     await client.post(
         f"v1/groups/{empty_group.id}/users/{group_member.user.id}",
@@ -459,9 +457,9 @@ async def test_not_admin_group_member_can_not_copy_connection_with_remove_source
     )
 
     # Assert
-    assert result.status_code == 403
     assert result.json() == {
+        "message": "You have no power here",
         "ok": False,
         "status_code": 403,
-        "message": "You have no power here",
     }
+    assert result.status_code == 403

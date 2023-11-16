@@ -143,12 +143,12 @@ async def test_groupless_user_cannot_create_connection_error(
             },
         },
     )
-    assert result.status_code == 403
     assert result.json() == {
+        "message": "Group not found",
         "ok": False,
-        "status_code": 403,
-        "message": "You have no power here",
+        "status_code": 404,
     }
+    assert result.status_code == 404
 
 
 async def test_check_fields_validation_on_create_connection(
@@ -336,7 +336,7 @@ async def test_group_member_can_create_group_connection(
     }
 
 
-async def test_other_group_admin_cannot_create_group_connection(
+async def test_other_group_owner_cannot_create_group_connection(
     client: AsyncClient, empty_group: MockGroup, group: MockGroup
 ):
     admin = empty_group.get_member_of_role(TestUserRoles.Owner)
@@ -360,15 +360,16 @@ async def test_other_group_admin_cannot_create_group_connection(
             },
         },
     )
-    assert result.status_code == 403
+
     assert result.json() == {
+        "message": "Group not found",
         "ok": False,
-        "status_code": 403,
-        "message": "You have no power here",
+        "status_code": 404,
     }
+    assert result.status_code == 404
 
 
-async def test_group_admin_can_create_group_connection(
+async def test_group_owner_can_create_group_connection(
     client: AsyncClient,
     empty_group: MockGroup,
     session: AsyncSession,

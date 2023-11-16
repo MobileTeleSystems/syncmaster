@@ -35,28 +35,31 @@ async def test_not_member_group_cannot_add_user_to_group(
     }
 
 
-async def test_member_group_cannot_add_user_to_group(
+async def test_guest_cannot_add_user_to_group(
     client: AsyncClient,
     group: MockGroup,
     simple_user: MockUser,
 ):
-    user = group.get_member_of_role(TestUserRoles.User)
+    # Act
+    user = group.get_member_of_role(TestUserRoles.Guest)
     result = await client.post(
         f"v1/groups/{group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "role": TestUserRoles.User,
+            "role": TestUserRoles.Guest,
         },
     )
-    assert result.status_code == 403
+
+    # Assert
     assert result.json() == {
         "ok": False,
         "status_code": 403,
         "message": "You have no power here",
     }
+    assert result.status_code == 403
 
 
-async def test_admin_of_group_can_add_user_to_group(
+async def test_owner_of_group_can_add_user_to_group(
     client: AsyncClient,
     empty_group: MockGroup,
     simple_user: MockUser,
@@ -101,7 +104,7 @@ async def test_admin_of_group_can_add_user_to_group(
     }
 
 
-async def test_admin_of_group_can_not_add_user_to_group_with_wrong_role(
+async def test_owner_of_group_can_not_add_user_to_group_with_wrong_role(
     client: AsyncClient,
     empty_group: MockGroup,
     simple_user: MockUser,
@@ -126,7 +129,7 @@ async def test_admin_of_group_can_not_add_user_to_group_with_wrong_role(
     }
 
 
-async def test_admin_of_group_can_not_add_user_to_group_without_role(
+async def test_owner_of_group_can_not_add_user_to_group_without_role(
     client: AsyncClient,
     empty_group: MockGroup,
     simple_user: MockUser,
@@ -235,9 +238,9 @@ async def test_cannot_add_user_to_incorrect_group(
             "role": TestUserRoles.User,
         },
     )
-    assert result.status_code == 404
     assert result.json() == {
         "ok": False,
         "status_code": 404,
         "message": "Group not found",
     }
+    assert result.status_code == 404

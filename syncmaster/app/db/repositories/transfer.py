@@ -27,14 +27,9 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         self,
         page: int,
         page_size: int,
-        current_user_id: int,
-        is_superuser: bool,
         group_id: int | None = None,
     ) -> Pagination:
         stmt = select(Transfer).where(Transfer.is_deleted.is_(False))
-
-        if not is_superuser:
-            stmt = self.apply_user_permission(stmt, current_user_id)
 
         return await self._paginate_scalar_result(
             query=stmt.where(Transfer.group_id == group_id).order_by(Transfer.name),
@@ -45,15 +40,11 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
     async def read_by_id(
         self,
         transfer_id: int,
-        current_user_id: int,
-        is_superuser: bool,
     ) -> Transfer:
         stmt = select(Transfer).where(
             Transfer.id == transfer_id,
             Transfer.is_deleted.is_(False),
         )
-        if not is_superuser:
-            stmt = self.apply_user_permission(stmt, current_user_id)
         try:
             result: ScalarResult[Transfer] = await self._session.scalars(stmt)
             return result.one()
@@ -62,7 +53,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
 
     async def create(
         self,
-        group_id: int | None,
+        group_id: int,
         source_connection_id: int,
         target_connection_id: int,
         name: str,
@@ -157,9 +148,8 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
             new_transfer = await self._copy(Transfer.id == transfer_id, **kwargs)
 
             return new_transfer
-
-        except IntegrityError as e:
-            self._raise_error(e)
+        except IntegrityError as integrity_error:
+            self._raise_error(integrity_error)
 
     async def list_by_connection_id(self, conn_id: int) -> Sequence[Transfer]:
         query = select(Transfer).where(

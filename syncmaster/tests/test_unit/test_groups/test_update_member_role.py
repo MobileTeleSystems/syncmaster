@@ -5,7 +5,7 @@ from tests.utils import MockConnection, MockGroup, TestUserRoles
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_admin_of_group_can_update_user_role(
+async def test_owner_of_group_can_update_user_role(
     client: AsyncClient,
     group: MockGroup,
 ):
@@ -21,7 +21,7 @@ async def test_admin_of_group_can_update_user_role(
     assert result.status_code == 200
 
 
-async def test_admin_of_group_can_not_update_user_role_with_wrong_role(
+async def test_owner_of_group_can_not_update_user_role_with_wrong_role(
     client: AsyncClient,
     group: MockGroup,
 ):
@@ -49,12 +49,11 @@ async def test_admin_of_group_can_not_update_user_role_with_wrong_role(
 @pytest.mark.parametrize(
     "group_member",
     [
-        TestUserRoles.Maintainer,
         TestUserRoles.User,
         TestUserRoles.Guest,
     ],
 )
-async def test_not_admin_group_can_not_update_user_role(
+async def test_not_owner_of_group_can_not_update_user_role(
     client: AsyncClient,
     group: MockGroup,
     group_member: str,
@@ -75,7 +74,7 @@ async def test_not_admin_group_can_not_update_user_role(
     assert result.status_code == 403
 
 
-async def test_other_group_admin_can_not_update_user_role(
+async def test_other_group_owner_can_not_update_user_role(
     client: AsyncClient,
     group: MockGroup,
     empty_group: MockGroup,

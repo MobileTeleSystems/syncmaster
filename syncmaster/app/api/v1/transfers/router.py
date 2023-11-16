@@ -15,11 +15,13 @@ from app.api.v1.transfers.schemas import (
     UpdateTransferSchema,
 )
 from app.db.models import Status, User
+from app.db.utils import Permission
 from app.exceptions import (
     CannotConnectToTaskQueueError,
     ConnectionNotFound,
     DifferentTransferAndConnectionsGroups,
     DifferentTypeConnectionsAndParams,
+    GroupNotFound,
     TransferNotFound,
 )
 from app.exceptions.base import ActionNotAllowed
@@ -38,13 +40,20 @@ async def read_transfers(
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> TransferPageSchema:
     """Return transfers in page format"""
+    resource_role = await unit_of_work.group.get_permission(
+        user=current_user,
+        group_id=group_id,
+    )
+
+    if resource_role == Permission.NONE:
+        raise GroupNotFound
+
     pagination = await unit_of_work.transfer.paginate(
         page=page,
         page_size=page_size,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
         group_id=group_id,
     )
+
     return TransferPageSchema.from_pagination(pagination=pagination)
 
 
@@ -54,25 +63,20 @@ async def create_transfer(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadTransferSchema:
-    if not current_user.is_superuser and not (
-        await unit_of_work.group.is_member(transfer_data.group_id, current_user.id)
-        or await unit_of_work.group.is_admin(
-            transfer_data.group_id,
-            current_user.id,
-        )
-    ):
+    group_permission = await unit_of_work.group.get_permission(
+        user=current_user,
+        group_id=transfer_data.group_id,
+    )
+
+    if group_permission < Permission.WRITE:
         raise ActionNotAllowed
 
     target_connection = await unit_of_work.connection.read_by_id(
         connection_id=transfer_data.target_connection_id,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
     )
 
     source_connection = await unit_of_work.connection.read_by_id(
         connection_id=transfer_data.source_connection_id,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
     )
 
     if (
@@ -117,11 +121,15 @@ async def read_transfer(
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadTransferSchema:
     """Return transfer data by transfer ID"""
-    transfer = await unit_of_work.transfer.read_by_id(
-        transfer_id=transfer_id,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
+    resource_role = await unit_of_work.transfer.get_permission(
+        user=current_user,
+        resource_id=transfer_id,
     )
+
+    if resource_role == Permission.NONE:
+        raise TransferNotFound
+
+    transfer = await unit_of_work.transfer.read_by_id(transfer_id=transfer_id)
     return ReadTransferSchema.from_orm(transfer)
 
 
@@ -132,56 +140,45 @@ async def copy_transfer(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> StatusCopyTransferResponseSchema:
-    transfer = await unit_of_work.transfer.read_by_id(
-        transfer_id=transfer_id,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
-    )
-
     # Check: user can copy transfer
-    if not current_user.is_superuser and not await unit_of_work.transfer.check_user_rights(
-        user_id=current_user.id,
-        group_id=transfer.group_id,
-    ):
+    target_source_transfer_rules = await asyncio.gather(
+        unit_of_work.transfer.get_permission(
+            user=current_user,
+            resource_id=transfer_id,
+        ),
+        unit_of_work.group.get_permission(
+            user=current_user,
+            group_id=transfer_data.new_group_id,
+        ),
+    )
+    resource_role, target_group_role = target_source_transfer_rules
+
+    if resource_role == Permission.NONE:
         raise TransferNotFound
 
-    gathered_connections = await asyncio.gather(
-        *[
-            unit_of_work.connection.read_by_id(
-                connection_id=connection_id,
-                is_superuser=current_user.is_superuser,
-                current_user_id=current_user.id,
-            )
-            for connection_id in (
-                transfer.source_connection_id,
-                transfer.target_connection_id,
-            )
-        ],
-    )
-
-    source_connection, target_connection = gathered_connections
-
-    # Check: The user can manage the resource
-    for connection_group_id in (source_connection.group_id, target_connection.group_id):
-        if not current_user.is_superuser and not await unit_of_work.connection.check_user_rights(
-            user_id=current_user.id,
-            group_id=connection_group_id,
-        ):
-            raise ConnectionNotFound
-
-    # Check: target group exists
-    await unit_of_work.group.read_by_id(
-        group_id=transfer_data.new_group_id,
-        is_superuser=current_user.is_superuser,
-        current_user_id=current_user.id,
-    )
-
-    # Check: The user can perform actions in the target group
-    if not current_user.is_superuser and not await unit_of_work.connection.check_user_rights(
-        user_id=current_user.id,
-        group_id=transfer_data.new_group_id,
-    ):
+    if target_group_role < Permission.WRITE:
         raise ActionNotAllowed
+
+    # Check: user can delete transfer
+    if transfer_data.remove_source and resource_role < Permission.DELETE:
+        raise ActionNotAllowed
+
+    transfer = await unit_of_work.transfer.read_by_id(transfer_id=transfer_id)
+    # Check: user can copy connection
+    target_source_connection_rules = await asyncio.gather(
+        unit_of_work.connection.get_permission(
+            user=current_user,
+            resource_id=transfer.source_connection_id,
+        ),
+        unit_of_work.connection.get_permission(
+            user=current_user,
+            resource_id=transfer.target_connection_id,
+        ),
+    )
+    source_connection_role, target_connection_role = target_source_connection_rules
+
+    if source_connection_role == Permission.NONE or target_connection_role == Permission.NONE:
+        raise ConnectionNotFound
 
     async with unit_of_work:
         copied_source_connection = await unit_of_work.connection.copy(
@@ -205,17 +202,7 @@ async def copy_transfer(
         )
 
         if transfer_data.remove_source:
-            # Check: user can remove original transfer
-            if not current_user.is_superuser:
-                if not await unit_of_work.transfer.check_admin_rights(
-                    user_id=current_user.id,
-                    group_id=transfer.group_id,
-                ):
-                    raise ActionNotAllowed
-
-            await unit_of_work.transfer.delete(
-                transfer_id=transfer_id,
-            )
+            await unit_of_work.transfer.delete(transfer_id=transfer_id)
 
     return StatusCopyTransferResponseSchema(
         ok=True,
@@ -234,22 +221,44 @@ async def update_transfer(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadTransferSchema:
+    # Check: user can update transfer
+    resource_role = await unit_of_work.transfer.get_permission(
+        user=current_user,
+        resource_id=transfer_id,
+    )
+
+    if resource_role == Permission.NONE:
+        raise TransferNotFound
+
+    if resource_role < Permission.WRITE:
+        raise ActionNotAllowed
+
     transfer = await unit_of_work.transfer.read_by_id(
         transfer_id=transfer_id,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
     )
+
     target_connection = await unit_of_work.connection.read_by_id(
         connection_id=transfer_data.target_connection_id or transfer.target_connection_id,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
     )
     source_connection = await unit_of_work.connection.read_by_id(
         connection_id=transfer_data.source_connection_id or transfer.source_connection_id,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
     )
 
+    # Check: user can read new connections
+    target_resource_role = await unit_of_work.connection.get_permission(
+        user=current_user,
+        resource_id=target_connection.id,
+    )
+
+    source_resource_role = await unit_of_work.connection.get_permission(
+        user=current_user,
+        resource_id=source_connection.id,
+    )
+
+    if source_resource_role == Permission.NONE or target_resource_role == Permission.NONE:
+        raise ConnectionNotFound
+
+    # Check: connections and transfer group
     if (
         target_connection.group_id != source_connection.group_id
         or target_connection.group_id != transfer.group_id
@@ -293,17 +302,16 @@ async def delete_transfer(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> StatusResponseSchema:
-    transfer = await unit_of_work.transfer.read_by_id(
-        transfer_id=transfer_id,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
+    resource_role = await unit_of_work.transfer.get_permission(
+        user=current_user,
+        resource_id=transfer_id,
     )
 
-    if not current_user.is_superuser:
-        await unit_of_work.transfer.check_admin_rights(
-            user_id=current_user.id,
-            group_id=transfer.group_id,
-        )
+    if resource_role == Permission.NONE:
+        raise TransferNotFound
+
+    if resource_role < Permission.DELETE:
+        raise ActionNotAllowed
 
     async with unit_of_work:
         await unit_of_work.transfer.delete(
@@ -326,16 +334,20 @@ async def read_runs(
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> RunPageSchema:
     """Return runs of transfer with pagination"""
-    await unit_of_work.transfer.read_by_id(
-        transfer_id=transfer_id,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
+    resource_rule = await unit_of_work.transfer.get_permission(
+        user=current_user,
+        resource_id=transfer_id,
     )
+
+    if resource_rule == Permission.NONE:
+        raise GroupNotFound
+
     pagination = await unit_of_work.run.paginate(
         transfer_id=transfer_id,
         page=page,
         page_size=page_size,
     )
+
     return RunPageSchema.from_pagination(pagination=pagination)
 
 
@@ -346,34 +358,36 @@ async def read_run(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadRunSchema:
-    await unit_of_work.transfer.read_by_id(
-        transfer_id=transfer_id,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
+    resource_role = await unit_of_work.transfer.get_permission(
+        user=current_user,
+        resource_id=transfer_id,
     )
+
+    if resource_role == Permission.NONE:
+        raise TransferNotFound
+
     run = await unit_of_work.run.read_by_id(run_id=run_id)
     return ReadRunSchema.from_orm(run)
 
 
 @router.post("/transfers/{transfer_id}/runs")
-async def start_transfer(
+async def start_run(
     transfer_id: int,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadRunSchema:
-    await unit_of_work.transfer.read_by_id(
-        transfer_id=transfer_id,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
+    # Check: user can start transfer
+    resource_rule = await unit_of_work.transfer.get_permission(
+        user=current_user,
+        resource_id=transfer_id,
     )
-    try:
-        await unit_of_work.transfer.read_by_id(
-            transfer_id=transfer_id,
-            current_user_id=current_user.id,
-            is_superuser=current_user.is_superuser,
-        )
-    except TransferNotFound as e:
-        raise ActionNotAllowed from e
+
+    if resource_rule == Permission.NONE:
+        raise TransferNotFound
+
+    if resource_rule < Permission.WRITE:
+        raise ActionNotAllowed
+
     async with unit_of_work:
         run = await unit_of_work.run.create(transfer_id=transfer_id)
     try:
@@ -395,19 +409,18 @@ async def stop_run(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadRunSchema:
-    await unit_of_work.transfer.read_by_id(
-        transfer_id=transfer_id,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
+    # Check: user can stop transfer
+    resource_rule = await unit_of_work.transfer.get_permission(
+        user=current_user,
+        resource_id=transfer_id,
     )
-    try:
-        await unit_of_work.transfer.read_by_id(
-            transfer_id=transfer_id,
-            current_user_id=current_user.id,
-            is_superuser=current_user.is_superuser,
-        )
-    except TransferNotFound as e:
-        raise ActionNotAllowed from e
+
+    if resource_rule == Permission.NONE:
+        raise TransferNotFound
+
+    if resource_rule < Permission.WRITE:
+        raise ActionNotAllowed
+
     async with unit_of_work:
         run = await unit_of_work.run.stop(run_id=run_id)
         # TODO add immdiate stop transfer after stop Run

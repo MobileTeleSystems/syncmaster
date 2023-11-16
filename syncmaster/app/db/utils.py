@@ -1,5 +1,6 @@
 import math
 from collections.abc import Sequence
+from enum import IntEnum
 from typing import Any
 
 
@@ -19,3 +20,10 @@ class Pagination:
         if self.has_next:
             self.next_page = page + 1
         self.pages = int(math.ceil(total / float(page_size))) or 1
+
+
+class Permission(IntEnum):
+    NONE = 0
+    READ = 1
+    WRITE = 2  # same as CREATE, UPDATE, START, STOP
+    DELETE = 3

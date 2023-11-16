@@ -46,7 +46,7 @@ async def test_groupless_user_user_can_not_create_run(
     }
 
 
-async def test_group_admin_can_create_run_of_transfer_his_group(
+async def test_group_owner_can_create_run_of_transfer_his_group(
     client: AsyncClient,
     simple_user: MockUser,
     group_transfer: MockTransfer,
@@ -89,7 +89,7 @@ async def test_group_admin_can_create_run_of_transfer_his_group(
     }
 
 
-async def test_group_admin_cannot_create_run_of_other_group_transfer(
+async def test_group_owner_cannot_create_run_of_other_group_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
     empty_group: MockGroup,
@@ -123,7 +123,6 @@ async def test_superuser_can_create_run(
     mocker,
 ) -> None:
     mocker.patch("app.tasks.config.celery.send_task")
-
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/runs",
         headers={"Authorization": f"Bearer {superuser.token}"},

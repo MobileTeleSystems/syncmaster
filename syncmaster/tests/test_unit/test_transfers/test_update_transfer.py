@@ -92,7 +92,7 @@ async def test_superuser_can_update_transfer(
     }
 
 
-async def test_group_admin_cannot_update_other_group_transfer(
+async def test_group_owner_cannot_update_other_group_transfer(
     client: AsyncClient,
     empty_group: MockGroup,
     group_transfer: MockTransfer,
@@ -202,6 +202,7 @@ async def test_user_not_in_new_connection_group_can_not_update_transfer(
     empty_group: MockGroup,
     session: AsyncSession,
 ):
+    # Assert
     admin = group_transfer.owner_group.get_member_of_role("Owner")
 
     new_connection = await create_connection(
@@ -210,18 +211,20 @@ async def test_user_not_in_new_connection_group_can_not_update_transfer(
         group_id=empty_group.id,
     )
 
+    # Act
     result = await client.patch(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {admin.token}"},
         json={"source_connection_id": new_connection.id},
     )
 
-    assert result.status_code == 404
+    # Arrange
     assert result.json() == {
         "ok": False,
         "status_code": 404,
         "message": "Connection not found",
     }
+    assert result.status_code == 404
 
     await session.delete(new_connection)
     await session.commit()

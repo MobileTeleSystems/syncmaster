@@ -35,7 +35,6 @@ async def test_group_member_can_copy_transfer(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "remove_source": False,
             "new_group_id": empty_group.id,
         },
     )
@@ -115,15 +114,15 @@ async def test_group_member_can_not_copy_transfer_with_remove_source(
 
     # Assert
     result_json = result_response.json()
-    assert result_response.status_code == 403
     assert result_json == {
+        "message": "You have no power here",
         "ok": False,
         "status_code": 403,
-        "message": "You have no power here",
     }
+    assert result_response.status_code == 403
 
 
-async def test_group_admin_can_copy_transfer_with_remove_source_transfer(
+async def test_group_owner_can_copy_transfer_with_remove_source_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
     empty_group: MockGroup,
@@ -216,13 +215,12 @@ async def test_copy_transfer_with_non_existing_recipient_group_error(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {admin.token}"},
         json={
-            "remove_source": False,
             "new_group_id": -1,
         },
     )
 
-    assert result.status_code == 404
     assert result.json()["message"] == "Group not found"
+    assert result.status_code == 404
 
 
 async def test_copy_non_existing_transfer_error(
@@ -252,8 +250,8 @@ async def test_copy_non_existing_transfer_error(
     )
 
     # Assert
-    assert result.status_code == 404
     assert result.json()["message"] == "Transfer not found"
+    assert result.status_code == 404
 
 
 async def test_groupless_user_can_not_copy_transfer_error(
@@ -268,7 +266,6 @@ async def test_groupless_user_can_not_copy_transfer_error(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={
-            "remove_source": False,
             "new_group_id": empty_group.id,
         },
     )

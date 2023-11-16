@@ -63,7 +63,7 @@ async def test_in_group_user_can_read_connection(
     }
 
 
-async def test_group_admin_can_read_connection_of_his_group(
+async def test_group_owner_can_read_connection_of_his_group(
     client: AsyncClient,
     group_connection: MockConnection,
     simple_user: MockUser,
@@ -105,7 +105,7 @@ async def test_group_admin_can_read_connection_of_his_group(
     }
 
 
-async def test_group_admin_cannot_read_connection_of_other(
+async def test_group_owner_cannot_read_connection_of_other(
     client: AsyncClient,
     group_connection: MockConnection,
     empty_group: MockGroup,

@@ -10,25 +10,31 @@ from app.api.v1.groups.schemas import (
 from app.api.v1.schemas import StatusResponseSchema
 from app.api.v1.users.schemas import UserPageSchemaAsGroupMember
 from app.db.models import User
-from app.exceptions import ActionNotAllowed
+from app.db.utils import Permission
+from app.exceptions import ActionNotAllowed, GroupNotFound
 from app.services import UnitOfWork, get_user
 
 router = APIRouter(tags=["Groups"])
 
 
 @router.get("/groups")
-async def get_groups(
+async def read_groups(
     page: int = Query(gt=0, default=1),
     page_size: int = Query(gt=0, le=200, default=20),
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> GroupPageSchema:
-    pagination = await unit_of_work.group.paginate(
-        page=page,
-        page_size=page_size,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
-    )
+    if current_user.is_superuser:
+        pagination = await unit_of_work.group.paginate_all(
+            page=page,
+            page_size=page_size,
+        )
+    else:
+        pagination = await unit_of_work.group.paginate_for_user(
+            page=page,
+            page_size=page_size,
+            current_user_id=current_user.id,
+        )
     return GroupPageSchema.from_pagination(pagination=pagination)
 
 
@@ -52,11 +58,15 @@ async def read_group(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadGroupSchema:
-    group = await unit_of_work.group.read_by_id(
+    resource_role = await unit_of_work.group.get_permission(
+        user=current_user,
         group_id=group_id,
-        is_superuser=current_user.is_superuser,
-        current_user_id=current_user.id,
     )
+
+    if resource_role == Permission.NONE:
+        raise GroupNotFound
+
+    group = await unit_of_work.group.read_by_id(group_id=group_id)
     return ReadGroupSchema.from_orm(group)
 
 
@@ -67,15 +77,14 @@ async def update_group(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadGroupSchema:
-    is_superuser = current_user.is_superuser
-    cur_user_id = current_user.id
-
-    group = await unit_of_work.group.read_by_id(
+    resource_rule = await unit_of_work.group.get_permission(
+        user=current_user,
         group_id=group_id,
-        is_superuser=is_superuser,
-        current_user_id=cur_user_id,
     )
-    if not (group.admin_id == cur_user_id or is_superuser):
+    if resource_rule == Permission.NONE:
+        raise GroupNotFound
+
+    if resource_rule < Permission.WRITE:
         raise ActionNotAllowed
 
     async with unit_of_work:
@@ -99,19 +108,25 @@ async def delete_group(
 
 
 @router.get("/groups/{group_id}/users")
-async def get_group_users(
+async def read_group_users(
     group_id: int,
     page: int = Query(gt=0, default=1),
     page_size: int = Query(gt=0, le=200, default=20),
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> UserPageSchemaAsGroupMember:
+    resource_role = await unit_of_work.group.get_permission(
+        user=current_user,
+        group_id=group_id,
+    )
+
+    if resource_role == Permission.NONE:
+        raise GroupNotFound
+
     pagination = await unit_of_work.group.get_member_paginate(
         group_id=group_id,
         page=page,
         page_size=page_size,
-        current_user_id=current_user.id,
-        is_superuser=current_user.is_superuser,
     )
     return UserPageSchemaAsGroupMember.from_pagination(pagination=pagination)
 
@@ -124,15 +139,15 @@ async def update_user_role_group(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> AddUserSchema:
-    is_superuser = current_user.is_superuser
-    cur_user_id = current_user.id
-
-    group = await unit_of_work.group.read_by_id(
+    resource_role = await unit_of_work.group.get_permission(
+        user=current_user,
         group_id=group_id,
-        is_superuser=is_superuser,
-        current_user_id=cur_user_id,
     )
-    if not is_superuser and not group.admin_id == cur_user_id:
+
+    if resource_role == Permission.NONE:
+        raise GroupNotFound
+
+    if resource_role < Permission.DELETE:
         raise ActionNotAllowed
 
     async with unit_of_work:
@@ -153,16 +168,15 @@ async def add_user_to_group(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> StatusResponseSchema:
-    is_superuser = current_user.is_superuser
-    cur_user_id = current_user.id
-
-    group = await unit_of_work.group.read_by_id(
+    resource_rule = await unit_of_work.group.get_permission(
+        user=current_user,
         group_id=group_id,
-        is_superuser=is_superuser,
-        current_user_id=cur_user_id,
     )
 
-    if not (group.admin_id == cur_user_id or is_superuser):
+    if resource_rule == Permission.NONE:
+        raise GroupNotFound
+
+    if resource_rule < Permission.WRITE:
         raise ActionNotAllowed
 
     async with unit_of_work:
@@ -185,11 +199,20 @@ async def delete_user_from_group(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> StatusResponseSchema:
+    resource_rule = await unit_of_work.group.get_permission(
+        user=current_user,
+        group_id=group_id,
+    )
+
+    if resource_rule == Permission.NONE:
+        raise GroupNotFound
+
+    if resource_rule < Permission.DELETE and user_id != current_user.id:
+        raise ActionNotAllowed
+
     async with unit_of_work:
         await unit_of_work.group.delete_user(
             group_id=group_id,
             target_user_id=user_id,
-            current_user_id=current_user.id,
-            is_superuser=current_user.is_superuser,
         )
     return StatusResponseSchema(ok=True, status_code=200, message="User was successfully removed from group")

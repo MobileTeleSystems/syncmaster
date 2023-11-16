@@ -72,7 +72,7 @@ async def test_member_of_group_can_read_group_members(
     }
 
 
-async def test_admin_of_group_can_read_group_members(
+async def test_owner_of_group_can_read_group_members(
     client: AsyncClient,
     empty_group: MockGroup,
     group: MockGroup,

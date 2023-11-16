@@ -29,13 +29,13 @@ async def test_groupless_user_can_not_read_runs_transfer(
     )
     assert result.status_code == 404
     assert result.json() == {
+        "message": "Group not found",
         "ok": False,
         "status_code": 404,
-        "message": "Transfer not found",
     }
 
 
-async def test_group_admin_can_read_runs_of_the_own_transfer(
+async def test_group_owner_can_read_runs_of_the_own_transfer(
     client: AsyncClient,
     group_run: MockRun,
 ) -> None:

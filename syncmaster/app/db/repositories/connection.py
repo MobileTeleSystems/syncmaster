@@ -8,7 +8,6 @@ from app.db.models import Connection
 from app.db.repositories.repository_with_owner import RepositoryWithOwner
 from app.db.utils import Pagination
 from app.exceptions import (
-    ActionNotAllowed,
     ConnectionNotFound,
     ConnectionOwnerException,
     EntityNotFound,
@@ -26,17 +25,12 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         self,
         page: int,
         page_size: int,
-        current_user_id: int,
-        is_superuser: bool,
         group_id: int,
     ) -> Pagination:
         stmt = select(Connection).where(
             Connection.is_deleted.is_(False),
             Connection.group_id == group_id,
         )
-
-        if not is_superuser:
-            stmt = self.apply_user_permission(stmt, current_user_id)
 
         return await self._paginate_scalar_result(
             query=stmt.order_by(Connection.name),
@@ -47,12 +41,8 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
     async def read_by_id(
         self,
         connection_id: int,
-        current_user_id: int,
-        is_superuser: bool,
     ) -> Connection:
         stmt = select(Connection).where(Connection.id == connection_id, Connection.is_deleted.is_(False))
-        if not is_superuser:
-            stmt = self.apply_user_permission(stmt, current_user_id)
         result: ScalarResult[Connection] = await self._session.scalars(stmt)
         try:
             return result.one()
@@ -87,18 +77,12 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
     async def update(
         self,
         connection_id: int,
-        current_user_id: int,
-        is_superuser: bool,
         name: str | None,
         description: str | None,
         connection_data: dict[str, Any],
     ) -> Connection:
         try:
-            connection = await self.read_by_id(
-                connection_id=connection_id,
-                current_user_id=current_user_id,
-                is_superuser=is_superuser,
-            )
+            connection = await self.read_by_id(connection_id=connection_id)
             for key in connection.data:
                 if key not in connection_data or connection_data[key] is None:
                     connection_data[key] = connection.data[key]
@@ -115,16 +99,7 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
     async def delete(
         self,
         connection_id: int,
-        is_superuser: bool,
-        current_user_id: int,
-        group_id: int,
     ) -> None:
-        if not is_superuser and not await self.check_admin_rights(
-            user_id=current_user_id,
-            group_id=group_id,
-        ):
-            raise ActionNotAllowed
-
         try:
             await self._delete(connection_id)
         except (NoResultFound, EntityNotFound) as e:
@@ -144,8 +119,8 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
 
             return new_connection
 
-        except IntegrityError as e:
-            self._raise_error(e)
+        except IntegrityError as integrity_error:
+            self._raise_error(integrity_error)
 
     def _raise_error(self, err: DBAPIError) -> NoReturn:
         constraint = err.__cause__.__cause__.constraint_name  # type: ignore[union-attr]
