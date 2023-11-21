@@ -40,7 +40,7 @@ async def read_transfers(
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> TransferPageSchema:
     """Return transfers in page format"""
-    resource_role = await unit_of_work.group.get_permission(
+    resource_role = await unit_of_work.transfer.get_group_permission(
         user=current_user,
         group_id=group_id,
     )
@@ -63,7 +63,7 @@ async def create_transfer(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadTransferSchema:
-    group_permission = await unit_of_work.group.get_permission(
+    group_permission = await unit_of_work.transfer.get_group_permission(
         user=current_user,
         group_id=transfer_data.group_id,
     )
@@ -146,7 +146,7 @@ async def copy_transfer(
             user=current_user,
             resource_id=transfer_id,
         ),
-        unit_of_work.group.get_permission(
+        unit_of_work.transfer.get_group_permission(
             user=current_user,
             group_id=transfer_data.new_group_id,
         ),
@@ -340,7 +340,7 @@ async def read_runs(
     )
 
     if resource_rule == Permission.NONE:
-        raise GroupNotFound
+        raise TransferNotFound
 
     pagination = await unit_of_work.run.paginate(
         transfer_id=transfer_id,

@@ -19,6 +19,7 @@ from app.exceptions import (
     GroupAdminNotFound,
     GroupAlreadyExists,
     GroupNotFound,
+    RunNotFoundException,
     SyncmasterException,
     TransferNotFound,
     TransferOwnerException,
@@ -50,6 +51,12 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterExceptio
         return exception_json_response(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Group not found",
+        )
+
+    if isinstance(exc, RunNotFoundException):
+        return exception_json_response(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Run not found",
         )
 
     if isinstance(exc, GroupAdminNotFound):

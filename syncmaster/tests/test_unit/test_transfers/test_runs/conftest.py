@@ -8,7 +8,14 @@ from tests.test_unit.utils import (
     create_transfer,
     create_user,
 )
-from tests.utils import MockConnection, MockGroup, MockRun, MockTransfer, MockUser
+from tests.utils import (
+    MockConnection,
+    MockGroup,
+    MockRun,
+    MockTransfer,
+    MockUser,
+    TestUserRoles,
+)
 
 from app.api.v1.auth.utils import sign_jwt
 from app.config import Settings
@@ -38,7 +45,7 @@ async def group_run(session: AsyncSession, settings: Settings) -> MockTransfer:
         admin=MockUser(
             user=group_admin,
             auth_token=sign_jwt(group_admin.id, settings),
-            role="Owner",
+            role=TestUserRoles.Owner,
         ),
         members=members,
     )

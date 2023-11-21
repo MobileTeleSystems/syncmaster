@@ -24,7 +24,7 @@ from tests.test_unit.utils import (
     create_transfer,
     create_user,
 )
-from tests.utils import MockUser
+from tests.utils import MockUser, TestUserRoles
 
 from app.api.v1.auth.utils import sign_jwt
 from app.config import EnvTypes, Settings, TestSettings
@@ -352,7 +352,7 @@ async def transfers(
         "group_admin": MockUser(
             user=user,
             auth_token=sign_jwt(user.id, settings),
-            role="Owner",
+            role=TestUserRoles.Owner,
         ),
     }
     data.update(transfers)  # type: ignore

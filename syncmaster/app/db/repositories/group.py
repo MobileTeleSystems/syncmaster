@@ -5,7 +5,7 @@ from sqlalchemy import ScalarResult, insert, or_, select, update
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Group, GroupMemberRole, User, UserGroup
+from app.db.models import Group, User, UserGroup
 from app.db.repositories.base import Repository
 from app.db.utils import Pagination, Permission
 from app.exceptions import (
@@ -16,6 +16,7 @@ from app.exceptions import (
     GroupAlreadyExists,
     GroupNotFound,
     SyncmasterException,
+    UserNotFound,
 )
 
 
@@ -42,7 +43,6 @@ class GroupRepository(Repository[Group]):
             .join(
                 UserGroup,
                 UserGroup.group_id == Group.id,
-                full=True,
             )
             .where(
                 Group.is_deleted.is_(False),
@@ -51,6 +51,7 @@ class GroupRepository(Repository[Group]):
                     Group.admin_id == current_user_id,
                 ),
             )
+            .group_by(Group.id)
         )
 
         return await self._paginate_scalar_result(query=stmt.order_by(Group.name), page=page, page_size=page_size)
@@ -125,9 +126,12 @@ class GroupRepository(Repository[Group]):
                 .returning(UserGroup)
             )
             await self._session.flush()
-            obj = row_res.one()
+            obj = row_res.one_or_none()
         except IntegrityError as err:
             self._raise_error(err)
+
+        if not obj:
+            raise UserNotFound
 
         return obj
 
@@ -179,8 +183,9 @@ class GroupRepository(Repository[Group]):
             await self._session.flush()
 
     async def get_permission(self, user: User, group_id: int) -> Permission:
-        if user.is_superuser:
-            return Permission.DELETE
+        # Check: group exists
+        if not await self._session.get(Group, group_id):
+            raise GroupNotFound
 
         admin_query = (
             (
@@ -195,7 +200,7 @@ class GroupRepository(Repository[Group]):
 
         is_admin = await self._session.scalar(admin_query)
 
-        if is_admin:
+        if is_admin or user.is_superuser:
             return Permission.DELETE
 
         group_role_query = select(UserGroup).where(
@@ -206,20 +211,9 @@ class GroupRepository(Repository[Group]):
         user_group = await self._session.scalar(group_role_query)
 
         if not user_group:
-            # Check: group exists
-            if not await self._session.get(Group, group_id):
-                raise GroupNotFound
             return Permission.NONE
 
-        group_role = user_group.role
-
-        if group_role == GroupMemberRole.Guest:
-            return Permission.READ
-
-        if group_role == GroupMemberRole.User:
-            return Permission.WRITE
-
-        return Permission.DELETE  # Maintainer
+        return Permission.READ
 
     async def delete_user(
         self,
@@ -255,5 +249,11 @@ class GroupRepository(Repository[Group]):
             pattern = r'Key \(group_id\)=\(-?\d+\) is not present in table "group".'
             if re.match(pattern, detail):
                 raise GroupNotFound from err
+
+        if constraint == "fk__user_group__user_id__user":
+            detail = err.__cause__.__cause__.detail  # type: ignore[union-attr]
+            pattern = r'Key \(user_id\)=\(-?\d+\) is not present in table "user".'
+            if re.match(pattern, detail):
+                raise UserNotFound from err
 
         raise SyncmasterException from err

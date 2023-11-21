@@ -1,192 +1,257 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockGroup, MockUser, TestUserRoles
+from tests.utils import MockConnection, MockGroup, MockUser, TestUserRoles
 
 pytestmark = [pytest.mark.asyncio]
 
 
+async def test_owner_can_delete_anyone_from_group(
+    client: AsyncClient,
+    group: MockGroup,
+    role_maintainer_or_below: TestUserRoles,
+):
+    # Arrange
+    user = group.get_member_of_role(role_maintainer_or_below)
+    group_admin = group.get_member_of_role(TestUserRoles.Owner)
+    # Act
+    result = await client.delete(
+        f"v1/groups/{group.id}/users/{user.id}",
+        headers={"Authorization": f"Bearer {group_admin.token}"},
+    )
+    # Assert
+    assert result.json() == {
+        "ok": True,
+        "status_code": 200,
+        "message": "User was successfully removed from group",
+    }
+    assert result.status_code == 200
+
+
+async def test_groupless_user_cannot_remove_user_from_group(
+    client: AsyncClient,
+    group: MockGroup,
+    simple_user: MockUser,
+    role_maintainer_or_below: TestUserRoles,
+):
+    # Arrange
+    user = group.get_member_of_role(role_maintainer_or_below)
+    # Act
+    result = await client.delete(
+        f"v1/groups/{group.id}/users/{user.id}",
+        headers={"Authorization": f"Bearer {simple_user.token}"},
+    )
+    # Assert
+    assert result.json() == {
+        "ok": False,
+        "status_code": 404,
+        "message": "Group not found",
+    }
+    assert result.status_code == 404
+
+
+async def test_other_group_member_cannot_remove_user_from_group(
+    client: AsyncClient,
+    group: MockGroup,
+    group_connection: MockConnection,
+    role_maintainer_or_below: TestUserRoles,
+    role_guest_plus: TestUserRoles,
+):
+    # Arrange
+    user = group.get_member_of_role(role_maintainer_or_below)
+    other_group_member = group_connection.owner_group.get_member_of_role(role_guest_plus)
+    # Act
+    result = await client.delete(
+        f"v1/groups/{group.id}/users/{user.id}",
+        headers={"Authorization": f"Bearer {other_group_member.token}"},
+    )
+    # Assert
+    assert result.json() == {
+        "ok": False,
+        "status_code": 404,
+        "message": "Group not found",
+    }
+    assert result.status_code == 404
+
+
+async def test_maintainer_and_user_can_delete_self_from_group(
+    client: AsyncClient,
+    group: MockGroup,
+    role_maintainer_or_below_without_guest: TestUserRoles,
+):
+    # Arrange
+    user = group.get_member_of_role(role_maintainer_or_below_without_guest)
+    # Act
+    result = await client.delete(
+        f"v1/groups/{group.id}/users/{user.id}",
+        headers={"Authorization": f"Bearer {user.token}"},
+    )
+    # Assert
+    assert result.json() == {
+        "ok": True,
+        "status_code": 200,
+        "message": "User was successfully removed from group",
+    }
+    assert result.status_code == 200
+
+
+async def test_owner_cannot_delete_self_from_group(
+    client: AsyncClient,
+    group: MockGroup,
+):
+    # Arrange
+    user = group.get_member_of_role(TestUserRoles.Owner)
+    # Act
+    result = await client.delete(
+        f"v1/groups/{group.id}/users/{user.id}",
+        headers={"Authorization": f"Bearer {user.token}"},
+    )
+    # Assert
+    assert result.json() == {
+        "message": "User already is not group member",
+        "ok": False,
+        "status_code": 400,
+    }
+    assert result.status_code == 400
+
+
+async def test_maintainer_or_below_cannot_delete_others_from_group(
+    client: AsyncClient,
+    group: MockGroup,
+    role_maintainer_or_below: TestUserRoles,
+    role_guest_plus: TestUserRoles,
+):
+    if role_maintainer_or_below != role_guest_plus:
+        # Arrange
+        user = group.get_member_of_role(role_maintainer_or_below)
+        other_group_member = group.get_member_of_role(role_guest_plus)
+        # Act
+        result = await client.delete(
+            f"v1/groups/{group.id}/users/{other_group_member.id}",
+            headers={"Authorization": f"Bearer {user.token}"},
+        )
+        # Assert
+        assert result.json() == {
+            "ok": False,
+            "status_code": 403,
+            "message": "You have no power here",
+        }
+        assert result.status_code == 403
+
+
+async def test_superuser_can_delete_user_from_group(
+    client: AsyncClient,
+    group: MockGroup,
+    superuser: MockUser,
+    role_maintainer_or_below: TestUserRoles,
+):
+    # Arrange
+    user = group.get_member_of_role(role_maintainer_or_below)
+    # Act
+    result = await client.delete(
+        f"v1/groups/{group.id}/users/{user.id}",
+        headers={"Authorization": f"Bearer {superuser.token}"},
+    )
+    # Assert
+    assert result.json() == {
+        "ok": True,
+        "status_code": 200,
+        "message": "User was successfully removed from group",
+    }
+    assert result.status_code == 200
+
+
 async def test_not_authorized_user_cannot_remove_user_from_group(client: AsyncClient, group: MockGroup):
-    member = group.get_member_of_role(TestUserRoles.User)
-    result = await client.delete(f"v1/groups/{group.id}/users/{member.id}")
-    assert result.status_code == 401
+    # Arrange
+    user = group.get_member_of_role(TestUserRoles.User)
+    # Act
+    result = await client.delete(f"v1/groups/{group.id}/users/{user.id}")
+    # Assert
     assert result.json() == {
         "ok": False,
         "status_code": 401,
         "message": "Not authenticated",
     }
+    assert result.status_code == 401
 
 
-async def test_not_member_group_cannot_remove_user_from_group(
-    client: AsyncClient, group: MockGroup, simple_user: MockUser
-):
-    member = group.get_member_of_role(TestUserRoles.User)
-    result = await client.delete(
-        f"v1/groups/{group.id}/users/{member.id}",
-        headers={"Authorization": f"Bearer {simple_user.token}"},
-    )
-    assert result.status_code == 404
-    assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Group not found",
-    }
-
-
-async def test_member_of_group_can_delete_self_from_group(client: AsyncClient, group: MockGroup):
-    member = group.get_member_of_role(TestUserRoles.User)
-    result = await client.delete(
-        f"v1/groups/{group.id}/users/{member.id}",
-        headers={"Authorization": f"Bearer {member.token}"},
-    )
-    assert result.json() == {
-        "ok": True,
-        "status_code": 200,
-        "message": "User was successfully removed from group",
-    }
-    assert result.status_code == 200
-
-    result = await client.get(
-        f"v1/groups/{group.id}",
-        headers={"Authorization": f"Bearer {member.token}"},
-    )
-    assert result.status_code == 404
-    assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Group not found",
-    }
-
-
-async def test_member_of_group_cannot_delete_others_from_group(client: AsyncClient, group: MockGroup):
-    first_member = group.get_member_of_role(TestUserRoles.Maintainer)
-    second_member = group.get_member_of_role(TestUserRoles.User)
-
-    result = await client.delete(
-        f"v1/groups/{group.id}/users/{first_member.id}",
-        headers={"Authorization": f"Bearer {second_member.token}"},
-    )
-    assert result.json() == {
-        "ok": False,
-        "status_code": 403,
-        "message": "You have no power here",
-    }
-    assert result.status_code == 403
-
-    result = await client.get(
-        f"v1/groups/{group.id}",
-        headers={"Authorization": f"Bearer {first_member.token}"},
-    )
-
-    assert result.json() == {
-        "id": group.id,
-        "name": group.name,
-        "description": group.description,
-        "admin_id": group.admin_id,
-    }
-    assert result.status_code == 200
-
-
-async def test_owner_of_group_can_delete_anyone_from_group(client: AsyncClient, group: MockGroup):
-    for member in (
-        group.get_member_of_role(TestUserRoles.Maintainer),
-        group.get_member_of_role(TestUserRoles.User),
-        group.get_member_of_role(TestUserRoles.Guest),
-    ):
-        result = await client.delete(
-            f"v1/groups/{group.id}/users/{member.id}",
-            headers={"Authorization": f"Bearer {group.get_member_of_role(TestUserRoles.Owner).token}"},
-        )
-        assert result.status_code == 200
-        assert result.json() == {
-            "ok": True,
-            "status_code": 200,
-            "message": "User was successfully removed from group",
-        }
-
-    result = await client.get(
-        f"v1/groups/{group.id}/users",
-        headers={"Authorization": f"Bearer {group.get_member_of_role(TestUserRoles.Owner).token}"},
-    )
-    assert result.status_code == 200
-    assert result.json() == {
-        "meta": {
-            "page": 1,
-            "pages": 1,
-            "total": 0,
-            "page_size": 20,
-            "has_next": False,
-            "has_previous": False,
-            "next_page": None,
-            "previous_page": None,
-        },
-        "items": [],
-    }
-
-
-async def test_cannot_delete_someone_twice_from_group(client: AsyncClient, group: MockGroup):
-    member = group.get_member_of_role(TestUserRoles.User)
-    result = await client.delete(
-        f"v1/groups/{group.id}/users/{member.id}",
-        headers={"Authorization": f"Bearer {group.get_member_of_role(TestUserRoles.Owner).token}"},
-    )
-    assert result.status_code == 200
-    assert result.json() == {
-        "ok": True,
-        "status_code": 200,
-        "message": "User was successfully removed from group",
-    }
-
-    result = await client.delete(
-        f"v1/groups/{group.id}/users/{member.id}",
-        headers={"Authorization": f"Bearer {group.get_member_of_role(TestUserRoles.Owner).token}"},
-    )
-    assert result.status_code == 400
-    assert result.json() == {
-        "ok": False,
-        "status_code": 400,
-        "message": "User already is not group member",
-    }
-
-
-async def test_superuser_can_delete_from_any_group(
+async def test_owner_delete_unknown_user_error(
     client: AsyncClient,
     group: MockGroup,
-    empty_group: MockGroup,
+):
+    # Arrange
+    group_admin = group.get_member_of_role(TestUserRoles.Owner)
+    # Act
+    result = await client.delete(
+        f"v1/groups/{group.id}/users/-1",
+        headers={"Authorization": f"Bearer {group_admin.token}"},
+    )
+    # Assert
+    assert result.json() == {
+        "message": "User already is not group member",
+        "ok": False,
+        "status_code": 400,
+    }
+    assert result.status_code == 400
+
+
+async def test_owner_delete_user_from_unknown_group_error(
+    client: AsyncClient,
+    group: MockGroup,
+    role_maintainer_or_below: TestUserRoles,
+):
+    # Arrange
+    group_admin = group.get_member_of_role(TestUserRoles.Owner)
+    user = group.get_member_of_role(role_maintainer_or_below)
+    # Act
+    result = await client.delete(
+        f"v1/groups/-1/users/{user.user.id}",
+        headers={"Authorization": f"Bearer {group_admin.token}"},
+    )
+    # Assert
+    assert result.json() == {
+        "message": "Group not found",
+        "ok": False,
+        "status_code": 404,
+    }
+    assert result.status_code == 404
+
+
+async def test_superuser_delete_unknown_user_error(
+    client: AsyncClient,
+    group: MockGroup,
     superuser: MockUser,
 ):
-    member = group.get_member_of_role(TestUserRoles.User)
+    # Act
     result = await client.delete(
-        f"v1/groups/{group.id}/users/{member.id}",
+        f"v1/groups/{group.id}/users/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
-    assert result.status_code == 200
+    # Assert
     assert result.json() == {
-        "ok": True,
-        "status_code": 200,
-        "message": "User was successfully removed from group",
+        "message": "User already is not group member",
+        "ok": False,
+        "status_code": 400,
     }
+    assert result.status_code == 400
 
-    result = await client.post(
-        f"v1/groups/{empty_group.id}/users/{member.id}",
-        headers={"Authorization": f"Bearer {superuser.token}"},
-        json={
-            "role": TestUserRoles.User,
-        },
-    )
-    assert result.status_code == 200
-    assert result.json() == {
-        "ok": True,
-        "status_code": 200,
-        "message": "User was successfully added to group",
-    }
 
+async def test_superuser_delete_user_from_unknown_group_error(
+    client: AsyncClient,
+    group: MockGroup,
+    superuser: MockUser,
+    role_maintainer_or_below: TestUserRoles,
+):
+    # Arrange
+    user = group.get_member_of_role(role_maintainer_or_below)
+    # Act
     result = await client.delete(
-        f"v1/groups/{empty_group.id}/users/{member.id}",
+        f"v1/groups/-1/users/{user.user.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
-    assert result.status_code == 200
+    # Assert
     assert result.json() == {
-        "ok": True,
-        "status_code": 200,
-        "message": "User was successfully removed from group",
+        "message": "Group not found",
+        "ok": False,
+        "status_code": 404,
     }
+    assert result.status_code == 404
