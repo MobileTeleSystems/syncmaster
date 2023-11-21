@@ -24,6 +24,9 @@ from app.services import UnitOfWork, get_user
 router = APIRouter(tags=["Connections"])
 
 
+CONNECTION_TYPES = ORACLE_TYPE, POSTGRES_TYPE
+
+
 @router.get("/connections")
 async def read_connections(
     group_id: int,
@@ -33,7 +36,7 @@ async def read_connections(
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ConnectionPageSchema:
     """Return connections in page format"""
-    resource_role = await unit_of_work.group.get_permission(
+    resource_role = await unit_of_work.connection.get_group_permission(
         user=current_user,
         group_id=group_id,
     )
@@ -86,7 +89,7 @@ async def create_connection(
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadConnectionSchema:
     """Create new connection"""
-    group_permission = await unit_of_work.group.get_permission(
+    group_permission = await unit_of_work.connection.get_group_permission(
         user=current_user,
         group_id=connection_data.group_id,
     )
@@ -128,7 +131,7 @@ async def create_connection(
 
 @router.get("/connections/known_types", dependencies=[Depends(get_user(is_active=True))])
 async def read_connection_types() -> list[str]:
-    return [get_args(type_)[0] for type_ in (ORACLE_TYPE, POSTGRES_TYPE)]
+    return [get_args(type_)[0] for type_ in CONNECTION_TYPES]
 
 
 @router.get("/connections/{connection_id}")
@@ -258,12 +261,15 @@ async def copy_connection(
             user=current_user,
             resource_id=connection_id,
         ),
-        unit_of_work.group.get_permission(
+        unit_of_work.connection.get_group_permission(
             user=current_user,
             group_id=copy_connection_data.new_group_id,
         ),
     )
     resource_role, target_group_role = target_source_rules
+
+    if copy_connection_data.remove_source and resource_role < Permission.DELETE:
+        raise ActionNotAllowed
 
     if resource_role == Permission.NONE:
         raise ConnectionNotFound
@@ -272,9 +278,6 @@ async def copy_connection(
         raise GroupNotFound
 
     if target_group_role < Permission.WRITE:
-        raise ActionNotAllowed
-
-    if copy_connection_data.remove_source and resource_role < Permission.DELETE:
         raise ActionNotAllowed
 
     async with unit_of_work:

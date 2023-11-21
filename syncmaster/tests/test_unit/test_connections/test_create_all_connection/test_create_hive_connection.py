@@ -11,15 +11,20 @@ from app.db.repositories.utils import decrypt_auth_data
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_create_hive_connection(
+async def test_user_plus_can_create_hive_connection(
     client: AsyncClient,
     group: MockGroup,
     session: AsyncSession,
     settings: Settings,
+    role_user_plus: TestUserRoles,
 ):
+    # Arrange
+    user = group.get_member_of_role(role_user_plus)
+
+    # Act
     result = await client.post(
         "v1/connections",
-        headers={"Authorization": f"Bearer {group.get_member_of_role(TestUserRoles.Owner).token}"},
+        headers={"Authorization": f"Bearer {user.token}"},
         json={
             "group_id": group.id,
             "name": "New connection",
@@ -51,6 +56,7 @@ async def test_create_hive_connection(
         )
     ).one()
 
+    # Assert
     assert result.status_code == 200
     assert result.json() == {
         "id": connection.id,

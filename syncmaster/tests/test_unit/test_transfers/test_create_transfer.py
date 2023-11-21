@@ -2,7 +2,6 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.test_unit.utils import create_connection
 from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser, TestUserRoles
 
 from app.db.models import Transfer
@@ -10,65 +9,45 @@ from app.db.models import Transfer
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_unauthorized_user_cannot_create_transfer(
+async def test_user_plus_can_create_transfer(
     client: AsyncClient,
-    group_transfer: MockTransfer,
-):
-    result = await client.post(
-        "v1/transfers",
-        json={
-            "group_id": None,
-            "name": "New transfer",
-            "source_connection_id": group_transfer.source_connection_id,
-            "target_connection_id": group_transfer.target_connection_id,
-            "source_params": {"type": "postgres", "table_name": "test"},
-            "target_params": {"type": "postgres", "table_name": "test1"},
-        },
-    )
-    assert result.status_code == 401
-    assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
-    }
-
-
-async def test_group_member_can_create_transfer(
-    client: AsyncClient,
-    group_connection: MockConnection,
+    two_group_connections: tuple[MockConnection, MockConnection],
     session: AsyncSession,
+    role_user_plus: TestUserRoles,
 ):
-    user = group_connection.owner_group.get_member_of_role(TestUserRoles.User)
-    other_connection = await create_connection(
-        session=session,
-        name="other_connection",
-        group_id=group_connection.owner_group.group.id,
-    )
+    # Arrange
+    first_connection, second_connection = two_group_connections
+    user = first_connection.owner_group.get_member_of_role(role_user_plus)
 
+    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "group_id": group_connection.owner_group.group.id,
+            "group_id": first_connection.owner_group.group.id,
             "name": "new test transfer",
             "description": "",
             "is_scheduled": False,
             "schedule": "",
-            "source_connection_id": group_connection.id,
-            "target_connection_id": other_connection.id,
+            "source_connection_id": first_connection.id,
+            "target_connection_id": second_connection.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
         },
     )
+
+    # Pre-Assert
     transfer = (
         await session.scalars(
             select(Transfer).filter_by(
                 name="new test transfer",
-                group_id=group_connection.owner_group.group.id,
+                group_id=first_connection.owner_group.group.id,
             )
         )
     ).one()
+
+    # Assert
     assert result.status_code == 200
     assert result.json() == {
         "id": transfer.id,
@@ -84,77 +63,70 @@ async def test_group_member_can_create_transfer(
         "strategy_params": transfer.strategy_params,
     }
 
-    await session.delete(other_connection)
-    await session.commit()
+
+async def test_guest_cannot_create_transfer(
+    client: AsyncClient,
+    two_group_connections: tuple[MockConnection, MockConnection],
+    session: AsyncSession,
+):
+    # Arrange
+    first_connection, second_connection = two_group_connections
+    user = first_connection.owner_group.get_member_of_role(TestUserRoles.Guest)
+
+    # Act
+    result = await client.post(
+        "v1/transfers",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "group_id": first_connection.owner_group.group.id,
+            "name": "new test transfer",
+            "description": "",
+            "is_scheduled": False,
+            "schedule": "",
+            "source_connection_id": first_connection.id,
+            "target_connection_id": second_connection.id,
+            "source_params": {"type": "postgres", "table_name": "source_table"},
+            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "strategy_params": {"type": "full"},
+        },
+    )
+
+    # Assert
+    assert result.json() == {
+        "message": "You have no power here",
+        "ok": False,
+        "status_code": 403,
+    }
 
 
 async def test_groupless_user_cannot_create_transfer(
     client: AsyncClient,
     simple_user: MockUser,
-    group_connection: MockConnection,
+    two_group_connections: tuple[MockConnection, MockConnection],
     session: AsyncSession,
 ):
-    other_connection = await create_connection(
-        session=session,
-        name="other_connection",
-        group_id=group_connection.owner_group.group.id,
-    )
+    # Arrange
+    first_conn, second_conn = two_group_connections
+
+    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={
-            "group_id": group_connection.owner_group.group.id,
+            "group_id": first_conn.owner_group.group.id,
             "name": "new test transfer",
             "description": "",
             "is_scheduled": False,
             "schedule": "",
-            "source_connection_id": group_connection.id,
-            "target_connection_id": other_connection.id,
+            "source_connection_id": first_conn.id,
+            "target_connection_id": second_conn.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
         },
     )
 
-    assert result.status_code == 403
-    assert result.json() == {
-        "ok": False,
-        "status_code": 403,
-        "message": "You have no power here",
-    }
-
-    await session.delete(other_connection)
-    await session.commit()
-
-
-async def test_other_group_owner_cannot_create_group_transfer(
-    client: AsyncClient,
-    group_connection: MockConnection,
-    session: AsyncSession,
-    empty_group: MockGroup,
-):
-    other_admin = empty_group.get_member_of_role("Owner")
-    other_connection = await create_connection(
-        session=session,
-        name="other_connection",
-        group_id=group_connection.owner_group.id,
-    )
-    result = await client.post(
-        "v1/transfers",
-        headers={"Authorization": f"Bearer {other_admin.token}"},
-        json={
-            "group_id": group_connection.owner_group.id,
-            "name": "new test group transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
-            "source_connection_id": group_connection.id,
-            "target_connection_id": other_connection.id,
-            "source_params": {"type": "postgres", "table_name": "source_table"},
-            "target_params": {"type": "postgres", "table_name": "target_table"},
-            "strategy_params": {"type": "full"},
-        },
-    )
+    # Assert
     assert result.status_code == 403
     assert result.json() == {
         "ok": False,
@@ -163,82 +135,63 @@ async def test_other_group_owner_cannot_create_group_transfer(
     }
 
 
-async def test_group_owner_can_create_own_group_transfer(
+async def test_other_group_user_plus_cannot_create_group_transfer(
     client: AsyncClient,
-    group_connection: MockConnection,
+    two_group_connections: tuple[MockConnection, MockConnection],
     session: AsyncSession,
+    group: MockGroup,
+    role_user_plus: TestUserRoles,
 ):
-    admin = group_connection.owner_group.get_member_of_role("Owner")
-    other_connection = await create_connection(
-        session=session,
-        name="other_connection",
-        group_id=group_connection.owner_group.id,
-    )
+    # Arrange
+    first_conn, second_conn = two_group_connections
+    user = group.get_member_of_role(role_user_plus)
+
+    # Act
     result = await client.post(
         "v1/transfers",
-        headers={"Authorization": f"Bearer {admin.token}"},
+        headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "group_id": group_connection.owner_group.id,
+            "group_id": first_conn.owner_group.id,
             "name": "new test group transfer",
             "description": "",
             "is_scheduled": False,
             "schedule": "",
-            "source_connection_id": group_connection.id,
-            "target_connection_id": other_connection.id,
+            "source_connection_id": first_conn.id,
+            "target_connection_id": second_conn.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
         },
     )
-    transfer = (
-        await session.scalars(
-            select(Transfer).filter_by(
-                name="new test group transfer",
-                group_id=group_connection.owner_group.id,
-            )
-        )
-    ).one()
-    assert result.status_code == 200
+    assert result.status_code == 403
     assert result.json() == {
-        "id": transfer.id,
-        "group_id": transfer.group_id,
-        "name": transfer.name,
-        "description": transfer.description,
-        "schedule": transfer.schedule,
-        "is_scheduled": transfer.is_scheduled,
-        "source_connection_id": transfer.source_connection_id,
-        "target_connection_id": transfer.target_connection_id,
-        "source_params": transfer.source_params,
-        "target_params": transfer.target_params,
-        "strategy_params": transfer.strategy_params,
+        "ok": False,
+        "status_code": 403,
+        "message": "You have no power here",
     }
-
-    await session.delete(other_connection)
-    await session.commit()
 
 
 async def test_superuser_can_create_transfer(
     client: AsyncClient,
-    group_connection: MockConnection,
+    two_group_connections: tuple[MockConnection, MockConnection],
     session: AsyncSession,
     superuser: MockUser,
 ):
-    other_connection = await create_connection(
-        session=session,
-        name="other_connection",
-        group_id=group_connection.owner_group.id,
-    )
+    # Arrange
+    first_conn, second_conn = two_group_connections
+
+    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
-            "group_id": group_connection.owner_group.id,
+            "group_id": first_conn.owner_group.id,
             "name": "new test group transfer",
             "description": "",
             "is_scheduled": False,
             "schedule": "",
-            "source_connection_id": group_connection.id,
-            "target_connection_id": other_connection.id,
+            "source_connection_id": first_conn.id,
+            "target_connection_id": second_conn.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
@@ -248,10 +201,11 @@ async def test_superuser_can_create_transfer(
         await session.scalars(
             select(Transfer).filter_by(
                 name="new test group transfer",
-                group_id=group_connection.owner_group.id,
+                group_id=first_conn.owner_group.id,
             )
         )
     ).one()
+
     assert result.status_code == 200
     assert result.json() == {
         "id": transfer.id,
@@ -266,9 +220,6 @@ async def test_superuser_can_create_transfer(
         "target_params": transfer.target_params,
         "strategy_params": transfer.strategy_params,
     }
-
-    await session.delete(other_connection)
-    await session.commit()
 
 
 @pytest.mark.parametrize(
@@ -329,25 +280,23 @@ async def test_check_fields_validation_on_create_transfer(
     new_data: dict,
     error_json: dict,
     client: AsyncClient,
-    group_connection: MockConnection,
+    two_group_connections: tuple[MockConnection, MockConnection],
     session: AsyncSession,
+    role_user_plus: TestUserRoles,
 ):
-    admin_user = group_connection.owner_group.get_member_of_role("Owner")
+    # Arrange
+    first_conn, second_conn = two_group_connections
+    user = first_conn.owner_group.get_member_of_role(role_user_plus)
 
-    other_connection = await create_connection(
-        session=session,
-        name="other_connection",
-        group_id=group_connection.owner_group.group.id,
-    )
-
+    # Act
     transfer_data = {
         "name": "new test transfer",
-        "group_id": group_connection.owner_group.group.id,
+        "group_id": first_conn.owner_group.group.id,
         "description": "",
         "is_scheduled": True,
         "schedule": "",
-        "source_connection_id": group_connection.id,
-        "target_connection_id": other_connection.id,
+        "source_connection_id": first_conn.id,
+        "target_connection_id": second_conn.id,
         "source_params": {"type": "postgres", "table_name": "source_table"},
         "target_params": {"type": "postgres", "table_name": "target_table"},
         "strategy_params": {"type": "full"},
@@ -355,42 +304,44 @@ async def test_check_fields_validation_on_create_transfer(
     transfer_data.update(new_data)
     result = await client.post(
         "v1/transfers",
-        headers={"Authorization": f"Bearer {admin_user.token}"},
+        headers={"Authorization": f"Bearer {user.token}"},
         json=transfer_data,
     )
+
+    # Assert
     assert result.status_code == 422
     assert result.json() == {"detail": [error_json]}
 
 
 async def test_check_connection_types_and_its_params_on_create_transfer(
     client: AsyncClient,
-    group_connection: MockConnection,
+    two_group_connections: tuple[MockConnection, MockConnection],
     session: AsyncSession,
+    role_user_plus: TestUserRoles,
 ):
-    admin_user = group_connection.owner_group.get_member_of_role("Owner")
+    # Arrange
+    first_conn, second_conn = two_group_connections
+    user = first_conn.owner_group.get_member_of_role(role_user_plus)
 
-    other_connection = await create_connection(
-        session=session,
-        name="other_connection",
-        group_id=group_connection.owner_group.group.id,
-    )
-
+    # Act
     result = await client.post(
         "v1/transfers",
-        headers={"Authorization": f"Bearer {admin_user.token}"},
+        headers={"Authorization": f"Bearer {user.token}"},
         json={
             "name": "new test transfer",
-            "group_id": group_connection.owner_group.group.id,
+            "group_id": first_conn.owner_group.group.id,
             "description": "",
             "is_scheduled": False,
             "schedule": "",
-            "source_connection_id": group_connection.connection.id,
-            "target_connection_id": other_connection.id,
+            "source_connection_id": first_conn.connection.id,
+            "target_connection_id": second_conn.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "oracle", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
         },
     )
+
+    # Assert
     assert result.status_code == 400
     assert result.json() == {
         "ok": False,
@@ -398,44 +349,30 @@ async def test_check_connection_types_and_its_params_on_create_transfer(
         "message": "Target connection has type `postgres` but its params has `oracle` type",
     }
 
-    await session.delete(other_connection)
-    await session.commit()
 
-
-async def test_check_different_connection_owners_on_create_transfer(
+async def test_check_different_connections_owner_group_on_create_transfer(
     client: AsyncClient,
-    group_connection: MockConnection,
-    empty_group: MockConnection,
     session: AsyncSession,
+    two_group_connections: tuple[MockConnection, MockConnection],
+    group_connection: MockConnection,
+    role_user_plus: TestUserRoles,
 ):
     # Arrange
-    user = group_connection.owner_group.get_member_of_role(TestUserRoles.User)
+    first_conn, _ = two_group_connections
+    user = first_conn.owner_group.get_member_of_role(role_user_plus)
 
-    await client.post(
-        f"v1/groups/{empty_group.id}/users/{user.user.id}",
-        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
-        json={
-            "role": TestUserRoles.User,
-        },
-    )
-
-    new_connection = await create_connection(
-        session=session,
-        name="New group admin connection",
-        group_id=empty_group.id,
-    )
     # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
             "name": "new test transfer",
-            "group_id": group_connection.owner_group.group.id,
+            "group_id": first_conn.owner_group.group.id,
             "description": "",
             "is_scheduled": False,
             "schedule": "",
-            "source_connection_id": group_connection.id,
-            "target_connection_id": new_connection.id,
+            "source_connection_id": first_conn.connection.id,
+            "target_connection_id": group_connection.connection.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
@@ -443,42 +380,64 @@ async def test_check_different_connection_owners_on_create_transfer(
     )
 
     # Assert
-    assert result.status_code == 400
     assert result.json() == {
         "message": "Connections should belong to the transfer group",
         "ok": False,
         "status_code": 400,
     }
-    await session.delete(new_connection)
-    await session.commit()
+    assert result.status_code == 400
 
 
-async def test_group_member_can_not_create_transfer_with_another_group_connection(
+async def test_unauthorized_user_cannot_create_transfer(
     client: AsyncClient,
-    group_connection: MockConnection,
-    empty_group: MockConnection,
+    group_transfer: MockTransfer,
+):
+    # Act
+    result = await client.post(
+        "v1/transfers",
+        json={
+            "group_id": group_transfer.owner_group.group.id,
+            "name": "New transfer name",
+            "source_connection_id": group_transfer.source_connection_id,
+            "target_connection_id": group_transfer.target_connection_id,
+            "source_params": {"type": "postgres", "table_name": "test"},
+            "target_params": {"type": "postgres", "table_name": "test1"},
+        },
+    )
+
+    # Assert
+    assert result.status_code == 401
+    assert result.json() == {
+        "ok": False,
+        "status_code": 401,
+        "message": "Not authenticated",
+    }
+
+
+@pytest.mark.parametrize("iter_conn_id", [(False, True), (True, False)])
+async def test_group_member_cannot_create_transfer_with_unknown_connection_error(
+    client: AsyncClient,
+    two_group_connections: tuple[MockConnection, MockConnection],
     session: AsyncSession,
+    role_user_plus: TestUserRoles,
+    iter_conn_id: tuple,
 ):
     # Arrange
-    admin = group_connection.owner_group.get_member_of_role(TestUserRoles.Owner)
-    new_connection = await create_connection(
-        session=session,
-        name="New group admin connection",
-        group_id=empty_group.id,
-    )
+    first_conn, second_conn = two_group_connections
+    user = first_conn.owner_group.get_member_of_role(role_user_plus)
 
     # Act
     result = await client.post(
         "v1/transfers",
-        headers={"Authorization": f"Bearer {admin.token}"},
+        headers={"Authorization": f"Bearer {user.token}"},
         json={
+            "group_id": first_conn.owner_group.group.id,
             "name": "new test transfer",
-            "group_id": group_connection.owner_group.group.id,
             "description": "",
             "is_scheduled": False,
             "schedule": "",
-            "source_connection_id": group_connection.id,
-            "target_connection_id": new_connection.id,
+            "source_connection_id": first_conn.id if iter_conn_id[0] else -1,
+            "target_connection_id": second_conn.id if iter_conn_id[1] else -1,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
@@ -487,10 +446,116 @@ async def test_group_member_can_not_create_transfer_with_another_group_connectio
 
     # Assert
     assert result.json() == {
-        "message": "Connections should belong to the transfer group",
+        "message": "Connection not found",
         "ok": False,
-        "status_code": 400,
+        "status_code": 404,
     }
-    assert result.status_code == 400
-    await session.delete(new_connection)
-    await session.commit()
+
+
+async def test_group_member_cannot_create_transfer_with_unknown_group_error(
+    client: AsyncClient,
+    two_group_connections: tuple[MockConnection, MockConnection],
+    session: AsyncSession,
+    role_user_plus: TestUserRoles,
+):
+    # Arrange
+    first_conn, second_conn = two_group_connections
+    user = first_conn.owner_group.get_member_of_role(role_user_plus)
+
+    # Act
+    result = await client.post(
+        "v1/transfers",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "group_id": -1,
+            "name": "new test transfer",
+            "description": "",
+            "is_scheduled": False,
+            "schedule": "",
+            "source_connection_id": first_conn.id,
+            "target_connection_id": second_conn.id,
+            "source_params": {"type": "postgres", "table_name": "source_table"},
+            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "strategy_params": {"type": "full"},
+        },
+    )
+
+    # Assert
+
+    assert result.json() == {
+        "message": "Group not found",
+        "ok": False,
+        "status_code": 404,
+    }
+
+
+@pytest.mark.parametrize("conn_id", [(False, True), (True, False)])
+async def test_superuser_cannot_create_transfer_with_unknown_connection_error(
+    client: AsyncClient,
+    two_group_connections: tuple[MockConnection, MockConnection],
+    session: AsyncSession,
+    conn_id: tuple,
+    superuser: MockUser,
+):
+    # Arrange
+    first_conn, second_conn = two_group_connections
+
+    # Act
+    result = await client.post(
+        "v1/transfers",
+        headers={"Authorization": f"Bearer {superuser.token}"},
+        json={
+            "group_id": first_conn.owner_group.group.id,
+            "name": "new test transfer",
+            "description": "",
+            "is_scheduled": False,
+            "schedule": "",
+            "source_connection_id": first_conn.id if conn_id[0] else -1,
+            "target_connection_id": second_conn.id if conn_id[1] else -1,
+            "source_params": {"type": "postgres", "table_name": "source_table"},
+            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "strategy_params": {"type": "full"},
+        },
+    )
+
+    # Assert
+    assert result.json() == {
+        "message": "Connection not found",
+        "ok": False,
+        "status_code": 404,
+    }
+
+
+async def test_superuser_cannot_create_transfer_with_unknown_group_error(
+    client: AsyncClient,
+    two_group_connections: tuple[MockConnection, MockConnection],
+    session: AsyncSession,
+    superuser: MockUser,
+):
+    # Arrange
+    first_conn, second_conn = two_group_connections
+
+    # Act
+    result = await client.post(
+        "v1/transfers",
+        headers={"Authorization": f"Bearer {superuser.token}"},
+        json={
+            "group_id": -1,
+            "name": "new test transfer",
+            "description": "",
+            "is_scheduled": False,
+            "schedule": "",
+            "source_connection_id": first_conn.id,
+            "target_connection_id": second_conn.id,
+            "source_params": {"type": "postgres", "table_name": "source_table"},
+            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "strategy_params": {"type": "full"},
+        },
+    )
+
+    # Assert
+    assert result.json() == {
+        "message": "Group not found",
+        "ok": False,
+        "status_code": 404,
+    }

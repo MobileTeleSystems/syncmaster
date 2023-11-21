@@ -57,13 +57,13 @@ class MockGroup:
             self._guest = members[2]
 
     def get_member_of_role(self, role_name: str) -> MockUser:
-        if role_name == "Maintainer":
+        if role_name == TestUserRoles.Maintainer:
             return self._maintainer
-        if role_name == "User":
+        if role_name == TestUserRoles.User:
             return self._user
-        if role_name == "Guest":
+        if role_name == TestUserRoles.Guest:
             return self._guest
-        if role_name == "Owner":
+        if role_name == TestUserRoles.Owner:
             return self._admin
 
         raise ValueError(f"Unknown role name: {role_name}.")

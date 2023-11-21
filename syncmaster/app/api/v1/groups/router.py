@@ -84,7 +84,7 @@ async def update_group(
     if resource_rule == Permission.NONE:
         raise GroupNotFound
 
-    if resource_rule < Permission.WRITE:
+    if resource_rule < Permission.DELETE:
         raise ActionNotAllowed
 
     async with unit_of_work:
@@ -139,15 +139,15 @@ async def update_user_role_group(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> AddUserSchema:
-    resource_role = await unit_of_work.group.get_permission(
+    resource_rule = await unit_of_work.group.get_permission(
         user=current_user,
         group_id=group_id,
     )
 
-    if resource_role == Permission.NONE:
+    if resource_rule == Permission.NONE:
         raise GroupNotFound
 
-    if resource_role < Permission.DELETE:
+    if resource_rule < Permission.DELETE:
         raise ActionNotAllowed
 
     async with unit_of_work:
@@ -176,7 +176,7 @@ async def add_user_to_group(
     if resource_rule == Permission.NONE:
         raise GroupNotFound
 
-    if resource_rule < Permission.WRITE:
+    if resource_rule < Permission.DELETE:
         raise ActionNotAllowed
 
     async with unit_of_work:
@@ -207,8 +207,10 @@ async def delete_user_from_group(
     if resource_rule == Permission.NONE:
         raise GroupNotFound
 
-    if resource_rule < Permission.DELETE and user_id != current_user.id:
-        raise ActionNotAllowed
+    # User can delete himself from the group
+    if user_id != current_user.id:
+        if resource_rule < Permission.DELETE:
+            raise ActionNotAllowed
 
     async with unit_of_work:
         await unit_of_work.group.delete_user(

@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-from tests.test_unit.conftest import create_group_member
+from tests.test_unit.conftest import add_user_to_group, create_group_member
 from tests.test_unit.utils import (
     create_connection,
     create_credentials,
@@ -27,13 +27,14 @@ from tests.utils import (
     MockGroup,
     MockTransfer,
     MockUser,
+    TestUserRoles,
     prepare_new_database,
     run_async_migrations,
 )
 
 from app.api.v1.auth.utils import sign_jwt
 from app.config import Settings, TestSettings
-from app.db.models import Base
+from app.db.models import Base, Connection
 from app.db.repositories.utils import decrypt_auth_data
 from app.main import get_application
 
@@ -144,7 +145,7 @@ async def group_transfer(
         admin=MockUser(
             user=group_admin,
             auth_token=sign_jwt(group_admin.id, settings),
-            role="Owner",
+            role=TestUserRoles.Owner,
         ),
         members=members,
     )
@@ -205,3 +206,210 @@ async def group_transfer(
     for member in members:
         await session.delete(member.user)
     await session.commit()
+
+
+@pytest_asyncio.fixture
+async def group_transfer_and_group_maintainer_plus(
+    session: AsyncSession,
+    empty_group: MockGroup,
+    group_transfer: MockTransfer,
+    role_maintainer_plus: TestUserRoles,
+    role_maintainer_or_below_without_guest: TestUserRoles,
+) -> str:
+    user = group_transfer.owner_group.get_member_of_role(role_maintainer_plus)
+
+    await add_user_to_group(
+        user=user.user,
+        group_id=empty_group.group.id,
+        session=session,
+        role=role_maintainer_or_below_without_guest,
+    )
+
+    return role_maintainer_plus
+
+
+@pytest_asyncio.fixture
+async def group_transfer_and_group_user_plus(
+    session: AsyncSession,
+    empty_group: MockGroup,
+    group_transfer: MockTransfer,
+    role_user_plus: TestUserRoles,
+    role_maintainer_or_below_without_guest: TestUserRoles,
+) -> str:
+    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+
+    await add_user_to_group(
+        user=user.user,
+        group_id=empty_group.group.id,
+        session=session,
+        role=role_maintainer_or_below_without_guest,
+    )
+
+    return role_user_plus
+
+
+@pytest_asyncio.fixture
+async def group_transfer_and_group_connection_user_plus(
+    session: AsyncSession,
+    empty_group: MockGroup,
+    group_transfer: MockTransfer,
+    role_user_plus: TestUserRoles,
+    role_maintainer_or_below_without_guest: TestUserRoles,
+    settings: Settings,
+) -> tuple[str, Connection]:
+    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+
+    await add_user_to_group(
+        user=user.user,
+        group_id=empty_group.group.id,
+        session=session,
+        role=role_maintainer_or_below_without_guest,
+    )
+
+    connection = await create_connection(
+        session=session,
+        name="group_transfer_source_connection",
+        group_id=empty_group.id,
+    )
+
+    await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=connection.id,
+    )
+
+    yield role_user_plus, connection
+    await session.delete(connection)
+    await session.commit()
+
+
+@pytest_asyncio.fixture
+async def group_transfer_and_group_user_or_below(
+    session: AsyncSession,
+    empty_group: MockGroup,
+    group_transfer: MockTransfer,
+    role_user_or_below: TestUserRoles,
+    role_maintainer_or_below_without_guest: TestUserRoles,
+) -> str:
+    user = group_transfer.owner_group.get_member_of_role(role_user_or_below)
+
+    await add_user_to_group(
+        user=user.user,
+        group_id=empty_group.group.id,
+        session=session,
+        role=role_maintainer_or_below_without_guest,
+    )
+
+    return role_user_or_below
+
+
+@pytest_asyncio.fixture(
+    params=[
+        TestUserRoles.Guest,
+        TestUserRoles.User,
+        TestUserRoles.Maintainer,
+        TestUserRoles.Owner,
+    ]
+)
+async def role_guest_plus(request):
+    """
+    Guest: only can READ (only resources)
+    User: READ, WRITE (only resources)
+    Maintainer: READ, WRITE, DELETE (only resources)
+    Owner: READ, WRITE, DELETE (resources and users in own group)
+    """
+    return request.param
+
+
+@pytest_asyncio.fixture(
+    params=[
+        TestUserRoles.Guest,
+        TestUserRoles.User,
+        TestUserRoles.Maintainer,
+    ]
+)
+async def role_guest_plus_without_owner(request):
+    """
+    Guest: only can READ (only resources)
+    User: READ, WRITE (only resources)
+    Maintainer: READ, WRITE, DELETE (only resources)
+    Owner: READ, WRITE, DELETE (resources and users in own group)
+    """
+    return request.param
+
+
+@pytest_asyncio.fixture(
+    params=[
+        TestUserRoles.User,
+        TestUserRoles.Owner,
+        TestUserRoles.Maintainer,
+    ]
+)
+async def role_user_plus(request):
+    """
+    User: READ, WRITE (only resources)
+    Maintainer: READ, WRITE, DELETE (only resources)
+    Owner: READ, WRITE, DELETE (resources and users in own group)
+    """
+    return request.param
+
+
+@pytest_asyncio.fixture(
+    params=[
+        TestUserRoles.Maintainer,
+        TestUserRoles.Owner,
+    ]
+)
+async def role_maintainer_plus(request):
+    """
+    Maintainer: READ, WRITE, DELETE (only resources)
+    Owner: READ, WRITE, DELETE (resources and users in own group)
+    """
+    return request.param
+
+
+@pytest_asyncio.fixture(
+    params=[
+        TestUserRoles.Guest,
+        TestUserRoles.User,
+    ]
+)
+async def role_user_or_below(request):
+    """
+    Guest: only can READ (only resources)
+    User: READ, WRITE (only resources)
+    """
+    return request.param
+
+
+@pytest_asyncio.fixture(
+    params=[
+        TestUserRoles.User,
+        TestUserRoles.Maintainer,
+    ]
+)
+async def role_maintainer_or_below_without_guest(request):
+    """
+    Guest: only can READ (only resources)
+    User: READ, WRITE (only resources)
+    Maintainer: READ, WRITE, DELETE (only resources)
+    """
+
+    return request.param
+
+
+@pytest_asyncio.fixture(
+    params=[
+        TestUserRoles.Guest,
+        TestUserRoles.User,
+        TestUserRoles.Maintainer,
+    ]
+)
+async def role_maintainer_or_below(request):
+    """
+    Guest: only can READ (only resources)
+    User: READ, WRITE (only resources)
+    Maintainer: READ, WRITE, DELETE (only resources)
+    """
+
+    return request.param
