@@ -1,6 +1,4 @@
-from string import ascii_lowercase, digits
-
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, constr
 
 from app.api.v1.schemas import MetaPageSchema, PageSchema
 from app.db.models import GroupMemberRole
@@ -8,14 +6,7 @@ from app.db.utils import Pagination
 
 
 class UpdateUserSchema(BaseModel):
-    username: str
-
-    @validator("username")
-    def username_validator(cls, value):
-        alph = ascii_lowercase + digits + "_"
-        if any(filter(lambda x: x not in alph, value)):
-            raise ValueError("Invalid username")
-        return value
+    username: constr(regex=r"^[_a-z0-9]+$")  # type: ignore # noqa: F722
 
 
 class ReadGroupMember(BaseModel):

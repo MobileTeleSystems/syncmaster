@@ -8,7 +8,16 @@ from sqlalchemy.orm import joinedload
 
 from app.api.v1.transfers.schemas import ReadFullTransferSchema
 from app.config import Settings
-from app.db.models import AuthData, Connection, Group, Run, Status, Transfer, User
+from app.db.models import (
+    AuthData,
+    Connection,
+    Group,
+    Queue,
+    Run,
+    Status,
+    Transfer,
+    User,
+)
 from app.db.repositories.utils import encrypt_auth_data
 
 
@@ -51,6 +60,23 @@ async def create_user(
     await session.commit()
     await session.refresh(u)
     return u
+
+
+async def create_queue(
+    session: AsyncSession,
+    name: str,
+    group_id: int,
+    description: str | None = None,
+) -> Queue:
+    queue = Queue(
+        name=name,
+        description=description,
+        group_id=group_id,
+    )
+    session.add(queue)
+    await session.commit()
+    await session.refresh(queue)
+    return queue
 
 
 async def create_group(session: AsyncSession, name: str, admin_id: int) -> Group:
@@ -118,6 +144,7 @@ async def create_transfer(
     name: str,
     source_connection_id: int,
     target_connection_id: int,
+    queue_id: int,
     group_id: int | None = None,
     source_params: dict | None = None,
     target_params: dict | None = None,
@@ -137,6 +164,7 @@ async def create_transfer(
         is_scheduled=is_scheduled,
         schedule=schedule,
         strategy_params=strategy_params or {"type": "full"},
+        queue_id=queue_id,
     )
     session.add(t)
     await session.commit()

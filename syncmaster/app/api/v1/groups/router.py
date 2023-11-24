@@ -58,7 +58,7 @@ async def read_group(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadGroupSchema:
-    resource_role = await unit_of_work.group.get_permission(
+    resource_role = await unit_of_work.group.get_group_permission(
         user=current_user,
         group_id=group_id,
     )
@@ -77,7 +77,7 @@ async def update_group(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadGroupSchema:
-    resource_rule = await unit_of_work.group.get_permission(
+    resource_rule = await unit_of_work.group.get_group_permission(
         user=current_user,
         group_id=group_id,
     )
@@ -115,7 +115,7 @@ async def read_group_users(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> UserPageSchemaAsGroupMember:
-    resource_role = await unit_of_work.group.get_permission(
+    resource_role = await unit_of_work.group.get_group_permission(
         user=current_user,
         group_id=group_id,
     )
@@ -139,7 +139,7 @@ async def update_user_role_group(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> AddUserSchema:
-    resource_rule = await unit_of_work.group.get_permission(
+    resource_rule = await unit_of_work.group.get_group_permission(
         user=current_user,
         group_id=group_id,
     )
@@ -168,7 +168,7 @@ async def add_user_to_group(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> StatusResponseSchema:
-    resource_rule = await unit_of_work.group.get_permission(
+    resource_rule = await unit_of_work.group.get_group_permission(
         user=current_user,
         group_id=group_id,
     )
@@ -199,7 +199,7 @@ async def delete_user_from_group(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> StatusResponseSchema:
-    resource_rule = await unit_of_work.group.get_permission(
+    resource_rule = await unit_of_work.group.get_group_permission(
         user=current_user,
         group_id=group_id,
     )

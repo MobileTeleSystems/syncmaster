@@ -1,9 +1,12 @@
+import secrets
+
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests.test_unit.conftest import create_group_member
 from tests.test_unit.utils import (
     create_connection,
     create_group,
+    create_queue,
     create_run,
     create_transfer,
     create_user,
@@ -61,12 +64,19 @@ async def group_run(session: AsyncSession, settings: Settings) -> MockTransfer:
         group_id=group.id,
     )
 
+    queue = await create_queue(
+        session=session,
+        name=f"{secrets.token_hex(5)}_test_runs_queue",
+        group_id=group.id,
+    )
+
     transfer = await create_transfer(
         session=session,
         name="group_transfer",
         group_id=group.id,
         source_connection_id=source_connection.id,
         target_connection_id=target_connection.id,
+        queue_id=queue.id,
     )
     mock_transfer = MockTransfer(
         transfer=transfer,
@@ -84,6 +94,7 @@ async def group_run(session: AsyncSession, settings: Settings) -> MockTransfer:
     await session.delete(target_connection)
     await session.delete(group)
     await session.delete(group_admin)
+    await session.delete(queue)
     for member in members:
         await session.delete(member.user)
     await session.commit()

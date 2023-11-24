@@ -20,6 +20,7 @@ from app.exceptions import (
     CannotConnectToTaskQueueError,
     ConnectionNotFound,
     DifferentTransferAndConnectionsGroups,
+    DifferentTransferAndQueueGroups,
     DifferentTypeConnectionsAndParams,
     GroupNotFound,
     TransferNotFound,
@@ -110,6 +111,7 @@ async def create_transfer(
             source_params=transfer_data.source_params.dict(),
             target_params=transfer_data.target_params.dict(),
             strategy_params=transfer_data.strategy_params.dict(),
+            queue_id=transfer_data.queue_id,
         )
     return ReadTransferSchema.from_orm(transfer)
 
@@ -121,7 +123,7 @@ async def read_transfer(
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadTransferSchema:
     """Return transfer data by transfer ID"""
-    resource_role = await unit_of_work.transfer.get_permission(
+    resource_role = await unit_of_work.transfer.get_resource_permission(
         user=current_user,
         resource_id=transfer_id,
     )
@@ -142,7 +144,7 @@ async def copy_transfer(
 ) -> StatusCopyTransferResponseSchema:
     # Check: user can copy transfer
     target_source_transfer_rules = await asyncio.gather(
-        unit_of_work.transfer.get_permission(
+        unit_of_work.transfer.get_resource_permission(
             user=current_user,
             resource_id=transfer_id,
         ),
@@ -166,11 +168,11 @@ async def copy_transfer(
     transfer = await unit_of_work.transfer.read_by_id(transfer_id=transfer_id)
     # Check: user can copy connection
     target_source_connection_rules = await asyncio.gather(
-        unit_of_work.connection.get_permission(
+        unit_of_work.connection.get_resource_permission(
             user=current_user,
             resource_id=transfer.source_connection_id,
         ),
-        unit_of_work.connection.get_permission(
+        unit_of_work.connection.get_resource_permission(
             user=current_user,
             resource_id=transfer.target_connection_id,
         ),
@@ -179,6 +181,13 @@ async def copy_transfer(
 
     if source_connection_role == Permission.NONE or target_connection_role == Permission.NONE:
         raise ConnectionNotFound
+
+    # Check: new queue exists
+    new_queue = await unit_of_work.queue.read_by_id(queue_id=transfer_data.new_queue_id)
+
+    # Acheck: new_queue_id and new_group_id are similar
+    if new_queue.group_id != transfer_data.new_group_id:
+        raise DifferentTransferAndQueueGroups
 
     async with unit_of_work:
         copied_source_connection = await unit_of_work.connection.copy(
@@ -199,6 +208,7 @@ async def copy_transfer(
             new_group_id=transfer_data.new_group_id,
             new_source_connection=copied_source_connection.id,
             new_target_connection=copied_target_connection.id,
+            new_queue_id=transfer_data.new_queue_id,
         )
 
         if transfer_data.remove_source:
@@ -222,7 +232,7 @@ async def update_transfer(
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadTransferSchema:
     # Check: user can update transfer
-    resource_role = await unit_of_work.transfer.get_permission(
+    resource_role = await unit_of_work.transfer.get_resource_permission(
         user=current_user,
         resource_id=transfer_id,
     )
@@ -244,18 +254,22 @@ async def update_transfer(
         connection_id=transfer_data.source_connection_id or transfer.source_connection_id,
     )
 
+    queue = await unit_of_work.queue.read_by_id(
+        transfer_data.new_queue_id or transfer.queue_id,
+    )
+
     # Check: user can read new connections
-    target_resource_role = await unit_of_work.connection.get_permission(
+    target_connection_resource_role = await unit_of_work.connection.get_resource_permission(
         user=current_user,
         resource_id=target_connection.id,
     )
 
-    source_resource_role = await unit_of_work.connection.get_permission(
+    source_connection_resource_role = await unit_of_work.connection.get_resource_permission(
         user=current_user,
         resource_id=source_connection.id,
     )
 
-    if source_resource_role == Permission.NONE or target_resource_role == Permission.NONE:
+    if source_connection_resource_role == Permission.NONE or target_connection_resource_role == Permission.NONE:
         raise ConnectionNotFound
 
     # Check: connections and transfer group
@@ -265,6 +279,9 @@ async def update_transfer(
         or source_connection.group_id != transfer.group_id
     ):
         raise DifferentTransferAndConnectionsGroups
+
+    if queue.group_id != transfer.group_id:
+        raise DifferentTransferAndQueueGroups
 
     if transfer_data.target_params and target_connection.data["type"] != transfer_data.target_params.type:
         raise DifferentTypeConnectionsAndParams(
@@ -302,7 +319,7 @@ async def delete_transfer(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> StatusResponseSchema:
-    resource_role = await unit_of_work.transfer.get_permission(
+    resource_role = await unit_of_work.transfer.get_resource_permission(
         user=current_user,
         resource_id=transfer_id,
     )
@@ -334,7 +351,7 @@ async def read_runs(
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> RunPageSchema:
     """Return runs of transfer with pagination"""
-    resource_rule = await unit_of_work.transfer.get_permission(
+    resource_rule = await unit_of_work.transfer.get_resource_permission(
         user=current_user,
         resource_id=transfer_id,
     )
@@ -358,7 +375,7 @@ async def read_run(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadRunSchema:
-    resource_role = await unit_of_work.transfer.get_permission(
+    resource_role = await unit_of_work.transfer.get_resource_permission(
         user=current_user,
         resource_id=transfer_id,
     )
@@ -377,7 +394,7 @@ async def start_run(
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadRunSchema:
     # Check: user can start transfer
-    resource_rule = await unit_of_work.transfer.get_permission(
+    resource_rule = await unit_of_work.transfer.get_resource_permission(
         user=current_user,
         resource_id=transfer_id,
     )
@@ -410,7 +427,7 @@ async def stop_run(
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadRunSchema:
     # Check: user can stop transfer
-    resource_rule = await unit_of_work.transfer.get_permission(
+    resource_rule = await unit_of_work.transfer.get_resource_permission(
         user=current_user,
         resource_id=transfer_id,
     )

@@ -140,7 +140,7 @@ async def read_connection(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadConnectionSchema:
-    resource_role = await unit_of_work.connection.get_permission(
+    resource_role = await unit_of_work.connection.get_resource_permission(
         user=current_user,
         resource_id=connection_id,
     )
@@ -174,7 +174,7 @@ async def update_connection(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadConnectionSchema:
-    resource_role = await unit_of_work.connection.get_permission(
+    resource_role = await unit_of_work.connection.get_resource_permission(
         user=current_user,
         resource_id=connection_id,
     )
@@ -220,7 +220,7 @@ async def delete_connection(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> StatusResponseSchema:
-    resource_role = await unit_of_work.connection.get_permission(
+    resource_role = await unit_of_work.connection.get_resource_permission(
         user=current_user,
         resource_id=connection_id,
     )
@@ -257,7 +257,7 @@ async def copy_connection(
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> StatusResponseSchema:
     target_source_rules = await asyncio.gather(
-        unit_of_work.connection.get_permission(
+        unit_of_work.connection.get_resource_permission(
             user=current_user,
             resource_id=connection_id,
         ),

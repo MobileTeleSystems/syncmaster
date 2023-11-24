@@ -61,6 +61,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         source_params: dict[str, Any],
         target_params: dict[str, Any],
         strategy_params: dict[str, Any],
+        queue_id: int,
     ) -> Transfer:
         query = (
             insert(Transfer)
@@ -73,6 +74,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
                 source_params=source_params,
                 target_params=target_params,
                 strategy_params=strategy_params,
+                queue_id=queue_id,
             )
             .returning(Transfer)
         )
@@ -135,6 +137,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
     async def copy(
         self,
         transfer_id: int,
+        new_queue_id: int,
         new_group_id: int | None,
         new_source_connection: int | None,
         new_target_connection: int | None,
@@ -144,6 +147,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
                 group_id=new_group_id,
                 source_connection_id=new_source_connection,
                 target_connection_id=new_target_connection,
+                queue_id=new_queue_id,
             )
             new_transfer = await self._copy(Transfer.id == transfer_id, **kwargs)
 

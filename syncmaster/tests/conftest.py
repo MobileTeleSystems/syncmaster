@@ -1,5 +1,6 @@
 import asyncio
 import os
+import secrets
 from collections.abc import AsyncGenerator
 from pathlib import Path
 
@@ -18,6 +19,7 @@ from tests.test_unit.utils import (
     create_connection,
     create_credentials,
     create_group,
+    create_queue,
     create_transfer,
     create_user,
 )
@@ -34,7 +36,7 @@ from tests.utils import (
 
 from app.api.v1.auth.utils import sign_jwt
 from app.config import Settings, TestSettings
-from app.db.models import Base, Connection
+from app.db.models import Base, Connection, Queue
 from app.db.repositories.utils import decrypt_auth_data
 from app.main import get_application
 
@@ -124,6 +126,13 @@ async def group_transfer(
         name="group_for_group_transfer",
         admin_id=group_admin.id,
     )
+
+    queue = await create_queue(
+        session=session,
+        name=f"{secrets.token_hex(5)}_test_queue",
+        group_id=group.id,
+    )
+
     members: list[MockUser] = []
     for username in (
         "transfer_group_member_maintainer",
@@ -177,7 +186,9 @@ async def group_transfer(
         group_id=group.id,
         source_connection_id=source_connection.id,
         target_connection_id=target_connection.id,
+        queue_id=queue.id,
     )
+
     yield MockTransfer(
         transfer=transfer,
         source_connection=MockConnection(
@@ -203,6 +214,7 @@ async def group_transfer(
     await session.delete(target_connection)
     await session.delete(group)
     await session.delete(group_admin)
+    await session.delete(queue)
     for member in members:
         await session.delete(member.user)
     await session.commit()
@@ -211,7 +223,7 @@ async def group_transfer(
 @pytest_asyncio.fixture
 async def group_transfer_and_group_maintainer_plus(
     session: AsyncSession,
-    empty_group: MockGroup,
+    group_queue: Queue,
     group_transfer: MockTransfer,
     role_maintainer_plus: TestUserRoles,
     role_maintainer_or_below_without_guest: TestUserRoles,
@@ -220,7 +232,7 @@ async def group_transfer_and_group_maintainer_plus(
 
     await add_user_to_group(
         user=user.user,
-        group_id=empty_group.group.id,
+        group_id=group_queue.group_id,
         session=session,
         role=role_maintainer_or_below_without_guest,
     )
@@ -231,7 +243,7 @@ async def group_transfer_and_group_maintainer_plus(
 @pytest_asyncio.fixture
 async def group_transfer_and_group_user_plus(
     session: AsyncSession,
-    empty_group: MockGroup,
+    group_queue: Queue,
     group_transfer: MockTransfer,
     role_user_plus: TestUserRoles,
     role_maintainer_or_below_without_guest: TestUserRoles,
@@ -240,7 +252,7 @@ async def group_transfer_and_group_user_plus(
 
     await add_user_to_group(
         user=user.user,
-        group_id=empty_group.group.id,
+        group_id=group_queue.group_id,
         session=session,
         role=role_maintainer_or_below_without_guest,
     )
@@ -251,7 +263,7 @@ async def group_transfer_and_group_user_plus(
 @pytest_asyncio.fixture
 async def group_transfer_and_group_connection_user_plus(
     session: AsyncSession,
-    empty_group: MockGroup,
+    group_queue: Queue,
     group_transfer: MockTransfer,
     role_user_plus: TestUserRoles,
     role_maintainer_or_below_without_guest: TestUserRoles,
@@ -261,7 +273,7 @@ async def group_transfer_and_group_connection_user_plus(
 
     await add_user_to_group(
         user=user.user,
-        group_id=empty_group.group.id,
+        group_id=group_queue.group_id,
         session=session,
         role=role_maintainer_or_below_without_guest,
     )
@@ -269,7 +281,7 @@ async def group_transfer_and_group_connection_user_plus(
     connection = await create_connection(
         session=session,
         name="group_transfer_source_connection",
-        group_id=empty_group.id,
+        group_id=group_queue.group_id,
     )
 
     await create_credentials(
@@ -286,7 +298,7 @@ async def group_transfer_and_group_connection_user_plus(
 @pytest_asyncio.fixture
 async def group_transfer_and_group_user_or_below(
     session: AsyncSession,
-    empty_group: MockGroup,
+    group_queue: Queue,
     group_transfer: MockTransfer,
     role_user_or_below: TestUserRoles,
     role_maintainer_or_below_without_guest: TestUserRoles,
@@ -295,7 +307,7 @@ async def group_transfer_and_group_user_or_below(
 
     await add_user_to_group(
         user=user.user,
-        group_id=empty_group.group.id,
+        group_id=group_queue.group_id,
         session=session,
         role=role_maintainer_or_below_without_guest,
     )

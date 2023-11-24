@@ -169,7 +169,7 @@ async def test_superuser_cannot_delete_unknown_transfer_error(
     assert result.status_code == 404
 
 
-async def test_group_member_cannot_delete_unknown_transfer_error(
+async def test_maintainer_plus_cannot_delete_unknown_transfer_error(
     client: AsyncClient,
     group_transfer: MockTransfer,
     role_maintainer_plus: TestUserRoles,
