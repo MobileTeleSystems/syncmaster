@@ -1,4 +1,5 @@
 import os
+import secrets
 from datetime import date, datetime
 from itertools import permutations
 
@@ -21,6 +22,7 @@ from tests.test_unit.utils import (
     create_connection,
     create_credentials,
     create_group,
+    create_queue,
     create_transfer,
     create_user,
 )
@@ -320,6 +322,12 @@ async def transfers(
         ),
     )
 
+    queue = await create_queue(
+        session=session,
+        name=f"{secrets.token_hex(5)}_test_queue",
+        group_id=group.id,
+    )
+
     transfers = {}
     for source, target in permutations(
         [
@@ -345,6 +353,7 @@ async def transfers(
                 "type": target_type,
                 "table_name": (oracle.user if target_type == "oracle" else "public") + ".target_table",
             },
+            queue_id=queue.id,
         )
         transfers[f"{source_type}_{target_type}"] = transfer
 
@@ -363,4 +372,5 @@ async def transfers(
     await session.delete(oracle_connection)
     await session.delete(hive_connection)
     await session.delete(user)
+    await session.delete(queue)
     await session.commit()

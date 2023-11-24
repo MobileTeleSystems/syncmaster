@@ -14,6 +14,11 @@ from app.exceptions.group import (
     GroupNameAlreadyExists,
     GroupNotFound,
 )
+from app.exceptions.queue import (
+    DifferentTransferAndQueueGroups,
+    QueueDeleteException,
+    QueueNotFoundException,
+)
 from app.exceptions.run import (
     CannotConnectToTaskQueueError,
     CannotStopRunException,
@@ -39,12 +44,15 @@ __all__ = [
     "ConnectionOwnerException",
     "ConnectionTypeNotRecognizedException",
     "DifferentTransferAndConnectionsGroups",
+    "DifferentTransferAndQueueGroups",
     "DifferentTypeConnectionsAndParams",
     "EntityNotFound",
     "GroupAdminNotFound",
     "GroupAlreadyExists",
     "GroupNameAlreadyExists",
     "GroupNotFound",
+    "QueueDeleteException",
+    "QueueNotFoundException",
     "RunNotFoundException",
     "SyncmasterException",
     "TransferNotFound",

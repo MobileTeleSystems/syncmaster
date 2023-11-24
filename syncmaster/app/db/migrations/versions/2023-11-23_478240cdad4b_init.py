@@ -1,15 +1,15 @@
 """init
 
-Revision ID: edd06bca93c0
+Revision ID: 478240cdad4b
 Revises:
-Create Date: 2023-11-09 14:04:26.966217
+Create Date: 2023-11-23 11:35:18.193060
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "edd06bca93c0"
+revision = "478240cdad4b"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -68,10 +68,26 @@ def upgrade() -> None:
     )
     op.create_index(op.f("ix__connection__group_id"), "connection", ["group_id"], unique=False)
     op.create_table(
+        "queue",
+        sa.Column("name", sa.String(length=128), nullable=False),
+        sa.Column("id", sa.BigInteger(), nullable=False),
+        sa.Column("group_id", sa.BigInteger(), nullable=False),
+        sa.Column("description", sa.String(length=512), nullable=False),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("is_deleted", sa.Boolean(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["group_id"], ["group.id"], name=op.f("fk__queue__group_id__group"), ondelete="CASCADE"
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk__queue")),
+        sa.UniqueConstraint("name", name=op.f("uq__queue__name")),
+    )
+    op.create_index(op.f("ix__queue__group_id"), "queue", ["group_id"], unique=False)
+    op.create_table(
         "user_group",
         sa.Column("user_id", sa.BigInteger(), nullable=False),
         sa.Column("group_id", sa.BigInteger(), nullable=False),
-        sa.Column("role", sa.String(), nullable=False),
+        sa.Column("role", sa.String(32), nullable=False),
         sa.ForeignKeyConstraint(
             ["group_id"], ["group.id"], name=op.f("fk__user_group__group_id__group"), ondelete="CASCADE"
         ),
@@ -109,11 +125,15 @@ def upgrade() -> None:
         sa.Column("target_params", sa.JSON(), nullable=False),
         sa.Column("is_scheduled", sa.Boolean(), nullable=False),
         sa.Column("schedule", sa.String(length=32), nullable=False),
+        sa.Column("queue_id", sa.BigInteger(), nullable=False),
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
         sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.ForeignKeyConstraint(
             ["group_id"], ["group.id"], name=op.f("fk__transfer__group_id__group"), ondelete="CASCADE"
+        ),
+        sa.ForeignKeyConstraint(
+            ["queue_id"], ["queue.id"], name=op.f("fk__transfer__queue_id__queue"), ondelete="CASCADE"
         ),
         sa.ForeignKeyConstraint(
             ["source_connection_id"],
@@ -207,6 +227,8 @@ def downgrade() -> None:
     op.drop_index(op.f("ix__user_group__user_id"), table_name="user_group")
     op.drop_index(op.f("ix__user_group__group_id"), table_name="user_group")
     op.drop_table("user_group")
+    op.drop_index(op.f("ix__queue__group_id"), table_name="queue")
+    op.drop_table("queue")
     op.drop_index(op.f("ix__connection__group_id"), table_name="connection")
     op.drop_table("connection")
     op.drop_index(op.f("ix__group__admin_id"), table_name="group")

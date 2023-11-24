@@ -144,10 +144,10 @@ async def test_group_member_cannot_read_unknown_run_error(
     client: AsyncClient,
     group_run: MockRun,
     simple_user: MockUser,
-    role_user_plus: TestUserRoles,
+    role_guest_plus: TestUserRoles,
 ):
     # Arrange
-    user = group_run.transfer.owner_group.get_member_of_role(role_user_plus)
+    user = group_run.transfer.owner_group.get_member_of_role(role_guest_plus)
 
     # Act
     result = await client.get(

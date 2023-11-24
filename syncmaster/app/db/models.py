@@ -12,8 +12,9 @@ from sqlalchemy import (
     ForeignKey,
     PrimaryKeyConstraint,
     String,
+    UniqueConstraint,
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
 from sqlalchemy_utils import ChoiceType
 
 from app.db.base import Base
@@ -44,6 +45,7 @@ class Group(Base, TimestampMixin, DeletableMixin):
 
     admin: Mapped[User] = relationship("User")
     members: Mapped[list[User]] = relationship("User", secondary="user_group")
+    queue: Mapped[Queue] = relationship(back_populates="group")
 
     def __repr__(self) -> str:
         return f"Group(name={self.name}, admin_id={self.admin_id})"
@@ -76,6 +78,10 @@ class Connection(Base, ResourceMixin, DeletableMixin, TimestampMixin):
 
     def __repr__(self):
         return f"<Connection " f"name={self.name} " f"description={self.description} " f"group_id={self.group_id}>"
+
+    @declared_attr  # type: ignore
+    def __table_args__(cls) -> tuple:
+        return (UniqueConstraint("name", "group_id"),)
 
 
 class AuthData(Base, TimestampMixin):
@@ -110,10 +116,20 @@ class Transfer(
     target_params: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
     is_scheduled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     schedule: Mapped[str] = mapped_column(String(32), nullable=False, default="")
+    queue_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("queue.id", ondelete="CASCADE"),
+        nullable=False,
+    )
 
     group: Mapped[Group] = relationship("Group")
     source_connection: Mapped[Connection] = relationship(foreign_keys=source_connection_id)
     target_connection: Mapped[Connection] = relationship(foreign_keys=target_connection_id)
+    queue: Mapped[Queue] = relationship(back_populates="transfers")
+
+    @declared_attr  # type: ignore
+    def __table_args__(cls) -> tuple:
+        return (UniqueConstraint("name", "group_id"),)
 
 
 class Status(enum.StrEnum):
@@ -164,3 +180,13 @@ class Run(Base, TimestampMixin):
             f"transfer_id={self.transfer_id} "
             f"created_at={self.created_at:%Y-%m-%d %H:%M:%S}>"
         )
+
+
+class Queue(Base, ResourceMixin, TimestampMixin, DeletableMixin):
+    name: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
+
+    transfers: Mapped[list[Transfer]] = relationship(back_populates="queue")
+    group: Mapped[Group] = relationship(back_populates="queue")
+
+    def __repr__(self):
+        return f"<Queue name={self.name} description={self.description}>"

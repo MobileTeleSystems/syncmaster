@@ -6,7 +6,7 @@ from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests.utils import MockGroup, MockTransfer, MockUser, TestUserRoles
 
-from app.db.models import Connection
+from app.db.models import Connection, Queue
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -18,7 +18,7 @@ async def test_maintainer_plus_can_copy_transfer_with_remove_source(
     event_loop,
     group_transfer_and_group_maintainer_plus: str,
     group_transfer: MockTransfer,
-    empty_group: MockGroup,
+    group_queue: Queue,
 ):
     # Arrange
     role = group_transfer_and_group_maintainer_plus
@@ -29,7 +29,8 @@ async def test_maintainer_plus_can_copy_transfer_with_remove_source(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "new_group_id": empty_group.id,
+            "new_group_id": group_queue.group_id,
+            "new_queue_id": group_queue.id,
             "remove_source": True,
         },
     )
@@ -87,7 +88,7 @@ async def test_user_plus_can_copy_transfer_without_remove_source(
     event_loop,
     group_transfer_and_group_user_plus: str,
     group_transfer: MockTransfer,
-    empty_group: MockGroup,
+    group_queue: Queue,
 ):
     # Arrange
     role = group_transfer_and_group_user_plus
@@ -98,7 +99,8 @@ async def test_user_plus_can_copy_transfer_without_remove_source(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "new_group_id": empty_group.id,
+            "new_group_id": group_queue.group_id,
+            "new_queue_id": group_queue.id,
         },
     )
 
@@ -154,7 +156,7 @@ async def test_user_or_below_cannot_copy_transfer_with_remove_source(
     event_loop,
     group_transfer_and_group_user_or_below: str,
     group_transfer: MockTransfer,
-    empty_group: MockGroup,
+    group_queue: Queue,
 ):
     # Arrange
     role = group_transfer_and_group_user_or_below
@@ -166,7 +168,8 @@ async def test_user_or_below_cannot_copy_transfer_with_remove_source(
         headers={"Authorization": f"Bearer {user.token}"},
         json={
             "remove_source": True,
-            "new_group_id": empty_group.id,
+            "new_group_id": group_queue.group_id,
+            "new_queue_id": group_queue.id,
         },
     )
 
@@ -185,14 +188,15 @@ async def test_groupless_user_cannot_copy_transfer(
     session: AsyncSession,
     simple_user: MockUser,
     group_transfer: MockTransfer,
-    empty_group: MockGroup,
+    group_queue: Queue,
 ):
     # Act
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={
-            "new_group_id": empty_group.id,
+            "new_group_id": group_queue.group_id,
+            "new_queue_id": group_queue.id,
         },
     )
 
@@ -208,6 +212,7 @@ async def test_other_group_guest_plus_member_cannot_copy_transfer(
     session: AsyncSession,
     role_guest_plus: TestUserRoles,
     event_loop,
+    group_queue: Queue,
 ):
     # Arrange
     user = group.get_member_of_role(role_guest_plus)
@@ -217,7 +222,8 @@ async def test_other_group_guest_plus_member_cannot_copy_transfer(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "new_group_id": group.group.id,
+            "new_group_id": group_queue.group_id,
+            "new_queue_id": group_queue.id,
         },
     )
 
@@ -238,15 +244,16 @@ async def test_superuser_can_copy_transfer_with_remove_source(
     event_loop,
     superuser: MockUser,
     group_transfer: MockTransfer,
-    group: MockGroup,
+    group_queue: Queue,
 ):
     # Act
     result_response = await client.post(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
-            "new_group_id": group.id,
+            "new_group_id": group_queue.group_id,
             "remove_source": True,
+            "new_queue_id": group_queue.id,
         },
     )
 
@@ -296,19 +303,49 @@ async def test_superuser_can_copy_transfer_with_remove_source(
     assert copied_transfer_response.json()["target_connection_id"] == new_connection_target_response.json()["id"]
 
 
+async def test_user_plus_cannot_copy_transfer_if_new_queue_in_another_group(
+    client: AsyncClient,
+    group_transfer_and_group_maintainer_plus: str,
+    group_transfer: MockTransfer,
+    group_queue: Queue,
+    mock_queue: Queue,
+):
+    # Arrange
+    role = group_transfer_and_group_maintainer_plus
+    user = group_transfer.owner_group.get_member_of_role(role)
+
+    # Act
+    result = await client.post(
+        f"v1/transfers/{group_transfer.id}/copy_transfer",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "new_group_id": group_queue.group_id,
+            "new_queue_id": mock_queue.id,
+        },
+    )
+
+    assert result.json() == {
+        "message": "Queue should belong to the transfer group",
+        "ok": False,
+        "status_code": 400,
+    }
+    assert result.status_code == 400
+
+
 async def test_superuser_cannot_copy_unknown_transfer_error(
     client: AsyncClient,
-    session: AsyncSession,
     superuser: MockUser,
     group: MockGroup,
+    group_queue: Queue,
 ):
     # Act
     result_response = await client.post(
         "v1/transfers/-1/copy_transfer",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
-            "new_group_id": group.id,
+            "new_group_id": group_queue.group_id,
             "remove_source": True,
+            "new_queue_id": group_queue.id,
         },
     )
 
@@ -324,9 +361,9 @@ async def test_superuser_cannot_copy_unknown_transfer_error(
 
 async def test_superuser_cannot_copy_transfer_with_unknown_new_group_error(
     client: AsyncClient,
-    session: AsyncSession,
     superuser: MockUser,
     group_transfer: MockTransfer,
+    group_queue: Queue,
 ):
     # Act
     result_response = await client.post(
@@ -335,6 +372,7 @@ async def test_superuser_cannot_copy_transfer_with_unknown_new_group_error(
         json={
             "new_group_id": -1,
             "remove_source": True,
+            "new_queue_id": group_queue.id,
         },
     )
 
@@ -348,14 +386,16 @@ async def test_superuser_cannot_copy_transfer_with_unknown_new_group_error(
     assert result_response.status_code == 404
 
 
-async def test_copy_transfer_with_unknown_new_group_error(
+async def test_user_plus_cannot_copy_transfer_with_unknown_new_group_error(
     client: AsyncClient,
-    group_transfer: MockTransfer,
-    session: AsyncSession,
     role_user_plus: TestUserRoles,
+    group_transfer_and_group_user_plus: str,
+    group_transfer: MockTransfer,
+    group_queue: Queue,
 ):
     # Arrange
-    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+    role = group_transfer_and_group_user_plus
+    user = group_transfer.owner_group.get_member_of_role(role)
 
     # Act
     result = await client.post(
@@ -363,6 +403,7 @@ async def test_copy_transfer_with_unknown_new_group_error(
         headers={"Authorization": f"Bearer {user.token}"},
         json={
             "new_group_id": -1,
+            "new_queue_id": group_queue.id,
         },
     )
 
@@ -372,10 +413,9 @@ async def test_copy_transfer_with_unknown_new_group_error(
 
 async def test_copy_unknown_transfer_error(
     client: AsyncClient,
-    session: AsyncSession,
     group_transfer_and_group_maintainer_plus: str,
     group_transfer: MockTransfer,
-    empty_group: MockGroup,
+    group_queue: Queue,
 ):
     # Arrnage
     role = group_transfer_and_group_maintainer_plus
@@ -386,10 +426,66 @@ async def test_copy_unknown_transfer_error(
         "v1/transfers/-1/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "new_group_id": empty_group.id,
+            "new_group_id": group_queue.group_id,
+            "new_queue_id": group_queue.id,
         },
     )
 
     # Assert
     assert result.json()["message"] == "Transfer not found"
     assert result.status_code == 404
+
+
+async def test_user_plus_cannot_copy_transfer_with_unknown_new_queue_id_error(
+    client: AsyncClient,
+    event_loop,
+    group_transfer_and_group_user_plus: str,
+    group_transfer: MockTransfer,
+    group_queue: Queue,
+):
+    # Arrange
+    role = group_transfer_and_group_user_plus
+    user = group_transfer.owner_group.get_member_of_role(role)
+
+    # Act
+    result = await client.post(
+        f"v1/transfers/{group_transfer.id}/copy_transfer",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "new_group_id": group_queue.group_id,
+            "new_queue_id": -1,
+        },
+    )
+
+    # Assert
+    assert result.json() == {
+        "message": "Queue not found",
+        "ok": False,
+        "status_code": 404,
+    }
+
+
+async def test_superuser_cannot_copy_transfer_with_unknown_new_queue_id_error(
+    client: AsyncClient,
+    event_loop,
+    superuser: MockUser,
+    group_transfer: MockTransfer,
+    group_queue: Queue,
+):
+    # Act
+    result = await client.post(
+        f"v1/transfers/{group_transfer.id}/copy_transfer",
+        headers={"Authorization": f"Bearer {superuser.token}"},
+        json={
+            "new_group_id": group_queue.group_id,
+            "remove_source": True,
+            "new_queue_id": -1,
+        },
+    )
+
+    # Assert
+    assert result.json() == {
+        "message": "Queue not found",
+        "ok": False,
+        "status_code": 404,
+    }

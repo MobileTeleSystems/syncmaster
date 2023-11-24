@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser, TestUserRoles
 
-from app.db.models import Transfer
+from app.db.models import Queue, Transfer
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -14,17 +14,19 @@ async def test_user_plus_can_create_transfer(
     two_group_connections: tuple[MockConnection, MockConnection],
     session: AsyncSession,
     role_user_plus: TestUserRoles,
+    group_queue: Queue,
+    mock_group: MockGroup,
 ):
     # Arrange
     first_connection, second_connection = two_group_connections
-    user = first_connection.owner_group.get_member_of_role(role_user_plus)
+    user = mock_group.get_member_of_role(role_user_plus)
 
     # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "group_id": first_connection.owner_group.group.id,
+            "group_id": mock_group.group.id,
             "name": "new test transfer",
             "description": "",
             "is_scheduled": False,
@@ -34,6 +36,7 @@ async def test_user_plus_can_create_transfer(
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
+            "queue_id": group_queue.id,
         },
     )
 
@@ -42,7 +45,7 @@ async def test_user_plus_can_create_transfer(
         await session.scalars(
             select(Transfer).filter_by(
                 name="new test transfer",
-                group_id=first_connection.owner_group.group.id,
+                group_id=mock_group.group.id,
             )
         )
     ).one()
@@ -61,24 +64,26 @@ async def test_user_plus_can_create_transfer(
         "source_params": transfer.source_params,
         "target_params": transfer.target_params,
         "strategy_params": transfer.strategy_params,
+        "queue_id": transfer.queue_id,
     }
 
 
 async def test_guest_cannot_create_transfer(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
-    session: AsyncSession,
+    mock_group: MockGroup,
+    group_queue: Queue,
 ):
     # Arrange
     first_connection, second_connection = two_group_connections
-    user = first_connection.owner_group.get_member_of_role(TestUserRoles.Guest)
+    user = mock_group.get_member_of_role(TestUserRoles.Guest)
 
     # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "group_id": first_connection.owner_group.group.id,
+            "group_id": mock_group.id,
             "name": "new test transfer",
             "description": "",
             "is_scheduled": False,
@@ -88,6 +93,7 @@ async def test_guest_cannot_create_transfer(
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
+            "queue_id": group_queue.id,
         },
     )
 
@@ -103,7 +109,7 @@ async def test_groupless_user_cannot_create_transfer(
     client: AsyncClient,
     simple_user: MockUser,
     two_group_connections: tuple[MockConnection, MockConnection],
-    session: AsyncSession,
+    group_queue: Queue,
 ):
     # Arrange
     first_conn, second_conn = two_group_connections
@@ -123,6 +129,7 @@ async def test_groupless_user_cannot_create_transfer(
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
+            "queue_id": group_queue.id,
         },
     )
 
@@ -138,9 +145,9 @@ async def test_groupless_user_cannot_create_transfer(
 async def test_other_group_user_plus_cannot_create_group_transfer(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
-    session: AsyncSession,
     group: MockGroup,
     role_user_plus: TestUserRoles,
+    group_queue: Queue,
 ):
     # Arrange
     first_conn, second_conn = two_group_connections
@@ -161,6 +168,7 @@ async def test_other_group_user_plus_cannot_create_group_transfer(
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
+            "queue_id": group_queue.id,
         },
     )
     assert result.status_code == 403
@@ -176,6 +184,8 @@ async def test_superuser_can_create_transfer(
     two_group_connections: tuple[MockConnection, MockConnection],
     session: AsyncSession,
     superuser: MockUser,
+    mock_group: MockGroup,
+    group_queue: Queue,
 ):
     # Arrange
     first_conn, second_conn = two_group_connections
@@ -185,7 +195,7 @@ async def test_superuser_can_create_transfer(
         "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
-            "group_id": first_conn.owner_group.id,
+            "group_id": mock_group.id,
             "name": "new test group transfer",
             "description": "",
             "is_scheduled": False,
@@ -195,13 +205,14 @@ async def test_superuser_can_create_transfer(
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
+            "queue_id": group_queue.id,
         },
     )
     transfer = (
         await session.scalars(
             select(Transfer).filter_by(
                 name="new test group transfer",
-                group_id=first_conn.owner_group.id,
+                group_id=mock_group.id,
             )
         )
     ).one()
@@ -219,6 +230,7 @@ async def test_superuser_can_create_transfer(
         "source_params": transfer.source_params,
         "target_params": transfer.target_params,
         "strategy_params": transfer.strategy_params,
+        "queue_id": transfer.queue_id,
     }
 
 
@@ -281,17 +293,18 @@ async def test_check_fields_validation_on_create_transfer(
     error_json: dict,
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
-    session: AsyncSession,
     role_user_plus: TestUserRoles,
+    mock_group: MockGroup,
+    group_queue: Queue,
 ):
     # Arrange
     first_conn, second_conn = two_group_connections
-    user = first_conn.owner_group.get_member_of_role(role_user_plus)
+    user = mock_group.get_member_of_role(role_user_plus)
 
     # Act
     transfer_data = {
         "name": "new test transfer",
-        "group_id": first_conn.owner_group.group.id,
+        "group_id": mock_group.id,
         "description": "",
         "is_scheduled": True,
         "schedule": "",
@@ -300,6 +313,7 @@ async def test_check_fields_validation_on_create_transfer(
         "source_params": {"type": "postgres", "table_name": "source_table"},
         "target_params": {"type": "postgres", "table_name": "target_table"},
         "strategy_params": {"type": "full"},
+        "queue_id": group_queue.id,
     }
     transfer_data.update(new_data)
     result = await client.post(
@@ -316,12 +330,13 @@ async def test_check_fields_validation_on_create_transfer(
 async def test_check_connection_types_and_its_params_on_create_transfer(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
-    session: AsyncSession,
     role_user_plus: TestUserRoles,
+    mock_group: MockGroup,
+    group_queue: Queue,
 ):
     # Arrange
     first_conn, second_conn = two_group_connections
-    user = first_conn.owner_group.get_member_of_role(role_user_plus)
+    user = mock_group.get_member_of_role(role_user_plus)
 
     # Act
     result = await client.post(
@@ -329,7 +344,7 @@ async def test_check_connection_types_and_its_params_on_create_transfer(
         headers={"Authorization": f"Bearer {user.token}"},
         json={
             "name": "new test transfer",
-            "group_id": first_conn.owner_group.group.id,
+            "group_id": mock_group.id,
             "description": "",
             "is_scheduled": False,
             "schedule": "",
@@ -338,6 +353,7 @@ async def test_check_connection_types_and_its_params_on_create_transfer(
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "oracle", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
+            "queue_id": group_queue.id,
         },
     )
 
@@ -352,14 +368,15 @@ async def test_check_connection_types_and_its_params_on_create_transfer(
 
 async def test_check_different_connections_owner_group_on_create_transfer(
     client: AsyncClient,
-    session: AsyncSession,
     two_group_connections: tuple[MockConnection, MockConnection],
     group_connection: MockConnection,
     role_user_plus: TestUserRoles,
+    mock_group: MockGroup,
+    group_queue: Queue,
 ):
     # Arrange
     first_conn, _ = two_group_connections
-    user = first_conn.owner_group.get_member_of_role(role_user_plus)
+    user = mock_group.get_member_of_role(role_user_plus)
 
     # Act
     result = await client.post(
@@ -367,7 +384,7 @@ async def test_check_different_connections_owner_group_on_create_transfer(
         headers={"Authorization": f"Bearer {user.token}"},
         json={
             "name": "new test transfer",
-            "group_id": first_conn.owner_group.group.id,
+            "group_id": mock_group.id,
             "description": "",
             "is_scheduled": False,
             "schedule": "",
@@ -376,6 +393,7 @@ async def test_check_different_connections_owner_group_on_create_transfer(
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
+            "queue_id": group_queue.id,
         },
     )
 
@@ -391,6 +409,7 @@ async def test_check_different_connections_owner_group_on_create_transfer(
 async def test_unauthorized_user_cannot_create_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
+    group_queue: Queue,
 ):
     # Act
     result = await client.post(
@@ -402,6 +421,7 @@ async def test_unauthorized_user_cannot_create_transfer(
             "target_connection_id": group_transfer.target_connection_id,
             "source_params": {"type": "postgres", "table_name": "test"},
             "target_params": {"type": "postgres", "table_name": "test1"},
+            "queue_id": group_queue.id,
         },
     )
 
@@ -418,13 +438,14 @@ async def test_unauthorized_user_cannot_create_transfer(
 async def test_group_member_cannot_create_transfer_with_unknown_connection_error(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
-    session: AsyncSession,
     role_user_plus: TestUserRoles,
     iter_conn_id: tuple,
+    mock_group: MockGroup,
+    group_queue: Queue,
 ):
     # Arrange
     first_conn, second_conn = two_group_connections
-    user = first_conn.owner_group.get_member_of_role(role_user_plus)
+    user = mock_group.get_member_of_role(role_user_plus)
 
     # Act
     result = await client.post(
@@ -441,6 +462,7 @@ async def test_group_member_cannot_create_transfer_with_unknown_connection_error
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
+            "queue_id": group_queue.id,
         },
     )
 
@@ -452,11 +474,11 @@ async def test_group_member_cannot_create_transfer_with_unknown_connection_error
     }
 
 
-async def test_group_member_cannot_create_transfer_with_unknown_group_error(
+async def test_user_plus_cannot_create_transfer_with_unknown_group_error(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
-    session: AsyncSession,
     role_user_plus: TestUserRoles,
+    group_queue: Queue,
 ):
     # Arrange
     first_conn, second_conn = two_group_connections
@@ -477,11 +499,11 @@ async def test_group_member_cannot_create_transfer_with_unknown_group_error(
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
+            "queue_id": group_queue.id,
         },
     )
 
     # Assert
-
     assert result.json() == {
         "message": "Group not found",
         "ok": False,
@@ -493,9 +515,9 @@ async def test_group_member_cannot_create_transfer_with_unknown_group_error(
 async def test_superuser_cannot_create_transfer_with_unknown_connection_error(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
-    session: AsyncSession,
     conn_id: tuple,
     superuser: MockUser,
+    group_queue: Queue,
 ):
     # Arrange
     first_conn, second_conn = two_group_connections
@@ -515,6 +537,7 @@ async def test_superuser_cannot_create_transfer_with_unknown_connection_error(
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
+            "queue_id": group_queue.id,
         },
     )
 
@@ -529,8 +552,8 @@ async def test_superuser_cannot_create_transfer_with_unknown_connection_error(
 async def test_superuser_cannot_create_transfer_with_unknown_group_error(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
-    session: AsyncSession,
     superuser: MockUser,
+    group_queue: Queue,
 ):
     # Arrange
     first_conn, second_conn = two_group_connections
@@ -550,6 +573,7 @@ async def test_superuser_cannot_create_transfer_with_unknown_group_error(
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
+            "queue_id": group_queue.id,
         },
     )
 

@@ -372,16 +372,16 @@ async def test_groupless_user_cannot_create_connection(
     assert result.status_code == 404
 
 
-async def test_user_plus_cannot_create_connection_with_unknown_group_error(
+async def test_group_member_cannot_create_connection_with_unknown_group_error(
     client: AsyncClient,
     group: MockGroup,
     session: AsyncSession,
     settings: Settings,
-    role_user_plus: TestUserRoles,
+    role_guest_plus: TestUserRoles,
     event_loop,
 ):
     # Arrange
-    user = group.get_member_of_role(role_user_plus)
+    user = group.get_member_of_role(role_guest_plus)
 
     # Act
     result = await client.post(

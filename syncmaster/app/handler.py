@@ -15,10 +15,13 @@ from app.exceptions import (
     ConnectionNotFound,
     ConnectionOwnerException,
     DifferentTransferAndConnectionsGroups,
+    DifferentTransferAndQueueGroups,
     DifferentTypeConnectionsAndParams,
     GroupAdminNotFound,
     GroupAlreadyExists,
     GroupNotFound,
+    QueueDeleteException,
+    QueueNotFoundException,
     RunNotFoundException,
     SyncmasterException,
     TransferNotFound,
@@ -57,6 +60,12 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterExceptio
         return exception_json_response(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Run not found",
+        )
+
+    if isinstance(exc, QueueNotFoundException):
+        return exception_json_response(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Queue not found",
         )
 
     if isinstance(exc, GroupAdminNotFound):
@@ -124,9 +133,21 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterExceptio
             detail="Connections should belong to the transfer group",
         )
 
+    if isinstance(exc, DifferentTransferAndQueueGroups):
+        return exception_json_response(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Queue should belong to the transfer group",
+        )
+
     if isinstance(exc, DifferentTypeConnectionsAndParams):
         return exception_json_response(
             status_code=status.HTTP_400_BAD_REQUEST,
+            detail=exc.message,
+        )
+
+    if isinstance(exc, QueueDeleteException):
+        return exception_json_response(
+            status_code=status.HTTP_409_CONFLICT,
             detail=exc.message,
         )
 

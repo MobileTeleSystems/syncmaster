@@ -44,6 +44,7 @@ async def test_guest_plus_can_read_transfers(
                 "source_params": group_transfer.source_params,
                 "target_params": group_transfer.target_params,
                 "strategy_params": group_transfer.strategy_params,
+                "queue_id": group_transfer.transfer.queue_id,
             }
         ],
     }
@@ -106,6 +107,7 @@ async def test_superuser_can_read_transfers(
                 "source_params": group_transfer.source_params,
                 "target_params": group_transfer.target_params,
                 "strategy_params": group_transfer.strategy_params,
+                "queue_id": group_transfer.transfer.queue_id,
             },
         ],
     }

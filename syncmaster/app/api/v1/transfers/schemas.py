@@ -46,6 +46,7 @@ class ReadTransferSchema(BaseModel):
     description: str
     is_scheduled: bool
     schedule: str
+    queue_id: int
     source_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData = Field(
         ...,
         discriminator="type",
@@ -69,6 +70,7 @@ class TransferPageSchema(PageSchema):
 
 class CopyTransferSchema(BaseModel):
     new_group_id: int
+    new_queue_id: int
     remove_source: bool = False
 
 
@@ -79,6 +81,7 @@ class CreateTransferSchema(BaseModel):
     name: str
     description: str
     is_scheduled: bool
+    queue_id: int
     schedule: str | None = None
     source_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData = Field(
         ...,
@@ -109,6 +112,7 @@ class UpdateTransferSchema(BaseModel):
     description: str | None
     is_scheduled: bool | None
     schedule: str | None
+    new_queue_id: int | None
     source_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData | None = Field(
         discriminator="type", default=None
     )

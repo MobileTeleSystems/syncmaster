@@ -146,11 +146,12 @@ async def test_update_user(
     assert response.json() == {
         "detail": [
             {
+                "ctx": {"pattern": "^[_a-z0-9]+$"},
                 "loc": ["body", "username"],
-                "msg": "Invalid username",
-                "type": "value_error",
+                "msg": 'string does not match regex "^[_a-z0-9]+$"',
+                "type": "value_error.str.regex",
             }
-        ]
+        ],
     }
 
     # check change other user from simple

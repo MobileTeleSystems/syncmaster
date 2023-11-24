@@ -1,15 +1,7 @@
 from datetime import datetime
 
-from sqlalchemy import (
-    BigInteger,
-    Boolean,
-    DateTime,
-    ForeignKey,
-    String,
-    UniqueConstraint,
-    func,
-)
-from sqlalchemy.orm import Mapped, declared_attr, mapped_column
+from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, String, func
+from sqlalchemy.orm import Mapped, mapped_column
 
 
 class TimestampMixin:
@@ -29,15 +21,11 @@ class DeletableMixin:
 
 class ResourceMixin:
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    name: Mapped[str] = mapped_column(String(128), nullable=False, default="")
     group_id: Mapped[int] = mapped_column(
         BigInteger,
         ForeignKey("group.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
-    name: Mapped[str] = mapped_column(String(128), nullable=False, default="")
     description: Mapped[str] = mapped_column(String(512), nullable=False, default="")
-
-    @declared_attr  # type: ignore
-    def __table_args__(cls) -> tuple:
-        return (UniqueConstraint("name", "group_id"),)

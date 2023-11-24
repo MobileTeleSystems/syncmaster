@@ -12,7 +12,8 @@ Model = TypeVar("Model", bound=Base)
 
 
 class RepositoryWithOwner(Repository, Generic[Model]):
-    async def get_permission(self, user: User, resource_id: int) -> Permission:
+    async def get_resource_permission(self, user: User, resource_id: int) -> Permission:
+        """Method for determining CRUD rights in a repository (self.model) for a resource"""
         is_exists = await self._session.get(self._model, resource_id)
 
         if not is_exists:
@@ -64,9 +65,10 @@ class RepositoryWithOwner(Repository, Generic[Model]):
         if group_role == GroupMemberRole.User:
             return Permission.WRITE
 
-        return Permission.DELETE  # Maintainer , Owner
+        return Permission.DELETE  # Maintainer
 
     async def get_group_permission(self, user: User, group_id: int) -> Permission:
+        """Method for determining CRUD permissions in the specified group"""
         admin_query = (
             (
                 select(Group).where(
@@ -109,4 +111,4 @@ class RepositoryWithOwner(Repository, Generic[Model]):
         if group_role == GroupMemberRole.User:
             return Permission.WRITE
 
-        return Permission.DELETE  # Maintainer, Owner
+        return Permission.DELETE  # Maintainer

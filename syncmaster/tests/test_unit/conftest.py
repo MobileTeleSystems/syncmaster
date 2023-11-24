@@ -6,6 +6,7 @@ from tests.test_unit.utils import (
     create_connection,
     create_credentials,
     create_group,
+    create_queue,
     create_user,
     create_user_cm,
 )
@@ -19,7 +20,7 @@ from tests.utils import (
 
 from app.api.v1.auth.utils import sign_jwt
 from app.config import Settings
-from app.db.models import User, UserGroup
+from app.db.models import Queue, User, UserGroup
 from app.db.repositories.utils import decrypt_auth_data
 
 
@@ -188,10 +189,10 @@ async def group(session: AsyncSession, settings: Settings) -> MockGroup:
 
 
 @pytest_asyncio.fixture
-async def two_group_connections(
+async def mock_group(
     session: AsyncSession,
     settings: Settings,
-) -> tuple[MockConnection, MockConnection]:
+):
     group_admin = await create_user(
         session=session,
         username=f"{secrets.token_hex(5)}_group_connection_admin",
@@ -202,6 +203,7 @@ async def two_group_connections(
         name=f"{secrets.token_hex(5)}_group_for_group_connection",
         admin_id=group_admin.id,
     )
+
     members: list[MockUser] = []
     for username in (
         f"{secrets.token_hex(5)}_connection_group_member_maintainer",
@@ -218,16 +220,76 @@ async def two_group_connections(
         )
 
     await session.commit()
+
+    yield MockGroup(
+        group=group,
+        admin=MockUser(
+            user=group_admin,
+            auth_token=sign_jwt(group_admin.id, settings),
+            role=TestUserRoles.Owner,
+        ),
+        members=members,
+    )
+    await session.delete(group_admin)
+    await session.delete(group)
+    for member in members:
+        await session.delete(member.user)
+    await session.commit()
+
+
+@pytest_asyncio.fixture
+async def group_queue(
+    session: AsyncSession,
+    settings: Settings,
+    mock_group: MockGroup,
+) -> Queue:
+    queue = await create_queue(
+        session=session,
+        name=f"{secrets.token_hex(5)}_test_queue",
+        group_id=mock_group.id,
+    )
+
+    yield queue
+
+    await session.delete(queue)
+    await session.commit()
+
+
+@pytest_asyncio.fixture
+async def mock_queue(
+    session: AsyncSession,
+    settings: Settings,
+    group: MockGroup,
+) -> Queue:
+    queue = await create_queue(
+        session=session,
+        name=f"{secrets.token_hex(5)}_test_queue",
+        group_id=group.group.id,
+    )
+
+    yield queue
+
+    await session.delete(queue)
+    await session.commit()
+
+
+@pytest_asyncio.fixture
+async def two_group_connections(
+    session: AsyncSession,
+    settings: Settings,
+    mock_group: MockGroup,
+    group_queue: Queue,  # do not delete
+) -> tuple[MockConnection, MockConnection]:
     connection1 = await create_connection(
         session=session,
         name=f"{secrets.token_hex(5)}_group_for_group_connection",
-        group_id=group.id,
+        group_id=mock_group.id,
     )
 
     connection2 = await create_connection(
         session=session,
         name=f"{secrets.token_hex(5)}_group_for_group_connection",
-        group_id=group.id,
+        group_id=mock_group.id,
     )
 
     credentials1 = await create_credentials(
@@ -248,39 +310,17 @@ async def two_group_connections(
             connection_id=connection1.id,
         ),
         connection=connection1,
-        owner_group=MockGroup(
-            group=group,
-            admin=MockUser(
-                user=group_admin,
-                auth_token=sign_jwt(group_admin.id, settings),
-                role=TestUserRoles.Owner,
-            ),
-            members=members,
-        ),
+        owner_group=mock_group,
     ), MockConnection(
         credentials=MockCredentials(
             value=decrypt_auth_data(credentials2.value, settings=settings),
             connection_id=connection2.id,
         ),
         connection=connection2,
-        owner_group=MockGroup(
-            group=group,
-            admin=MockUser(
-                user=group_admin,
-                auth_token=sign_jwt(group_admin.id, settings),
-                role=TestUserRoles.Owner,
-            ),
-            members=members,
-        ),
+        owner_group=mock_group,
     )
-    await session.delete(credentials1)
     await session.delete(connection1)
-    await session.delete(credentials2)
     await session.delete(connection2)
-    await session.delete(group_admin)
-    await session.delete(group)
-    for member in members:
-        await session.delete(member.user)
     await session.commit()
 
 
