@@ -78,7 +78,7 @@ async def test_groupless_user_cannot_delete_group(
 ):
     # Act
     result = await client.delete(
-        f"v1/groups/-1",
+        "v1/groups/-1",
         headers={
             "Authorization": f"Bearer {simple_user.token}",
         },
@@ -98,7 +98,7 @@ async def test_superuser_cannot_delete_unknown_group_error(
 ):
     # Act
     result = await client.delete(
-        f"v1/groups/-1",
+        "v1/groups/-1",
         headers={
             "Authorization": f"Bearer {superuser.token}",
         },

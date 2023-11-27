@@ -132,7 +132,7 @@ async def test_superuser_read_not_exist_transfer_error(
     group_transfer: MockTransfer,
 ):
     result = await client.get(
-        f"v1/transfers/-1",
+        "v1/transfers/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
     assert result.status_code == 404
@@ -153,7 +153,7 @@ async def test_group_member_cannot_read_unknown_transfer_error(
 
     # Act
     result = await client.get(
-        f"v1/transfers/-1",
+        "v1/transfers/-1",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 

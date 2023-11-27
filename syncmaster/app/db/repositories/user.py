@@ -8,10 +8,10 @@ from app.db.models import User
 from app.db.repositories.base import Repository
 from app.db.utils import Pagination
 from app.exceptions import (
-    EntityNotFound,
-    SyncmasterException,
-    UsernameAlreadyExists,
-    UserNotFound,
+    EntityNotFoundError,
+    SyncmasterError,
+    UsernameAlreadyExistsError,
+    UserNotFoundError,
 )
 
 
@@ -29,21 +29,21 @@ class UserRepository(Repository[User]):
     async def read_by_id(self, user_id: int, **kwargs: Any) -> User:
         try:
             return await self._read_by_id(id=user_id, **kwargs)
-        except EntityNotFound as e:
-            raise UserNotFound from e
+        except EntityNotFoundError as e:
+            raise UserNotFoundError from e
 
     async def read_by_username(self, username: str) -> User:
         try:
             result: ScalarResult[User] = await self._session.scalars(select(User).where(User.username == username))
             return result.one()
         except NoResultFound as e:
-            raise EntityNotFound from e
+            raise EntityNotFoundError from e
 
     async def update(self, user_id: int, data: dict) -> User:
         try:
             return await self._update(User.id == user_id, User.is_deleted.is_(False), **data)
-        except EntityNotFound as e:
-            raise UserNotFound from e
+        except EntityNotFoundError as e:
+            raise UserNotFoundError from e
         except IntegrityError as e:
             self._raise_error(e)
 
@@ -69,6 +69,6 @@ class UserRepository(Repository[User]):
         constraint = err.__cause__.__cause__.constraint_name  # type: ignore
 
         if constraint == "ix__user__username":
-            raise UsernameAlreadyExists from err
+            raise UsernameAlreadyExistsError from err
 
-        raise SyncmasterException from err
+        raise SyncmasterError from err

@@ -155,7 +155,7 @@ async def test_member_of_group_cannot_read_unknown_group_members_error(
     user = group.get_member_of_role(role_guest_plus)
     # Act
     result = await client.get(
-        f"v1/groups/-1/users",
+        "v1/groups/-1/users",
         headers={
             "Authorization": f"Bearer {user.token}",
         },
@@ -176,7 +176,7 @@ async def test_superuser_read_unknown_group_members_error(
 ):
     # Act
     result = await client.get(
-        f"v1/groups/-1/users",
+        "v1/groups/-1/users",
         headers={
             "Authorization": f"Bearer {superuser.token}",
         },

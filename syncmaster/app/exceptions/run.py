@@ -1,17 +1,17 @@
 from app.db.models import Status
-from app.exceptions.base import EntityNotFound, SyncmasterException
+from app.exceptions.base import EntityNotFoundError, SyncmasterError
 
 
-class RunNotFoundException(EntityNotFound):
+class RunNotFoundError(EntityNotFoundError):
     pass
 
 
-class CannotStopRunException(SyncmasterException):
+class CannotStopRunError(SyncmasterError):
     def __init__(self, run_id: int, current_status: Status):
         self.run_id = run_id
         self.current_status = current_status
 
 
-class CannotConnectToTaskQueueError(SyncmasterException):
+class CannotConnectToTaskQueueError(SyncmasterError):
     def __init__(self, run_id: int):
         self.run_id = run_id

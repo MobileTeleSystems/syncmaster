@@ -181,7 +181,7 @@ async def test_maintainer_plus_delete_unknown_connection_error(
 
     # Act
     result = await client.delete(
-        f"v1/connections/-1",
+        "v1/connections/-1",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
@@ -202,7 +202,7 @@ async def test_superuser_delete_unknown_connection_error(
 ):
     # Act
     result = await client.delete(
-        f"v1/connections/-1",
+        "v1/connections/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 

@@ -196,7 +196,7 @@ async def test_superuser_cannot_read_from_unknown_group_error(
 ):
     # Act
     result = await client.get(
-        f"v1/connections?group_id=-1",
+        "v1/connections?group_id=-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 

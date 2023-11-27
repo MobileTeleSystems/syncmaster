@@ -178,7 +178,7 @@ async def test_group_member_cannot_create_run_of_unknown_transfer_error(
 
     # Act
     result = await client.post(
-        f"v1/transfers/-1/runs",
+        "v1/transfers/-1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
@@ -202,7 +202,7 @@ async def test_superuser_cannot_create_run_of_unknown_transfer_error(
 
     # Act
     result = await client.post(
-        f"v1/transfers/-1/runs",
+        "v1/transfers/-1/runs",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 

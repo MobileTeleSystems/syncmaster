@@ -13,7 +13,7 @@ from app.dto.transfers import (
     OracleTransferParamsDTO,
     PostgresTransferParamsDTO,
 )
-from app.exceptions import ConnectionTypeNotRecognizedException
+from app.exceptions import ConnectionTypeNotRecognizedError
 from app.tasks.handlers.base import Handler
 from app.tasks.handlers.hive import HiveHandler
 from app.tasks.handlers.oracle import OracleHandler
@@ -88,4 +88,4 @@ class TransferController:
                 connection=PostgresConnectionDTO(**connection_data),
                 transfer_params=PostgresTransferParamsDTO(**transfer_params),
             )
-        raise ConnectionTypeNotRecognizedException
+        raise ConnectionTypeNotRecognizedError

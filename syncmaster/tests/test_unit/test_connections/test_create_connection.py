@@ -222,7 +222,10 @@ async def test_check_fields_validation_on_create_connection(
         "detail": [
             {
                 "loc": ["body", "connection_data"],
-                "msg": "No match for discriminator 'type' and value 'POSTGRESQL' (allowed values: 'hive', 'oracle', 'postgres')",
+                "msg": (
+                    "No match for discriminator 'type' and value 'POSTGRESQL' "
+                    "(allowed values: 'hive', 'oracle', 'postgres')"
+                ),
                 "type": "value_error.discriminated_union.invalid_discriminator",
                 "ctx": {
                     "discriminator_key": "type",

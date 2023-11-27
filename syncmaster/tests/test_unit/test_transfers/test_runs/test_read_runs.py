@@ -149,7 +149,7 @@ async def test_group_member_cannot_read_runs_of_the_unknown_transfer_error(
 
     # Act
     result = await client.get(
-        f"v1/transfers/-1/runs",
+        "v1/transfers/-1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
@@ -168,7 +168,7 @@ async def test_superuser_cannot_read_runs_of_unknown_transfer_error(
 ) -> None:
     # Act
     result = await client.get(
-        f"v1/transfers/-1/runs",
+        "v1/transfers/-1/runs",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
     # Assert

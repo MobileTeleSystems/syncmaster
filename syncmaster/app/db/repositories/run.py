@@ -3,17 +3,17 @@ from typing import Any, NoReturn
 from sqlalchemy import desc, select
 from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import selectinload
 
 from app.api.v1.transfers.schemas import ReadFullTransferSchema
 from app.db.models import Run, Status, Transfer
 from app.db.repositories.base import Repository
 from app.db.utils import Pagination
 from app.exceptions import (
-    CannotStopRunException,
-    RunNotFoundException,
-    SyncmasterException,
-    TransferNotFound,
+    CannotStopRunError,
+    RunNotFoundError,
+    SyncmasterError,
+    TransferNotFoundError,
 )
 
 
@@ -33,7 +33,7 @@ class RunRepository(Repository[Run]):
     async def read_by_id(self, run_id: int) -> Run:
         run = await self._session.get(Run, run_id)
         if run is None:
-            raise RunNotFoundException
+            raise RunNotFoundError
         return run
 
     async def create(self, transfer_id: int) -> Run:
@@ -56,24 +56,24 @@ class RunRepository(Repository[Run]):
     async def stop(self, run_id: int) -> Run:
         run = await self.read_by_id(run_id=run_id)
         if run.status not in [Status.CREATED, Status.STARTED]:
-            raise CannotStopRunException(run_id=run_id, current_status=run.status)
+            raise CannotStopRunError(run_id=run_id, current_status=run.status)
         run.status = Status.SEND_STOP_SIGNAL
         await self._session.flush()
         return run
 
     async def read_full_serialized_transfer(self, transfer_id: int) -> dict[str, Any]:
-        transfer = await self._session.get(
-            Transfer,
-            transfer_id,
-            options=(
-                joinedload(Transfer.source_connection),
-                joinedload(Transfer.target_connection),
-            ),
+        transfer = await self._session.scalars(
+            select(Transfer)
+            .where(Transfer.id == transfer_id)
+            .options(
+                selectinload(Transfer.source_connection),
+                selectinload(Transfer.target_connection),
+            )
         )
-        return ReadFullTransferSchema.from_orm(transfer).dict()
+        return ReadFullTransferSchema.from_orm(transfer.one()).dict()
 
     def _raise_error(self, e: DBAPIError) -> NoReturn:
         constraint = e.__cause__.__cause__.constraint_name  # type: ignore[union-attr]
         if constraint == "fk__run__transfer_id__transfer":
-            raise TransferNotFound from e
-        raise SyncmasterException from e
+            raise TransferNotFoundError from e
+        raise SyncmasterError from e

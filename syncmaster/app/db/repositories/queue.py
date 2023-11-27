@@ -9,8 +9,8 @@ from app.api.v1.queue.schemas import UpdateQueueSchema
 from app.db.models import Group, GroupMemberRole, Queue, User, UserGroup
 from app.db.repositories.repository_with_owner import RepositoryWithOwner
 from app.db.utils import Permission
-from app.exceptions import EntityNotFound, GroupNotFound, SyncmasterException
-from app.exceptions.queue import QueueNotFoundException
+from app.exceptions import EntityNotFoundError, GroupNotFoundError, SyncmasterError
+from app.exceptions.queue import QueueNotFoundError
 
 
 class QueueRepository(RepositoryWithOwner[Queue]):
@@ -41,7 +41,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
             result: ScalarResult[Queue] = await self._session.scalars(stmt)
             return result.one()
         except NoResultFound as e:
-            raise QueueNotFoundException from e
+            raise QueueNotFoundError from e
 
     async def paginate(
         self,
@@ -80,8 +80,8 @@ class QueueRepository(RepositoryWithOwner[Queue]):
     ) -> None:
         try:
             await self._delete(queue_id)
-        except (NoResultFound, EntityNotFound) as e:
-            raise QueueNotFoundException from e
+        except (NoResultFound, EntityNotFoundError) as e:
+            raise QueueNotFoundError from e
 
     async def get_group_permission(self, user: User, group_id: int) -> Permission:
         """
@@ -115,7 +115,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         if not user_group:
             # Check: group exists
             if not await self._session.get(Group, group_id):
-                raise GroupNotFound
+                raise GroupNotFoundError
 
             # If the user is not in the group, then he is either a superuser or does not have any rights
             if not user.is_superuser:
@@ -187,4 +187,4 @@ class QueueRepository(RepositoryWithOwner[Queue]):
 
     @staticmethod
     def _raise_error(err: DBAPIError) -> NoReturn:
-        raise SyncmasterException from err
+        raise SyncmasterError from err

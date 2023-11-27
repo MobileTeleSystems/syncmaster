@@ -10,8 +10,8 @@ from app.api.v1.queue.schemas import (
 from app.api.v1.schemas import StatusResponseSchema
 from app.db.models import User
 from app.db.utils import Permission
-from app.exceptions import ActionNotAllowed, GroupNotFound
-from app.exceptions.queue import QueueDeleteException, QueueNotFoundException
+from app.exceptions import ActionNotAllowedError, GroupNotFoundError
+from app.exceptions.queue import QueueDeleteError, QueueNotFoundError
 from app.services import UnitOfWork, get_user
 
 router = APIRouter(tags=["Queues"])
@@ -29,7 +29,7 @@ async def read_queue(
     )
 
     if resource_role == Permission.NONE:
-        raise QueueNotFoundException
+        raise QueueNotFoundError
 
     queue = await unit_of_work.queue.read_by_id(
         queue_id=queue_id,
@@ -48,10 +48,10 @@ async def create_queue(
         group_id=queue_data.group_id,
     )
     if group_permission == Permission.NONE:
-        raise GroupNotFound
+        raise GroupNotFoundError
 
     if group_permission < Permission.WRITE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
 
     async with unit_of_work:
         queue = await unit_of_work.queue.create(queue_data.dict())
@@ -72,10 +72,10 @@ async def update_queue(
     )
 
     if resource_role == Permission.NONE:
-        raise QueueNotFoundException
+        raise QueueNotFoundError
 
     if resource_role < Permission.WRITE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
 
     async with unit_of_work:
         queue = await unit_of_work.queue.update(
@@ -97,17 +97,17 @@ async def delete_queue(
     )
 
     if resource_role == Permission.NONE:
-        raise QueueNotFoundException
+        raise QueueNotFoundError
 
     if resource_role < Permission.DELETE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
 
     queue = await unit_of_work.queue.read_by_id(queue_id=queue_id)
 
     transfers = queue.transfers
 
     if transfers:
-        raise QueueDeleteException(
+        raise QueueDeleteError(
             f"The queue has an associated transfers(s). Number of the linked transfers: {len(transfers)}",
         )
 
@@ -135,7 +135,7 @@ async def read_queues(
     )
 
     if resource_role == Permission.NONE:
-        raise GroupNotFound
+        raise GroupNotFoundError
 
     pagination = await unit_of_work.queue.paginate(
         page=page,

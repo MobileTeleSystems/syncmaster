@@ -124,7 +124,7 @@ async def test_group_member_cannot_read_unknown_queue_error(
 
     # Act
     result = await client.get(
-        f"v1/queues/-1",
+        "v1/queues/-1",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
@@ -143,7 +143,7 @@ async def test_superuser_cannot_read_unknow_queue_error(
 ):
     # Act
     result = await client.get(
-        f"v1/queues/-1",
+        "v1/queues/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 

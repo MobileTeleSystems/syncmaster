@@ -15,13 +15,16 @@ async def test_run_simple_transfer(
     prepare_postgres,
     init_df: DataFrame,
 ):
+    # Arrange
     user: MockUser = transfers["group_admin"]
     transfer: Transfer = transfers["hive_postgres"]
 
+    # Act
     result = await client.post(
         f"v1/transfers/{transfer.id}/runs",
         headers={"Authorization": f"Bearer {user.token}"},
     )
+    # Assert
     assert result.status_code == 200
 
     run_data = await get_run_on_end(

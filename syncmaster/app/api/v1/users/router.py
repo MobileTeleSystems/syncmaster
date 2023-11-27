@@ -6,7 +6,7 @@ from app.api.deps import UnitOfWorkMarker
 from app.api.v1.schemas import StatusResponseSchema
 from app.api.v1.users.schemas import ReadUserSchema, UpdateUserSchema, UserPageSchema
 from app.db.models import User
-from app.exceptions import ActionNotAllowed
+from app.exceptions import ActionNotAllowedError
 from app.services import UnitOfWork, get_user
 
 logger = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ async def update_user(
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadUserSchema:
     if user_id != current_user.id and not current_user.is_superuser:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
     async with unit_of_work:
         change_user = await unit_of_work.user.update(user_id=user_id, data=user_data.dict())
     return ReadUserSchema.from_orm(change_user)

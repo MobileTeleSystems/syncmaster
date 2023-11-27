@@ -5,7 +5,7 @@ from app.api.deps import SettingsMarker, UnitOfWorkMarker
 from app.api.v1.auth.schemas import AuthTokenSchema
 from app.api.v1.auth.utils import sign_jwt
 from app.config import Settings
-from app.exceptions import EntityNotFound
+from app.exceptions import EntityNotFoundError
 from app.services import UnitOfWork
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -20,7 +20,7 @@ async def login(
     """This is the test auth method!!! Not for production!!!!"""
     try:
         user = await unit_of_work.user.read_by_username(username=form_data.username)
-    except EntityNotFound:
+    except EntityNotFoundError:
         async with unit_of_work:
             user = await unit_of_work.user.create(
                 username=form_data.username,

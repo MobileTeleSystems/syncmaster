@@ -1,25 +1,25 @@
-from app.exceptions.base import SyncmasterException
+from app.exceptions.base import SyncmasterError
 
 
-class GroupNameAlreadyExists(SyncmasterException):
+class GroupNameAlreadyExistsError(SyncmasterError):
     pass
 
 
-class GroupAdminNotFound(SyncmasterException):
+class GroupAdminNotFoundError(SyncmasterError):
     pass
 
 
-class GroupAlreadyExists(SyncmasterException):
+class GroupAlreadyExistsError(SyncmasterError):
     pass
 
 
-class AlreadyIsGroupMember(SyncmasterException):
+class AlreadyIsGroupMemberError(SyncmasterError):
     pass
 
 
-class AlreadyIsNotGroupMember(SyncmasterException):
+class AlreadyIsNotGroupMemberError(SyncmasterError):
     pass
 
 
-class GroupNotFound(SyncmasterException):
+class GroupNotFoundError(SyncmasterError):
     pass

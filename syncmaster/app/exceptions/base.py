@@ -1,10 +1,10 @@
-class SyncmasterException(Exception):
+class SyncmasterError(Exception):
     pass
 
 
-class EntityNotFound(SyncmasterException):
+class EntityNotFoundError(SyncmasterError):
     pass
 
 
-class ActionNotAllowed(SyncmasterException):
+class ActionNotAllowedError(SyncmasterError):
     pass

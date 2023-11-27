@@ -1,9 +1,9 @@
-from app.exceptions.base import SyncmasterException
+from app.exceptions.base import SyncmasterError
 
 
-class UsernameAlreadyExists(SyncmasterException):
+class UsernameAlreadyExistsError(SyncmasterError):
     pass
 
 
-class UserNotFound(SyncmasterException):
+class UserNotFoundError(SyncmasterError):
     pass

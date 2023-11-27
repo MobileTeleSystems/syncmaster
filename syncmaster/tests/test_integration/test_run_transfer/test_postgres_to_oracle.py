@@ -15,13 +15,16 @@ async def test_run_simple_transfer(
     prepare_oracle,
     init_df: DataFrame,
 ):
+    # Arrange
     user: MockUser = transfers["group_admin"]
     transfer: Transfer = transfers["postgres_oracle"]
 
+    # Act
     result = await client.post(
         f"v1/transfers/{transfer.id}/runs",
         headers={"Authorization": f"Bearer {user.token}"},
     )
+    # Assert
     assert result.status_code == 200
 
     run_data = await get_run_on_end(client, transfer.id, result.json()["id"], user.token)
