@@ -238,6 +238,23 @@ async def test_superuser_can_create_transfer(
     argnames=["new_data", "error_json"],
     argvalues=(
         (
+            {"name": ""},
+            {
+                "ctx": {"limit_value": 1},
+                "loc": ["body", "name"],
+                "msg": "ensure this value has at least 1 characters",
+                "type": "value_error.any_str.min_length",
+            },
+        ),
+        (
+            {"name": None},
+            {
+                "loc": ["body", "name"],
+                "msg": "none is not an allowed value",
+                "type": "type_error.none.not_allowed",
+            },
+        ),
+        (
             {"is_scheduled": 2},
             {
                 "loc": ["body", "is_scheduled"],

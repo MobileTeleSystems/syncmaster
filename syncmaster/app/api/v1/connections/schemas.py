@@ -1,6 +1,12 @@
 from pydantic import BaseModel, Field, SecretStr, root_validator
 
-from app.api.v1.schemas import HIVE_TYPE, ORACLE_TYPE, POSTGRES_TYPE, PageSchema
+from app.api.v1.schemas import (
+    HIVE_TYPE,
+    ORACLE_TYPE,
+    POSTGRES_TYPE,
+    NameConstr,
+    PageSchema,
+)
 
 
 class ReadHiveConnectionSchema(BaseModel):
@@ -72,7 +78,7 @@ class UpdateOracleConnectionSchema(BaseModel):
 
 class UpdateOracleAuthSchema(BaseModel):
     type: ORACLE_TYPE
-    user: str | None = None
+    user: NameConstr | None = None  # type: ignore # noqa: F722
     password: SecretStr | None = None
 
 
@@ -101,7 +107,7 @@ class UpdateHiveAuthSchema(BaseModel):
 
 
 class UpdateConnectionSchema(BaseModel):
-    name: str | None = None
+    name: NameConstr | None = None  # type: ignore # noqa: F722
     description: str | None = None
     auth_data: UpdateHiveAuthSchema | UpdateOracleAuthSchema | UpdatePostgresAuthSchema | None = Field(
         discriminator="type", default=None
@@ -168,7 +174,7 @@ class CreatePostgresAuthSchema(BaseModel):
 
 class CreateConnectionSchema(BaseModel):
     group_id: int
-    name: str
+    name: NameConstr  # type: ignore # noqa: F722
     description: str
     data: CreateHiveConnectionSchema | CreateOracleConnectionSchema | CreatePostgresConnectionSchema = Field(
         ...,

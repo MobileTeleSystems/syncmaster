@@ -216,13 +216,71 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
     }
 
 
-@pytest.mark.parametrize("name", ["очередь", "Queue name", "♥︎", "q" * 129])
+@pytest.mark.parametrize(
+    "name_value,error",
+    [
+        (
+            "очередь",
+            {
+                "ctx": {"pattern": "^[-_a-zA-Z0-9]+$"},
+                "loc": ["body", "name"],
+                "msg": 'string does not match regex "^[-_a-zA-Z0-9]+$"',
+                "type": "value_error.str.regex",
+            },
+        ),
+        (
+            "Queue name",
+            {
+                "ctx": {"pattern": "^[-_a-zA-Z0-9]+$"},
+                "loc": ["body", "name"],
+                "msg": 'string does not match regex "^[-_a-zA-Z0-9]+$"',
+                "type": "value_error.str.regex",
+            },
+        ),
+        (
+            "♥︎",
+            {
+                "ctx": {"pattern": "^[-_a-zA-Z0-9]+$"},
+                "loc": ["body", "name"],
+                "msg": 'string does not match regex "^[-_a-zA-Z0-9]+$"',
+                "type": "value_error.str.regex",
+            },
+        ),
+        (
+            "q" * 129,
+            {
+                "ctx": {"limit_value": 128},
+                "loc": ["body", "name"],
+                "msg": "ensure this value has at most 128 characters",
+                "type": "value_error.any_str.max_length",
+            },
+        ),
+        (
+            "",
+            {
+                "ctx": {"pattern": "^[-_a-zA-Z0-9]+$"},
+                "loc": ["body", "name"],
+                "msg": 'string does not match regex "^[-_a-zA-Z0-9]+$"',
+                "type": "value_error.str.regex",
+            },
+        ),
+        (
+            None,
+            {
+                "loc": ["body", "name"],
+                "msg": "none is not an allowed value",
+                "type": "type_error.none.not_allowed",
+            },
+        ),
+    ],
+)
 async def test_maintainer_plus_cannot_create_queue_with_wrong_name(
     client: AsyncClient,
     session: AsyncSession,
     role_maintainer_plus: TestUserRoles,
     mock_group: MockGroup,
-    name: str,
+    name_value: str,
+    error: dict,
 ):
     # Arrange
     user = mock_group.get_member_of_role(role_maintainer_plus)
@@ -232,11 +290,11 @@ async def test_maintainer_plus_cannot_create_queue_with_wrong_name(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "name": name,
+            "name": name_value,
             "description": "Some interesting description",
             "group_id": mock_group.group.id,
         },
     )
 
     # Assert
-    assert result.json()["detail"][0]["loc"] == ["body", "name"]
+    assert result.json() == {"detail": [error]}

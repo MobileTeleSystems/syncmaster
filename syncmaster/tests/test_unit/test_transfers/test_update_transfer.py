@@ -116,6 +116,34 @@ async def test_other_group_member_cannot_update_transfer(
     assert result.status_code == 404
 
 
+async def test_check_name_field_validation_on_update_transfer(
+    client: AsyncClient,
+    group_transfer: MockTransfer,
+    role_user_plus: TestUserRoles,
+):
+    # Arrange
+    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+
+    # Act
+    result = await client.patch(
+        f"v1/transfers/{group_transfer.id}",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={"name": ""},
+    )
+
+    # Assert
+    assert result.json() == {
+        "detail": [
+            {
+                "ctx": {"limit_value": 1},
+                "loc": ["body", "name"],
+                "msg": "ensure this value has at least 1 characters",
+                "type": "value_error.any_str.min_length",
+            }
+        ],
+    }
+
+
 async def test_check_connection_types_and_its_params_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
