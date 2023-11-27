@@ -18,14 +18,14 @@ from app.db.models import Status, User
 from app.db.utils import Permission
 from app.exceptions import (
     CannotConnectToTaskQueueError,
-    ConnectionNotFound,
-    DifferentTransferAndConnectionsGroups,
-    DifferentTransferAndQueueGroups,
-    DifferentTypeConnectionsAndParams,
-    GroupNotFound,
-    TransferNotFound,
+    ConnectionNotFoundError,
+    DifferentTransferAndConnectionsGroupsError,
+    DifferentTransferAndQueueGroupError,
+    DifferentTypeConnectionsAndParamsError,
+    GroupNotFoundError,
+    TransferNotFoundError,
 )
-from app.exceptions.base import ActionNotAllowed
+from app.exceptions.base import ActionNotAllowedError
 from app.services import UnitOfWork, get_user
 from app.tasks.config import celery
 
@@ -47,7 +47,7 @@ async def read_transfers(
     )
 
     if resource_role == Permission.NONE:
-        raise GroupNotFound
+        raise GroupNotFoundError
 
     pagination = await unit_of_work.transfer.paginate(
         page=page,
@@ -70,36 +70,39 @@ async def create_transfer(
     )
 
     if group_permission < Permission.WRITE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
 
     target_connection = await unit_of_work.connection.read_by_id(
         connection_id=transfer_data.target_connection_id,
     )
-
     source_connection = await unit_of_work.connection.read_by_id(
         connection_id=transfer_data.source_connection_id,
     )
+    queue = await unit_of_work.queue.read_by_id(transfer_data.queue_id)
 
     if (
         target_connection.group_id != source_connection.group_id
         or target_connection.group_id != transfer_data.group_id
         or source_connection.group_id != transfer_data.group_id
     ):
-        raise DifferentTransferAndConnectionsGroups
+        raise DifferentTransferAndConnectionsGroupsError
 
     if target_connection.data["type"] != transfer_data.target_params.type:
-        raise DifferentTypeConnectionsAndParams(
+        raise DifferentTypeConnectionsAndParamsError(
             connection_type=target_connection.data["type"],
             conn="target",
             params_type=transfer_data.target_params.type,
         )
 
     if source_connection.data["type"] != transfer_data.source_params.type:
-        raise DifferentTypeConnectionsAndParams(
+        raise DifferentTypeConnectionsAndParamsError(
             connection_type=source_connection.data["type"],
             conn="source",
             params_type=transfer_data.source_params.type,
         )
+
+    if transfer_data.group_id != queue.group_id:
+        raise DifferentTransferAndQueueGroupError
 
     async with unit_of_work:
         transfer = await unit_of_work.transfer.create(
@@ -129,7 +132,7 @@ async def read_transfer(
     )
 
     if resource_role == Permission.NONE:
-        raise TransferNotFound
+        raise TransferNotFoundError
 
     transfer = await unit_of_work.transfer.read_by_id(transfer_id=transfer_id)
     return ReadTransferSchema.from_orm(transfer)
@@ -156,14 +159,14 @@ async def copy_transfer(
     resource_role, target_group_role = target_source_transfer_rules
 
     if resource_role == Permission.NONE:
-        raise TransferNotFound
+        raise TransferNotFoundError
 
     if target_group_role < Permission.WRITE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
 
     # Check: user can delete transfer
     if transfer_data.remove_source and resource_role < Permission.DELETE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
 
     transfer = await unit_of_work.transfer.read_by_id(transfer_id=transfer_id)
     # Check: user can copy connection
@@ -180,14 +183,14 @@ async def copy_transfer(
     source_connection_role, target_connection_role = target_source_connection_rules
 
     if source_connection_role == Permission.NONE or target_connection_role == Permission.NONE:
-        raise ConnectionNotFound
+        raise ConnectionNotFoundError
 
     # Check: new queue exists
     new_queue = await unit_of_work.queue.read_by_id(queue_id=transfer_data.new_queue_id)
 
     # Acheck: new_queue_id and new_group_id are similar
     if new_queue.group_id != transfer_data.new_group_id:
-        raise DifferentTransferAndQueueGroups
+        raise DifferentTransferAndQueueGroupError
 
     async with unit_of_work:
         copied_source_connection = await unit_of_work.connection.copy(
@@ -238,10 +241,10 @@ async def update_transfer(
     )
 
     if resource_role == Permission.NONE:
-        raise TransferNotFound
+        raise TransferNotFoundError
 
     if resource_role < Permission.WRITE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
 
     transfer = await unit_of_work.transfer.read_by_id(
         transfer_id=transfer_id,
@@ -270,7 +273,7 @@ async def update_transfer(
     )
 
     if source_connection_resource_role == Permission.NONE or target_connection_resource_role == Permission.NONE:
-        raise ConnectionNotFound
+        raise ConnectionNotFoundError
 
     # Check: connections and transfer group
     if (
@@ -278,20 +281,20 @@ async def update_transfer(
         or target_connection.group_id != transfer.group_id
         or source_connection.group_id != transfer.group_id
     ):
-        raise DifferentTransferAndConnectionsGroups
+        raise DifferentTransferAndConnectionsGroupsError
 
     if queue.group_id != transfer.group_id:
-        raise DifferentTransferAndQueueGroups
+        raise DifferentTransferAndQueueGroupError
 
     if transfer_data.target_params and target_connection.data["type"] != transfer_data.target_params.type:
-        raise DifferentTypeConnectionsAndParams(
+        raise DifferentTypeConnectionsAndParamsError(
             connection_type=target_connection.data["type"],
             conn="target",
             params_type=transfer_data.target_params.type,
         )
 
     if transfer_data.source_params and source_connection.data["type"] != transfer_data.source_params.type:
-        raise DifferentTypeConnectionsAndParams(
+        raise DifferentTypeConnectionsAndParamsError(
             connection_type=source_connection.data["type"],
             conn="source",
             params_type=transfer_data.source_params.type,
@@ -309,6 +312,7 @@ async def update_transfer(
             strategy_params=transfer_data.strategy_params.dict() if transfer_data.strategy_params else {},
             is_scheduled=transfer_data.is_scheduled,
             schedule=transfer_data.schedule,
+            new_queue_id=transfer_data.new_queue_id,
         )
     return ReadTransferSchema.from_orm(transfer)
 
@@ -325,10 +329,10 @@ async def delete_transfer(
     )
 
     if resource_role == Permission.NONE:
-        raise TransferNotFound
+        raise TransferNotFoundError
 
     if resource_role < Permission.DELETE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
 
     async with unit_of_work:
         await unit_of_work.transfer.delete(
@@ -357,7 +361,7 @@ async def read_runs(
     )
 
     if resource_rule == Permission.NONE:
-        raise TransferNotFound
+        raise TransferNotFoundError
 
     pagination = await unit_of_work.run.paginate(
         transfer_id=transfer_id,
@@ -381,7 +385,7 @@ async def read_run(
     )
 
     if resource_role == Permission.NONE:
-        raise TransferNotFound
+        raise TransferNotFoundError
 
     run = await unit_of_work.run.read_by_id(run_id=run_id)
     return ReadRunSchema.from_orm(run)
@@ -400,15 +404,17 @@ async def start_run(
     )
 
     if resource_rule == Permission.NONE:
-        raise TransferNotFound
+        raise TransferNotFoundError
 
     if resource_rule < Permission.WRITE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
+
+    transfer = await unit_of_work.transfer.read_by_id(transfer_id=transfer_id)
 
     async with unit_of_work:
         run = await unit_of_work.run.create(transfer_id=transfer_id)
     try:
-        celery.send_task("run_transfer_task", kwargs={"run_id": run.id})
+        celery.send_task("run_transfer_task", kwargs={"run_id": run.id}, queue=transfer.queue.name)
     except KombuError as e:
         async with unit_of_work:
             run = await unit_of_work.run.update(
@@ -433,10 +439,10 @@ async def stop_run(
     )
 
     if resource_rule == Permission.NONE:
-        raise TransferNotFound
+        raise TransferNotFoundError
 
     if resource_rule < Permission.WRITE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
 
     async with unit_of_work:
         run = await unit_of_work.run.stop(run_id=run_id)

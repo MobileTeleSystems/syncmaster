@@ -1,5 +1,4 @@
 import os
-import secrets
 from datetime import date, datetime
 from itertools import permutations
 
@@ -324,7 +323,7 @@ async def transfers(
 
     queue = await create_queue(
         session=session,
-        name=f"{secrets.token_hex(5)}_test_queue",
+        name="test_queue",
         group_id=group.id,
     )
 

@@ -11,7 +11,7 @@ from app.api.v1.schemas import StatusResponseSchema
 from app.api.v1.users.schemas import UserPageSchemaAsGroupMember
 from app.db.models import User
 from app.db.utils import Permission
-from app.exceptions import ActionNotAllowed, GroupNotFound
+from app.exceptions import ActionNotAllowedError, GroupNotFoundError
 from app.services import UnitOfWork, get_user
 
 router = APIRouter(tags=["Groups"])
@@ -64,7 +64,7 @@ async def read_group(
     )
 
     if resource_role == Permission.NONE:
-        raise GroupNotFound
+        raise GroupNotFoundError
 
     group = await unit_of_work.group.read_by_id(group_id=group_id)
     return ReadGroupSchema.from_orm(group)
@@ -82,10 +82,10 @@ async def update_group(
         group_id=group_id,
     )
     if resource_rule == Permission.NONE:
-        raise GroupNotFound
+        raise GroupNotFoundError
 
     if resource_rule < Permission.DELETE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
 
     async with unit_of_work:
         group = await unit_of_work.group.update(
@@ -121,7 +121,7 @@ async def read_group_users(
     )
 
     if resource_role == Permission.NONE:
-        raise GroupNotFound
+        raise GroupNotFoundError
 
     pagination = await unit_of_work.group.get_member_paginate(
         group_id=group_id,
@@ -145,10 +145,10 @@ async def update_user_role_group(
     )
 
     if resource_rule == Permission.NONE:
-        raise GroupNotFound
+        raise GroupNotFoundError
 
     if resource_rule < Permission.DELETE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
 
     async with unit_of_work:
         result = await unit_of_work.group.update_member_role(
@@ -174,10 +174,10 @@ async def add_user_to_group(
     )
 
     if resource_rule == Permission.NONE:
-        raise GroupNotFound
+        raise GroupNotFoundError
 
     if resource_rule < Permission.DELETE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
 
     async with unit_of_work:
         await unit_of_work.group.add_user(
@@ -205,12 +205,12 @@ async def delete_user_from_group(
     )
 
     if resource_rule == Permission.NONE:
-        raise GroupNotFound
+        raise GroupNotFoundError
 
     # User can delete himself from the group
     if user_id != current_user.id:
         if resource_rule < Permission.DELETE:
-            raise ActionNotAllowed
+            raise ActionNotAllowedError
 
     async with unit_of_work:
         await unit_of_work.group.delete_user(

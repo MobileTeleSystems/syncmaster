@@ -231,7 +231,7 @@ async def test_owner_of_group_update_unknown_group_error(client: AsyncClient, em
     }
     # Act
     result = await client.patch(
-        f"v1/groups/-1",
+        "v1/groups/-1",
         json=group_data,
         headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
     )
@@ -275,7 +275,7 @@ async def test_superuser_update_unknown_group_error(client: AsyncClient, empty_g
     }
     # Act
     result = await client.patch(
-        f"v1/groups/-1",
+        "v1/groups/-1",
         json=group_data,
         headers={"Authorization": f"Bearer {superuser.token}"},
     )

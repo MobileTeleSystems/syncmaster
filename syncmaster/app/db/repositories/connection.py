@@ -8,12 +8,12 @@ from app.db.models import Connection
 from app.db.repositories.repository_with_owner import RepositoryWithOwner
 from app.db.utils import Pagination
 from app.exceptions import (
-    ConnectionNotFound,
-    ConnectionOwnerException,
-    EntityNotFound,
-    GroupNotFound,
-    SyncmasterException,
-    UserNotFound,
+    ConnectionNotFoundError,
+    ConnectionOwnerError,
+    EntityNotFoundError,
+    GroupNotFoundError,
+    SyncmasterError,
+    UserNotFoundError,
 )
 
 
@@ -47,7 +47,7 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         try:
             return result.one()
         except NoResultFound as e:
-            raise ConnectionNotFound from e
+            raise ConnectionNotFoundError from e
 
     async def create(
         self,
@@ -102,8 +102,8 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
     ) -> None:
         try:
             await self._delete(connection_id)
-        except (NoResultFound, EntityNotFound) as e:
-            raise ConnectionNotFound from e
+        except (NoResultFound, EntityNotFoundError) as e:
+            raise ConnectionNotFoundError from e
 
     async def copy(
         self,
@@ -125,9 +125,9 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
     def _raise_error(self, err: DBAPIError) -> NoReturn:
         constraint = err.__cause__.__cause__.constraint_name  # type: ignore[union-attr]
         if constraint == "fk__connection__group_id__group":
-            raise GroupNotFound from err
+            raise GroupNotFoundError from err
         if constraint == "fk__connection__user_id__user":
-            raise UserNotFound from err
+            raise UserNotFoundError from err
         if constraint == "ck__connection__owner_constraint":
-            raise ConnectionOwnerException from err
-        raise SyncmasterException from err
+            raise ConnectionOwnerError from err
+        raise SyncmasterError from err

@@ -4,18 +4,20 @@ from typing import Any, NoReturn
 from sqlalchemy import ScalarResult, insert, or_, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.db.models import Transfer
 from app.db.repositories.repository_with_owner import RepositoryWithOwner
 from app.db.utils import Pagination
 from app.exceptions import (
-    ConnectionNotFound,
-    EntityNotFound,
-    GroupNotFound,
-    SyncmasterException,
-    TransferNotFound,
-    TransferOwnerException,
-    UserNotFound,
+    ConnectionNotFoundError,
+    EntityNotFoundError,
+    GroupNotFoundError,
+    QueueNotFoundError,
+    SyncmasterError,
+    TransferNotFoundError,
+    TransferOwnerError,
+    UserNotFoundError,
 )
 
 
@@ -41,15 +43,19 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         self,
         transfer_id: int,
     ) -> Transfer:
-        stmt = select(Transfer).where(
-            Transfer.id == transfer_id,
-            Transfer.is_deleted.is_(False),
+        stmt = (
+            select(Transfer)
+            .where(
+                Transfer.id == transfer_id,
+                Transfer.is_deleted.is_(False),
+            )
+            .options(selectinload(Transfer.queue))
         )
         try:
             result: ScalarResult[Transfer] = await self._session.scalars(stmt)
             return result.one()
         except NoResultFound as e:
-            raise TransferNotFound from e
+            raise TransferNotFoundError from e
 
     async def create(
         self,
@@ -98,6 +104,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         strategy_params: dict[str, Any],
         is_scheduled: bool | None,
         schedule: str | None,
+        new_queue_id: int | None,
     ) -> Transfer:
         try:
             for key in transfer.source_params:
@@ -121,6 +128,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
                 target_connection_id=target_connection_id or transfer.target_connection_id,
                 source_params=source_params,
                 target_params=target_params,
+                queue_id=new_queue_id or transfer.queue_id,
             )
         except IntegrityError as e:
             self._raise_error(e)
@@ -131,8 +139,8 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
     ) -> None:
         try:
             await self._delete(transfer_id)
-        except (NoResultFound, EntityNotFound) as e:
-            raise TransferNotFound from e
+        except (NoResultFound, EntityNotFoundError) as e:
+            raise TransferNotFoundError from e
 
     async def copy(
         self,
@@ -168,16 +176,20 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
     def _raise_error(self, err: DBAPIError) -> NoReturn:
         constraint = err.__cause__.__cause__.constraint_name  # type: ignore[union-attr]
         if constraint == "fk__transfer__group_id__group":
-            raise GroupNotFound from err
+            raise GroupNotFoundError from err
         if constraint == "fk__transfer__user_id__user":
-            raise UserNotFound from err
+            raise UserNotFoundError from err
 
         if constraint in [
             "fk__transfer__source_connection_id__connection",
             "fk__transfer__target_connection_id__connection",
         ]:
-            raise ConnectionNotFound from err
+            raise ConnectionNotFoundError from err
 
         if constraint == "ck__transfer__owner_constraint":
-            raise TransferOwnerException from err
-        raise SyncmasterException from err
+            raise TransferOwnerError from err
+
+        if constraint == "fk__transfer__queue_id__queue":
+            raise QueueNotFoundError from err
+
+        raise SyncmasterError from err

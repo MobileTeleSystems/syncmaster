@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.config import Settings
 from app.db.models import AuthData, Run, Status, Transfer
 from app.db.repositories.utils import decrypt_auth_data
-from app.exceptions.run import RunNotFoundException
+from app.exceptions.run import RunNotFoundError
 from app.tasks.base import WorkerTask
 from app.tasks.config import celery
 from app.tasks.controller import TransferController
@@ -41,7 +41,7 @@ def run_transfer(session: Session, run_id: int, settings: Settings):
         ),
     )
     if run is None:
-        raise RunNotFoundException
+        raise RunNotFoundError
     run.status = Status.STARTED
     run.started_at = datetime.utcnow()
     session.add(run)

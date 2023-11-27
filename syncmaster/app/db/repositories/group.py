@@ -9,14 +9,14 @@ from app.db.models import Group, User, UserGroup
 from app.db.repositories.base import Repository
 from app.db.utils import Pagination, Permission
 from app.exceptions import (
-    AlreadyIsGroupMember,
-    AlreadyIsNotGroupMember,
-    EntityNotFound,
-    GroupAdminNotFound,
-    GroupAlreadyExists,
-    GroupNotFound,
-    SyncmasterException,
-    UserNotFound,
+    AlreadyIsGroupMemberError,
+    AlreadyIsNotGroupMemberError,
+    EntityNotFoundError,
+    GroupAdminNotFoundError,
+    GroupAlreadyExistsError,
+    GroupNotFoundError,
+    SyncmasterError,
+    UserNotFoundError,
 )
 
 
@@ -65,7 +65,7 @@ class GroupRepository(Repository[Group]):
             result: ScalarResult[Group] = await self._session.scalars(stmt)
             return result.one()
         except NoResultFound as e:
-            raise GroupNotFound from e
+            raise GroupNotFoundError from e
 
     async def create(self, name: str, description: str, admin_id: int) -> Group:
         query = (
@@ -100,8 +100,8 @@ class GroupRepository(Repository[Group]):
                 description=description,
                 admin_id=admin_id,
             )
-        except EntityNotFound as e:
-            raise GroupNotFound from e
+        except EntityNotFoundError as e:
+            raise GroupNotFoundError from e
         except IntegrityError as e:
             self._raise_error(e)
 
@@ -131,7 +131,7 @@ class GroupRepository(Repository[Group]):
             self._raise_error(err)
 
         if not obj:
-            raise UserNotFound
+            raise UserNotFoundError
 
         return obj
 
@@ -160,8 +160,8 @@ class GroupRepository(Repository[Group]):
     async def delete(self, group_id: int) -> None:
         try:
             await self._delete(group_id)
-        except EntityNotFound as e:
-            raise GroupNotFound from e
+        except EntityNotFoundError as e:
+            raise GroupNotFoundError from e
 
     async def add_user(
         self,
@@ -189,7 +189,7 @@ class GroupRepository(Repository[Group]):
         """
         # Check: group exists
         if not await self._session.get(Group, group_id):
-            raise GroupNotFound
+            raise GroupNotFoundError
 
         admin_query = (
             (
@@ -232,7 +232,7 @@ class GroupRepository(Repository[Group]):
             },
         )
         if user_group is None:
-            raise AlreadyIsNotGroupMember
+            raise AlreadyIsNotGroupMemberError
         await self._session.delete(user_group)
         await self._session.flush()
 
@@ -240,24 +240,24 @@ class GroupRepository(Repository[Group]):
         constraint = err.__cause__.__cause__.constraint_name  # type: ignore[union-attr]
 
         if constraint == "fk__group__admin_id__user":
-            raise GroupAdminNotFound from err
+            raise GroupAdminNotFoundError from err
 
         if constraint == "uq__group__name":
-            raise GroupAlreadyExists from err
+            raise GroupAlreadyExistsError from err
 
         if constraint == "pk__user_group":
-            raise AlreadyIsGroupMember from err
+            raise AlreadyIsGroupMemberError from err
 
         if constraint == "fk__user_group__group_id__group":
             detail = err.__cause__.__cause__.detail  # type: ignore[union-attr]
             pattern = r'Key \(group_id\)=\(-?\d+\) is not present in table "group".'
             if re.match(pattern, detail):
-                raise GroupNotFound from err
+                raise GroupNotFoundError from err
 
         if constraint == "fk__user_group__user_id__user":
             detail = err.__cause__.__cause__.detail  # type: ignore[union-attr]
             pattern = r'Key \(user_id\)=\(-?\d+\) is not present in table "user".'
             if re.match(pattern, detail):
-                raise UserNotFound from err
+                raise UserNotFoundError from err
 
-        raise SyncmasterException from err
+        raise SyncmasterError from err

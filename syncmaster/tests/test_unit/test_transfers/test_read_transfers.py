@@ -137,7 +137,7 @@ async def test_user_plus_cannot_read_unknown_group_transfers_error(
 
     # Act
     result = await client.get(
-        f"v1/transfers?group_id=-1",
+        "v1/transfers?group_id=-1",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
@@ -156,7 +156,7 @@ async def test_superuser_cannot_read_unknown_group_transfers_error(
 ):
     # Act
     result = await client.get(
-        f"v1/transfers?group_id=-1",
+        "v1/transfers?group_id=-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 

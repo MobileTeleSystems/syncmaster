@@ -12,7 +12,7 @@ from app.api.deps import (
 from app.api.router import api_router
 from app.config import Settings
 from app.db.factory import create_engine, create_session_factory, get_uow
-from app.exceptions import SyncmasterException
+from app.exceptions import SyncmasterError
 from app.handler import http_exception_handler, syncmsater_exception_handler
 from app.services import get_auth_scheme
 
@@ -32,7 +32,7 @@ def get_application(settings: Settings) -> FastAPI:
 
     application.include_router(api_router)
     application.exception_handler(HTTPException)(http_exception_handler)
-    application.exception_handler(SyncmasterException)(syncmsater_exception_handler)
+    application.exception_handler(SyncmasterError)(syncmsater_exception_handler)
 
     engine = create_engine(connection_uri=settings.build_db_connection_uri())
     session_factory = create_session_factory(engine=engine)

@@ -266,6 +266,53 @@ async def test_unauthorized_user_cannot_update_transfer(
     }
 
 
+async def test_user_plus_cannot_update_transfer_with_other_group_queue(
+    client: AsyncClient,
+    group_transfer: MockTransfer,
+    role_user_plus: TestUserRoles,
+    group_queue: Queue,
+):
+    # Arrange
+    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+
+    # Act
+    result = await client.patch(
+        f"v1/transfers/{group_transfer.id}",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={"new_queue_id": group_queue.id},
+    )
+
+    # Assert
+    assert result.json() == {
+        "message": "Queue should belong to the transfer group",
+        "ok": False,
+        "status_code": 400,
+    }
+    assert result.status_code == 400
+
+
+async def test_superuser_cannot_update_transfer_with_other_group_queue(
+    client: AsyncClient,
+    group_transfer: MockTransfer,
+    superuser: MockUser,
+    group_queue: Queue,
+):
+    # Act
+    result = await client.patch(
+        f"v1/transfers/{group_transfer.id}",
+        headers={"Authorization": f"Bearer {superuser.token}"},
+        json={"new_queue_id": group_queue.id},
+    )
+
+    # Assert
+    assert result.json() == {
+        "message": "Queue should belong to the transfer group",
+        "ok": False,
+        "status_code": 400,
+    }
+    assert result.status_code == 400
+
+
 async def test_group_member_cannot_update_unknow_transfer_error(
     client: AsyncClient,
     group_transfer: MockTransfer,
@@ -276,7 +323,7 @@ async def test_group_member_cannot_update_unknow_transfer_error(
 
     # Act
     result = await client.patch(
-        f"v1/transfers/-1",
+        "v1/transfers/-1",
         headers={"Authorization": f"Bearer {user.token}"},
         json={"name": "New transfer name"},
     )
@@ -297,7 +344,7 @@ async def test_superuser_cannot_update_unknown_transfer_error(
 ):
     # Act
     result = await client.patch(
-        f"v1/transfers/-1",
+        "v1/transfers/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={"name": "New transfer name"},
     )
@@ -308,4 +355,50 @@ async def test_superuser_cannot_update_unknown_transfer_error(
         "ok": False,
         "status_code": 404,
     }
+    assert result.status_code == 404
+
+
+async def test_user_plus_cannot_update_transfer_with_unknown_queue_id_error(
+    client: AsyncClient,
+    group_transfer: MockTransfer,
+    role_user_plus: TestUserRoles,
+):
+    # Arrange
+    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+
+    # Act
+    result = await client.patch(
+        f"v1/transfers/{group_transfer.id}",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={"new_queue_id": -1},
+    )
+
+    # Assert
+    assert result.json() == {
+        "message": "Queue not found",
+        "ok": False,
+        "status_code": 404,
+    }
+    assert result.status_code == 404
+
+
+async def test_superuser_cannot_update_transfer_with_unknown_queue_id(
+    client: AsyncClient,
+    group_transfer: MockTransfer,
+    superuser: MockUser,
+):
+    # Act
+    result = await client.patch(
+        f"v1/transfers/{group_transfer.id}",
+        headers={"Authorization": f"Bearer {superuser.token}"},
+        json={"new_queue_id": -1},
+    )
+
+    # Assert
+    assert result.json() == {
+        "message": "Queue not found",
+        "ok": False,
+        "status_code": 404,
+    }
+
     assert result.status_code == 404

@@ -10,7 +10,7 @@ from app.config import Settings
 from app.db.models import AuthData
 from app.db.repositories.base import Repository
 from app.db.repositories.utils import decrypt_auth_data, encrypt_auth_data
-from app.exceptions import AuthDataNotFound, SyncmasterException
+from app.exceptions import AuthDataNotFoundError, SyncmasterError
 
 
 class CredentialsRepository(Repository[AuthData]):
@@ -32,7 +32,7 @@ class CredentialsRepository(Repository[AuthData]):
             result: ScalarResult[AuthData] = await self._session.scalars(query)
             return decrypt_auth_data(result.one().value, settings=self._settings)
         except NoResultFound as e:
-            raise AuthDataNotFound(f"Connection id = {connection_id}") from e
+            raise AuthDataNotFoundError(f"Connection id = {connection_id}") from e
 
     async def add_to_connection(self, connection_id: int, data: dict) -> AuthData:
         query = (
@@ -81,4 +81,4 @@ class CredentialsRepository(Repository[AuthData]):
             self._raise_error(e)
 
     def _raise_error(self, err: DBAPIError) -> NoReturn:
-        raise SyncmasterException from err
+        raise SyncmasterError from err

@@ -200,7 +200,7 @@ async def test_maintainer_plus_cannot_delete_unknown_queue_error(
 
     # Act
     result = await client.delete(
-        f"v1/queues/-1",
+        "v1/queues/-1",
         headers={"Authorization": f"Bearer {user.token}"},
     )
     # Assert
@@ -220,7 +220,7 @@ async def test_superuser_cannot_delete_unknown_queue_error(
 ):
     # Act
     result = await client.delete(
-        f"v1/queues/-1",
+        "v1/queues/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
     # Assert

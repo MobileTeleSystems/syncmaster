@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.base import Base
 from app.db.utils import Pagination
-from app.exceptions import EntityNotFound
+from app.exceptions import EntityNotFoundError
 
 Model = TypeVar("Model", bound=Base)
 
@@ -24,7 +24,7 @@ class Repository(Generic[Model], ABC):
         else:
             obj = await self._session.get(self._model, id)
         if obj is None:
-            raise EntityNotFound
+            raise EntityNotFoundError
         return obj
 
     @staticmethod
@@ -51,7 +51,7 @@ class Repository(Generic[Model], ABC):
             await self._session.flush()
             obj = new_row.one()
         except NoResultFound as e:
-            raise EntityNotFound from e
+            raise EntityNotFoundError from e
         return obj
 
     async def _update(self, *args: Any, **kwargs: Any) -> Model:
@@ -61,7 +61,7 @@ class Repository(Generic[Model], ABC):
             await self._session.flush()
             obj = result.one()
         except NoResultFound as e:
-            raise EntityNotFound from e
+            raise EntityNotFoundError from e
         return obj
 
     async def _delete(self, id: int) -> Model:

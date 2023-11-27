@@ -259,7 +259,7 @@ async def test_superuser_cannot_update_unknown_connection_error(
 ):
     # Act
     result = await client.patch(
-        f"v1/connections/-1",
+        "v1/connections/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={"name": "New connection name"},
     )

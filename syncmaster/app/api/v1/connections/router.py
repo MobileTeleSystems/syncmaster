@@ -17,8 +17,12 @@ from app.api.v1.connections.schemas import (
 from app.api.v1.schemas import MetaPageSchema, StatusResponseSchema
 from app.db.models import User
 from app.db.utils import Permission
-from app.exceptions import ActionNotAllowed, AuthDataNotFound, GroupNotFound
-from app.exceptions.connection import ConnectionDeleteException, ConnectionNotFound
+from app.exceptions import (
+    ActionNotAllowedError,
+    AuthDataNotFoundError,
+    GroupNotFoundError,
+)
+from app.exceptions.connection import ConnectionDeleteError, ConnectionNotFoundError
 from app.services import UnitOfWork, get_user
 
 router = APIRouter(tags=["Connections"])
@@ -42,7 +46,7 @@ async def read_connections(
     )
 
     if resource_role == Permission.NONE:
-        raise GroupNotFound
+        raise GroupNotFoundError
 
     pagination = await unit_of_work.connection.paginate(
         page=page,
@@ -94,10 +98,10 @@ async def create_connection(
         group_id=connection_data.group_id,
     )
     if group_permission == Permission.NONE:
-        raise GroupNotFound
+        raise GroupNotFoundError
 
     if group_permission < Permission.WRITE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
 
     data = connection_data.data.dict()
     auth_data = connection_data.auth_data.dict()
@@ -146,7 +150,7 @@ async def read_connection(
     )
 
     if resource_role == Permission.NONE:
-        raise ConnectionNotFound
+        raise ConnectionNotFoundError
 
     connection = await unit_of_work.connection.read_by_id(connection_id=connection_id)
 
@@ -154,7 +158,7 @@ async def read_connection(
         credentials = await unit_of_work.credentials.get_for_connection(
             connection_id=connection.id,
         )
-    except AuthDataNotFound:
+    except AuthDataNotFoundError:
         credentials = None
 
     return ReadConnectionSchema(
@@ -180,10 +184,10 @@ async def update_connection(
     )
 
     if resource_role == Permission.NONE:
-        raise ConnectionNotFound
+        raise ConnectionNotFoundError
 
     if resource_role < Permission.WRITE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
 
     async with unit_of_work:
         connection = await unit_of_work.connection.update(
@@ -226,10 +230,10 @@ async def delete_connection(
     )
 
     if resource_role == Permission.NONE:
-        raise ConnectionNotFound
+        raise ConnectionNotFoundError
 
     if resource_role < Permission.DELETE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
 
     connection = await unit_of_work.connection.read_by_id(connection_id=connection_id)
 
@@ -244,7 +248,7 @@ async def delete_connection(
                 message="Connection was deleted",
             )
 
-    raise ConnectionDeleteException(
+    raise ConnectionDeleteError(
         f"The connection has an associated transfers. Number of the connected transfers: {len(transfers)}",
     )
 
@@ -269,16 +273,16 @@ async def copy_connection(
     resource_role, target_group_role = target_source_rules
 
     if copy_connection_data.remove_source and resource_role < Permission.DELETE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
 
     if resource_role == Permission.NONE:
-        raise ConnectionNotFound
+        raise ConnectionNotFoundError
 
     if target_group_role == Permission.NONE:
-        raise GroupNotFound
+        raise GroupNotFoundError
 
     if target_group_role < Permission.WRITE:
-        raise ActionNotAllowed
+        raise ActionNotAllowedError
 
     async with unit_of_work:
         await unit_of_work.connection.copy(

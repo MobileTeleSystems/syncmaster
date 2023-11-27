@@ -1,21 +1,21 @@
 from typing import Literal
 
-from app.exceptions.base import SyncmasterException
+from app.exceptions.base import SyncmasterError
 
 
-class TransferOwnerException(SyncmasterException):
+class TransferOwnerError(SyncmasterError):
     pass
 
 
-class TransferNotFound(SyncmasterException):
+class TransferNotFoundError(SyncmasterError):
     pass
 
 
-class DifferentTransferAndConnectionsGroups(SyncmasterException):
+class DifferentTransferAndConnectionsGroupsError(SyncmasterError):
     pass
 
 
-class DifferentTypeConnectionsAndParams(SyncmasterException):
+class DifferentTypeConnectionsAndParamsError(SyncmasterError):
     def __init__(
         self,
         connection_type: str,

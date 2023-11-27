@@ -6,7 +6,7 @@ from app.db.base import Base
 from app.db.models import Group, GroupMemberRole, User, UserGroup
 from app.db.repositories.base import Repository
 from app.db.utils import Permission
-from app.exceptions import GroupNotFound
+from app.exceptions import GroupNotFoundError
 
 Model = TypeVar("Model", bound=Base)
 
@@ -95,7 +95,7 @@ class RepositoryWithOwner(Repository, Generic[Model]):
         if not user_group:
             # Check: group exists
             if not await self._session.get(Group, group_id):
-                raise GroupNotFound
+                raise GroupNotFoundError
 
             # If the user is not in the group, then he is either a superuser or does not have any rights
             if not user.is_superuser:

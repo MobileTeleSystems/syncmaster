@@ -16,4 +16,4 @@ COPY ./syncmaster/ /syncmaster/
 
 # https://docs.celeryq.dev/en/stable/userguide/workers.html#max-tasks-per-child-setting
 # Required to start each Celery task in separated process, avoiding issues with global Spark session object
-CMD ["celery", "-A" ,"app.tasks.config.celery" ,"worker", "--loglevel=info", "--max-tasks-per-child=1"]
+CMD ["celery", "-A" ,"app.tasks.config.celery" ,"worker", "--loglevel=info", "--max-tasks-per-child=1", "-Q", "test_queue"]

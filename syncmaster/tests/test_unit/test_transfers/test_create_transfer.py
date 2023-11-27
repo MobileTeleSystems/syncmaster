@@ -259,7 +259,10 @@ async def test_superuser_can_create_transfer(
             },
             {
                 "loc": ["body", "strategy_params"],
-                "msg": "No match for discriminator 'type' and value 'new some strategy type' (allowed values: 'full', 'incremental')",
+                "msg": (
+                    "No match for discriminator 'type' and value 'new some strategy type' (allowed values: "
+                    "'full', 'incremental')"
+                ),
                 "type": "value_error.discriminated_union.invalid_discriminator",
                 "ctx": {
                     "discriminator_key": "type",
@@ -277,7 +280,10 @@ async def test_superuser_can_create_transfer(
             },
             {
                 "loc": ["body", "source_params"],
-                "msg": "No match for discriminator 'type' and value 'new some connection type' (allowed values: 'postgres', 'oracle', 'hive')",
+                "msg": (
+                    "No match for discriminator 'type' and value 'new some connection type' "
+                    "(allowed values: 'postgres', 'oracle', 'hive')"
+                ),
                 "type": "value_error.discriminated_union.invalid_discriminator",
                 "ctx": {
                     "discriminator_key": "type",
@@ -434,6 +440,79 @@ async def test_unauthorized_user_cannot_create_transfer(
     }
 
 
+async def test_user_plus_cannot_create_transfer_with_other_group_queue(
+    client: AsyncClient,
+    two_group_connections: tuple[MockConnection, MockConnection],
+    role_user_plus: TestUserRoles,
+    group_transfer: MockTransfer,
+):
+    # Arrange
+    first_conn, second_conn = two_group_connections
+    user = first_conn.owner_group.get_member_of_role(role_user_plus)
+
+    # Act
+    result = await client.post(
+        "v1/transfers",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "group_id": first_conn.owner_group.group.id,
+            "name": "new test transfer",
+            "description": "",
+            "is_scheduled": False,
+            "schedule": "",
+            "source_connection_id": first_conn.id,
+            "target_connection_id": second_conn.id,
+            "source_params": {"type": "postgres", "table_name": "source_table"},
+            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "strategy_params": {"type": "full"},
+            "queue_id": group_transfer.transfer.queue_id,
+        },
+    )
+
+    # Assert
+    assert result.json() == {
+        "message": "Queue should belong to the transfer group",
+        "ok": False,
+        "status_code": 400,
+    }
+
+
+async def test_superuser_cannot_create_transfer_with_other_group_queue(
+    client: AsyncClient,
+    two_group_connections: tuple[MockConnection, MockConnection],
+    group_transfer: MockTransfer,
+    superuser: MockUser,
+):
+    # Arrange
+    first_conn, second_conn = two_group_connections
+
+    # Act
+    result = await client.post(
+        "v1/transfers",
+        headers={"Authorization": f"Bearer {superuser.token}"},
+        json={
+            "group_id": first_conn.owner_group.group.id,
+            "name": "new test transfer",
+            "description": "",
+            "is_scheduled": False,
+            "schedule": "",
+            "source_connection_id": first_conn.id,
+            "target_connection_id": second_conn.id,
+            "source_params": {"type": "postgres", "table_name": "source_table"},
+            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "strategy_params": {"type": "full"},
+            "queue_id": group_transfer.transfer.queue_id,
+        },
+    )
+
+    # Assert
+    assert result.json() == {
+        "message": "Queue should belong to the transfer group",
+        "ok": False,
+        "status_code": 400,
+    }
+
+
 @pytest.mark.parametrize("iter_conn_id", [(False, True), (True, False)])
 async def test_group_member_cannot_create_transfer_with_unknown_connection_error(
     client: AsyncClient,
@@ -549,6 +628,42 @@ async def test_superuser_cannot_create_transfer_with_unknown_connection_error(
     }
 
 
+async def test_user_plus_cannot_create_transfer_with_unknown_queue_error(
+    client: AsyncClient,
+    two_group_connections: tuple[MockConnection, MockConnection],
+    role_user_plus: TestUserRoles,
+):
+    # Arrange
+    first_conn, second_conn = two_group_connections
+    user = first_conn.owner_group.get_member_of_role(role_user_plus)
+
+    # Act
+    result = await client.post(
+        "v1/transfers",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "group_id": first_conn.owner_group.group.id,
+            "name": "new test transfer",
+            "description": "",
+            "is_scheduled": False,
+            "schedule": "",
+            "source_connection_id": first_conn.id,
+            "target_connection_id": second_conn.id,
+            "source_params": {"type": "postgres", "table_name": "source_table"},
+            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "strategy_params": {"type": "full"},
+            "queue_id": -1,
+        },
+    )
+
+    # Assert
+    assert result.json() == {
+        "message": "Queue not found",
+        "ok": False,
+        "status_code": 404,
+    }
+
+
 async def test_superuser_cannot_create_transfer_with_unknown_group_error(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
@@ -580,6 +695,41 @@ async def test_superuser_cannot_create_transfer_with_unknown_group_error(
     # Assert
     assert result.json() == {
         "message": "Group not found",
+        "ok": False,
+        "status_code": 404,
+    }
+
+
+async def test_superuser_cannot_create_transfer_with_unknown_queue_error(
+    client: AsyncClient,
+    two_group_connections: tuple[MockConnection, MockConnection],
+    superuser: MockUser,
+):
+    # Arrange
+    first_conn, second_conn = two_group_connections
+
+    # Act
+    result = await client.post(
+        "v1/transfers",
+        headers={"Authorization": f"Bearer {superuser.token}"},
+        json={
+            "group_id": first_conn.owner_group.group.id,
+            "name": "new test transfer",
+            "description": "",
+            "is_scheduled": False,
+            "schedule": "",
+            "source_connection_id": first_conn.id,
+            "target_connection_id": second_conn.id,
+            "source_params": {"type": "postgres", "table_name": "source_table"},
+            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "strategy_params": {"type": "full"},
+            "queue_id": -1,
+        },
+    )
+
+    # Assert
+    assert result.json() == {
+        "message": "Queue not found",
         "ok": False,
         "status_code": 404,
     }

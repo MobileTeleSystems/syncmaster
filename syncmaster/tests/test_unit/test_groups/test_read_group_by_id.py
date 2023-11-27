@@ -113,7 +113,7 @@ async def test_member_of_group_read_unknown_group_error(
     user = group.get_member_of_role(role_guest_plus)
     # Act
     result = await client.get(
-        f"v1/groups/-1",
+        "v1/groups/-1",
         headers={"Authorization": f"Bearer {user.token}"},
     )
     # Assert

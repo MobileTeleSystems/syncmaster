@@ -5,29 +5,29 @@ from fastapi.responses import JSONResponse
 
 from app.api.v1.schemas import StatusResponseSchema
 from app.exceptions import (
-    ActionNotAllowed,
-    AlreadyIsGroupMember,
-    AlreadyIsNotGroupMember,
-    AuthDataNotFound,
+    ActionNotAllowedError,
+    AlreadyIsGroupMemberError,
+    AlreadyIsNotGroupMemberError,
+    AuthDataNotFoundError,
     CannotConnectToTaskQueueError,
-    CannotStopRunException,
-    ConnectionDeleteException,
-    ConnectionNotFound,
-    ConnectionOwnerException,
-    DifferentTransferAndConnectionsGroups,
-    DifferentTransferAndQueueGroups,
-    DifferentTypeConnectionsAndParams,
-    GroupAdminNotFound,
-    GroupAlreadyExists,
-    GroupNotFound,
-    QueueDeleteException,
-    QueueNotFoundException,
-    RunNotFoundException,
-    SyncmasterException,
-    TransferNotFound,
-    TransferOwnerException,
-    UsernameAlreadyExists,
-    UserNotFound,
+    CannotStopRunError,
+    ConnectionDeleteError,
+    ConnectionNotFoundError,
+    ConnectionOwnerError,
+    DifferentTransferAndConnectionsGroupsError,
+    DifferentTransferAndQueueGroupError,
+    DifferentTypeConnectionsAndParamsError,
+    GroupAdminNotFoundError,
+    GroupAlreadyExistsError,
+    GroupNotFoundError,
+    QueueDeleteError,
+    QueueNotFoundError,
+    RunNotFoundError,
+    SyncmasterError,
+    TransferNotFoundError,
+    TransferOwnerError,
+    UsernameAlreadyExistsError,
+    UserNotFoundError,
 )
 
 logger = logging.getLogger(__name__)
@@ -37,115 +37,115 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     return exception_json_response(status_code=exc.status_code, detail=exc.detail)
 
 
-async def syncmsater_exception_handler(request: Request, exc: SyncmasterException):
-    if isinstance(exc, AuthDataNotFound):
+async def syncmsater_exception_handler(request: Request, exc: SyncmasterError):
+    if isinstance(exc, AuthDataNotFoundError):
         return exception_json_response(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Credentials not found. {exc.message}",
         )
 
-    if isinstance(exc, ConnectionDeleteException):
+    if isinstance(exc, ConnectionDeleteError):
         return exception_json_response(status_code=status.HTTP_409_CONFLICT, detail=exc.message)
 
-    if isinstance(exc, ActionNotAllowed):
+    if isinstance(exc, ActionNotAllowedError):
         return exception_json_response(status_code=status.HTTP_403_FORBIDDEN, detail="You have no power here")
 
-    if isinstance(exc, GroupNotFound):
+    if isinstance(exc, GroupNotFoundError):
         return exception_json_response(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Group not found",
         )
 
-    if isinstance(exc, RunNotFoundException):
+    if isinstance(exc, RunNotFoundError):
         return exception_json_response(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Run not found",
         )
 
-    if isinstance(exc, QueueNotFoundException):
+    if isinstance(exc, QueueNotFoundError):
         return exception_json_response(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Queue not found",
         )
 
-    if isinstance(exc, GroupAdminNotFound):
+    if isinstance(exc, GroupAdminNotFoundError):
         return exception_json_response(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Admin not found",
         )
-    if isinstance(exc, GroupAlreadyExists):
+    if isinstance(exc, GroupAlreadyExistsError):
         return exception_json_response(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Group name already taken",
         )
 
-    if isinstance(exc, AlreadyIsNotGroupMember):
+    if isinstance(exc, AlreadyIsNotGroupMemberError):
         return exception_json_response(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User already is not group member",
         )
 
-    if isinstance(exc, AlreadyIsGroupMember):
+    if isinstance(exc, AlreadyIsGroupMemberError):
         return exception_json_response(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User already is group member",
         )
 
-    if isinstance(exc, UserNotFound):
+    if isinstance(exc, UserNotFoundError):
         return exception_json_response(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
 
-    if isinstance(exc, UsernameAlreadyExists):
+    if isinstance(exc, UsernameAlreadyExistsError):
         return exception_json_response(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username is already taken",
         )
 
-    if isinstance(exc, ConnectionNotFound):
+    if isinstance(exc, ConnectionNotFoundError):
         return exception_json_response(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Connection not found",
         )
 
-    if isinstance(exc, ConnectionOwnerException):
+    if isinstance(exc, ConnectionOwnerError):
         return exception_json_response(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot create connection with that user_id and group_id values",
         )
 
-    if isinstance(exc, TransferNotFound):
+    if isinstance(exc, TransferNotFoundError):
         return exception_json_response(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Transfer not found",
         )
 
-    if isinstance(exc, TransferOwnerException):
+    if isinstance(exc, TransferOwnerError):
         return exception_json_response(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot create transfer with that group_id value",
         )
 
-    if isinstance(exc, DifferentTransferAndConnectionsGroups):
+    if isinstance(exc, DifferentTransferAndConnectionsGroupsError):
         return exception_json_response(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Connections should belong to the transfer group",
         )
 
-    if isinstance(exc, DifferentTransferAndQueueGroups):
+    if isinstance(exc, DifferentTransferAndQueueGroupError):
         return exception_json_response(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Queue should belong to the transfer group",
         )
 
-    if isinstance(exc, DifferentTypeConnectionsAndParams):
+    if isinstance(exc, DifferentTypeConnectionsAndParamsError):
         return exception_json_response(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=exc.message,
         )
 
-    if isinstance(exc, QueueDeleteException):
+    if isinstance(exc, QueueDeleteError):
         return exception_json_response(
             status_code=status.HTTP_409_CONFLICT,
             detail=exc.message,
@@ -157,7 +157,7 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterExceptio
             detail=f"Syncmaster not connected to task queue. Run {exc.run_id} was failed",
         )
 
-    if isinstance(exc, CannotStopRunException):
+    if isinstance(exc, CannotStopRunError):
         return exception_json_response(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Cannot stop run {exc.run_id}. Current status is {exc.current_status}",

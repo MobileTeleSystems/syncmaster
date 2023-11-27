@@ -1,14 +1,14 @@
-from app.exceptions.base import EntityNotFound, SyncmasterException
+from app.exceptions.base import EntityNotFoundError, SyncmasterError
 
 
-class QueueNotFoundException(EntityNotFound):
+class QueueNotFoundError(EntityNotFoundError):
     pass
 
 
-class QueueDeleteException(SyncmasterException):
+class QueueDeleteError(SyncmasterError):
     def __init__(self, message: str) -> None:
         self.message = message
 
 
-class DifferentTransferAndQueueGroups(SyncmasterException):
+class DifferentTransferAndQueueGroupError(SyncmasterError):
     pass

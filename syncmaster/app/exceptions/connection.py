@@ -1,22 +1,22 @@
-from app.exceptions.base import EntityNotFound, SyncmasterException
+from app.exceptions.base import EntityNotFoundError, SyncmasterError
 
 
-class ConnectionNotFound(EntityNotFound):
+class ConnectionNotFoundError(EntityNotFoundError):
     pass
 
 
-class ConnectionOwnerException(SyncmasterException):
+class ConnectionOwnerError(SyncmasterError):
     pass
 
 
-class ConnectionTypeNotRecognizedException(SyncmasterException):
+class ConnectionTypeNotRecognizedError(SyncmasterError):
     pass
 
 
-class UserDoNotHaveRightsInTheTargetGroup(SyncmasterException):
+class UserDoNotHaveRightsInTheTargetGroupError(SyncmasterError):
     pass
 
 
-class ConnectionDeleteException(SyncmasterException):
+class ConnectionDeleteError(SyncmasterError):
     def __init__(self, message: str) -> None:
         self.message = message
