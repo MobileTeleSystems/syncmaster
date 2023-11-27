@@ -62,6 +62,34 @@ async def test_groupless_user_cannot_update_connection(
     assert result.status_code == 404
 
 
+async def test_check_name_field_validation_on_update_connection(
+    client: AsyncClient,
+    group_connection: MockConnection,
+    role_user_plus: TestUserRoles,
+):
+    # Arrange
+    user = group_connection.owner_group.get_member_of_role(role_user_plus)
+
+    # Act
+    result = await client.patch(
+        f"v1/connections/{group_connection.id}",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={"name": ""},
+    )
+
+    # Assert
+    assert result.json() == {
+        "detail": [
+            {
+                "ctx": {"limit_value": 1},
+                "loc": ["body", "name"],
+                "msg": "ensure this value has at least 1 characters",
+                "type": "value_error.any_str.min_length",
+            }
+        ]
+    }
+
+
 async def test_group_member_cannot_update_other_group_connection(
     client: AsyncClient,
     group: MockGroup,

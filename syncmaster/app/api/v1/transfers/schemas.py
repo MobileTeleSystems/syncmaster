@@ -9,6 +9,7 @@ from app.api.v1.schemas import (
     INCREMENTAL_TYPE,
     ORACLE_TYPE,
     POSTGRES_TYPE,
+    NameConstr,
     PageSchema,
 )
 from app.db.models import Status
@@ -78,7 +79,7 @@ class CreateTransferSchema(BaseModel):
     group_id: int
     source_connection_id: int
     target_connection_id: int
-    name: str
+    name: NameConstr  # type: ignore # noqa: F722
     description: str
     is_scheduled: bool
     queue_id: int
@@ -108,7 +109,7 @@ class CreateTransferSchema(BaseModel):
 class UpdateTransferSchema(BaseModel):
     source_connection_id: int | None
     target_connection_id: int | None
-    name: str | None
+    name: NameConstr | None  # type: ignore # noqa: F722
     description: str | None
     is_scheduled: bool | None
     schedule: str | None

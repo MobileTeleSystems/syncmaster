@@ -137,6 +137,41 @@ async def test_check_fields_validation_on_create_connection(
         headers={"Authorization": f"Bearer {user.token}"},
         json={
             "group_id": group_connection.id,
+            "name": "",
+            "description": "",
+            "connection_data": {
+                "type": "postgres",
+                "host": "127.0.0.1",
+                "port": 5432,
+                "database_name": "postgres",
+            },
+            "auth_data": {
+                "type": "postgres",
+                "user": "user",
+                "password": "secret",
+            },
+        },
+    )
+
+    # Assert
+    assert result.status_code == 422
+    assert result.json() == {
+        "detail": [
+            {
+                "ctx": {"limit_value": 1},
+                "loc": ["body", "name"],
+                "msg": "ensure this value has at least 1 characters",
+                "type": "value_error.any_str.min_length",
+            }
+        ],
+    }
+
+    # Act
+    result = await client.post(
+        "v1/connections",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "group_id": group_connection.id,
             "name": None,
             "description": "",
             "connection_data": {

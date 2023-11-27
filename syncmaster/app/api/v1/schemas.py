@@ -1,7 +1,7 @@
 import abc
 from typing import Any, Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, constr
 
 from app.db.utils import Pagination
 
@@ -14,6 +14,9 @@ INCREMENTAL_TYPE = Literal["incremental"]
 HIVE_TYPE = Literal["hive"]
 ORACLE_TYPE = Literal["oracle"]
 POSTGRES_TYPE = Literal["postgres"]
+
+
+NameConstr = constr(min_length=1)
 
 
 class StatusResponseSchema(BaseModel):
