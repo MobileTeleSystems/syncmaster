@@ -11,6 +11,10 @@ class TransferNotFoundError(SyncmasterError):
     pass
 
 
+class DuplicatedTransferNameError(SyncmasterError):
+    pass
+
+
 class DifferentTransferAndConnectionsGroupsError(SyncmasterError):
     pass
 

@@ -196,6 +196,7 @@ async def copy_transfer(
         copied_source_connection = await unit_of_work.connection.copy(
             connection_id=transfer.source_connection_id,
             new_group_id=transfer_data.new_group_id,
+            new_name=transfer_data.new_source_connection_name,
         )
 
         copied_target_connection = copied_source_connection
@@ -204,6 +205,7 @@ async def copy_transfer(
             copied_target_connection = await unit_of_work.connection.copy(
                 connection_id=transfer.target_connection_id,
                 new_group_id=transfer_data.new_group_id,
+                new_name=transfer_data.new_target_connection_name,
             )
 
         copied_transfer = await unit_of_work.transfer.copy(
@@ -212,6 +214,7 @@ async def copy_transfer(
             new_source_connection=copied_source_connection.id,
             new_target_connection=copied_target_connection.id,
             new_queue_id=transfer_data.new_queue_id,
+            new_name=transfer_data.new_name,
         )
 
         if transfer_data.remove_source:

@@ -288,6 +288,7 @@ async def copy_connection(
         await unit_of_work.connection.copy(
             connection_id=connection_id,
             new_group_id=copy_connection_data.new_group_id,
+            new_name=copy_connection_data.new_name,
         )
 
         if copy_connection_data.remove_source:

@@ -17,6 +17,8 @@ from app.exceptions import (
     DifferentTransferAndConnectionsGroupsError,
     DifferentTransferAndQueueGroupError,
     DifferentTypeConnectionsAndParamsError,
+    DuplicatedConnectionNameError,
+    DuplicatedTransferNameError,
     GroupAdminNotFoundError,
     GroupAlreadyExistsError,
     GroupNotFoundError,
@@ -149,6 +151,18 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterError):
         return exception_json_response(
             status_code=status.HTTP_409_CONFLICT,
             detail=exc.message,
+        )
+
+    if isinstance(exc, DuplicatedConnectionNameError):
+        return exception_json_response(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="The connection name already exists in the target group, please specify a new one",
+        )
+
+    if isinstance(exc, DuplicatedTransferNameError):
+        return exception_json_response(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="The transfer name already exists in the target group, please specify a new one",
         )
 
     if isinstance(exc, CannotConnectToTaskQueueError):

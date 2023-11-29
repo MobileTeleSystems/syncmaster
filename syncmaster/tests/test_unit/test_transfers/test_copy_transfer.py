@@ -1,3 +1,4 @@
+import secrets
 from operator import or_
 
 import pytest
@@ -301,6 +302,130 @@ async def test_superuser_can_copy_transfer_with_remove_source(
 
     assert copied_transfer_response.json()["source_connection_id"] == new_connection_source_response.json()["id"]
     assert copied_transfer_response.json()["target_connection_id"] == new_connection_target_response.json()["id"]
+
+
+async def test_maintainer_plus_can_copy_transfer_with_new_name(
+    client: AsyncClient,
+    session: AsyncSession,
+    event_loop,
+    group_transfer_and_group_maintainer_plus: str,
+    group_transfer: MockTransfer,
+    group_queue: Queue,
+    request,
+):
+    # Arrange
+    role = group_transfer_and_group_maintainer_plus
+    user = group_transfer.owner_group.get_member_of_role(role)
+    new_name = f"{secrets.token_hex(5)}"
+
+    # Act
+    result = await client.post(
+        f"v1/transfers/{group_transfer.id}/copy_transfer",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "new_group_id": group_queue.group_id,
+            "new_queue_id": group_queue.id,
+            "new_name": new_name,
+        },
+    )
+
+    result_json = result.json()
+
+    def delete_rows():
+        async def afin():
+            delete_new_connections_query = delete(Connection).where(
+                or_(
+                    Connection.id == result_json["source_connection_id"],
+                    Connection.id == result_json["target_connection_id"],
+                ),
+            )
+            await session.execute(delete_new_connections_query)
+            await session.commit()
+
+        event_loop.run_until_complete(afin())
+
+    request.addfinalizer(delete_rows)
+
+    # Assert
+    assert result.status_code == 200
+
+    copied_transfer_response = await client.get(
+        f"v1/transfers/{result_json['copied_transfer_id']}",
+        headers={"Authorization": f"Bearer {user.token}"},
+    )
+
+    assert copied_transfer_response.json()["name"] == new_name
+
+
+async def test_check_validate_copy_transfer_parameter_new_name(
+    client: AsyncClient,
+    session: AsyncSession,
+    event_loop,
+    group_transfer_and_group_maintainer_plus: str,
+    group_transfer: MockTransfer,
+    group_queue: Queue,
+):
+    # Arrange
+    role = group_transfer_and_group_maintainer_plus
+    user = group_transfer.owner_group.get_member_of_role(role)
+    new_name = ""
+
+    # Act
+    result = await client.post(
+        f"v1/transfers/{group_transfer.id}/copy_transfer",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "new_group_id": group_queue.group_id,
+            "new_queue_id": group_queue.id,
+            "new_name": new_name,
+        },
+    )
+
+    result.json()
+
+    # Assert
+    assert result.json() == {
+        "detail": [
+            {
+                "ctx": {"limit_value": 1},
+                "loc": ["body", "new_name"],
+                "msg": "ensure this value has at least 1 characters",
+                "type": "value_error.any_str.min_length",
+            }
+        ],
+    }
+
+
+async def test_maintainer_plus_can_not_copy_transfer_with_same_name_in_new_group(
+    client: AsyncClient,
+    session: AsyncSession,
+    event_loop,
+    group_transfer_with_same_name_maintainer_plus: str,
+    group_transfer: MockTransfer,
+    group_queue: Queue,
+):
+    # Arrange
+    role = group_transfer_with_same_name_maintainer_plus
+    user = group_transfer.owner_group.get_member_of_role(role)
+    new_name = "duplicated_group_transfer"
+
+    # Act
+    result = await client.post(
+        f"v1/transfers/{group_transfer.id}/copy_transfer",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "new_group_id": group_queue.group_id,
+            "new_queue_id": group_queue.id,
+            "new_name": new_name,
+        },
+    )
+
+    # Assert
+    assert result.json() == {
+        "message": "The transfer name already exists in the target group, please specify a new one",
+        "ok": False,
+        "status_code": 409,
+    }
 
 
 async def test_user_plus_cannot_copy_transfer_if_new_queue_in_another_group(

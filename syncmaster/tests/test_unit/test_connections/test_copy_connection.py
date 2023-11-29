@@ -1,3 +1,5 @@
+import secrets
+
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
@@ -397,6 +399,113 @@ async def test_user_plus_can_copy_connection_without_remove_source(
     }
 
 
+async def test_user_plus_can_copy_connection_with_new_connection_name(
+    client: AsyncClient,
+    session: AsyncSession,
+    role_user_plus: TestUserRoles,
+    group_connection_and_group_user_plus: str,
+    group_connection: MockConnection,
+    empty_group: MockGroup,
+):
+    # Arrange
+    role = group_connection_and_group_user_plus
+    user = group_connection.owner_group.get_member_of_role(role)
+    new_name = f"{secrets.token_hex(5)}"
+
+    # Act
+    result = await client.post(
+        f"v1/connections/{group_connection.id}/copy_connection",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={"new_group_id": empty_group.id, "new_name": new_name},
+    )
+
+    # Assert
+    assert result.status_code == 200
+    assert result.json() == {
+        "ok": True,
+        "status_code": 200,
+        "message": "Connection was copied",
+    }
+
+    # new connection with new name exist in target group
+    new_connection = await session.scalars(
+        select(Connection).filter(
+            Connection.name == new_name,
+            Connection.group_id == empty_group.group.id,
+        )
+    )
+    conn_with_old_name = await session.scalars(
+        select(Connection).filter(
+            Connection.name == group_connection.connection.name,
+            Connection.group_id == empty_group.group.id,
+        )
+    )
+    assert new_connection.one()
+    assert not conn_with_old_name.one_or_none()
+
+
+async def test_check_name_validation_copy_connection_with_new_connection_name(
+    client: AsyncClient,
+    session: AsyncSession,
+    role_user_plus: TestUserRoles,
+    group_connection_and_group_user_plus: str,
+    group_connection: MockConnection,
+    empty_group: MockGroup,
+):
+    # Arrange
+    role = group_connection_and_group_user_plus
+    user = group_connection.owner_group.get_member_of_role(role)
+    new_name = ""
+
+    # Act
+    result = await client.post(
+        f"v1/connections/{group_connection.id}/copy_connection",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={"new_group_id": empty_group.id, "new_name": new_name},
+    )
+
+    # Assert
+    assert result.json() == {
+        "detail": [
+            {
+                "ctx": {"limit_value": 1},
+                "loc": ["body", "new_name"],
+                "msg": "ensure this value has at least 1 characters",
+                "type": "value_error.any_str.min_length",
+            }
+        ],
+    }
+
+
+async def test_maintainer_plus_cannot_copy_connection_with_same_name_in_new_group(
+    client: AsyncClient,
+    session: AsyncSession,
+    settings: Settings,
+    group_connection_with_same_name_maintainer_plus: str,
+    group_connection: MockConnection,
+    empty_group: MockGroup,
+):
+    # Arrange
+    role = group_connection_with_same_name_maintainer_plus
+    user = group_connection.owner_group.get_member_of_role(role)
+
+    # Act
+    result = await client.post(
+        f"v1/connections/{group_connection.id}/copy_connection",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "new_group_id": empty_group.id,
+        },
+    )
+
+    # Assert
+    assert result.json() == {
+        "message": "The connection name already exists in the target group, please specify a new one",
+        "ok": False,
+        "status_code": 409,
+    }
+
+
 async def test_user_below_can_not_copy_connection_with_remove_source(
     client: AsyncClient,
     role_user_or_below: TestUserRoles,
@@ -427,7 +536,7 @@ async def test_user_below_can_not_copy_connection_with_remove_source(
     assert result.status_code == 403
 
 
-async def test_can_not_copy_connection_with_unknown_connection_error(
+async def test_cannot_copy_connection_with_unknown_connection_error(
     client: AsyncClient,
     role_user_plus: TestUserRoles,
     group_connection_and_group_user_plus: str,
@@ -456,12 +565,10 @@ async def test_can_not_copy_connection_with_unknown_connection_error(
     assert result.status_code == 404
 
 
-async def test_superuser_can_not_copy_unknown_connection_error(
+async def test_superuser_cannot_copy_unknown_connection_error(
     client: AsyncClient,
-    group_connection_and_group_user_plus: str,  # do not delete
     superuser: MockUser,
     empty_group: MockGroup,
-    group_connection: MockConnection,
 ):
     # Act
     result = await client.post(
@@ -481,7 +588,7 @@ async def test_superuser_can_not_copy_unknown_connection_error(
     assert result.status_code == 404
 
 
-async def test_can_not_copy_connection_with_unknown_new_group_id_error(
+async def test_cannot_copy_connection_with_unknown_new_group_id_error(
     client: AsyncClient,
     role_user_plus: TestUserRoles,
     group_connection_and_group_user_plus: str,
@@ -511,7 +618,6 @@ async def test_can_not_copy_connection_with_unknown_new_group_id_error(
 
 async def test_superuser_cannot_copy_connection_with_unknown_new_group_id_error(
     client: AsyncClient,
-    group_connection_and_group_user_plus: str,  # do not delete
     superuser: MockUser,
     group_connection: MockConnection,
 ):

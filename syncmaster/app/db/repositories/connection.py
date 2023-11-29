@@ -10,6 +10,7 @@ from app.db.utils import Pagination
 from app.exceptions import (
     ConnectionNotFoundError,
     ConnectionOwnerError,
+    DuplicatedConnectionNameError,
     EntityNotFoundError,
     GroupNotFoundError,
     SyncmasterError,
@@ -109,9 +110,10 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         self,
         connection_id: int,
         new_group_id: int,
+        new_name: str | None,
     ) -> Connection:
         try:
-            kwargs_for_copy = dict(group_id=new_group_id)
+            kwargs_for_copy = dict(group_id=new_group_id, name=new_name)
             new_connection = await self._copy(
                 Connection.id == connection_id,
                 **kwargs_for_copy,
@@ -130,4 +132,6 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
             raise UserNotFoundError from err
         if constraint == "ck__connection__owner_constraint":
             raise ConnectionOwnerError from err
+        if constraint == "uq__connection__name_group_id":
+            raise DuplicatedConnectionNameError from err
         raise SyncmasterError from err

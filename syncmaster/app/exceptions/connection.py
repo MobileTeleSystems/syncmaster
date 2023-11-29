@@ -17,6 +17,10 @@ class UserDoNotHaveRightsInTheTargetGroupError(SyncmasterError):
     pass
 
 
+class DuplicatedConnectionNameError(SyncmasterError):
+    pass
+
+
 class ConnectionDeleteError(SyncmasterError):
     def __init__(self, message: str) -> None:
         self.message = message
