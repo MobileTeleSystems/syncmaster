@@ -11,6 +11,7 @@ from app.db.repositories.repository_with_owner import RepositoryWithOwner
 from app.db.utils import Pagination
 from app.exceptions import (
     ConnectionNotFoundError,
+    DuplicatedTransferNameError,
     EntityNotFoundError,
     GroupNotFoundError,
     QueueNotFoundError,
@@ -149,6 +150,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         new_group_id: int | None,
         new_source_connection: int | None,
         new_target_connection: int | None,
+        new_name: str | None,
     ) -> Transfer:
         try:
             kwargs = dict(
@@ -156,6 +158,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
                 source_connection_id=new_source_connection,
                 target_connection_id=new_target_connection,
                 queue_id=new_queue_id,
+                name=new_name,
             )
             new_transfer = await self._copy(Transfer.id == transfer_id, **kwargs)
 
@@ -191,5 +194,8 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
 
         if constraint == "fk__transfer__queue_id__queue":
             raise QueueNotFoundError from err
+
+        if constraint == "uq__transfer__name_group_id":
+            raise DuplicatedTransferNameError
 
         raise SyncmasterError from err

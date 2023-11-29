@@ -72,6 +72,9 @@ class TransferPageSchema(PageSchema):
 class CopyTransferSchema(BaseModel):
     new_group_id: int
     new_queue_id: int
+    new_source_connection_name: NameConstr | None = None  # type: ignore # noqa: F722
+    new_target_connection_name: NameConstr | None = None  # type: ignore # noqa: F722
+    new_name: NameConstr | None  # type: ignore # noqa: F722
     remove_source: bool = False
 
 

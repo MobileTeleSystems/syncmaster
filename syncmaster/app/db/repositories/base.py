@@ -44,6 +44,10 @@ class Repository(Generic[Model], ABC):
 
         d = self._model_as_dict(origin_model)
 
+        for k, v in kwargs.items():
+            if v is None:
+                kwargs.update({k: getattr(origin_model, k)})
+
         d.update(kwargs)  # Process kwargs in order to keep only what needs to be updated
         query_insert_new_row = insert(self._model).values(**d).returning(self._model)
         try:

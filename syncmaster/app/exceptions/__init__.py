@@ -8,6 +8,7 @@ from app.exceptions.connection import (
     ConnectionNotFoundError,
     ConnectionOwnerError,
     ConnectionTypeNotRecognizedError,
+    DuplicatedConnectionNameError,
 )
 from app.exceptions.credentials import AuthDataNotFoundError
 from app.exceptions.group import (
@@ -31,6 +32,7 @@ from app.exceptions.run import (
 from app.exceptions.transfer import (
     DifferentTransferAndConnectionsGroupsError,
     DifferentTypeConnectionsAndParamsError,
+    DuplicatedTransferNameError,
     TransferNotFoundError,
     TransferOwnerError,
 )
@@ -50,6 +52,8 @@ __all__ = [
     "DifferentTransferAndConnectionsGroupsError",
     "DifferentTransferAndQueueGroupError",
     "DifferentTypeConnectionsAndParamsError",
+    "DuplicatedConnectionNameError",
+    "DuplicatedTransferNameError",
     "EntityNotFoundError",
     "GroupAdminNotFoundError",
     "GroupAlreadyExistsError",

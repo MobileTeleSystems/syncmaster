@@ -196,4 +196,5 @@ class CreateConnectionSchema(BaseModel):
 
 class ConnectionCopySchema(BaseModel):
     new_group_id: int
+    new_name: NameConstr | None = None  # type: ignore # noqa: F722
     remove_source: bool = False

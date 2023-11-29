@@ -413,6 +413,66 @@ async def group_connection_and_group_maintainer_plus(
 
 
 @pytest_asyncio.fixture
+async def group_connection_with_same_name_maintainer_plus(
+    session: AsyncSession,
+    settings: Settings,
+    empty_group: MockGroup,
+    group_connection: MockConnection,
+    role_maintainer_plus: TestUserRoles,
+    role_maintainer_or_below_without_guest: TestUserRoles,
+) -> str:
+    user = group_connection.owner_group.get_member_of_role(role_maintainer_plus)
+
+    await add_user_to_group(
+        user=user.user,
+        group_id=empty_group.group.id,
+        session=session,
+        role=role_maintainer_or_below_without_guest,
+    )
+    connection = await create_connection(
+        session=session,
+        name=group_connection.connection.name,
+        group_id=empty_group.group.id,
+    )
+
+    credentials = await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=connection.id,
+    )
+
+    yield role_maintainer_plus
+    await session.delete(connection)
+    await session.delete(credentials)
+    await session.commit()
+
+
+@pytest_asyncio.fixture
+async def group_connection_with_same_name(
+    session: AsyncSession,
+    settings: Settings,
+    empty_group: MockGroup,
+    group_connection: MockConnection,
+) -> None:
+    connection = await create_connection(
+        session=session,
+        name=group_connection.connection.name,
+        group_id=empty_group.group.id,
+    )
+
+    credentials = await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=connection.id,
+    )
+
+    yield
+    await session.delete(connection)
+    await session.delete(credentials)
+    await session.commit()
+
+
+@pytest_asyncio.fixture
 async def group_connection_and_group_user_plus(
     session: AsyncSession,
     empty_group: MockGroup,
