@@ -116,15 +116,15 @@ async def group_transfer(
     session: AsyncSession,
     settings: Settings,
 ) -> AsyncGenerator[MockTransfer, None]:
-    group_admin = await create_user(
+    group_owner = await create_user(
         session=session,
-        username="group_transfer_admin",
+        username="group_transfer_owner",
         is_active=True,
     )
     group = await create_group(
         session=session,
         name="group_for_group_transfer",
-        admin_id=group_admin.id,
+        owner_id=group_owner.id,
     )
 
     queue = await create_queue(
@@ -151,9 +151,9 @@ async def group_transfer(
     await session.commit()
     mock_group = MockGroup(
         group=group,
-        admin=MockUser(
-            user=group_admin,
-            auth_token=sign_jwt(group_admin.id, settings),
+        owner=MockUser(
+            user=group_owner,
+            auth_token=sign_jwt(group_owner.id, settings),
             role=TestUserRoles.Owner,
         ),
         members=members,
@@ -213,7 +213,7 @@ async def group_transfer(
     await session.delete(source_connection)
     await session.delete(target_connection)
     await session.delete(group)
-    await session.delete(group_admin)
+    await session.delete(group_owner)
     await session.delete(queue)
     for member in members:
         await session.delete(member.user)

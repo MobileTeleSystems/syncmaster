@@ -26,8 +26,8 @@ from app.config import Settings
 
 @pytest_asyncio.fixture
 async def group_run(session: AsyncSession, settings: Settings) -> MockTransfer:
-    group_admin = await create_user(session=session, username="group_admin_connection", is_active=True)
-    group = await create_group(session=session, name="connection_group", admin_id=group_admin.id)
+    group_owner = await create_user(session=session, username="group_owner_connection", is_active=True)
+    group = await create_group(session=session, name="connection_group", owner_id=group_owner.id)
     members: list[MockUser] = []
     for username in (
         "connection_group_member_maintainer",
@@ -45,9 +45,9 @@ async def group_run(session: AsyncSession, settings: Settings) -> MockTransfer:
     await session.commit()
     mock_group = MockGroup(
         group=group,
-        admin=MockUser(
-            user=group_admin,
-            auth_token=sign_jwt(group_admin.id, settings),
+        owner=MockUser(
+            user=group_owner,
+            auth_token=sign_jwt(group_owner.id, settings),
             role=TestUserRoles.Owner,
         ),
         members=members,
@@ -93,7 +93,7 @@ async def group_run(session: AsyncSession, settings: Settings) -> MockTransfer:
     await session.delete(source_connection)
     await session.delete(target_connection)
     await session.delete(group)
-    await session.delete(group_admin)
+    await session.delete(group_owner)
     await session.delete(queue)
     for member in members:
         await session.delete(member.user)

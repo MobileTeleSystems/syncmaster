@@ -7,7 +7,7 @@ from app.db.models import GroupMemberRole
 class UpdateGroupSchema(BaseModel):
     name: NameConstr  # type: ignore # noqa: F722
     description: str
-    admin_id: int
+    owner_id: int
 
 
 class AddUserSchema(BaseModel):
@@ -21,7 +21,7 @@ class ReadGroupSchema(BaseModel):
     id: int
     name: NameConstr  # type: ignore # noqa: F722
     description: str
-    admin_id: int
+    owner_id: int
 
     class Config:
         orm_mode = True

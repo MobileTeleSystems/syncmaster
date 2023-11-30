@@ -89,10 +89,10 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         'User' does not have WRITE permission in the QUEUE repository
         """
 
-        admin_query = (
+        owner_query = (
             (
                 select(Group).where(
-                    Group.admin_id == user.id,
+                    Group.owner_id == user.id,
                     Group.id == group_id,
                 )
             )
@@ -100,9 +100,9 @@ class QueueRepository(RepositoryWithOwner[Queue]):
             .select()
         )
 
-        is_admin = await self._session.scalar(admin_query)
+        is_owner = await self._session.scalar(owner_query)
 
-        if is_admin:
+        if is_owner:
             return Permission.DELETE
 
         group_role_query = select(UserGroup).where(
@@ -143,7 +143,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         if user.is_superuser:
             return Permission.DELETE
 
-        admin_query = (
+        owner_query = (
             (
                 select(self._model)
                 .join(
@@ -151,7 +151,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
                     Group.id == self._model.group_id,
                 )
                 .where(
-                    Group.admin_id == user.id,
+                    Group.owner_id == user.id,
                     self._model.id == resource_id,
                 )
             )
@@ -159,9 +159,9 @@ class QueueRepository(RepositoryWithOwner[Queue]):
             .select()
         )
 
-        is_admin = await self._session.scalar(admin_query)
+        is_owner = await self._session.scalar(owner_query)
 
-        if is_admin:
+        if is_owner:
             return Permission.DELETE
 
         group_role_query = (

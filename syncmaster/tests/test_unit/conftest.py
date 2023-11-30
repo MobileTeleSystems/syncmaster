@@ -124,38 +124,38 @@ async def deleted_user(session: AsyncSession, settings: Settings):
 
 @pytest_asyncio.fixture
 async def empty_group(session: AsyncSession, settings) -> MockGroup:
-    admin = await create_user(
+    owner = await create_user(
         session=session,
-        username="empty_group_admin",
+        username="empty_group_owner",
         is_active=True,
     )
     group = await create_group(
         session=session,
         name="empty_group",
-        admin_id=admin.id,
+        owner_id=owner.id,
     )
     yield MockGroup(
         group=group,
-        admin=MockUser(
-            user=admin,
-            auth_token=sign_jwt(admin.id, settings),
+        owner=MockUser(
+            user=owner,
+            auth_token=sign_jwt(owner.id, settings),
             role=TestUserRoles.Owner,
         ),
         members=[],
     )
     await session.delete(group)
-    await session.delete(admin)
+    await session.delete(owner)
     await session.commit()
 
 
 @pytest_asyncio.fixture
 async def group(session: AsyncSession, settings: Settings) -> MockGroup:
-    admin = await create_user(
+    owner = await create_user(
         session=session,
-        username="notempty_group_admin",
+        username="notempty_group_owner",
         is_active=True,
     )
-    group = await create_group(session=session, name="notempty_group", admin_id=admin.id)
+    group = await create_group(session=session, name="notempty_group", owner_id=owner.id)
     members: list[MockUser] = []
     for username in (
         "not_empty_group_member_maintainer",
@@ -174,15 +174,15 @@ async def group(session: AsyncSession, settings: Settings) -> MockGroup:
     await session.commit()
     yield MockGroup(
         group=group,
-        admin=MockUser(
-            user=admin,
-            auth_token=sign_jwt(admin.id, settings),
+        owner=MockUser(
+            user=owner,
+            auth_token=sign_jwt(owner.id, settings),
             role=TestUserRoles.Owner,
         ),
         members=members,
     )
     await session.delete(group)
-    await session.delete(admin)
+    await session.delete(owner)
     for member in members:
         await session.delete(member.user)
     await session.commit()
@@ -193,15 +193,15 @@ async def mock_group(
     session: AsyncSession,
     settings: Settings,
 ):
-    group_admin = await create_user(
+    group_owner = await create_user(
         session=session,
-        username=f"{secrets.token_hex(5)}_group_connection_admin",
+        username=f"{secrets.token_hex(5)}_group_connection_owner",
         is_active=True,
     )
     group = await create_group(
         session=session,
         name=f"{secrets.token_hex(5)}_group_for_group_connection",
-        admin_id=group_admin.id,
+        owner_id=group_owner.id,
     )
 
     members: list[MockUser] = []
@@ -223,14 +223,14 @@ async def mock_group(
 
     yield MockGroup(
         group=group,
-        admin=MockUser(
-            user=group_admin,
-            auth_token=sign_jwt(group_admin.id, settings),
+        owner=MockUser(
+            user=group_owner,
+            auth_token=sign_jwt(group_owner.id, settings),
             role=TestUserRoles.Owner,
         ),
         members=members,
     )
-    await session.delete(group_admin)
+    await session.delete(group_owner)
     await session.delete(group)
     for member in members:
         await session.delete(member.user)
@@ -329,15 +329,15 @@ async def group_connection(
     session: AsyncSession,
     settings: Settings,
 ) -> MockConnection:
-    group_admin = await create_user(
+    group_owner = await create_user(
         session=session,
-        username=f"{secrets.token_hex(5)}_group_connection_admin",
+        username=f"{secrets.token_hex(5)}_group_connection_owner",
         is_active=True,
     )
     group = await create_group(
         session=session,
         name=f"{secrets.token_hex(5)}_group_for_group_connection",
-        admin_id=group_admin.id,
+        owner_id=group_owner.id,
     )
     members: list[MockUser] = []
     for username in (
@@ -375,9 +375,9 @@ async def group_connection(
         connection=connection,
         owner_group=MockGroup(
             group=group,
-            admin=MockUser(
-                user=group_admin,
-                auth_token=sign_jwt(group_admin.id, settings),
+            owner=MockUser(
+                user=group_owner,
+                auth_token=sign_jwt(group_owner.id, settings),
                 role=TestUserRoles.Owner,
             ),
             members=members,
@@ -385,7 +385,7 @@ async def group_connection(
     )
     await session.delete(credentials)
     await session.delete(connection)
-    await session.delete(group_admin)
+    await session.delete(group_owner)
     await session.delete(group)
     for member in members:
         await session.delete(member.user)

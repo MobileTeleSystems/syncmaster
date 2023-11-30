@@ -41,14 +41,14 @@ class Group(Base, TimestampMixin, DeletableMixin):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     name: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(String(512), nullable=False, default="")
-    admin_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
 
-    admin: Mapped[User] = relationship("User")
+    owner: Mapped[User] = relationship("User")
     members: Mapped[list[User]] = relationship("User", secondary="user_group")
     queue: Mapped[Queue] = relationship(back_populates="group")
 
     def __repr__(self) -> str:
-        return f"Group(name={self.name}, admin_id={self.admin_id})"
+        return f"Group(name={self.name}, owner_id={self.owner_id})"
 
 
 class UserGroup(Base):
