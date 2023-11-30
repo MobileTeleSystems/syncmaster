@@ -30,8 +30,9 @@ async def test_user_plus_can_create_run_of_transfer_his_group(
 
     # Act
     result = await client.post(
-        f"v1/transfers/{group_transfer.id}/runs",
+        f"v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
+        json={"transfer_id": group_transfer.id},
     )
 
     # Assert
@@ -65,8 +66,9 @@ async def test_groupless_user_cannot_create_run(
 
     # Act
     result = await client.post(
-        f"v1/transfers/{group_transfer.id}/runs",
+        f"v1/runs",
         headers={"Authorization": f"Bearer {simple_user.token}"},
+        json={"transfer_id": group_transfer.id},
     )
 
     # Assert
@@ -92,8 +94,9 @@ async def test_group_member_cannot_create_run_of_other_group_transfer(
 
     # Act
     result = await client.post(
-        f"v1/transfers/{group_transfer.id}/runs",
+        f"v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
+        json={"transfer_id": group_transfer.id},
     )
 
     # Assert
@@ -123,8 +126,9 @@ async def test_superuser_can_create_run(
 
     # Act
     result = await client.post(
-        f"v1/transfers/{group_transfer.id}/runs",
+        f"v1/runs",
         headers={"Authorization": f"Bearer {superuser.token}"},
+        json={"transfer_id": group_transfer.id},
     )
     run = (
         await session.scalars(
@@ -154,7 +158,10 @@ async def test_unauthorized_user_cannot_create_run(
     mocker.patch("app.tasks.config.celery.send_task")
 
     # Act
-    result = await client.post(f"v1/transfers/{group_transfer.id}/runs")
+    result = await client.post(
+        f"v1/runs",
+        json={"transfer_id": group_transfer.id},
+    )
 
     # Assert
     assert result.json() == {
@@ -178,8 +185,9 @@ async def test_group_member_cannot_create_run_of_unknown_transfer_error(
 
     # Act
     result = await client.post(
-        "v1/transfers/-1/runs",
+        "v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
+        json={"transfer_id": -1},
     )
 
     # Assert
@@ -202,8 +210,9 @@ async def test_superuser_cannot_create_run_of_unknown_transfer_error(
 
     # Act
     result = await client.post(
-        "v1/transfers/-1/runs",
+        "v1/runs",
         headers={"Authorization": f"Bearer {superuser.token}"},
+        json={"transfer_id": -1},
     )
 
     # Assert

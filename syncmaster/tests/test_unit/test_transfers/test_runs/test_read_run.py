@@ -8,7 +8,6 @@ pytestmark = [pytest.mark.asyncio]
 async def test_user_plus_can_read_run(
     client: AsyncClient,
     group_run: MockRun,
-    simple_user: MockUser,
     role_user_plus: TestUserRoles,
 ):
     # Arrange
@@ -16,7 +15,7 @@ async def test_user_plus_can_read_run(
 
     # Act
     result = await client.get(
-        f"v1/transfers/{group_run.transfer.id}/runs/{group_run.id}",
+        f"v1/runs/{group_run.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
@@ -40,7 +39,7 @@ async def test_groupless_user_cannot_read_run(
 ) -> None:
     # Act
     result = await client.get(
-        f"v1/transfers/{group_run.transfer.id}/runs/{group_run.id}",
+        f"v1/runs/{group_run.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
 
@@ -56,7 +55,6 @@ async def test_groupless_user_cannot_read_run(
 async def test_another_group_member_cannot_read_run(
     client: AsyncClient,
     group_run: MockRun,
-    simple_user: MockUser,
     role_guest_plus: TestUserRoles,
     group: MockGroup,
 ):
@@ -65,7 +63,7 @@ async def test_another_group_member_cannot_read_run(
 
     # Act
     result = await client.get(
-        f"v1/transfers/{group_run.transfer.id}/runs/{group_run.id}",
+        f"v1/runs/{group_run.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
@@ -84,7 +82,7 @@ async def test_superuser_can_read_runs(
 ) -> None:
     # Act
     result = await client.get(
-        f"v1/transfers/{group_run.transfer.id}/runs/{group_run.id}",
+        f"v1/runs/{group_run.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 
@@ -106,7 +104,7 @@ async def test_unauthorized_user_cannot_read_run(
     group_run: MockRun,
 ) -> None:
     # Act
-    result = await client.get(f"v1/transfers/{group_run.transfer.id}/runs/{group_run.id}")
+    result = await client.get(f"v1/runs/{group_run.id}")
 
     # Assert
     assert result.json() == {
@@ -117,33 +115,9 @@ async def test_unauthorized_user_cannot_read_run(
     assert result.status_code == 401
 
 
-async def test_group_member_cannot_read_run_of_unknown_transfer_error(
-    client: AsyncClient,
-    group_run: MockRun,
-    simple_user: MockUser,
-    role_guest_plus: TestUserRoles,
-):
-    # Arrange
-    user = group_run.transfer.owner_group.get_member_of_role(role_guest_plus)
-
-    # Act
-    result = await client.get(
-        f"v1/transfers/-1/runs/{group_run.id}",
-        headers={"Authorization": f"Bearer {user.token}"},
-    )
-
-    # Assert
-    assert result.json() == {
-        "message": "Transfer not found",
-        "ok": False,
-        "status_code": 404,
-    }
-
-
 async def test_group_member_cannot_read_unknown_run_error(
     client: AsyncClient,
     group_run: MockRun,
-    simple_user: MockUser,
     role_guest_plus: TestUserRoles,
 ):
     # Arrange
@@ -151,32 +125,13 @@ async def test_group_member_cannot_read_unknown_run_error(
 
     # Act
     result = await client.get(
-        f"v1/transfers/{group_run.transfer.id}/runs/-1",
+        f"v1/runs/-1",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
     # Assert
     assert result.json() == {
         "message": "Run not found",
-        "ok": False,
-        "status_code": 404,
-    }
-
-
-async def test_superuser_cannot_read_run_of_unknown_transfer_error(
-    client: AsyncClient,
-    superuser: MockUser,
-    group_run: MockRun,
-) -> None:
-    # Act
-    result = await client.get(
-        f"v1/transfers/-1/runs/{group_run.id}",
-        headers={"Authorization": f"Bearer {superuser.token}"},
-    )
-
-    # Assert
-    assert result.json() == {
-        "message": "Transfer not found",
         "ok": False,
         "status_code": 404,
     }
@@ -189,7 +144,7 @@ async def test_superuser_cannot_read_unknown_run_error(
 ) -> None:
     # Act
     result = await client.get(
-        f"v1/transfers/{group_run.transfer.id}/runs/-1",
+        f"v1/runs/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 

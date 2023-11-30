@@ -198,12 +198,15 @@ async def drop_database(connection: AsyncConnection, db_name: str) -> None:
     await connection.execute(text(query))
 
 
-async def get_run_on_end(client: AsyncClient, transfer_id: int, run_id: int, token: str) -> dict[str, Any]:
+async def get_run_on_end(client: AsyncClient, run_id: int, token: str) -> dict[str, Any]:
     while True:
         result = await client.get(
-            f"v1/transfers/{transfer_id}/runs/{run_id}",
+            f"v1/runs/{run_id}",
             headers={"Authorization": f"Bearer {token}"},
         )
+        if result.status_code != 200:
+            raise Exception("Run not found")
+
         data = result.json()
         if data["status"] in [Status.FINISHED, Status.FAILED]:
             return data

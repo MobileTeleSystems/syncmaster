@@ -15,8 +15,9 @@ async def test_user_plus_can_read_runs_of_the_transfer(
 
     # Act
     result = await client.get(
-        f"v1/transfers/{group_run.transfer.id}/runs",
+        f"v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
+        params={"transfer_id": group_run.transfer.id},
     )
 
     # Assert
@@ -52,8 +53,9 @@ async def test_groupless_user_cannot_read_runs_transfer(
 ) -> None:
     # Act
     result = await client.get(
-        f"v1/transfers/{group_run.transfer.id}/runs",
+        f"v1/runs",
         headers={"Authorization": f"Bearer {simple_user.token}"},
+        params={"transfer_id": group_run.transfer.id},
     )
 
     # Arrange
@@ -72,8 +74,9 @@ async def test_superuser_can_read_runs(
 ) -> None:
     # Act
     result = await client.get(
-        f"v1/transfers/{group_run.transfer.id}/runs",
+        f"v1/runs",
         headers={"Authorization": f"Bearer {superuser.token}"},
+        params={"transfer_id": group_run.transfer.id},
     )
     # Assert
     assert result.json() == {
@@ -106,7 +109,10 @@ async def test_unauthorized_user_cannot_read_run(
     group_transfer: MockTransfer,
 ) -> None:
     # Act
-    result = await client.get(f"v1/transfers/{group_transfer.id}/runs")
+    result = await client.get(
+        f"v1/runs",
+        params={"transfer_id": group_transfer.id},
+    )
     # Assert
     assert result.status_code == 401
     assert result.json() == {
@@ -127,8 +133,9 @@ async def test_other_group_member_cannot_read_runs_of_the_transfer(
 
     # Act
     result = await client.get(
-        f"v1/transfers/{group_run.transfer.id}/runs",
+        f"v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
+        params={"transfer_id": group_run.transfer.id},
     )
 
     # Assert
@@ -149,8 +156,9 @@ async def test_group_member_cannot_read_runs_of_the_unknown_transfer_error(
 
     # Act
     result = await client.get(
-        "v1/transfers/-1/runs",
+        "v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
+        params={"transfer_id": -1},
     )
 
     # Assert
@@ -168,8 +176,9 @@ async def test_superuser_cannot_read_runs_of_unknown_transfer_error(
 ) -> None:
     # Act
     result = await client.get(
-        "v1/transfers/-1/runs",
+        "v1/runs",
         headers={"Authorization": f"Bearer {superuser.token}"},
+        params={"transfer_id": -1},
     )
     # Assert
     assert result.json() == {

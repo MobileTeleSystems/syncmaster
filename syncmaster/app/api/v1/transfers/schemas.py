@@ -155,3 +155,7 @@ class ReadFullTransferSchema(ReadTransferSchema):
 
     class Config:
         orm_mode = True
+
+
+class CreateRunSchema(BaseModel):
+    transfer_id: int
