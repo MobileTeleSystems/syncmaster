@@ -15,8 +15,9 @@ async def test_guest_plus_can_read_transfers(
 
     # Act
     result = await client.get(
-        f"v1/transfers?group_id={group_transfer.owner_group.group.id}",
+        f"v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
+        params={"group_id": group_transfer.owner_group.group.id},
     )
 
     # Assert
@@ -58,8 +59,9 @@ async def test_groupless_user_cannot_read_transfers(
 ):
     # Act
     result = await client.get(
-        f"v1/transfers?group_id={group_transfer.owner_group.group.id}",
+        f"v1/transfers",
         headers={"Authorization": f"Bearer {simple_user.token}"},
+        params={"group_id": group_transfer.owner_group.group.id},
     )
 
     # Assert
@@ -78,8 +80,9 @@ async def test_superuser_can_read_transfers(
 ):
     # Act
     result = await client.get(
-        f"v1/transfers?group_id={group_transfer.owner_group.group.id}",
+        f"v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
+        params={"group_id": group_transfer.owner_group.group.id},
     )
 
     # Assert
@@ -137,8 +140,9 @@ async def test_user_plus_cannot_read_unknown_group_transfers_error(
 
     # Act
     result = await client.get(
-        "v1/transfers?group_id=-1",
+        "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
+        params={"group_id": -1},
     )
 
     # Assert
@@ -156,8 +160,9 @@ async def test_superuser_cannot_read_unknown_group_transfers_error(
 ):
     # Act
     result = await client.get(
-        "v1/transfers?group_id=-1",
+        "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
+        params={"group_id": -1},
     )
 
     # Assert

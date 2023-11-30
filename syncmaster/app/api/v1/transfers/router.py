@@ -7,6 +7,7 @@ from app.api.deps import UnitOfWorkMarker
 from app.api.v1.schemas import StatusCopyTransferResponseSchema, StatusResponseSchema
 from app.api.v1.transfers.schemas import (
     CopyTransferSchema,
+    CreateRunSchema,
     CreateTransferSchema,
     ReadRunSchema,
     ReadTransferSchema,
@@ -349,7 +350,7 @@ async def delete_transfer(
     )
 
 
-@router.get("/transfers/{transfer_id}/runs")
+@router.get("/runs")
 async def read_runs(
     transfer_id: int,
     page: int = Query(gt=0, default=1),
@@ -375,35 +376,35 @@ async def read_runs(
     return RunPageSchema.from_pagination(pagination=pagination)
 
 
-@router.get("/transfers/{transfer_id}/runs/{run_id}")
+@router.get("/runs/{run_id}")
 async def read_run(
-    transfer_id: int,
     run_id: int,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadRunSchema:
+    run = await unit_of_work.run.read_by_id(run_id=run_id)
+
     resource_role = await unit_of_work.transfer.get_resource_permission(
         user=current_user,
-        resource_id=transfer_id,
+        resource_id=run.transfer_id,
     )
 
     if resource_role == Permission.NONE:
         raise TransferNotFoundError
 
-    run = await unit_of_work.run.read_by_id(run_id=run_id)
     return ReadRunSchema.from_orm(run)
 
 
-@router.post("/transfers/{transfer_id}/runs")
+@router.post("/runs")
 async def start_run(
-    transfer_id: int,
+    create_run_data: CreateRunSchema,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadRunSchema:
     # Check: user can start transfer
     resource_rule = await unit_of_work.transfer.get_resource_permission(
         user=current_user,
-        resource_id=transfer_id,
+        resource_id=create_run_data.transfer_id,
     )
 
     if resource_rule == Permission.NONE:
@@ -412,10 +413,10 @@ async def start_run(
     if resource_rule < Permission.WRITE:
         raise ActionNotAllowedError
 
-    transfer = await unit_of_work.transfer.read_by_id(transfer_id=transfer_id)
+    transfer = await unit_of_work.transfer.read_by_id(transfer_id=create_run_data.transfer_id)
 
     async with unit_of_work:
-        run = await unit_of_work.run.create(transfer_id=transfer_id)
+        run = await unit_of_work.run.create(transfer_id=create_run_data.transfer_id)
     try:
         celery.send_task("run_transfer_task", kwargs={"run_id": run.id}, queue=transfer.queue.name)
     except KombuError as e:
@@ -428,17 +429,18 @@ async def start_run(
     return ReadRunSchema.from_orm(run)
 
 
-@router.post("/transfers/{transfer_id}/runs/{run_id}/stop")
+@router.post("/runs/{run_id}/stop")
 async def stop_run(
-    transfer_id: int,
     run_id: int,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadRunSchema:
+    run = await unit_of_work.run.read_by_id(run_id=run_id)
+
     # Check: user can stop transfer
     resource_rule = await unit_of_work.transfer.get_resource_permission(
         user=current_user,
-        resource_id=transfer_id,
+        resource_id=run.transfer_id,
     )
 
     if resource_rule == Permission.NONE:
@@ -449,5 +451,5 @@ async def stop_run(
 
     async with unit_of_work:
         run = await unit_of_work.run.stop(run_id=run_id)
-        # TODO add immdiate stop transfer after stop Run
+        # TODO: add immdiate stop transfer after stop Run
     return ReadRunSchema.from_orm(run)

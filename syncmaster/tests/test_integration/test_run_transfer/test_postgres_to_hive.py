@@ -21,13 +21,18 @@ async def test_run_simple_transfer(
 
     # Act
     result = await client.post(
-        f"v1/transfers/{transfer.id}/runs",
+        f"v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
+        json={"transfer_id": transfer.id},
     )
     # Assert
     assert result.status_code == 200
 
-    run_data = await get_run_on_end(client, transfer.id, result.json()["id"], user.token)
+    run_data = await get_run_on_end(
+        client=client,
+        run_id=result.json()["id"],
+        token=user.token,
+    )
     assert run_data["status"] == Status.FINISHED.value
     reader = DBReader(
         connection=prepare_hive,

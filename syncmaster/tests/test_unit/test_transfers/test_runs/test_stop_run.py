@@ -19,7 +19,7 @@ async def test_user_plus_can_stop_run_of_transfer_his_group(
 
     # Act
     result = await client.post(
-        f"v1/transfers/{group_run.transfer.id}/runs/{group_run.id}/stop",
+        f"v1/runs/{group_run.id}/stop",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
@@ -47,7 +47,7 @@ async def test_groupless_user_cannot_stop_run(
 ) -> None:
     # Act
     result = await client.post(
-        f"v1/transfers/{group_run.transfer.id}/runs/{group_run.id}/stop",
+        f"v1/runs/{group_run.id}/stop",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
     # Assert
@@ -71,7 +71,7 @@ async def test_other_group_member_cannot_stop_run_of_other_group_transfer(
 
     # Act
     result = await client.post(
-        f"v1/transfers/{group_run.transfer.id}/runs/{group_run.id}/stop",
+        f"v1/runs/{group_run.id}/stop",
         headers={"Authorization": f"Bearer {user.token}"},
     )
     # Assert
@@ -93,7 +93,7 @@ async def test_superuser_can_stop_run(
 ) -> None:
     # Act
     result = await client.post(
-        f"v1/transfers/{group_run.transfer.id}/runs/{group_run.id}/stop",
+        f"v1/runs/{group_run.id}/stop",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
     # Assert
@@ -128,7 +128,7 @@ async def test_user_plus_cannot_stop_run_in_status_except_started_or_created(
 
     # Act
     result = await client.post(
-        f"v1/transfers/{group_run.transfer.id}/runs/{group_run.id}/stop",
+        f"v1/runs/{group_run.id}/stop",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
@@ -146,7 +146,7 @@ async def test_unauthorized_user_cannot_stop_run(
     group_run: MockRun,
 ) -> None:
     # Act
-    result = await client.post(f"v1/transfers/{group_run.transfer.id}/runs/{group_run.id}/stop")
+    result = await client.post(f"v1/runs/{group_run.id}/stop")
 
     # Assert
     assert result.status_code == 401
@@ -155,33 +155,6 @@ async def test_unauthorized_user_cannot_stop_run(
         "status_code": 401,
         "message": "Not authenticated",
     }
-
-
-async def test_group_member_cannot_stop_run_of_unknown_transfer_error(
-    client: AsyncClient,
-    group_run: MockRun,
-    session: AsyncSession,
-    role_guest_plus: TestUserRoles,
-) -> None:
-    # Arrange
-    user = group_run.transfer.owner_group.get_member_of_role(role_guest_plus)
-
-    # Act
-    result = await client.post(
-        f"v1/transfers/-1/runs/{group_run.id}/stop",
-        headers={"Authorization": f"Bearer {user.token}"},
-    )
-
-    # Assert
-    await session.refresh(group_run.run)
-    assert group_run.status == Status.CREATED
-
-    assert result.json() == {
-        "message": "Transfer not found",
-        "ok": False,
-        "status_code": 404,
-    }
-    assert result.status_code == 404
 
 
 async def test_user_plus_cannot_stop_unknown_run_of_transfer_error(
@@ -195,7 +168,7 @@ async def test_user_plus_cannot_stop_unknown_run_of_transfer_error(
 
     # Act
     result = await client.post(
-        f"v1/transfers/{group_run.transfer.id}/runs/-1/stop",
+        f"v1/runs/-1/stop",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
@@ -211,28 +184,6 @@ async def test_user_plus_cannot_stop_unknown_run_of_transfer_error(
     assert result.status_code == 404
 
 
-async def test_superuser_cannot_stop_unknown_transfer_run_error(
-    client: AsyncClient,
-    superuser: MockUser,
-    group_run: MockRun,
-    session: AsyncSession,
-) -> None:
-    # Act
-    result = await client.post(
-        f"v1/transfers/-1/runs/{group_run.id}/stop",
-        headers={"Authorization": f"Bearer {superuser.token}"},
-    )
-    # Assert
-    await session.refresh(group_run.run)
-    assert group_run.status == Status.CREATED
-
-    assert result.json() == {
-        "message": "Transfer not found",
-        "ok": False,
-        "status_code": 404,
-    }
-
-
 async def test_superuser_cannot_stop_unknown_run_error(
     client: AsyncClient,
     superuser: MockUser,
@@ -241,7 +192,7 @@ async def test_superuser_cannot_stop_unknown_run_error(
 ) -> None:
     # Act
     result = await client.post(
-        f"v1/transfers/{group_run.transfer.id}/runs/-1/stop",
+        f"v1/runs/-1/stop",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
     # Assert

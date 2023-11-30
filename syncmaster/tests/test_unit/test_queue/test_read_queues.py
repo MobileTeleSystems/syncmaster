@@ -22,6 +22,7 @@ async def test_group_member_can_read_queues(
     result = await client.get(
         f"v1/queues?group_id={mock_group.id}",
         headers={"Authorization": f"Bearer {user.token}"},
+        params={"group_id": mock_group.id},
     )
     # Assert
     assert result.json() == {
@@ -57,8 +58,9 @@ async def test_superuser_can_read_queues(
 ):
     # Act
     result = await client.get(
-        f"v1/queues?group_id={mock_group.id}",
+        f"v1/queues",
         headers={"Authorization": f"Bearer {superuser.token}"},
+        params={"group_id": mock_group.id},
     )
     # Assert
     assert result.json() == {
@@ -96,9 +98,11 @@ async def test_other_group_member_cannot_read_queues(
     user = group.get_member_of_role(role_guest_plus)
     # Act
     result = await client.get(
-        f"v1/queues?group_id={mock_group.id}",
+        f"v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
+        params={"group_id": mock_group.id},
     )
+
     # Assert
     assert result.json() == {
         "message": "Group not found",
@@ -119,8 +123,9 @@ async def test_group_member_cannot_read__unknown_group_queues_error(
     user = mock_group.get_member_of_role(role_guest_plus)
     # Act
     result = await client.get(
-        "v1/queues?group_id=-1",
+        "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
+        params={"group_id": -1},
     )
     # Assert
     assert result.json() == {
@@ -140,8 +145,9 @@ async def test_superuser_cannot_read_unknown_group_queues_error(
 ):
     # Act
     result = await client.get(
-        "v1/queues?group_id=-1",
+        "v1/queues",
         headers={"Authorization": f"Bearer {superuser.token}"},
+        params={"group_id": -1},
     )
     # Assert
     assert result.json() == {
