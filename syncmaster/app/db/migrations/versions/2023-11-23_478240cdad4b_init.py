@@ -41,15 +41,15 @@ def upgrade() -> None:
         sa.Column("id", sa.BigInteger(), nullable=False),
         sa.Column("name", sa.String(length=256), nullable=False),
         sa.Column("description", sa.String(length=512), nullable=False),
-        sa.Column("admin_id", sa.BigInteger(), nullable=False),
+        sa.Column("owner_id", sa.BigInteger(), nullable=False),
         sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
-        sa.ForeignKeyConstraint(["admin_id"], ["user.id"], name=op.f("fk__group__admin_id__user"), ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["owner_id"], ["user.id"], name=op.f("fk__group__owner_id__user"), ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id", name=op.f("pk__group")),
         sa.UniqueConstraint("name", name=op.f("uq__group__name")),
     )
-    op.create_index(op.f("ix__group__admin_id"), "group", ["admin_id"], unique=False)
+    op.create_index(op.f("ix__group__owner_id"), "group", ["owner_id"], unique=False)
     op.create_table(
         "connection",
         sa.Column("id", sa.BigInteger(), nullable=False),
@@ -231,7 +231,7 @@ def downgrade() -> None:
     op.drop_table("queue")
     op.drop_index(op.f("ix__connection__group_id"), table_name="connection")
     op.drop_table("connection")
-    op.drop_index(op.f("ix__group__admin_id"), table_name="group")
+    op.drop_index(op.f("ix__group__owner_id"), table_name="group")
     op.drop_table("group")
     op.drop_index(op.f("ix__user__username"), table_name="user")
     op.drop_table("user")

@@ -12,11 +12,11 @@ async def test_owner_can_delete_anyone_from_group(
 ):
     # Arrange
     user = group.get_member_of_role(role_maintainer_or_below)
-    group_admin = group.get_member_of_role(TestUserRoles.Owner)
+    group_owner = group.get_member_of_role(TestUserRoles.Owner)
     # Act
     result = await client.delete(
         f"v1/groups/{group.id}/users/{user.id}",
-        headers={"Authorization": f"Bearer {group_admin.token}"},
+        headers={"Authorization": f"Bearer {group_owner.token}"},
     )
     # Assert
     assert result.json() == {
@@ -179,11 +179,11 @@ async def test_owner_delete_unknown_user_error(
     group: MockGroup,
 ):
     # Arrange
-    group_admin = group.get_member_of_role(TestUserRoles.Owner)
+    group_owner = group.get_member_of_role(TestUserRoles.Owner)
     # Act
     result = await client.delete(
         f"v1/groups/{group.id}/users/-1",
-        headers={"Authorization": f"Bearer {group_admin.token}"},
+        headers={"Authorization": f"Bearer {group_owner.token}"},
     )
     # Assert
     assert result.json() == {
@@ -200,12 +200,12 @@ async def test_owner_delete_user_from_unknown_group_error(
     role_maintainer_or_below: TestUserRoles,
 ):
     # Arrange
-    group_admin = group.get_member_of_role(TestUserRoles.Owner)
+    group_owner = group.get_member_of_role(TestUserRoles.Owner)
     user = group.get_member_of_role(role_maintainer_or_below)
     # Act
     result = await client.delete(
         f"v1/groups/-1/users/{user.user.id}",
-        headers={"Authorization": f"Bearer {group_admin.token}"},
+        headers={"Authorization": f"Bearer {group_owner.token}"},
     )
     # Assert
     assert result.json() == {

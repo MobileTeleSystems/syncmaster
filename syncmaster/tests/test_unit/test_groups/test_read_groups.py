@@ -34,7 +34,7 @@ async def test_group_member_can_read_groups(
                 "id": group.id,
                 "name": group.name,
                 "description": group.description,
-                "admin_id": group.admin_id,
+                "owner_id": group.owner_id,
             }
         ],
     }
@@ -96,13 +96,13 @@ async def test_superuser_can_read_all_groups(
                 "id": empty_group.id,
                 "name": empty_group.name,
                 "description": empty_group.description,
-                "admin_id": empty_group.admin_id,
+                "owner_id": empty_group.owner_id,
             },
             {
                 "id": group.id,
                 "name": group.name,
                 "description": group.description,
-                "admin_id": group.admin_id,
+                "owner_id": group.owner_id,
             },
         ],
     }

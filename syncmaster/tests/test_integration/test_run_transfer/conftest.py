@@ -246,10 +246,10 @@ async def transfers(
 ):
     user = await create_user(
         session=session,
-        username="admin_group",
+        username="owner_group",
         is_active=True,
     )
-    group = await create_group(session=session, name="connection_group", admin_id=user.id)
+    group = await create_group(session=session, name="connection_group", owner_id=user.id)
     hive_connection = await create_connection(
         session=session,
         name="integration_hive",
@@ -357,7 +357,7 @@ async def transfers(
         transfers[f"{source_type}_{target_type}"] = transfer
 
     data = {
-        "group_admin": MockUser(
+        "group_owner": MockUser(
             user=user,
             auth_token=sign_jwt(user.id, settings),
             role=TestUserRoles.Owner,

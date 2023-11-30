@@ -47,7 +47,7 @@ async def create_group(
         group = await unit_of_work.group.create(
             name=group_data.name,
             description=group_data.description,
-            admin_id=group_data.admin_id,
+            owner_id=group_data.owner_id,
         )
     return ReadGroupSchema.from_orm(group)
 
@@ -90,7 +90,7 @@ async def update_group(
     async with unit_of_work:
         group = await unit_of_work.group.update(
             group_id=group_id,
-            admin_id=group_data.admin_id,
+            owner_id=group_data.owner_id,
             name=group_data.name,
             description=group_data.description,
         )

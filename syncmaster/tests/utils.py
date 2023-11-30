@@ -45,11 +45,11 @@ class MockGroup:
     def __init__(
         self,
         group: Group,
-        admin: MockUser,
+        owner: MockUser,
         members: list[MockUser],
     ):
         self.group = group
-        self._admin = admin
+        self._owner = owner
 
         if members:
             self._maintainer = members[0]
@@ -64,7 +64,7 @@ class MockGroup:
         if role_name == TestUserRoles.Guest:
             return self._guest
         if role_name == TestUserRoles.Owner:
-            return self._admin
+            return self._owner
 
         raise ValueError(f"Unknown role name: {role_name}.")
 

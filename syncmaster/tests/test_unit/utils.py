@@ -79,8 +79,8 @@ async def create_queue(
     return queue
 
 
-async def create_group(session: AsyncSession, name: str, admin_id: int) -> Group:
-    g = Group(name=name, admin_id=admin_id)
+async def create_group(session: AsyncSession, name: str, owner_id: int) -> Group:
+    g = Group(name=name, owner_id=owner_id)
     session.add(g)
     await session.commit()
     await session.refresh(g)

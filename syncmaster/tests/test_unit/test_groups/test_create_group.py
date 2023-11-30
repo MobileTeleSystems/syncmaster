@@ -19,7 +19,7 @@ async def test_only_superuser_can_create_group(
     group_data = {
         "name": "new_test_group",
         "description": "description of new test group",
-        "admin_id": simple_user.id,
+        "owner_id": simple_user.id,
     }
 
     group = (await session.scalars(select(Group).where(Group.name == group_data["name"]))).one_or_none()
@@ -37,7 +37,7 @@ async def test_only_superuser_can_create_group(
     assert result.json() == {
         "id": group.id,
         "name": group_data["name"],
-        "admin_id": group_data["admin_id"],
+        "owner_id": group_data["owner_id"],
         "description": group_data["description"],
     }
     assert result.status_code == 200
@@ -51,7 +51,7 @@ async def test_not_superuser_cannot_create_group(
     group_data = {
         "name": "new_test_group",
         "description": "description of new test group",
-        "admin_id": simple_user.id,
+        "owner_id": simple_user.id,
     }
 
     # Act
@@ -79,7 +79,7 @@ async def test_superuser_cannot_create_group_twice(
     group_data = {
         "name": "test_superuser_cannot_create_group_twice",
         "description": "description of new test group",
-        "admin_id": simple_user.id,
+        "owner_id": simple_user.id,
     }
 
     # Act
@@ -113,7 +113,7 @@ async def test_not_authorized_user_cannot_create_group(
     group_data = {
         "name": "new_test_group",
         "description": "description of new test group",
-        "admin_id": simple_user.id,
+        "owner_id": simple_user.id,
     }
 
     # Act
@@ -136,7 +136,7 @@ async def test_superuser_cannot_create_group_with_incorrect_owner_id_error(
     group_data = {
         "name": "new_another_group",
         "description": "description of new test group",
-        "admin_id": -123,
+        "owner_id": -123,
     }
 
     # Act

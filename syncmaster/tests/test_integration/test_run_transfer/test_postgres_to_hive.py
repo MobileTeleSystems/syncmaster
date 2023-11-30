@@ -16,7 +16,7 @@ async def test_run_simple_transfer(
     init_df: DataFrame,
 ):
     # Arrange
-    user: MockUser = transfers["group_admin"]
+    user: MockUser = transfers["group_owner"]
     transfer: Transfer = transfers["postgres_hive"]
 
     # Act

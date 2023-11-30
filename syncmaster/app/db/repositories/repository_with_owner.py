@@ -22,7 +22,7 @@ class RepositoryWithOwner(Repository, Generic[Model]):
         if user.is_superuser:
             return Permission.DELETE
 
-        admin_query = (
+        owner_query = (
             (
                 select(self._model)
                 .join(
@@ -30,7 +30,7 @@ class RepositoryWithOwner(Repository, Generic[Model]):
                     Group.id == self._model.group_id,
                 )
                 .where(
-                    Group.admin_id == user.id,
+                    Group.owner_id == user.id,
                     self._model.id == resource_id,
                 )
             )
@@ -38,9 +38,9 @@ class RepositoryWithOwner(Repository, Generic[Model]):
             .select()
         )
 
-        is_admin = await self._session.scalar(admin_query)
+        is_owner = await self._session.scalar(owner_query)
 
-        if is_admin:
+        if is_owner:
             return Permission.DELETE
 
         group_role_query = (
@@ -69,10 +69,10 @@ class RepositoryWithOwner(Repository, Generic[Model]):
 
     async def get_group_permission(self, user: User, group_id: int) -> Permission:
         """Method for determining CRUD permissions in the specified group"""
-        admin_query = (
+        owner_query = (
             (
                 select(Group).where(
-                    Group.admin_id == user.id,
+                    Group.owner_id == user.id,
                     Group.id == group_id,
                 )
             )
@@ -80,9 +80,9 @@ class RepositoryWithOwner(Repository, Generic[Model]):
             .select()
         )
 
-        is_admin = await self._session.scalar(admin_query)
+        is_owner = await self._session.scalar(owner_query)
 
-        if is_admin:
+        if is_owner:
             return Permission.DELETE
 
         group_role_query = select(UserGroup).where(

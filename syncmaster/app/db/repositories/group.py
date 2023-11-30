@@ -48,7 +48,7 @@ class GroupRepository(Repository[Group]):
                 Group.is_deleted.is_(False),
                 or_(
                     UserGroup.user_id == current_user_id,
-                    Group.admin_id == current_user_id,
+                    Group.owner_id == current_user_id,
                 ),
             )
             .group_by(Group.id)
@@ -67,13 +67,13 @@ class GroupRepository(Repository[Group]):
         except NoResultFound as e:
             raise GroupNotFoundError from e
 
-    async def create(self, name: str, description: str, admin_id: int) -> Group:
+    async def create(self, name: str, description: str, owner_id: int) -> Group:
         query = (
             insert(Group)
             .values(
                 name=name,
                 description=description,
-                admin_id=admin_id,
+                owner_id=owner_id,
             )
             .returning(Group)
         )
@@ -90,7 +90,7 @@ class GroupRepository(Repository[Group]):
         group_id: int,
         name: str,
         description: str,
-        admin_id: int,
+        owner_id: int,
     ) -> Group:
         args = [Group.id == group_id, Group.is_deleted.is_(False)]
         try:
@@ -98,7 +98,7 @@ class GroupRepository(Repository[Group]):
                 *args,
                 name=name,
                 description=description,
-                admin_id=admin_id,
+                owner_id=owner_id,
             )
         except EntityNotFoundError as e:
             raise GroupNotFoundError from e
@@ -191,10 +191,10 @@ class GroupRepository(Repository[Group]):
         if not await self._session.get(Group, group_id):
             raise GroupNotFoundError
 
-        admin_query = (
+        owner_query = (
             (
                 select(Group).where(
-                    Group.admin_id == user.id,
+                    Group.owner_id == user.id,
                     Group.id == group_id,
                 )
             )
@@ -202,9 +202,9 @@ class GroupRepository(Repository[Group]):
             .select()
         )
 
-        is_admin = await self._session.scalar(admin_query)
+        is_owner = await self._session.scalar(owner_query)
 
-        if is_admin or user.is_superuser:
+        if is_owner or user.is_superuser:
             return Permission.DELETE
 
         group_role_query = select(UserGroup).where(
@@ -239,7 +239,7 @@ class GroupRepository(Repository[Group]):
     def _raise_error(self, err: DBAPIError) -> NoReturn:
         constraint = err.__cause__.__cause__.constraint_name  # type: ignore[union-attr]
 
-        if constraint == "fk__group__admin_id__user":
+        if constraint == "fk__group__owner_id__user":
             raise GroupAdminNotFoundError from err
 
         if constraint == "uq__group__name":

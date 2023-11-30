@@ -8,7 +8,7 @@ pytestmark = [pytest.mark.asyncio]
 async def test_owner_of_group_can_update_group(client: AsyncClient, empty_group: MockGroup):
     # Arrange
     group_data = {
-        "admin_id": empty_group.get_member_of_role(TestUserRoles.Owner).id,
+        "owner_id": empty_group.get_member_of_role(TestUserRoles.Owner).id,
         "name": "new_group_name",
         "description": "some description",
     }
@@ -34,7 +34,7 @@ async def test_owner_of_group_can_update_group(client: AsyncClient, empty_group:
 async def test_groupless_user_cannot_update_group(client: AsyncClient, empty_group: MockGroup, simple_user: MockUser):
     # Arrange
     group_data = {
-        "admin_id": simple_user.id,
+        "owner_id": simple_user.id,
         "name": "new_group_name",
         "description": " asdf",
     }
@@ -62,7 +62,7 @@ async def test_other_group_member_cannot_update_group(
     # Arrange
     user = group.get_member_of_role(role_guest_plus)
     group_data = {
-        "admin_id": user.id,
+        "owner_id": user.id,
         "name": "new_group_name",
         "description": " asdf",
     }
@@ -84,7 +84,7 @@ async def test_other_group_member_cannot_update_group(
 async def test_superuser_can_update_group(client: AsyncClient, empty_group: MockGroup, superuser: MockUser):
     # Arrange
     group_data = {
-        "admin_id": empty_group.get_member_of_role(TestUserRoles.Owner).id,
+        "owner_id": empty_group.get_member_of_role(TestUserRoles.Owner).id,
         "name": "new_group_name",
         "description": "some description",
     }
@@ -124,7 +124,7 @@ async def test_validation_on_update_group(
 
     # Arrange
     group_data = {
-        "admin_id": -1,
+        "owner_id": -1,
         "name": "new_group_name",
         "description": "some description",
     }
@@ -143,7 +143,7 @@ async def test_validation_on_update_group(
     }
     # Arrange
     group_data = {
-        "admin_id": empty_group.admin_id,
+        "owner_id": empty_group.owner_id,
         "name": group.name,
         "description": "some description",
     }
@@ -169,7 +169,7 @@ async def test_owner_change_group_owner(client: AsyncClient, empty_group: MockGr
         headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
         json={
             "name": empty_group.name,
-            "admin_id": simple_user.id,
+            "owner_id": simple_user.id,
             "description": empty_group.description,
         },
     )
@@ -177,7 +177,7 @@ async def test_owner_change_group_owner(client: AsyncClient, empty_group: MockGr
     assert result.json() == {
         "id": empty_group.id,
         "name": empty_group.name,
-        "admin_id": simple_user.id,
+        "owner_id": simple_user.id,
         "description": empty_group.description,
     }
     assert result.status_code == 200
@@ -197,7 +197,7 @@ async def test_maintainer_or_below_cannot_change_group_owner(
         headers={"Authorization": f"Bearer {user.token}"},
         json={
             "name": group.name,
-            "admin_id": simple_user.id,
+            "owner_id": simple_user.id,
             "description": group.description,
         },
     )
@@ -225,7 +225,7 @@ async def test_not_authorized_user_cannot_update_group(client: AsyncClient, empt
 async def test_owner_of_group_update_unknown_group_error(client: AsyncClient, empty_group: MockGroup):
     # Arrange
     group_data = {
-        "admin_id": empty_group.get_member_of_role(TestUserRoles.Owner).id,
+        "owner_id": empty_group.get_member_of_role(TestUserRoles.Owner).id,
         "name": "new_group_name",
         "description": "some description",
     }
@@ -244,10 +244,10 @@ async def test_owner_of_group_update_unknown_group_error(client: AsyncClient, em
     }
 
 
-async def test_owner_of_group_update_group_unknown_admin_error(client: AsyncClient, empty_group: MockGroup):
+async def test_owner_of_group_update_group_unknown_owner_error(client: AsyncClient, empty_group: MockGroup):
     # Arrange
     group_data = {
-        "admin_id": -1,
+        "owner_id": -1,
         "name": "new_group_name",
         "description": "some description",
     }
@@ -269,7 +269,7 @@ async def test_owner_of_group_update_group_unknown_admin_error(client: AsyncClie
 async def test_superuser_update_unknown_group_error(client: AsyncClient, empty_group: MockGroup, superuser: MockUser):
     # Arrange
     group_data = {
-        "admin_id": empty_group.get_member_of_role(TestUserRoles.Owner).id,
+        "owner_id": empty_group.get_member_of_role(TestUserRoles.Owner).id,
         "name": "new_group_name",
         "description": "some description",
     }
@@ -288,14 +288,14 @@ async def test_superuser_update_unknown_group_error(client: AsyncClient, empty_g
     }
 
 
-async def test_superuser_update_group_unknown_admin_error(
+async def test_superuser_update_group_unknown_owner_error(
     client: AsyncClient,
     empty_group: MockGroup,
     superuser: MockUser,
 ):
     # Arrange
     group_data = {
-        "admin_id": -1,
+        "owner_id": -1,
         "name": "new_group_name",
         "description": "some description",
     }
