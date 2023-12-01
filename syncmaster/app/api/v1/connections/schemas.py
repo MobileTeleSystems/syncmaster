@@ -173,17 +173,22 @@ class CreatePostgresAuthSchema(BaseModel):
 
 
 class CreateConnectionSchema(BaseModel):
-    group_id: int
-    name: NameConstr  # type: ignore # noqa: F722
-    description: str
+    group_id: int = Field(..., description="Connection owner group id")
+    name: NameConstr = Field(..., description="Connection name")  # type: ignore # noqa: F722
+    description: str = Field(..., description="Additional description")
     data: CreateHiveConnectionSchema | CreateOracleConnectionSchema | CreatePostgresConnectionSchema = Field(
         ...,
         discriminator="type",
         alias="connection_data",
+        description=(
+            "Data required to connect to the database. These are the parameters that are specified in the "
+            "URL request."
+        ),
     )
     auth_data: CreateHiveAuthSchema | CreateOracleAuthSchema | CreatePostgresAuthSchema = Field(
         ...,
         discriminator="type",
+        description="Credentials for authorization",
     )
 
     @root_validator

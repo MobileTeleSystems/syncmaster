@@ -50,7 +50,7 @@ async def create_queue(
     if group_permission == Permission.NONE:
         raise GroupNotFoundError
 
-    if group_permission < Permission.WRITE:
+    if group_permission < Permission.DELETE:
         raise ActionNotAllowedError
 
     async with unit_of_work:
@@ -74,7 +74,7 @@ async def update_queue(
     if resource_role == Permission.NONE:
         raise QueueNotFoundError
 
-    if resource_role < Permission.WRITE:
+    if resource_role < Permission.DELETE:
         raise ActionNotAllowedError
 
     async with unit_of_work:

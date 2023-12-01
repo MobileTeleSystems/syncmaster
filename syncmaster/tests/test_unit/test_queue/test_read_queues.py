@@ -58,7 +58,7 @@ async def test_superuser_can_read_queues(
 ):
     # Act
     result = await client.get(
-        f"v1/queues",
+        "v1/queues",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"group_id": mock_group.id},
     )
@@ -98,7 +98,7 @@ async def test_other_group_member_cannot_read_queues(
     user = group.get_member_of_role(role_guest_plus)
     # Act
     result = await client.get(
-        f"v1/queues",
+        "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"group_id": mock_group.id},
     )

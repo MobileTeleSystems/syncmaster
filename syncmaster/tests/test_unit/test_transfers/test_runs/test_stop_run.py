@@ -168,7 +168,7 @@ async def test_user_plus_cannot_stop_unknown_run_of_transfer_error(
 
     # Act
     result = await client.post(
-        f"v1/runs/-1/stop",
+        "v1/runs/-1/stop",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
@@ -192,7 +192,7 @@ async def test_superuser_cannot_stop_unknown_run_error(
 ) -> None:
     # Act
     result = await client.post(
-        f"v1/runs/-1/stop",
+        "v1/runs/-1/stop",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
     # Assert

@@ -79,25 +79,28 @@ class CopyTransferSchema(BaseModel):
 
 
 class CreateTransferSchema(BaseModel):
-    group_id: int
-    source_connection_id: int
-    target_connection_id: int
-    name: NameConstr  # type: ignore # noqa: F722
-    description: str
-    is_scheduled: bool
-    queue_id: int
-    schedule: str | None = None
+    group_id: int = Field(..., description="Transfer owner group id")
+    source_connection_id: int = Field(..., description="id of the connection that will be the data source")
+    target_connection_id: int = Field(..., description="id of the connection that will be the data receiver")
+    name: NameConstr = Field(..., description="Transfer name")  # type: ignore # noqa: F722
+    description: str = Field(..., description="Additional description")
+    is_scheduled: bool = Field(..., description="Is the transfer on schedule")
+    queue_id: int = Field(..., description="id of the queue in which the transfer will be performed")
+    schedule: str | None = Field(None, description="Execution schedule in cron format")
     source_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData = Field(
         ...,
         discriminator="type",
+        description="Data source parameters",
     )
     target_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData = Field(
         ...,
         discriminator="type",
+        description="Data receiver parameters",
     )
     strategy_params: FullStrategy | IncrementalStrategy = Field(
         ...,
         discriminator="type",
+        description="Incremental or archive download options",
     )
 
     @root_validator
