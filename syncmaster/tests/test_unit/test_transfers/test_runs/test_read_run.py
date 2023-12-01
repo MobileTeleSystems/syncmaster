@@ -125,7 +125,7 @@ async def test_group_member_cannot_read_unknown_run_error(
 
     # Act
     result = await client.get(
-        f"v1/runs/-1",
+        "v1/runs/-1",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
@@ -144,7 +144,7 @@ async def test_superuser_cannot_read_unknown_run_error(
 ) -> None:
     # Act
     result = await client.get(
-        f"v1/runs/-1",
+        "v1/runs/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 

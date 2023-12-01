@@ -30,7 +30,7 @@ async def test_user_plus_can_create_run_of_transfer_his_group(
 
     # Act
     result = await client.post(
-        f"v1/runs",
+        "v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
         json={"transfer_id": group_transfer.id},
     )
@@ -66,7 +66,7 @@ async def test_groupless_user_cannot_create_run(
 
     # Act
     result = await client.post(
-        f"v1/runs",
+        "v1/runs",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={"transfer_id": group_transfer.id},
     )
@@ -94,7 +94,7 @@ async def test_group_member_cannot_create_run_of_other_group_transfer(
 
     # Act
     result = await client.post(
-        f"v1/runs",
+        "v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
         json={"transfer_id": group_transfer.id},
     )
@@ -126,7 +126,7 @@ async def test_superuser_can_create_run(
 
     # Act
     result = await client.post(
-        f"v1/runs",
+        "v1/runs",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={"transfer_id": group_transfer.id},
     )
@@ -159,7 +159,7 @@ async def test_unauthorized_user_cannot_create_run(
 
     # Act
     result = await client.post(
-        f"v1/runs",
+        "v1/runs",
         json={"transfer_id": group_transfer.id},
     )
 

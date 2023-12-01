@@ -21,7 +21,7 @@ async def test_run_simple_transfer(
 
     # Act
     result = await client.post(
-        f"v1/runs",
+        "v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
         json={"transfer_id": transfer.id},
     )

@@ -19,7 +19,7 @@ async def test_guest_plus_can_read_connections(
 
     # Act
     result = await client.get(
-        f"v1/connections",
+        "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"group_id": group_connection.connection.group_id},
     )
@@ -72,7 +72,7 @@ async def test_other_group_member_cannot_read_group_connections(
 
     # Act
     result = await client.get(
-        f"v1/connections",
+        "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"group_id": group_connection.connection.group_id},
     )
@@ -95,7 +95,7 @@ async def test_groupless_user_cannot_read_group_connections(
 ):
     # Act
     result = await client.get(
-        f"v1/connections",
+        "v1/connections",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         params={"group_id": group_connection.connection.group_id},
     )
@@ -116,7 +116,7 @@ async def test_superuser_can_read_connections(
 ):
     # Act
     result = await client.get(
-        f"v1/connections",
+        "v1/connections",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"group_id": group_connection.connection.group_id},
     )
