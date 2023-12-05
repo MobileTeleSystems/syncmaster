@@ -1,5 +1,6 @@
 from onetl.connection import Oracle
 from onetl.db import DBReader, DBWriter
+from pyspark.sql.dataframe import DataFrame
 
 from app.dto.connections import OracleConnectionDTO
 from app.dto.transfers import OracleTransferParamsDTO
@@ -25,9 +26,11 @@ class OracleHandler(Handler):
 
     def init_reader(self):
         super().init_reader()
+        df = self.connection.get_df_schema(self.transfer_params.table_name)
         self.reader = DBReader(
             connection=self.connection,
             table=self.transfer_params.table_name,
+            columns=[f'"{f}"' for f in df.fieldNames()],
         )
 
     def init_writer(self):
@@ -36,3 +39,8 @@ class OracleHandler(Handler):
             connection=self.connection,
             table=self.transfer_params.table_name,
         )
+
+    def normalize_column_name(self, df: DataFrame) -> DataFrame:
+        for column_name in df.columns:
+            df = df.withColumnRenamed(column_name, column_name.upper())
+        return df

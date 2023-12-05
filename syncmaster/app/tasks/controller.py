@@ -62,8 +62,12 @@ class TransferController:
         self.target.init_connection()
         self.target.init_writer()
         logger.info("Source and target were initialized")
-        df = self.source.read()
+
+        df = self.target.normalize_column_name(self.source.read())
+        logger.info("Data has been read")
+
         self.target.write(df)
+        logger.info("Data has been inserted")
 
     def get_handler(
         self,

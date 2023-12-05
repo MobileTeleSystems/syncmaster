@@ -373,3 +373,252 @@ async def transfers(
     await session.delete(user)
     await session.delete(queue)
     await session.commit()
+
+
+@pytest.fixture
+def init_df_with_mixed_column_naming(spark: SparkSession) -> DataFrame:
+    df_schema = StructType(
+        [
+            StructField("Id", IntegerType()),
+            StructField("Phone Number", StringType()),
+            StructField("region", StringType()),
+            StructField("birth_DATE", DateType()),
+            StructField("Registered At", TimestampType()),
+            StructField("account_balance", DoubleType()),
+        ],
+    )
+    df_to_write = spark.createDataFrame(
+        data=[
+            {
+                "Id": 1,
+                "Phone Number": "+79123456789",
+                "region": "Mordor",
+                "birth_DATE": date(year=2023, month=3, day=11),
+                "Registered At": datetime.now(),
+                "account_balance": 1234.2343,
+            },
+        ],
+        schema=df_schema,
+    )
+    return df_to_write
+
+
+@pytest.fixture
+def prepare_postgres_with_mixed_column_naming(
+    spark: SparkSession,
+    postgres: PostgresConnectionDTO,
+    init_df_with_mixed_column_naming: DataFrame,
+) -> Postgres:
+    postgres_connection = Postgres(
+        host=postgres.host,
+        port=postgres.port,
+        user=postgres.user,
+        password=postgres.password,
+        database=postgres.database_name,
+        spark=spark,
+    ).check()
+    postgres_connection.execute("DROP TABLE IF EXISTS public.source_table")
+    postgres_connection.execute("DROP TABLE IF EXISTS public.target_table")
+    db_writer = DBWriter(
+        connection=postgres_connection,
+        target="public.source_table",
+        options=Postgres.WriteOptions(if_exists="append"),
+    )
+    db_writer.run(init_df_with_mixed_column_naming)
+    return postgres_connection
+
+
+@pytest.fixture
+def prepare_hive_with_mixed_column_naming(
+    spark: SparkSession,
+    hive: HiveConnectionDTO,
+    init_df_with_mixed_column_naming: DataFrame,
+) -> Hive:
+    hive_connection = Hive(
+        cluster=hive.cluster,
+        spark=spark,
+    ).check()
+    hive_connection.execute("DROP TABLE IF EXISTS public.source_table")
+    hive_connection.execute("DROP TABLE IF EXISTS public.target_table")
+    hive_connection.execute("CREATE DATABASE IF NOT EXISTS public")
+    db_writer = DBWriter(
+        connection=hive_connection,
+        target="public.source_table",
+    )
+    db_writer.run(init_df_with_mixed_column_naming)
+    spark.catalog.refreshTable("public.source_table")
+    return hive_connection
+
+
+@pytest.fixture
+def prepare_oracle_with_mixed_column_naming(
+    spark: SparkSession,
+    oracle: OracleConnectionDTO,
+    init_df_with_mixed_column_naming: DataFrame,
+) -> Oracle:
+    oracle_connection = Oracle(
+        host=oracle.host,
+        port=oracle.port,
+        user=oracle.user,
+        password=oracle.password,
+        sid=oracle.sid,
+        service_name=oracle.service_name,
+        spark=spark,
+    ).check()
+    try:
+        oracle_connection.execute(f"DROP TABLE {oracle.user}.source_table")
+    except Exception:
+        pass
+    try:
+        oracle_connection.execute(f"DROP TABLE {oracle.user}.target_table")
+    except Exception:
+        pass
+    db_writer = DBWriter(
+        connection=oracle_connection,
+        target=f"{oracle.user}.source_table",
+        options=Oracle.WriteOptions(if_exists="append"),
+    )
+    db_writer.run(init_df_with_mixed_column_naming)
+    return oracle_connection
+
+
+@pytest_asyncio.fixture
+async def transfers_with_mixed_column_naming(
+    prepare_postgres_with_mixed_column_naming,
+    prepare_oracle_with_mixed_column_naming,
+    prepare_hive_with_mixed_column_naming,
+    postgres: PostgresConnectionDTO,
+    oracle: OracleConnectionDTO,
+    hive: HiveConnectionDTO,
+    session: AsyncSession,
+    settings: Settings,
+):
+    user = await create_user(
+        session=session,
+        username="owner_group",
+        is_active=True,
+    )
+    group = await create_group(session=session, name="connection_group", owner_id=user.id)
+    hive_connection = await create_connection(
+        session=session,
+        name="integration_hive",
+        data=dict(
+            type=hive.type,
+            cluster=hive.cluster,
+            additional_params={},
+        ),
+        group_id=group.id,
+    )
+
+    await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=hive_connection.id,
+        auth_data=dict(
+            type="hive",
+            user=hive.user,
+            password=hive.password,
+        ),
+    )
+
+    postgres_connection = await create_connection(
+        session=session,
+        name="integration_postgres",
+        data=dict(
+            type=postgres.type,
+            host=postgres.host,
+            port=postgres.port,
+            database_name=postgres.database_name,
+            additional_params={},
+        ),
+        group_id=group.id,
+    )
+
+    await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=postgres_connection.id,
+        auth_data=dict(
+            type="postgres",
+            user=postgres.user,
+            password=postgres.password,
+        ),
+    )
+
+    oracle_connection = await create_connection(
+        session=session,
+        name="integration_oracle",
+        data=dict(
+            type=oracle.type,
+            host=oracle.host,
+            port=oracle.port,
+            sid=oracle.sid,
+            service_name=oracle.service_name,
+            additional_params={},
+        ),
+        group_id=group.id,
+    )
+
+    await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=oracle_connection.id,
+        auth_data=dict(
+            type="oracle",
+            user=oracle.user,
+            password=oracle.password,
+        ),
+    )
+
+    queue = await create_queue(
+        session=session,
+        name="test_queue",
+        group_id=group.id,
+    )
+
+    transfers = {}
+    for source, target in permutations(
+        [
+            hive_connection,
+            oracle_connection,
+            postgres_connection,
+        ],
+        2,
+    ):
+        source_type = source.data["type"]
+        target_type = target.data["type"]
+        transfer = await create_transfer(
+            session=session,
+            group_id=group.id,
+            name=f"integration_transfer_{source_type}_{target_type}",
+            source_connection_id=source.id,
+            target_connection_id=target.id,
+            source_params={
+                "type": source_type,
+                "table_name": (oracle.user if source_type == "oracle" else "public") + ".source_table",
+            },
+            target_params={
+                "type": target_type,
+                "table_name": (oracle.user if target_type == "oracle" else "public") + ".target_table",
+            },
+            queue_id=queue.id,
+        )
+        transfers[f"{source_type}_{target_type}"] = transfer
+
+    data = {
+        "group_owner": MockUser(
+            user=user,
+            auth_token=sign_jwt(user.id, settings),
+            role=TestUserRoles.Owner,
+        ),
+    }
+    data.update(transfers)  # type: ignore
+    yield data
+    for transfer in transfers.values():
+        await session.delete(transfer)
+    await session.delete(postgres_connection)
+    await session.delete(oracle_connection)
+    await session.delete(hive_connection)
+    await session.delete(user)
+    await session.delete(queue)
+    await session.commit()

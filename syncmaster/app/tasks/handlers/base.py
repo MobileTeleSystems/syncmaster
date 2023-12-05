@@ -30,7 +30,7 @@ class Handler(ABC):
         self.transfer_params = transfer_params
 
     def init_connection(self):
-        pass
+        ...
 
     def set_spark(self, spark: SparkSession):
         self.spark = spark
@@ -52,3 +52,6 @@ class Handler(ABC):
         if self.writer is None:
             raise ValueError("Writer is not initialized")
         return self.writer.run(df=df)
+
+    def normalize_column_name(self, df: DataFrame) -> DataFrame:  # type: ignore
+        ...
