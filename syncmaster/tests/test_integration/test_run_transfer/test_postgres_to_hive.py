@@ -42,4 +42,5 @@ async def test_run_simple_transfer(
     df = reader.run()
     for field in init_df.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
+
     assert df.sort("ID").collect() == init_df.sort("ID").collect()

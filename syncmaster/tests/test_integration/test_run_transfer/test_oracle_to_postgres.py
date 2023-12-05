@@ -38,7 +38,7 @@ async def test_run_simple_transfer(
     reader = DBReader(
         connection=prepare_postgres,
         table="public.target_table",
-        columns=list(map(lambda x: f'"{x}"'.upper(), init_df.columns)),
+        columns=list(map(lambda x: f'"{x}"'.lower(), init_df.columns)),
     )
     # TODO: после фикса бага https://jira.mts.ru/browse/DOP-8666 в onetl, пофиксить тесты
     df = reader.run()
