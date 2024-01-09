@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-License-Identifier: Apache-2.0
 from pydantic import BaseModel, Field, SecretStr, root_validator
 
 from app.api.v1.schemas import (

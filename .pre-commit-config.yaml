@@ -31,11 +31,36 @@ repos:
       - id: python-use-type-annotations
       - id: text-unicode-replacement-char
 
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.4
+    hooks:
+      - id: forbid-tabs
+      - id: remove-tabs
+        args: [--whitespaces-count, '2']
+      - id: chmod
+        args: ['644']
+        exclude_types: [shell]
+      #  exclude: ^(.*__main__\.py)$
+      #- id: chmod
+      #  args: ['755']
+      #  types: [shell]
+      #- id: chmod
+      #  args: ['755']
+      #  files: ^(.*__main__\.py)$
+      - id: insert-license
+        files: .*\.py$
+        exclude: ^(syncmaster/tests/.*\.py)$
+        args:
+          - --license-filepath
+          - .spdx-license-header.txt
+          - --use-current-year
+          - --no-extra-eol
+
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.15.0
     hooks:
       - id: pyupgrade
-        args: [--py311-plus]
+        args: [--py311-plus, --keep-runtime-typing]
 
   - repo: https://github.com/pycqa/autoflake
     rev: v2.2.1
@@ -48,13 +73,13 @@ repos:
           - --ignore-init-module-imports
 
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 23.10.0
+    rev: 23.12.1
     hooks:
       - id: black
         language_version: python3.11
 
   - repo: https://github.com/pycqa/bandit
-    rev: 1.7.5
+    rev: 1.7.6
     hooks:
       - id: bandit
         args:
@@ -64,7 +89,7 @@ repos:
         require_serial: true
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
+    rev: 5.13.2
     hooks:
       - id: isort
         name: isort (python)
@@ -86,10 +111,20 @@ repos:
       - id: docker-compose-check
 
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.11.0
+    rev: v2.12.0
     hooks:
       - id: pretty-format-yaml
         args: [--autofix, --indent, '2', --offset, '2']
+
+  - repo: https://github.com/sbrunner/hooks
+    rev: 0.7.0
+    hooks:
+      - id: poetry-check
+        additional_dependencies:
+          - poetry
+      - id: poetry-lock
+        additional_dependencies:
+          - poetry
 
   - repo: meta
     hooks:

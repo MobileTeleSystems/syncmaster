@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-License-Identifier: Apache-2.0
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import Settings

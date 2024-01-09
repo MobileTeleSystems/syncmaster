@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-License-Identifier: Apache-2.0
 import math
 from collections.abc import Sequence
 from enum import IntEnum

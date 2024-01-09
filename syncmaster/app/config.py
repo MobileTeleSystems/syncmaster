@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-License-Identifier: Apache-2.0
 from enum import StrEnum
 from pathlib import Path
 from typing import TYPE_CHECKING

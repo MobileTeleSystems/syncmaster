@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-License-Identifier: Apache-2.0
 from onetl.connection import Hive
 from onetl.db import DBReader, DBWriter
 from pyspark.sql.dataframe import DataFrame

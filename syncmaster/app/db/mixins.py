@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-License-Identifier: Apache-2.0
 from datetime import datetime
 
 from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, String, func
