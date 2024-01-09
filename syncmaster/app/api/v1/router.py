@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-License-Identifier: Apache-2.0
 from fastapi import APIRouter
 
 from app.api.v1.auth.router import router as auth_router

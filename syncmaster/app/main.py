@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-License-Identifier: Apache-2.0
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from starlette.middleware.cors import CORSMiddleware

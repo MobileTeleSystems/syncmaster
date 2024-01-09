@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-License-Identifier: Apache-2.0
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.deps import UnitOfWorkMarker
