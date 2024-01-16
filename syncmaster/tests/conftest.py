@@ -111,9 +111,25 @@ async def client(
 
 
 @pytest_asyncio.fixture
+async def create_connection_data(request):
+    if hasattr(request, "param"):
+        return request.param
+    return None
+
+
+@pytest_asyncio.fixture
+async def create_transfer_data(request):
+    if hasattr(request, "param"):
+        return request.param
+    return None
+
+
+@pytest_asyncio.fixture
 async def group_transfer(
     session: AsyncSession,
     settings: Settings,
+    create_connection_data: dict | None,
+    create_transfer_data: dict | None,
 ) -> AsyncGenerator[MockTransfer, None]:
     group_owner = await create_user(
         session=session,
@@ -162,6 +178,7 @@ async def group_transfer(
         session=session,
         name="group_transfer_source_connection",
         group_id=group.id,
+        data=create_connection_data,
     )
     source_connection_creds = await create_credentials(
         session=session,
@@ -172,6 +189,7 @@ async def group_transfer(
         session=session,
         name="group_transfer_target_connection",
         group_id=group.id,
+        data=create_connection_data,
     )
     target_connection_creds = await create_credentials(
         session=session,
@@ -186,6 +204,8 @@ async def group_transfer(
         source_connection_id=source_connection.id,
         target_connection_id=target_connection.id,
         queue_id=queue.id,
+        source_params=create_transfer_data,
+        target_params=create_transfer_data,
     )
 
     yield MockTransfer(

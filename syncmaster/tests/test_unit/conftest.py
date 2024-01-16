@@ -274,8 +274,16 @@ async def mock_queue(
 
 
 @pytest_asyncio.fixture
+async def create_connection_data(request):
+    if hasattr(request, "param"):
+        return request.param
+    return None
+
+
+@pytest_asyncio.fixture
 async def two_group_connections(
     session: AsyncSession,
+    create_connection_data,
     settings: Settings,
     mock_group: MockGroup,
     group_queue: Queue,  # do not delete
@@ -284,12 +292,14 @@ async def two_group_connections(
         session=session,
         name=f"{secrets.token_hex(5)}_group_for_group_connection",
         group_id=mock_group.id,
+        data=create_connection_data,
     )
 
     connection2 = await create_connection(
         session=session,
         name=f"{secrets.token_hex(5)}_group_for_group_connection",
         group_id=mock_group.id,
+        data=create_connection_data,
     )
 
     credentials1 = await create_credentials(

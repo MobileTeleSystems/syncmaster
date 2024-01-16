@@ -16,6 +16,11 @@ INCREMENTAL_TYPE = Literal["incremental"]
 HIVE_TYPE = Literal["hive"]
 ORACLE_TYPE = Literal["oracle"]
 POSTGRES_TYPE = Literal["postgres"]
+S3_TYPE = Literal["s3"]
+
+# file formats
+CSV_FORMAT = Literal["csv"]
+JSONLINE_FORMAT = Literal["jsonline"]
 
 
 NameConstr = constr(min_length=1)
