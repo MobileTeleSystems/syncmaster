@@ -7,16 +7,19 @@ from kombu.exceptions import KombuError
 
 from app.api.deps import UnitOfWorkMarker
 from app.api.v1.schemas import StatusCopyTransferResponseSchema, StatusResponseSchema
-from app.api.v1.transfers.schemas import (
-    CopyTransferSchema,
+from app.api.v1.transfers.schemas.run import (
     CreateRunSchema,
-    CreateTransferSchema,
     ReadRunSchema,
-    ReadTransferSchema,
     RunPageSchema,
+)
+from app.api.v1.transfers.schemas.transfer import (
+    CopyTransferSchema,
+    CreateTransferSchema,
+    ReadTransferSchema,
     TransferPageSchema,
     UpdateTransferSchema,
 )
+from app.api.v1.transfers.utils import process_s3_directory_path
 from app.db.models import Status, User
 from app.db.utils import Permission
 from app.exceptions import (
@@ -106,6 +109,8 @@ async def create_transfer(
 
     if transfer_data.group_id != queue.group_id:
         raise DifferentTransferAndQueueGroupError
+
+    transfer_data = process_s3_directory_path(transfer_data)  # type: ignore
 
     async with unit_of_work:
         transfer = await unit_of_work.transfer.create(
@@ -305,6 +310,8 @@ async def update_transfer(
             conn="source",
             params_type=transfer_data.source_params.type,
         )
+
+    transfer_data = process_s3_directory_path(transfer_data)  # type: ignore
 
     async with unit_of_work:
         transfer = await unit_of_work.transfer.update(

@@ -6,6 +6,7 @@ from app.api.v1.schemas import (
     HIVE_TYPE,
     ORACLE_TYPE,
     POSTGRES_TYPE,
+    S3_TYPE,
     NameConstr,
     PageSchema,
 )
@@ -158,6 +159,20 @@ class CreateOracleAuthSchema(BaseModel):
     type: ORACLE_TYPE
     user: str
     password: SecretStr
+
+
+class CreateS3ConnectionSchema(BaseModel):
+    type: S3_TYPE
+    host: str
+    port: int
+    additional_params: dict = Field(default_factory=dict)
+
+
+class ReadS3ConnectionSchema(BaseModel):
+    type: S3_TYPE
+    host: str
+    port: int
+    additional_params: dict = Field(default_factory=dict)
 
 
 class CreatePostgresConnectionSchema(BaseModel):

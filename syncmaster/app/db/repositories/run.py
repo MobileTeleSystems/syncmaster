@@ -7,7 +7,7 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.api.v1.transfers.schemas import ReadFullTransferSchema
+from app.api.v1.transfers.schemas.transfer import ReadFullTransferSchema
 from app.db.models import Run, Status, Transfer
 from app.db.repositories.base import Repository
 from app.db.utils import Pagination

@@ -6,7 +6,7 @@ from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from app.api.v1.transfers.schemas import ReadFullTransferSchema
+from app.api.v1.transfers.schemas.transfer import ReadFullTransferSchema
 from app.config import Settings
 from app.db.models import (
     AuthData,

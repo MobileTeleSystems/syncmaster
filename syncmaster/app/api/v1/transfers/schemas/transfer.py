@@ -1,43 +1,32 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-from datetime import datetime
+from __future__ import annotations
 
 from pydantic import BaseModel, Field, root_validator
 
 from app.api.v1.connections.schemas import ReadConnectionSchema
-from app.api.v1.schemas import (
-    FULL_TYPE,
-    HIVE_TYPE,
-    INCREMENTAL_TYPE,
-    ORACLE_TYPE,
-    POSTGRES_TYPE,
-    NameConstr,
-    PageSchema,
+from app.api.v1.schemas import NameConstr, PageSchema
+from app.api.v1.transfers.schemas.db import (
+    ReadHiveTransferData,
+    ReadOracleTransferData,
+    ReadPostgresTransferData,
 )
-from app.db.models import Status
+from app.api.v1.transfers.schemas.file.s3 import (
+    S3CreateTransferSourceParamsSchema,
+    S3CreateTransferTargetParamsSchema,
+    S3ReadTransferSourceParamsSchema,
+    S3ReadTransferTargetParamsSchema,
+)
+from app.api.v1.transfers.schemas.strategy import FullStrategy, IncrementalStrategy
 
 
-class FullStrategy(BaseModel):
-    type: FULL_TYPE
-
-
-class IncrementalStrategy(BaseModel):
-    type: INCREMENTAL_TYPE
-
-
-class ReadHiveTransferData(BaseModel):
-    type: HIVE_TYPE
-    table_name: str
-
-
-class ReadOracleTransferData(BaseModel):
-    type: ORACLE_TYPE
-    table_name: str
-
-
-class ReadPostgresTransferData(BaseModel):
-    type: POSTGRES_TYPE
-    table_name: str
+class CopyTransferSchema(BaseModel):
+    new_group_id: int
+    new_queue_id: int
+    new_source_connection_name: NameConstr | None = None  # type: ignore # noqa: F722
+    new_target_connection_name: NameConstr | None = None  # type: ignore # noqa: F722
+    new_name: NameConstr | None  # type: ignore # noqa: F722
+    remove_source: bool = False
 
 
 class ReadTransferSchema(BaseModel):
@@ -50,11 +39,15 @@ class ReadTransferSchema(BaseModel):
     is_scheduled: bool
     schedule: str
     queue_id: int
-    source_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData = Field(
+    source_params: (
+        ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData | S3ReadTransferSourceParamsSchema
+    ) = Field(
         ...,
         discriminator="type",
     )
-    target_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData = Field(
+    target_params: (
+        ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData | S3ReadTransferTargetParamsSchema
+    ) = Field(
         ...,
         discriminator="type",
     )
@@ -67,19 +60,6 @@ class ReadTransferSchema(BaseModel):
         orm_mode = True
 
 
-class TransferPageSchema(PageSchema):
-    items: list[ReadTransferSchema]
-
-
-class CopyTransferSchema(BaseModel):
-    new_group_id: int
-    new_queue_id: int
-    new_source_connection_name: NameConstr | None = None  # type: ignore # noqa: F722
-    new_target_connection_name: NameConstr | None = None  # type: ignore # noqa: F722
-    new_name: NameConstr | None  # type: ignore # noqa: F722
-    remove_source: bool = False
-
-
 class CreateTransferSchema(BaseModel):
     group_id: int = Field(..., description="Transfer owner group id")
     source_connection_id: int = Field(..., description="id of the connection that will be the data source")
@@ -89,12 +69,16 @@ class CreateTransferSchema(BaseModel):
     is_scheduled: bool = Field(..., description="Is the transfer on schedule")
     queue_id: int = Field(..., description="id of the queue in which the transfer will be performed")
     schedule: str | None = Field(None, description="Execution schedule in cron format")
-    source_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData = Field(
+    source_params: (
+        ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData | S3CreateTransferSourceParamsSchema
+    ) = Field(
         ...,
         discriminator="type",
         description="Data source parameters",
     )
-    target_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData = Field(
+    target_params: (
+        ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData | S3CreateTransferTargetParamsSchema
+    ) = Field(
         ...,
         discriminator="type",
         description="Data receiver parameters",
@@ -122,36 +106,21 @@ class UpdateTransferSchema(BaseModel):
     is_scheduled: bool | None
     schedule: str | None
     new_queue_id: int | None
-    source_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData | None = Field(
-        discriminator="type", default=None
-    )
-    target_params: ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData | None = Field(
-        discriminator="type", default=None
-    )
+    source_params: (
+        ReadPostgresTransferData
+        | ReadOracleTransferData
+        | ReadHiveTransferData
+        | S3CreateTransferSourceParamsSchema
+        | None
+    ) = Field(discriminator="type", default=None)
+    target_params: (
+        ReadPostgresTransferData
+        | ReadOracleTransferData
+        | ReadHiveTransferData
+        | S3CreateTransferTargetParamsSchema
+        | None
+    ) = Field(discriminator="type", default=None)
     strategy_params: FullStrategy | IncrementalStrategy | None = Field(discriminator="type", default=None)
-
-
-class ShortRunSchema(BaseModel):
-    id: int
-    transfer_id: int
-    started_at: datetime | None
-    ended_at: datetime | None
-    status: Status
-    log_url: str | None
-
-    class Config:
-        orm_mode = True
-
-
-class RunPageSchema(PageSchema):
-    items: list[ShortRunSchema]
-
-
-class ReadRunSchema(ShortRunSchema):
-    transfer_dump: dict
-
-    class Config:
-        orm_mode = True
 
 
 class ReadFullTransferSchema(ReadTransferSchema):
@@ -162,5 +131,5 @@ class ReadFullTransferSchema(ReadTransferSchema):
         orm_mode = True
 
 
-class CreateRunSchema(BaseModel):
-    transfer_id: int
+class TransferPageSchema(PageSchema):
+    items: list[ReadTransferSchema]
