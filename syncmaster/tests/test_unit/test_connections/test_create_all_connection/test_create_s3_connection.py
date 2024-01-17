@@ -11,7 +11,7 @@ from app.db.repositories.utils import decrypt_auth_data
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_user_plus_can_create_oracle_connection_with_service_name(
+async def test_user_plus_can_create_s3_connection(
     client: AsyncClient,
     group: MockGroup,
     session: AsyncSession,
@@ -30,15 +30,18 @@ async def test_user_plus_can_create_oracle_connection_with_service_name(
             "name": "New connection",
             "description": "",
             "connection_data": {
-                "type": "oracle",
-                "host": "127.0.0.1",
-                "port": 1521,
-                "service_name": "service_name",
+                "type": "s3",
+                "bucket": "some_bucket",
+                "host": "some_host",
+                "port": 80,
+                "region": "some_region",
+                "protocol": "http",
+                "bucket_style": "domain",
             },
             "auth_data": {
-                "type": "oracle",
-                "user": "user",
-                "password": "secret",
+                "type": "s3",
+                "access_key": "access_key",
+                "secret_key": "secret_key",
             },
         },
     )
@@ -63,30 +66,34 @@ async def test_user_plus_can_create_oracle_connection_with_service_name(
     assert result.status_code == 200
     assert result.json() == {
         "id": connection.id,
+        "group_id": connection.group_id,
         "name": connection.name,
         "description": connection.description,
-        "group_id": connection.group_id,
         "connection_data": {
             "type": connection.data["type"],
             "host": connection.data["host"],
+            "bucket": connection.data["bucket"],
             "port": connection.data["port"],
-            "additional_params": connection.data["additional_params"],
-            "service_name": connection.data["service_name"],
-            "sid": connection.data["sid"],
+            "region": connection.data["region"],
+            "protocol": connection.data["protocol"],
+            "bucket_style": connection.data["bucket_style"],
         },
         "auth_data": {
             "type": decrypted["type"],
-            "user": decrypted["user"],
+            "access_key": decrypted["access_key"],
         },
     }
 
 
-async def test_user_plus_can_create_oracle_connection_with_sid(
+@pytest.mark.parametrize("port,protocol", [(80, "http"), (443, "https")])
+async def test_user_plus_can_create_s3_connection_auto_generate_port(
     client: AsyncClient,
     group: MockGroup,
     session: AsyncSession,
     settings: Settings,
     role_user_plus: TestUserRoles,
+    protocol: str,
+    port: int,
 ):
     # Arrange
     user = group.get_member_of_role(role_user_plus)
@@ -100,15 +107,17 @@ async def test_user_plus_can_create_oracle_connection_with_sid(
             "name": "New connection",
             "description": "",
             "connection_data": {
-                "type": "oracle",
-                "host": "127.0.0.1",
-                "port": 1521,
-                "sid": "sid_name",
+                "type": "s3",
+                "bucket": "some_bucket",
+                "host": "some_host",
+                "region": "some_region",
+                "protocol": protocol,
+                "bucket_style": "domain",
             },
             "auth_data": {
-                "type": "oracle",
-                "user": "user",
-                "password": "secret",
+                "type": "s3",
+                "access_key": "access_key",
+                "secret_key": "secret_key",
             },
         },
     )
@@ -133,69 +142,20 @@ async def test_user_plus_can_create_oracle_connection_with_sid(
     assert result.status_code == 200
     assert result.json() == {
         "id": connection.id,
+        "group_id": connection.group_id,
         "name": connection.name,
         "description": connection.description,
-        "group_id": connection.group_id,
         "connection_data": {
             "type": connection.data["type"],
             "host": connection.data["host"],
-            "port": connection.data["port"],
-            "sid": connection.data["sid"],
-            "service_name": connection.data["service_name"],
-            "additional_params": connection.data["additional_params"],
+            "bucket": connection.data["bucket"],
+            "port": port,
+            "region": connection.data["region"],
+            "protocol": connection.data["protocol"],
+            "bucket_style": connection.data["bucket_style"],
         },
         "auth_data": {
             "type": decrypted["type"],
-            "user": decrypted["user"],
+            "access_key": decrypted["access_key"],
         },
-    }
-
-
-async def test_user_plus_create_oracle_connection_with_sid_and_service_name_error(
-    client: AsyncClient,
-    group: MockGroup,
-    session: AsyncSession,
-    role_user_plus: TestUserRoles,
-):
-    # Arrange
-    user = group.get_member_of_role(role_user_plus)
-
-    # Act
-    result = await client.post(
-        "v1/connections",
-        headers={"Authorization": f"Bearer {user.token}"},
-        json={
-            "group_id": group.id,
-            "name": "New connection",
-            "description": "",
-            "connection_data": {
-                "type": "oracle",
-                "host": "127.0.0.1",
-                "port": 1521,
-                "sid": "sid_name",
-                "service_name": "service_name",
-            },
-            "auth_data": {
-                "type": "oracle",
-                "user": "user",
-                "password": "secret",
-            },
-        },
-    )
-
-    # Assert
-    assert result.status_code == 422
-    assert result.json() == {
-        "detail": [
-            {
-                "loc": [
-                    "body",
-                    "connection_data",
-                    "CreateOracleConnectionSchema",
-                    "__root__",
-                ],
-                "msg": "You must specify either sid or service_name but not both",
-                "type": "value_error",
-            }
-        ]
     }

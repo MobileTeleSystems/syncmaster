@@ -23,6 +23,8 @@ from app.config import Settings
 from app.db.models import Queue, User, UserGroup
 from app.db.repositories.utils import decrypt_auth_data
 
+ALLOWED_SOURCES = "'hive', 'oracle', 'postgres', 's3'"
+
 
 async def create_group_member(
     username: str,
@@ -274,7 +276,7 @@ async def mock_queue(
 
 
 @pytest_asyncio.fixture
-async def create_connection_data(request):
+async def create_connection_data(request) -> dict | None:
     if hasattr(request, "param"):
         return request.param
     return None
@@ -335,9 +337,18 @@ async def two_group_connections(
 
 
 @pytest_asyncio.fixture
+async def create_connection_auth_data(request) -> dict | None:
+    if hasattr(request, "param"):
+        return request.param
+    return None
+
+
+@pytest_asyncio.fixture
 async def group_connection(
     session: AsyncSession,
     settings: Settings,
+    create_connection_data: dict | None,
+    create_connection_auth_data: dict | None,
 ) -> MockConnection:
     group_owner = await create_user(
         session=session,
@@ -369,12 +380,14 @@ async def group_connection(
         session=session,
         name=f"{secrets.token_hex(5)}_group_for_group_connection",
         group_id=group.id,
+        data=create_connection_data,
     )
 
     credentials = await create_credentials(
         session=session,
         settings=settings,
         connection_id=connection.id,
+        auth_data=create_connection_auth_data,
     )
 
     yield MockConnection(

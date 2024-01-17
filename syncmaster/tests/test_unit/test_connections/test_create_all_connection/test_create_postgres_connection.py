@@ -59,6 +59,7 @@ async def test_user_plus_create_postgres_connection(
     ).one()
 
     # Assert
+    decrypted = decrypt_auth_data(creds.value, settings=settings)
     assert result.status_code == 200
     assert result.json() == {
         "id": connection.id,
@@ -73,7 +74,7 @@ async def test_user_plus_create_postgres_connection(
             "additional_params": connection.data["additional_params"],
         },
         "auth_data": {
-            "type": decrypt_auth_data(creds.value, settings=settings)["type"],
-            "user": decrypt_auth_data(creds.value, settings=settings)["user"],
+            "type": decrypted["type"],
+            "user": decrypted["user"],
         },
     }
