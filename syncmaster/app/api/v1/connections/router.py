@@ -7,16 +7,19 @@ from fastapi import APIRouter, Depends, Query, status
 from pydantic import SecretStr
 
 from app.api.deps import UnitOfWorkMarker
-from app.api.v1.connections.schemas import (
-    ORACLE_TYPE,
-    POSTGRES_TYPE,
+from app.api.v1.connections.schemas.connection import (
     ConnectionCopySchema,
     ConnectionPageSchema,
     CreateConnectionSchema,
     ReadConnectionSchema,
     UpdateConnectionSchema,
 )
-from app.api.v1.schemas import MetaPageSchema, StatusResponseSchema
+from app.api.v1.schemas import (
+    ORACLE_TYPE,
+    POSTGRES_TYPE,
+    MetaPageSchema,
+    StatusResponseSchema,
+)
 from app.db.models import User
 from app.db.utils import Permission
 from app.exceptions import (
@@ -206,17 +209,13 @@ async def update_connection(
             )
 
     auth_data = await unit_of_work.credentials.get_for_connection(connection_id)
-
     return ReadConnectionSchema(
         id=connection.id,
         group_id=connection.group_id,
         name=connection.name,
         description=connection.description,
         data=connection.data,
-        auth_data={
-            "type": auth_data["type"],
-            "user": auth_data["user"],
-        },
+        auth_data=auth_data,
     )
 
 

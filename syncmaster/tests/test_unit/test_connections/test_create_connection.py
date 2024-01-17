@@ -2,6 +2,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from tests.test_unit.conftest import ALLOWED_SOURCES
 from tests.utils import MockConnection, MockGroup, MockUser, TestUserRoles
 
 from app.config import Settings
@@ -72,6 +73,7 @@ async def test_user_plus_can_create_connection(
     request.addfinalizer(delete_rows)
 
     # Assert
+    decrypted = decrypt_auth_data(creds.value, settings=settings)
     assert result.json() == {
         "id": connection.id,
         "name": connection.name,
@@ -85,8 +87,8 @@ async def test_user_plus_can_create_connection(
             "additional_params": connection.data["additional_params"],
         },
         "auth_data": {
-            "type": decrypt_auth_data(creds.value, settings=settings)["type"],
-            "user": decrypt_auth_data(creds.value, settings=settings)["user"],
+            "type": decrypted["type"],
+            "user": decrypted["user"],
         },
     }
     assert result.status_code == 200
@@ -258,14 +260,13 @@ async def test_check_fields_validation_on_create_connection(
             {
                 "loc": ["body", "connection_data"],
                 "msg": (
-                    "No match for discriminator 'type' and value 'POSTGRESQL' "
-                    "(allowed values: 'hive', 'oracle', 'postgres')"
+                    f"No match for discriminator 'type' and value 'POSTGRESQL' (allowed values: {ALLOWED_SOURCES})"
                 ),
                 "type": "value_error.discriminated_union.invalid_discriminator",
                 "ctx": {
                     "discriminator_key": "type",
                     "discriminator_value": "POSTGRESQL",
-                    "allowed_values": "'hive', 'oracle', 'postgres'",
+                    "allowed_values": ALLOWED_SOURCES,
                 },
             }
         ]
@@ -355,7 +356,7 @@ async def test_superuser_can_create_connection(
             )
         )
     ).one()
-
+    decrypted = decrypt_auth_data(creds.value, settings=settings)
     assert result.status_code == 200
     assert result.json() == {
         "id": connection.id,
@@ -370,8 +371,8 @@ async def test_superuser_can_create_connection(
             "additional_params": connection.data["additional_params"],
         },
         "auth_data": {
-            "type": decrypt_auth_data(creds.value, settings=settings)["type"],
-            "user": decrypt_auth_data(creds.value, settings=settings)["user"],
+            "type": decrypted["type"],
+            "user": decrypted["user"],
         },
     }
 

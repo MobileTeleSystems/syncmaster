@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, root_validator
 
-from app.api.v1.connections.schemas import ReadConnectionSchema
+from app.api.v1.connections.schemas.connection import ReadConnectionSchema
 from app.api.v1.schemas import NameConstr, PageSchema
 from app.api.v1.transfers.schemas.db import (
     ReadHiveTransferData,
