@@ -30,35 +30,41 @@ Installation
 Entities
 ========
 
-Transfer
---------
-A transfer is an object for storing information about the data loading process.
-It stores information about the type of connection to the data source, as well as the target table.
-The transfer also stores the name of the queue to which the data upload task will be transferred.
+User
+----
+
+This is representation of user which can access the application.
+It is automatically created during first login, no special registration step is needed.
+
+User can be marked as superuser. Such user has priviliges to do anything they want.
+Usually there are a few superusers within the entire application.
 
 Example:
 
 .. code-block:: json
 
     {
-        "group_id": "1",
-        "name": "My beautiful transfer.",
-        "description": "What a great transfer !",
-        "is_scheduled": "False",
-        "schedule": "",
-        "source_connection_id": "1",
-        "target_connection_id": "2",
-        "source_params": "{'type': 'postgres', 'table_name': 'source_table'}",
-        "target_params": "{'type': 'postgres', 'table_name': 'target_table'}",
-        "strategy_params": "{'type': 'full'}",
-        "queue_id": "1",
+        "username": "msmarty5",
+        "is_superuser": False,
+        "is_active": True,
     }
 
-Run
----
-This entity represents the launched data upload process. If the transfer is information about unloading
-then run is a running process. Run stores information about the startup time as well as its status.
-The user cannot create run himself; It is created as a result of executing transfer.
+Group
+----
+
+Other objects (like connection, transfer, run, queue) can be created only within some group (see ``group_id``).
+
+Note: currently groups can be created only by superuser.
+
+Example:
+
+.. code-block:: json
+
+    {
+        "name": "Some group",
+        "description": "",
+        "owner_id": 123,
+    }
 
 Connection
 ----------
@@ -70,10 +76,9 @@ Example:
 .. code-block:: json
 
     {
-        "id": "1",
+        "group_id": "1",
         "name": "Beautiful name",
         "description": "What a great connection !",
-        "group_id": "1",
         "connection_data": {
             "type": "postgres",
             "host": "127.0.0.1",
@@ -84,23 +89,69 @@ Example:
         "auth_data": {
             "type": "postgres",
             "user": "user_name",
-            "passwrod": "password",
+            "password": "password",
         }
     }
 
 Queue
 -----
-A queue is an entity for specifying on which worker a task will be executed.
+A queue is an entity for specifying on which set of workers a task will be executed. This is just a as Celery queue.
 
 Example:
 
 .. code-block:: json
 
     {
-        "id": "1",
+        "group_id": 1,
         "name": "Beautiful name",
         "description": "What a great queue !",
-        "group_id": 1,
+    }
+
+Runs are send to a specific queue. Celery workers can be assigned to one or multiple queues to handle those runs.
+
+Transfer
+--------
+A transfer is an object for storing information about the data loading process.
+It stores information like source connection, target connection, table name and so on.
+The transfer also stores the name of the queue to which the data upload task will be transferred.
+
+Example:
+
+.. code-block:: json
+
+    {
+        "group_id": "1",
+        "queue_id": "1",
+        "name": "My beautiful transfer.",
+        "description": "What a great transfer !",
+        "is_scheduled": "False",
+        "schedule": "",
+        "source_connection_id": "1",
+        "target_connection_id": "2",
+        "source_params": "{'type': 'postgres', 'table_name': 'source_table'}",
+        "target_params": "{'type': 'postgres', 'table_name': 'target_table'}",
+        "strategy_params": "{'type': 'full'}",
+    }
+
+Run
+---
+This entity represents the launched data upload process. If the transfer is information about unloading
+then run is a running process. Run stores information about the startup time as well as its status.
+The user cannot create run himself; It is created as a result of executing transfer.
+
+Example:
+
+.. code-block:: json
+
+    {
+        "transfer_id": 123,
+        "started_at: "2024-01-19T16:30:07+03:00",
+        "ended_at: None,
+        "status": "STARTED",
+        "log_url: "https://kinaba.url/...",
+        "transfer_dump": {
+            # transfer object JSON
+        },
     }
 
 .. Roles
@@ -108,45 +159,20 @@ Example:
 Roles and rules
 ===============
 
-- Users have rights only in the group in which they are registered.
-  In a group where they do not exist, they have no rights.
+- Object within the group can be seen/interacted with only by users which are members of the group.
+- Permissions are limited by role assigned to user within specific group.
 - There can be only one user in a group with the Owner role, all other roles are not limited in
   number.
 - Superuser can read, write to the table and delete without being in the group.
 
-All rights indicated in the tables below apply only to resources associated with the user group.
+Roles are:
 
-Transfers, Runs and Connections
---------------------------------
+* ``GUEST`` - read-only
+* ``USER`` - read-write
+* ``MAINTAINER`` (DevOps) - read-write + manage queues
+* ``OWNER`` (Product Owner) - read-write + manage queues + manage user-group mapping
+* ``SUPERUSER`` - meta role assigned to specific users (NOT within group). Read-write + manage queues + manage user-group mapping + create/delete groups.
 
-.. list-table:: Right to work wirh Transfers, Runs and Connections repositories.
-   :header-rows: 1
-
-
-   * - Rule \ Role
-     - Guest
-     - User
-     - Maintainer
-     - Owner
-     - Superuser
-   * - READ
-     - x
-     - x
-     - x
-     - x
-     - x
-   * - UPDATE, CREATE
-     -
-     - x
-     - x
-     - x
-     - x
-   * - DELETE
-     -
-     -
-     - x
-     - x
-     - x
 
 Groups
 -------
@@ -202,6 +228,38 @@ Each user has the right to remove himself from a group, regardless of his role i
      -
      -
      -
+     - x
+     - x
+
+Transfers, Runs and Connections
+--------------------------------
+
+.. list-table:: Right to work wirh Transfers, Runs and Connections repositories.
+   :header-rows: 1
+
+
+   * - Rule \ Role
+     - Guest
+     - User
+     - Maintainer
+     - Owner
+     - Superuser
+   * - READ
+     - x
+     - x
+     - x
+     - x
+     - x
+   * - UPDATE, CREATE
+     -
+     - x
+     - x
+     - x
+     - x
+   * - DELETE
+     -
+     -
+     - x
      - x
      - x
 
