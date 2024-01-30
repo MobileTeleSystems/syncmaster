@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
 
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import BaseModel, SecretStr
 
 from app.api.v1.schemas import HIVE_TYPE
 
@@ -12,7 +12,6 @@ class HiveBaseSchema(BaseModel):
 
 class ReadHiveConnectionSchema(HiveBaseSchema):
     cluster: str
-    additional_params: dict = Field(default_factory=dict)
 
 
 class ReadHiveAuthSchema(HiveBaseSchema):
@@ -21,7 +20,6 @@ class ReadHiveAuthSchema(HiveBaseSchema):
 
 class UpdateHiveConnectionSchema(HiveBaseSchema):
     cluster: str | None
-    additional_params: dict | None = Field(default_factory=dict)
 
 
 class UpdateHiveAuthSchema(HiveBaseSchema):
@@ -29,7 +27,6 @@ class UpdateHiveAuthSchema(HiveBaseSchema):
 
 
 class CreateHiveConnectionSchema(HiveBaseSchema):
-    additional_params: dict = Field(default_factory=dict)
     cluster: str
 
 

@@ -104,3 +104,9 @@ check-fixtures: ##@Test Check declared fixtures without using
 	RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD} \
 	PYTHONPATH=${APP_PATH} \
 	${POETRY} run pytest --dead-fixtures ./syncmaster/tests/
+
+back_docker_run_test:
+	docker run --env-file ./.env.docker \
+	-v ./syncmaster:/syncmaster \
+	--net syncmaster_network -p 8000:8000 --rm \
+	 -it --name syncmaster_back syncmaster_back /bin/bash

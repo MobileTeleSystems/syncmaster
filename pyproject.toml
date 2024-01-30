@@ -32,7 +32,7 @@ psycopg2-binary = "^2.9.7"
 pytest-randomly = "^3.13.0"
 pytest-deadfixtures = "^2.2.1"
 pytest-mock = "^3.11.1"
-onetl = {extras = ["spark"], version = "^0.9.3"}
+onetl = {extras = ["spark", "s3"], version = "^0.9.3"}
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.3.3"
@@ -47,8 +47,8 @@ types-python-jose = "^3.3.4.7"
 
 [[tool.poetry.source]]
 name = "nexus"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
-priority = "primary"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
+priority = "default"
 
 [[tool.poetry.source]]
 name = "artifactory"

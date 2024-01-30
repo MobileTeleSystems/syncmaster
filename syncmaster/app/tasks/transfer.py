@@ -66,7 +66,7 @@ def run_transfer(session: Session, run_id: int, settings: Settings):
             target_auth_data=target_auth_data,
             settings=settings,
         )
-        controller.make_transfer()
+        controller.start_transfer()
     except Exception:
         run.status = Status.FAILED
         logger.exception("Run `%s` was failed", run.id)
@@ -76,9 +76,9 @@ def run_transfer(session: Session, run_id: int, settings: Settings):
     finally:
         # Both the source and the receiver use the same spark session,
         # so it is enough to stop the session at the source.
-        if controller is not None and controller.source.spark is not None:
-            controller.source.spark.sparkContext.stop()
-            controller.source.spark.stop()
+        if controller is not None and controller.source_handler.spark is not None:
+            controller.source_handler.spark.sparkContext.stop()
+            controller.source_handler.spark.stop()
 
     run.ended_at = datetime.utcnow()
     session.add(run)

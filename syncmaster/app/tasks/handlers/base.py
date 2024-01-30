@@ -6,23 +6,15 @@ from onetl.db import DBReader, DBWriter
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
 
-from app.dto.connections import (
-    HiveConnectionDTO,
-    OracleConnectionDTO,
-    PostgresConnectionDTO,
-)
-from app.dto.transfers import (
-    HiveTransferParamsDTO,
-    OracleTransferParamsDTO,
-    PostgresTransferParamsDTO,
-)
+from app.dto.connections import ConnectionDTO
+from app.dto.transfers import TransferDTO
 
 
 class Handler(ABC):
     def __init__(
         self,
-        connection: PostgresConnectionDTO | OracleConnectionDTO | HiveConnectionDTO,
-        transfer_params: OracleTransferParamsDTO | PostgresTransferParamsDTO | HiveTransferParamsDTO,
+        connection: ConnectionDTO,
+        transfer_params: TransferDTO,
         spark: SparkSession | None = None,
     ) -> None:
         self.spark = spark
