@@ -21,7 +21,7 @@ tz = ["python-dateutil"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -40,7 +40,7 @@ vine = ">=5.0.0"
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -65,7 +65,74 @@ trio = ["trio (<0.22)"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
+reference = "nexus"
+
+[[package]]
+name = "argon2-cffi"
+version = "23.1.0"
+description = "Argon2 for Python"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "argon2_cffi-23.1.0-py3-none-any.whl", hash = "sha256:c670642b78ba29641818ab2e68bd4e6a78ba53b7eff7b4c3815ae16abf91c7ea"},
+    {file = "argon2_cffi-23.1.0.tar.gz", hash = "sha256:879c3e79a2729ce768ebb7d36d4609e3a78a4ca2ec3a9f12286ca057e3d0db08"},
+]
+
+[package.dependencies]
+argon2-cffi-bindings = "*"
+
+[package.extras]
+dev = ["argon2-cffi[tests,typing]", "tox (>4)"]
+docs = ["furo", "myst-parser", "sphinx", "sphinx-copybutton", "sphinx-notfound-page"]
+tests = ["hypothesis", "pytest"]
+typing = ["mypy"]
+
+[package.source]
+type = "legacy"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
+reference = "nexus"
+
+[[package]]
+name = "argon2-cffi-bindings"
+version = "21.2.0"
+description = "Low-level CFFI bindings for Argon2"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "argon2-cffi-bindings-21.2.0.tar.gz", hash = "sha256:bb89ceffa6c791807d1305ceb77dbfacc5aa499891d2c55661c6459651fc39e3"},
+    {file = "argon2_cffi_bindings-21.2.0-cp36-abi3-macosx_10_9_x86_64.whl", hash = "sha256:ccb949252cb2ab3a08c02024acb77cfb179492d5701c7cbdbfd776124d4d2367"},
+    {file = "argon2_cffi_bindings-21.2.0-cp36-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:9524464572e12979364b7d600abf96181d3541da11e23ddf565a32e70bd4dc0d"},
+    {file = "argon2_cffi_bindings-21.2.0-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b746dba803a79238e925d9046a63aa26bf86ab2a2fe74ce6b009a1c3f5c8f2ae"},
+    {file = "argon2_cffi_bindings-21.2.0-cp36-abi3-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:58ed19212051f49a523abb1dbe954337dc82d947fb6e5a0da60f7c8471a8476c"},
+    {file = "argon2_cffi_bindings-21.2.0-cp36-abi3-musllinux_1_1_aarch64.whl", hash = "sha256:bd46088725ef7f58b5a1ef7ca06647ebaf0eb4baff7d1d0d177c6cc8744abd86"},
+    {file = "argon2_cffi_bindings-21.2.0-cp36-abi3-musllinux_1_1_i686.whl", hash = "sha256:8cd69c07dd875537a824deec19f978e0f2078fdda07fd5c42ac29668dda5f40f"},
+    {file = "argon2_cffi_bindings-21.2.0-cp36-abi3-musllinux_1_1_x86_64.whl", hash = "sha256:f1152ac548bd5b8bcecfb0b0371f082037e47128653df2e8ba6e914d384f3c3e"},
+    {file = "argon2_cffi_bindings-21.2.0-cp36-abi3-win32.whl", hash = "sha256:603ca0aba86b1349b147cab91ae970c63118a0f30444d4bc80355937c950c082"},
+    {file = "argon2_cffi_bindings-21.2.0-cp36-abi3-win_amd64.whl", hash = "sha256:b2ef1c30440dbbcba7a5dc3e319408b59676e2e039e2ae11a8775ecf482b192f"},
+    {file = "argon2_cffi_bindings-21.2.0-cp38-abi3-macosx_10_9_universal2.whl", hash = "sha256:e415e3f62c8d124ee16018e491a009937f8cf7ebf5eb430ffc5de21b900dad93"},
+    {file = "argon2_cffi_bindings-21.2.0-pp37-pypy37_pp73-macosx_10_9_x86_64.whl", hash = "sha256:3e385d1c39c520c08b53d63300c3ecc28622f076f4c2b0e6d7e796e9f6502194"},
+    {file = "argon2_cffi_bindings-21.2.0-pp37-pypy37_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2c3e3cc67fdb7d82c4718f19b4e7a87123caf8a93fde7e23cf66ac0337d3cb3f"},
+    {file = "argon2_cffi_bindings-21.2.0-pp37-pypy37_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6a22ad9800121b71099d0fb0a65323810a15f2e292f2ba450810a7316e128ee5"},
+    {file = "argon2_cffi_bindings-21.2.0-pp37-pypy37_pp73-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:f9f8b450ed0547e3d473fdc8612083fd08dd2120d6ac8f73828df9b7d45bb351"},
+    {file = "argon2_cffi_bindings-21.2.0-pp37-pypy37_pp73-win_amd64.whl", hash = "sha256:93f9bf70084f97245ba10ee36575f0c3f1e7d7724d67d8e5b08e61787c320ed7"},
+    {file = "argon2_cffi_bindings-21.2.0-pp38-pypy38_pp73-macosx_10_9_x86_64.whl", hash = "sha256:3b9ef65804859d335dc6b31582cad2c5166f0c3e7975f324d9ffaa34ee7e6583"},
+    {file = "argon2_cffi_bindings-21.2.0-pp38-pypy38_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:d4966ef5848d820776f5f562a7d45fdd70c2f330c961d0d745b784034bd9f48d"},
+    {file = "argon2_cffi_bindings-21.2.0-pp38-pypy38_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:20ef543a89dee4db46a1a6e206cd015360e5a75822f76df533845c3cbaf72670"},
+    {file = "argon2_cffi_bindings-21.2.0-pp38-pypy38_pp73-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:ed2937d286e2ad0cc79a7087d3c272832865f779430e0cc2b4f3718d3159b0cb"},
+    {file = "argon2_cffi_bindings-21.2.0-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:5e00316dabdaea0b2dd82d141cc66889ced0cdcbfa599e8b471cf22c620c329a"},
+]
+
+[package.dependencies]
+cffi = ">=1.0.1"
+
+[package.extras]
+dev = ["cogapp", "pre-commit", "pytest", "wheel"]
+tests = ["pytest"]
+
+[package.source]
+type = "legacy"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -123,7 +190,7 @@ test = ["flake8 (>=5.0,<6.0)", "uvloop (>=0.15.3)"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -151,7 +218,7 @@ yaml = ["PyYAML"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -172,7 +239,7 @@ test = ["hypothesis", "pytest", "pytest-benchmark[histogram]", "pytest-cov", "py
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -188,7 +255,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -240,7 +307,7 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -300,7 +367,7 @@ zstd = ["zstandard (==0.21.0)"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -316,7 +383,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -397,7 +464,7 @@ pycparser = "*"
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -413,7 +480,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -432,7 +499,7 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -451,7 +518,7 @@ click = ">=7"
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -473,7 +540,7 @@ dev = ["coveralls", "pytest (>=3.6)", "pytest-cov", "wheel"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -496,7 +563,7 @@ testing = ["pytest (>=7.2.1)", "pytest-cov (>=4.0.0)", "tox (>=4.4.3)"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -512,7 +579,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -562,7 +629,7 @@ test-randomorder = ["pytest-randomly"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -584,7 +651,7 @@ dev = ["PyTest", "PyTest-Cov", "bump2version (<1)", "sphinx (<2)", "tox"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -600,7 +667,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -623,7 +690,7 @@ gmpy2 = ["gmpy2"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -644,7 +711,7 @@ pydantic = "<2"
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -660,7 +727,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -684,7 +751,7 @@ all = ["email-validator (>=1.1.1)", "httpx (>=0.23.0)", "itsdangerous (>=1.1.0)"
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -704,7 +771,7 @@ testing = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "diff-cover (>=7.5)", "p
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -725,7 +792,7 @@ pyflakes = ">=3.0.0,<3.1.0"
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -776,7 +843,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -795,7 +862,7 @@ smmap = ">=3.0.1,<6"
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -814,7 +881,7 @@ gitdb = ">=4.0.1,<5"
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -896,7 +963,7 @@ test = ["objgraph", "psutil"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -912,7 +979,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -938,7 +1005,7 @@ socks = ["socksio (==1.*)"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -966,7 +1033,7 @@ socks = ["socksio (==1.*)"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -985,7 +1052,7 @@ tests = ["freezegun", "pytest", "pytest-cov"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1004,7 +1071,7 @@ license = ["ukkonen"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1020,7 +1087,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1044,7 +1111,7 @@ testing = ["flufl.flake8", "importlib-resources (>=1.3)", "packaging", "pyfakefs
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1060,7 +1127,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1082,7 +1149,7 @@ requirements-deprecated-finder = ["pip-api", "pipreqs"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1119,7 +1186,7 @@ zookeeper = ["kazoo (>=2.8.0)"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1143,7 +1210,7 @@ testing = ["pytest"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1172,7 +1239,7 @@ testing = ["coverage", "pytest", "pytest-cov", "pytest-regressions"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1246,7 +1313,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1262,7 +1329,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1278,7 +1345,30 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
+reference = "nexus"
+
+[[package]]
+name = "minio"
+version = "7.2.3"
+description = "MinIO Python SDK for Amazon S3 Compatible Cloud Storage"
+optional = false
+python-versions = "*"
+files = [
+    {file = "minio-7.2.3-py3-none-any.whl", hash = "sha256:e6b5ce0a9b4368da50118c3f0c4df5dbf33885d44d77fce6c0aa1c485e6af7a1"},
+    {file = "minio-7.2.3.tar.gz", hash = "sha256:4971dfb1a71eeefd38e1ce2dc7edc4e6eb0f07f1c1d6d70c15457e3280cfc4b9"},
+]
+
+[package.dependencies]
+argon2-cffi = "*"
+certifi = "*"
+pycryptodome = "*"
+typing-extensions = "*"
+urllib3 = "*"
+
+[package.source]
+type = "legacy"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1328,7 +1418,7 @@ reports = ["lxml"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1344,7 +1434,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1363,18 +1453,18 @@ setuptools = "*"
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
 name = "onetl"
-version = "0.9.4"
+version = "0.9.5"
 description = "One ETL tool to rule them all"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "onetl-0.9.4-py3-none-any.whl", hash = "sha256:c51531921b5ae049da85796242de344eb9295e2238ad97dc2b4b0b6ffc171f63"},
-    {file = "onetl-0.9.4.tar.gz", hash = "sha256:7a29147b59040fde61393ccd367a3bc38bb03b6cc53eb3a44ec7231610eb4a64"},
+    {file = "onetl-0.9.5-py3-none-any.whl", hash = "sha256:37f193e698c209b007ac3f8081eab783844770ee6f9ec819a3d5e4d2b30b81d0"},
+    {file = "onetl-0.9.5.tar.gz", hash = "sha256:118da1f3805d69bcaebee0dbeb1f64b5342f339d5dc0c821981c7336a3c4ec5b"},
 ]
 
 [package.dependencies]
@@ -1384,6 +1474,7 @@ evacuator = ">=1.0,<1.1"
 frozendict = "*"
 humanize = "*"
 importlib-metadata = ">=3.6.0"
+minio = {version = "*", optional = true, markers = "extra == \"s3\""}
 ordered-set = "*"
 platformdirs = "*"
 pydantic = ">=1.9.2,<1.10.2 || >1.10.2,<2"
@@ -1406,7 +1497,7 @@ webdav = ["webdavclient3"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1425,7 +1516,7 @@ dev = ["black", "mypy", "pytest"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1441,7 +1532,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1457,7 +1548,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1473,7 +1564,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1493,7 +1584,7 @@ test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.3.1)", "pytest-
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1513,7 +1604,7 @@ testing = ["pytest", "pytest-benchmark"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1536,7 +1627,7 @@ virtualenv = ">=20.10.0"
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1555,7 +1646,7 @@ wcwidth = "*"
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1586,7 +1677,7 @@ test = ["enum34", "ipaddress", "mock", "pywin32", "wmi"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1660,7 +1751,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1676,7 +1767,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1692,7 +1783,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1708,7 +1799,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1724,7 +1815,53 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
+reference = "nexus"
+
+[[package]]
+name = "pycryptodome"
+version = "3.20.0"
+description = "Cryptographic library for Python"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+files = [
+    {file = "pycryptodome-3.20.0-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:f0e6d631bae3f231d3634f91ae4da7a960f7ff87f2865b2d2b831af1dfb04e9a"},
+    {file = "pycryptodome-3.20.0-cp27-cp27m-manylinux2010_i686.whl", hash = "sha256:baee115a9ba6c5d2709a1e88ffe62b73ecc044852a925dcb67713a288c4ec70f"},
+    {file = "pycryptodome-3.20.0-cp27-cp27m-manylinux2010_x86_64.whl", hash = "sha256:417a276aaa9cb3be91f9014e9d18d10e840a7a9b9a9be64a42f553c5b50b4d1d"},
+    {file = "pycryptodome-3.20.0-cp27-cp27m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2a1250b7ea809f752b68e3e6f3fd946b5939a52eaeea18c73bdab53e9ba3c2dd"},
+    {file = "pycryptodome-3.20.0-cp27-cp27m-musllinux_1_1_aarch64.whl", hash = "sha256:d5954acfe9e00bc83ed9f5cb082ed22c592fbbef86dc48b907238be64ead5c33"},
+    {file = "pycryptodome-3.20.0-cp27-cp27m-win32.whl", hash = "sha256:06d6de87c19f967f03b4cf9b34e538ef46e99a337e9a61a77dbe44b2cbcf0690"},
+    {file = "pycryptodome-3.20.0-cp27-cp27m-win_amd64.whl", hash = "sha256:ec0bb1188c1d13426039af8ffcb4dbe3aad1d7680c35a62d8eaf2a529b5d3d4f"},
+    {file = "pycryptodome-3.20.0-cp27-cp27mu-manylinux2010_i686.whl", hash = "sha256:5601c934c498cd267640b57569e73793cb9a83506f7c73a8ec57a516f5b0b091"},
+    {file = "pycryptodome-3.20.0-cp27-cp27mu-manylinux2010_x86_64.whl", hash = "sha256:d29daa681517f4bc318cd8a23af87e1f2a7bad2fe361e8aa29c77d652a065de4"},
+    {file = "pycryptodome-3.20.0-cp27-cp27mu-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:3427d9e5310af6680678f4cce149f54e0bb4af60101c7f2c16fdf878b39ccccc"},
+    {file = "pycryptodome-3.20.0-cp27-cp27mu-musllinux_1_1_aarch64.whl", hash = "sha256:3cd3ef3aee1079ae44afaeee13393cf68b1058f70576b11439483e34f93cf818"},
+    {file = "pycryptodome-3.20.0-cp35-abi3-macosx_10_9_universal2.whl", hash = "sha256:ac1c7c0624a862f2e53438a15c9259d1655325fc2ec4392e66dc46cdae24d044"},
+    {file = "pycryptodome-3.20.0-cp35-abi3-macosx_10_9_x86_64.whl", hash = "sha256:76658f0d942051d12a9bd08ca1b6b34fd762a8ee4240984f7c06ddfb55eaf15a"},
+    {file = "pycryptodome-3.20.0-cp35-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f35d6cee81fa145333137009d9c8ba90951d7d77b67c79cbe5f03c7eb74d8fe2"},
+    {file = "pycryptodome-3.20.0-cp35-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:76cb39afede7055127e35a444c1c041d2e8d2f1f9c121ecef573757ba4cd2c3c"},
+    {file = "pycryptodome-3.20.0-cp35-abi3-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:49a4c4dc60b78ec41d2afa392491d788c2e06edf48580fbfb0dd0f828af49d25"},
+    {file = "pycryptodome-3.20.0-cp35-abi3-musllinux_1_1_aarch64.whl", hash = "sha256:fb3b87461fa35afa19c971b0a2b7456a7b1db7b4eba9a8424666104925b78128"},
+    {file = "pycryptodome-3.20.0-cp35-abi3-musllinux_1_1_i686.whl", hash = "sha256:acc2614e2e5346a4a4eab6e199203034924313626f9620b7b4b38e9ad74b7e0c"},
+    {file = "pycryptodome-3.20.0-cp35-abi3-musllinux_1_1_x86_64.whl", hash = "sha256:210ba1b647837bfc42dd5a813cdecb5b86193ae11a3f5d972b9a0ae2c7e9e4b4"},
+    {file = "pycryptodome-3.20.0-cp35-abi3-win32.whl", hash = "sha256:8d6b98d0d83d21fb757a182d52940d028564efe8147baa9ce0f38d057104ae72"},
+    {file = "pycryptodome-3.20.0-cp35-abi3-win_amd64.whl", hash = "sha256:9b3ae153c89a480a0ec402e23db8d8d84a3833b65fa4b15b81b83be9d637aab9"},
+    {file = "pycryptodome-3.20.0-pp27-pypy_73-manylinux2010_x86_64.whl", hash = "sha256:4401564ebf37dfde45d096974c7a159b52eeabd9969135f0426907db367a652a"},
+    {file = "pycryptodome-3.20.0-pp27-pypy_73-win32.whl", hash = "sha256:ec1f93feb3bb93380ab0ebf8b859e8e5678c0f010d2d78367cf6bc30bfeb148e"},
+    {file = "pycryptodome-3.20.0-pp310-pypy310_pp73-macosx_10_9_x86_64.whl", hash = "sha256:acae12b9ede49f38eb0ef76fdec2df2e94aad85ae46ec85be3648a57f0a7db04"},
+    {file = "pycryptodome-3.20.0-pp310-pypy310_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f47888542a0633baff535a04726948e876bf1ed880fddb7c10a736fa99146ab3"},
+    {file = "pycryptodome-3.20.0-pp310-pypy310_pp73-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:6e0e4a987d38cfc2e71b4a1b591bae4891eeabe5fa0f56154f576e26287bfdea"},
+    {file = "pycryptodome-3.20.0-pp310-pypy310_pp73-win_amd64.whl", hash = "sha256:c18b381553638414b38705f07d1ef0a7cf301bc78a5f9bc17a957eb19446834b"},
+    {file = "pycryptodome-3.20.0-pp39-pypy39_pp73-macosx_10_9_x86_64.whl", hash = "sha256:a60fedd2b37b4cb11ccb5d0399efe26db9e0dd149016c1cc6c8161974ceac2d6"},
+    {file = "pycryptodome-3.20.0-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:405002eafad114a2f9a930f5db65feef7b53c4784495dd8758069b89baf68eab"},
+    {file = "pycryptodome-3.20.0-pp39-pypy39_pp73-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:2ab6ab0cb755154ad14e507d1df72de9897e99fd2d4922851a276ccc14f4f1a5"},
+    {file = "pycryptodome-3.20.0-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:acf6e43fa75aca2d33e93409f2dafe386fe051818ee79ee8a3e21de9caa2ac9e"},
+    {file = "pycryptodome-3.20.0.tar.gz", hash = "sha256:09609209ed7de61c2b560cc5c8c4fbf892f8b15b1faf7e4cbffac97db1fffda7"},
+]
+
+[package.source]
+type = "legacy"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1781,7 +1918,7 @@ email = ["email-validator (>=1.0.3)"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1797,7 +1934,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1816,7 +1953,7 @@ plugins = ["importlib-metadata"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1841,7 +1978,7 @@ sql = ["numpy (>=1.15)", "pandas (>=1.0.5)", "pyarrow (>=1.0.0)"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1866,7 +2003,7 @@ testing = ["argcomplete", "attrs (>=19.2.0)", "hypothesis (>=3.56)", "mock", "no
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1889,7 +2026,7 @@ testing = ["coverage (>=6.2)", "flaky (>=3.5.0)", "hypothesis (>=5.7.1)", "mypy 
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1908,7 +2045,7 @@ pytest = ">=3.0.0"
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1930,7 +2067,7 @@ dev = ["pre-commit", "pytest-asyncio", "tox"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1949,7 +2086,7 @@ pytest = "*"
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1968,7 +2105,7 @@ six = ">=1.5"
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -1995,7 +2132,7 @@ pycryptodome = ["pyasn1", "pycryptodome (>=3.3.1,<4.0.0)"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2014,7 +2151,7 @@ dev = ["atomicwrites (==1.2.1)", "attrs (==19.2.0)", "coverage (==6.5.0)", "hatc
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2068,7 +2205,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2091,7 +2228,7 @@ jupyter = ["ipywidgets (>=7.5.1,<9)"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2110,7 +2247,7 @@ pyasn1 = ">=0.1.3"
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2131,7 +2268,7 @@ testing-integration = ["build[virtualenv]", "filelock (>=3.4.0)", "jaraco.envs (
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2147,7 +2284,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2163,7 +2300,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2179,7 +2316,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2263,7 +2400,7 @@ sqlcipher = ["sqlcipher3-binary"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2296,7 +2433,7 @@ url = ["furl (>=0.4.1)"]
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2318,7 +2455,7 @@ full = ["httpx (>=0.22.0)", "itsdangerous", "jinja2", "python-multipart", "pyyam
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2337,7 +2474,7 @@ pbr = ">=2.0.0,<2.1.0 || >2.1.0"
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2353,7 +2490,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2372,7 +2509,7 @@ types-pyasn1 = "*"
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2388,7 +2525,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2404,7 +2541,28 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
+reference = "nexus"
+
+[[package]]
+name = "urllib3"
+version = "2.1.0"
+description = "HTTP library with thread-safe connection pooling, file post, and more."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "urllib3-2.1.0-py3-none-any.whl", hash = "sha256:55901e917a5896a349ff771be919f8bd99aff50b79fe58fec595eb37bbc56bb3"},
+    {file = "urllib3-2.1.0.tar.gz", hash = "sha256:df7aa8afb0148fa78488e7899b2c59b5f4ffcfa82e6c54ccb9dd37c1d7b52d54"},
+]
+
+[package.extras]
+brotli = ["brotli (>=1.0.9)", "brotlicffi (>=0.8.0)"]
+socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
+zstd = ["zstandard (>=0.18.0)"]
+
+[package.source]
+type = "legacy"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2427,7 +2585,7 @@ standard = ["colorama (>=0.4)", "httptools (>=0.5.0)", "python-dotenv (>=0.13)",
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2443,7 +2601,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2468,7 +2626,7 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2484,7 +2642,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2573,7 +2731,7 @@ files = [
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [[package]]
@@ -2593,10 +2751,10 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 
 [package.source]
 type = "legacy"
-url = "https://nexus.services.mts.ru/repository/pip/simple"
+url = "http://nexus.services.mts.ru/repository/pip/simple"
 reference = "nexus"
 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "48c767d2221d256c60df0757171801645beff93e169008d69d5bf787246803de"
+content-hash = "b2b7b13e02c4a2e6284716a65f44cf248f613e63046596e0f61387519b3edada"

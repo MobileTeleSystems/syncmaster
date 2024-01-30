@@ -19,6 +19,17 @@ services:
     networks:
       - network
 
+  s3:
+    image: bitnami/minio:latest
+    container_name: s3
+    restart: unless-stopped
+    env_file: .env.docker
+    ports:
+      - 9010:9000
+      - 9011:9001
+    networks:
+      - network
+
   worker:
     image: syncmaster_worker
     restart: unless-stopped

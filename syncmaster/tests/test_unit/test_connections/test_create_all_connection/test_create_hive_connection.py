@@ -67,7 +67,6 @@ async def test_user_plus_can_create_hive_connection(
         "connection_data": {
             "type": connection.data["type"],
             "cluster": connection.data["cluster"],
-            "additional_params": connection.data["additional_params"],
         },
         "auth_data": {
             "type": decrypted["type"],

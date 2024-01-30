@@ -14,8 +14,8 @@ class PostgresConnectionDTO(ConnectionDTO):
     port: int
     user: str
     password: str
-    database_name: str
     additional_params: dict
+    database_name: str
     type: str = "postgres"
 
 
@@ -25,16 +25,28 @@ class OracleConnectionDTO(ConnectionDTO):
     port: int
     user: str
     password: str
+    additional_params: dict
     sid: str | None
     service_name: str | None
-    additional_params: dict
     type: str = "oracle"
 
 
 @dataclass
 class HiveConnectionDTO(ConnectionDTO):
-    cluster: str
-    additional_params: dict
     user: str
     password: str
+    cluster: str
     type: str = "hive"
+
+
+@dataclass
+class S3ConnectionDTO(ConnectionDTO):
+    host: str
+    port: int
+    access_key: str
+    secret_key: str
+    bucket: str
+    additional_params: dict
+    region: str | None = None
+    protocol: str = "https"
+    type: str = "s3"

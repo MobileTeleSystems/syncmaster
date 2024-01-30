@@ -90,6 +90,14 @@ class TestSettings(BaseSettings):
     TEST_HIVE_USER: str
     TEST_HIVE_PASSWORD: str
 
+    TEST_S3_HOST: str
+    TEST_S3_PORT: int
+    TEST_S3_BUCKET: str
+    TEST_S3_ACCESS_KEY: str
+    TEST_S3_SECRET_KEY: str
+    TEST_S3_PROTOCOL: str = "http"
+    TEST_S3_ADDITIONAL_PARAMS: dict = {}
+
     @root_validator
     def check_sid_and_service_name(cls, values):
         sid = values.get("TEST_ORACLE_SID")
