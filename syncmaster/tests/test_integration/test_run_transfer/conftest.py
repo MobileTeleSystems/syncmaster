@@ -3,11 +3,13 @@ import os
 from collections import namedtuple
 from itertools import permutations
 from pathlib import Path, PurePosixPath
+from typing import Literal
 
 import pytest
 import pytest_asyncio
 from onetl.connection import Hive, Oracle, Postgres, SparkS3
 from onetl.db import DBWriter
+from onetl.file.format import CSV, JSONLine
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import (
     DateType,
@@ -278,12 +280,15 @@ def s3_file_connection(s3_server):
 def s3_file_connection_with_path(request, s3_file_connection):
     connection = s3_file_connection
     root = PurePosixPath("/data")
+    target = PurePosixPath("/target")
 
     def finalizer():
         connection.remove_dir(root, recursive=True)
+        connection.remove_dir(target, recursive=True)
 
     request.addfinalizer(finalizer)
     connection.remove_dir(root, recursive=True)
+    connection.remove_dir(target, recursive=True)
 
     return connection, root
 
@@ -322,10 +327,10 @@ def s3_file_df_connection(s3_file_connection, spark, s3_server):
 
 
 @pytest_asyncio.fixture(scope="session")
-def prepare_s3(resource_path, s3_file_connection, s3_file_df_connection_with_path):
+def prepare_s3(resource_path, s3_file_connection, s3_file_df_connection_with_path: tuple[SparkS3, PurePosixPath]):
     connection, upload_to = s3_file_df_connection_with_path
-    upload_from = resource_path / "file_df_connection" / "csv" / "with_header"
-    files = upload_files(upload_from, upload_to, s3_file_connection)
+    files = upload_files(resource_path, upload_to, s3_file_connection)
+
     return connection, upload_to, files
 
 
@@ -353,9 +358,9 @@ def prepare_hive(
 
 @pytest.fixture
 def prepare_oracle(
-    spark: SparkSession,
-    oracle: OracleConnectionDTO,
     init_df: DataFrame,
+    oracle: OracleConnectionDTO,
+    spark: SparkSession,
 ) -> Oracle:
     oracle_connection = Oracle(
         host=oracle.host,
@@ -383,20 +388,46 @@ def prepare_oracle(
     return oracle_connection
 
 
+@pytest_asyncio.fixture(params=["csv"])
+def choice_s3_file_format(request):
+    file_format: Literal["csv", "jsonline"] = request.param
+    file_format_object = None
+    if file_format == "csv":
+        file_format_object = CSV(
+            lineSep="\n",
+            header=True,
+        )
+    if file_format == "jsonline":
+        file_format_object = JSONLine(
+            encoding="utf-8",
+            lineSep="\n",
+        )
+    return file_format, file_format_object
+
+
+@pytest_asyncio.fixture(params=[""])
+def choice_s3_file_type(request):
+    return request.param
+
+
 @pytest_asyncio.fixture
 async def transfers(
+    choice_s3_file_format,
+    choice_s3_file_type,
     prepare_postgres,
     prepare_oracle,
     prepare_hive,
     prepare_s3,
     postgres: PostgresConnectionDTO,
+    settings: Settings,
+    session: AsyncSession,
     oracle: OracleConnectionDTO,
     hive: HiveConnectionDTO,
     s3: S3ConnectionDTO,
-    session: AsyncSession,
-    settings: Settings,
 ):
+    s3_file_format, file_format_object = choice_s3_file_format
     _, source_path, _ = prepare_s3
+
     user = await create_user(
         session=session,
         username="owner_group",
@@ -519,11 +550,17 @@ async def transfers(
         source_type = source.data["type"]
         target_type = target.data["type"]
 
+        file_format = {}
+        if source_type == "s3" or target_type == "s3":
+            file_format = file_format_object.dict()
+            file_format["type"] = s3_file_format
+
         if source_type == "s3":
             source_params = {
                 "type": source_type,
-                "directory_path": str(source_path),
-                "file_format": {"type": "csv", "header": True, "lineSep": os.linesep},
+                "directory_path": str(source_path / "file_df_connection" / s3_file_format / choice_s3_file_type),
+                "file_format": file_format,
+                "df_schema": df_schema.json(),
                 "options": {},
             }
         else:
@@ -532,11 +569,21 @@ async def transfers(
                 "table_name": (oracle.user if source_type == "oracle" else "public") + ".source_table",
             }
 
-        # In the implementation of writing to file storage, this parameter will change
-        target_params = {
-            "type": target_type,
-            "table_name": (oracle.user if target_type == "oracle" else "public") + ".target_table",
-        }
+        if target_type == "s3":
+            # TODO: Add this parameter to the file_format_object creation
+            file_format["timestampFormat"] = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+
+            target_params = {
+                "type": target_type,
+                "directory_path": f"/target/{s3_file_format}/{choice_s3_file_type}",
+                "file_format": file_format,
+                "options": {},
+            }
+        else:
+            target_params = {
+                "type": target_type,
+                "table_name": (oracle.user if target_type == "oracle" else "public") + ".target_table",
+            }
 
         transfer = await create_transfer(
             session=session,
