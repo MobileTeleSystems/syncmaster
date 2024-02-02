@@ -105,8 +105,14 @@ check-fixtures: ##@Test Check declared fixtures without using
 	PYTHONPATH=${APP_PATH} \
 	${POETRY} run pytest --dead-fixtures ./syncmaster/tests/
 
-back_docker_run_test:
+run_back_docker:
 	docker run --env-file ./.env.docker \
 	-v ./syncmaster:/syncmaster \
 	--net syncmaster_network -p 8000:8000 --rm \
-	 -it --name syncmaster_back syncmaster_back /bin/bash
+	 -it --name backend syncmaster_back /bin/bash
+
+run_worker_docker:
+	docker run --env-file ./.env.docker \
+	-v ./syncmaster:/syncmaster \
+	--net syncmaster_network --rm \
+	-it --name worker syncmaster_worker /bin/bash

@@ -6,7 +6,6 @@ import csv
 import gzip
 import io
 import json
-import os
 import random
 import shutil
 import sys
@@ -270,7 +269,7 @@ def save_as_jsonline_plain(data: list[dict], path: Path) -> None:
     with open(path / "file.jsonl", "w") as file:
         for row in data:
             row_str = json.dumps(row, default=_to_string)
-            file.write(row_str + os.linesep)
+            file.write(row_str + "\n")
 
 
 def save_as_jsonline_gz(data: list[dict], path: Path) -> None:
@@ -279,7 +278,7 @@ def save_as_jsonline_gz(data: list[dict], path: Path) -> None:
     buffer = io.StringIO()
     for row in data:
         row_str = json.dumps(row, default=_to_string)
-        buffer.write(row_str + os.linesep)
+        buffer.write(row_str + "\n")
 
     with open(path / "file.jsonl.gz", "wb") as file:
         with gzip.GzipFile(fileobj=file, mode="w", mtime=0) as gzfile:
