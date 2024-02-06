@@ -5,7 +5,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockGroup, MockTransfer, MockUser, TestUserRoles
+from tests.utils import MockGroup, MockTransfer, MockUser, UserTestRoles
 
 from app.db.models import Connection, Queue
 
@@ -211,7 +211,7 @@ async def test_other_group_guest_plus_member_cannot_copy_transfer(
     group_transfer: MockTransfer,
     group: MockGroup,
     session: AsyncSession,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
     event_loop,
     group_queue: Queue,
 ):
@@ -513,7 +513,7 @@ async def test_superuser_cannot_copy_transfer_with_unknown_new_group_error(
 
 async def test_user_plus_cannot_copy_transfer_with_unknown_new_group_error(
     client: AsyncClient,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
     group_transfer_and_group_user_plus: str,
     group_transfer: MockTransfer,
     group_queue: Queue,

@@ -24,7 +24,7 @@ from app.db.models import Connection, Group, Run, Status, Transfer, User
 logger = logging.getLogger(__name__)
 
 
-class TestUserRoles(enum.StrEnum):
+class UserTestRoles(enum.StrEnum):
     Owner = "Owner"
     Maintainer = "Maintainer"
     User = "User"
@@ -57,13 +57,13 @@ class MockGroup:
             self._guest = members[2]
 
     def get_member_of_role(self, role_name: str) -> MockUser:
-        if role_name == TestUserRoles.Maintainer:
+        if role_name == UserTestRoles.Maintainer:
             return self._maintainer
-        if role_name == TestUserRoles.User:
+        if role_name == UserTestRoles.User:
             return self._user
-        if role_name == TestUserRoles.Guest:
+        if role_name == UserTestRoles.Guest:
             return self._guest
-        if role_name == TestUserRoles.Owner:
+        if role_name == UserTestRoles.Owner:
             return self._owner
 
         raise ValueError(f"Unknown role name: {role_name}.")

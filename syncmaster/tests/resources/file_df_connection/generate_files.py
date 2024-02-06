@@ -12,7 +12,7 @@ import sys
 from argparse import ArgumentParser
 from collections.abc import Iterator
 from contextlib import contextmanager
-from datetime import date, datetime, timezone
+from datetime import date, datetime
 from pathlib import Path
 from tempfile import gettempdir
 from typing import TYPE_CHECKING, Any, TextIO
@@ -28,65 +28,24 @@ if TYPE_CHECKING:
 SEED = 42
 
 
-def get_data() -> list[dict]:
-    return [
-        {
-            "id": 1,
-            "str_value": "val1",
-            "int_value": 123,
-            "date_value": date(2021, 1, 1),
-            "datetime_value": datetime(2021, 1, 1, 1, 1, 1, tzinfo=timezone.utc),
-            "float_value": 1.23,
-        },
-        {
-            "id": 2,
-            "str_value": "val1",
-            "int_value": 234,
-            "date_value": date(2022, 2, 2),
-            "datetime_value": datetime(2022, 2, 2, 2, 2, 2, tzinfo=timezone.utc),
-            "float_value": 2.34,
-        },
-        {
-            "id": 3,
-            "str_value": "val2",
-            "int_value": 345,
-            "date_value": date(2023, 3, 3),
-            "datetime_value": datetime(2023, 3, 3, 3, 3, 3, tzinfo=timezone.utc),
-            "float_value": 3.45,
-        },
-        {
-            "id": 4,
-            "str_value": "val2",
-            "int_value": 456,
-            "date_value": date(2024, 4, 4),
-            "datetime_value": datetime(2024, 4, 4, 4, 4, 4, tzinfo=timezone.utc),
-            "float_value": 4.56,
-        },
-        {
-            "id": 5,
-            "str_value": "val3",
-            "int_value": 567,
-            "date_value": date(2025, 5, 5),
-            "datetime_value": datetime(2025, 5, 5, 5, 5, 5, tzinfo=timezone.utc),
-            "float_value": 5.67,
-        },
-        {
-            "id": 6,
-            "str_value": "val3",
-            "int_value": 678,
-            "date_value": date(2026, 6, 6),
-            "datetime_value": datetime(2026, 6, 6, 6, 6, 6, tzinfo=timezone.utc),
-            "float_value": 6.78,
-        },
-        {
-            "id": 7,
-            "str_value": "val3",
-            "int_value": 789,
-            "date_value": date(2027, 7, 7),
-            "datetime_value": datetime(2027, 7, 7, 7, 7, 7, tzinfo=timezone.utc),
-            "float_value": 7.89,
-        },
-    ]
+def get_data() -> list:
+    try:
+        from test_data import data
+
+        return data
+    except Exception as e:
+        print("File test_data.py does not exists, run 'generate_data.py'.", e)
+        exit(1)
+
+
+def get_intervals() -> list:
+    try:
+        from test_data import intervals
+
+        return intervals
+    except Exception as e:
+        print("File test_data.py does not exists, run 'generate_data.py'.", e)
+        exit(1)
 
 
 def get_pandas_dataframe(data: list[dict]) -> PandasDataFrame:
@@ -100,12 +59,13 @@ def get_pyarrow_schema() -> ArrowSchema:
 
     return pa.schema(
         [
-            pa.field("id", pa.int32()),
-            pa.field("str_value", pa.string()),
-            pa.field("int_value", pa.int32()),
-            pa.field("date_value", pa.date32()),
-            pa.field("datetime_value", pa.timestamp("ms")),
-            pa.field("float_value", pa.float64()),
+            pa.field("ID", pa.int32()),
+            pa.field("PHONE_NUMBER", pa.string()),
+            pa.field("REGION", pa.string()),
+            pa.field("NUMBER", pa.int32()),
+            pa.field("BIRTH_DATE", pa.date32()),
+            pa.field("REGISTERED_AT", pa.timestamp("ms")),
+            pa.field("ACCOUNT_BALANCE", pa.float64()),
         ],
     )
 
@@ -125,12 +85,13 @@ def get_avro_schema() -> AvroSchema:
         "type": "record",
         "name": "MyType",
         "fields": [
-            {"name": "id", "type": "int"},
-            {"name": "str_value", "type": "string"},
-            {"name": "int_value", "type": "int"},
-            {"name": "date_value", "type": {"type": "int", "logicalType": "date"}},
-            {"name": "datetime_value", "type": {"type": "long", "logicalType": "timestamp-millis"}},
-            {"name": "float_value", "type": "double"},
+            {"name": "ID", "type": "int"},
+            {"name": "PHONE_NUMBER", "type": "string"},
+            {"name": "REGION", "type": "string"},
+            {"name": "NUMBER", "type": "int"},
+            {"name": "BIRTH_DATE", "type": {"type": "int", "logicalType": "date"}},
+            {"name": "REGISTERED_AT", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+            {"name": "ACCOUNT_BALANCE", "type": "double"},
         ],
     }
     return parse_avro_schema(json.dumps(schema))
@@ -188,46 +149,44 @@ def save_as_csv_nested(data: list[dict], path: Path) -> None:
     path.joinpath("some/path/more").mkdir(parents=True, exist_ok=True)
     path.joinpath("some/path/more/even_more").mkdir(parents=True, exist_ok=True)
 
-    with open(path / "some/path/for_val1.csv", "w", newline="") as file:
-        data_for_val1 = [row for row in data if row["str_value"] == "val1"]
-        _write_csv(data_for_val1, file)
+    counter = 0
 
-    with open(path / "some/path/more/for_val2.csv", "w", newline="") as file:
-        data_for_val2 = [row for row in data if row["str_value"] == "val2"]
-        _write_csv(data_for_val2, file)
+    for num, interval in enumerate(get_intervals()):
+        if counter <= 2:
+            with open(path / f"some/path/for_val{num}.csv", "w", newline="") as file:
+                _write_csv([row for row in data if row["NUMBER"] in interval], file)
 
-    with open(path / "some/path/more/even_more/for_val3.csv", "w", newline="") as file:
-        data_for_val3 = [row for row in data if row["str_value"] == "val3"]
-        _write_csv(data_for_val3, file)
+        if counter in (3, 4, 5):
+            with open(path / f"some/path/more/for_val{num}.csv", "w", newline="") as file:
+                _write_csv([row for row in data if row["NUMBER"] in interval], file)
+
+        if counter >= 6:
+            with open(path / f"some/path/more/even_more/for_val{num}.csv", "w", newline="") as file:
+                _write_csv([row for row in data if row["NUMBER"] in interval], file)
+
+        counter += 1
 
 
 def save_as_csv_partitioned(data: list[dict], path: Path) -> None:
     def filter_and_drop(rows: list[dict], column: str, value: Any) -> list[dict]:
         result = []
         for row in rows:
-            if row[column] == value:
+            if row[column] == value or row[column] in value:
                 row_copy = row.copy()
                 row_copy.pop(column)
                 result.append(row_copy)
         return result
 
-    path.joinpath("str_value=val1").mkdir(parents=True, exist_ok=True)
-    path.joinpath("str_value=val2").mkdir(parents=True, exist_ok=True)
-    path.joinpath("str_value=val3").mkdir(parents=True, exist_ok=True)
+    for num, _ in enumerate(get_intervals()):
+        path.joinpath(f"NUMBER={num}").mkdir(parents=True, exist_ok=True)
 
     columns = list(data[0].keys())
-    columns.remove("str_value")
-    with open(path / "str_value=val1/file.csv", "w", newline="") as file:
-        data_for_val1 = filter_and_drop(data, "str_value", "val1")
-        _write_csv(data_for_val1, file)
+    columns.remove("NUMBER")
 
-    with open(path / "str_value=val2/file.csv", "w", newline="") as file:
-        data_for_val2 = filter_and_drop(data, "str_value", "val2")
-        _write_csv(data_for_val2, file)
-
-    with open(path / "str_value=val3/file.csv", "w", newline="") as file:
-        data_for_val3 = filter_and_drop(data, "str_value", "val3")
-        _write_csv(data_for_val3, file)
+    for num, interval in enumerate(get_intervals()):
+        with open(path / f"NUMBER={num}/file.csv", "w", newline="") as file:
+            data_for_val = filter_and_drop(data, "NUMBER", interval)
+            _write_csv(data_for_val, file)
 
 
 def save_as_csv(data: list[dict], path: Path) -> None:
@@ -355,7 +314,7 @@ def temporary_set_seed(seed: int) -> Iterator[int]:
 
 
 def save_as_avro_plain(data: list[dict], path: Path) -> None:
-    from avro.datafile import DataFileDFWriter
+    from avro.datafile import DataFileWriter
     from avro.io import DatumWriter
 
     path.mkdir(parents=True, exist_ok=True)
@@ -364,13 +323,13 @@ def save_as_avro_plain(data: list[dict], path: Path) -> None:
         # DataFileDFWriter.sync_marker is initialized with randbytes
         # temporary set seed to avoid generating files with different hashes
         with temporary_set_seed(SEED):
-            with DataFileDFWriter(file, DatumWriter(), schema) as writer:
+            with DataFileWriter(file, DatumWriter(), schema) as writer:
                 for row in data:
                     writer.append(row)
 
 
 def save_as_avro_snappy(data: list[dict], path: Path) -> None:
-    from avro.datafile import DataFileDFWriter
+    from avro.datafile import DataFileWriter
     from avro.io import DatumWriter
 
     path.mkdir(parents=True, exist_ok=True)
@@ -379,7 +338,7 @@ def save_as_avro_snappy(data: list[dict], path: Path) -> None:
         # DataFileDFWriter.sync_marker is initialized with randbytes
         # temporary set seed to avoid generating files with different hashes
         with temporary_set_seed(SEED):
-            with DataFileDFWriter(file, DatumWriter(), schema, codec="snappy") as writer:
+            with DataFileWriter(file, DatumWriter(), schema, codec="snappy") as writer:
                 for row in data:
                     writer.append(row)
 
@@ -405,8 +364,8 @@ def save_as_xls_with_options(
     file = path / "file.xls"
 
     df = get_pandas_dataframe(data)
-    df["datetime_value"] = df.datetime_value.dt.tz_localize(None)
-    df.to_excel(file, index=index, engine="xlwt", **kwargs)
+    df["REGISTERED_AT"] = df.REGISTERED_AT.dt.tz_localize(None)
+    df.to_excel(file, index=index, engine="xlsxwriter", **kwargs)
 
 
 def make_zip_deterministic(path: Path) -> None:
@@ -434,7 +393,7 @@ def save_as_xlsx_with_options(
     file = path / "file.xls"
 
     df = get_pandas_dataframe(data)
-    df["datetime_value"] = df.datetime_value.dt.tz_localize(None)
+    df["REGISTERED_AT"] = df.REGISTERED_AT.dt.tz_localize(None)
     df.to_excel(file, index=index, engine="openpyxl", **kwargs)
     make_zip_deterministic(file)
 
@@ -567,12 +526,12 @@ def main(argv: list[str] | None = None) -> None:
     if args.format not in format_mapping and args.format != "all":
         raise ValueError(f"Format {args.format} is not supported")
 
-    data = get_data()
     if args.format == "all":
         save_functions = list(format_mapping.values())
     else:
         save_functions = [format_mapping[args.format]]
 
+    data = get_data()
     for save_func in save_functions:
         save_func(data, args.path)
 

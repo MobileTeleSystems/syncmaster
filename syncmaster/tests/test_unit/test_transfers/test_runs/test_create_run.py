@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockGroup, MockTransfer, MockUser, TestUserRoles
+from tests.utils import MockGroup, MockTransfer, MockUser, UserTestRoles
 
 from app.db.models import Run, Status
 
@@ -14,7 +14,7 @@ async def test_user_plus_can_create_run_of_transfer_his_group(
     group_transfer: MockTransfer,
     session: AsyncSession,
     mocker,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
 ) -> None:
     # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_user_plus)
@@ -86,7 +86,7 @@ async def test_group_member_cannot_create_run_of_other_group_transfer(
     group: MockGroup,
     session: AsyncSession,
     mocker,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     mocker.patch("app.tasks.config.celery.send_task")
@@ -177,7 +177,7 @@ async def test_group_member_cannot_create_run_of_unknown_transfer_error(
     group_transfer: MockTransfer,
     session: AsyncSession,
     mocker,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ) -> None:
     # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_guest_plus)

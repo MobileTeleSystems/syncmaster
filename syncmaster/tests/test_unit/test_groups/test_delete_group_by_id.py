@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockGroup, MockUser, TestUserRoles
+from tests.utils import MockGroup, MockUser, UserTestRoles
 
 from app.db.models import Group
 
@@ -40,7 +40,7 @@ async def test_only_superuser_can_delete_group(
 async def test_not_superuser_cannot_delete_group(
     client: AsyncClient,
     group: MockGroup,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_guest_plus)

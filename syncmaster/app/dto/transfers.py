@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from dataclasses import dataclass
 
-from app.api.v1.transfers.schemas.file_format import CSV, JSONLine
+from app.api.v1.transfers.schemas.file_format import CSV, JSON, JSONLine
 
 
 @dataclass
@@ -31,7 +31,7 @@ class HiveTransferParamsDTO(TransferDTO):
 @dataclass
 class S3TransferParamsDTO(TransferDTO):
     directory_path: str
-    file_format: CSV | JSONLine
+    file_format: CSV | JSONLine | JSON
     options: dict
     df_schema: dict | None = None
     type: str = "s3"

@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockGroup, MockTransfer, MockUser, TestUserRoles
+from tests.utils import MockGroup, MockTransfer, MockUser, UserTestRoles
 
 from app.db.models import Queue
 
@@ -14,7 +14,7 @@ async def test_group_member_can_read_queues(
     group_queue: Queue,
     group_transfer: MockTransfer,  # another group with queue
     mock_group: MockGroup,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = mock_group.get_member_of_role(role_guest_plus)
@@ -92,7 +92,7 @@ async def test_other_group_member_cannot_read_queues(
     group_queue: Queue,
     mock_group: MockGroup,
     group: MockGroup,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_guest_plus)
@@ -117,7 +117,7 @@ async def test_group_member_cannot_read__unknown_group_queues_error(
     group_queue: Queue,
     group_transfer: MockTransfer,  # another group with queue
     mock_group: MockGroup,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = mock_group.get_member_of_role(role_guest_plus)

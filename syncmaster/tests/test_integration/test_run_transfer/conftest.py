@@ -9,7 +9,7 @@ import pytest
 import pytest_asyncio
 from onetl.connection import Hive, Oracle, Postgres, SparkS3
 from onetl.db import DBWriter
-from onetl.file.format import CSV, JSONLine
+from onetl.file.format import CSV, JSON, JSONLine
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import (
     DateType,
@@ -21,6 +21,7 @@ from pyspark.sql.types import (
     TimestampType,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
+from tests.resources.file_df_connection.test_data import data
 from tests.test_unit.utils import (
     create_connection,
     create_credentials,
@@ -30,7 +31,7 @@ from tests.test_unit.utils import (
     create_user,
     upload_files,
 )
-from tests.utils import MockUser, TestUserRoles
+from tests.utils import MockUser, UserTestRoles
 
 from app.api.v1.auth.utils import sign_jwt
 from app.config import EnvTypes, Settings, TestSettings
@@ -43,12 +44,13 @@ from app.dto.connections import (
 
 df_schema = StructType(
     [
-        StructField("id", IntegerType()),
-        StructField("str_value", StringType()),
-        StructField("int_value", IntegerType()),
-        StructField("date_value", DateType()),
-        StructField("datetime_value", TimestampType()),
-        StructField("float_value", DoubleType()),
+        StructField("ID", IntegerType()),
+        StructField("PHONE_NUMBER", StringType()),
+        StructField("REGION", StringType()),
+        StructField("NUMBER", IntegerType()),
+        StructField("BIRTH_DATE", DateType()),
+        StructField("REGISTERED_AT", TimestampType()),
+        StructField("ACCOUNT_BALANCE", DoubleType()),
     ],
 )
 
@@ -156,62 +158,9 @@ def s3(test_settings: TestSettings) -> S3ConnectionDTO:
 
 @pytest.fixture
 def init_df(spark: SparkSession) -> DataFrame:
-    df_schema = StructType(
-        [
-            StructField("ID", IntegerType()),
-            StructField("PHONE_NUMBER", StringType()),
-            StructField("REGION", StringType()),
-            StructField("BIRTH_DATE", DateType()),
-            StructField("REGISTERED_AT", TimestampType()),
-            StructField("ACCOUNT_BALANCE", DoubleType()),
-        ],
-    )
-    df_to_write = spark.createDataFrame(
-        data=[
-            {
-                "ID": 1,
-                "PHONE_NUMBER": "+79123456789",
-                "REGION": "Mordor",
-                "BIRTH_DATE": datetime.date(year=2023, month=3, day=11),
-                "REGISTERED_AT": datetime.datetime.now(),
-                "ACCOUNT_BALANCE": 1234.2343,
-            },
-            {
-                "ID": 2,
-                "PHONE_NUMBER": "+79123456789",
-                "REGION": "Mordor",
-                "BIRTH_DATE": datetime.date(year=2023, month=3, day=11),
-                "REGISTERED_AT": datetime.datetime.now(),
-                "ACCOUNT_BALANCE": 1234.2343,
-            },
-            {
-                "ID": 3,
-                "PHONE_NUMBER": "+79123456789",
-                "REGION": "Mordor",
-                "BIRTH_DATE": datetime.date(year=2023, month=3, day=11),
-                "REGISTERED_AT": datetime.datetime.now(),
-                "ACCOUNT_BALANCE": 1234.2343,
-            },
-            {
-                "ID": 4,
-                "PHONE_NUMBER": "+79123456789",
-                "REGION": "Mordor",
-                "BIRTH_DATE": datetime.date(year=2023, month=3, day=11),
-                "REGISTERED_AT": datetime.datetime.now(),
-                "ACCOUNT_BALANCE": 1234.2343,
-            },
-            {
-                "ID": 5,
-                "PHONE_NUMBER": "+79123456789",
-                "REGION": "Mordor",
-                "BIRTH_DATE": datetime.date(year=2023, month=3, day=11),
-                "REGISTERED_AT": datetime.datetime.now(),
-                "ACCOUNT_BALANCE": 1234.2343,
-            },
-        ],
-        schema=df_schema,
-    )
-    return df_to_write
+    df = spark.createDataFrame(data, df_schema)  # type: ignore
+
+    return df
 
 
 @pytest.fixture
@@ -402,6 +351,11 @@ def choice_s3_file_format(request):
             encoding="utf-8",
             lineSep="\n",
         )
+    if file_format == "json":
+        file_format_object = JSON(
+            lineSep="\n",
+            encoding="utf-8",
+        )
     return file_format, file_format_object
 
 
@@ -554,6 +508,7 @@ async def transfers(
         if source_type == "s3" or target_type == "s3":
             file_format = file_format_object.dict()
             file_format["type"] = s3_file_format
+            file_format["timestampFormat"] = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS+00:00"
 
         if source_type == "s3":
             source_params = {
@@ -570,9 +525,6 @@ async def transfers(
             }
 
         if target_type == "s3":
-            # TODO: Add this parameter to the file_format_object creation
-            file_format["timestampFormat"] = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
-
             target_params = {
                 "type": target_type,
                 "directory_path": f"/target/{s3_file_format}/{choice_s3_file_type}",
@@ -601,7 +553,7 @@ async def transfers(
         "group_owner": MockUser(
             user=user,
             auth_token=sign_jwt(user.id, settings),
-            role=TestUserRoles.Owner,
+            role=UserTestRoles.Owner,
         ),
     }
     data.update(transfers)  # type: ignore
@@ -629,20 +581,20 @@ def init_df_with_mixed_column_naming(spark: SparkSession) -> DataFrame:
             StructField("account_balance", DoubleType()),
         ],
     )
-    df_to_write = spark.createDataFrame(
+
+    return spark.createDataFrame(
         data=[
-            {
-                "Id": 1,
-                "Phone Number": "+79123456789",
-                "region": "Mordor",
-                "birth_DATE": datetime.date(year=2023, month=3, day=11),
-                "Registered At": datetime.datetime.now(),
-                "account_balance": 1234.2343,
-            },
+            (
+                1,
+                "+79123456789",
+                "Mordor",
+                datetime.date(year=2023, month=3, day=11),
+                datetime.datetime.now(),
+                1234.2343,
+            ),
         ],
         schema=df_schema,
     )
-    return df_to_write
 
 
 @pytest.fixture
@@ -850,7 +802,7 @@ async def transfers_with_mixed_column_naming(
         "group_owner": MockUser(
             user=user,
             auth_token=sign_jwt(user.id, settings),
-            role=TestUserRoles.Owner,
+            role=UserTestRoles.Owner,
         ),
     }
     data.update(transfers)  # type: ignore

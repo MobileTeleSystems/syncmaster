@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockGroup, MockUser, TestUserRoles
+from tests.utils import MockGroup, MockUser, UserTestRoles
 
 from app.db.models import Queue
 
@@ -11,7 +11,7 @@ pytestmark = [pytest.mark.asyncio]
 async def test_maintainer_plus_can_update_queue(
     client: AsyncClient,
     session: AsyncSession,
-    role_maintainer_plus: TestUserRoles,
+    role_maintainer_plus: UserTestRoles,
     group_queue: Queue,
     mock_group: MockGroup,
 ):
@@ -126,7 +126,7 @@ async def test_anon_user_cannot_update_queue(
 async def test_user_or_below_cannot_update_queue(
     client: AsyncClient,
     session: AsyncSession,
-    role_user_or_below: TestUserRoles,
+    role_user_or_below: UserTestRoles,
     group_queue: Queue,
     mock_group: MockGroup,
 ):
@@ -156,7 +156,7 @@ async def test_other_group_member_cannot_update_queue(
     session: AsyncSession,
     group_queue: Queue,
     group: MockGroup,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_user_plus)
@@ -177,7 +177,7 @@ async def test_other_group_member_cannot_update_queue(
 async def test_maintainer_plus_cannot_update_unknown_queue_error(
     client: AsyncClient,
     session: AsyncSession,
-    role_maintainer_plus: TestUserRoles,
+    role_maintainer_plus: UserTestRoles,
     group_queue: Queue,
     mock_group: MockGroup,
 ):

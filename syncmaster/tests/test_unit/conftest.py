@@ -15,7 +15,7 @@ from tests.utils import (
     MockCredentials,
     MockGroup,
     MockUser,
-    TestUserRoles,
+    UserTestRoles,
 )
 
 from app.api.v1.auth.utils import sign_jwt
@@ -35,11 +35,11 @@ async def create_group_member(
     role_name = username.split("_")[-1]
 
     if role_name == "maintainer":
-        role = TestUserRoles.Maintainer
+        role = UserTestRoles.Maintainer
     elif role_name == "user":
-        role = TestUserRoles.User
+        role = UserTestRoles.User
     elif role_name == "guest":
-        role = TestUserRoles.Guest
+        role = UserTestRoles.Guest
     else:
         raise ValueError(f"Unknown role {role_name}.")
 
@@ -86,7 +86,7 @@ async def superuser(session: AsyncSession, settings: Settings):
         yield MockUser(
             user=user,
             auth_token=sign_jwt(user.id, settings),
-            role=TestUserRoles.User,
+            role=UserTestRoles.User,
         )
 
 
@@ -96,7 +96,7 @@ async def simple_user(session: AsyncSession, settings: Settings):
         yield MockUser(
             user=user,
             auth_token=sign_jwt(user.id, settings),
-            role=TestUserRoles.User,
+            role=UserTestRoles.User,
         )
 
 
@@ -106,7 +106,7 @@ async def inactive_user(session: AsyncSession, settings: Settings):
         yield MockUser(
             user=user,
             auth_token=sign_jwt(user.id, settings),
-            role=TestUserRoles.User,
+            role=UserTestRoles.User,
         )
 
 
@@ -120,7 +120,7 @@ async def deleted_user(session: AsyncSession, settings: Settings):
         yield MockUser(
             user=user,
             auth_token=sign_jwt(user.id, settings),
-            role=TestUserRoles.User,
+            role=UserTestRoles.User,
         )
 
 
@@ -141,7 +141,7 @@ async def empty_group(session: AsyncSession, settings) -> MockGroup:
         owner=MockUser(
             user=owner,
             auth_token=sign_jwt(owner.id, settings),
-            role=TestUserRoles.Owner,
+            role=UserTestRoles.Owner,
         ),
         members=[],
     )
@@ -179,7 +179,7 @@ async def group(session: AsyncSession, settings: Settings) -> MockGroup:
         owner=MockUser(
             user=owner,
             auth_token=sign_jwt(owner.id, settings),
-            role=TestUserRoles.Owner,
+            role=UserTestRoles.Owner,
         ),
         members=members,
     )
@@ -228,7 +228,7 @@ async def mock_group(
         owner=MockUser(
             user=group_owner,
             auth_token=sign_jwt(group_owner.id, settings),
-            role=TestUserRoles.Owner,
+            role=UserTestRoles.Owner,
         ),
         members=members,
     )
@@ -401,7 +401,7 @@ async def group_connection(
             owner=MockUser(
                 user=group_owner,
                 auth_token=sign_jwt(group_owner.id, settings),
-                role=TestUserRoles.Owner,
+                role=UserTestRoles.Owner,
             ),
             members=members,
         ),
@@ -420,8 +420,8 @@ async def group_connection_and_group_maintainer_plus(
     session: AsyncSession,
     empty_group: MockGroup,
     group_connection: MockConnection,
-    role_maintainer_plus: TestUserRoles,
-    role_maintainer_or_below_without_guest: TestUserRoles,
+    role_maintainer_plus: UserTestRoles,
+    role_maintainer_or_below_without_guest: UserTestRoles,
 ) -> str:
     user = group_connection.owner_group.get_member_of_role(role_maintainer_plus)
 
@@ -441,8 +441,8 @@ async def group_connection_with_same_name_maintainer_plus(
     settings: Settings,
     empty_group: MockGroup,
     group_connection: MockConnection,
-    role_maintainer_plus: TestUserRoles,
-    role_maintainer_or_below_without_guest: TestUserRoles,
+    role_maintainer_plus: UserTestRoles,
+    role_maintainer_or_below_without_guest: UserTestRoles,
 ) -> str:
     user = group_connection.owner_group.get_member_of_role(role_maintainer_plus)
 
@@ -500,8 +500,8 @@ async def group_connection_and_group_user_plus(
     session: AsyncSession,
     empty_group: MockGroup,
     group_connection: MockConnection,
-    role_user_plus: TestUserRoles,
-    role_maintainer_or_below_without_guest: TestUserRoles,
+    role_user_plus: UserTestRoles,
+    role_maintainer_or_below_without_guest: UserTestRoles,
 ) -> str:
     user = group_connection.owner_group.get_member_of_role(role_user_plus)
 
@@ -520,7 +520,7 @@ async def group_connection_and_group_user_or_below(
     session: AsyncSession,
     empty_group: MockGroup,
     group_connection: MockConnection,
-    role_user_or_below: TestUserRoles,
+    role_user_or_below: UserTestRoles,
 ) -> str:
     user = group_connection.owner_group.get_member_of_role(role_user_or_below)
 

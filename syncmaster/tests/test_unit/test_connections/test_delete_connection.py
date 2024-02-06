@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser, TestUserRoles
+from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser, UserTestRoles
 
 from app.db.models import Connection
 
@@ -11,7 +11,7 @@ pytestmark = [pytest.mark.asyncio]
 async def test_maintainer_plus_can_delete_connection(
     client: AsyncClient,
     group_connection: MockConnection,
-    role_maintainer_plus: TestUserRoles,
+    role_maintainer_plus: UserTestRoles,
     session: AsyncSession,
 ):
     # Arraange
@@ -66,7 +66,7 @@ async def test_maintainer_plus_cannot_delete_connection_with_linked_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
     session: AsyncSession,
-    role_maintainer_plus: TestUserRoles,
+    role_maintainer_plus: UserTestRoles,
 ):
     # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_maintainer_plus)
@@ -92,7 +92,7 @@ async def test_other_group_member_cannot_delete_group_connection(
     client: AsyncClient,
     group: MockGroup,
     group_connection: MockConnection,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_guest_plus)
@@ -135,7 +135,7 @@ async def test_superuser_can_delete_group_connection(
 async def test_user_or_below_cannot_delete_connection(
     client: AsyncClient,
     group_connection: MockConnection,
-    role_user_or_below: TestUserRoles,
+    role_user_or_below: UserTestRoles,
 ):
     # Arrange
     user = group_connection.owner_group.get_member_of_role(role_user_or_below)
@@ -173,7 +173,7 @@ async def test_unauthorized_user_cannot_delete_connection(client: AsyncClient, g
 async def test_maintainer_plus_delete_unknown_connection_error(
     client: AsyncClient,
     group_connection: MockConnection,
-    role_maintainer_plus: TestUserRoles,
+    role_maintainer_plus: UserTestRoles,
     session: AsyncSession,
 ):
     # Arraange

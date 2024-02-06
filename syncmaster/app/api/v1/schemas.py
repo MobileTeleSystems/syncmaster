@@ -21,6 +21,7 @@ S3_TYPE = Literal["s3"]
 # file formats
 CSV_FORMAT = Literal["csv"]
 JSONLINE_FORMAT = Literal["jsonline"]
+JSON_FORMAT = Literal["json"]
 
 
 NameConstr = constr(min_length=1)

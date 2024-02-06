@@ -50,7 +50,6 @@ async def test_run_pg_to_s3_transfer_csv(
         options={},
         df_schema=init_df.schema,
     )
-    # TODO: после фикса бага https://jira.mts.ru/browse/DOP-8666 в onetl, пофиксить тесты
     df = reader.run()
 
     for field in init_df.schema:
@@ -99,7 +98,6 @@ async def test_run_pg_to_s3_transfer_jsonline(
         options={},
         df_schema=init_df.schema,
     )
-    # TODO: после фикса бага https://jira.mts.ru/browse/DOP-8666 в onetl, пофиксить тесты
     df = reader.run()
 
     for field in init_df.schema:

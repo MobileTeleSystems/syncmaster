@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from app.api.v1.schemas import CSV_FORMAT, JSONLINE_FORMAT
+from app.api.v1.schemas import CSV_FORMAT, JSON_FORMAT, JSONLINE_FORMAT
 
 
 class CSV(BaseModel):
@@ -19,5 +19,11 @@ class CSV(BaseModel):
 
 class JSONLine(BaseModel):
     type: JSONLINE_FORMAT
+    encoding: str = "utf-8"
+    line_sep: str = "\n"
+
+
+class JSON(BaseModel):
+    type: JSON_FORMAT
     encoding: str = "utf-8"
     line_sep: str = "\n"

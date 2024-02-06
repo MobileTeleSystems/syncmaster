@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockConnection, MockGroup, TestUserRoles
+from tests.utils import MockConnection, MockGroup, UserTestRoles
 
 from app.db.models import Queue, Transfer
 
@@ -36,7 +36,7 @@ async def test_user_plus_can_create_s3_transfer(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
     session: AsyncSession,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
     group_queue: Queue,
     mock_group: MockGroup,
     target_source_params: dict,

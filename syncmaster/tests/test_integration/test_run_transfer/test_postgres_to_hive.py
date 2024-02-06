@@ -38,7 +38,6 @@ async def test_run_simple_transfer(
         connection=prepare_hive,
         table="public.target_table",
     )
-    # TODO: после фикса бага https://jira.mts.ru/browse/DOP-8666 в onetl, пофиксить тесты
     df = reader.run()
     for field in init_df.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))

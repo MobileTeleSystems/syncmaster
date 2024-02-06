@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockTransfer, TestUserRoles
+from tests.utils import MockTransfer, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -37,7 +37,7 @@ pytestmark = [pytest.mark.asyncio]
 async def test_user_plus_can_update_s3_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
     create_connection_data: dict,
     create_transfer_data: dict,
 ):
