@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockGroup, MockTransfer, MockUser, TestUserRoles
+from tests.utils import MockGroup, MockTransfer, MockUser, UserTestRoles
 
 from app.db.models import Queue
 
@@ -13,7 +13,7 @@ async def test_maintainer_plus_can_delete_queue(
     session: AsyncSession,
     group_queue: Queue,
     mock_group: MockGroup,
-    role_maintainer_plus: TestUserRoles,
+    role_maintainer_plus: UserTestRoles,
 ):
     # Arrange
     user = mock_group.get_member_of_role(role_maintainer_plus)
@@ -87,7 +87,7 @@ async def test_user_or_below_cannot_delete_queue(
     session: AsyncSession,
     group_queue: Queue,
     mock_group: MockGroup,
-    role_user_or_below: TestUserRoles,
+    role_user_or_below: UserTestRoles,
 ):
     # Arrange
     user = mock_group.get_member_of_role(role_user_or_below)
@@ -110,7 +110,7 @@ async def test_other_group_member_cannot_delete_queue(
     session: AsyncSession,
     group_queue: Queue,
     group: MockGroup,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_guest_plus)
@@ -131,7 +131,7 @@ async def test_other_group_member_cannot_delete_queue(
 async def test_maintainer_plus_cannot_delete_queue_with_linked_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
-    role_maintainer_plus: TestUserRoles,
+    role_maintainer_plus: UserTestRoles,
 ):
     # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_maintainer_plus)
@@ -196,7 +196,7 @@ async def test_maintainer_plus_cannot_delete_unknown_queue_error(
     mock_group: MockGroup,
 ):
     # Arrange
-    user = mock_group.get_member_of_role(TestUserRoles.Owner)
+    user = mock_group.get_member_of_role(UserTestRoles.Owner)
 
     # Act
     result = await client.delete(

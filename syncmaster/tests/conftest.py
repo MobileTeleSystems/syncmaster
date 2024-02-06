@@ -29,7 +29,7 @@ from tests.utils import (
     MockGroup,
     MockTransfer,
     MockUser,
-    TestUserRoles,
+    UserTestRoles,
     prepare_new_database,
     run_async_migrations,
 )
@@ -169,7 +169,7 @@ async def group_transfer(
         owner=MockUser(
             user=group_owner,
             auth_token=sign_jwt(group_owner.id, settings),
-            role=TestUserRoles.Owner,
+            role=UserTestRoles.Owner,
         ),
         members=members,
     )
@@ -244,8 +244,8 @@ async def group_transfer_and_group_maintainer_plus(
     session: AsyncSession,
     group_queue: Queue,
     group_transfer: MockTransfer,
-    role_maintainer_plus: TestUserRoles,
-    role_maintainer_or_below_without_guest: TestUserRoles,
+    role_maintainer_plus: UserTestRoles,
+    role_maintainer_or_below_without_guest: UserTestRoles,
 ) -> str:
     user = group_transfer.owner_group.get_member_of_role(role_maintainer_plus)
 
@@ -265,8 +265,8 @@ async def group_transfer_with_same_name_maintainer_plus(
     settings: Settings,
     group_queue: Queue,
     group_transfer: MockTransfer,
-    role_maintainer_plus: TestUserRoles,
-    role_maintainer_or_below_without_guest: TestUserRoles,
+    role_maintainer_plus: UserTestRoles,
+    role_maintainer_or_below_without_guest: UserTestRoles,
 ) -> str:
     user = group_transfer.owner_group.get_member_of_role(role_maintainer_plus)
 
@@ -363,8 +363,8 @@ async def group_transfer_and_group_user_plus(
     session: AsyncSession,
     group_queue: Queue,
     group_transfer: MockTransfer,
-    role_user_plus: TestUserRoles,
-    role_maintainer_or_below_without_guest: TestUserRoles,
+    role_user_plus: UserTestRoles,
+    role_maintainer_or_below_without_guest: UserTestRoles,
 ) -> str:
     user = group_transfer.owner_group.get_member_of_role(role_user_plus)
 
@@ -383,8 +383,8 @@ async def group_transfer_and_group_connection_user_plus(
     session: AsyncSession,
     group_queue: Queue,
     group_transfer: MockTransfer,
-    role_user_plus: TestUserRoles,
-    role_maintainer_or_below_without_guest: TestUserRoles,
+    role_user_plus: UserTestRoles,
+    role_maintainer_or_below_without_guest: UserTestRoles,
     settings: Settings,
 ) -> tuple[str, Connection]:
     user = group_transfer.owner_group.get_member_of_role(role_user_plus)
@@ -418,8 +418,8 @@ async def group_transfer_and_group_user_or_below(
     session: AsyncSession,
     group_queue: Queue,
     group_transfer: MockTransfer,
-    role_user_or_below: TestUserRoles,
-    role_maintainer_or_below_without_guest: TestUserRoles,
+    role_user_or_below: UserTestRoles,
+    role_maintainer_or_below_without_guest: UserTestRoles,
 ) -> str:
     user = group_transfer.owner_group.get_member_of_role(role_user_or_below)
 
@@ -435,10 +435,10 @@ async def group_transfer_and_group_user_or_below(
 
 @pytest_asyncio.fixture(
     params=[
-        TestUserRoles.Guest,
-        TestUserRoles.User,
-        TestUserRoles.Maintainer,
-        TestUserRoles.Owner,
+        UserTestRoles.Guest,
+        UserTestRoles.User,
+        UserTestRoles.Maintainer,
+        UserTestRoles.Owner,
     ]
 )
 async def role_guest_plus(request):
@@ -453,9 +453,9 @@ async def role_guest_plus(request):
 
 @pytest_asyncio.fixture(
     params=[
-        TestUserRoles.Guest,
-        TestUserRoles.User,
-        TestUserRoles.Maintainer,
+        UserTestRoles.Guest,
+        UserTestRoles.User,
+        UserTestRoles.Maintainer,
     ]
 )
 async def role_guest_plus_without_owner(request):
@@ -470,9 +470,9 @@ async def role_guest_plus_without_owner(request):
 
 @pytest_asyncio.fixture(
     params=[
-        TestUserRoles.User,
-        TestUserRoles.Owner,
-        TestUserRoles.Maintainer,
+        UserTestRoles.User,
+        UserTestRoles.Owner,
+        UserTestRoles.Maintainer,
     ]
 )
 async def role_user_plus(request):
@@ -486,8 +486,8 @@ async def role_user_plus(request):
 
 @pytest_asyncio.fixture(
     params=[
-        TestUserRoles.Maintainer,
-        TestUserRoles.Owner,
+        UserTestRoles.Maintainer,
+        UserTestRoles.Owner,
     ]
 )
 async def role_maintainer_plus(request):
@@ -500,8 +500,8 @@ async def role_maintainer_plus(request):
 
 @pytest_asyncio.fixture(
     params=[
-        TestUserRoles.Guest,
-        TestUserRoles.User,
+        UserTestRoles.Guest,
+        UserTestRoles.User,
     ]
 )
 async def role_user_or_below(request):
@@ -514,8 +514,8 @@ async def role_user_or_below(request):
 
 @pytest_asyncio.fixture(
     params=[
-        TestUserRoles.User,
-        TestUserRoles.Maintainer,
+        UserTestRoles.User,
+        UserTestRoles.Maintainer,
     ]
 )
 async def role_maintainer_or_below_without_guest(request):
@@ -530,9 +530,9 @@ async def role_maintainer_or_below_without_guest(request):
 
 @pytest_asyncio.fixture(
     params=[
-        TestUserRoles.Guest,
-        TestUserRoles.User,
-        TestUserRoles.Maintainer,
+        UserTestRoles.Guest,
+        UserTestRoles.User,
+        UserTestRoles.Maintainer,
     ]
 )
 async def role_maintainer_or_below(request):

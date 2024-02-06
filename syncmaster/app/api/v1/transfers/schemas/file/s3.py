@@ -7,7 +7,7 @@ from pathlib import PurePosixPath
 from pydantic import BaseModel, Field, validator
 
 from app.api.v1.schemas import S3_TYPE
-from app.api.v1.transfers.schemas.file_format import CSV, JSONLine
+from app.api.v1.transfers.schemas.file_format import CSV, JSON, JSONLine
 
 
 def validate_directory_path(path: str) -> PurePosixPath:
@@ -19,13 +19,13 @@ def validate_directory_path(path: str) -> PurePosixPath:
 class S3ReadTransferSourceParamsSchema(BaseModel):
     type: S3_TYPE
     directory_path: str
-    file_format: CSV | JSONLine = Field(..., discriminator="type")
+    file_format: CSV | JSONLine | JSON = Field(..., discriminator="type")
 
 
 class S3ReadTransferTargetParamsSchema(BaseModel):
     type: S3_TYPE
     directory_path: str
-    file_format: CSV | JSONLine = Field(..., discriminator="type")
+    file_format: CSV | JSONLine | JSON = Field(..., discriminator="type")
 
 
 # At the moment the S3CreateTransferSourceParamsSchema and S3CreateTransferTargetParamsSchema
@@ -44,7 +44,7 @@ class S3CreateTransferSourceParamsSchema(BaseModel):
 class S3CreateTransferTargetParamsSchema(BaseModel):
     type: S3_TYPE
     directory_path: PurePosixPath
-    file_format: CSV | JSONLine = Field(..., discriminator="type")
+    file_format: CSV | JSONLine = Field(..., discriminator="type")  # JSON FORMAT IS NOT SUPPORTED AS A TARGET !
 
     class Config:
         arbitrary_types_allowed = True

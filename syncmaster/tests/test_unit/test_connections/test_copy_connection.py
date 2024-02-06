@@ -4,7 +4,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockConnection, MockGroup, MockUser, TestUserRoles
+from tests.utils import MockConnection, MockGroup, MockUser, UserTestRoles
 
 from app.config import Settings
 from app.db.models import AuthData, Connection
@@ -241,7 +241,7 @@ async def test_other_group_member_cannot_copy_connection(
     group: MockGroup,
     session: AsyncSession,
     settings: Settings,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     user = group.get_member_of_role(role_guest_plus)
 
@@ -266,7 +266,7 @@ async def test_not_in_both_groups_user_can_not_copy_connection(
     empty_group: MockGroup,
     session: AsyncSession,
     settings: Settings,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
 ):
     # Arrange
     user = group_connection.owner_group.get_member_of_role(role_user_plus)
@@ -322,7 +322,7 @@ async def test_groupless_user_can_not_copy_connection(
     simple_user: MockUser,
     session: AsyncSession,
     settings: Settings,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = simple_user
@@ -372,7 +372,7 @@ async def test_groupless_user_can_not_copy_connection(
 
 async def test_user_plus_can_copy_connection_without_remove_source(
     client: AsyncClient,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
     group_connection_and_group_user_plus: str,
     group_connection: MockConnection,
     empty_group: MockGroup,
@@ -402,7 +402,7 @@ async def test_user_plus_can_copy_connection_without_remove_source(
 async def test_user_plus_can_copy_connection_with_new_connection_name(
     client: AsyncClient,
     session: AsyncSession,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
     group_connection_and_group_user_plus: str,
     group_connection: MockConnection,
     empty_group: MockGroup,
@@ -447,7 +447,7 @@ async def test_user_plus_can_copy_connection_with_new_connection_name(
 async def test_check_name_validation_copy_connection_with_new_connection_name(
     client: AsyncClient,
     session: AsyncSession,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
     group_connection_and_group_user_plus: str,
     group_connection: MockConnection,
     empty_group: MockGroup,
@@ -508,7 +508,7 @@ async def test_maintainer_plus_cannot_copy_connection_with_same_name_in_new_grou
 
 async def test_user_below_can_not_copy_connection_with_remove_source(
     client: AsyncClient,
-    role_user_or_below: TestUserRoles,
+    role_user_or_below: UserTestRoles,
     group_connection_and_group_user_or_below: str,
     group_connection: MockConnection,
     empty_group: MockGroup,
@@ -538,7 +538,7 @@ async def test_user_below_can_not_copy_connection_with_remove_source(
 
 async def test_cannot_copy_connection_with_unknown_connection_error(
     client: AsyncClient,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
     group_connection_and_group_user_plus: str,
     group_connection: MockConnection,
     empty_group: MockGroup,
@@ -590,7 +590,7 @@ async def test_superuser_cannot_copy_unknown_connection_error(
 
 async def test_cannot_copy_connection_with_unknown_new_group_id_error(
     client: AsyncClient,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
     group_connection_and_group_user_plus: str,
     group_connection: MockConnection,
 ):

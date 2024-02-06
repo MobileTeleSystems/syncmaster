@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockConnection, TestUserRoles
+from tests.utils import MockConnection, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -30,7 +30,7 @@ pytestmark = [pytest.mark.asyncio]
 async def test_user_plus_can_update_s3_connection(
     client: AsyncClient,
     group_connection: MockConnection,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
     create_connection_data: dict,  # don't remove
     create_connection_auth_data: dict,  # don't remove
 ):

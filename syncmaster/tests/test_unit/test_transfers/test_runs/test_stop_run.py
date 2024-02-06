@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockGroup, MockRun, MockUser, TestUserRoles
+from tests.utils import MockGroup, MockRun, MockUser, UserTestRoles
 
 from app.db.models import Status
 
@@ -12,7 +12,7 @@ async def test_user_plus_can_stop_run_of_transfer_his_group(
     client: AsyncClient,
     group_run: MockRun,
     session: AsyncSession,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
 ) -> None:
     # Arrange
     user = group_run.transfer.owner_group.get_member_of_role(role_user_plus)
@@ -63,7 +63,7 @@ async def test_other_group_member_cannot_stop_run_of_other_group_transfer(
     client: AsyncClient,
     group_run: MockRun,
     group: MockGroup,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
     session: AsyncSession,
 ) -> None:
     # Arrenge
@@ -118,7 +118,7 @@ async def test_user_plus_cannot_stop_run_in_status_except_started_or_created(
     client: AsyncClient,
     group_run: MockRun,
     session: AsyncSession,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
 ) -> None:
     # Arrange
     user = group_run.transfer.owner_group.get_member_of_role(role_user_plus)
@@ -161,7 +161,7 @@ async def test_user_plus_cannot_stop_unknown_run_of_transfer_error(
     client: AsyncClient,
     group_run: MockRun,
     session: AsyncSession,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
 ) -> None:
     # Arrange
     user = group_run.transfer.owner_group.get_member_of_role(role_user_plus)

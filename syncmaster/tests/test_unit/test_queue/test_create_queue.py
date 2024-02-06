@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockGroup, MockUser, TestUserRoles
+from tests.utils import MockGroup, MockUser, UserTestRoles
 
 from app.db.models import Queue
 
@@ -12,7 +12,7 @@ pytestmark = [pytest.mark.asyncio]
 async def test_maintainer_plus_can_create_queue(
     client: AsyncClient,
     session: AsyncSession,
-    role_maintainer_plus: TestUserRoles,
+    role_maintainer_plus: UserTestRoles,
     mock_group: MockGroup,
 ):
     # Arrange
@@ -87,7 +87,7 @@ async def test_superuser_can_create_queue(
 async def test_user_or_below_cannot_create_queue(
     client: AsyncClient,
     session: AsyncSession,
-    role_user_or_below: TestUserRoles,
+    role_user_or_below: UserTestRoles,
     mock_group: MockGroup,
 ):
     # Arrange
@@ -114,7 +114,7 @@ async def test_user_or_below_cannot_create_queue(
 
 async def test_other_group_member_cannot_create_queue(
     client: AsyncClient,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
     empty_group: MockGroup,
     group: MockGroup,
 ):
@@ -168,7 +168,7 @@ async def test_groupless_user_cannot_create_queue_error(
 
 async def test_maintainer_plus_cannot_create_queue_with_unknown_group_error(
     client: AsyncClient,
-    role_maintainer_plus: TestUserRoles,
+    role_maintainer_plus: UserTestRoles,
     mock_group: MockGroup,
 ):
     # Arrange
@@ -277,7 +277,7 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
 async def test_maintainer_plus_cannot_create_queue_with_wrong_name(
     client: AsyncClient,
     session: AsyncSession,
-    role_maintainer_plus: TestUserRoles,
+    role_maintainer_plus: UserTestRoles,
     mock_group: MockGroup,
     name_value: str,
     error: dict,

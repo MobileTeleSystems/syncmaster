@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockGroup, MockUser, TestUserRoles
+from tests.utils import MockGroup, MockUser, UserTestRoles
 
 from app.db.models import Queue
 
@@ -11,7 +11,7 @@ async def test_group_member_can_read_queue(
     client: AsyncClient,
     group_queue: Queue,
     mock_group: MockGroup,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = mock_group.get_member_of_role(role_guest_plus)
@@ -77,7 +77,7 @@ async def test_other_group_guest_plus_cannot_read_queue(
     client: AsyncClient,
     group_queue: Queue,
     mock_group: MockGroup,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
     group: MockGroup,
 ):
     # Arrange
@@ -117,7 +117,7 @@ async def test_anon_user_cannot_read_queue_error(
 async def test_group_member_cannot_read_unknown_queue_error(
     client: AsyncClient,
     mock_group: MockGroup,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = mock_group.get_member_of_role(role_guest_plus)

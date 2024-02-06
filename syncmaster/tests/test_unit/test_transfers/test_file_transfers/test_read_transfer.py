@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockTransfer, TestUserRoles
+from tests.utils import MockTransfer, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -37,7 +37,7 @@ pytestmark = [pytest.mark.asyncio]
 async def test_guest_plus_can_read_s3_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
     create_connection_data: dict,
     create_transfer_data: dict,
 ):

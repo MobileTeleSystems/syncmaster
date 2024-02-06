@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockGroup, MockRun, MockUser, TestUserRoles
+from tests.utils import MockGroup, MockRun, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -8,7 +8,7 @@ pytestmark = [pytest.mark.asyncio]
 async def test_user_plus_can_read_run(
     client: AsyncClient,
     group_run: MockRun,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
 ):
     # Arrange
     user = group_run.transfer.owner_group.get_member_of_role(role_user_plus)
@@ -55,7 +55,7 @@ async def test_groupless_user_cannot_read_run(
 async def test_another_group_member_cannot_read_run(
     client: AsyncClient,
     group_run: MockRun,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
     group: MockGroup,
 ):
     # Arrange
@@ -118,7 +118,7 @@ async def test_unauthorized_user_cannot_read_run(
 async def test_group_member_cannot_read_unknown_run_error(
     client: AsyncClient,
     group_run: MockRun,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = group_run.transfer.owner_group.get_member_of_role(role_guest_plus)

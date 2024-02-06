@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockConnection, MockGroup, MockUser, TestUserRoles
+from tests.utils import MockConnection, MockGroup, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -8,11 +8,11 @@ pytestmark = [pytest.mark.asyncio]
 async def test_owner_can_delete_anyone_from_group(
     client: AsyncClient,
     group: MockGroup,
-    role_maintainer_or_below: TestUserRoles,
+    role_maintainer_or_below: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_maintainer_or_below)
-    group_owner = group.get_member_of_role(TestUserRoles.Owner)
+    group_owner = group.get_member_of_role(UserTestRoles.Owner)
     # Act
     result = await client.delete(
         f"v1/groups/{group.id}/users/{user.id}",
@@ -31,7 +31,7 @@ async def test_groupless_user_cannot_remove_user_from_group(
     client: AsyncClient,
     group: MockGroup,
     simple_user: MockUser,
-    role_maintainer_or_below: TestUserRoles,
+    role_maintainer_or_below: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_maintainer_or_below)
@@ -53,8 +53,8 @@ async def test_other_group_member_cannot_remove_user_from_group(
     client: AsyncClient,
     group: MockGroup,
     group_connection: MockConnection,
-    role_maintainer_or_below: TestUserRoles,
-    role_guest_plus: TestUserRoles,
+    role_maintainer_or_below: UserTestRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_maintainer_or_below)
@@ -76,7 +76,7 @@ async def test_other_group_member_cannot_remove_user_from_group(
 async def test_maintainer_and_user_can_delete_self_from_group(
     client: AsyncClient,
     group: MockGroup,
-    role_maintainer_or_below_without_guest: TestUserRoles,
+    role_maintainer_or_below_without_guest: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_maintainer_or_below_without_guest)
@@ -99,7 +99,7 @@ async def test_owner_cannot_delete_self_from_group(
     group: MockGroup,
 ):
     # Arrange
-    user = group.get_member_of_role(TestUserRoles.Owner)
+    user = group.get_member_of_role(UserTestRoles.Owner)
     # Act
     result = await client.delete(
         f"v1/groups/{group.id}/users/{user.id}",
@@ -117,8 +117,8 @@ async def test_owner_cannot_delete_self_from_group(
 async def test_maintainer_or_below_cannot_delete_others_from_group(
     client: AsyncClient,
     group: MockGroup,
-    role_maintainer_or_below: TestUserRoles,
-    role_guest_plus: TestUserRoles,
+    role_maintainer_or_below: UserTestRoles,
+    role_guest_plus: UserTestRoles,
 ):
     if role_maintainer_or_below != role_guest_plus:
         # Arrange
@@ -142,7 +142,7 @@ async def test_superuser_can_delete_user_from_group(
     client: AsyncClient,
     group: MockGroup,
     superuser: MockUser,
-    role_maintainer_or_below: TestUserRoles,
+    role_maintainer_or_below: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_maintainer_or_below)
@@ -162,7 +162,7 @@ async def test_superuser_can_delete_user_from_group(
 
 async def test_not_authorized_user_cannot_remove_user_from_group(client: AsyncClient, group: MockGroup):
     # Arrange
-    user = group.get_member_of_role(TestUserRoles.User)
+    user = group.get_member_of_role(UserTestRoles.User)
     # Act
     result = await client.delete(f"v1/groups/{group.id}/users/{user.id}")
     # Assert
@@ -179,7 +179,7 @@ async def test_owner_delete_unknown_user_error(
     group: MockGroup,
 ):
     # Arrange
-    group_owner = group.get_member_of_role(TestUserRoles.Owner)
+    group_owner = group.get_member_of_role(UserTestRoles.Owner)
     # Act
     result = await client.delete(
         f"v1/groups/{group.id}/users/-1",
@@ -197,10 +197,10 @@ async def test_owner_delete_unknown_user_error(
 async def test_owner_delete_user_from_unknown_group_error(
     client: AsyncClient,
     group: MockGroup,
-    role_maintainer_or_below: TestUserRoles,
+    role_maintainer_or_below: UserTestRoles,
 ):
     # Arrange
-    group_owner = group.get_member_of_role(TestUserRoles.Owner)
+    group_owner = group.get_member_of_role(UserTestRoles.Owner)
     user = group.get_member_of_role(role_maintainer_or_below)
     # Act
     result = await client.delete(
@@ -239,7 +239,7 @@ async def test_superuser_delete_user_from_unknown_group_error(
     client: AsyncClient,
     group: MockGroup,
     superuser: MockUser,
-    role_maintainer_or_below: TestUserRoles,
+    role_maintainer_or_below: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_maintainer_or_below)

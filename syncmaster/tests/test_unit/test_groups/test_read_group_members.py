@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockConnection, MockGroup, MockUser, TestUserRoles
+from tests.utils import MockConnection, MockGroup, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -8,7 +8,7 @@ pytestmark = [pytest.mark.asyncio]
 async def test_member_of_group_can_read_group_members(
     client: AsyncClient,
     group: MockGroup,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_guest_plus)
@@ -28,9 +28,9 @@ async def test_member_of_group_can_read_group_members(
             "role": user.role,
         }
         for user in (
-            group.get_member_of_role(TestUserRoles.Maintainer),
-            group.get_member_of_role(TestUserRoles.User),
-            group.get_member_of_role(TestUserRoles.Guest),
+            group.get_member_of_role(UserTestRoles.Maintainer),
+            group.get_member_of_role(UserTestRoles.User),
+            group.get_member_of_role(UserTestRoles.Guest),
         )
     ]
 
@@ -74,7 +74,7 @@ async def test_other_group_member_cannot_read_group_members(
     client: AsyncClient,
     group: MockGroup,
     group_connection: MockConnection,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = group_connection.owner_group.get_member_of_role(role_guest_plus)
@@ -111,9 +111,9 @@ async def test_superuser_can_read_group_members(
             "role": user.role,
         }
         for user in (
-            group.get_member_of_role(TestUserRoles.Maintainer),
-            group.get_member_of_role(TestUserRoles.User),
-            group.get_member_of_role(TestUserRoles.Guest),
+            group.get_member_of_role(UserTestRoles.Maintainer),
+            group.get_member_of_role(UserTestRoles.User),
+            group.get_member_of_role(UserTestRoles.Guest),
         )
     ]
     members.sort(key=lambda x: x["username"])
@@ -149,7 +149,7 @@ async def test_not_authorized_user_cannot_read_group_members(client: AsyncClient
 async def test_member_of_group_cannot_read_unknown_group_members_error(
     client: AsyncClient,
     group: MockGroup,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_guest_plus)

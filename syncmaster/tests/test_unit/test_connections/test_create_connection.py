@@ -3,7 +3,7 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests.test_unit.conftest import ALLOWED_SOURCES
-from tests.utils import MockConnection, MockGroup, MockUser, TestUserRoles
+from tests.utils import MockConnection, MockGroup, MockUser, UserTestRoles
 
 from app.config import Settings
 from app.db.models import AuthData, Connection
@@ -17,7 +17,7 @@ async def test_user_plus_can_create_connection(
     group: MockGroup,
     session: AsyncSession,
     settings: Settings,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
     event_loop,
     request,
 ):
@@ -128,10 +128,10 @@ async def test_unauthorized_user_cannot_create_connection(
 async def test_check_fields_validation_on_create_connection(
     client: AsyncClient,
     group_connection: MockConnection,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
 ):
     # Arrange
-    user = group_connection.owner_group.get_member_of_role(TestUserRoles.User)
+    user = group_connection.owner_group.get_member_of_role(UserTestRoles.User)
 
     # Act
     result = await client.post(
@@ -277,7 +277,7 @@ async def test_other_group_member_cannot_create_group_connection(
     client: AsyncClient,
     empty_group: MockGroup,
     group: MockGroup,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_guest_plus)
@@ -416,7 +416,7 @@ async def test_group_member_cannot_create_connection_with_unknown_group_error(
     group: MockGroup,
     session: AsyncSession,
     settings: Settings,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
     event_loop,
 ):
     # Arrange

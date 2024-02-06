@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockGroup, TestUserRoles
+from tests.utils import MockGroup, UserTestRoles
 
 from app.config import Settings
 from app.db.models import AuthData, Connection
@@ -16,7 +16,7 @@ async def test_user_plus_can_create_oracle_connection_with_service_name(
     group: MockGroup,
     session: AsyncSession,
     settings: Settings,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_user_plus)
@@ -86,7 +86,7 @@ async def test_user_plus_can_create_oracle_connection_with_sid(
     group: MockGroup,
     session: AsyncSession,
     settings: Settings,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_user_plus)
@@ -155,7 +155,7 @@ async def test_user_plus_create_oracle_connection_with_sid_and_service_name_erro
     client: AsyncClient,
     group: MockGroup,
     session: AsyncSession,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_user_plus)

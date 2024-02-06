@@ -78,9 +78,9 @@ services:
     ports:
       - 5433:5432
     environment:
-      POSTGRES_DB: test_postgres
-      POSTGRES_USER: test_user
-      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: syncmaster
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: secret
     networks:
       - network
 

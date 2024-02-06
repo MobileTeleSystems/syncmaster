@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockConnection, MockGroup, MockUser, TestUserRoles
+from tests.utils import MockConnection, MockGroup, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -9,7 +9,7 @@ pytestmark = [pytest.mark.asyncio]
 async def test_guest_plus_can_read_connection(
     client: AsyncClient,
     group_connection: MockConnection,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
     session: AsyncSession,
 ):
     # Arrange
@@ -66,7 +66,7 @@ async def test_other_group_member_cannot_read_connection(
     client: AsyncClient,
     group_connection: MockConnection,
     group: MockGroup,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_guest_plus)
@@ -134,7 +134,7 @@ async def test_unauthorized_user_cannot_read_connection(client: AsyncClient, gro
 async def test_guest_plus_cannot_read_unknown_connection_error(
     client: AsyncClient,
     group_connection: MockConnection,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = group_connection.owner_group.get_member_of_role(role_guest_plus)

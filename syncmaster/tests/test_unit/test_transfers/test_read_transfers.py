@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockTransfer, MockUser, TestUserRoles
+from tests.utils import MockTransfer, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -8,7 +8,7 @@ pytestmark = [pytest.mark.asyncio]
 async def test_guest_plus_can_read_transfers(
     client: AsyncClient,
     group_transfer: MockTransfer,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
 ):
     # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_guest_plus)
@@ -133,7 +133,7 @@ async def test_unauthorized_user_cannot_read_transfers(client: AsyncClient):
 async def test_user_plus_cannot_read_unknown_group_transfers_error(
     client: AsyncClient,
     group_transfer: MockTransfer,
-    role_user_plus: TestUserRoles,
+    role_user_plus: UserTestRoles,
 ):
     # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_user_plus)

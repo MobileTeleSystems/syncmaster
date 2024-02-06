@@ -17,7 +17,7 @@ from tests.utils import (
     MockRun,
     MockTransfer,
     MockUser,
-    TestUserRoles,
+    UserTestRoles,
 )
 
 from app.api.v1.auth.utils import sign_jwt
@@ -48,7 +48,7 @@ async def group_run(session: AsyncSession, settings: Settings) -> MockTransfer:
         owner=MockUser(
             user=group_owner,
             auth_token=sign_jwt(group_owner.id, settings),
-            role=TestUserRoles.Owner,
+            role=UserTestRoles.Owner,
         ),
         members=members,
     )

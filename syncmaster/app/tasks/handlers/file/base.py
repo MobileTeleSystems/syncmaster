@@ -5,7 +5,7 @@ import json
 import pydantic
 from onetl.base.base_file_df_connection import BaseFileDFConnection
 from onetl.file import FileDFReader, FileDFWriter
-from onetl.file.format import CSV, JSONLine
+from onetl.file.format import CSV, JSON, JSONLine
 from pyspark.sql.dataframe import DataFrame
 from pyspark.sql.types import StructType
 
@@ -52,5 +52,7 @@ class FileHandler(Handler):
             return pydantic.parse_obj_as(CSV, self.transfer_params.file_format)
         elif file_type == "jsonline":
             return pydantic.parse_obj_as(JSONLine, self.transfer_params.file_format)
+        elif file_type == "json":
+            return pydantic.parse_obj_as(JSON, self.transfer_params.file_format)
         else:
             raise ValueError("Unknown file type")

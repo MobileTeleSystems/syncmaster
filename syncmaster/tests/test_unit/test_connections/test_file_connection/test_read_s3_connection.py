@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils import MockConnection, TestUserRoles
+from tests.utils import MockConnection, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -31,7 +31,7 @@ pytestmark = [pytest.mark.asyncio]
 async def test_guest_plus_can_read_s3_connection(
     client: AsyncClient,
     group_connection: MockConnection,
-    role_guest_plus: TestUserRoles,
+    role_guest_plus: UserTestRoles,
     session: AsyncSession,
     create_connection_data: dict,  # don't remove
     create_connection_auth_data: dict,  # don't remove

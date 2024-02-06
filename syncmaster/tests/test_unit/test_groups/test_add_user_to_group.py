@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from tests.utils import MockGroup, MockUser, TestUserRoles
+from tests.utils import MockGroup, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -9,10 +9,10 @@ async def test_owner_can_add_user_to_group(
     client: AsyncClient,
     empty_group: MockGroup,
     simple_user: MockUser,
-    role_maintainer_or_below: TestUserRoles,
+    role_maintainer_or_below: UserTestRoles,
 ):
     # Arrange
-    user = empty_group.get_member_of_role(TestUserRoles.Owner)
+    user = empty_group.get_member_of_role(UserTestRoles.Owner)
 
     # Act
     result = await client.post(
@@ -66,7 +66,7 @@ async def test_groupless_user_cannot_add_user_to_group(
         f"v1/groups/{empty_group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={
-            "role": TestUserRoles.User,
+            "role": UserTestRoles.User,
         },
     )
     # Assert
@@ -82,7 +82,7 @@ async def test_maintainer_or_below_cannot_add_user_to_group(
     client: AsyncClient,
     group: MockGroup,
     simple_user: MockUser,
-    role_maintainer_or_below: TestUserRoles,
+    role_maintainer_or_below: UserTestRoles,
 ):
     # Arrange
     user = group.get_member_of_role(role_maintainer_or_below)
@@ -111,7 +111,7 @@ async def test_owner_cannot_add_user_to_group_with_wrong_role(
     simple_user: MockUser,
 ):
     # Arrange
-    user = group.get_member_of_role(TestUserRoles.Owner)
+    user = group.get_member_of_role(UserTestRoles.Owner)
 
     # Act
     result = await client.post(
@@ -140,7 +140,7 @@ async def test_owner_cannot_add_user_to_group_without_role(
     simple_user: MockUser,
 ):
     # Arrange
-    user = group.get_member_of_role(TestUserRoles.Owner)
+    user = group.get_member_of_role(UserTestRoles.Owner)
 
     # Act
     result = await client.post(
@@ -172,7 +172,7 @@ async def test_superuser_can_add_user_to_group(
         f"v1/groups/{empty_group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
-            "role": TestUserRoles.User,
+            "role": UserTestRoles.User,
         },
     )
 
@@ -216,14 +216,14 @@ async def test_owner_cannot_add_user_to_group_twice(
     simple_user: MockUser,
 ):
     # Arrange
-    user = group.get_member_of_role(TestUserRoles.Owner)
+    user = group.get_member_of_role(UserTestRoles.Owner)
 
     # Act
     result = await client.post(
         f"v1/groups/{group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "role": TestUserRoles.User,
+            "role": UserTestRoles.User,
         },
     )
     # Assert
@@ -238,7 +238,7 @@ async def test_owner_cannot_add_user_to_group_twice(
         f"v1/groups/{group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "role": TestUserRoles.User,
+            "role": UserTestRoles.User,
         },
     )
     assert result.json() == {
@@ -268,12 +268,12 @@ async def test_owner_add_user_to_unknown_group_error(
     client: AsyncClient,
     empty_group: MockGroup,
     simple_user: MockUser,
-    role_maintainer_or_below: TestUserRoles,
+    role_maintainer_or_below: UserTestRoles,
 ):
     # Act
     result = await client.post(
         f"v1/groups/-1/users/{simple_user.id}",
-        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
+        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(UserTestRoles.Owner).token}"},
         json={
             "role": role_maintainer_or_below,
         },
@@ -292,12 +292,12 @@ async def test_owner_add_unknown_user_to_group_error(
     client: AsyncClient,
     empty_group: MockGroup,
     simple_user: MockUser,
-    role_maintainer_or_below: TestUserRoles,
+    role_maintainer_or_below: UserTestRoles,
 ):
     # Act
     result = await client.post(
         f"v1/groups/{empty_group.id}/users/-1",
-        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(TestUserRoles.Owner).token}"},
+        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(UserTestRoles.Owner).token}"},
         json={
             "role": role_maintainer_or_below,
         },
@@ -321,7 +321,7 @@ async def test_superuser_add_user_to_unknown_group_error(
         f"v1/groups/-1/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
-            "role": TestUserRoles.User,
+            "role": UserTestRoles.User,
         },
     )
 
@@ -345,7 +345,7 @@ async def test_superuser_add_unknown_user_error(
         f"v1/groups/{empty_group.group.id}/users/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
-            "role": TestUserRoles.User,
+            "role": UserTestRoles.User,
         },
     )
 
