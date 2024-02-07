@@ -9,25 +9,17 @@ pytestmark = [pytest.mark.asyncio]
     "create_connection_data,create_connection_auth_data",
     [
         (
+            {"type": "hdfs", "cluster": "cluster"},
             {
-                "type": "s3",
-                "bucket": "some_bucket",
-                "host": "some_host",
-                "port": 80,
-                "region": "some_region",
-                "protocol": "http",
-                "bucket_style": "domain",
-            },
-            {
-                "type": "s3",
-                "access_key": "access_key",
-                "secret_key": "secret_key",
+                "type": "hdfs",
+                "user": "user",
+                "password": "password",
             },
         )
     ],
     indirect=True,
 )
-async def test_user_plus_can_update_s3_connection(
+async def test_user_plus_can_update_hdfs_connection(
     client: AsyncClient,
     group_connection: MockConnection,
     role_user_plus: UserTestRoles,
@@ -36,14 +28,14 @@ async def test_user_plus_can_update_s3_connection(
 ):
     # Arrange
     user = group_connection.owner_group.get_member_of_role(role_user_plus)
-    parameter_to_update = "region"
-    value_to_update = "new_region"
+    parameter_to_update = "cluster"
+    value_to_update = "updated_cluser"
 
     # Act
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"connection_data": {"type": "s3", parameter_to_update: value_to_update}},
+        json={"connection_data": {"type": "hdfs", parameter_to_update: value_to_update}},
     )
 
     # Assert
@@ -52,18 +44,10 @@ async def test_user_plus_can_update_s3_connection(
         "name": group_connection.connection.name,
         "description": group_connection.description,
         "group_id": group_connection.group_id,
-        "connection_data": {
-            parameter_to_update: value_to_update,
-            "type": group_connection.data["type"],
-            "host": group_connection.data["host"],
-            "bucket": group_connection.data["bucket"],
-            "port": group_connection.data["port"],
-            "protocol": group_connection.data["protocol"],
-            "bucket_style": group_connection.data["bucket_style"],
-        },
+        "connection_data": {"type": group_connection.data["type"], parameter_to_update: value_to_update},
         "auth_data": {
             "type": group_connection.credentials.value["type"],
-            "access_key": group_connection.credentials.value["access_key"],
+            "user": group_connection.credentials.value["user"],
         },
     }
     assert result.status_code == 200

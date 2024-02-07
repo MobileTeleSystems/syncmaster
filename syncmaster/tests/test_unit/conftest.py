@@ -23,7 +23,7 @@ from app.config import Settings
 from app.db.models import Queue, User, UserGroup
 from app.db.repositories.utils import decrypt_auth_data
 
-ALLOWED_SOURCES = "'hive', 'oracle', 'postgres', 's3'"
+ALLOWED_SOURCES = "'hive', 'oracle', 'postgres', 'hdfs', 's3'"
 
 
 async def create_group_member(
