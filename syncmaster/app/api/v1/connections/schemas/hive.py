@@ -23,7 +23,8 @@ class UpdateHiveConnectionSchema(HiveBaseSchema):
 
 
 class UpdateHiveAuthSchema(HiveBaseSchema):
-    pass
+    user: str | None = None
+    password: SecretStr | None = None
 
 
 class CreateHiveConnectionSchema(HiveBaseSchema):
@@ -31,5 +32,6 @@ class CreateHiveConnectionSchema(HiveBaseSchema):
 
 
 class CreateHiveAuthSchema(HiveBaseSchema):
+    # Needed to create a spark session. For authorization in Kerberos
     user: str
     password: SecretStr

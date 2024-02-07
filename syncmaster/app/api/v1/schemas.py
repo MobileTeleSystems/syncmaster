@@ -17,6 +17,7 @@ HIVE_TYPE = Literal["hive"]
 ORACLE_TYPE = Literal["oracle"]
 POSTGRES_TYPE = Literal["postgres"]
 S3_TYPE = Literal["s3"]
+HDFS_TYPE = Literal["hdfs"]
 
 # file formats
 CSV_FORMAT = Literal["csv"]

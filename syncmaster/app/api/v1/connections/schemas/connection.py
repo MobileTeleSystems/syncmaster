@@ -3,6 +3,14 @@
 
 from pydantic import BaseModel, Field, root_validator
 
+from app.api.v1.connections.schemas.hdfs import (
+    HDFSCreateAuthSchema,
+    HDFSCreateConnectionSchema,
+    HDFSReadAuthSchema,
+    HDFSReadConnectionSchema,
+    HDFSUpdateAuthSchema,
+    HDFSUpdateConnectionSchema,
+)
 from app.api.v1.connections.schemas.hive import (
     CreateHiveAuthSchema,
     CreateHiveConnectionSchema,
@@ -38,26 +46,34 @@ from app.api.v1.connections.schemas.s3 import (
 from app.api.v1.schemas import NameConstr, PageSchema
 
 ReadConnectionDataSchema = (
-    ReadHiveConnectionSchema | ReadOracleConnectionSchema | ReadPostgresConnectionSchema | S3ReadConnectionSchema
+    ReadHiveConnectionSchema
+    | HDFSReadConnectionSchema
+    | ReadOracleConnectionSchema
+    | ReadPostgresConnectionSchema
+    | S3ReadConnectionSchema
 )
 CreateConnectionDataSchema = (
     CreateHiveConnectionSchema
     | CreateOracleConnectionSchema
     | CreatePostgresConnectionSchema
+    | HDFSCreateConnectionSchema
     | S3CreateConnectionSchema
 )
 UpdateConnectionDataSchema = (
     UpdateHiveConnectionSchema
-    | UpdatePostgresConnectionSchema
-    | UpdateOracleConnectionSchema
+    | HDFSUpdateConnectionSchema
     | S3UpdateConnectionSchema
+    | UpdateOracleConnectionSchema
+    | UpdatePostgresConnectionSchema
 )
-ReadConnectionAuthDataSchema = ReadHiveAuthSchema | ReadOracleAuthSchema | ReadPostgresAuthSchema | S3ReadAuthSchema
+ReadConnectionAuthDataSchema = (
+    ReadHiveAuthSchema | ReadOracleAuthSchema | ReadPostgresAuthSchema | S3ReadAuthSchema | HDFSReadAuthSchema
+)
 CreateConnectionAuthDataSchema = (
-    CreateHiveAuthSchema | CreateOracleAuthSchema | CreatePostgresAuthSchema | S3CreateAuthSchema
+    CreateHiveAuthSchema | CreateOracleAuthSchema | CreatePostgresAuthSchema | S3CreateAuthSchema | HDFSCreateAuthSchema
 )
 UpdateConnectionAuthDataSchema = (
-    UpdateHiveAuthSchema | UpdateOracleAuthSchema | UpdatePostgresAuthSchema | S3UpdateAuthSchema
+    UpdateHiveAuthSchema | UpdateOracleAuthSchema | UpdatePostgresAuthSchema | S3UpdateAuthSchema | HDFSUpdateAuthSchema
 )
 
 
