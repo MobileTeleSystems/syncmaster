@@ -5,14 +5,14 @@ from onetl.db import DBReader, DBWriter
 from pyspark.sql.dataframe import DataFrame
 
 from app.dto.connections import HiveConnectionDTO
-from app.dto.transfers import HiveTransferParamsDTO
+from app.dto.transfers import HiveTransferDTO
 from app.tasks.handlers.base import Handler
 
 
 class HiveHandler(Handler):
     connection: Hive
     connection_dto: HiveConnectionDTO
-    transfer_params: HiveTransferParamsDTO
+    transfer_dto: HiveTransferDTO
 
     def init_connection(self):
         self.connection = Hive(
@@ -22,17 +22,17 @@ class HiveHandler(Handler):
 
     def init_reader(self):
         super().init_reader()
-        self.spark.catalog.refreshTable(self.transfer_params.table_name)
+        self.spark.catalog.refreshTable(self.transfer_dto.table_name)
         self.reader = DBReader(
             connection=self.connection,
-            table=self.transfer_params.table_name,
+            table=self.transfer_dto.table_name,
         )
 
     def init_writer(self):
         super().init_writer()
         self.writer = DBWriter(
             connection=self.connection,
-            table=self.transfer_params.table_name,
+            table=self.transfer_dto.table_name,
         )
 
     def normalize_column_name(self, df: DataFrame) -> DataFrame:

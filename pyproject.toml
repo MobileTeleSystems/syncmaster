@@ -13,6 +13,7 @@ pydantic = "^1.10.11"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 python-multipart = "^0.0.6"
 celery = "^5.3.3"
+onetl = "<0.10"
 
 [tool.poetry.group.worker.dependencies]
 onetl = {extras = ["spark"], version = "^0.9.3"}
@@ -33,7 +34,7 @@ psycopg2-binary = "^2.9.7"
 pytest-randomly = "^3.13.0"
 pytest-deadfixtures = "^2.2.1"
 pytest-mock = "^3.11.1"
-onetl = {extras = ["spark", "s3"], version = "^0.9.3"}
+onetl = {extras = ["spark", "s3", "hdfs"], version = "^0.9.3"}
 faker = "^22.6.0"
 
 [tool.poetry.group.dev.dependencies]

@@ -299,13 +299,13 @@ async def test_superuser_can_create_transfer(
                 "loc": ["body", "source_params"],
                 "msg": (
                     "No match for discriminator 'type' and value 'new some connection type' "
-                    "(allowed values: 'postgres', 'oracle', 'hive', 's3')"
+                    "(allowed values: 'postgres', 'hdfs', 'hive', 'oracle', 's3')"
                 ),
                 "type": "value_error.discriminated_union.invalid_discriminator",
                 "ctx": {
                     "discriminator_key": "type",
                     "discriminator_value": "new some connection type",
-                    "allowed_values": "'postgres', 'oracle', 'hive', 's3'",
+                    "allowed_values": "'postgres', 'hdfs', 'hive', 'oracle', 's3'",
                 },
             },
         ),
@@ -540,7 +540,7 @@ async def test_user_plus_can_not_create_transfer_with_target_s3_json(
     assert result.json() == {
         "detail": [
             {
-                "loc": ["body", "target_params", "S3CreateTransferTargetParamsSchema", "file_format"],
+                "loc": ["body", "target_params", "S3CreateTransferTarget", "file_format"],
                 "msg": "No match for discriminator 'type' and value 'json' (allowed values: 'csv', 'jsonline')",
                 "type": "value_error.discriminated_union.invalid_discriminator",
                 "ctx": {

@@ -142,6 +142,10 @@ tests:
     TEST_HIVE_USER: hive_user
     TEST_HIVE_PASSWORD: hive_password
 
+    HDFS_HOST: test-hive
+    HDFS_WEBHDFS_PORT: 9870
+    HDFS_IPC_PORT: 9820
+
     TEST_S3_HOST: s3
     TEST_S3_PORT: 9000
     TEST_S3_ACCESS_KEY: syncmaster

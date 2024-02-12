@@ -13,15 +13,15 @@ from app.dto.transfers import TransferDTO
 class Handler(ABC):
     def __init__(
         self,
-        connection: ConnectionDTO,
-        transfer_params: TransferDTO,
+        connection_dto: ConnectionDTO,
+        transfer_dto: TransferDTO,
         spark: SparkSession | None = None,
     ) -> None:
         self.spark = spark
         self.reader: DBReader | None = None
         self.writer: DBWriter | None = None
-        self.connection_dto = connection
-        self.transfer_params = transfer_params
+        self.connection_dto = connection_dto
+        self.transfer_dto = transfer_dto
 
     def init_connection(self):
         ...

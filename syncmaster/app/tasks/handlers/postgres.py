@@ -5,14 +5,14 @@ from onetl.db import DBReader, DBWriter
 from pyspark.sql.dataframe import DataFrame
 
 from app.dto.connections import PostgresConnectionDTO
-from app.dto.transfers import PostgresTransferParamsDTO
+from app.dto.transfers import PostgresTransferDTO
 from app.tasks.handlers.base import Handler
 
 
 class PostgresHandler(Handler):
     connection: Postgres
     connection_dto: PostgresConnectionDTO
-    transfer_params: PostgresTransferParamsDTO
+    transfer_dto: PostgresTransferDTO
 
     def init_connection(self):
         self.connection = Postgres(
@@ -27,10 +27,10 @@ class PostgresHandler(Handler):
 
     def init_reader(self):
         super().init_reader()
-        df = self.connection.get_df_schema(self.transfer_params.table_name)
+        df = self.connection.get_df_schema(self.transfer_dto.table_name)
         self.reader = DBReader(
             connection=self.connection,
-            table=self.transfer_params.table_name,
+            table=self.transfer_dto.table_name,
             columns=[f'"{f}"' for f in df.fieldNames()],
         )
 
@@ -38,7 +38,7 @@ class PostgresHandler(Handler):
         super().init_writer()
         self.writer = DBWriter(
             connection=self.connection,
-            table=self.transfer_params.table_name,
+            table=self.transfer_dto.table_name,
         )
 
     def normalize_column_name(self, df: DataFrame) -> DataFrame:

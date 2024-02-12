@@ -36,6 +36,7 @@ from tests.utils import MockUser, UserTestRoles
 from app.api.v1.auth.utils import sign_jwt
 from app.config import EnvTypes, Settings, TestSettings
 from app.dto.connections import (
+    HDFSConnectionDTO,
     HiveConnectionDTO,
     OracleConnectionDTO,
     PostgresConnectionDTO,
@@ -109,6 +110,16 @@ def get_spark_session(connection_settings: Settings) -> SparkSession:
 def hive(test_settings: TestSettings) -> HiveConnectionDTO:
     return HiveConnectionDTO(
         type="hive",
+        cluster=test_settings.TEST_HIVE_CLUSTER,
+        user=test_settings.TEST_HIVE_USER,
+        password=test_settings.TEST_HIVE_PASSWORD,
+    )
+
+
+@pytest.fixture
+def hdfs(test_settings: TestSettings) -> HDFSConnectionDTO:
+    return HDFSConnectionDTO(
+        type="hdfs",
         cluster=test_settings.TEST_HIVE_CLUSTER,
         user=test_settings.TEST_HIVE_USER,
         password=test_settings.TEST_HIVE_PASSWORD,
@@ -228,18 +239,18 @@ def s3_file_connection(s3_server):
 @pytest_asyncio.fixture(scope="session")
 def s3_file_connection_with_path(request, s3_file_connection):
     connection = s3_file_connection
-    root = PurePosixPath("/data")
+    source = PurePosixPath("/data")
     target = PurePosixPath("/target")
 
     def finalizer():
-        connection.remove_dir(root, recursive=True)
+        connection.remove_dir(source, recursive=True)
         connection.remove_dir(target, recursive=True)
 
     request.addfinalizer(finalizer)
-    connection.remove_dir(root, recursive=True)
+    connection.remove_dir(source, recursive=True)
     connection.remove_dir(target, recursive=True)
 
-    return connection, root
+    return connection, source
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -280,6 +291,78 @@ def prepare_s3(resource_path, s3_file_connection, s3_file_df_connection_with_pat
     connection, upload_to = s3_file_df_connection_with_path
     files = upload_files(resource_path, upload_to, s3_file_connection)
 
+    return connection, upload_to, files
+
+
+@pytest.fixture(
+    scope="session",
+)
+def hdfs_server():
+    HDFSServer = namedtuple("HDFSServer", ["host", "webhdfs_port", "ipc_port"])
+    return HDFSServer(
+        host=os.getenv("HDFS_HOST"),
+        webhdfs_port=os.getenv("HDFS_WEBHDFS_PORT"),
+        ipc_port=os.getenv("HDFS_IPC_PORT"),
+    )
+
+
+@pytest.fixture(
+    scope="session",
+)
+def hdfs_file_df_connection(spark, hdfs_server):
+    from onetl.connection import SparkHDFS
+
+    return SparkHDFS(
+        cluster="rnd-dwh",
+        host=hdfs_server.host,
+        ipc_port=hdfs_server.ipc_port,
+        spark=spark,
+    )
+
+
+@pytest.fixture(
+    scope="session",
+)
+def hdfs_file_connection(hdfs_server):
+    from onetl.connection import HDFS
+
+    return HDFS(host=hdfs_server.host, webhdfs_port=hdfs_server.webhdfs_port)
+
+
+@pytest.fixture()
+def hdfs_file_connection_with_path(request, hdfs_file_connection):
+    connection = hdfs_file_connection
+    source = PurePosixPath("/data")
+    target = PurePosixPath("/target")
+
+    def finalizer():
+        connection.remove_dir(source, recursive=True)
+        connection.remove_dir(target, recursive=True)
+
+    request.addfinalizer(finalizer)
+
+    connection.remove_dir(source, recursive=True)
+    connection.remove_dir(target, recursive=True)
+    connection.create_dir(source)
+
+    return connection, source
+
+
+@pytest.fixture()
+def hdfs_file_df_connection_with_path(hdfs_file_connection_with_path, hdfs_file_df_connection):
+    _, source = hdfs_file_connection_with_path
+    return hdfs_file_df_connection, source
+
+
+@pytest.fixture()
+def prepare_hdfs(
+    hdfs_file_df_connection_with_path,
+    hdfs_file_connection,
+    resource_path,
+):
+    connection, upload_to = hdfs_file_df_connection_with_path
+    upload_from = resource_path / "file_df_connection"
+    files = upload_files(upload_from, upload_to, hdfs_file_connection)
     return connection, upload_to, files
 
 
@@ -338,7 +421,7 @@ def prepare_oracle(
 
 
 @pytest_asyncio.fixture(params=["csv"])
-def choice_s3_file_format(request):
+def choice_file_format(request):
     file_format: Literal["csv", "jsonline"] = request.param
     file_format_object = None
     if file_format == "csv":
@@ -360,16 +443,17 @@ def choice_s3_file_format(request):
 
 
 @pytest_asyncio.fixture(params=[""])
-def choice_s3_file_type(request):
+def choice_file_type(request):
     return request.param
 
 
 @pytest_asyncio.fixture
 async def transfers(
-    choice_s3_file_format,
-    choice_s3_file_type,
+    choice_file_format,
+    choice_file_type,
     prepare_postgres,
     prepare_oracle,
+    prepare_hdfs,
     prepare_hive,
     prepare_s3,
     postgres: PostgresConnectionDTO,
@@ -377,9 +461,10 @@ async def transfers(
     session: AsyncSession,
     oracle: OracleConnectionDTO,
     hive: HiveConnectionDTO,
+    hdfs: HDFSConnectionDTO,
     s3: S3ConnectionDTO,
 ):
-    s3_file_format, file_format_object = choice_s3_file_format
+    s3_file_format, file_format_object = choice_file_format
     _, source_path, _ = prepare_s3
 
     user = await create_user(
@@ -485,6 +570,27 @@ async def transfers(
         ),
     )
 
+    hdfs_connection = await create_connection(
+        session=session,
+        name="integration_hdfs",
+        data=dict(
+            type=hdfs.type,
+            cluster=hdfs.cluster,
+        ),
+        group_id=group.id,
+    )
+
+    await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=hdfs_connection.id,
+        auth_data=dict(
+            type="hdfs",
+            user=hdfs.user,
+            password=hdfs.password,
+        ),
+    )
+
     queue = await create_queue(
         session=session,
         name="test_queue",
@@ -498,22 +604,24 @@ async def transfers(
             oracle_connection,
             postgres_connection,
             s3_connection,
+            hdfs_connection,
         ],
         2,
     ):
+        transfer_type = ("s3", "hdfs")
         source_type = source.data["type"]
         target_type = target.data["type"]
 
         file_format = {}
-        if source_type == "s3" or target_type == "s3":
+        if (source_type in transfer_type) or (target_type in transfer_type):
             file_format = file_format_object.dict()
             file_format["type"] = s3_file_format
             file_format["timestampFormat"] = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS+00:00"
 
-        if source_type == "s3":
+        if source_type in transfer_type:
             source_params = {
                 "type": source_type,
-                "directory_path": str(source_path / "file_df_connection" / s3_file_format / choice_s3_file_type),
+                "directory_path": str(source_path / "file_df_connection" / s3_file_format / choice_file_type),
                 "file_format": file_format,
                 "df_schema": df_schema.json(),
                 "options": {},
@@ -524,10 +632,10 @@ async def transfers(
                 "table_name": (oracle.user if source_type == "oracle" else "public") + ".source_table",
             }
 
-        if target_type == "s3":
+        if target_type in transfer_type:
             target_params = {
                 "type": target_type,
-                "directory_path": f"/target/{s3_file_format}/{choice_s3_file_type}",
+                "directory_path": f"/target/{s3_file_format}/{choice_file_type}",
                 "file_format": file_format,
                 "options": {},
             }
@@ -564,6 +672,7 @@ async def transfers(
     await session.delete(oracle_connection)
     await session.delete(hive_connection)
     await session.delete(s3_connection)
+    await session.delete(hdfs_connection)
     await session.delete(user)
     await session.delete(queue)
     await session.commit()

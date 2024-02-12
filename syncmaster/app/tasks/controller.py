@@ -6,19 +6,22 @@ from typing import Any
 from app.config import Settings
 from app.db.models import Connection, Transfer
 from app.dto.connections import (
+    HDFSConnectionDTO,
     HiveConnectionDTO,
     OracleConnectionDTO,
     PostgresConnectionDTO,
     S3ConnectionDTO,
 )
 from app.dto.transfers import (
-    HiveTransferParamsDTO,
-    OracleTransferParamsDTO,
-    PostgresTransferParamsDTO,
-    S3TransferParamsDTO,
+    HDFSTransferDTO,
+    HiveTransferDTO,
+    OracleTransferDTO,
+    PostgresTransferDTO,
+    S3TransferDTO,
 )
 from app.exceptions import ConnectionTypeNotRecognizedError
 from app.tasks.handlers.base import Handler
+from app.tasks.handlers.file.hdfs import HDFSHandler
 from app.tasks.handlers.file.s3 import S3Handler
 from app.tasks.handlers.hive import HiveHandler
 from app.tasks.handlers.oracle import OracleHandler
@@ -31,22 +34,27 @@ connection_handler_proxy = {
     "hive": (
         HiveHandler,
         HiveConnectionDTO,
-        HiveTransferParamsDTO,
+        HiveTransferDTO,
     ),
     "oracle": (
         OracleHandler,
         OracleConnectionDTO,
-        OracleTransferParamsDTO,
+        OracleTransferDTO,
     ),
     "postgres": (
         PostgresHandler,
         PostgresConnectionDTO,
-        PostgresTransferParamsDTO,
+        PostgresTransferDTO,
     ),
     "s3": (
         S3Handler,
         S3ConnectionDTO,
-        S3TransferParamsDTO,
+        S3TransferDTO,
+    ),
+    "hdfs": (
+        HDFSHandler,
+        HDFSConnectionDTO,
+        HDFSTransferDTO,
     ),
 }
 
@@ -113,6 +121,6 @@ class TransferController:
         handler, connection_dto, transfer_dto = connection_handler_proxy[handler_type]  # type: ignore
 
         return handler(
-            connection=connection_dto(**connection_data),
-            transfer_params=transfer_dto(**transfer_params),
+            connection_dto=connection_dto(**connection_data),
+            transfer_dto=transfer_dto(**transfer_params),
         )
