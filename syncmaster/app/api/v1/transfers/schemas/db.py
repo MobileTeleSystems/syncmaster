@@ -7,16 +7,17 @@ from pydantic import BaseModel
 from app.api.v1.schemas import HIVE_TYPE, ORACLE_TYPE, POSTGRES_TYPE
 
 
-class ReadHiveTransferData(BaseModel):
+class ReadDBTransfer(BaseModel):
+    table_name: str
+
+
+class HiveReadTransferSourceAndTarget(ReadDBTransfer):
     type: HIVE_TYPE
-    table_name: str
 
 
-class ReadOracleTransferData(BaseModel):
+class OracleReadTransferSourceAndTarget(ReadDBTransfer):
     type: ORACLE_TYPE
-    table_name: str
 
 
-class ReadPostgresTransferData(BaseModel):
+class PostgresReadTransferSourceAndTarget(ReadDBTransfer):
     type: POSTGRES_TYPE
-    table_name: str

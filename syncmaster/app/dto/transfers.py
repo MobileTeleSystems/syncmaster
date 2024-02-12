@@ -11,27 +11,36 @@ class TransferDTO:
 
 
 @dataclass
-class PostgresTransferParamsDTO(TransferDTO):
+class PostgresTransferDTO(TransferDTO):
     table_name: str
     type: str = "postgres"
 
 
 @dataclass
-class OracleTransferParamsDTO(TransferDTO):
+class OracleTransferDTO(TransferDTO):
     table_name: str
     type: str = "oracle"
 
 
 @dataclass
-class HiveTransferParamsDTO(TransferDTO):
+class HiveTransferDTO(TransferDTO):
     table_name: str
     type: str = "hive"
 
 
 @dataclass
-class S3TransferParamsDTO(TransferDTO):
+class S3TransferDTO(TransferDTO):
     directory_path: str
     file_format: CSV | JSONLine | JSON
     options: dict
     df_schema: dict | None = None
     type: str = "s3"
+
+
+@dataclass
+class HDFSTransferDTO(TransferDTO):
+    directory_path: str
+    file_format: CSV | JSONLine | JSON
+    options: dict
+    df_schema: dict | None = None
+    type: str = "hdfs"

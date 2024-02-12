@@ -10,11 +10,11 @@ from app.db.models import Status, Transfer
 pytestmark = [pytest.mark.asyncio]
 
 
-@pytest.mark.parametrize("choice_s3_file_type", ["with_header"], indirect=True)
-@pytest.mark.parametrize("choice_s3_file_format", ["csv"], indirect=True)
+@pytest.mark.parametrize("choice_file_type", ["with_header"], indirect=True)
+@pytest.mark.parametrize("choice_file_format", ["csv"], indirect=True)
 async def test_run_s3_transfer_csv(
-    choice_s3_file_format,
-    choice_s3_file_type,
+    choice_file_format,
+    choice_file_type,
     prepare_postgres,
     prepare_s3,
     transfers: dict[str, MockUser | Transfer],
@@ -52,11 +52,11 @@ async def test_run_s3_transfer_csv(
     assert df.sort("id").collect() == init_df.sort("id").collect()
 
 
-@pytest.mark.parametrize("choice_s3_file_type", ["without_compression"], indirect=True)
-@pytest.mark.parametrize("choice_s3_file_format", ["jsonline"], indirect=True)
+@pytest.mark.parametrize("choice_file_type", ["without_compression"], indirect=True)
+@pytest.mark.parametrize("choice_file_format", ["jsonline"], indirect=True)
 async def test_run_s3_transfer_jsonline(
-    choice_s3_file_format,
-    choice_s3_file_type,
+    choice_file_format,
+    choice_file_type,
     prepare_postgres,
     prepare_s3,
     transfers: dict[str, MockUser | Transfer],
@@ -94,11 +94,11 @@ async def test_run_s3_transfer_jsonline(
     assert df.sort("id").collect() == init_df.sort("id").collect()
 
 
-@pytest.mark.parametrize("choice_s3_file_type", ["without_compression"], indirect=True)
-@pytest.mark.parametrize("choice_s3_file_format", ["json"], indirect=True)
+@pytest.mark.parametrize("choice_file_type", ["without_compression"], indirect=True)
+@pytest.mark.parametrize("choice_file_format", ["json"], indirect=True)
 async def test_run_s3_transfer_json(
-    choice_s3_file_format,
-    choice_s3_file_type,
+    choice_file_format,
+    choice_file_type,
     prepare_postgres,
     prepare_s3,
     transfers: dict[str, MockUser | Transfer],

@@ -7,17 +7,73 @@ from pydantic import BaseModel, Field, root_validator
 from app.api.v1.connections.schemas.connection import ReadConnectionSchema
 from app.api.v1.schemas import NameConstr, PageSchema
 from app.api.v1.transfers.schemas.db import (
-    ReadHiveTransferData,
-    ReadOracleTransferData,
-    ReadPostgresTransferData,
+    HiveReadTransferSourceAndTarget,
+    OracleReadTransferSourceAndTarget,
+    PostgresReadTransferSourceAndTarget,
+)
+from app.api.v1.transfers.schemas.file.hdfs import (
+    HDFSCreateTransferSource,
+    HDFSCreateTransferTarget,
+    HDFSReadTransferSource,
+    HDFSReadTransferTarget,
 )
 from app.api.v1.transfers.schemas.file.s3 import (
-    S3CreateTransferSourceParamsSchema,
-    S3CreateTransferTargetParamsSchema,
-    S3ReadTransferSourceParamsSchema,
-    S3ReadTransferTargetParamsSchema,
+    S3CreateTransferSource,
+    S3CreateTransferTarget,
+    S3ReadTransferSource,
+    S3ReadTransferTarget,
 )
 from app.api.v1.transfers.schemas.strategy import FullStrategy, IncrementalStrategy
+
+ReadTransferSchemaSource = (
+    PostgresReadTransferSourceAndTarget
+    | HDFSReadTransferSource
+    | HiveReadTransferSourceAndTarget
+    | OracleReadTransferSourceAndTarget
+    | S3ReadTransferSource
+)
+
+ReadTransferSchemaTarget = (
+    PostgresReadTransferSourceAndTarget
+    | HDFSReadTransferTarget
+    | HiveReadTransferSourceAndTarget
+    | OracleReadTransferSourceAndTarget
+    | S3ReadTransferTarget
+)
+
+CreateTransferSchemaSource = (
+    PostgresReadTransferSourceAndTarget
+    | HDFSCreateTransferSource
+    | HiveReadTransferSourceAndTarget
+    | OracleReadTransferSourceAndTarget
+    | S3CreateTransferSource
+)
+
+CreateTransferSchemaTarget = (
+    PostgresReadTransferSourceAndTarget
+    | HDFSCreateTransferTarget
+    | HiveReadTransferSourceAndTarget
+    | OracleReadTransferSourceAndTarget
+    | S3CreateTransferTarget
+)
+
+UpdateTransferSchemaSource = (
+    PostgresReadTransferSourceAndTarget
+    | HDFSReadTransferSource
+    | HiveReadTransferSourceAndTarget
+    | OracleReadTransferSourceAndTarget
+    | S3CreateTransferSource
+    | None
+)
+
+UpdateTransferSchemaTarget = (
+    PostgresReadTransferSourceAndTarget
+    | HDFSReadTransferSource
+    | HiveReadTransferSourceAndTarget
+    | OracleReadTransferSourceAndTarget
+    | S3CreateTransferTarget
+    | None
+)
 
 
 class CopyTransferSchema(BaseModel):
@@ -39,15 +95,11 @@ class ReadTransferSchema(BaseModel):
     is_scheduled: bool
     schedule: str
     queue_id: int
-    source_params: (
-        ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData | S3ReadTransferSourceParamsSchema
-    ) = Field(
+    source_params: ReadTransferSchemaSource = Field(
         ...,
         discriminator="type",
     )
-    target_params: (
-        ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData | S3ReadTransferTargetParamsSchema
-    ) = Field(
+    target_params: ReadTransferSchemaTarget = Field(
         ...,
         discriminator="type",
     )
@@ -69,16 +121,12 @@ class CreateTransferSchema(BaseModel):
     is_scheduled: bool = Field(..., description="Is the transfer on schedule")
     queue_id: int = Field(..., description="id of the queue in which the transfer will be performed")
     schedule: str | None = Field(None, description="Execution schedule in cron format")
-    source_params: (
-        ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData | S3CreateTransferSourceParamsSchema
-    ) = Field(
+    source_params: CreateTransferSchemaSource = Field(
         ...,
         discriminator="type",
         description="Data source parameters",
     )
-    target_params: (
-        ReadPostgresTransferData | ReadOracleTransferData | ReadHiveTransferData | S3CreateTransferTargetParamsSchema
-    ) = Field(
+    target_params: CreateTransferSchemaTarget = Field(
         ...,
         discriminator="type",
         description="Data receiver parameters",
@@ -106,20 +154,8 @@ class UpdateTransferSchema(BaseModel):
     is_scheduled: bool | None
     schedule: str | None
     new_queue_id: int | None
-    source_params: (
-        ReadPostgresTransferData
-        | ReadOracleTransferData
-        | ReadHiveTransferData
-        | S3CreateTransferSourceParamsSchema
-        | None
-    ) = Field(discriminator="type", default=None)
-    target_params: (
-        ReadPostgresTransferData
-        | ReadOracleTransferData
-        | ReadHiveTransferData
-        | S3CreateTransferTargetParamsSchema
-        | None
-    ) = Field(discriminator="type", default=None)
+    source_params: UpdateTransferSchemaSource = Field(discriminator="type", default=None)
+    target_params: UpdateTransferSchemaTarget = Field(discriminator="type", default=None)
     strategy_params: FullStrategy | IncrementalStrategy | None = Field(discriminator="type", default=None)
 
 

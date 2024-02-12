@@ -17,7 +17,7 @@ from app.tasks.handlers.base import Handler
 class FileHandler(Handler):
     connection: BaseFileDFConnection
     connection_dto: ConnectionDTO
-    transfer_params: TransferDTO
+    transfer_dto: TransferDTO
 
     def init_connection(self):
         ...
@@ -28,9 +28,9 @@ class FileHandler(Handler):
         self.reader = FileDFReader(
             connection=self.connection,
             format=self._get_format(),
-            source_path=self.transfer_params.directory_path,
-            df_schema=StructType.fromJson(json.loads(self.transfer_params.df_schema)),
-            options=self.transfer_params.options,
+            source_path=self.transfer_dto.directory_path,
+            df_schema=StructType.fromJson(json.loads(self.transfer_dto.df_schema)),
+            options=self.transfer_dto.options,
         )
 
     def init_writer(self):
@@ -39,20 +39,20 @@ class FileHandler(Handler):
         self.writer = FileDFWriter(
             connection=self.connection,
             format=self._get_format(),
-            target_path=self.transfer_params.directory_path,
-            options=self.transfer_params.options,
+            target_path=self.transfer_dto.directory_path,
+            options=self.transfer_dto.options,
         )
 
     def normalize_column_name(self, df: DataFrame) -> DataFrame:  # type: ignore
         return df
 
     def _get_format(self):
-        file_type = self.transfer_params.file_format["type"]
+        file_type = self.transfer_dto.file_format["type"]
         if file_type == "csv":
-            return pydantic.parse_obj_as(CSV, self.transfer_params.file_format)
+            return pydantic.parse_obj_as(CSV, self.transfer_dto.file_format)
         elif file_type == "jsonline":
-            return pydantic.parse_obj_as(JSONLine, self.transfer_params.file_format)
+            return pydantic.parse_obj_as(JSONLine, self.transfer_dto.file_format)
         elif file_type == "json":
-            return pydantic.parse_obj_as(JSON, self.transfer_params.file_format)
+            return pydantic.parse_obj_as(JSON, self.transfer_dto.file_format)
         else:
             raise ValueError("Unknown file type")

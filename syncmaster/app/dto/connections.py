@@ -40,6 +40,14 @@ class HiveConnectionDTO(ConnectionDTO):
 
 
 @dataclass
+class HDFSConnectionDTO(ConnectionDTO):
+    user: str
+    password: str
+    cluster: str
+    type: str = "hdfs"
+
+
+@dataclass
 class S3ConnectionDTO(ConnectionDTO):
     host: str
     port: int

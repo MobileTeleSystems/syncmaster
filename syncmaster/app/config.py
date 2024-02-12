@@ -45,7 +45,7 @@ class Settings(BaseSettings):
         port: int | None = None,
         user: str | None = None,
         password: str | None = None,
-        database: str | None = None
+        database: str | None = None,
     ) -> str:
         return "postgresql+{}://{}:{}@{}:{}/{}".format(
             driver or "asyncpg",

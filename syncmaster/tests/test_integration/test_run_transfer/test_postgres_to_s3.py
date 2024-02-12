@@ -9,11 +9,11 @@ from app.db.models import Status, Transfer
 pytestmark = [pytest.mark.asyncio]
 
 
-@pytest.mark.parametrize("choice_s3_file_type", ["without_header"], indirect=True)
-@pytest.mark.parametrize("choice_s3_file_format", ["csv"], indirect=True)
+@pytest.mark.parametrize("choice_file_type", ["without_header"], indirect=True)
+@pytest.mark.parametrize("choice_file_format", ["csv"], indirect=True)
 async def test_run_pg_to_s3_transfer_csv(
-    choice_s3_file_format,
-    choice_s3_file_type,
+    choice_file_format,
+    choice_file_type,
     prepare_postgres,
     prepare_s3,
     transfers: dict[str, MockUser | Transfer],
@@ -22,7 +22,7 @@ async def test_run_pg_to_s3_transfer_csv(
     spark,
 ):
     # Arrange
-    s3_file_format, file_object = choice_s3_file_format
+    s3_file_format, file_object = choice_file_format
     s3_connection, _, _ = prepare_s3
     user: MockUser = transfers["group_owner"]  # type: ignore
     transfer: Transfer = transfers["postgres_s3"]  # type: ignore
@@ -46,7 +46,7 @@ async def test_run_pg_to_s3_transfer_csv(
     reader = FileDFReader(
         connection=s3_connection,
         format=file_object,
-        source_path=f"/target/{s3_file_format}/{choice_s3_file_type}",
+        source_path=f"/target/{s3_file_format}/{choice_file_type}",
         options={},
         df_schema=init_df.schema,
     )
@@ -57,11 +57,11 @@ async def test_run_pg_to_s3_transfer_csv(
     assert df.sort("ID").collect() == init_df.sort("ID").collect()
 
 
-@pytest.mark.parametrize("choice_s3_file_type", ["without_compression"], indirect=True)
-@pytest.mark.parametrize("choice_s3_file_format", ["jsonline"], indirect=True)
+@pytest.mark.parametrize("choice_file_type", ["without_compression"], indirect=True)
+@pytest.mark.parametrize("choice_file_format", ["jsonline"], indirect=True)
 async def test_run_pg_to_s3_transfer_jsonline(
-    choice_s3_file_format,
-    choice_s3_file_type,
+    choice_file_format,
+    choice_file_type,
     prepare_postgres,
     prepare_s3,
     transfers: dict[str, MockUser | Transfer],
@@ -70,7 +70,7 @@ async def test_run_pg_to_s3_transfer_jsonline(
     spark,
 ):
     # Arrange
-    s3_file_format, file_object = choice_s3_file_format
+    s3_file_format, file_object = choice_file_format
     s3_connection, _, _ = prepare_s3
     user: MockUser = transfers["group_owner"]  # type: ignore
     transfer: Transfer = transfers["postgres_s3"]  # type: ignore
@@ -94,7 +94,7 @@ async def test_run_pg_to_s3_transfer_jsonline(
     reader = FileDFReader(
         connection=s3_connection,
         format=file_object,
-        source_path=f"/target/{s3_file_format}/{choice_s3_file_type}",
+        source_path=f"/target/{s3_file_format}/{choice_file_type}",
         options={},
         df_schema=init_df.schema,
     )
