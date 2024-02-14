@@ -361,8 +361,7 @@ def prepare_hdfs(
     resource_path,
 ):
     connection, upload_to = hdfs_file_df_connection_with_path
-    upload_from = resource_path / "file_df_connection"
-    files = upload_files(upload_from, upload_to, hdfs_file_connection)
+    files = upload_files(resource_path, upload_to, hdfs_file_connection)
     return connection, upload_to, files
 
 
