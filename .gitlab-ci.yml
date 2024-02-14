@@ -53,6 +53,15 @@ worker_test_image:
     CICD_DOCKER__FILE_PATH: ./docker/worker.dockerfile
     CICD_DOCKER__IMAGE_NAME: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/worker
     CICD_DOCKER__CACHE_FROM: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/worker:develop
+    CICD_DOCKER__BUILD_EXTRA_ARGS: --target=prod
+
+worker_prod_image:
+  extends: .build_test_image
+  variables:
+    CICD_DOCKER__FILE_PATH: ./docker/worker.dockerfile
+    CICD_DOCKER__IMAGE_NAME: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/test/worker
+    CICD_DOCKER__CACHE_FROM: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/test/worker:develop
+    CICD_DOCKER__BUILD_EXTRA_ARGS: --target=test
 
 mypy:
   image: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend:${CI_COMMIT_REF_SLUG}
@@ -167,7 +176,7 @@ tests:
     - name: central-mirror.services.mts.ru/rabbitmq
       alias: rabbitmq
 
-    - name: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/worker:${CI_COMMIT_REF_SLUG}
+    - name: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/test/worker:${CI_COMMIT_REF_SLUG}
       alias: worker
 
     - name: central-mirror.services.mts.ru/postgres:15
