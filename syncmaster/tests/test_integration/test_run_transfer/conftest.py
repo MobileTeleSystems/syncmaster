@@ -100,7 +100,7 @@ def get_spark_session(connection_settings: Settings) -> SparkSession:
     if connection_settings.ENV == EnvTypes.GITLAB:
         spark = spark.config(
             "spark.jars.ivySettings",
-            os.fspath(connection_settings.IVYSETTINGS_PATH),
+            os.fspath(Path(__file__).parent.parent.parent.parent / "tests" / "config" / "ivysettings.xml"),
         )
 
     return spark.getOrCreate()

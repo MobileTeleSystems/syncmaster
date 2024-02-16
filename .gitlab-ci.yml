@@ -229,7 +229,7 @@ tests:
 
   script:
     - python ./syncmaster/app/pre_start.py
-    - python -m pytest -v ./syncmaster/tests -v --log-cli-level=INFO -s --junitxml=${JUNIT_FILE}
+    - python -m pytest -vv ./syncmaster/tests --log-cli-level=INFO -s --junitxml=${JUNIT_FILE}
   artifacts:
     when: always
     reports:
