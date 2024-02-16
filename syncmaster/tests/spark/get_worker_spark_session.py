@@ -1,7 +1,18 @@
+from __future__ import annotations
+
+import logging
+import os
+from pathlib import Path
+
 from onetl.connection import SparkHDFS
 from onetl.hooks import hook
+from pyspark.sql import SparkSession
 
-from app.tasks.utils import get_worker_spark_session  # noqa: F401
+from app.config import EnvTypes, Settings
+from app.dto.connections import ConnectionDTO
+from app.tasks.utils import get_spark_session_conf
+
+log = logging.getLogger(__name__)
 
 
 @SparkHDFS.Slots.get_cluster_namenodes.bind
@@ -26,3 +37,40 @@ def get_ipc_port(cluster: str) -> int | None:
     if cluster == "test-hive":
         return 9820
     return None
+
+
+def get_ivy_settings_conf(settings: Settings) -> dict:
+    config = {}
+    if settings.ENV == EnvTypes.GITLAB:
+        log.debug("Passing custom ivysettings.xml")
+        config.update(
+            {
+                "spark.jars.ivySettings": os.fspath(
+                    Path(__file__).parent.parent.parent / "tests" / "config" / "ivysettings.xml"
+                ),
+            }
+        )
+    return config
+
+
+def get_worker_spark_session(
+    settings: Settings,
+    source: ConnectionDTO,
+    target: ConnectionDTO,
+) -> SparkSession:
+    ivy_settings_conf = get_ivy_settings_conf(settings)
+
+    spark_builder = SparkSession.builder.appName("celery_worker")
+
+    for k, v in get_spark_session_conf(source, target).items():
+        spark_builder = spark_builder.config(k, v)
+
+    if source.type == "hive" or target.type == "hive":  # type: ignore
+        log.debug("Enabling Hive support")
+        spark_builder = spark_builder.enableHiveSupport()
+
+    if ivy_settings_conf:
+        for k, v in ivy_settings_conf.items():
+            spark_builder = spark_builder.config(k, v)
+
+    return spark_builder.getOrCreate()

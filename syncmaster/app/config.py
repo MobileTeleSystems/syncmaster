@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
 from enum import StrEnum
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pydantic import BaseSettings, PyObject, root_validator
@@ -57,7 +56,12 @@ class Settings(BaseSettings):
         )
 
     def build_rabbit_connection_uri(
-        self, *, host: str | None = None, port: int | None = None, user: str | None = None, password: str | None = None
+        self,
+        *,
+        host: str | None = None,
+        port: int | None = None,
+        user: str | None = None,
+        password: str | None = None,
     ) -> str:
         return "amqp://{}:{}@{}:{}//".format(
             user or self.RABBITMQ_USER,
@@ -67,8 +71,6 @@ class Settings(BaseSettings):
         )
 
     TOKEN_EXPIRED_TIME: int = 60 * 60 * 10  # 10 hours
-
-    IVYSETTINGS_PATH = Path(__file__).parent.parent / "config" / "ivysettings.xml"
     CREATE_SPARK_SESSION_FUNCTION: PyObject = "app.tasks.utils.get_worker_spark_session"  # type: ignore[assignment]
 
 

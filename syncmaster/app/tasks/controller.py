@@ -87,6 +87,7 @@ class TransferController:
             target=self.target_handler.connection_dto,
             source=self.source_handler.connection_dto,
         )
+
         self.source_handler.set_spark(spark)
         self.target_handler.set_spark(spark)
         logger.info("source connection = %s", self.source_handler)
