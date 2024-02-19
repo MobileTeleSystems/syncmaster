@@ -5,13 +5,13 @@ from tests.utils import MockConnection, MockGroup, MockUser, UserTestRoles
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_user_plus_can_update_connection(
+async def test_developer_plus_can_update_connection(
     client: AsyncClient,
     group_connection: MockConnection,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group_connection.owner_group.get_member_of_role(role_user_plus)
+    user = group_connection.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.patch(
@@ -65,10 +65,10 @@ async def test_groupless_user_cannot_update_connection(
 async def test_check_name_field_validation_on_update_connection(
     client: AsyncClient,
     group_connection: MockConnection,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group_connection.owner_group.get_member_of_role(role_user_plus)
+    user = group_connection.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.patch(
@@ -151,10 +151,10 @@ async def test_superuser_can_update_connection(
 async def test_update_connection_data_fields(
     client: AsyncClient,
     group_connection: MockConnection,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group_connection.owner_group.get_member_of_role(role_user_plus)
+    user = group_connection.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.patch(
@@ -207,10 +207,10 @@ async def test_update_connection_data_fields(
 async def test_update_connection_auth_data_fields(
     client: AsyncClient,
     group_connection: MockConnection,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group_connection.owner_group.get_member_of_role(role_user_plus)
+    user = group_connection.owner_group.get_member_of_role(role_developer_plus)
     # Act
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
@@ -258,13 +258,13 @@ async def test_unauthorized_user_cannot_update_connection(
     assert result.status_code == 401
 
 
-async def test_user_plus_cannot_update_unknown_connection_error(
+async def test_developer_plus_cannot_update_unknown_connection_error(
     client: AsyncClient,
     group_connection: MockConnection,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group_connection.owner_group.get_member_of_role(role_user_plus)
+    user = group_connection.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.patch(

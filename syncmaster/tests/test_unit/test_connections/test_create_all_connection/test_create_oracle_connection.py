@@ -11,15 +11,15 @@ from app.db.repositories.utils import decrypt_auth_data
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_user_plus_can_create_oracle_connection_with_service_name(
+async def test_developer_plus_can_create_oracle_connection_with_service_name(
     client: AsyncClient,
     group: MockGroup,
     session: AsyncSession,
     settings: Settings,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group.get_member_of_role(role_user_plus)
+    user = group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(
@@ -81,15 +81,15 @@ async def test_user_plus_can_create_oracle_connection_with_service_name(
     }
 
 
-async def test_user_plus_can_create_oracle_connection_with_sid(
+async def test_developer_plus_can_create_oracle_connection_with_sid(
     client: AsyncClient,
     group: MockGroup,
     session: AsyncSession,
     settings: Settings,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group.get_member_of_role(role_user_plus)
+    user = group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(
@@ -151,14 +151,14 @@ async def test_user_plus_can_create_oracle_connection_with_sid(
     }
 
 
-async def test_user_plus_create_oracle_connection_with_sid_and_service_name_error(
+async def test_developer_plus_create_oracle_connection_with_sid_and_service_name_error(
     client: AsyncClient,
     group: MockGroup,
     session: AsyncSession,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group.get_member_of_role(role_user_plus)
+    user = group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(

@@ -168,7 +168,7 @@ Roles and rules
 Roles are:
 
 * ``GUEST`` - read-only
-* ``USER`` - read-write
+* ``DEVELOPER`` - read-write
 * ``MAINTAINER`` (DevOps) - read-write + manage queues
 * ``OWNER`` (Product Owner) - read-write + manage queues + manage user-group mapping
 * ``SUPERUSER`` - meta role assigned to specific users (NOT within group). Read-write + manage queues + manage user-group mapping + create/delete groups.
@@ -182,7 +182,7 @@ Groups
 
    * - Rule \ Role
      - Guest
-     - User
+     - Developer
      - Maintainer
      - Owner
      - Superuser
@@ -220,7 +220,7 @@ Each user has the right to remove himself from a group, regardless of his role i
 
    * - Rule \ Role
      - Guest
-     - User
+     - Developer
      - Maintainer
      - Owner
      - Superuser
@@ -246,7 +246,7 @@ Transfers, Runs and Connections
 
    * - Rule \ Role
      - Guest
-     - User
+     - Developer
      - Maintainer
      - Owner
      - Superuser
@@ -277,7 +277,7 @@ Queues
 
    * - Rule \ Role
      - Guest
-     - User
+     - Developer
      - Maintainer
      - Owner
      - Superuser

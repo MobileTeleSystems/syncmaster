@@ -132,13 +132,13 @@ async def test_superuser_can_delete_group_connection(
     }
 
 
-async def test_user_or_below_cannot_delete_connection(
+async def test_developer_or_below_cannot_delete_connection(
     client: AsyncClient,
     group_connection: MockConnection,
-    role_user_or_below: UserTestRoles,
+    role_developer_or_below: UserTestRoles,
 ):
     # Arrange
-    user = group_connection.owner_group.get_member_of_role(role_user_or_below)
+    user = group_connection.owner_group.get_member_of_role(role_developer_or_below)
 
     # Act
     result = await client.delete(

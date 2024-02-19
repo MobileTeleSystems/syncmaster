@@ -36,8 +36,8 @@ async def create_group_member(
 
     if role_name == "maintainer":
         role = UserTestRoles.Maintainer
-    elif role_name == "user":
-        role = UserTestRoles.User
+    elif role_name == "developer":
+        role = UserTestRoles.Developer
     elif role_name == "guest":
         role = UserTestRoles.Guest
     else:
@@ -86,7 +86,7 @@ async def superuser(session: AsyncSession, settings: Settings):
         yield MockUser(
             user=user,
             auth_token=sign_jwt(user.id, settings),
-            role=UserTestRoles.User,
+            role=UserTestRoles.Developer,
         )
 
 
@@ -96,7 +96,7 @@ async def simple_user(session: AsyncSession, settings: Settings):
         yield MockUser(
             user=user,
             auth_token=sign_jwt(user.id, settings),
-            role=UserTestRoles.User,
+            role=UserTestRoles.Developer,
         )
 
 
@@ -106,7 +106,7 @@ async def inactive_user(session: AsyncSession, settings: Settings):
         yield MockUser(
             user=user,
             auth_token=sign_jwt(user.id, settings),
-            role=UserTestRoles.User,
+            role=UserTestRoles.Developer,
         )
 
 
@@ -120,7 +120,7 @@ async def deleted_user(session: AsyncSession, settings: Settings):
         yield MockUser(
             user=user,
             auth_token=sign_jwt(user.id, settings),
-            role=UserTestRoles.User,
+            role=UserTestRoles.Developer,
         )
 
 
@@ -161,7 +161,7 @@ async def group(session: AsyncSession, settings: Settings) -> MockGroup:
     members: list[MockUser] = []
     for username in (
         "not_empty_group_member_maintainer",
-        "not_empty_group_member_user",
+        "not_empty_group_member_developer",
         "not_empty_group_member_guest",
     ):
         members.append(
@@ -209,7 +209,7 @@ async def mock_group(
     members: list[MockUser] = []
     for username in (
         f"{secrets.token_hex(5)}_connection_group_member_maintainer",
-        f"{secrets.token_hex(5)}_connection_group_member_user",
+        f"{secrets.token_hex(5)}_connection_group_member_developer",
         f"{secrets.token_hex(5)}_connection_group_member_guest",
     ):
         members.append(
@@ -363,7 +363,7 @@ async def group_connection(
     members: list[MockUser] = []
     for username in (
         f"{secrets.token_hex(5)}_connection_group_member_maintainer",
-        f"{secrets.token_hex(5)}_connection_group_member_user",
+        f"{secrets.token_hex(5)}_connection_group_member_developer",
         f"{secrets.token_hex(5)}_connection_group_member_guest",
     ):
         members.append(
@@ -496,14 +496,14 @@ async def group_connection_with_same_name(
 
 
 @pytest_asyncio.fixture
-async def group_connection_and_group_user_plus(
+async def group_connection_and_group_developer_plus(
     session: AsyncSession,
     empty_group: MockGroup,
     group_connection: MockConnection,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     role_maintainer_or_below_without_guest: UserTestRoles,
 ) -> str:
-    user = group_connection.owner_group.get_member_of_role(role_user_plus)
+    user = group_connection.owner_group.get_member_of_role(role_developer_plus)
 
     await add_user_to_group(
         user=user.user,
@@ -512,23 +512,23 @@ async def group_connection_and_group_user_plus(
         role=role_maintainer_or_below_without_guest,
     )
 
-    return role_user_plus
+    return role_developer_plus
 
 
 @pytest_asyncio.fixture
-async def group_connection_and_group_user_or_below(
+async def group_connection_and_group_developer_or_below(
     session: AsyncSession,
     empty_group: MockGroup,
     group_connection: MockConnection,
-    role_user_or_below: UserTestRoles,
+    role_developer_or_below: UserTestRoles,
 ) -> str:
-    user = group_connection.owner_group.get_member_of_role(role_user_or_below)
+    user = group_connection.owner_group.get_member_of_role(role_developer_or_below)
 
     await add_user_to_group(
         user=user.user,
         group_id=empty_group.group.id,
         session=session,
-        role=role_user_or_below,
+        role=role_developer_or_below,
     )
 
-    return role_user_or_below
+    return role_developer_or_below

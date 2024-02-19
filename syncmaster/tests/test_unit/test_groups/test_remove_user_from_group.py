@@ -162,7 +162,7 @@ async def test_superuser_can_delete_user_from_group(
 
 async def test_not_authorized_user_cannot_remove_user_from_group(client: AsyncClient, group: MockGroup):
     # Arrange
-    user = group.get_member_of_role(UserTestRoles.User)
+    user = group.get_member_of_role(UserTestRoles.Developer)
     # Act
     result = await client.delete(f"v1/groups/{group.id}/users/{user.id}")
     # Assert

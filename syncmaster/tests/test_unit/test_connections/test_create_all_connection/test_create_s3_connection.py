@@ -11,15 +11,15 @@ from app.db.repositories.utils import decrypt_auth_data
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_user_plus_can_create_s3_connection(
+async def test_developer_plus_can_create_s3_connection(
     client: AsyncClient,
     group: MockGroup,
     session: AsyncSession,
     settings: Settings,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group.get_member_of_role(role_user_plus)
+    user = group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(
@@ -86,17 +86,17 @@ async def test_user_plus_can_create_s3_connection(
 
 
 @pytest.mark.parametrize("port,protocol", [(80, "http"), (443, "https")])
-async def test_user_plus_can_create_s3_connection_auto_generate_port(
+async def test_developer_plus_can_create_s3_connection_auto_generate_port(
     client: AsyncClient,
     group: MockGroup,
     session: AsyncSession,
     settings: Settings,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     protocol: str,
     port: int,
 ):
     # Arrange
-    user = group.get_member_of_role(role_user_plus)
+    user = group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(

@@ -29,7 +29,7 @@ async def test_member_of_group_can_read_group_members(
         }
         for user in (
             group.get_member_of_role(UserTestRoles.Maintainer),
-            group.get_member_of_role(UserTestRoles.User),
+            group.get_member_of_role(UserTestRoles.Developer),
             group.get_member_of_role(UserTestRoles.Guest),
         )
     ]
@@ -112,7 +112,7 @@ async def test_superuser_can_read_group_members(
         }
         for user in (
             group.get_member_of_role(UserTestRoles.Maintainer),
-            group.get_member_of_role(UserTestRoles.User),
+            group.get_member_of_role(UserTestRoles.Developer),
             group.get_member_of_role(UserTestRoles.Guest),
         )
     ]

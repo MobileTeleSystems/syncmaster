@@ -8,14 +8,14 @@ from app.db.models import Status
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_user_plus_can_stop_run_of_transfer_his_group(
+async def test_developer_plus_can_stop_run_of_transfer_his_group(
     client: AsyncClient,
     group_run: MockRun,
     session: AsyncSession,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ) -> None:
     # Arrange
-    user = group_run.transfer.owner_group.get_member_of_role(role_user_plus)
+    user = group_run.transfer.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(
@@ -113,15 +113,15 @@ async def test_superuser_can_stop_run(
 
 
 @pytest.mark.parametrize("status", (Status.SEND_STOP_SIGNAL, Status.FINISHED, Status.FAILED, Status.STOPPED))
-async def test_user_plus_cannot_stop_run_in_status_except_started_or_created(
+async def test_developer_plus_cannot_stop_run_in_status_except_started_or_created(
     status: Status,
     client: AsyncClient,
     group_run: MockRun,
     session: AsyncSession,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ) -> None:
     # Arrange
-    user = group_run.transfer.owner_group.get_member_of_role(role_user_plus)
+    user = group_run.transfer.owner_group.get_member_of_role(role_developer_plus)
     group_run.run.status = status
     session.add(group_run.run)
     await session.commit()
@@ -157,14 +157,14 @@ async def test_unauthorized_user_cannot_stop_run(
     }
 
 
-async def test_user_plus_cannot_stop_unknown_run_of_transfer_error(
+async def test_developer_plus_cannot_stop_unknown_run_of_transfer_error(
     client: AsyncClient,
     group_run: MockRun,
     session: AsyncSession,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ) -> None:
     # Arrange
-    user = group_run.transfer.owner_group.get_member_of_role(role_user_plus)
+    user = group_run.transfer.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(

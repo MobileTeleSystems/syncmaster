@@ -11,15 +11,15 @@ from app.db.repositories.utils import decrypt_auth_data
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_user_plus_create_postgres_connection(
+async def test_developer_plus_create_postgres_connection(
     client: AsyncClient,
     group: MockGroup,
     session: AsyncSession,
     settings: Settings,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group.get_member_of_role(role_user_plus)
+    user = group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(

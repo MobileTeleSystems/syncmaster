@@ -32,11 +32,11 @@ pytestmark = [pytest.mark.asyncio]
         },
     ],
 )
-async def test_user_plus_can_create_s3_transfer(
+async def test_developer_plus_can_create_s3_transfer(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
     session: AsyncSession,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     group_queue: Queue,
     mock_group: MockGroup,
     target_source_params: dict,
@@ -44,7 +44,7 @@ async def test_user_plus_can_create_s3_transfer(
 ):
     # Arrange
     first_connection, second_connection = two_group_connections
-    user = mock_group.get_member_of_role(role_user_plus)
+    user = mock_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(
@@ -114,11 +114,11 @@ async def test_user_plus_can_create_s3_transfer(
         },
     ],
 )
-async def test_user_plus_can_create_hdfs_transfer(
+async def test_developer_plus_can_create_hdfs_transfer(
     create_connection_data: dict,
     two_group_connections: tuple[MockConnection, MockConnection],
     target_source_params: dict,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     group_queue: Queue,
     mock_group: MockGroup,
     session: AsyncSession,
@@ -126,7 +126,7 @@ async def test_user_plus_can_create_hdfs_transfer(
 ):
     # Arrange
     first_connection, second_connection = two_group_connections
-    user = mock_group.get_member_of_role(role_user_plus)
+    user = mock_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(
