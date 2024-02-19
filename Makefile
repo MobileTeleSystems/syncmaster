@@ -108,11 +108,13 @@ check-fixtures: ##@Test Check declared fixtures without using
 run_back_docker:
 	docker run --env-file ./.env.docker \
 	-v ./syncmaster:/syncmaster \
+	-v ./cached_jars:/root/.ivy2 \
 	--net syncmaster_network -p 8000:8000 --rm \
 	 -it --name backend syncmaster_back /bin/bash
 
 run_worker_docker:
 	docker run --env-file ./.env.docker \
 	-v ./syncmaster:/syncmaster \
+	-v ./cached_jars:/root/.ivy2 \
 	--net syncmaster_network --rm \
 	-it --name worker syncmaster_worker /bin/bash

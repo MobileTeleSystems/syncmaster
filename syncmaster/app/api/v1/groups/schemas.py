@@ -12,6 +12,11 @@ class UpdateGroupSchema(BaseModel):
     owner_id: int
 
 
+class CreateGroupSchema(BaseModel):
+    name: NameConstr  # type: ignore # noqa: F722
+    description: str
+
+
 class AddUserSchema(BaseModel):
     role: GroupMemberRole
 
