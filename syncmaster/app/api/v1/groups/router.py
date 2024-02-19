@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from app.api.deps import UnitOfWorkMarker
 from app.api.v1.groups.schemas import (
     AddUserSchema,
+    CreateGroupSchema,
     GroupPageSchema,
     ReadGroupSchema,
     UpdateGroupSchema,
@@ -40,16 +41,17 @@ async def read_groups(
     return GroupPageSchema.from_pagination(pagination=pagination)
 
 
-@router.post("/groups", dependencies=[Depends(get_user(is_superuser=True))])
+@router.post("/groups")
 async def create_group(
-    group_data: UpdateGroupSchema,
+    group_data: CreateGroupSchema,
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    current_user: User = Depends(get_user(is_active=True)),
 ) -> ReadGroupSchema:
     async with unit_of_work:
         group = await unit_of_work.group.create(
             name=group_data.name,
             description=group_data.description,
-            owner_id=group_data.owner_id,
+            owner_id=current_user.id,
         )
     return ReadGroupSchema.from_orm(group)
 
