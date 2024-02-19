@@ -123,15 +123,15 @@ async def test_anon_user_cannot_update_queue(
     }
 
 
-async def test_user_or_below_cannot_update_queue(
+async def test_developer_or_below_cannot_update_queue(
     client: AsyncClient,
     session: AsyncSession,
-    role_user_or_below: UserTestRoles,
+    role_developer_or_below: UserTestRoles,
     group_queue: Queue,
     mock_group: MockGroup,
 ):
     # Arrange
-    user = mock_group.get_member_of_role(role_user_or_below)
+    user = mock_group.get_member_of_role(role_developer_or_below)
 
     # Act
     result = await client.patch(
@@ -156,10 +156,10 @@ async def test_other_group_member_cannot_update_queue(
     session: AsyncSession,
     group_queue: Queue,
     group: MockGroup,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group.get_member_of_role(role_user_plus)
+    user = group.get_member_of_role(role_developer_plus)
     # Act
     result = await client.patch(
         f"v1/queues/{group_queue.id}",

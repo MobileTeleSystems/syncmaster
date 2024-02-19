@@ -34,15 +34,15 @@ pytestmark = [pytest.mark.asyncio]
     ],
     indirect=True,
 )
-async def test_user_plus_can_update_s3_transfer(
+async def test_developer_plus_can_update_s3_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     create_connection_data: dict,
     create_transfer_data: dict,
 ):
     # Arrange
-    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+    user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.patch(

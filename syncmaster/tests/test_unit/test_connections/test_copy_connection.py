@@ -266,10 +266,10 @@ async def test_not_in_both_groups_user_can_not_copy_connection(
     empty_group: MockGroup,
     session: AsyncSession,
     settings: Settings,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group_connection.owner_group.get_member_of_role(role_user_plus)
+    user = group_connection.owner_group.get_member_of_role(role_developer_plus)
 
     query_current_row = select(Connection).where(Connection.id == group_connection.id)
 
@@ -370,15 +370,15 @@ async def test_groupless_user_can_not_copy_connection(
     }
 
 
-async def test_user_plus_can_copy_connection_without_remove_source(
+async def test_developer_plus_can_copy_connection_without_remove_source(
     client: AsyncClient,
-    role_user_plus: UserTestRoles,
-    group_connection_and_group_user_plus: str,
+    role_developer_plus: UserTestRoles,
+    group_connection_and_group_developer_plus: str,
     group_connection: MockConnection,
     empty_group: MockGroup,
 ):
     # Arrange
-    role = group_connection_and_group_user_plus
+    role = group_connection_and_group_developer_plus
     user = group_connection.owner_group.get_member_of_role(role)
 
     # Act
@@ -399,16 +399,16 @@ async def test_user_plus_can_copy_connection_without_remove_source(
     }
 
 
-async def test_user_plus_can_copy_connection_with_new_connection_name(
+async def test_developer_plus_can_copy_connection_with_new_connection_name(
     client: AsyncClient,
     session: AsyncSession,
-    role_user_plus: UserTestRoles,
-    group_connection_and_group_user_plus: str,
+    role_developer_plus: UserTestRoles,
+    group_connection_and_group_developer_plus: str,
     group_connection: MockConnection,
     empty_group: MockGroup,
 ):
     # Arrange
-    role = group_connection_and_group_user_plus
+    role = group_connection_and_group_developer_plus
     user = group_connection.owner_group.get_member_of_role(role)
     new_name = f"{secrets.token_hex(5)}"
 
@@ -447,13 +447,13 @@ async def test_user_plus_can_copy_connection_with_new_connection_name(
 async def test_check_name_validation_copy_connection_with_new_connection_name(
     client: AsyncClient,
     session: AsyncSession,
-    role_user_plus: UserTestRoles,
-    group_connection_and_group_user_plus: str,
+    role_developer_plus: UserTestRoles,
+    group_connection_and_group_developer_plus: str,
     group_connection: MockConnection,
     empty_group: MockGroup,
 ):
     # Arrange
-    role = group_connection_and_group_user_plus
+    role = group_connection_and_group_developer_plus
     user = group_connection.owner_group.get_member_of_role(role)
     new_name = ""
 
@@ -506,15 +506,15 @@ async def test_maintainer_plus_cannot_copy_connection_with_same_name_in_new_grou
     }
 
 
-async def test_user_below_can_not_copy_connection_with_remove_source(
+async def test_developer_below_can_not_copy_connection_with_remove_source(
     client: AsyncClient,
-    role_user_or_below: UserTestRoles,
-    group_connection_and_group_user_or_below: str,
+    role_developer_or_below: UserTestRoles,
+    group_connection_and_group_developer_or_below: str,
     group_connection: MockConnection,
     empty_group: MockGroup,
 ):
     # Arrange
-    role = group_connection_and_group_user_or_below
+    role = group_connection_and_group_developer_or_below
     user = group_connection.owner_group.get_member_of_role(role)
 
     # Act
@@ -538,13 +538,13 @@ async def test_user_below_can_not_copy_connection_with_remove_source(
 
 async def test_cannot_copy_connection_with_unknown_connection_error(
     client: AsyncClient,
-    role_user_plus: UserTestRoles,
-    group_connection_and_group_user_plus: str,
+    role_developer_plus: UserTestRoles,
+    group_connection_and_group_developer_plus: str,
     group_connection: MockConnection,
     empty_group: MockGroup,
 ):
     # Arrange
-    role = group_connection_and_group_user_plus
+    role = group_connection_and_group_developer_plus
     user = group_connection.owner_group.get_member_of_role(role)
 
     # Act
@@ -590,12 +590,12 @@ async def test_superuser_cannot_copy_unknown_connection_error(
 
 async def test_cannot_copy_connection_with_unknown_new_group_id_error(
     client: AsyncClient,
-    role_user_plus: UserTestRoles,
-    group_connection_and_group_user_plus: str,
+    role_developer_plus: UserTestRoles,
+    group_connection_and_group_developer_plus: str,
     group_connection: MockConnection,
 ):
     # Arrange
-    role = group_connection_and_group_user_plus
+    role = group_connection_and_group_developer_plus
     user = group_connection.owner_group.get_member_of_role(role)
 
     # Act

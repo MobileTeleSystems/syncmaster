@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 class UserTestRoles(enum.StrEnum):
     Owner = "Owner"
     Maintainer = "Maintainer"
-    User = "User"
+    Developer = "Developer"
     Guest = "Guest"
 
 
@@ -53,14 +53,14 @@ class MockGroup:
 
         if members:
             self._maintainer = members[0]
-            self._user = members[1]
+            self._developer = members[1]
             self._guest = members[2]
 
     def get_member_of_role(self, role_name: str) -> MockUser:
         if role_name == UserTestRoles.Maintainer:
             return self._maintainer
-        if role_name == UserTestRoles.User:
-            return self._user
+        if role_name == UserTestRoles.Developer:
+            return self._developer
         if role_name == UserTestRoles.Guest:
             return self._guest
         if role_name == UserTestRoles.Owner:

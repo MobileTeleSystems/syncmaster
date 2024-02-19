@@ -66,7 +66,7 @@ async def test_groupless_user_cannot_add_user_to_group(
         f"v1/groups/{empty_group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={
-            "role": UserTestRoles.User,
+            "role": UserTestRoles.Developer,
         },
     )
     # Assert
@@ -124,9 +124,9 @@ async def test_owner_cannot_add_user_to_group_with_wrong_role(
     assert result.json() == {
         "detail": [
             {
-                "ctx": {"enum_values": ["Maintainer", "User", "Guest"]},
+                "ctx": {"enum_values": ["Maintainer", "Developer", "Guest"]},
                 "loc": ["body", "role"],
-                "msg": "value is not a valid enumeration member; permitted: 'Maintainer', 'User', 'Guest'",
+                "msg": "value is not a valid enumeration member; permitted: 'Maintainer', 'Developer', 'Guest'",
                 "type": "type_error.enum",
             }
         ]
@@ -172,7 +172,7 @@ async def test_superuser_can_add_user_to_group(
         f"v1/groups/{empty_group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
-            "role": UserTestRoles.User,
+            "role": UserTestRoles.Developer,
         },
     )
 
@@ -223,7 +223,7 @@ async def test_owner_cannot_add_user_to_group_twice(
         f"v1/groups/{group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "role": UserTestRoles.User,
+            "role": UserTestRoles.Developer,
         },
     )
     # Assert
@@ -238,7 +238,7 @@ async def test_owner_cannot_add_user_to_group_twice(
         f"v1/groups/{group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "role": UserTestRoles.User,
+            "role": UserTestRoles.Developer,
         },
     )
     assert result.json() == {
@@ -321,7 +321,7 @@ async def test_superuser_add_user_to_unknown_group_error(
         f"v1/groups/-1/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
-            "role": UserTestRoles.User,
+            "role": UserTestRoles.Developer,
         },
     )
 
@@ -345,7 +345,7 @@ async def test_superuser_add_unknown_user_error(
         f"v1/groups/{empty_group.group.id}/users/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
-            "role": UserTestRoles.User,
+            "role": UserTestRoles.Developer,
         },
     )
 

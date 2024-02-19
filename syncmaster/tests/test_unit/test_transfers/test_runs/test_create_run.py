@@ -9,15 +9,15 @@ from app.db.models import Run, Status
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_user_plus_can_create_run_of_transfer_his_group(
+async def test_developer_plus_can_create_run_of_transfer_his_group(
     client: AsyncClient,
     group_transfer: MockTransfer,
     session: AsyncSession,
     mocker,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ) -> None:
     # Arrange
-    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+    user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
     mocker.patch("app.tasks.config.celery.send_task")
 
     run = (

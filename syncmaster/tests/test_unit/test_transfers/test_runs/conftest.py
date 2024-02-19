@@ -31,7 +31,7 @@ async def group_run(session: AsyncSession, settings: Settings) -> MockTransfer:
     members: list[MockUser] = []
     for username in (
         "connection_group_member_maintainer",
-        "connection_group_member_user",
+        "connection_group_member_developer",
         "connection_group_member_guest",
     ):
         members.append(

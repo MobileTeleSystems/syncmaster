@@ -187,7 +187,7 @@ class GroupRepository(Repository[Group]):
     async def get_group_permission(self, user: User, group_id: int) -> Permission:
         """
         Method for determining CRUD rights in a specified group
-        'User' and 'MAINTAINER' does not have WRITE and DELETE permission in the GROUP repository
+        'DEVELOPER' and 'MAINTAINER' does not have WRITE and DELETE permission in the GROUP repository
         """
         # Check: group exists
         if not await self._session.get(Group, group_id):

@@ -84,14 +84,14 @@ async def test_superuser_can_create_queue(
     await session.commit()
 
 
-async def test_user_or_below_cannot_create_queue(
+async def test_developer_or_below_cannot_create_queue(
     client: AsyncClient,
     session: AsyncSession,
-    role_user_or_below: UserTestRoles,
+    role_developer_or_below: UserTestRoles,
     mock_group: MockGroup,
 ):
     # Arrange
-    user = mock_group.get_member_of_role(role_user_or_below)
+    user = mock_group.get_member_of_role(role_developer_or_below)
 
     # Act
     result = await client.post(
@@ -114,12 +114,12 @@ async def test_user_or_below_cannot_create_queue(
 
 async def test_other_group_member_cannot_create_queue(
     client: AsyncClient,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     empty_group: MockGroup,
     group: MockGroup,
 ):
     # Arrange
-    user = group.get_member_of_role(role_user_plus)
+    user = group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(

@@ -5,13 +5,13 @@ from tests.utils import MockGroup, MockRun, MockUser, UserTestRoles
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_user_plus_can_read_run(
+async def test_developer_plus_can_read_run(
     client: AsyncClient,
     group_run: MockRun,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group_run.transfer.owner_group.get_member_of_role(role_user_plus)
+    user = group_run.transfer.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.get(

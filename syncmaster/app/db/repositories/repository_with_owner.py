@@ -64,7 +64,7 @@ class RepositoryWithOwner(Repository, Generic[Model]):
         if group_role == GroupMemberRole.Guest:
             return Permission.READ
 
-        if group_role == GroupMemberRole.User:
+        if group_role == GroupMemberRole.Developer:
             return Permission.WRITE
 
         return Permission.DELETE  # Maintainer
@@ -110,7 +110,7 @@ class RepositoryWithOwner(Repository, Generic[Model]):
         if group_role == GroupMemberRole.Guest:
             return Permission.READ
 
-        if group_role == GroupMemberRole.User:
+        if group_role == GroupMemberRole.Developer:
             return Permission.WRITE
 
         return Permission.DELETE  # Maintainer

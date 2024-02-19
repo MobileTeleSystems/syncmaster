@@ -82,15 +82,15 @@ async def test_groupless_user_cannot_delete_queue(
     assert result.status_code == 404
 
 
-async def test_user_or_below_cannot_delete_queue(
+async def test_developer_or_below_cannot_delete_queue(
     client: AsyncClient,
     session: AsyncSession,
     group_queue: Queue,
     mock_group: MockGroup,
-    role_user_or_below: UserTestRoles,
+    role_developer_or_below: UserTestRoles,
 ):
     # Arrange
-    user = mock_group.get_member_of_role(role_user_or_below)
+    user = mock_group.get_member_of_role(role_developer_or_below)
 
     # Act
     result = await client.delete(

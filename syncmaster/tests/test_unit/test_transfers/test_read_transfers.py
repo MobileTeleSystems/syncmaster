@@ -130,13 +130,13 @@ async def test_unauthorized_user_cannot_read_transfers(client: AsyncClient):
     assert result.status_code == 401
 
 
-async def test_user_plus_cannot_read_unknown_group_transfers_error(
+async def test_developer_plus_cannot_read_unknown_group_transfers_error(
     client: AsyncClient,
     group_transfer: MockTransfer,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+    user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.get(

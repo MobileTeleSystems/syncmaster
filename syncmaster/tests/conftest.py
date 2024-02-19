@@ -151,7 +151,7 @@ async def group_transfer(
     members: list[MockUser] = []
     for username in (
         "transfer_group_member_maintainer",
-        "transfer_group_member_user",
+        "transfer_group_member_developer",
         "transfer_group_member_guest",
     ):
         members.append(
@@ -359,14 +359,14 @@ async def group_transfer_with_same_name(
 
 
 @pytest_asyncio.fixture
-async def group_transfer_and_group_user_plus(
+async def group_transfer_and_group_developer_plus(
     session: AsyncSession,
     group_queue: Queue,
     group_transfer: MockTransfer,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     role_maintainer_or_below_without_guest: UserTestRoles,
 ) -> str:
-    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+    user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
 
     await add_user_to_group(
         user=user.user,
@@ -375,19 +375,19 @@ async def group_transfer_and_group_user_plus(
         role=role_maintainer_or_below_without_guest,
     )
 
-    return role_user_plus
+    return role_developer_plus
 
 
 @pytest_asyncio.fixture
-async def group_transfer_and_group_connection_user_plus(
+async def group_transfer_and_group_connection_developer_plus(
     session: AsyncSession,
     group_queue: Queue,
     group_transfer: MockTransfer,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     role_maintainer_or_below_without_guest: UserTestRoles,
     settings: Settings,
 ) -> tuple[str, Connection]:
-    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+    user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
 
     await add_user_to_group(
         user=user.user,
@@ -408,20 +408,20 @@ async def group_transfer_and_group_connection_user_plus(
         connection_id=connection.id,
     )
 
-    yield role_user_plus, connection
+    yield role_developer_plus, connection
     await session.delete(connection)
     await session.commit()
 
 
 @pytest_asyncio.fixture
-async def group_transfer_and_group_user_or_below(
+async def group_transfer_and_group_developer_or_below(
     session: AsyncSession,
     group_queue: Queue,
     group_transfer: MockTransfer,
-    role_user_or_below: UserTestRoles,
+    role_developer_or_below: UserTestRoles,
     role_maintainer_or_below_without_guest: UserTestRoles,
 ) -> str:
-    user = group_transfer.owner_group.get_member_of_role(role_user_or_below)
+    user = group_transfer.owner_group.get_member_of_role(role_developer_or_below)
 
     await add_user_to_group(
         user=user.user,
@@ -430,13 +430,13 @@ async def group_transfer_and_group_user_or_below(
         role=role_maintainer_or_below_without_guest,
     )
 
-    return role_user_or_below
+    return role_developer_or_below
 
 
 @pytest_asyncio.fixture(
     params=[
         UserTestRoles.Guest,
-        UserTestRoles.User,
+        UserTestRoles.Developer,
         UserTestRoles.Maintainer,
         UserTestRoles.Owner,
     ]
@@ -444,7 +444,7 @@ async def group_transfer_and_group_user_or_below(
 async def role_guest_plus(request):
     """
     Guest: only can READ (only resources)
-    User: READ, WRITE (only resources)
+    Developer: READ, WRITE (only resources)
     Maintainer: READ, WRITE, DELETE (only resources)
     Owner: READ, WRITE, DELETE (resources and users in own group)
     """
@@ -454,14 +454,14 @@ async def role_guest_plus(request):
 @pytest_asyncio.fixture(
     params=[
         UserTestRoles.Guest,
-        UserTestRoles.User,
+        UserTestRoles.Developer,
         UserTestRoles.Maintainer,
     ]
 )
 async def role_guest_plus_without_owner(request):
     """
     Guest: only can READ (only resources)
-    User: READ, WRITE (only resources)
+    Developer: READ, WRITE (only resources)
     Maintainer: READ, WRITE, DELETE (only resources)
     Owner: READ, WRITE, DELETE (resources and users in own group)
     """
@@ -470,14 +470,14 @@ async def role_guest_plus_without_owner(request):
 
 @pytest_asyncio.fixture(
     params=[
-        UserTestRoles.User,
+        UserTestRoles.Developer,
         UserTestRoles.Owner,
         UserTestRoles.Maintainer,
     ]
 )
-async def role_user_plus(request):
+async def role_developer_plus(request):
     """
-    User: READ, WRITE (only resources)
+    Developer: READ, WRITE (only resources)
     Maintainer: READ, WRITE, DELETE (only resources)
     Owner: READ, WRITE, DELETE (resources and users in own group)
     """
@@ -501,27 +501,27 @@ async def role_maintainer_plus(request):
 @pytest_asyncio.fixture(
     params=[
         UserTestRoles.Guest,
-        UserTestRoles.User,
+        UserTestRoles.Developer,
     ]
 )
-async def role_user_or_below(request):
+async def role_developer_or_below(request):
     """
     Guest: only can READ (only resources)
-    User: READ, WRITE (only resources)
+    Developer: READ, WRITE (only resources)
     """
     return request.param
 
 
 @pytest_asyncio.fixture(
     params=[
-        UserTestRoles.User,
+        UserTestRoles.Developer,
         UserTestRoles.Maintainer,
     ]
 )
 async def role_maintainer_or_below_without_guest(request):
     """
     Guest: only can READ (only resources)
-    User: READ, WRITE (only resources)
+    Developer: READ, WRITE (only resources)
     Maintainer: READ, WRITE, DELETE (only resources)
     """
 
@@ -531,14 +531,14 @@ async def role_maintainer_or_below_without_guest(request):
 @pytest_asyncio.fixture(
     params=[
         UserTestRoles.Guest,
-        UserTestRoles.User,
+        UserTestRoles.Developer,
         UserTestRoles.Maintainer,
     ]
 )
 async def role_maintainer_or_below(request):
     """
     Guest: only can READ (only resources)
-    User: READ, WRITE (only resources)
+    Developer: READ, WRITE (only resources)
     Maintainer: READ, WRITE, DELETE (only resources)
     """
 

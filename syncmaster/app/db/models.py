@@ -25,7 +25,7 @@ from app.db.mixins import DeletableMixin, ResourceMixin, TimestampMixin
 
 class GroupMemberRole(enum.StrEnum):
     Maintainer = "Maintainer"
-    User = "User"
+    Developer = "Developer"
     Guest = "Guest"
 
 

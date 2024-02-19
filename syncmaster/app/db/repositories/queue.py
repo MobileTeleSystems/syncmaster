@@ -88,7 +88,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
     async def get_group_permission(self, user: User, group_id: int) -> Permission:
         """
         Method for determining CRUD permissions in the specified group
-        'User' does not have WRITE permission in the QUEUE repository
+        'DEVELOPER' does not have WRITE permission in the QUEUE repository
         """
 
         owner_query = (
@@ -127,7 +127,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
 
         group_role = user_group.role
 
-        if group_role in (GroupMemberRole.Guest, GroupMemberRole.User):
+        if group_role in (GroupMemberRole.Guest, GroupMemberRole.Developer):
             return Permission.READ
 
         return Permission.DELETE
@@ -135,7 +135,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
     async def get_resource_permission(self, user: User, resource_id: int) -> Permission:
         """
         Method for determining CRUD rights in a repository (self.model) for a resource
-        'User' does not have WRITE permission in the QUEUE repository
+        'DEVELOPER' does not have WRITE permission in the QUEUE repository
         """
         is_exists = await self._session.get(self._model, resource_id)
 
@@ -182,7 +182,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
 
         group_role = user_group.role
 
-        if group_role in (GroupMemberRole.Guest, GroupMemberRole.User):
+        if group_role in (GroupMemberRole.Guest, GroupMemberRole.Developer):
             return Permission.READ
 
         return Permission.DELETE

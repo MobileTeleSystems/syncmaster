@@ -2,18 +2,18 @@ import pytest
 from httpx import AsyncClient
 from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser, UserTestRoles
 
-from app.db.models import Connection, Queue
+from app.db.models import Queue
 
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_user_plus_can_update_transfer(
+async def test_developer_plus_can_update_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+    user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.patch(
@@ -95,10 +95,10 @@ async def test_other_group_member_cannot_update_transfer(
     client: AsyncClient,
     group: MockGroup,
     group_transfer: MockTransfer,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group.get_member_of_role(role_user_plus)
+    user = group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.patch(
@@ -119,10 +119,10 @@ async def test_other_group_member_cannot_update_transfer(
 async def test_check_name_field_validation_on_update_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+    user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.patch(
@@ -147,10 +147,10 @@ async def test_check_name_field_validation_on_update_transfer(
 async def test_check_connection_types_and_its_params_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+    user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
     # Act
     result = await client.patch(
         f"v1/transfers/{group_transfer.id}",
@@ -202,11 +202,11 @@ async def test_check_connection_types_and_its_params_transfer(
 
 async def test_check_different_connection_groups_for_transfer(
     client: AsyncClient,
-    group_transfer_and_group_connection_user_plus: tuple[str, Connection],
+    group_transfer_and_group_connection_developer_plus,
     group_transfer: MockTransfer,
 ):
     # Arrange
-    role, connection = group_transfer_and_group_connection_user_plus
+    role, connection = group_transfer_and_group_connection_developer_plus
     user = group_transfer.owner_group.get_member_of_role(role)
 
     # Act
@@ -229,10 +229,10 @@ async def test_check_different_queue_groups_for_transfer(
     client: AsyncClient,
     group_queue: Queue,
     group_transfer: MockTransfer,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+    user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.patch(
@@ -250,14 +250,14 @@ async def test_check_different_queue_groups_for_transfer(
     assert result.status_code == 400
 
 
-async def test_user_plus_not_in_new_connection_group_cannot_update_transfer(
+async def test_developer_plus_not_in_new_connection_group_cannot_update_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
     group_connection: MockConnection,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Assert
-    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+    user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.patch(
@@ -294,14 +294,14 @@ async def test_unauthorized_user_cannot_update_transfer(
     }
 
 
-async def test_user_plus_cannot_update_transfer_with_other_group_queue(
+async def test_developer_plus_cannot_update_transfer_with_other_group_queue(
     client: AsyncClient,
     group_transfer: MockTransfer,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     group_queue: Queue,
 ):
     # Arrange
-    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+    user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.patch(
@@ -386,13 +386,13 @@ async def test_superuser_cannot_update_unknown_transfer_error(
     assert result.status_code == 404
 
 
-async def test_user_plus_cannot_update_transfer_with_unknown_queue_id_error(
+async def test_developer_plus_cannot_update_transfer_with_unknown_queue_id_error(
     client: AsyncClient,
     group_transfer: MockTransfer,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group_transfer.owner_group.get_member_of_role(role_user_plus)
+    user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.patch(

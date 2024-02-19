@@ -80,14 +80,14 @@ async def test_groupless_user_cannot_delete_transfer(
     }
 
 
-async def test_user_or_below_cannot_delete_transfer(
+async def test_developer_or_below_cannot_delete_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
     session: AsyncSession,
-    role_user_or_below: UserTestRoles,
+    role_developer_or_below: UserTestRoles,
 ):
     # Act
-    user = group_transfer.owner_group.get_member_of_role(role_user_or_below)
+    user = group_transfer.owner_group.get_member_of_role(role_developer_or_below)
 
     # Assert
     result = await client.delete(

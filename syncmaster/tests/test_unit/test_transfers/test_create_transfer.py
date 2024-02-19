@@ -9,17 +9,17 @@ from app.db.models import Queue, Transfer
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_user_plus_can_create_transfer(
+async def test_developer_plus_can_create_transfer(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
     session: AsyncSession,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     group_queue: Queue,
     mock_group: MockGroup,
 ):
     # Arrange
     first_connection, second_connection = two_group_connections
-    user = mock_group.get_member_of_role(role_user_plus)
+    user = mock_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(
@@ -146,12 +146,12 @@ async def test_other_group_user_plus_cannot_create_group_transfer(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
     group: MockGroup,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     group_queue: Queue,
 ):
     # Arrange
     first_conn, second_conn = two_group_connections
-    user = group.get_member_of_role(role_user_plus)
+    user = group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(
@@ -316,13 +316,13 @@ async def test_check_fields_validation_on_create_transfer(
     error_json: dict,
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     mock_group: MockGroup,
     group_queue: Queue,
 ):
     # Arrange
     first_conn, second_conn = two_group_connections
-    user = mock_group.get_member_of_role(role_user_plus)
+    user = mock_group.get_member_of_role(role_developer_plus)
 
     # Act
     transfer_data = {
@@ -353,13 +353,13 @@ async def test_check_fields_validation_on_create_transfer(
 async def test_check_connection_types_and_its_params_on_create_transfer(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     mock_group: MockGroup,
     group_queue: Queue,
 ):
     # Arrange
     first_conn, second_conn = two_group_connections
-    user = mock_group.get_member_of_role(role_user_plus)
+    user = mock_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(
@@ -393,13 +393,13 @@ async def test_check_different_connections_owner_group_on_create_transfer(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
     group_connection: MockConnection,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     mock_group: MockGroup,
     group_queue: Queue,
 ):
     # Arrange
     first_conn, _ = two_group_connections
-    user = mock_group.get_member_of_role(role_user_plus)
+    user = mock_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(
@@ -457,15 +457,15 @@ async def test_unauthorized_user_cannot_create_transfer(
     }
 
 
-async def test_user_plus_cannot_create_transfer_with_other_group_queue(
+async def test_developer_plus_cannot_create_transfer_with_other_group_queue(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     group_transfer: MockTransfer,
 ):
     # Arrange
     first_conn, second_conn = two_group_connections
-    user = first_conn.owner_group.get_member_of_role(role_user_plus)
+    user = first_conn.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(
@@ -494,17 +494,17 @@ async def test_user_plus_cannot_create_transfer_with_other_group_queue(
     }
 
 
-async def test_user_plus_can_not_create_transfer_with_target_s3_json(
+async def test_developer_plus_can_not_create_transfer_with_target_s3_json(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
     session: AsyncSession,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     group_queue: Queue,
     mock_group: MockGroup,
 ):
     # Arrange
     first_connection, second_connection = two_group_connections
-    user = mock_group.get_member_of_role(role_user_plus)
+    user = mock_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(
@@ -593,14 +593,14 @@ async def test_superuser_cannot_create_transfer_with_other_group_queue(
 async def test_group_member_cannot_create_transfer_with_unknown_connection_error(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     iter_conn_id: tuple,
     mock_group: MockGroup,
     group_queue: Queue,
 ):
     # Arrange
     first_conn, second_conn = two_group_connections
-    user = mock_group.get_member_of_role(role_user_plus)
+    user = mock_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(
@@ -629,15 +629,15 @@ async def test_group_member_cannot_create_transfer_with_unknown_connection_error
     }
 
 
-async def test_user_plus_cannot_create_transfer_with_unknown_group_error(
+async def test_developer_plus_cannot_create_transfer_with_unknown_group_error(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     group_queue: Queue,
 ):
     # Arrange
     first_conn, second_conn = two_group_connections
-    user = first_conn.owner_group.get_member_of_role(role_user_plus)
+    user = first_conn.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(
@@ -704,14 +704,14 @@ async def test_superuser_cannot_create_transfer_with_unknown_connection_error(
     }
 
 
-async def test_user_plus_cannot_create_transfer_with_unknown_queue_error(
+async def test_developer_plus_cannot_create_transfer_with_unknown_queue_error(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
     first_conn, second_conn = two_group_connections
-    user = first_conn.owner_group.get_member_of_role(role_user_plus)
+    user = first_conn.owner_group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(

@@ -12,17 +12,17 @@ from app.db.repositories.utils import decrypt_auth_data
 pytestmark = [pytest.mark.asyncio]
 
 
-async def test_user_plus_can_create_connection(
+async def test_developer_plus_can_create_connection(
     client: AsyncClient,
     group: MockGroup,
     session: AsyncSession,
     settings: Settings,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
     event_loop,
     request,
 ):
     # Arrange
-    user = group.get_member_of_role(role_user_plus)
+    user = group.get_member_of_role(role_developer_plus)
 
     # Act
     result = await client.post(
@@ -128,10 +128,10 @@ async def test_unauthorized_user_cannot_create_connection(
 async def test_check_fields_validation_on_create_connection(
     client: AsyncClient,
     group_connection: MockConnection,
-    role_user_plus: UserTestRoles,
+    role_developer_plus: UserTestRoles,
 ):
     # Arrange
-    user = group_connection.owner_group.get_member_of_role(UserTestRoles.User)
+    user = group_connection.owner_group.get_member_of_role(UserTestRoles.Developer)
 
     # Act
     result = await client.post(
