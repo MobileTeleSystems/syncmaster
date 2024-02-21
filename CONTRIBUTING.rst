@@ -35,7 +35,7 @@ Open terminal and run these commands:
 
 .. code:: bash
 
-    git clone https://gitlab.services.mts.ru/myuser/syncmaster.git -b develop
+    git clone https://github.com/MobileTeleSystems/syncmaster.git -b develop
 
     cd syncmaster
 
