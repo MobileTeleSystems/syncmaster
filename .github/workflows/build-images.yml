@@ -37,7 +37,7 @@ jobs:
       - name: Build Backend image
         uses: docker/build-push-action@v5
         with:
-          tags: ${{ env.TAG }}
+          tags: test
           context: .
           file: docker/backend.dockerfile
           pull: true
