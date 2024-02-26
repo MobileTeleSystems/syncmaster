@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - develop
+    pull_request:
+      branches-ignore:
+        - master
   workflow_dispatch:
 
 jobs:
