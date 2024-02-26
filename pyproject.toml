@@ -107,15 +107,3 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "uvicorn.*"
 ignore_missing_imports = true
-#
-#[[tool.mypy.overrides]]
-#module = "httpx.*"
-#ignore_missing_imports = true
-#
-#[[tool.mypy.overrides]]
-#module = "pytest.*"
-#ignore_missing_imports = true
-#
-#[[tool.mypy.overrides]]
-#module = "pytest_asyncio.*"
-#ignore_missing_imports = true
