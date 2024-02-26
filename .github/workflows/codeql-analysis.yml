@@ -62,7 +62,7 @@ jobs:
         run: poetry run flake8 syncmaster/
 
       - name: Run mypy
-        run: mypy --config-file ./pyproject.toml ./syncmaster/app
+        run: poetry run mypy --config-file ./pyproject.toml ./syncmaster/app
 
   codeql:
     name: CodeQL

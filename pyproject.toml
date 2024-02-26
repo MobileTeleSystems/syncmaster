@@ -63,7 +63,6 @@ known_first_party = ["app"]
 [tool.mypy]
 python_version = "3.11"
 plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
-exclude = '''(?x)(tests/.*)'''
 
 [[tool.mypy.overrides]]
 module = "alembic.*"
@@ -108,15 +107,15 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "uvicorn.*"
 ignore_missing_imports = true
-#
-#[[tool.mypy.overrides]]
-#module = "httpx.*"
-#ignore_missing_imports = true
-#
-#[[tool.mypy.overrides]]
-#module = "pytest.*"
-#ignore_missing_imports = true
-#
-#[[tool.mypy.overrides]]
-#module = "pytest_asyncio.*"
-#ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "httpx.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pytest.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pytest_asyncio.*"
+ignore_missing_imports = true
