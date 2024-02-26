@@ -135,3 +135,4 @@ ci:
   skip:
     - mypy # checked with Github Actions
     - chmod
+    - docker-compose-check
