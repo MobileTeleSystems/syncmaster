@@ -130,3 +130,9 @@ repos:
     hooks:
       - id: check-hooks-apply
       - id: check-useless-excludes
+
+ci:
+  skip:
+    - mypy  # checked with Github Actions
+    - chmod  # failing in pre-commit.ci
+    - docker-compose-check  # cannot run on pre-commit.ci

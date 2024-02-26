@@ -48,16 +48,6 @@ platformdirs = "3.8.0"
 sqlalchemy = {extras = ["mypy"], version = "^2.0.18"}
 types-python-jose = "^3.3.4.7"
 
-[[tool.poetry.source]]
-name = "nexus"
-url = "http://nexus.services.mts.ru/repository/pip/simple"
-priority = "default"
-
-[[tool.poetry.source]]
-name = "artifactory"
-url = "https://artifactory.mts.ru/artifactory/api/pypi/pip-bigdata/simple/"
-
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
@@ -73,6 +63,7 @@ known_first_party = ["app"]
 [tool.mypy]
 python_version = "3.11"
 plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
+follow_imports = "silent"
 
 [[tool.mypy.overrides]]
 module = "alembic.*"
