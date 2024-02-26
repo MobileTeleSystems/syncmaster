@@ -130,3 +130,7 @@ repos:
     hooks:
       - id: check-hooks-apply
       - id: check-useless-excludes
+
+ci:
+  skip:
+    - mypy # checked with Github Actions
