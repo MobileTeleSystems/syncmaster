@@ -56,7 +56,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install --no-root --all-extras --with dev --without docs,test
+          poetry install --no-root --all-extras --with dev --without test
 
       - name: Run flake8
         run: poetry run flake8 horizon/
