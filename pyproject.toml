@@ -63,7 +63,7 @@ known_first_party = ["app"]
 [tool.mypy]
 python_version = "3.11"
 plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
-exclude = ['syncmaster/tests',]
+exclude = 'syncmaster/tests'
 
 [[tool.mypy.overrides]]
 module = "alembic.*"
