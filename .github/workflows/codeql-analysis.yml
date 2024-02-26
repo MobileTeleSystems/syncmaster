@@ -59,10 +59,10 @@ jobs:
           poetry install --no-root --all-extras --with dev --without test
 
       - name: Run flake8
-        run: poetry run flake8 horizon/
+        run: poetry run flake8 syncmaster/
 
       - name: Run mypy
-        run: poetry run mypy ./horizon --config-file ./pyproject.toml
+        run: poetry run mypy ./syncmaster --config-file ./pyproject.toml
 
   codeql:
     name: CodeQL
