@@ -1,10 +1,10 @@
-FROM sregistry.mts.ru/bigdata/platform/docker-images/python:3.11-slim as prod
+FROM python:3.12-slim as prod
 
-RUN microdnf install java-17-openjdk libnghttp2-1.33.0-3.el8_2.1  # fix version https://github.com/nghttp2/nghttp2/issues/2003
-RUN microdnf install telnet  # for debugging in pdb
-
-RUN pip install --no-cache-dir --timeout 3 --retries 3 poetry \
-    && poetry config virtualenvs.create false
+RUN apt update && sudo apt upgrade
+RUN apt install telnetd
+RUN apt install openjdk-17-jdk
+RUN apt install -y install libnghttp2-14
+RUN pip install --no-cache-dir --timeout 3 --retries 3 poetry && poetry config virtualenvs.create false
 
 WORKDIR /syncmaster
 
