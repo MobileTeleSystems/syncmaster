@@ -136,6 +136,5 @@ services:
 networks:
   network:
 
-
 volumes:
   postgres_data:
