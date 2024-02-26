@@ -1,7 +1,20 @@
 FROM python:3.12-slim
 
-RUN apt install openjdk-17-jdk
-RUN apt install -y install libnghttp2-14
+RUN apt-get update && apt-get install -y \
+        libkrb5-dev \
+        libsasl2-dev \
+        libsasl2-modules-gssapi-mit \
+        libsasl2-modules-ldap \
+        libsasl2-modules \
+        libssl-dev \
+        libldap2-dev \
+        autoconf \
+        gcc \
+        g++ \
+        make \
+        libnghttp2-dev \
+        libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --no-cache-dir --timeout 3 --retries 3 poetry \
     && poetry config virtualenvs.create false
