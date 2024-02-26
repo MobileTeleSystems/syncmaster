@@ -56,13 +56,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install --no-root --all-extras --with backend,dev --without test
+          poetry install --no-root --all-extras --with dev --without test
 
       - name: Run flake8
         run: poetry run flake8 syncmaster/
 
       - name: Run mypy
-        run: poetry run mypy ./syncmaster/app --config-file ./pyproject.toml
+        run: poetry run mypy ./syncmaster/syncmaster/app --config-file ./pyproject.toml
 
   codeql:
     name: CodeQL
