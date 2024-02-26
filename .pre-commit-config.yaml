@@ -133,6 +133,6 @@ repos:
 
 ci:
   skip:
-    - mypy # checked with Github Actions
-    - chmod
-    - docker-compose-check
+    - mypy  # checked with Github Actions
+    - chmod  # failing in pre-commit.ci
+    - docker-compose-check  # cannot run on pre-commit.ci
