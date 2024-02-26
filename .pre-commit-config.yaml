@@ -134,3 +134,4 @@ repos:
 ci:
   skip:
     - mypy # checked with Github Actions
+    - chmod
