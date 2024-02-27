@@ -75,7 +75,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry add "pydantic<2.0.0"
+          poetry install --no-root --with backend,dev,test
 
       - name: Run Tests
         run: |
