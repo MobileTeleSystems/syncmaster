@@ -82,7 +82,7 @@ jobs:
           source .env.github
           mkdir -p reports/
           echo "127.0.0.1 hdfs" | sudo tee -a /etc/hosts
-          poetry run coverage run -m pytest
+          poetry run coverage run -m pytest  -vvvvv -s --ff -x
 
       - name: Shutdown Backend Container
         if: always()
