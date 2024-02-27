@@ -79,7 +79,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          source .env.docker
+          source .env.github
           mkdir -p reports/
           poetry run coverage run -m pytest
 
