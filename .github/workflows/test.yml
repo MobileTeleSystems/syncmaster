@@ -74,7 +74,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install --no-root --only backend
+          poetry install --no-root --only backend,dev
 
       - name: Run Tests
         run: |
