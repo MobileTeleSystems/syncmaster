@@ -80,6 +80,7 @@ jobs:
       - name: Run Tests
         run: |
           source .env.github
+          printenv
           mkdir -p reports/
           poetry run coverage run -m pytest
 
