@@ -95,6 +95,7 @@ services:
       - 10002:10002  # Hive server Admin UI
       - 19888:19888  # MapReduce JobServer History UI
       - 9083:9083  # Hive Metastore server
+      - 9864:9864 # Datanode UI
     environment:
       WITH_HIVE_SERVER: 'false'  # We leave only the metastore server, we don’t need Hive itself, we don’t waste resources on it
       HIVE_METASTORE_DB_URL: jdbc:postgresql://metastore-hive:5432/metastore

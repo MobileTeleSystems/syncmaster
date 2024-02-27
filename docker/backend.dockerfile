@@ -22,7 +22,7 @@ RUN pip install --no-cache-dir --timeout 3 --retries 3 poetry \
 WORKDIR /syncmaster
 
 COPY ./pyproject.toml ./poetry.lock* /syncmaster/
-RUN poetry install --no-root --with backend,dev,test
+RUN poetry install --no-root --only backend
 
 COPY ./syncmaster/ /syncmaster/
 
