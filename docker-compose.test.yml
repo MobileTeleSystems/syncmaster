@@ -95,7 +95,7 @@ services:
       - 19888:19888  # MapReduce JobServer History UI
       - 9083:9083  # Hive Metastore server
     environment:
-      WITH_HIVE_SERVER: 'false'  # оставляем только сервер метастора, сам Hive нам не требуется, не тратим на него ресурсы
+      WITH_HIVE_SERVER: 'false'  # We leave only the metastore server, we don’t need Hive itself, we don’t waste resources on it
       HIVE_METASTORE_DB_URL: jdbc:postgresql://metastore-hive:5432/metastore
       HIVE_METASTORE_DB_DRIVER: org.postgresql.Driver
       HIVE_METASTORE_DB_USER: test_hive
