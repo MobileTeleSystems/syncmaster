@@ -75,11 +75,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install "pydantic<2.0.0"
+          poetry add "pydantic<2.0.0"
 
       - name: Run Tests
         run: |
-          source .env.local
+          source .env.docker
           mkdir -p reports/
           poetry run coverage run -m pytest
 
