@@ -22,7 +22,7 @@ RUN pip install --no-cache-dir --timeout 3 --retries 3 poetry && poetry config v
 WORKDIR /syncmaster
 
 COPY ./pyproject.toml ./poetry.lock* /syncmaster/
-RUN poetry install --with worker
+RUN poetry install --no-root --with worker
 
 COPY ./syncmaster/ /syncmaster/
 
