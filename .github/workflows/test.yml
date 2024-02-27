@@ -25,30 +25,24 @@ jobs:
       POETRY_VERSION: 1.7.1
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Backend Container
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/backend.dockerfile
-          load: true
-          cache-to: type=gha,mode=max
-          cache-from: type=gha
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Build Worker Container
+      - name: Build Backend image
         uses: docker/build-push-action@v5
         with:
           context: .
           target: test
           file: docker/worker.dockerfile
-          load: true
           cache-to: type=gha,mode=max
           cache-from: type=gha
+          provenance: mode=max
 
       - name: Start Worker Container With Dependencies  # the next stage is to change from backend to worker
         run: |
