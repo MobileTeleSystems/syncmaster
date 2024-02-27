@@ -364,6 +364,7 @@ def prepare_hdfs(
     print(10 * "-")
     print(resource_path)
     print(upload_to)
+    print(hdfs_file_connection.host)
     print(10 * "-")
     files = upload_files(resource_path, upload_to, hdfs_file_connection)
     return connection, upload_to, files
