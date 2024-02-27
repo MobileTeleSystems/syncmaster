@@ -44,6 +44,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          target: test
           file: docker/worker.dockerfile
           load: true
           cache-to: type=gha,mode=max
