@@ -11,7 +11,7 @@ on:
 
 jobs:
   build-backend:
-    name: Build image
+    name: Build backend image
     runs-on: ubuntu-latest
     if: github.repository == 'MobileTeleSystems/syncmaster'  # prevent running on forks
 
@@ -34,7 +34,7 @@ jobs:
           cache-from: type=gha
           provenance: mode=max
   build-worker:
-    name: Build image
+    name: Build worker image
     runs-on: ubuntu-latest
     if: github.repository == 'MobileTeleSystems/syncmaster'  # prevent running on forks
 
