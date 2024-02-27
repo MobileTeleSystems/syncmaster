@@ -42,7 +42,6 @@ jobs:
           file: docker/worker.dockerfile
           cache-to: type=gha,mode=max
           cache-from: type=gha
-          provenance: mode=max
 
       - name: Start Worker Container With Dependencies  # the next stage is to change from backend to worker
         run: |
@@ -75,13 +74,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install --no-root --with backend,dev,test
+          poetry install --no-root --only backend
 
       - name: Run Tests
         run: |
           source .env.github
-          printenv
           mkdir -p reports/
+          echo "127.0.0.1 hdfs" | sudo tee -a /etc/hosts
           poetry run coverage run -m pytest -vvvvv -s --ff -x
 
       - name: Shutdown Backend Container
