@@ -69,7 +69,7 @@ services:
       - network
 
   metastore-hive:
-    image: central-mirror.services.mts.ru/postgres:15-alpine
+    image: postgres:15-alpine
     restart: unless-stopped
     environment:
       POSTGRES_DB: metastore
