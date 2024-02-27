@@ -22,9 +22,7 @@ RUN pip install --no-cache-dir --timeout 3 --retries 3 poetry && poetry config v
 WORKDIR /syncmaster
 
 COPY ./pyproject.toml ./poetry.lock* /syncmaster/
-RUN poetry export -f requirements.txt --with worker --output /syncmaster/requirements.txt \
-    --without-hashes --with-credentials --without-urls \
-    && pip install --timeout 5 --retries 5 --no-cache-dir -r /syncmaster/requirements.txt
+RUN poetry install --with worker
 
 COPY ./syncmaster/ /syncmaster/
 
