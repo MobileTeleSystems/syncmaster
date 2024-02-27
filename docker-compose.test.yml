@@ -1,0 +1,110 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    env_file: .env.dev
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - network
+
+  worker:
+    image: syncmaster_worker
+    restart: unless-stopped
+    build:
+      dockerfile: docker/worker.dockerfile
+      context: .
+      network: host
+    networks:
+      - network
+    env_file: .env.docker
+    command: [celery, -A, app.tasks.config.celery, worker, --loglevel=info, --max-tasks-per-child=1, -Q, test_queue]
+
+  rabbitmq:
+    image: rabbitmq
+    restart: unless-stopped
+    ports:
+      - 5672:5672
+    networks:
+      - network
+
+  s3:
+    image: bitnami/minio:latest
+    container_name: s3
+    restart: unless-stopped
+    env_file: .env.docker
+    ports:
+      - 9010:9000
+      - 9011:9001
+    networks:
+      - network
+
+  test-postgres:
+    image: postgres:15
+    restart: unless-stopped
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_DB: syncmaster
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: secret
+    networks:
+      - network
+
+  test-oracle:
+    image: gvenzl/oracle-xe:slim-faststart
+    restart: unless-stopped
+    ports:
+      - 1522:1521
+    environment:
+      TZ: UTC
+      ORACLE_PASSWORD: test_password
+      ORACLE_DATABASE: test_oracle
+      APP_USER: test_user
+      APP_USER_PASSWORD: test_password
+    networks:
+      - network
+
+  metastore-hive:
+    image: central-mirror.services.mts.ru/postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: metastore
+      POSTGRES_USER: test_hive
+      POSTGRES_PASSWORD: test_hive
+    ports:
+      - 5440:5432
+    networks:
+      - network
+
+  test-hive:
+    image: mtsrus/hadoop:hadoop2.7.3-hive2.3.9
+    restart: unless-stopped
+    depends_on:
+      - metastore-hive
+    ports:
+      - 9820:9820  # HDFS IPC
+      - 9870:9870  # HDFS WebHDFS
+      - 8088:8088  # Yarn UI
+      - 8042:8042  # NodeManager UI
+      - 10000:10000  # Hive server
+      - 10002:10002  # Hive server Admin UI
+      - 19888:19888  # MapReduce JobServer History UI
+      - 9083:9083  # Hive Metastore server
+    environment:
+      WITH_HIVE_SERVER: 'false'  # оставляем только сервер метастора, сам Hive нам не требуется, не тратим на него ресурсы
+      HIVE_METASTORE_DB_URL: jdbc:postgresql://metastore-hive:5432/metastore
+      HIVE_METASTORE_DB_DRIVER: org.postgresql.Driver
+      HIVE_METASTORE_DB_USER: test_hive
+      HIVE_METASTORE_DB_PASSWORD: test_hive
+    networks:
+      - network
+
+networks:
+  network:
+
+volumes:
+  postgres_data:
