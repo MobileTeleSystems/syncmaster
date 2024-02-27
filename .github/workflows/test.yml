@@ -39,6 +39,7 @@ jobs:
         with:
           context: .
           target: test
+          tags: syncmaster_worker:${{ github.sha }}
           file: docker/worker.dockerfile
           cache-to: type=gha,mode=max
           cache-from: type=gha
@@ -74,14 +75,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install --no-root --only backend,dev
+          poetry install --no-root --with backend,dev,test
 
       - name: Run Tests
         run: |
           source .env.github
           mkdir -p reports/
           echo "127.0.0.1 hdfs" | sudo tee -a /etc/hosts
-          poetry run coverage run -m pytest -vvvvv -s --ff -x
+          poetry run coverage run -m pytest
 
       - name: Shutdown Backend Container
         if: always()
