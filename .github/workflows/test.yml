@@ -27,8 +27,8 @@ jobs:
     steps:
       - name: Start HDFS
         run: |
-          docker compose -f docker-compose.test.yml down -v --remove-orphans
-          docker compose -f docker-compose.test.yml up -d test-hive --wait --wait-timeout 200 &
+          docker compose -f ./docker-compose.test.yml down -v --remove-orphans
+          docker compose -f ./docker-compose.test.yml up -d test-hive --wait --wait-timeout 200 &
           wait_pid=$!
           docker compose logs -f test-hive &
           wait $wait_pid
@@ -42,7 +42,7 @@ jobs:
 
       - name: Start dependencies
         run: |
-          docker compose up -f docker-compose.test.yml -d \
+          docker compose -f docker-compose.test.yml up -d \
           test-postgres test-s3 test-oracle metastore-hive rabbitmq worker db
 
       - name: Set up Python 3.11
