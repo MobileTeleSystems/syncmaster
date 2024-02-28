@@ -82,7 +82,8 @@ jobs:
           source .env.github
           mkdir -p reports/
           echo "127.0.0.1 test-hive" | sudo tee -a /etc/hosts
-          sleep(180)
+          ./docker/wait-for-it.sh -h localhost -p 9870 -t 60
+          ./docker/wait-for-it.sh -h localhost -p 1522 -t 60
           poetry run coverage run -m pytest -vvv -s --ff -x
 
       - name: Shutdown Backend Container
