@@ -25,6 +25,8 @@ WORKDIR /syncmaster
 COPY ./pyproject.toml ./poetry.lock* /syncmaster/
 
 RUN pip install --upgrade pip
+RUN pip install setuptools
+RUN pip install wheels
 
 RUN poetry install --no-root --with worker
 
