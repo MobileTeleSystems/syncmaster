@@ -46,10 +46,7 @@ services:
     restart: unless-stopped
     ports:
       - 5433:5432
-    environment:
-      POSTGRES_DB: syncmaster
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: secret
+    env_file: .env.docker
     networks:
       - network
 
