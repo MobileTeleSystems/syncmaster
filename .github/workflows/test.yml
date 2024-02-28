@@ -45,10 +45,6 @@ jobs:
           docker compose up -f docker-compose.test.yml -d \
           test-postgres test-s3 test-oracle metastore-hive rabbitmq worker db
 
-      - name: Start up dependencies
-        run: |
-
-
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
