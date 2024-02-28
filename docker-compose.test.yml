@@ -100,7 +100,7 @@ services:
       HIVE_METASTORE_DB_PASSWORD: test_hive
     volumes:
       - ./hive-logs/:/opt/hadoop/logs/
-      - ./hive-logs/hive.txt:/tmp/root/hive.log
+      - ./hive-logs/:/tmp/root/
     networks:
       - network
 
