@@ -81,7 +81,7 @@ jobs:
         run: |
           source .env.github
           mkdir -p reports/
-          echo "127.0.0.1 hdfs" | sudo tee -a /etc/hosts
+          echo "127.0.0.1 test-hive" | sudo tee -a /etc/hosts
           poetry run coverage run -m pytest -vvv -s --ff -x
 
       - name: Shutdown Backend Container
