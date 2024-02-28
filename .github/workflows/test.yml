@@ -28,10 +28,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Run docker compose
+        run: |
+          docker compose -f ./docker-compose.test.yml down -v --remove-orphans
+
       - name: Start HDFS
         run: |
           docker compose -f ./docker-compose.test.yml down -v --remove-orphans
-          docker compose -f ./docker-compose.test.yml up -d metastore-hive test-hive --wait --wait-timeout 200 &
+          docker compose -f ./docker-compose.test.yml up -d --wait --wait-timeout 200 &
           wait_pid=$!
           docker compose logs -f test-hive &
           wait $wait_pid
@@ -42,9 +46,6 @@ jobs:
         run: |
           ./docker/wait-for-it.sh -h localhost -p 9870 -t 60
 
-      - name: Run docker compose
-        run: |
-          docker compose -f ./docker-compose.test.yml up -d db test-oracle test-postgres test-s3 worker rabbitmq
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
