@@ -25,6 +25,9 @@ jobs:
       POETRY_VERSION: 1.7.1
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Start HDFS
         run: |
           docker compose -f ./docker-compose.test.yml down -v --remove-orphans
