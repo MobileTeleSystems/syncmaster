@@ -69,7 +69,7 @@ services:
       - network
 
   metastore-hive:
-    image: postgres:15-alpine
+    image: postgres:15
     restart: unless-stopped
     environment:
       POSTGRES_DB: metastore
