@@ -40,12 +40,11 @@ jobs:
           docker compose logs -f test-hive &
           wait $wait_pid
         env:
-          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-hadoop${{ inputs.hadoop-version }}
+          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
       - name: Wait for HDFS to be ready
         run: |
           ./docker/wait-for-it.sh -h localhost -p 9870 -t 60
-
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
@@ -84,4 +83,4 @@ jobs:
         run: |
           docker compose -f docker-compose.test.yml down -v --remove-orphans
         env:
-          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-backend
+          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
