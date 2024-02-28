@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
         libsasl2-modules-gssapi-mit \
         libsasl2-modules-ldap \
         libsasl2-modules \
+        openjdk-17-jdk \
         libssl-dev \
         libldap2-dev \
         autoconf \

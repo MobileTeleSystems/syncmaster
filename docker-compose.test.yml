@@ -98,9 +98,6 @@ services:
       HIVE_METASTORE_DB_DRIVER: org.postgresql.Driver
       HIVE_METASTORE_DB_USER: test_hive
       HIVE_METASTORE_DB_PASSWORD: test_hive
-    volumes:
-      - ./hive-logs/:/opt/hadoop/logs/
-      - ./hive-logs/:/tmp/root/
     networks:
       - network
 

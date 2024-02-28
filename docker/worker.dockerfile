@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
         libsasl2-modules-gssapi-mit \
         libsasl2-modules-ldap \
         libsasl2-modules \
+        openjdk-17-jdk \
         libssl-dev \
         libldap2-dev \
         autoconf \
@@ -22,7 +23,7 @@ RUN pip install --no-cache-dir --timeout 3 --retries 3 poetry && poetry config v
 WORKDIR /syncmaster
 
 COPY ./pyproject.toml ./poetry.lock* /syncmaster/
-RUN poetry install --no-root --with worker
+RUN poetry install --no-root --only worker
 
 COPY ./syncmaster/ /syncmaster/
 
