@@ -37,7 +37,7 @@ jobs:
       - name: Start HDFS
         run: |
           docker compose -f ./docker-compose.test.yml down -v --remove-orphans
-          docker compose -f ./docker-compose.test.yml up -d --wait --wait-timeout 200 &
+          docker compose -f ./docker-compose.test.yml up -d test-hive --wait --wait-timeout 200 &
           wait_pid=$!
           docker compose logs -f test-hive &
           wait $wait_pid
@@ -47,6 +47,10 @@ jobs:
       - name: Wait for HDFS to be ready
         run: |
           ./docker/wait-for-it.sh -h localhost -p 9870 -t 60
+
+      - name: Run docker compose
+        run: |
+          docker compose -f ./docker-compose.test.yml up -d
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
