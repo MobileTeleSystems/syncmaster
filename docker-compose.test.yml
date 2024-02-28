@@ -21,7 +21,6 @@ services:
     networks:
       - network
     env_file: .env.docker
-    command: [celery, -A, app.tasks.config.celery, worker, --loglevel=info, --max-tasks-per-child=1, -Q, test_queue]
 
   rabbitmq:
     image: rabbitmq
