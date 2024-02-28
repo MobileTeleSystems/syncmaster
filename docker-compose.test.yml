@@ -80,7 +80,7 @@ services:
       - network
 
   test-hive:
-    image: ${HDFS_IMAGE:-mtsrus/hadoop:hadoop2-hdfs}
+    image: mtsrus/hadoop:hadoop2-hdfs
     restart: unless-stopped
     hostname: test-hive
     depends_on:
