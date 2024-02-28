@@ -42,7 +42,6 @@ jobs:
           docker compose logs -f test-hive &
           wait $wait_pid
         env:
-          HDFS_IMAGE: mtsrus/hadoop:${{ inputs.hadoop-version }}
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-hadoop${{ inputs.hadoop-version }}
           POSTGRES_DB: metastore
           POSTGRES_USER: test_hive
