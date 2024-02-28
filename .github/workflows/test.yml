@@ -82,7 +82,8 @@ jobs:
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
-      - name: Upload coverage results
+      - name: Upload coverage result
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: hivelogs
