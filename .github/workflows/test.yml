@@ -42,6 +42,7 @@ jobs:
           tags: syncmaster_worker:${{ github.sha }}
           file: docker/worker.dockerfile
           cache-to: type=gha,mode=max
+          pull: true
           cache-from: type=gha
 
       - name: Start Worker Container With Dependencies  # the next stage is to change from backend to worker
