@@ -33,6 +33,8 @@ jobs:
           df -h
           pwd
           realpath ~/
+          ls -lsah /mnt || true
+          ls -lsah /mnt/* || true
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
