@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
     env:
-      POETRY_VERSION: 1.7.1
+      POETRY_VERSION: 1.6.1
 
     steps:
       - name: Checkout code
