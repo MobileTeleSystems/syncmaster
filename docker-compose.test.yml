@@ -42,6 +42,7 @@ services:
       - test-s3
     env_file: .env.docker
 
+
   rabbitmq:
     image: rabbitmq
     restart: unless-stopped
