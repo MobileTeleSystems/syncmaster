@@ -20,6 +20,8 @@ services:
       network: host
     networks:
       - network
+    volumes:
+      - ${HOME}/.ivy2:/root/.ivy2
     env_file: .env.docker
 
   backend:
@@ -40,6 +42,8 @@ services:
       - test-postgres
       - test-hive
       - test-s3
+    volumes:
+      - ${HOME}/.ivy2:/root/.ivy2
     env_file: .env.docker
 
 

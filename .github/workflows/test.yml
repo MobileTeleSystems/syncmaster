@@ -40,6 +40,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Cache ivy2 pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.ivy2
+          key: ivy2
+
       - name: Try to clean free space
         run: |
           docker system prune -a -f --volumes
