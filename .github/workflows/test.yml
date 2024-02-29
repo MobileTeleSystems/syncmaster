@@ -31,6 +31,8 @@ jobs:
       - name: Show space
         run: |
           df -h
+          pwd
+          realpath ~/
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -61,7 +63,9 @@ jobs:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
       - name: Shutdown
+        if: always()
         run: |
+          df -h
           docker compose -f docker-compose.test.yml down -v --remove-orphans
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
