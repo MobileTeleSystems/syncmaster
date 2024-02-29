@@ -53,7 +53,7 @@ jobs:
       - name: Run Tests.
         run: |
           docker logs backend
-          docker compose -f docker-compose.test.yml exec -T backend /bin/bash coverage run -m pytest -vvv -s --ff -x
+          docker compose -f docker-compose.test.yml exec -T backend coverage run -m pytest -vvv -s --ff -x
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
