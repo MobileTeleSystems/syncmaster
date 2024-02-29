@@ -59,6 +59,8 @@ jobs:
         run: |
           docker ps
           docker compose exec -T backend /bin/bash coverage run -m pytest -vvv -s --ff -x
+        env:
+          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
       - name: Shutdown
         run: |

@@ -41,6 +41,7 @@ services:
       - test-hive
       - test-s3
     env_file: .env.docker
+    command: python app/main.py
 
   rabbitmq:
     image: rabbitmq
