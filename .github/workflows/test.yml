@@ -56,6 +56,7 @@ jobs:
           SYNCMASTER_WORKER_IMAGE: syncmaster_worker:${{ github.sha }}
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
+
       - name: Run Tests
         run: |
           docker ps -a
