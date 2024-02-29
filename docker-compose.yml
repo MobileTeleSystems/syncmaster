@@ -3,30 +3,11 @@ services:
   db:
     image: postgres:15
     restart: unless-stopped
-    env_file: .env.dev
+    env_file: .env.docker
     ports:
       - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - network
-
-  rabbitmq:
-    image: rabbitmq
-    restart: unless-stopped
-    ports:
-      - 5672:5672
-    networks:
-      - network
-
-  s3:
-    image: bitnami/minio:latest
-    container_name: s3
-    restart: unless-stopped
-    env_file: .env.docker
-    ports:
-      - 9010:9000
-      - 9011:9001
     networks:
       - network
 
@@ -40,11 +21,10 @@ services:
     networks:
       - network
     env_file: .env.docker
-    command: [celery, -A, app.tasks.config.celery, worker, --loglevel=info, --max-tasks-per-child=1, -Q, test_queue]
 
   backend:
     image: syncmaster_back
-    restart: unless-stopped
+    container_name: backend
     build:
       dockerfile: docker/backend.dockerfile
       context: .
@@ -56,31 +36,37 @@ services:
     depends_on:
       - db
       - rabbitmq
-      - worker
       - test-oracle
       - test-postgres
       - test-hive
-    environment:
-      POSTGRES_HOST: db
-      POSGRES_PORT: 5432
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      - test-s3
+    env_file: .env.docker
 
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
-      RABBITMQ_USER: guest
-      RABBITMQ_PASSWORD: guest
+  rabbitmq:
+    image: rabbitmq
+    restart: unless-stopped
+    ports:
+      - 5672:5672
+    networks:
+      - network
+
+  test-s3:
+    image: bitnami/minio:latest
+    container_name: s3
+    restart: unless-stopped
+    env_file: .env.docker
+    ports:
+      - 9010:9000
+      - 9011:9001
+    networks:
+      - network
 
   test-postgres:
     image: postgres:15
     restart: unless-stopped
     ports:
       - 5433:5432
-    environment:
-      POSTGRES_DB: syncmaster
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: secret
+    env_file: .env.docker
     networks:
       - network
 
@@ -99,7 +85,7 @@ services:
       - network
 
   metastore-hive:
-    image: central-mirror.services.mts.ru/postgres:15-alpine
+    image: postgres:15
     restart: unless-stopped
     environment:
       POSTGRES_DB: metastore
@@ -111,8 +97,9 @@ services:
       - network
 
   test-hive:
-    image: mtsrus/hadoop:hadoop2.7.3-hive2.3.9
+    image: mtsrus/hadoop:hadoop2-hdfs
     restart: unless-stopped
+    hostname: test-hive
     depends_on:
       - metastore-hive
     ports:
@@ -124,8 +111,9 @@ services:
       - 10002:10002  # Hive server Admin UI
       - 19888:19888  # MapReduce JobServer History UI
       - 9083:9083  # Hive Metastore server
+      - 9864:9864 # Datanode UI
     environment:
-      WITH_HIVE_SERVER: 'false'  # оставляем только сервер метастора, сам Hive нам не требуется, не тратим на него ресурсы
+      WITH_HIVE_SERVER: 'false'  # We leave only the metastore server, we don’t need Hive itself, we don’t waste resources on it
       HIVE_METASTORE_DB_URL: jdbc:postgresql://metastore-hive:5432/metastore
       HIVE_METASTORE_DB_DRIVER: org.postgresql.Driver
       HIVE_METASTORE_DB_USER: test_hive
@@ -135,7 +123,6 @@ services:
 
 networks:
   network:
-
 
 volumes:
   postgres_data:
