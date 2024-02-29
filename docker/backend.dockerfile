@@ -23,6 +23,9 @@ RUN pip install --no-cache-dir --timeout 3 --retries 3 poetry \
 WORKDIR /syncmaster
 
 COPY ./pyproject.toml ./poetry.lock* /syncmaster/
+
+RUN pip install --upgrade pip setuptools wheel packaging
+
 RUN poetry install --no-root --only backend
 
 COPY ./syncmaster/ /syncmaster/
