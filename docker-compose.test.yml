@@ -12,7 +12,7 @@ services:
       - network
 
   worker:
-    image: syncmaster_worker
+    image: ${SYNCMASTER_WORKER_IMAGE:-syncmaster_worker}
     restart: unless-stopped
     build:
       dockerfile: docker/worker.dockerfile
