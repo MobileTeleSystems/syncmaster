@@ -22,6 +22,26 @@ services:
       - network
     env_file: .env.docker
 
+  backend:
+    image: syncmaster_back
+    container_name: backend
+    build:
+      dockerfile: docker/backend.dockerfile
+      context: .
+      network: host
+    ports:
+      - 8000:8000
+    networks:
+      - network
+    depends_on:
+      - db
+      - rabbitmq
+      - test-oracle
+      - test-postgres
+      - test-hive
+      - test-s3
+    env_file: .env.docker
+
   rabbitmq:
     image: rabbitmq
     restart: unless-stopped

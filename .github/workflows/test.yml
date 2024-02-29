@@ -34,6 +34,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Try to clean free space
+        run: |
+          docker system prune -a -f --volumes
+
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
@@ -44,21 +48,6 @@ jobs:
         with:
           version: 1.6.1
 
-      - name: Poetry lock
-        run: |
-          poetry lock
-
-      - name: Build Backend image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          target: test
-          tags: syncmaster_backend:${{ github.sha }}
-          file: docker/worker.dockerfile
-          load: true
-          cache-to: type=gha,mode=max
-          cache-from: type=gha
-
       - name: Start docker compose
         run: |
           docker compose -f ./docker-compose.test.yml down -v --remove-orphans
@@ -67,14 +56,8 @@ jobs:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
       - name: Run Tests
-        uses: tj-actions/docker-run@v2
-        with:
-          image: syncmaster_backend:${{ github.sha }}
-          name: backend
-          options: --net syncmaster_network --env-file ./.env.docker --rm
-          args: |
-            cd /syncmaster
-            coverage run -m pytest -vvv -s --ff -x
+        run: |
+          docker compose exec -T backend /bin/bash coverage run -m pytest -vvv -s --ff -x
 
       - name: Shutdown
         run: |
