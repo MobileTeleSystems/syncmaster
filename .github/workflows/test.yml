@@ -33,6 +33,7 @@ jobs:
           df -h
           pwd
           realpath ~/
+          ls -lsah ~ || true
           ls -lsah /mnt || true
           ls -lsah /mnt/* || true
 
