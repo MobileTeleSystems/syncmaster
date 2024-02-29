@@ -89,7 +89,7 @@ def upgrade() -> None:
         "user_group",
         sa.Column("user_id", sa.BigInteger(), nullable=False),
         sa.Column("group_id", sa.BigInteger(), nullable=False),
-        sa.Column("role", sa.String(32), nullable=False),
+        sa.Column("role", sa.String(255), nullable=False),
         sa.ForeignKeyConstraint(
             ["group_id"], ["group.id"], name=op.f("fk__user_group__group_id__group"), ondelete="CASCADE"
         ),
@@ -161,7 +161,7 @@ def upgrade() -> None:
         sa.Column("transfer_id", sa.BigInteger(), nullable=False),
         sa.Column("started_at", sa.DateTime(), nullable=True),
         sa.Column("ended_at", sa.DateTime(), nullable=True),
-        sa.Column("status", sa.String(32), nullable=False),
+        sa.Column("status", sa.String(255), nullable=False),
         sa.Column("log_url", sa.String(length=512), nullable=True),
         sa.Column("transfer_dump", sa.JSON(), nullable=False),
         sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
