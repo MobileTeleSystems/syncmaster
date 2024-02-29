@@ -57,6 +57,7 @@ jobs:
 
       - name: Run Tests
         run: |
+          docker ps
           docker compose exec -T backend /bin/bash coverage run -m pytest -vvv -s --ff -x
 
       - name: Shutdown
