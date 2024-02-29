@@ -50,20 +50,20 @@ jobs:
 
       - name: Start docker compose
         run: |
-          docker compose down -v --remove-orphans
-          docker compose up -d --wait --wait-timeout 200
+          docker compose -f docker-compose.test.yml down -v --remove-orphans
+          docker compose -f docker-compose.test.yml up -d --wait --wait-timeout 200
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
       - name: Run Tests
         run: |
           docker ps
-          docker compose exec -T backend /bin/bash coverage run -m pytest -vvv -s --ff -x
+          docker compose -f docker-compose.test.yml exec -T backend /bin/bash coverage run -m pytest -vvv -s --ff -x
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
       - name: Shutdown
         run: |
-          docker compose down -v --remove-orphans
+          docker compose -f docker-compose.test.yml down -v --remove-orphans
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
