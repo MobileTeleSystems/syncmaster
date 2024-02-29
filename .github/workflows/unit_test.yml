@@ -17,7 +17,7 @@ env:
 
 jobs:
   tests:
-    name: Run tests (Python 3.11, Pydantic v1 on ubuntu-latest)
+    name: Run unit tests (Python 3.11, Pydantic v1 on ubuntu-latest)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -55,10 +55,25 @@ jobs:
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
-      - name: Run Tests.
+      - name: Run Unit Tests.
         run: |
           source .env.github
           mkdir -p reports/
           poetry run coverage run -m pytest -vvv -s ./syncmaster/tests/test_unit
+        env:
+          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
+
+      - name: Run DB Tests.
+        run: |
+          source .env.github
+          mkdir -p reports/
+          poetry run coverage run -m pytest -vvv -s ./syncmaster/tests/test_database
+        env:
+          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
+
+      - name: Shutdown
+        if: always()
+        run: |
+          docker compose -f docker-compose.test.yml down -v --remove-orphans
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
