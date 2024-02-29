@@ -28,17 +28,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Show space
-        run: |
-          df -h
-          pwd
-          realpath ~/
-          ls -lsah ~ || true
-          ls -lsah /mnt || true
-          ls -lsah /mnt/* || true
-          mkdir -p ~/.ivy2/ /mnt/.ivy2/
-          sudo  mount --bind /mnt/.ivy2/ ~/.ivy2/
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -48,7 +37,7 @@ jobs:
       - name: Cache ivy2 pip
         uses: actions/cache@v4
         with:
-          path: ~/.ivy2
+          path: /mnt/.ivy2
           key: ivy2
 
       - name: Try to clean free space
