@@ -65,8 +65,6 @@ jobs:
 
       - name: Run DB Tests.
         run: |
-          source .env.github
-          mkdir -p reports/
           poetry run coverage run -m pytest -vvv -s ./syncmaster/tests/test_database
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
