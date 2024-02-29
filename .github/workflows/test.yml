@@ -43,11 +43,6 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Install poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: 1.6.1
-
       - name: Start docker compose
         run: |
           docker compose -f docker-compose.test.yml down -v --remove-orphans
