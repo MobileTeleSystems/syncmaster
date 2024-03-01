@@ -13,3 +13,4 @@ __pycache__/
 .vscode
 .venv/
 venv/
+cached_jars/

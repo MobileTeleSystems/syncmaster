@@ -157,4 +157,4 @@ cython_debug/
 
 **/metastore_db/
 **/spark-warehouse/
-/cached_jars/
+cached_jars/
