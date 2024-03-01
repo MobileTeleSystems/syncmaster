@@ -20,13 +20,10 @@ services:
       network: host
     networks:
       - network
-    volumes:
-      - /mnt/.ivy2:/root/.ivy2
     env_file: .env.docker
 
   backend:
     image: syncmaster_back
-    container_name: backend
     build:
       dockerfile: docker/backend.dockerfile
       context: .
@@ -38,8 +35,6 @@ services:
     depends_on:
       - db
       - rabbitmq
-    volumes:
-      - /mnt/.ivy2:/root/.ivy2
     env_file: .env.docker
 
   rabbitmq:

@@ -17,7 +17,7 @@ env:
 
 jobs:
   tests:
-    name: Run unit tests (Python 3.11, Pydantic v1 on ubuntu-latest)
+    name: Run unit tests
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -34,23 +34,26 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Set up Python 3.11
+      - name: Set up Python ${{ env.DEFAULT_PYTHON }}
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: ${{ env.DEFAULT_PYTHON }}
 
-      - name: Install poetry
+      - name: Install poetry ${{ env.POETRY_VERSION }}
         uses: snok/install-poetry@v1
         with:
-          version: 1.6.1
+          version: ${{ env.POETRY_VERSION }}
 
       - name: Cache poetry
         uses: actions/cache@v4
         with:
           path: ~/.cache/pypoetry
-          key: python-311-codeql-${{ hashFiles('**/poetry.lock') }}
+          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-tests-unit-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
-            python-311-codeql-${{ hashFiles('**/poetry.lock') }}
+            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-tests-unit-${{ hashFiles('**/poetry.lock') }}
+            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-tests-unit-
+            ${{ runner.os }}-python
+            ${{ runner.os }}
 
       - name: Install dependencies
         run: |

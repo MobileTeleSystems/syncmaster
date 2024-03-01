@@ -26,7 +26,6 @@ services:
 
   backend:
     image: syncmaster_back
-    container_name: backend
     build:
       dockerfile: docker/backend.dockerfile
       context: .
