@@ -5,7 +5,7 @@ from tests.utils import MockConnection, MockGroup, MockUser, UserTestRoles
 
 from app.config import Settings
 
-pytestmark = [pytest.mark.asyncio]
+pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
 
 async def test_guest_plus_can_read_connections(

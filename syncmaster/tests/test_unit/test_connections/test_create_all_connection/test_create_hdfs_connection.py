@@ -8,7 +8,7 @@ from app.config import Settings
 from app.db.models import AuthData, Connection
 from app.db.repositories.utils import decrypt_auth_data
 
-pytestmark = [pytest.mark.asyncio]
+pytestmark = [pytest.mark.asyncio, pytest.mark.backend, pytest.mark.hdfs]
 
 
 async def test_developer_plus_can_create_hdfs_connection(

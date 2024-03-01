@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from tests.utils import MockConnection, MockGroup, MockUser, UserTestRoles
 
-pytestmark = [pytest.mark.asyncio]
+pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
 
 async def test_developer_plus_can_update_connection(

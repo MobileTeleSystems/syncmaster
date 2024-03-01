@@ -5,7 +5,7 @@ from tests.utils import MockGroup, MockUser, UserTestRoles
 
 from app.db.models import Group
 
-pytestmark = [pytest.mark.asyncio]
+pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
 
 async def test_only_superuser_can_delete_group(

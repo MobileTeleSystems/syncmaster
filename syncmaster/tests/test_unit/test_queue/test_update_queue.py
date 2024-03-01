@@ -5,7 +5,7 @@ from tests.utils import MockGroup, MockUser, UserTestRoles
 
 from app.db.models import Queue
 
-pytestmark = [pytest.mark.asyncio]
+pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
 
 async def test_maintainer_plus_can_update_queue(

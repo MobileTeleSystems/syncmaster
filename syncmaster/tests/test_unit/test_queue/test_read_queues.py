@@ -5,7 +5,7 @@ from tests.utils import MockGroup, MockTransfer, MockUser, UserTestRoles
 
 from app.db.models import Queue
 
-pytestmark = [pytest.mark.asyncio]
+pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
 
 async def test_group_member_can_read_queues(

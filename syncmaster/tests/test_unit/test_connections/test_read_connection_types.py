@@ -6,7 +6,7 @@ from tests.utils import MockUser
 
 from app.api.v1.connections.router import CONNECTION_TYPES
 
-pytestmark = [pytest.mark.asyncio]
+pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
 
 async def test_unauthorized_user_cannot_read_connection_types(client: AsyncClient):

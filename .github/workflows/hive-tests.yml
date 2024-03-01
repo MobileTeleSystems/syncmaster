@@ -1,0 +1,65 @@
+name: Unit Tests
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches-ignore:
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEFAULT_PYTHON: '3.11'
+
+jobs:
+  tests:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+
+    env:
+      POETRY_VERSION: 1.6.1
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Worker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          tag: syncmaster_worker:${{ github.sha }}
+          file: docker/worker.dockerfile
+          load: true
+          cache-to: type=gha,mode=max
+          cache-from: type=gha
+
+      - name: Docker compose up
+        run: |
+          docker compose -f docker-compose.test.yml down -v --remove-orphans
+          docker compose up -d db worker rabbitmq test-hive test-postgres
+        env:
+          WORKER_IMAGE_TAG: ${{ github.sha }}
+          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
+
+      - name: Run Hive Tests.
+        run: |
+          docker compose -f ./docker-compose.test.yml exec -T backend pytest -vvv -s -m hive
+        env:
+          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
+
+      - name: Shutdown
+        if: always()
+        run: |
+          docker compose -f docker-compose.test.yml down -v --remove-orphans
+        env:
+          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster

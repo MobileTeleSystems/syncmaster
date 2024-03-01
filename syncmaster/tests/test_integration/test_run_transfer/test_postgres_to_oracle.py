@@ -6,7 +6,7 @@ from tests.utils import MockUser, get_run_on_end
 
 from app.db.models import Status, Transfer
 
-pytestmark = [pytest.mark.asyncio]
+pytestmark = [pytest.mark.asyncio, pytest.mark.worker, pytest.mark.oracle]
 
 
 async def test_run_simple_transfer(

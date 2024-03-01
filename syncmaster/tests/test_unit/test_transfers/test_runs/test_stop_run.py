@@ -5,7 +5,7 @@ from tests.utils import MockGroup, MockRun, MockUser, UserTestRoles
 
 from app.db.models import Status
 
-pytestmark = [pytest.mark.asyncio]
+pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
 
 async def test_developer_plus_can_stop_run_of_transfer_his_group(

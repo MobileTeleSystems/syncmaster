@@ -8,7 +8,7 @@ from tests.utils import MockUser
 
 from app.db.models import Group
 
-pytestmark = [pytest.mark.asyncio]
+pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
 
 async def test_simple_user_can_create_group(
