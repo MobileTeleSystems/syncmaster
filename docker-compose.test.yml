@@ -21,7 +21,7 @@ services:
     networks:
       - network
     volumes:
-      - /mnt/.ivy2:/root/.ivy2
+      - ./cached_jars:/root/.ivy2
     env_file: .env.docker
 
   backend:
@@ -43,7 +43,7 @@ services:
       - test-hive
       - test-s3
     volumes:
-      - /mnt/.ivy2:/root/.ivy2
+      - ./cached_jars:/root/.ivy2
     env_file: .env.docker
 
 
