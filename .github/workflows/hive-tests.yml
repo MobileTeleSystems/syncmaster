@@ -1,4 +1,4 @@
-name: Unit Tests
+name: Hive Tests
 on:
   push:
     branches:
