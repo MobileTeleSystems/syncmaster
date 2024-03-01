@@ -1,0 +1,56 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    env_file: .env.docker
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - network
+
+  worker:
+    image: syncmaster_worker
+    restart: unless-stopped
+    build:
+      dockerfile: docker/worker.dockerfile
+      context: .
+      network: host
+    networks:
+      - network
+    volumes:
+      - /mnt/.ivy2:/root/.ivy2
+    env_file: .env.docker
+
+  backend:
+    image: syncmaster_back
+    container_name: backend
+    build:
+      dockerfile: docker/backend.dockerfile
+      context: .
+      network: host
+    ports:
+      - 8000:8000
+    networks:
+      - network
+    depends_on:
+      - db
+      - rabbitmq
+    volumes:
+      - /mnt/.ivy2:/root/.ivy2
+    env_file: .env.docker
+
+  rabbitmq:
+    image: rabbitmq
+    restart: unless-stopped
+    ports:
+      - 5672:5672
+    networks:
+      - network
+networks:
+  network:
+
+volumes:
+  postgres_data:
