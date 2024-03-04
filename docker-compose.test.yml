@@ -104,7 +104,6 @@ services:
   test-hive:
     image: mtsrus/hadoop:hadoop2-hdfs
     restart: unless-stopped
-    hostname: test-hive
     depends_on:
       - metastore-hive
     ports:
@@ -123,6 +122,10 @@ services:
       HIVE_METASTORE_DB_DRIVER: org.postgresql.Driver
       HIVE_METASTORE_DB_USER: test_hive
       HIVE_METASTORE_DB_PASSWORD: test_hive
+      HADOOP_HEAPSIZE: 1024
+      HDFS_HOST: test-hive
+      HDFS_WEBHDFS_PORT: 9870
+      HDFS_IPC_PORT: 9820
     networks:
       - network
 
