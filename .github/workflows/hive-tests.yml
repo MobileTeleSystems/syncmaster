@@ -50,7 +50,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          tag: syncmaster_worker:${{ github.sha }}
+          tags: syncmaster_worker:${{ github.sha }}
           file: docker/worker.dockerfile
           load: true
           cache-to: type=gha,mode=max
