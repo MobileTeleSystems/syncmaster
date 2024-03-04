@@ -20,6 +20,13 @@ services:
       network: host
     networks:
       - network
+    depends_on:
+      - db
+      - rabbitmq
+      - test-oracle
+      - test-postgres
+      - test-hive
+      - test-s3
     volumes:
       - ./cached_jars:/root/.ivy2
     env_file: .env.docker
