@@ -46,6 +46,16 @@ jobs:
           docker-images: true
           swap-storage: true
 
+      - name: Cache jars
+        uses: actions/cache@v4
+        with:
+          path: ./cached_jars
+          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-hive
+          restore-keys: |
+            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-hive
+            ${{ runner.os }}-python
+            ${{ runner.os }}
+
       - name: Build Worker Image
         uses: docker/build-push-action@v5
         with:
