@@ -53,7 +53,7 @@ jobs:
 
       - name: Run Hive Tests.
         run: |
-          docker logs backed
+          docker container logs backend
           docker compose -f ./docker-compose.test.yml exec -T backend pytest -vvv -s -m hive
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
