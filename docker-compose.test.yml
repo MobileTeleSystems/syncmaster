@@ -102,7 +102,7 @@ services:
       - network
 
   test-hive:
-    image: mtsrus/hadoop:hadoop2-hdfs
+    image: mtsrus/hadoop:hadoop2.7.3-hive2.3.9
     restart: unless-stopped
     hostname: test-hive
     depends_on:
