@@ -46,7 +46,6 @@ services:
       - ./cached_jars:/root/.ivy2
     env_file: .env.docker
 
-
   rabbitmq:
     image: rabbitmq
     restart: unless-stopped
