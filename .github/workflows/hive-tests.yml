@@ -64,6 +64,10 @@ jobs:
           WORKER_IMAGE_TAG: ${{ github.sha }}
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
+      - name: Wait
+        run: |
+          ./docker/wait-for-it.sh -h test-hive -p 9870 -t 60
+
       - name: Run Hive Tests.
         run: |
           docker compose -f ./docker-compose.test.yml exec -T backend pytest -vvv -s -m hive
