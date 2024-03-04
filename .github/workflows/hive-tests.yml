@@ -45,7 +45,7 @@ jobs:
 
       - name: Docker compose up
         run: |
-          docker compose -f docker-compose.test.yml down -v --remove-orphans
+          docker stop $(docker ps -qa);docker rm $(docker ps -qa);
           docker compose up -d db worker rabbitmq test-hive test-postgres
         env:
           WORKER_IMAGE_TAG: ${{ github.sha }}
