@@ -1,4 +1,4 @@
-name: Hive Tests
+name: Oracle Tests
 on:
   push:
     branches:
@@ -17,7 +17,7 @@ env:
 
 jobs:
   tests:
-    name: Run Hive tests
+    name: Run Oracle tests
     runs-on: ubuntu-latest
 
     steps:
@@ -47,9 +47,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./cached_jars
-          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-hive-jars
+          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-oracle-jars
           restore-keys: |
-            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-hive-jars
+            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-oracle-jars
             ${{ runner.os }}-python
             ${{ runner.os }}
 
@@ -66,16 +66,16 @@ jobs:
       - name: Docker compose up
         run: |
           docker compose -f docker-compose.test.yml down -v --remove-orphans
-          docker compose -f docker-compose.test.yml up -d db worker rabbitmq test-hive test-postgres --wait --wait-timeout 200
+          docker compose -f docker-compose.test.yml up -d db worker rabbitmq test-oracle test-postgres --wait --wait-timeout 200
         env:
           WORKER_IMAGE_TAG: ${{ github.sha }}
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
-      - name: Run Hive Tests.
+      - name: Run Oracle Tests.
         # Tests for the backend are run on the worker.
         # Backend and worker on the same container.
         run: |
-          docker compose -f ./docker-compose.test.yml exec -T worker pytest -vvv -s -m hive
+          docker compose -f ./docker-compose.test.yml exec -T worker pytest -vvv -s -m oracle
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
