@@ -313,7 +313,7 @@ def hdfs_file_df_connection(spark, hdfs_server):
     from onetl.connection import SparkHDFS
 
     return SparkHDFS(
-        cluster="rnd-dwh",
+        cluster="test-hive",
         host=hdfs_server.host,
         ipc_port=hdfs_server.ipc_port,
         spark=spark,
