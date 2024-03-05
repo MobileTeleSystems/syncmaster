@@ -6,7 +6,7 @@ from tests.utils import MockConnection, MockGroup, UserTestRoles
 
 from app.db.models import Queue, Transfer
 
-pytestmark = [pytest.mark.asyncio]
+pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
 
 @pytest.mark.parametrize(

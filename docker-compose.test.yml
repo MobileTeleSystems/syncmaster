@@ -12,7 +12,7 @@ services:
       - network
 
   worker:
-    image: syncmaster_worker
+    image: syncmaster_worker:${WORKER_IMAGE_TAG:-latest}
     restart: unless-stopped
     build:
       dockerfile: docker/worker.dockerfile
@@ -20,12 +20,20 @@ services:
       network: host
     networks:
       - network
+    depends_on:
+      - db
+      - rabbitmq
+      - test-oracle
+      - test-postgres
+      - test-hive
+      - test-s3
     volumes:
       - ./cached_jars:/root/.ivy2
     env_file: .env.docker
 
   backend:
     image: syncmaster_back
+    container_name: backend
     restart: unless-stopped
     build:
       dockerfile: docker/backend.dockerfile
@@ -45,7 +53,6 @@ services:
     volumes:
       - ./cached_jars:/root/.ivy2
     env_file: .env.docker
-
 
   rabbitmq:
     image: rabbitmq
@@ -102,7 +109,7 @@ services:
       - network
 
   test-hive:
-    image: mtsrus/hadoop:hadoop2-hdfs
+    image: mtsrus/hadoop:hadoop2.7.3-hive2.3.9
     restart: unless-stopped
     hostname: test-hive
     depends_on:

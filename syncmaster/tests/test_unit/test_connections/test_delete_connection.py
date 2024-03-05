@@ -5,7 +5,7 @@ from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser, UserT
 
 from app.db.models import Connection
 
-pytestmark = [pytest.mark.asyncio]
+pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
 
 async def test_maintainer_plus_can_delete_connection(

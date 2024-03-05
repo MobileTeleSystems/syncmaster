@@ -7,7 +7,7 @@ from tests.utils import MockUser, get_run_on_end
 
 from app.db.models import Status, Transfer
 
-pytestmark = [pytest.mark.asyncio]
+pytestmark = [pytest.mark.asyncio, pytest.mark.worker, pytest.mark.s3, pytest.mark.postgres]
 
 
 @pytest.mark.parametrize("choice_file_type", ["with_header"], indirect=True)

@@ -9,7 +9,7 @@ from tests.utils import MockGroup, MockTransfer, MockUser, UserTestRoles
 
 from app.db.models import Connection, Queue
 
-pytestmark = [pytest.mark.asyncio]
+pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
 
 async def test_maintainer_plus_can_copy_transfer_with_remove_source(

@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from tests.utils import MockConnection, MockGroup, MockUser, UserTestRoles
 
-pytestmark = [pytest.mark.asyncio]
+pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
 
 async def test_owner_can_delete_anyone_from_group(

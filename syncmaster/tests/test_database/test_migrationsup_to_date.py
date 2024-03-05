@@ -5,6 +5,8 @@ from tests.utils import get_diff_db_metadata
 
 from app.db.models import Base
 
+pytestmark = [pytest.mark.backend]
+
 
 @pytest.mark.asyncio
 async def test_migrations_up_to_date(async_engine: AsyncEngine):

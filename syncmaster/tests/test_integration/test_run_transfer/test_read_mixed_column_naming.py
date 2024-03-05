@@ -6,7 +6,7 @@ from tests.utils import MockUser, get_run_on_end
 
 from app.db.models import Status, Transfer
 
-pytestmark = [pytest.mark.asyncio]
+pytestmark = [pytest.mark.asyncio, pytest.mark.worker, pytest.mark.oracle, pytest.mark.postgres]
 
 
 async def test_change_mixed_column_naming_to_oracle_default_case(

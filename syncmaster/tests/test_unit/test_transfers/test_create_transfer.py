@@ -6,7 +6,7 @@ from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser, UserT
 
 from app.db.models import Queue, Transfer
 
-pytestmark = [pytest.mark.asyncio]
+pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
 
 async def test_developer_plus_can_create_transfer(

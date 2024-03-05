@@ -109,3 +109,14 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "uvicorn.*"
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+markers = [
+    "backend: tests for backend (require running database)",
+    "worker: tests for syncmaster worker",
+    "hive: tests for Hive",
+    "postgres: tests on Postgres",
+    "oracle: tests for Oracle",
+    "hdfs: tests for hadoop hdfs",
+    "s3: tests for S3",
+]

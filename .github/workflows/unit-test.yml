@@ -12,6 +12,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
+
 env:
   DEFAULT_PYTHON: '3.11'
 
@@ -19,8 +20,7 @@ jobs:
   tests:
     name: Run unit tests
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
+
     env:
       POETRY_VERSION: 1.6.1
 
