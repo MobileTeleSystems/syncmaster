@@ -59,6 +59,7 @@ jobs:
           context: .
           tags: syncmaster_worker:${{ github.sha }}
           file: docker/worker.dockerfile
+          target: test
           load: true
           cache-to: type=gha,mode=max
           cache-from: type=gha
