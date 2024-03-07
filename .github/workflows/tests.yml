@@ -12,7 +12,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
-
 env:
   DEFAULT_PYTHON: '3.11'
 
@@ -36,10 +35,39 @@ jobs:
   all_done:
     name: Tests done
     runs-on: ubuntu-latest
+
+    env:
+      POETRY_VERSION: 1.6.1
+
     needs: [oracle_tests, hive_tests, s3_tests, unit_tests]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.DEFAULT_PYTHON }}
+
+      - name: Install poetry ${{ env.POETRY_VERSION }}
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+
+      - name: Cache poetry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-tests-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-tests-${{ hashFiles('**/poetry.lock') }}
+            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-tests-
+            ${{ runner.os }}-python
+            ${{ runner.os }}
+
+      - name: Install dependencies
+        run: |
+          poetry install --no-root --with test
 
       - name: Generate coverate reports
         run: ./combine_coverage.sh
