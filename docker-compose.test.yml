@@ -53,7 +53,9 @@ services:
       - test-s3
     volumes:
       - ./cached_jars:/root/.ivy2
+      - ./reports:/syncmaster/reports
     env_file: .env.docker
+    command: [coverage, run, app/main.py]
 
   rabbitmq:
     image: rabbitmq
