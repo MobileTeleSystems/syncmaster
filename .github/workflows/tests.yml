@@ -16,10 +16,6 @@ env:
   DEFAULT_PYTHON: '3.11'
 
 jobs:
-  tests:
-    name: Run all tests
-    runs-on: ubuntu-latest
-
   oracle_tests:
     uses: ./.github/workflows/oracle-tests.yml
 
