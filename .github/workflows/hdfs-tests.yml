@@ -76,12 +76,15 @@ jobs:
         # Tests for the backend are run on the worker.
         # Backend and worker on the same container.
         run: |
-          docker compose -f ./docker-compose.test.yml exec -T worker coverage run pytest -vvv -s -m hdfs
+          docker compose -f ./docker-compose.test.yml exec -T worker python -m coverage run pytest -vvv -s -m hdfs
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
-      - name: Generate coverate reports
-        run: ./combine_coverage.sh
+      - name: Upload coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: hdfs-tests
+          path: reports/*
 
       - name: Shutdown
         if: always()

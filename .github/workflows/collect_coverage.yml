@@ -1,0 +1,25 @@
+name: Collect coverage Tests
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches-ignore:
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEFAULT_PYTHON: '3.11'
+
+jobs:
+  tests:
+    name: Collect coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
