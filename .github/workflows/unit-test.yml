@@ -64,8 +64,9 @@ jobs:
 
       - name: Run Unit Tests.
         run: |
+          mkdir reports/
           source .env.local
-          poetry run coverage run -m pytest -vvv -s ./syncmaster/tests/test_unit
+          ./pytest_runner.sh -m backend
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
