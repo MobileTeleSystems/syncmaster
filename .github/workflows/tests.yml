@@ -69,7 +69,7 @@ jobs:
       - name: Move coverage data to the root folder
         run: find reports -type f -exec mv '{}' reports \;
 
-      - name: Generate coverate reports
+      - name: Generate coverage reports
         run: ./combine_coverage.sh
 
       - name: Check coverage
