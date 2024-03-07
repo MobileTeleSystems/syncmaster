@@ -49,25 +49,25 @@ jobs:
         with:
           python-version: ${{ env.DEFAULT_PYTHON }}
 
-      - name: Install poetry ${{ env.POETRY_VERSION }}
-        uses: snok/install-poetry@v1
-        with:
-          version: ${{ env.POETRY_VERSION }}
-
-      - name: Cache poetry
+      - name: Cache pip
         uses: actions/cache@v4
         with:
-          path: ~/.cache/pypoetry
-          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-tests-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-tests-${{ hashFiles('**/poetry.lock') }}
-            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-tests-
-            ${{ runner.os }}-python
-            ${{ runner.os }}
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-coverage
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip setuptools wheel
 
       - name: Install dependencies
-        run: |
-          poetry install --no-root --with test
+        run: pip install -I coverage pytest
+
+      - name: Download all coverage reports
+        uses: actions/download-artifact@v4
+        with:
+          path: reports
+
+      - name: Move coverage data to the root folder
+        run: find reports -type f -exec mv '{}' reports \;
 
       - name: Generate coverate reports
         run: |
