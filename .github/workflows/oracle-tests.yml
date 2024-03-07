@@ -2,10 +2,6 @@ name: Oracle Tests
 on:
   workflow_call:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
-  cancel-in-progress: true
-
 env:
   DEFAULT_PYTHON: '3.11'
 
