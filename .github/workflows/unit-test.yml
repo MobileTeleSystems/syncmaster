@@ -1,12 +1,6 @@
 name: Unit Tests
 on:
-  push:
-    branches:
-      - develop
-  pull_request:
-    branches-ignore:
-      - master
-  workflow_dispatch:
+  'workflow_call:':
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
