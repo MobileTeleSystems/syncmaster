@@ -39,6 +39,7 @@ faker = "^22.6.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.4.3"
+gevent = "^24.2.1"
 pre-commit = "^3.3.3"
 mypy = "^1.4.1"
 black = "^23.3.0"
