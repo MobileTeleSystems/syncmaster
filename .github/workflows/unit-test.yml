@@ -64,7 +64,7 @@ jobs:
 
       - name: Run Unit Tests.
         run: |
-          mkdir reports/
+          mkdir reports/ || echo "Directory exists"
           source .env.local
           ./pytest_runner.sh -m backend
         env:
