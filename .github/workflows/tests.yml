@@ -70,4 +70,7 @@ jobs:
           poetry install --no-root --with test
 
       - name: Generate coverate reports
-        run: ./combine_coverage.sh
+        run: |
+          root_path=$(dirname $(realpath $0))
+          coverage combine --rcfile=tests/.coveragerc
+          coverage xml --rcfile=tests/.coveragerc -o $root_path/reports/coverage.xml -i
