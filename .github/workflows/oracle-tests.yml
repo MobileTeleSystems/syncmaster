@@ -76,9 +76,12 @@ jobs:
         # Tests for the backend are run on the worker.
         # Backend and worker on the same container.
         run: |
-          docker compose -f ./docker-compose.test.yml exec -T worker pytest -vvv -s -m oracle
+          docker compose -f ./docker-compose.test.yml exec -T worker coverage run pytest -vvv -s -m oracle
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
+
+      - name: Generate coverate reports
+        run: ./combine_coverage.sh
 
       - name: Shutdown
         if: always()

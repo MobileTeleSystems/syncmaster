@@ -26,14 +26,14 @@ COPY ./pyproject.toml ./poetry.lock* /syncmaster/
 
 RUN pip install --upgrade pip setuptools wheel packaging
 
-RUN poetry install --no-root --with worker,test
+RUN poetry install --no-root --with worker,test,dev
 
 COPY ./syncmaster/ /syncmaster/
 
 
 # https://docs.celeryq.dev/en/stable/userguide/workers.html#max-tasks-per-child-setting
 # Required to start each Celery task in separated process, avoiding issues with global Spark session object
-CMD ["celery", "-A" ,"app.tasks.config.celery", "worker", "--loglevel=info", "--max-tasks-per-child=1"]
+CMD ["coverage", "run", "celery", "-A" ,"app.tasks.config.celery", "worker", "--loglevel=info", "--max-tasks-per-child=1"]
 
 FROM prod as test
 
