@@ -68,7 +68,6 @@ jobs:
         run: |
           mkdir reports/ || echo "Directory exists"
           docker compose -f ./docker-compose.test.yml exec -T worker python -m coverage run -m pytest -vvv -s -m hive
-          ./pytest_runner.sh -m hive
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
