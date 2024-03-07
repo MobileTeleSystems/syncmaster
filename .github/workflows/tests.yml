@@ -70,4 +70,4 @@ jobs:
         run: find reports -type f -exec mv '{}' reports \;
 
       - name: Generate coverate reports
-        run: ./combine_coverage.shi
+        run: ./combine_coverage.sh
