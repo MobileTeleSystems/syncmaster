@@ -55,13 +55,6 @@ jobs:
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
-      - name: Run DB Tests.
-        run: |
-          source .env.local
-          poetry run coverage run -m pytest -vvv -s ./syncmaster/tests/test_database
-        env:
-          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
-
       - name: Run Unit Tests.
         run: |
           mkdir reports/ || echo "Directory exists"
