@@ -39,4 +39,4 @@ FROM prod as test
 
 ENV CREATE_SPARK_SESSION_FUNCTION="tests.spark.get_worker_spark_session.get_worker_spark_session"
 # Queue for tests
-CMD ["coverage", "run", "celery", "-A" ,"app.tasks.config.celery", "worker", "--loglevel=info", "--max-tasks-per-child=1", "-Q", "test_queue"]
+CMD ["coverage", "run", "-m", "celery", "-A" ,"app.tasks.config.celery", "worker", "--loglevel=info", "--max-tasks-per-child=1", "-Q", "test_queue"]
