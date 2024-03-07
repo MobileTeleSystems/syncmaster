@@ -19,7 +19,34 @@ jobs:
   tests:
     name: Collect coverage
     runs-on: ubuntu-latest
+    needs: [hdfs-tests, hive-tests, oracle-tests, unit-tests]
+
+    env:
+      POETRY_VERSION: 1.6.1
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Install poetry ${{ env.POETRY_VERSION }}
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+
+      - name: Cache poetry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-collect-coverage-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-collect-coverage-${{ hashFiles('**/poetry.lock') }}
+            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-collect-coverage-
+            ${{ runner.os }}-python
+            ${{ runner.os }}
+
+      - name: Install dependencies
+        run: |
+          poetry install --no-root --with test
+
+      - name: Generate coverate reports
+        run: ./combine_coverage.sh

@@ -23,10 +23,6 @@ services:
     depends_on:
       - db
       - rabbitmq
-      - test-oracle
-      - test-postgres
-      - test-hive
-      - test-s3
     volumes:
       - ./cached_jars:/root/.ivy2
       - ./reports:/syncmaster/reports
@@ -47,10 +43,6 @@ services:
     depends_on:
       - db
       - rabbitmq
-      - test-oracle
-      - test-postgres
-      - test-hive
-      - test-s3
     volumes:
       - ./cached_jars:/root/.ivy2
       - ./reports:/syncmaster/reports

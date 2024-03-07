@@ -76,7 +76,7 @@ jobs:
         # Tests for the backend are run on the worker.
         # Backend and worker on the same container.
         run: |
-          docker compose -f ./docker-compose.test.yml exec -T worker python -m coverage run pytest -vvv -s -m hdfs
+          docker compose -f ./docker-compose.test.yml exec -T worker python -m coverage run -m pytest -vvv -s -m hdfs
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
