@@ -39,11 +39,12 @@ jobs:
             echo "TAG=mtsrus/syncmaster-worker.:latest,mtsrus/syncmaster-worker.:${{ github.ref_name }}" >> $GITHUB_ENV
           fi
 
-      - name: Build Backend image
+      - name: Build worker image
         uses: docker/build-push-action@v5
         with:
           tags: ${{ env.TAG }}
           context: .
+          target: prod
           file: docker/worker.dockerfile
           pull: true
           push: true
