@@ -10,7 +10,7 @@ trap _term SIGTERM SIGINT
 if [[ "x$CI" == "xtrue" ]]; then
     root_path=$(dirname $(realpath $0))
     python_version=$(python -c 'import sys; print("{0}.{1}".format(*sys.version_info))')
-    poetry run coverage run --rcfile=syncmaster/tests/.coveragerc -m pytest --junitxml=$root_path/reports/junit/python${python_version}.xml "$@"
+    poetry run coverage run -m pytest --junitxml=$root_path/reports/junit/python${python_version}.xml "$@"
 else
     poetry run pytest "$@"
 fi
