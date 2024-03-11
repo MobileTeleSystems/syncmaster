@@ -129,7 +129,7 @@ source = ["syncmaster"]
 branch = true
 parallel = true
 relative_files = true
-concurrency = ["gevent"]
+concurrency = ["gevent", "multiprocessing"]
 omit = [
   "tests/*",
 ]

@@ -34,7 +34,6 @@ services:
 
   backend:
     image: syncmaster_back
-    container_name: backend
     restart: unless-stopped
     build:
       dockerfile: docker/backend.dockerfile
