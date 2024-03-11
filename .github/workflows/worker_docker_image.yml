@@ -1,4 +1,4 @@
-name: Docker image
+name: Worker docker image
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   release:
-    name: Build & push image to Dockerhub
+    name: Build & push worker image to Dockerhub
     runs-on: ubuntu-latest
     if: github.repository == 'MobileTeleSystems/syncmaster'  # prevent running on forks
 
