@@ -78,6 +78,10 @@ def get_worker_spark_session(
     return spark_builder.getOrCreate()
 
 
+# Needed to collect code coverage by tests in the worker
+# https://github.com/nedbat/coveragepy/issues/689#issuecomment-656706935
+
+
 COV = None
 
 
