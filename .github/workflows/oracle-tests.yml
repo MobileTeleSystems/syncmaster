@@ -76,6 +76,7 @@ jobs:
         with:
           name: oracle-tests
           path: reports/*
+
       - name: Shutdown
         if: always()
         run: |
