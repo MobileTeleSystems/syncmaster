@@ -66,16 +66,9 @@ jobs:
         # Tests for the backend are run on the worker.
         # Backend and worker on the same container.
         run: |
-          docker compose -f ./docker-compose.test.yml exec -T worker python -m coverage run -m pytest -vvv -s -m oracle
+          docker compose -f ./docker-compose.test.yml exec -T worker coverage run -m pytest -vvv -s -m oracle
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
-
-
-      - name: Upload coverage results
-        uses: actions/upload-artifact@v4
-        with:
-          name: oracle-tests
-          path: reports/*
 
       - name: Shutdown
         if: always()
@@ -83,3 +76,9 @@ jobs:
           docker compose -f docker-compose.test.yml down -v --remove-orphans
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
+
+      - name: Upload coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: oracle-tests
+          path: reports/*

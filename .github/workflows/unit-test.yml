@@ -46,7 +46,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install --no-root --with backend,test,dev
+          poetry install --no-root --with backend,test
 
       - name: Start docker compose
         run: |
@@ -62,15 +62,15 @@ jobs:
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
-      - name: Upload coverage results
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-tests
-          path: reports/*
-
       - name: Shutdown
         if: always()
         run: |
           docker compose -f docker-compose.test.yml down -v --remove-orphans
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
+
+      - name: Upload coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-tests
+          path: reports/*
