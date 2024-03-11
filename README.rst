@@ -4,6 +4,11 @@
 SyncMaster
 ==========
 
+|Coverage|
+
+.. |Coverage| image:: https://codecov.io/gh/MobileTeleSystems/syncmaster/graph/badge.svg?token=ky7UyUxolB
+ :target: https://codecov.io/gh/MobileTeleSystems/syncmaster
+
 
 Requirements
 ============
