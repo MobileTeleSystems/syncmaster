@@ -1,0 +1,76 @@
+name: Docker image
+
+on:
+  push:
+    branches:
+      - develop
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Build & push image to Dockerhub
+    runs-on: ubuntu-latest
+    if: github.repository == 'MobileTeleSystems/syncmaster'  # prevent running on forks
+
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set tag
+        id: set_tag
+        run: |
+          if [[ "${{ github.ref_type }}" == "branch" && "${{ github.ref_name }}" == "develop" ]]; then
+            echo "TAG=mtsrus/syncmaster-backend:develop" >> $GITHUB_ENV
+          elif [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "TAG=mtsrus/syncmaster-backend:latest,mtsrus/syncmaster-backend:${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
+
+      - name: Build Backend image
+        uses: docker/build-push-action@v5
+        with:
+          tags: ${{ env.TAG }}
+          context: .
+          file: docker/backend.dockerfile
+          pull: true
+          push: true
+          cache-to: type=gha,mode=max
+          cache-from: type=gha
+          platforms: |
+            linux/amd64
+            linux/arm64/v8
+          provenance: mode=max
+
+      - name: Convert README to Markdown
+        uses: docker://pandoc/core:2.9
+        with:
+          args: >-
+            --output=README.md
+            --from=rst
+            --to=gfm
+            --wrap=none
+            README.rst
+
+      - name: Update DockerHub Description
+        uses: peter-evans/dockerhub-description@v4
+        if: github.ref_type == 'tag'
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          # this requires token with read+write+delete permissions. read+write is not enough!
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: mtsrus/syncmaster-backend
+          short-description: ${{ github.event.repository.description }}
+          enable-url-completion: true
