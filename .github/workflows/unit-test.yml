@@ -1,17 +1,6 @@
 name: Unit Tests
 on:
-  push:
-    branches:
-      - develop
-  pull_request:
-    branches-ignore:
-      - master
-  workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
-  cancel-in-progress: true
-
+  workflow_call:
 
 env:
   DEFAULT_PYTHON: '3.11'
@@ -66,18 +55,10 @@ jobs:
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
-      - name: Run DB Tests.
-        run: |
-          source .env.local
-          mkdir -p reports/
-          poetry run coverage run -m pytest -vvv -s ./syncmaster/tests/test_database
-        env:
-          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
-
       - name: Run Unit Tests.
         run: |
           source .env.local
-          poetry run coverage run -m pytest -vvv -s ./syncmaster/tests/test_unit
+          ./pytest_runner.sh -m backend
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
@@ -87,3 +68,9 @@ jobs:
           docker compose -f docker-compose.test.yml down -v --remove-orphans
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
+
+      - name: Upload coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-tests
+          path: reports/*

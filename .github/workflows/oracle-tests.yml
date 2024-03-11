@@ -1,16 +1,6 @@
 name: Oracle Tests
 on:
-  push:
-    branches:
-      - develop
-  pull_request:
-    branches-ignore:
-      - master
-  workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
-  cancel-in-progress: true
+  workflow_call:
 
 env:
   DEFAULT_PYTHON: '3.11'
@@ -76,7 +66,7 @@ jobs:
         # Tests for the backend are run on the worker.
         # Backend and worker on the same container.
         run: |
-          docker compose -f ./docker-compose.test.yml exec -T worker pytest -vvv -s -m oracle
+          docker compose -f ./docker-compose.test.yml exec -T worker coverage run -m pytest -vvv -s -m oracle
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
@@ -86,3 +76,9 @@ jobs:
           docker compose -f docker-compose.test.yml down -v --remove-orphans
         env:
           COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
+
+      - name: Upload coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: oracle-tests
+          path: reports/*

@@ -4,6 +4,8 @@ import logging
 import os
 from pathlib import Path
 
+from celery.signals import worker_process_init, worker_process_shutdown
+from coverage import Coverage
 from onetl.connection import SparkHDFS
 from onetl.hooks import hook
 from pyspark.sql import SparkSession
@@ -74,3 +76,25 @@ def get_worker_spark_session(
             spark_builder = spark_builder.config(k, v)
 
     return spark_builder.getOrCreate()
+
+
+# Needed to collect code coverage by tests in the worker
+# https://github.com/nedbat/coveragepy/issues/689#issuecomment-656706935
+
+
+COV = None
+
+
+@worker_process_init.connect
+def start_coverage(**kwargs):
+    global COV
+
+    COV = Coverage(data_suffix=True)
+    COV.start()
+
+
+@worker_process_shutdown.connect
+def save_coverage(**kwargs):
+    if COV is not None:
+        COV.stop()
+        COV.save()
