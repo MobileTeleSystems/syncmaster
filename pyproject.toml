@@ -131,7 +131,7 @@ parallel = true
 relative_files = true
 concurrency = ["gevent", "multiprocessing"]
 omit = [
-  "tests/*",
+  "syncmaster/tests/*",
 ]
 data_file = "reports/.coverage"
 
