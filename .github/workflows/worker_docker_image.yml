@@ -8,6 +8,10 @@ on:
       - '[0-9]+.[0-9]+.[0-9]+'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   release:
     name: Build & push worker image to Dockerhub
