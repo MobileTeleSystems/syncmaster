@@ -26,7 +26,7 @@ COPY ./pyproject.toml ./poetry.lock* /syncmaster/
 
 RUN pip install --upgrade pip setuptools wheel packaging
 
-RUN poetry install --no-root --with backend
+RUN poetry install --no-root --extras "backend"
 
 COPY ./syncmaster/ /syncmaster/
 
