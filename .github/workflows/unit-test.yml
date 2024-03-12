@@ -46,7 +46,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install --no-root --with backend,test
+          poetry install --no-root --extras "backend" --with test
 
       - name: Start docker compose
         run: |

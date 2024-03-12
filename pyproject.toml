@@ -1,9 +1,49 @@
 [tool.poetry]
-name = "syncmaster"
+name = "data-syncmaster"
 version = "0.1.0"
-description = ""
+license = "Apache-2.0"
+description = "Syncmaster REST API + Worker"
 authors = ["DataOps.ETL <onetools@mts.ru>"]
 readme = "README.rst"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Pydantic",
+    "Framework :: Pydantic :: 1",
+    "Framework :: Pydantic :: 2",
+    "Framework :: FastAPI",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+keywords = ["Syncmaster", "REST", "API", "Worker", "Replication"]
+
+packages = [
+    { include = "syncmaster/app" },
+]
+
+include = [
+    {path = "syncmaster/*.ini"},
+]
+
+exclude = [
+    {path = "syncmaster/tests"},
+]
+
+[tool.poetry.urls]  # Optional
+"Homepage" = "https://github.com/MobileTeleSystems/syncmaster"
+"Source" = "https://github.com/MobileTeleSystems/syncmaster"
+"CI/CD" = "https://github.com/MobileTeleSystems/syncmaster/actions"
+"Tracker" = "https://github.com/MobileTeleSystems/syncmaster/issues"
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -13,17 +53,25 @@ pydantic = "^1.10.11"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 python-multipart = "^0.0.6"
 celery = "^5.3.3"
-onetl = "<0.10"
+onetl = {version = "<0.10", extras = ["spark"]}
+psycopg2-binary = {version = "^2.9.7", optional = true }
+fastapi = {version = "^0.99.1", optional = true }
+uvicorn = {version = "^0.22.0", optional = true }
+alembic = {version = "^1.11.1", optional = true }
+asyncpg = {version = "^0.28.0", optional = true }
 
-[tool.poetry.group.worker.dependencies]
-onetl = {extras = ["spark"], version = "^0.9.3"}
-psycopg2-binary = "^2.9.7"
+[tool.poetry.extras]
+backend = [
+    "alembic",
+    "asyncpg",
+    "fastapi",
+    "uvicorn",
+]
 
-[tool.poetry.group.backend.dependencies]
-fastapi = "^0.99.1"
-uvicorn = "^0.22.0"
-alembic = "^1.11.1"
-asyncpg = "^0.28.0"
+worker = [
+    "onetl",
+    "psycopg2-binary",
+]
 
 [tool.poetry.group.test.dependencies]
 pandas-stubs = "^2.1.4.231227"

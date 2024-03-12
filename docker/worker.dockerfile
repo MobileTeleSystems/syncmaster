@@ -26,7 +26,7 @@ COPY ./pyproject.toml ./poetry.lock* /syncmaster/
 
 RUN pip install --upgrade pip setuptools wheel packaging
 
-RUN poetry install --no-root --with worker
+RUN poetry install --no-root --extras "worker"
 
 COPY ./syncmaster/ /syncmaster/
 
@@ -37,7 +37,7 @@ CMD ["celery", "-A" ,"app.tasks.config.celery", "worker", "--loglevel=info", "--
 
 FROM prod as test
 
-RUN poetry install --no-root --with worker,test
+RUN poetry install --no-root --extras "worker backend" --with test
 
 ENV CREATE_SPARK_SESSION_FUNCTION="tests.spark.get_worker_spark_session.get_worker_spark_session"
 # Queue for tests
