@@ -37,8 +37,6 @@ async def test_run_simple_transfer(
     reader = DBReader(
         connection=prepare_oracle,
         table=f"{prepare_oracle.user}.target_table",
-        # TODO: после фикса бага https://jira.mts.ru/browse/DOP-8666 в onetl, пофиксить тесты
-        columns=list(map(lambda x: f'"{x}"'.upper(), init_df.columns)),
     )
     df = reader.run()
     for field in init_df.schema:

@@ -37,8 +37,6 @@ async def test_change_mixed_column_naming_to_oracle_default_case(
     reader = DBReader(
         connection=prepare_oracle_with_mixed_column_naming,
         table=f"{prepare_oracle_with_mixed_column_naming.user}.target_table",
-        # TODO: после фикса бага https://jira.mts.ru/browse/DOP-8666 в onetl, пофиксить тесты
-        columns=list(map(lambda x: f'"{x}"'.upper(), init_df_with_mixed_column_naming.columns)),
     )
     df = reader.run()
 
@@ -80,8 +78,6 @@ async def test_change_mixed_column_naming_to_postgres_default_case(
     reader = DBReader(
         connection=prepare_postgres_with_mixed_column_naming,
         table="public.target_table",
-        # TODO: после фикса бага https://jira.mts.ru/browse/DOP-8666 в onetl, пофиксить тесты
-        columns=list(map(lambda x: f'"{x}"'.lower(), init_df_with_mixed_column_naming.columns)),
     )
     df = reader.run()
 
@@ -123,8 +119,6 @@ async def test_change_mixed_column_naming_to_hive_default_case(
     reader = DBReader(
         connection=prepare_hive_with_mixed_column_naming,
         table="public.target_table",
-        # TODO: после фикса бага https://jira.mts.ru/browse/DOP-8666 в onetl, пофиксить тесты
-        columns=[f"`{column.lower()}`" for column in init_df_with_mixed_column_naming.columns],
     )
     df = reader.run()
 
