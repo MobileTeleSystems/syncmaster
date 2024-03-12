@@ -11,7 +11,6 @@ if TYPE_CHECKING:
 
 class EnvTypes(StrEnum):
     LOCAL = "LOCAL"
-    GITLAB = "GITLAB"
 
 
 class Settings(BaseSettings):

@@ -34,7 +34,7 @@ from tests.test_unit.utils import (
 from tests.utils import MockUser, UserTestRoles
 
 from app.api.v1.auth.utils import sign_jwt
-from app.config import EnvTypes, Settings, TestSettings
+from app.config import Settings, TestSettings
 from app.dto.connections import (
     HDFSConnectionDTO,
     HiveConnectionDTO,
@@ -96,12 +96,6 @@ def get_spark_session(connection_settings: Settings) -> SparkSession:
             "org.apache.spark.internal.io.cloud.PathOutputCommitProtocol",
         )
     )
-
-    if connection_settings.ENV == EnvTypes.GITLAB:
-        spark = spark.config(
-            "spark.jars.ivySettings",
-            os.fspath(Path(__file__).parent.parent.parent.parent / "tests" / "config" / "ivysettings.xml"),
-        )
 
     return spark.getOrCreate()
 

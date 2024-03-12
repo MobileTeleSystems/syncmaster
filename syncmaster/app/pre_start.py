@@ -5,7 +5,7 @@ from time import sleep
 
 from tests.test_integration.test_run_transfer.conftest import get_spark_session
 
-from app.config import EnvTypes, Settings, TestSettings
+from app.config import Settings, TestSettings
 
 TIMEOUT = 5
 COUNT = 12
@@ -93,10 +93,3 @@ def check_test_hive(settings: Settings, test_settings: TestSettings) -> None:
 
 
 settings = Settings()
-
-if settings.ENV == EnvTypes.GITLAB:
-    logging.basicConfig(level=logging.INFO)
-    test_settings = TestSettings()
-    check_test_oracle(settings, test_settings)
-    check_test_postgres(settings, test_settings)
-    check_test_hive(settings, test_settings)
