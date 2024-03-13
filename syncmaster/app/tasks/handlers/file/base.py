@@ -19,8 +19,7 @@ class FileHandler(Handler):
     connection_dto: ConnectionDTO
     transfer_dto: TransferDTO
 
-    def init_connection(self):
-        ...
+    def init_connection(self): ...
 
     def init_reader(self):
         super().init_reader()

@@ -32,7 +32,7 @@ repos:
       - id: text-unicode-replacement-char
 
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.4
+    rev: v1.5.5
     hooks:
       - id: forbid-tabs
       - id: remove-tabs
@@ -57,13 +57,13 @@ repos:
           - --no-extra-eol
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.15.0
+    rev: v3.15.1
     hooks:
       - id: pyupgrade
         args: [--py311-plus, --keep-runtime-typing]
 
   - repo: https://github.com/pycqa/autoflake
-    rev: v2.2.1
+    rev: v2.3.0
     hooks:
       - id: autoflake
         args:
@@ -73,13 +73,13 @@ repos:
           - --ignore-init-module-imports
 
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 23.12.1
+    rev: 24.2.0
     hooks:
       - id: black
         language_version: python3.11
 
   - repo: https://github.com/pycqa/bandit
-    rev: 1.7.6
+    rev: 1.7.8
     hooks:
       - id: bandit
         args:

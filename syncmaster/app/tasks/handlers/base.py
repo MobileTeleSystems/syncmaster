@@ -23,8 +23,7 @@ class Handler(ABC):
         self.connection_dto = connection_dto
         self.transfer_dto = transfer_dto
 
-    def init_connection(self):
-        ...
+    def init_connection(self): ...
 
     def set_spark(self, spark: SparkSession):
         self.spark = spark
