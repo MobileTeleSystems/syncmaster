@@ -28,15 +28,25 @@ classifiers = [
 keywords = ["Syncmaster", "REST", "API", "Worker", "Replication"]
 
 packages = [
-    { include = "syncmaster/app" },
+    { include = "syncmaster/backend" },
 ]
 
 include = [
-    {path = "syncmaster/*.ini"},
+    {path = "syncmaster/db/*"},
+    {path = "syncmaster/db/migrations/*"},
+    {path = "syncmaster/db/migrations/versions/*"},
+    {path = "syncmaster/db/repositories/*"},
+    {path = "syncmaster/dto/*.py"},
+    {path = "syncmaster/exceptions/*.py"},
+    {path = "syncmaster/schemas/v1/connections/*.py"},
+    {path = "syncmaster/schemas/v1/transfers/*.py"},
+    {path = "syncmaster/schemas/v1/transfers/file/*.py"},
+    {path = "syncmaster/schemas/v1/*.py"},
+    {path = "syncmaster/schemas/*.py"},
 ]
 
 exclude = [
-    {path = "syncmaster/tests"},
+    {path = "tests"},
 ]
 
 [tool.poetry.urls]  # Optional

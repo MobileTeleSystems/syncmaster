@@ -33,12 +33,14 @@ COPY ./syncmaster/ /syncmaster/
 
 # https://docs.celeryq.dev/en/stable/userguide/workers.html#max-tasks-per-child-setting
 # Required to start each Celery task in separated process, avoiding issues with global Spark session object
-CMD ["celery", "-A" ,"app.tasks.config.celery", "worker", "--loglevel=info", "--max-tasks-per-child=1"]
+CMD ["celery", "-A" ,"backend.worker.config.celery", "worker", "--loglevel=info", "--max-tasks-per-child=1"]
 
 FROM prod as test
+
+COPY ./tests /syncmaster/tests
 
 RUN poetry install --no-root --extras "worker backend" --with test
 
 ENV CREATE_SPARK_SESSION_FUNCTION="tests.spark.get_worker_spark_session.get_worker_spark_session"
 # Queue for tests
-CMD ["coverage", "run", "-m", "celery", "-A" ,"app.tasks.config.celery", "worker", "--loglevel=info", "--max-tasks-per-child=1", "-Q", "test_queue"]
+CMD ["coverage", "run", "-m", "celery", "-A" ,"backend.worker.config.celery", "worker", "--loglevel=info", "--max-tasks-per-child=1", "-Q", "test_queue"]
