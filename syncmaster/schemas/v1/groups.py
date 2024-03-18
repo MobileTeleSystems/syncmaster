@@ -3,7 +3,7 @@
 from pydantic import BaseModel
 
 from syncmaster.db import GroupMemberRole
-from syncmaster.schemas.v1.schemas import NameConstr, PageSchema
+from syncmaster.schemas.v1 import NameConstr, PageSchema
 
 
 class UpdateGroupSchema(BaseModel):

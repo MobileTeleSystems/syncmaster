@@ -9,6 +9,13 @@ from syncmaster.backend.api.v1.auth.utils import sign_jwt
 from syncmaster.config import Settings
 from syncmaster.db import Queue, User, UserGroup
 from syncmaster.db.repositories.utils import decrypt_auth_data
+from tests.mocks import (
+    MockConnection,
+    MockCredentials,
+    MockGroup,
+    MockUser,
+    UserTestRoles,
+)
 from tests.test_unit.utils import (
     create_connection,
     create_credentials,
@@ -16,13 +23,6 @@ from tests.test_unit.utils import (
     create_queue,
     create_user,
     create_user_cm,
-)
-from tests.utils import (
-    MockConnection,
-    MockCredentials,
-    MockGroup,
-    MockUser,
-    UserTestRoles,
 )
 
 ALLOWED_SOURCES = "'hive', 'oracle', 'postgres', 'hdfs', 's3'"

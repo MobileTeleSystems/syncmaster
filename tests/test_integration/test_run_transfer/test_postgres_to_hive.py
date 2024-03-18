@@ -6,7 +6,7 @@ from onetl.db import DBReader
 from pyspark.sql import DataFrame
 
 from syncmaster.db import Status, Transfer
-from tests.utils import MockUser, get_run_on_end
+from tests.mocks import MockUser, get_run_on_end
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.worker, pytest.mark.hive, pytest.mark.postgres]
 

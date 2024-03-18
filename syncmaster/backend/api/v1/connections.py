@@ -18,18 +18,18 @@ from syncmaster.exceptions.connection import (
     ConnectionDeleteError,
     ConnectionNotFoundError,
 )
+from syncmaster.schemas.v1 import (
+    ORACLE_TYPE,
+    POSTGRES_TYPE,
+    MetaPageSchema,
+    StatusResponseSchema,
+)
 from syncmaster.schemas.v1.connections.connection import (
     ConnectionCopySchema,
     ConnectionPageSchema,
     CreateConnectionSchema,
     ReadConnectionSchema,
     UpdateConnectionSchema,
-)
-from syncmaster.schemas.v1.schemas import (
-    ORACLE_TYPE,
-    POSTGRES_TYPE,
-    MetaPageSchema,
-    StatusResponseSchema,
 )
 
 router = APIRouter(tags=["Connections"])

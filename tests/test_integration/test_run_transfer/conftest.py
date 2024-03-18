@@ -35,6 +35,7 @@ from syncmaster.dto.connections import (
     PostgresConnectionDTO,
     S3ConnectionDTO,
 )
+from tests.mocks import MockUser, UserTestRoles
 from tests.resources.file_df_connection.test_data import data
 from tests.test_unit.utils import (
     create_connection,
@@ -45,7 +46,6 @@ from tests.test_unit.utils import (
     create_user,
     upload_files,
 )
-from tests.utils import MockUser, UserTestRoles
 
 logger = logging.getLogger(__name__)
 

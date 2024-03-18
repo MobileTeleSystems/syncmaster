@@ -28,7 +28,7 @@ RUN pip install --upgrade pip setuptools wheel packaging
 
 RUN poetry install --no-root --extras "backend"
 
-COPY . /syncmaster/
+COPY ./syncmaster ./.github ./docker ./docker-compose.test.yml ./pyproject.toml ./pytest_runner.py ./combine_coverage.sh ./.env.docker /syncmaster/
 
 ENV PYTHONPATH=/syncmaster
 

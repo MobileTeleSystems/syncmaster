@@ -3,7 +3,7 @@
 
 from pydantic import BaseModel, SecretStr
 
-from syncmaster.schemas.v1.schemas import HDFS_TYPE
+from syncmaster.schemas.v1 import HDFS_TYPE
 
 
 class HDFSConnectionBaseSchema(BaseModel):

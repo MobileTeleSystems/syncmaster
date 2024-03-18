@@ -4,7 +4,7 @@ import pytest
 from httpx import AsyncClient
 
 from syncmaster.db import Queue
-from tests.utils import MockConnection, MockGroup, MockTransfer, MockUser, UserTestRoles
+from tests.mocks import MockConnection, MockGroup, MockTransfer, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 

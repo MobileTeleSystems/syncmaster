@@ -21,10 +21,7 @@ from syncmaster.exceptions import (
     TransferNotFoundError,
 )
 from syncmaster.exceptions.base import ActionNotAllowedError
-from syncmaster.schemas.v1.schemas import (
-    StatusCopyTransferResponseSchema,
-    StatusResponseSchema,
-)
+from syncmaster.schemas.v1 import StatusCopyTransferResponseSchema, StatusResponseSchema
 from syncmaster.schemas.v1.transfers import (
     CopyTransferSchema,
     CreateRunSchema,
@@ -95,18 +92,18 @@ async def create_transfer(
     ):
         raise DifferentTransferAndConnectionsGroupsError
 
-    if target_connection.data["type"] != transfer_data.target_params.type:
+    if target_connection.data["type"] != transfer_data.target_params.type:  # type: ignore[attr-defined]
         raise DifferentTypeConnectionsAndParamsError(
             connection_type=target_connection.data["type"],
             conn="target",
-            params_type=transfer_data.target_params.type,
+            params_type=transfer_data.target_params.type,  # type: ignore[attr-defined]
         )
 
-    if source_connection.data["type"] != transfer_data.source_params.type:
+    if source_connection.data["type"] != transfer_data.source_params.type:  # type: ignore[attr-defined]
         raise DifferentTypeConnectionsAndParamsError(
             connection_type=source_connection.data["type"],
             conn="source",
-            params_type=transfer_data.source_params.type,
+            params_type=transfer_data.source_params.type,  # type: ignore[attr-defined]
         )
 
     if transfer_data.group_id != queue.group_id:
@@ -121,8 +118,8 @@ async def create_transfer(
             description=transfer_data.description,
             target_connection_id=transfer_data.target_connection_id,
             source_connection_id=transfer_data.source_connection_id,
-            source_params=transfer_data.source_params.dict(),
-            target_params=transfer_data.target_params.dict(),
+            source_params=transfer_data.source_params.dict(),  # type: ignore[attr-defined]
+            target_params=transfer_data.target_params.dict(),  # type: ignore[attr-defined]
             strategy_params=transfer_data.strategy_params.dict(),
             queue_id=transfer_data.queue_id,
         )
@@ -299,18 +296,24 @@ async def update_transfer(
     if queue.group_id != transfer.group_id:
         raise DifferentTransferAndQueueGroupError
 
-    if transfer_data.target_params and target_connection.data["type"] != transfer_data.target_params.type:
+    if (
+        transfer_data.target_params
+        and target_connection.data["type"] != transfer_data.target_params.type  # type: ignore
+    ):
         raise DifferentTypeConnectionsAndParamsError(
             connection_type=target_connection.data["type"],
             conn="target",
-            params_type=transfer_data.target_params.type,
+            params_type=transfer_data.target_params.type,  # type: ignore[attr-defined]
         )
 
-    if transfer_data.source_params and source_connection.data["type"] != transfer_data.source_params.type:
+    if (
+        transfer_data.source_params
+        and source_connection.data["type"] != transfer_data.source_params.type  # type: ignore
+    ):
         raise DifferentTypeConnectionsAndParamsError(
             connection_type=source_connection.data["type"],
             conn="source",
-            params_type=transfer_data.source_params.type,
+            params_type=transfer_data.source_params.type,  # type: ignore[attr-defined]
         )
 
     transfer_data = process_file_transfer_directory_path(transfer_data)  # type: ignore
@@ -322,8 +325,8 @@ async def update_transfer(
             description=transfer_data.description,
             target_connection_id=transfer_data.target_connection_id,
             source_connection_id=transfer_data.source_connection_id,
-            source_params=transfer_data.source_params.dict() if transfer_data.source_params else {},
-            target_params=transfer_data.target_params.dict() if transfer_data.target_params else {},
+            source_params=transfer_data.source_params.dict() if transfer_data.source_params else {},  # type: ignore
+            target_params=transfer_data.target_params.dict() if transfer_data.target_params else {},  # type: ignore
             strategy_params=transfer_data.strategy_params.dict() if transfer_data.strategy_params else {},
             is_scheduled=transfer_data.is_scheduled,
             schedule=transfer_data.schedule,

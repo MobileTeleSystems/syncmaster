@@ -6,7 +6,7 @@ import pytest
 from httpx import AsyncClient
 
 from syncmaster.backend.api.v1.connections import CONNECTION_TYPES
-from tests.utils import MockUser
+from tests.mocks import MockUser
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 

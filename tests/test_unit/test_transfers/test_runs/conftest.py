@@ -7,6 +7,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.backend.api.v1.auth.utils import sign_jwt
 from syncmaster.config import Settings
+from tests.mocks import (
+    MockConnection,
+    MockGroup,
+    MockRun,
+    MockTransfer,
+    MockUser,
+    UserTestRoles,
+)
 from tests.test_unit.conftest import create_group_member
 from tests.test_unit.utils import (
     create_connection,
@@ -15,14 +23,6 @@ from tests.test_unit.utils import (
     create_run,
     create_transfer,
     create_user,
-)
-from tests.utils import (
-    MockConnection,
-    MockGroup,
-    MockRun,
-    MockTransfer,
-    MockUser,
-    UserTestRoles,
 )
 
 

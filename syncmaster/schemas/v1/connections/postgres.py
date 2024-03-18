@@ -3,7 +3,7 @@
 
 from pydantic import BaseModel, Field, SecretStr
 
-from syncmaster.schemas.v1.schemas import POSTGRES_TYPE
+from syncmaster.schemas.v1 import POSTGRES_TYPE
 
 
 class PostgresBaseSchema(BaseModel):

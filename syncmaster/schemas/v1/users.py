@@ -3,7 +3,7 @@
 from pydantic import BaseModel, constr
 
 from syncmaster.db import GroupMemberRole, Pagination
-from syncmaster.schemas.v1.schemas import MetaPageSchema, PageSchema
+from syncmaster.schemas.v1 import MetaPageSchema, PageSchema
 
 
 class UpdateUserSchema(BaseModel):

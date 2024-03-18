@@ -5,7 +5,7 @@ from celery.backends.database.session import ResultModelBase
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from syncmaster.db import Base
-from tests.utils import get_diff_db_metadata
+from tests.mocks import get_diff_db_metadata
 
 pytestmark = [pytest.mark.backend]
 

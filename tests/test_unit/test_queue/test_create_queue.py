@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db import Queue
-from tests.utils import MockGroup, MockUser, UserTestRoles
+from tests.mocks import MockGroup, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 

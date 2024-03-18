@@ -5,7 +5,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db import Status
-from tests.utils import MockGroup, MockRun, MockUser, UserTestRoles
+from tests.mocks import MockGroup, MockRun, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 

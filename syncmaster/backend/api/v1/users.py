@@ -8,7 +8,7 @@ from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.db import User
 from syncmaster.exceptions import ActionNotAllowedError
-from syncmaster.schemas.v1.schemas import StatusResponseSchema
+from syncmaster.schemas.v1 import StatusResponseSchema
 from syncmaster.schemas.v1.users import ReadUserSchema, UpdateUserSchema, UserPageSchema
 
 logger = logging.getLogger(__name__)

@@ -3,7 +3,7 @@
 import pytest
 from httpx import AsyncClient
 
-from tests.utils import MockTransfer, MockUser, UserTestRoles
+from tests.mocks import MockTransfer, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 

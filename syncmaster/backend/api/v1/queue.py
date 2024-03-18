@@ -7,13 +7,13 @@ from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.db import Permission, User
 from syncmaster.exceptions import ActionNotAllowedError, GroupNotFoundError
 from syncmaster.exceptions.queue import QueueDeleteError, QueueNotFoundError
+from syncmaster.schemas.v1 import StatusResponseSchema
 from syncmaster.schemas.v1.queue import (
     CreateQueueSchema,
     QueuePageSchema,
     ReadQueueSchema,
     UpdateQueueSchema,
 )
-from syncmaster.schemas.v1.schemas import StatusResponseSchema
 
 router = APIRouter(tags=["Queues"])
 

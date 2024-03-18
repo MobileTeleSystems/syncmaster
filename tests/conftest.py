@@ -24,16 +24,7 @@ from syncmaster.backend.main import get_application
 from syncmaster.config import Settings, TestSettings
 from syncmaster.db import Base, Connection, Queue
 from syncmaster.db.repositories.utils import decrypt_auth_data
-from tests.test_unit.conftest import add_user_to_group, create_group_member
-from tests.test_unit.utils import (
-    create_connection,
-    create_credentials,
-    create_group,
-    create_queue,
-    create_transfer,
-    create_user,
-)
-from tests.utils import (
+from tests.mocks import (
     MockConnection,
     MockCredentials,
     MockGroup,
@@ -42,6 +33,15 @@ from tests.utils import (
     UserTestRoles,
     prepare_new_database,
     run_async_migrations,
+)
+from tests.test_unit.conftest import add_user_to_group, create_group_member
+from tests.test_unit.utils import (
+    create_connection,
+    create_credentials,
+    create_group,
+    create_queue,
+    create_transfer,
+    create_user,
 )
 
 PROJECT_PATH = Path(__file__).parent.parent.resolve()

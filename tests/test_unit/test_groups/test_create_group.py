@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db import Group
-from tests.utils import MockUser
+from tests.mocks import MockUser
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
