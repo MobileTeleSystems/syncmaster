@@ -28,10 +28,8 @@ RUN pip install --upgrade pip setuptools wheel packaging
 
 RUN poetry install --no-root --extras "backend"
 
-COPY ./syncmaster/ /syncmaster/
+COPY . /syncmaster/
 
-COPY ./tests/ /tests/
+ENV PYTHONPATH=/syncmaster
 
-ENV PYTHONPATH=/
-
-CMD [ "python", "backend/main.py" ]
+CMD [ "python", "syncmaster/backend/main.py" ]
