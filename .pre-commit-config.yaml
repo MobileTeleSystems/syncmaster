@@ -63,7 +63,7 @@ repos:
         args: [--py311-plus, --keep-runtime-typing]
 
   - repo: https://github.com/pycqa/autoflake
-    rev: v2.3.0
+    rev: v2.3.1
     hooks:
       - id: autoflake
         args:
@@ -73,7 +73,7 @@ repos:
           - --ignore-init-module-imports
 
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 24.2.0
+    rev: 24.3.0
     hooks:
       - id: black
         language_version: python3.11
@@ -117,7 +117,7 @@ repos:
         args: [--autofix, --indent, '2', --offset, '2']
 
   - repo: https://github.com/sbrunner/hooks
-    rev: 0.7.0
+    rev: 1.0.0
     hooks:
       - id: poetry-check
         additional_dependencies:
