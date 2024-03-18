@@ -3,7 +3,7 @@
 
 from pydantic import BaseModel, SecretStr
 
-from syncmaster.schemas.v1 import HIVE_TYPE
+from syncmaster.schemas.v1.connection_types import HIVE_TYPE
 
 
 class HiveBaseSchema(BaseModel):

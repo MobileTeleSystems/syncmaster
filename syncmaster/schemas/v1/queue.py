@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from pydantic import BaseModel, Field, constr
 
-from syncmaster.schemas.v1 import PageSchema
+from syncmaster.schemas.v1.page_schema import PageSchema
 
 
 class CreateQueueSchema(BaseModel):

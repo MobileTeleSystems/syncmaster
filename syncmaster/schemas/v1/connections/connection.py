@@ -3,7 +3,6 @@
 
 from pydantic import BaseModel, Field, root_validator
 
-from syncmaster.schemas.v1 import NameConstr, PageSchema
 from syncmaster.schemas.v1.connections.hdfs import (
     HDFSCreateAuthSchema,
     HDFSCreateConnectionSchema,
@@ -44,6 +43,8 @@ from syncmaster.schemas.v1.connections.s3 import (
     S3UpdateAuthSchema,
     S3UpdateConnectionSchema,
 )
+from syncmaster.schemas.v1.page_schema import PageSchema
+from syncmaster.schemas.v1.types import NameConstr
 
 ReadConnectionDataSchema = (
     ReadHiveConnectionSchema

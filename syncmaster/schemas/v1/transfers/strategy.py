@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from syncmaster.schemas.v1 import FULL_TYPE, INCREMENTAL_TYPE
+from syncmaster.schemas.v1.transfer_types import FULL_TYPE, INCREMENTAL_TYPE
 
 
 class FullStrategy(BaseModel):

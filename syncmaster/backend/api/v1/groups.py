@@ -6,7 +6,6 @@ from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.db import Permission, User
 from syncmaster.exceptions import ActionNotAllowedError, GroupNotFoundError
-from syncmaster.schemas.v1 import StatusResponseSchema
 from syncmaster.schemas.v1.groups import (
     AddUserSchema,
     CreateGroupSchema,
@@ -14,6 +13,7 @@ from syncmaster.schemas.v1.groups import (
     ReadGroupSchema,
     UpdateGroupSchema,
 )
+from syncmaster.schemas.v1.status_schema import StatusResponseSchema
 from syncmaster.schemas.v1.users import UserPageSchemaAsGroupMember
 
 router = APIRouter(tags=["Groups"])

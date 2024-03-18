@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from syncmaster.schemas.v1.auth import AuthTokenSchema, TokenPayloadSchema
-from syncmaster.schemas.v1.connections import (
+from syncmaster.schemas.v1.connections.connection import (
     ConnectionCopySchema,
     ConnectionPageSchema,
     CreateConnectionSchema,
@@ -21,23 +21,6 @@ from syncmaster.schemas.v1.queue import (
     QueuePageSchema,
     ReadQueueSchema,
     UpdateQueueSchema,
-)
-from syncmaster.schemas.v1.schemas import (
-    CSV_FORMAT,
-    FULL_TYPE,
-    HDFS_TYPE,
-    HIVE_TYPE,
-    INCREMENTAL_TYPE,
-    JSON_FORMAT,
-    JSONLINE_FORMAT,
-    ORACLE_TYPE,
-    POSTGRES_TYPE,
-    S3_TYPE,
-    MetaPageSchema,
-    NameConstr,
-    PageSchema,
-    StatusCopyTransferResponseSchema,
-    StatusResponseSchema,
 )
 from syncmaster.schemas.v1.transfers import (
     CSV,

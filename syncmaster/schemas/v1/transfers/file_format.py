@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from syncmaster.schemas.v1 import CSV_FORMAT, JSON_FORMAT, JSONLINE_FORMAT
+from syncmaster.schemas.v1.file_formats import CSV_FORMAT, JSON_FORMAT, JSONLINE_FORMAT
 
 
 class CSV(BaseModel):

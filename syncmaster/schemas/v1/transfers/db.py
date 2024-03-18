@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from syncmaster.schemas.v1 import HIVE_TYPE, ORACLE_TYPE, POSTGRES_TYPE
+from syncmaster.schemas.v1.connection_types import HIVE_TYPE, ORACLE_TYPE, POSTGRES_TYPE
 
 
 class ReadDBTransfer(BaseModel):

@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, SecretStr, root_validator
 
-from syncmaster.schemas.v1 import S3_TYPE
+from syncmaster.schemas.v1.connection_types import S3_TYPE
 
 
 class S3BaseSchema(BaseModel):

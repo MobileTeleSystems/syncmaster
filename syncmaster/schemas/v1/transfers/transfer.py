@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, root_validator
 
-from syncmaster.schemas.v1 import NameConstr, PageSchema
 from syncmaster.schemas.v1.connections.connection import ReadConnectionSchema
+from syncmaster.schemas.v1.page_schema import PageSchema
 from syncmaster.schemas.v1.transfers.db import (
     HiveReadTransferSourceAndTarget,
     OracleReadTransferSourceAndTarget,
@@ -24,6 +24,7 @@ from syncmaster.schemas.v1.transfers.file.s3 import (
     S3ReadTransferTarget,
 )
 from syncmaster.schemas.v1.transfers.strategy import FullStrategy, IncrementalStrategy
+from syncmaster.schemas.v1.types import NameConstr
 
 ReadTransferSchemaSource = (
     PostgresReadTransferSourceAndTarget

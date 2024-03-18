@@ -21,7 +21,10 @@ from syncmaster.exceptions import (
     TransferNotFoundError,
 )
 from syncmaster.exceptions.base import ActionNotAllowedError
-from syncmaster.schemas.v1 import StatusCopyTransferResponseSchema, StatusResponseSchema
+from syncmaster.schemas.v1.status_schema import (
+    StatusCopyTransferResponseSchema,
+    StatusResponseSchema,
+)
 from syncmaster.schemas.v1.transfers import (
     CopyTransferSchema,
     CreateRunSchema,

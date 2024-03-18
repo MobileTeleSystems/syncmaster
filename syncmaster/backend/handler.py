@@ -32,7 +32,7 @@ from syncmaster.exceptions import (
     UsernameAlreadyExistsError,
     UserNotFoundError,
 )
-from syncmaster.schemas.v1 import StatusResponseSchema
+from syncmaster.schemas.v1.status_schema import StatusResponseSchema
 
 logger = logging.getLogger(__name__)
 
