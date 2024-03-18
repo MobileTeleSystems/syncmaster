@@ -1,11 +1,11 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
 import pytest
-from db import Run, Status
 from httpx import AsyncClient
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from syncmaster.db import Run, Status
 from tests.utils import MockGroup, MockTransfer, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
@@ -20,7 +20,7 @@ async def test_developer_plus_can_create_run_of_transfer_his_group(
 ) -> None:
     # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
-    mocker.patch("backend.worker.config.celery.send_task")
+    mocker.patch("syncmaster.worker.config.celery.send_task")
 
     run = (
         await session.scalars(
@@ -64,7 +64,7 @@ async def test_groupless_user_cannot_create_run(
     mocker,
 ) -> None:
     # Arrange
-    mocker.patch("backend.worker.config.celery.send_task")
+    mocker.patch("syncmaster.worker.config.celery.send_task")
 
     # Act
     result = await client.post(
@@ -91,7 +91,7 @@ async def test_group_member_cannot_create_run_of_other_group_transfer(
     role_guest_plus: UserTestRoles,
 ):
     # Arrange
-    mocker.patch("backend.worker.config.celery.send_task")
+    mocker.patch("syncmaster.worker.config.celery.send_task")
     user = group.get_member_of_role(role_guest_plus)
 
     # Act
@@ -124,7 +124,7 @@ async def test_superuser_can_create_run(
     mocker,
 ) -> None:
     # Arrange
-    mocker.patch("backend.worker.config.celery.send_task")
+    mocker.patch("syncmaster.worker.config.celery.send_task")
 
     # Act
     result = await client.post(
@@ -157,7 +157,7 @@ async def test_unauthorized_user_cannot_create_run(
     mocker,
 ) -> None:
     # Arrange
-    mocker.patch("backend.worker.config.celery.send_task")
+    mocker.patch("syncmaster.worker.config.celery.send_task")
 
     # Act
     result = await client.post(
@@ -183,7 +183,7 @@ async def test_group_member_cannot_create_run_of_unknown_transfer_error(
 ) -> None:
     # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_guest_plus)
-    mocker.patch("backend.worker.config.celery.send_task")
+    mocker.patch("syncmaster.worker.config.celery.send_task")
 
     # Act
     result = await client.post(
@@ -208,7 +208,7 @@ async def test_superuser_cannot_create_run_of_unknown_transfer_error(
     mocker,
 ) -> None:
     # Arrange
-    mocker.patch("backend.worker.config.celery.send_task")
+    mocker.patch("syncmaster.worker.config.celery.send_task")
 
     # Act
     result = await client.post(

@@ -2,9 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 from typing import Any, NoReturn
 
-from db import Connection, Pagination
-from db.repositories.repository_with_owner import RepositoryWithOwner
-from exceptions import (
+from sqlalchemy import ScalarResult, insert, select
+from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from syncmaster.db import Connection, Pagination
+from syncmaster.db.repositories.repository_with_owner import RepositoryWithOwner
+from syncmaster.exceptions import (
     ConnectionNotFoundError,
     ConnectionOwnerError,
     DuplicatedConnectionNameError,
@@ -13,9 +17,6 @@ from exceptions import (
     SyncmasterError,
     UserNotFoundError,
 )
-from sqlalchemy import ScalarResult, insert, select
-from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class ConnectionRepository(RepositoryWithOwner[Connection]):

@@ -1,10 +1,10 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
 import pytest
-from backend.config import Settings
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from syncmaster.backend.config import Settings
 from tests.utils import MockConnection, MockGroup, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]

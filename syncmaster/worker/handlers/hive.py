@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-from backend.worker.handlers.base import Handler
-from dto.connections import HiveConnectionDTO
-from dto.transfers import HiveTransferDTO
 from onetl.connection import Hive
 from onetl.db import DBReader, DBWriter
 from pyspark.sql.dataframe import DataFrame
+
+from syncmaster.dto.connections import HiveConnectionDTO
+from syncmaster.dto.transfers import HiveTransferDTO
+from syncmaster.worker.handlers.base import Handler
 
 
 class HiveHandler(Handler):

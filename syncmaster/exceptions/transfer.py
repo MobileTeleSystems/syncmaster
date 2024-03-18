@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from typing import Literal
 
-from exceptions.base import SyncmasterError
+from syncmaster.exceptions.base import SyncmasterError
 
 
 class TransferOwnerError(SyncmasterError):

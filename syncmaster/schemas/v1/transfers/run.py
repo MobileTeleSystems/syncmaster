@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from db import Status
 from pydantic import BaseModel
-from schemas.v1.schemas import PageSchema
+
+from syncmaster.db import Status
+from syncmaster.schemas.v1.schemas import PageSchema
 
 
 class ShortRunSchema(BaseModel):

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-from db import Status
-from exceptions.base import EntityNotFoundError, SyncmasterError
+from syncmaster.db import Status
+from syncmaster.exceptions.base import EntityNotFoundError, SyncmasterError
 
 
 class RunNotFoundError(EntityNotFoundError):

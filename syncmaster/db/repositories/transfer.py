@@ -3,9 +3,14 @@
 from collections.abc import Sequence
 from typing import Any, NoReturn
 
-from db import Pagination, Transfer
-from db.repositories.repository_with_owner import RepositoryWithOwner
-from exceptions import (
+from sqlalchemy import ScalarResult, insert, or_, select
+from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from syncmaster.db import Pagination, Transfer
+from syncmaster.db.repositories.repository_with_owner import RepositoryWithOwner
+from syncmaster.exceptions import (
     ConnectionNotFoundError,
     DuplicatedTransferNameError,
     EntityNotFoundError,
@@ -16,10 +21,6 @@ from exceptions import (
     TransferOwnerError,
     UserNotFoundError,
 )
-from sqlalchemy import ScalarResult, insert, or_, select
-from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 
 class TransferRepository(RepositoryWithOwner[Transfer]):

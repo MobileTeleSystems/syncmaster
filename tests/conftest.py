@@ -9,11 +9,6 @@ from pathlib import Path
 import pytest
 import pytest_asyncio
 from alembic.config import Config as AlembicConfig
-from backend.api.v1.auth.utils import sign_jwt
-from backend.config import Settings, TestSettings
-from backend.main import get_application
-from db import Base, Connection, Queue
-from db.repositories import decrypt_auth_data
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -22,6 +17,11 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+from syncmaster.backend.api.v1.auth.utils import sign_jwt
+from syncmaster.backend.config import Settings, TestSettings
+from syncmaster.backend.main import get_application
+from syncmaster.db import Base, Connection, Queue
+from syncmaster.db.repositories import decrypt_auth_data
 from tests.test_unit.conftest import add_user_to_group, create_group_member
 from tests.test_unit.utils import (
     create_connection,
@@ -65,8 +65,8 @@ def test_settings():
 
 @pytest.fixture(scope="session")
 def alembic_config(settings: Settings) -> AlembicConfig:
-    alembic_cfg = AlembicConfig(PROJECT_PATH / "db" / "alembic.ini")
-    alembic_cfg.set_main_option("script_location", os.fspath(PROJECT_PATH / "db/migrations"))
+    alembic_cfg = AlembicConfig(PROJECT_PATH / "syncmaster" / "db" / "alembic.ini")
+    alembic_cfg.set_main_option("script_location", os.fspath(PROJECT_PATH / "syncmaster/db/migrations"))
     alembic_cfg.set_main_option("sqlalchemy.url", settings.build_db_connection_uri())
     return alembic_cfg
 
@@ -107,9 +107,11 @@ async def client(
     settings: Settings,
     async_engine: AsyncEngine,
 ) -> AsyncGenerator:
+    print(10 * "-", "START CLIENT FIXTURE", 10 * "-")
     app = get_application(settings=settings)
     async with AsyncClient(app=app, base_url="http://testserver") as client:
         yield client
+        print(10 * "-", "END CLIENT FIXTURE", 10 * "-")
 
 
 @pytest_asyncio.fixture

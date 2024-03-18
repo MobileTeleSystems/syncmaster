@@ -30,6 +30,8 @@ RUN poetry install --no-root --extras "backend"
 
 COPY ./syncmaster/ /syncmaster/
 
-ENV PYTHONPATH=/syncmaster
+COPY ./tests/ /tests/
 
-CMD [ "python", "app/main.py" ]
+ENV PYTHONPATH=/
+
+CMD [ "python", "backend/main.py" ]

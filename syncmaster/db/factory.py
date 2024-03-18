@@ -3,14 +3,15 @@
 from collections.abc import AsyncGenerator, Callable
 from typing import Any
 
-from backend.config import Settings
-from backend.services import UnitOfWork
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
+
+from syncmaster.backend.config import Settings
+from syncmaster.backend.services import UnitOfWork
 
 
 def create_engine(connection_uri: str, **engine_kwargs: Any) -> AsyncEngine:

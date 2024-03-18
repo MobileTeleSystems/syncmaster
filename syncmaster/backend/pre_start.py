@@ -3,8 +3,7 @@
 import logging
 from time import sleep
 
-from backend.config import Settings, TestSettings
-
+from syncmaster.backend.config import Settings, TestSettings
 from tests.test_integration.test_run_transfer.conftest import get_spark_session
 
 TIMEOUT = 5

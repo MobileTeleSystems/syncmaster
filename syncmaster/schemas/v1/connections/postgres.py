@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from pydantic import BaseModel, Field, SecretStr
-from schemas.v1.schemas import POSTGRES_TYPE
+
+from syncmaster.schemas.v1.schemas import POSTGRES_TYPE
 
 
 class PostgresBaseSchema(BaseModel):

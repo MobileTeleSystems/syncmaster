@@ -1,19 +1,20 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-from backend.api.deps import UnitOfWorkMarker
-from backend.services import UnitOfWork, get_user
-from db import Permission, User
-from exceptions import ActionNotAllowedError, GroupNotFoundError
 from fastapi import APIRouter, Depends, Query
-from schemas.v1.groups import (
+
+from syncmaster.backend.api.deps import UnitOfWorkMarker
+from syncmaster.backend.services import UnitOfWork, get_user
+from syncmaster.db import Permission, User
+from syncmaster.exceptions import ActionNotAllowedError, GroupNotFoundError
+from syncmaster.schemas.v1.groups import (
     AddUserSchema,
     CreateGroupSchema,
     GroupPageSchema,
     ReadGroupSchema,
     UpdateGroupSchema,
 )
-from schemas.v1.schemas import StatusResponseSchema
-from schemas.v1.users import UserPageSchemaAsGroupMember
+from syncmaster.schemas.v1.schemas import StatusResponseSchema
+from syncmaster.schemas.v1.users import UserPageSchemaAsGroupMember
 
 router = APIRouter(tags=["Groups"])
 

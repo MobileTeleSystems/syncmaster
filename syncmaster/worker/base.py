@@ -1,8 +1,9 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-from backend.config import Settings
 from celery import Task
 from sqlalchemy import create_engine
+
+from syncmaster.backend.config import Settings
 
 
 class WorkerTask(Task):

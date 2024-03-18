@@ -4,14 +4,15 @@ from __future__ import annotations
 
 from typing import NoReturn
 
-from backend.config import Settings
-from db import AuthData
-from db.repositories import decrypt_auth_data, encrypt_auth_data
-from db.repositories.base import Repository
-from exceptions import AuthDataNotFoundError, SyncmasterError
 from sqlalchemy import ScalarResult, delete, insert, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from syncmaster.backend.config import Settings
+from syncmaster.db import AuthData
+from syncmaster.db.repositories import decrypt_auth_data, encrypt_auth_data
+from syncmaster.db.repositories.base import Repository
+from syncmaster.exceptions import AuthDataNotFoundError, SyncmasterError
 
 
 class CredentialsRepository(Repository[AuthData]):

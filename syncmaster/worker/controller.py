@@ -3,29 +3,29 @@
 import logging
 from typing import Any
 
-from backend.config import Settings
-from backend.worker.handlers.base import Handler
-from backend.worker.handlers.file.hdfs import HDFSHandler
-from backend.worker.handlers.file.s3 import S3Handler
-from backend.worker.handlers.hive import HiveHandler
-from backend.worker.handlers.oracle import OracleHandler
-from backend.worker.handlers.postgres import PostgresHandler
-from db import Connection, Transfer
-from dto.connections import (
+from syncmaster.backend.config import Settings
+from syncmaster.db import Connection, Transfer
+from syncmaster.dto.connections import (
     HDFSConnectionDTO,
     HiveConnectionDTO,
     OracleConnectionDTO,
     PostgresConnectionDTO,
     S3ConnectionDTO,
 )
-from dto.transfers import (
+from syncmaster.dto.transfers import (
     HDFSTransferDTO,
     HiveTransferDTO,
     OracleTransferDTO,
     PostgresTransferDTO,
     S3TransferDTO,
 )
-from exceptions import ConnectionTypeNotRecognizedError
+from syncmaster.exceptions import ConnectionTypeNotRecognizedError
+from syncmaster.worker.handlers.base import Handler
+from syncmaster.worker.handlers.file.hdfs import HDFSHandler
+from syncmaster.worker.handlers.file.s3 import S3Handler
+from syncmaster.worker.handlers.hive import HiveHandler
+from syncmaster.worker.handlers.oracle import OracleHandler
+from syncmaster.worker.handlers.postgres import PostgresHandler
 
 logger = logging.getLogger(__name__)
 

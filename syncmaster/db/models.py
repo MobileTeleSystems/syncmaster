@@ -6,8 +6,6 @@ import enum
 from datetime import datetime
 from typing import Any
 
-from db.base import Base
-from db.mixins import DeletableMixin, ResourceMixin, TimestampMixin
 from sqlalchemy import (
     JSON,
     BigInteger,
@@ -20,6 +18,9 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
 from sqlalchemy_utils import ChoiceType
+
+from syncmaster.db.base import Base
+from syncmaster.db.mixins import DeletableMixin, ResourceMixin, TimestampMixin
 
 
 class GroupMemberRole(enum.StrEnum):

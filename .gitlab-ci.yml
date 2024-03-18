@@ -67,7 +67,7 @@ mypy:
   image: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend:${CI_COMMIT_REF_SLUG}
   stage: static analysis
   script:
-    - python -m mypy ./syncmaster/app --config-file ./pyproject.toml
+    - python -m mypy ./syncmaster/backend --config-file ./pyproject.toml
   rules:
     - if: $CI_COMMIT_TAG
       when: never
@@ -78,7 +78,7 @@ flake8:
   image: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend:${CI_COMMIT_REF_SLUG}
   stage: static analysis
   script:
-    - python -m flake8 --max-line-length 120 --format=default ./syncmaster/app 2>&1 | tee flake8.txt
+    - python -m flake8 --max-line-length 120 --format=default ./syncmaster/backend 2>&1 | tee flake8.txt
   artifacts:
     when: always
     paths: [flake8.txt]
@@ -92,7 +92,7 @@ black:
   image: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend:${CI_COMMIT_REF_SLUG}
   stage: static analysis
   script:
-    - python -m black ./syncmaster/app --check
+    - python -m black ./syncmaster/backend --check
   rules:
     - if: $CI_COMMIT_TAG
       when: never
@@ -103,7 +103,7 @@ bandit:
   image: ${HARBOR_HOST}/${HARBOR_PROJECT}/${CI_PROJECT_PATH}/backend:${CI_COMMIT_REF_SLUG}
   stage: static analysis
   script:
-    - python -m bandit -ll -iii -r ./syncmaster/app -f json -o ./bandit.json
+    - python -m bandit -ll -iii -r ./syncmaster/backend -f json -o ./bandit.json
   artifacts:
     when: always
     paths: [./bandit.json]
@@ -228,7 +228,7 @@ tests:
         TEST_S3_BUCKET: syncmaster
 
   script:
-    - python ./syncmaster/app/pre_start.py
+    - python ./syncmaster/backend/pre_start.py
     - python -m pytest -vv ./syncmaster/tests --log-cli-level=INFO -s --junitxml=${JUNIT_FILE}
   artifacts:
     when: always

@@ -1,7 +1,8 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
 from pydantic import BaseModel, Field, constr
-from schemas.v1.schemas import PageSchema
+
+from syncmaster.schemas.v1.schemas import PageSchema
 
 
 class CreateQueueSchema(BaseModel):

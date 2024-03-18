@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-from schemas.v1.transfers import CreateTransferSchema, UpdateTransferSchema
+from syncmaster.schemas.v1.transfers import CreateTransferSchema, UpdateTransferSchema
 
 
 def process_file_transfer_directory_path(

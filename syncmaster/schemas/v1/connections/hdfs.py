@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from pydantic import BaseModel, SecretStr
-from schemas.v1.schemas import HDFS_TYPE
+
+from syncmaster.schemas.v1.schemas import HDFS_TYPE
 
 
 class HDFSConnectionBaseSchema(BaseModel):

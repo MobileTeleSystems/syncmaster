@@ -2,11 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 from abc import ABC
 
-from dto.connections import ConnectionDTO
-from dto.transfers import TransferDTO
 from onetl.db import DBReader, DBWriter
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
+
+from syncmaster.dto.connections import ConnectionDTO
+from syncmaster.dto.transfers import TransferDTO
 
 
 class Handler(ABC):

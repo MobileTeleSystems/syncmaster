@@ -3,14 +3,15 @@
 import json
 
 import pydantic
-from backend.worker.handlers.base import Handler
-from dto.connections import ConnectionDTO
-from dto.transfers import TransferDTO
 from onetl.base.base_file_df_connection import BaseFileDFConnection
 from onetl.file import FileDFReader, FileDFWriter
 from onetl.file.format import CSV, JSON, JSONLine
 from pyspark.sql.dataframe import DataFrame
 from pyspark.sql.types import StructType
+
+from syncmaster.dto.connections import ConnectionDTO
+from syncmaster.dto.transfers import TransferDTO
+from syncmaster.worker.handlers.base import Handler
 
 
 class FileHandler(Handler):

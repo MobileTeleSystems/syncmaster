@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from dataclasses import dataclass
 
-from schemas.v1.transfers import CSV, JSON, JSONLine
+from syncmaster.schemas.v1.transfers import CSV, JSON, JSONLine
 
 
 @dataclass

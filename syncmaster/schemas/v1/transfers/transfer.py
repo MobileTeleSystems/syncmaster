@@ -3,26 +3,27 @@
 from __future__ import annotations
 
 from pydantic import BaseModel, Field, root_validator
-from schemas.v1.connections.connection import ReadConnectionSchema
-from schemas.v1.schemas import NameConstr, PageSchema
-from schemas.v1.transfers.db import (
+
+from syncmaster.schemas.v1.connections.connection import ReadConnectionSchema
+from syncmaster.schemas.v1.schemas import NameConstr, PageSchema
+from syncmaster.schemas.v1.transfers.db import (
     HiveReadTransferSourceAndTarget,
     OracleReadTransferSourceAndTarget,
     PostgresReadTransferSourceAndTarget,
 )
-from schemas.v1.transfers.file.hdfs import (
+from syncmaster.schemas.v1.transfers.file.hdfs import (
     HDFSCreateTransferSource,
     HDFSCreateTransferTarget,
     HDFSReadTransferSource,
     HDFSReadTransferTarget,
 )
-from schemas.v1.transfers.file.s3 import (
+from syncmaster.schemas.v1.transfers.file.s3 import (
     S3CreateTransferSource,
     S3CreateTransferTarget,
     S3ReadTransferSource,
     S3ReadTransferTarget,
 )
-from schemas.v1.transfers.strategy import FullStrategy, IncrementalStrategy
+from syncmaster.schemas.v1.transfers.strategy import FullStrategy, IncrementalStrategy
 
 ReadTransferSchemaSource = (
     PostgresReadTransferSourceAndTarget

@@ -2,17 +2,18 @@
 # SPDX-License-Identifier: Apache-2.0
 from typing import Any, NoReturn
 
-from db import Pagination, User
-from db.repositories.base import Repository
-from exceptions import (
+from sqlalchemy import ScalarResult, insert, select
+from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from syncmaster.db import Pagination, User
+from syncmaster.db.repositories.base import Repository
+from syncmaster.exceptions import (
     EntityNotFoundError,
     SyncmasterError,
     UsernameAlreadyExistsError,
     UserNotFoundError,
 )
-from sqlalchemy import ScalarResult, insert, select
-from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class UserRepository(Repository[User]):

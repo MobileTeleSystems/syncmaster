@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from pydantic import BaseModel, Field, root_validator
-from schemas.v1.connections.hdfs import (
+
+from syncmaster.schemas.v1.connections.hdfs import (
     HDFSCreateAuthSchema,
     HDFSCreateConnectionSchema,
     HDFSReadAuthSchema,
@@ -10,7 +11,7 @@ from schemas.v1.connections.hdfs import (
     HDFSUpdateAuthSchema,
     HDFSUpdateConnectionSchema,
 )
-from schemas.v1.connections.hive import (
+from syncmaster.schemas.v1.connections.hive import (
     CreateHiveAuthSchema,
     CreateHiveConnectionSchema,
     ReadHiveAuthSchema,
@@ -18,7 +19,7 @@ from schemas.v1.connections.hive import (
     UpdateHiveAuthSchema,
     UpdateHiveConnectionSchema,
 )
-from schemas.v1.connections.oracle import (
+from syncmaster.schemas.v1.connections.oracle import (
     CreateOracleAuthSchema,
     CreateOracleConnectionSchema,
     ReadOracleAuthSchema,
@@ -26,7 +27,7 @@ from schemas.v1.connections.oracle import (
     UpdateOracleAuthSchema,
     UpdateOracleConnectionSchema,
 )
-from schemas.v1.connections.postgres import (
+from syncmaster.schemas.v1.connections.postgres import (
     CreatePostgresAuthSchema,
     CreatePostgresConnectionSchema,
     ReadPostgresAuthSchema,
@@ -34,7 +35,7 @@ from schemas.v1.connections.postgres import (
     UpdatePostgresAuthSchema,
     UpdatePostgresConnectionSchema,
 )
-from schemas.v1.connections.s3 import (
+from syncmaster.schemas.v1.connections.s3 import (
     S3CreateAuthSchema,
     S3CreateConnectionSchema,
     S3ReadAuthSchema,
@@ -42,7 +43,7 @@ from schemas.v1.connections.s3 import (
     S3UpdateAuthSchema,
     S3UpdateConnectionSchema,
 )
-from schemas.v1.schemas import NameConstr, PageSchema
+from syncmaster.schemas.v1.schemas import NameConstr, PageSchema
 
 ReadConnectionDataSchema = (
     ReadHiveConnectionSchema

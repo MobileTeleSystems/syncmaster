@@ -1,13 +1,14 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-from backend.api.deps import SettingsMarker, UnitOfWorkMarker
-from backend.api.v1.auth.utils import sign_jwt
-from backend.config import Settings
-from backend.services import UnitOfWork
-from exceptions import EntityNotFoundError
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from schemas.v1.auth import AuthTokenSchema
+
+from syncmaster.backend.api.deps import SettingsMarker, UnitOfWorkMarker
+from syncmaster.backend.api.v1.auth.utils import sign_jwt
+from syncmaster.backend.config import Settings
+from syncmaster.backend.services import UnitOfWork
+from syncmaster.exceptions import EntityNotFoundError
+from syncmaster.schemas.v1.auth import AuthTokenSchema
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 

@@ -4,11 +4,11 @@ import secrets
 from operator import or_
 
 import pytest
-from db import Connection, Queue
 from httpx import AsyncClient
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from syncmaster.db import Connection, Queue
 from tests.utils import MockGroup, MockTransfer, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]

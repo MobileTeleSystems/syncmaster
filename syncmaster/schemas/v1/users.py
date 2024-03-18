@@ -1,8 +1,9 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-from db import GroupMemberRole, Pagination
 from pydantic import BaseModel, constr
-from schemas.v1.schemas import MetaPageSchema, PageSchema
+
+from syncmaster.db import GroupMemberRole, Pagination
+from syncmaster.schemas.v1.schemas import MetaPageSchema, PageSchema
 
 
 class UpdateUserSchema(BaseModel):

@@ -71,7 +71,7 @@ class Settings(BaseSettings):
 
     TOKEN_EXPIRED_TIME: int = 60 * 60 * 10  # 10 hours
     CREATE_SPARK_SESSION_FUNCTION: PyObject = (
-        "backend.worker.utils.get_worker_spark_session"  # type: ignore[assignment]
+        "syncmaster.worker.utils.get_worker_spark_session"  # type: ignore[assignment]
     )
 
 

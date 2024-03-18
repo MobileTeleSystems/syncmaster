@@ -2,10 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 import time
 
-from backend.config import Settings
 from jose import JWTError, jwt
 from pydantic import ValidationError
-from schemas.v1.auth import TokenPayloadSchema
+
+from syncmaster.backend.config import Settings
+from syncmaster.schemas.v1.auth import TokenPayloadSchema
 
 
 def sign_jwt(user_id: int, settings: Settings) -> str:

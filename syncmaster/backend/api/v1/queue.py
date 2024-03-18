@@ -1,18 +1,19 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-from backend.api.deps import UnitOfWorkMarker
-from backend.services import UnitOfWork, get_user
-from db import Permission, User
-from exceptions import ActionNotAllowedError, GroupNotFoundError
-from exceptions.queue import QueueDeleteError, QueueNotFoundError
 from fastapi import APIRouter, Depends, Query, status
-from schemas.v1.queue import (
+
+from syncmaster.backend.api.deps import UnitOfWorkMarker
+from syncmaster.backend.services import UnitOfWork, get_user
+from syncmaster.db import Permission, User
+from syncmaster.exceptions import ActionNotAllowedError, GroupNotFoundError
+from syncmaster.exceptions.queue import QueueDeleteError, QueueNotFoundError
+from syncmaster.schemas.v1.queue import (
     CreateQueueSchema,
     QueuePageSchema,
     ReadQueueSchema,
     UpdateQueueSchema,
 )
-from schemas.v1.schemas import StatusResponseSchema
+from syncmaster.schemas.v1.schemas import StatusResponseSchema
 
 router = APIRouter(tags=["Queues"])
 

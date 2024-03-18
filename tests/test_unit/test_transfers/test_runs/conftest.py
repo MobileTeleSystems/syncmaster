@@ -3,10 +3,10 @@
 import secrets
 
 import pytest_asyncio
-from backend.api.v1.auth.utils import sign_jwt
-from backend.config import Settings
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from syncmaster.backend.api.v1.auth.utils import sign_jwt
+from syncmaster.backend.config import Settings
 from tests.test_unit.conftest import create_group_member
 from tests.test_unit.utils import (
     create_connection,

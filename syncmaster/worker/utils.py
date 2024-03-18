@@ -3,10 +3,11 @@
 import logging
 
 import pyspark
-from backend.config import Settings
-from dto.connections import ConnectionDTO
 from onetl.connection import Oracle, Postgres, SparkS3
 from pyspark.sql import SparkSession
+
+from syncmaster.backend.config import Settings
+from syncmaster.dto.connections import ConnectionDTO
 
 log = logging.getLogger(__name__)
 

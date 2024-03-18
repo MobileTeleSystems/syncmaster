@@ -3,8 +3,9 @@
 import abc
 from typing import Any, Literal
 
-from db import Pagination
 from pydantic import BaseModel, constr
+
+from syncmaster.db import Pagination
 
 # transfer types
 FULL_TYPE = Literal["full"]

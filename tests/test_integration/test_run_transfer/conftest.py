@@ -10,15 +10,6 @@ from typing import Literal
 
 import pytest
 import pytest_asyncio
-from backend.api.v1.auth.utils import sign_jwt
-from backend.config import Settings, TestSettings
-from dto.connections import (
-    HDFSConnectionDTO,
-    HiveConnectionDTO,
-    OracleConnectionDTO,
-    PostgresConnectionDTO,
-    S3ConnectionDTO,
-)
 from onetl.connection import Hive, Oracle, Postgres, SparkS3
 from onetl.db import DBWriter
 from onetl.file.format import CSV, JSON, JSONLine
@@ -34,6 +25,15 @@ from pyspark.sql.types import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from syncmaster.backend.api.v1.auth.utils import sign_jwt
+from syncmaster.backend.config import Settings, TestSettings
+from syncmaster.dto.connections import (
+    HDFSConnectionDTO,
+    HiveConnectionDTO,
+    OracleConnectionDTO,
+    PostgresConnectionDTO,
+    S3ConnectionDTO,
+)
 from tests.resources.file_df_connection.test_data import data
 from tests.test_unit.utils import (
     create_connection,
@@ -65,6 +65,7 @@ def spark(settings: Settings) -> SparkSession:
 
 
 def get_spark_session(connection_settings: Settings) -> SparkSession:
+    print(10 * "-", "START GET SPARK SESSION", 10 * "-")
     maven_packages = [p for connection in (Postgres, Oracle) for p in connection.get_packages()]
     maven_s3_packages = [p for p in SparkS3.get_packages(spark_version="3.4.1")]
     maven_packages.extend(maven_s3_packages)
@@ -166,7 +167,9 @@ def s3(test_settings: TestSettings) -> S3ConnectionDTO:
 
 @pytest.fixture
 def init_df(spark: SparkSession) -> DataFrame:
+    print(10 * "-", "START INIT DF", 10 * "-")
     df = spark.createDataFrame(data, df_schema)  # type: ignore
+    print(10 * "-", "END INIT DF", 10 * "-")
 
     return df
 
@@ -177,6 +180,7 @@ def prepare_postgres(
     postgres: PostgresConnectionDTO,
     init_df: DataFrame,
 ) -> Postgres:
+    print(10 * "-", "START PREPARE POSTGRES", 10 * "-")
     postgres_connection = Postgres(
         host=postgres.host,
         port=postgres.port,
@@ -193,6 +197,7 @@ def prepare_postgres(
         options=Postgres.WriteOptions(if_exists="append"),
     )
     db_writer.run(init_df)
+    print(10 * "-", "END PREPARE POSTGRES", 10 * "-")
     return postgres_connection
 
 
@@ -357,8 +362,10 @@ def prepare_hdfs(
     hdfs_file_connection,
     resource_path,
 ):
+    print(10 * "-", "START PREPARE HDFS", 10 * "-")
     connection, upload_to = hdfs_file_df_connection_with_path
     files = upload_files(resource_path, upload_to, hdfs_file_connection)
+    print(10 * "-", "END PREPARE HDFS", 10 * "-")
     return connection, upload_to, files
 
 
@@ -368,6 +375,7 @@ def prepare_hive(
     hive: HiveConnectionDTO,
     init_df: DataFrame,
 ) -> Hive:
+    print(10 * "-", "START PREPARE HIVE", 10 * "-")
     hive_connection = Hive(
         cluster=hive.cluster,
         spark=spark,
@@ -381,6 +389,7 @@ def prepare_hive(
     )
     db_writer.run(init_df)
     spark.catalog.refreshTable("public.source_table")
+    print(10 * "-", "END PREPARE HIVE", 10 * "-")
     return hive_connection
 
 
@@ -390,6 +399,7 @@ def prepare_oracle(
     oracle: OracleConnectionDTO,
     spark: SparkSession,
 ) -> Oracle:
+    print(10 * "-", "START PREPARE ORACLE", 10 * "-")
     oracle_connection = Oracle(
         host=oracle.host,
         port=oracle.port,
@@ -413,6 +423,7 @@ def prepare_oracle(
         options=Oracle.WriteOptions(if_exists="append"),
     )
     db_writer.run(init_df)
+    print(10 * "-", "END PREPARE ORACLE", 10 * "-")
     return oracle_connection
 
 
@@ -460,6 +471,7 @@ async def transfers(
     hdfs: HDFSConnectionDTO,
     s3: S3ConnectionDTO,
 ):
+    print(10 * "-", "START TRANSFERS FIXTURE", 10 * "-")
     s3_file_format, file_format_object = choice_file_format
     _, source_path, _ = prepare_s3
 
@@ -589,7 +601,7 @@ async def transfers(
 
     queue = await create_queue(
         session=session,
-        name=f"test_queue_{secrets.token_hex(5)}",
+        name="test_queue",
         group_id=group.id,
     )
 
@@ -661,6 +673,7 @@ async def transfers(
         ),
     }
     data.update(transfers)  # type: ignore
+    print(10 * "-", "END TRANSFERS FIXTURE", 10 * "-")
     yield data
     for transfer in transfers.values():
         await session.delete(transfer)

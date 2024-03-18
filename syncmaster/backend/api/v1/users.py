@@ -2,13 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 import logging
 
-from backend.api.deps import UnitOfWorkMarker
-from backend.services import UnitOfWork, get_user
-from db import User
-from exceptions import ActionNotAllowedError
 from fastapi import APIRouter, Depends, Query
-from schemas.v1.schemas import StatusResponseSchema
-from schemas.v1.users import ReadUserSchema, UpdateUserSchema, UserPageSchema
+
+from syncmaster.backend.api.deps import UnitOfWorkMarker
+from syncmaster.backend.services import UnitOfWork, get_user
+from syncmaster.db import User
+from syncmaster.exceptions import ActionNotAllowedError
+from syncmaster.schemas.v1.schemas import StatusResponseSchema
+from syncmaster.schemas.v1.users import ReadUserSchema, UpdateUserSchema, UserPageSchema
 
 logger = logging.getLogger(__name__)
 

@@ -3,7 +3,8 @@
 from typing import Literal
 
 from pydantic import BaseModel, SecretStr, root_validator
-from schemas.v1.schemas import S3_TYPE
+
+from syncmaster.schemas.v1.schemas import S3_TYPE
 
 
 class S3BaseSchema(BaseModel):

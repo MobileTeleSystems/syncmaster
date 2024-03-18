@@ -1,11 +1,11 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
 import pytest
-from db import Status, Transfer
 from httpx import AsyncClient
 from onetl.file import FileDFReader
 from pyspark.sql import DataFrame
 
+from syncmaster.db import Status, Transfer
 from tests.utils import MockUser, get_run_on_end
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.worker, pytest.mark.s3, pytest.mark.postgres]

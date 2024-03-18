@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
-from schemas.v1.schemas import HDFS_TYPE
-from schemas.v1.transfers.file.base import (
+from syncmaster.schemas.v1.schemas import HDFS_TYPE
+from syncmaster.schemas.v1.transfers.file.base import (
     CreateFileTransferSource,
     CreateFileTransferTarget,
     ReadFileTransferSource,

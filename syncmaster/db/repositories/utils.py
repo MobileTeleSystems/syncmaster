@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 import json
 
-from backend.config import Settings
 from cryptography.fernet import Fernet
+
+from syncmaster.backend.config import Settings
 
 
 def decrypt_auth_data(

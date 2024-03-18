@@ -3,21 +3,29 @@
 import asyncio
 from typing import get_args
 
-from backend.api.deps import UnitOfWorkMarker
-from backend.services import UnitOfWork, get_user
-from db import Permission, User
-from exceptions import ActionNotAllowedError, AuthDataNotFoundError, GroupNotFoundError
-from exceptions.connection import ConnectionDeleteError, ConnectionNotFoundError
 from fastapi import APIRouter, Depends, Query, status
 from pydantic import SecretStr
-from schemas.v1.connections.connection import (
+
+from syncmaster.backend.api.deps import UnitOfWorkMarker
+from syncmaster.backend.services import UnitOfWork, get_user
+from syncmaster.db import Permission, User
+from syncmaster.exceptions import (
+    ActionNotAllowedError,
+    AuthDataNotFoundError,
+    GroupNotFoundError,
+)
+from syncmaster.exceptions.connection import (
+    ConnectionDeleteError,
+    ConnectionNotFoundError,
+)
+from syncmaster.schemas.v1.connections.connection import (
     ConnectionCopySchema,
     ConnectionPageSchema,
     CreateConnectionSchema,
     ReadConnectionSchema,
     UpdateConnectionSchema,
 )
-from schemas.v1.schemas import (
+from syncmaster.schemas.v1.schemas import (
     ORACLE_TYPE,
     POSTGRES_TYPE,
     MetaPageSchema,

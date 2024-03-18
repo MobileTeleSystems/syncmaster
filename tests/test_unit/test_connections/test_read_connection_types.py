@@ -3,9 +3,9 @@
 from typing import get_args
 
 import pytest
-from backend.api.v1.connections import CONNECTION_TYPES
 from httpx import AsyncClient
 
+from syncmaster.backend.api.v1.connections import CONNECTION_TYPES
 from tests.utils import MockUser
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]

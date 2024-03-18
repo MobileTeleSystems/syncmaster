@@ -1,8 +1,10 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-from backend.config import Settings
-from db import AuthData
-from db.repositories import (
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from syncmaster.backend.config import Settings
+from syncmaster.db import AuthData
+from syncmaster.db.repositories import (
     ConnectionRepository,
     GroupRepository,
     QueueRepository,
@@ -10,8 +12,7 @@ from db.repositories import (
     TransferRepository,
     UserRepository,
 )
-from db.repositories.credentials_repository import CredentialsRepository
-from sqlalchemy.ext.asyncio import AsyncSession
+from syncmaster.db.repositories.credentials_repository import CredentialsRepository
 
 
 class UnitOfWork:

@@ -4,12 +4,13 @@ import asyncio
 from logging.config import fileConfig
 
 from alembic import context
-from backend.config import Settings
 from celery.backends.database.session import ResultModelBase
-from db import Base
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
+
+from syncmaster.backend.config import Settings
+from syncmaster.db import Base
 
 config = context.config
 

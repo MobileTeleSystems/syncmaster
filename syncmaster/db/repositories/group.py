@@ -3,9 +3,13 @@
 import re
 from typing import NoReturn
 
-from db import Group, Pagination, Permission, User, UserGroup
-from db.repositories.base import Repository
-from exceptions import (
+from sqlalchemy import ScalarResult, insert, or_, select, update
+from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from syncmaster.db import Group, Pagination, Permission, User, UserGroup
+from syncmaster.db.repositories.base import Repository
+from syncmaster.exceptions import (
     AlreadyIsGroupMemberError,
     AlreadyIsNotGroupMemberError,
     EntityNotFoundError,
@@ -15,9 +19,6 @@ from exceptions import (
     SyncmasterError,
     UserNotFoundError,
 )
-from sqlalchemy import ScalarResult, insert, or_, select, update
-from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class GroupRepository(Repository[Group]):

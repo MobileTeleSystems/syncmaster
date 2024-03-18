@@ -2,10 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 from typing import Generic, TypeVar
 
-from db import Base, Group, GroupMemberRole, Permission, User, UserGroup
-from db.repositories.base import Repository
-from exceptions import GroupNotFoundError
 from sqlalchemy import select
+
+from syncmaster.db import Base, Group, GroupMemberRole, Permission, User, UserGroup
+from syncmaster.db.repositories.base import Repository
+from syncmaster.exceptions import GroupNotFoundError
 
 Model = TypeVar("Model", bound=Base)
 

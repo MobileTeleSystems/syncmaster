@@ -8,14 +8,24 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Any
 
-from backend.config import Settings
-from db import AuthData, Connection, Group, Queue, Run, Status, Transfer, User
-from db.repositories import encrypt_auth_data
 from onetl.connection import FileConnection
 from onetl.impl import LocalPath, RemotePath
-from schemas.v1.transfers import ReadFullTransferSchema
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
+
+from syncmaster.backend.config import Settings
+from syncmaster.db import (
+    AuthData,
+    Connection,
+    Group,
+    Queue,
+    Run,
+    Status,
+    Transfer,
+    User,
+)
+from syncmaster.db.repositories import encrypt_auth_data
+from syncmaster.schemas.v1.transfers import ReadFullTransferSchema
 
 
 @asynccontextmanager

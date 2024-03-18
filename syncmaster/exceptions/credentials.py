@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-from exceptions import SyncmasterError
+from syncmaster.exceptions import SyncmasterError
 
 
 class AuthDataNotFoundError(SyncmasterError):

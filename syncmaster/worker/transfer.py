@@ -4,15 +4,16 @@ import logging
 from datetime import datetime
 
 import onetl
-from backend.config import Settings
-from backend.worker.base import WorkerTask
-from backend.worker.config import celery
-from backend.worker.controller import TransferController
-from db import AuthData, Run, Status, Transfer
-from db.repositories import decrypt_auth_data
-from exceptions.run import RunNotFoundError
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
+
+from syncmaster.backend.config import Settings
+from syncmaster.db import AuthData, Run, Status, Transfer
+from syncmaster.db.repositories import decrypt_auth_data
+from syncmaster.exceptions.run import RunNotFoundError
+from syncmaster.worker.base import WorkerTask
+from syncmaster.worker.config import celery
+from syncmaster.worker.controller import TransferController
 
 logger = logging.getLogger(__name__)
 

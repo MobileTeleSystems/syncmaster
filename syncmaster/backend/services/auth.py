@@ -2,14 +2,15 @@
 # SPDX-License-Identifier: Apache-2.0
 from collections.abc import Awaitable, Callable
 
-from backend.api.deps import AuthMarker, SettingsMarker, UnitOfWorkMarker
-from backend.api.v1.auth.utils import decode_jwt
-from backend.config import Settings
-from backend.services.unit_of_work import UnitOfWork
-from db import User
 from fastapi import Depends, Request, status
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
+
+from syncmaster.backend.api.deps import AuthMarker, SettingsMarker, UnitOfWorkMarker
+from syncmaster.backend.api.v1.auth.utils import decode_jwt
+from syncmaster.backend.config import Settings
+from syncmaster.backend.services.unit_of_work import UnitOfWork
+from syncmaster.db import User
 
 
 def get_user(

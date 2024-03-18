@@ -2,15 +2,20 @@
 # SPDX-License-Identifier: Apache-2.0
 from typing import NoReturn
 
-from db import Group, GroupMemberRole, Permission, Queue, User, UserGroup
-from db.repositories.repository_with_owner import RepositoryWithOwner
-from exceptions import EntityNotFoundError, GroupNotFoundError, SyncmasterError
-from exceptions.queue import QueueNotFoundError
-from schemas.v1.queue import UpdateQueueSchema
 from sqlalchemy import ScalarResult, insert, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+
+from syncmaster.db import Group, GroupMemberRole, Permission, Queue, User, UserGroup
+from syncmaster.db.repositories.repository_with_owner import RepositoryWithOwner
+from syncmaster.exceptions import (
+    EntityNotFoundError,
+    GroupNotFoundError,
+    SyncmasterError,
+)
+from syncmaster.exceptions.queue import QueueNotFoundError
+from syncmaster.schemas.v1.queue import UpdateQueueSchema
 
 
 class QueueRepository(RepositoryWithOwner[Queue]):

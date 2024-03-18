@@ -1,15 +1,19 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-from exceptions.base import ActionNotAllowedError, EntityNotFoundError, SyncmasterError
-from exceptions.connection import (
+from syncmaster.exceptions.base import (
+    ActionNotAllowedError,
+    EntityNotFoundError,
+    SyncmasterError,
+)
+from syncmaster.exceptions.connection import (
     ConnectionDeleteError,
     ConnectionNotFoundError,
     ConnectionOwnerError,
     ConnectionTypeNotRecognizedError,
     DuplicatedConnectionNameError,
 )
-from exceptions.credentials import AuthDataNotFoundError
-from exceptions.group import (
+from syncmaster.exceptions.credentials import AuthDataNotFoundError
+from syncmaster.exceptions.group import (
     AlreadyIsGroupMemberError,
     AlreadyIsNotGroupMemberError,
     GroupAdminNotFoundError,
@@ -17,24 +21,24 @@ from exceptions.group import (
     GroupNameAlreadyExistsError,
     GroupNotFoundError,
 )
-from exceptions.queue import (
+from syncmaster.exceptions.queue import (
     DifferentTransferAndQueueGroupError,
     QueueDeleteError,
     QueueNotFoundError,
 )
-from exceptions.run import (
+from syncmaster.exceptions.run import (
     CannotConnectToTaskQueueError,
     CannotStopRunError,
     RunNotFoundError,
 )
-from exceptions.transfer import (
+from syncmaster.exceptions.transfer import (
     DifferentTransferAndConnectionsGroupsError,
     DifferentTypeConnectionsAndParamsError,
     DuplicatedTransferNameError,
     TransferNotFoundError,
     TransferOwnerError,
 )
-from exceptions.user import UsernameAlreadyExistsError, UserNotFoundError
+from syncmaster.exceptions.user import UsernameAlreadyExistsError, UserNotFoundError
 
 __all__ = [
     "ActionNotAllowedError",

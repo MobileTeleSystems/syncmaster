@@ -1,21 +1,25 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
 import uvicorn
-from backend.api.deps import (
+from fastapi import FastAPI, HTTPException
+from starlette.middleware.cors import CORSMiddleware
+
+from syncmaster.backend.api.deps import (
     AuthMarker,
     DatabaseEngineMarker,
     DatabaseSessionMarker,
     SettingsMarker,
     UnitOfWorkMarker,
 )
-from backend.api.router import api_router
-from backend.config import Settings
-from backend.handler import http_exception_handler, syncmsater_exception_handler
-from backend.services import get_auth_scheme
-from db.factory import create_engine, create_session_factory, get_uow
-from exceptions import SyncmasterError
-from fastapi import FastAPI, HTTPException
-from starlette.middleware.cors import CORSMiddleware
+from syncmaster.backend.api.router import api_router
+from syncmaster.backend.config import Settings
+from syncmaster.backend.handler import (
+    http_exception_handler,
+    syncmsater_exception_handler,
+)
+from syncmaster.backend.services import get_auth_scheme
+from syncmaster.db.factory import create_engine, create_session_factory, get_uow
+from syncmaster.exceptions import SyncmasterError
 
 
 def get_application(settings: Settings) -> FastAPI:

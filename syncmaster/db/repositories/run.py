@@ -2,19 +2,20 @@
 # SPDX-License-Identifier: Apache-2.0
 from typing import Any, NoReturn
 
-from db import Pagination, Run, Status, Transfer
-from db.repositories.base import Repository
-from exceptions import (
+from sqlalchemy import desc, select
+from sqlalchemy.exc import DBAPIError, IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from syncmaster.db import Pagination, Run, Status, Transfer
+from syncmaster.db.repositories.base import Repository
+from syncmaster.exceptions import (
     CannotStopRunError,
     RunNotFoundError,
     SyncmasterError,
     TransferNotFoundError,
 )
-from schemas.v1.transfers import ReadFullTransferSchema
-from sqlalchemy import desc, select
-from sqlalchemy.exc import DBAPIError, IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from syncmaster.schemas.v1.transfers import ReadFullTransferSchema
 
 
 class RunRepository(Repository[Run]):

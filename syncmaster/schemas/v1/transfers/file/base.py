@@ -5,7 +5,8 @@ from __future__ import annotations
 from pathlib import PurePosixPath
 
 from pydantic import BaseModel, Field, validator
-from schemas.v1.transfers.file_format import CSV, JSON, JSONLine
+
+from syncmaster.schemas.v1.transfers.file_format import CSV, JSON, JSONLine
 
 
 def validate_directory_path(path: str) -> PurePosixPath:

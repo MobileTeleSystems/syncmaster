@@ -3,12 +3,12 @@
 import secrets
 
 import pytest_asyncio
-from backend.api.v1.auth.utils import sign_jwt
-from backend.config import Settings
-from db import Queue, User, UserGroup
-from db.repositories import decrypt_auth_data
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from syncmaster.backend.api.v1.auth.utils import sign_jwt
+from syncmaster.backend.config import Settings
+from syncmaster.db import Queue, User, UserGroup
+from syncmaster.db.repositories import decrypt_auth_data
 from tests.test_unit.utils import (
     create_connection,
     create_credentials,

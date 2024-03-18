@@ -2,7 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 import logging
 
-from exceptions import (
+from fastapi import HTTPException, Request, status
+from fastapi.responses import JSONResponse
+
+from syncmaster.exceptions import (
     ActionNotAllowedError,
     AlreadyIsGroupMemberError,
     AlreadyIsNotGroupMemberError,
@@ -29,9 +32,7 @@ from exceptions import (
     UsernameAlreadyExistsError,
     UserNotFoundError,
 )
-from fastapi import HTTPException, Request, status
-from fastapi.responses import JSONResponse
-from schemas.v1.schemas import StatusResponseSchema
+from syncmaster.schemas.v1.schemas import StatusResponseSchema
 
 logger = logging.getLogger(__name__)
 

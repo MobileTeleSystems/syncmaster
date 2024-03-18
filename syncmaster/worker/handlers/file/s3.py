@@ -1,7 +1,8 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-from backend.worker.handlers.file.base import FileHandler
 from onetl.connection import SparkS3
+
+from syncmaster.worker.handlers.file.base import FileHandler
 
 
 class S3Handler(FileHandler):

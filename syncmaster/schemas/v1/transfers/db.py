@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from pydantic import BaseModel
-from schemas.v1.schemas import HIVE_TYPE, ORACLE_TYPE, POSTGRES_TYPE
+
+from syncmaster.schemas.v1.schemas import HIVE_TYPE, ORACLE_TYPE, POSTGRES_TYPE
 
 
 class ReadDBTransfer(BaseModel):

@@ -3,11 +3,12 @@
 from abc import ABC
 from typing import Any, Generic, TypeVar
 
-from db import Base, Pagination
-from exceptions import EntityNotFoundError
 from sqlalchemy import ScalarResult, Select, and_, delete, func, insert, select, update
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from syncmaster.db import Base, Pagination
+from syncmaster.exceptions import EntityNotFoundError
 
 Model = TypeVar("Model", bound=Base)
 

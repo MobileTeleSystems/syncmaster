@@ -4,14 +4,15 @@ from __future__ import annotations
 
 import logging
 
-from backend.config import Settings
-from backend.worker.utils import get_spark_session_conf
 from celery.signals import worker_process_init, worker_process_shutdown
 from coverage import Coverage
-from dto.connections import ConnectionDTO
 from onetl.connection import SparkHDFS
 from onetl.hooks import hook
 from pyspark.sql import SparkSession
+
+from syncmaster.backend.config import Settings
+from syncmaster.dto.connections import ConnectionDTO
+from syncmaster.worker.utils import get_spark_session_conf
 
 log = logging.getLogger(__name__)
 

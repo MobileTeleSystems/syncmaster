@@ -2,12 +2,16 @@
 # SPDX-License-Identifier: Apache-2.0
 import asyncio
 
-from backend.api.deps import UnitOfWorkMarker
-from backend.api.v1.transfers.utils import process_file_transfer_directory_path
-from backend.services import UnitOfWork, get_user
-from backend.worker.config import celery
-from db import Permission, Status, User
-from exceptions import (
+from fastapi import APIRouter, Depends, Query, status
+from kombu.exceptions import KombuError
+
+from syncmaster.backend.api.deps import UnitOfWorkMarker
+from syncmaster.backend.api.v1.transfers.utils import (
+    process_file_transfer_directory_path,
+)
+from syncmaster.backend.services import UnitOfWork, get_user
+from syncmaster.db import Permission, Status, User
+from syncmaster.exceptions import (
     CannotConnectToTaskQueueError,
     ConnectionNotFoundError,
     DifferentTransferAndConnectionsGroupsError,
@@ -16,11 +20,12 @@ from exceptions import (
     GroupNotFoundError,
     TransferNotFoundError,
 )
-from exceptions.base import ActionNotAllowedError
-from fastapi import APIRouter, Depends, Query, status
-from kombu.exceptions import KombuError
-from schemas.v1.schemas import StatusCopyTransferResponseSchema, StatusResponseSchema
-from schemas.v1.transfers import (
+from syncmaster.exceptions.base import ActionNotAllowedError
+from syncmaster.schemas.v1.schemas import (
+    StatusCopyTransferResponseSchema,
+    StatusResponseSchema,
+)
+from syncmaster.schemas.v1.transfers import (
     CopyTransferSchema,
     CreateRunSchema,
     CreateTransferSchema,
@@ -30,6 +35,7 @@ from schemas.v1.transfers import (
     TransferPageSchema,
     UpdateTransferSchema,
 )
+from syncmaster.worker.config import celery
 
 router = APIRouter(tags=["Transfers"])
 

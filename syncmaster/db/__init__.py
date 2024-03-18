@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
 
-from db.base import Base
-from db.mixins import DeletableMixin, ResourceMixin, TimestampMixin
-from db.models import (
+from syncmaster.db.base import Base
+from syncmaster.db.mixins import DeletableMixin, ResourceMixin, TimestampMixin
+from syncmaster.db.models import (
     AuthData,
     Connection,
     Group,
@@ -15,7 +15,7 @@ from db.models import (
     User,
     UserGroup,
 )
-from db.utils import Pagination, Permission
+from syncmaster.db.utils import Pagination, Permission
 
 __all__ = [
     "AuthData",
