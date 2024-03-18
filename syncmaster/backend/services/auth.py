@@ -8,8 +8,8 @@ from fastapi.security import OAuth2PasswordBearer
 
 from syncmaster.backend.api.deps import AuthMarker, SettingsMarker, UnitOfWorkMarker
 from syncmaster.backend.api.v1.auth.utils import decode_jwt
-from syncmaster.backend.config import Settings
 from syncmaster.backend.services.unit_of_work import UnitOfWork
+from syncmaster.config import Settings
 from syncmaster.db import User
 
 

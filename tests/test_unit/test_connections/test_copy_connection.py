@@ -7,9 +7,9 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.backend.config import Settings
+from syncmaster.config import Settings
 from syncmaster.db import AuthData, Connection
-from syncmaster.db.repositories import decrypt_auth_data
+from syncmaster.db.repositories.utils import decrypt_auth_data
 from tests.utils import MockConnection, MockGroup, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]

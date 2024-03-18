@@ -6,7 +6,7 @@ import pyspark
 from onetl.connection import Oracle, Postgres, SparkS3
 from pyspark.sql import SparkSession
 
-from syncmaster.backend.config import Settings
+from syncmaster.config import Settings
 from syncmaster.dto.connections import ConnectionDTO
 
 log = logging.getLogger(__name__)

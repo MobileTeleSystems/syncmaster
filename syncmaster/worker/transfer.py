@@ -7,9 +7,9 @@ import onetl
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from syncmaster.backend.config import Settings
+from syncmaster.config import Settings
 from syncmaster.db import AuthData, Run, Status, Transfer
-from syncmaster.db.repositories import decrypt_auth_data
+from syncmaster.db.repositories.utils import decrypt_auth_data
 from syncmaster.exceptions.run import RunNotFoundError
 from syncmaster.worker.base import WorkerTask
 from syncmaster.worker.config import celery

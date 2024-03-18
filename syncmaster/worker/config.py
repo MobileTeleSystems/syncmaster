@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from celery import Celery
 
-from syncmaster.backend.config import Settings
+from syncmaster.config import Settings
 from syncmaster.worker.base import WorkerTask
 
 settings = Settings()

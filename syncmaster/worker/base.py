@@ -3,7 +3,7 @@
 from celery import Task
 from sqlalchemy import create_engine
 
-from syncmaster.backend.config import Settings
+from syncmaster.config import Settings
 
 
 class WorkerTask(Task):

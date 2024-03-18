@@ -10,9 +10,9 @@ from onetl.connection import SparkHDFS
 from onetl.hooks import hook
 from pyspark.sql import SparkSession
 
-from syncmaster.backend.config import Settings
+from syncmaster.config import Settings
 from syncmaster.dto.connections import ConnectionDTO
-from syncmaster.worker.utils import get_spark_session_conf
+from syncmaster.worker.spark import get_spark_session_conf
 
 log = logging.getLogger(__name__)
 

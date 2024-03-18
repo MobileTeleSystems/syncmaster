@@ -13,7 +13,7 @@ from onetl.impl import LocalPath, RemotePath
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from syncmaster.backend.config import Settings
+from syncmaster.config import Settings
 from syncmaster.db import (
     AuthData,
     Connection,
@@ -24,7 +24,7 @@ from syncmaster.db import (
     Transfer,
     User,
 )
-from syncmaster.db.repositories import encrypt_auth_data
+from syncmaster.db.repositories.utils import encrypt_auth_data
 from syncmaster.schemas.v1.transfers import ReadFullTransferSchema
 
 

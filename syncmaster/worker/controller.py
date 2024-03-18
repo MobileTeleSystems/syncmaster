@@ -3,7 +3,7 @@
 import logging
 from typing import Any
 
-from syncmaster.backend.config import Settings
+from syncmaster.config import Settings
 from syncmaster.db import Connection, Transfer
 from syncmaster.dto.connections import (
     HDFSConnectionDTO,

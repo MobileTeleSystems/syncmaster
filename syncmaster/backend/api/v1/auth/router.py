@@ -5,8 +5,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from syncmaster.backend.api.deps import SettingsMarker, UnitOfWorkMarker
 from syncmaster.backend.api.v1.auth.utils import sign_jwt
-from syncmaster.backend.config import Settings
 from syncmaster.backend.services import UnitOfWork
+from syncmaster.config import Settings
 from syncmaster.exceptions import EntityNotFoundError
 from syncmaster.schemas.v1.auth import AuthTokenSchema
 

@@ -1,9 +1,11 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
 import asyncio
+import logging
 import os
 import secrets
 from collections.abc import AsyncGenerator
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -18,10 +20,10 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from syncmaster.backend.api.v1.auth.utils import sign_jwt
-from syncmaster.backend.config import Settings, TestSettings
 from syncmaster.backend.main import get_application
+from syncmaster.config import Settings, TestSettings
 from syncmaster.db import Base, Connection, Queue
-from syncmaster.db.repositories import decrypt_auth_data
+from syncmaster.db.repositories.utils import decrypt_auth_data
 from tests.test_unit.conftest import add_user_to_group, create_group_member
 from tests.test_unit.utils import (
     create_connection,
@@ -43,6 +45,9 @@ from tests.utils import (
 )
 
 PROJECT_PATH = Path(__file__).parent.parent.resolve()
+
+
+logger = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope="session")
@@ -107,11 +112,11 @@ async def client(
     settings: Settings,
     async_engine: AsyncEngine,
 ) -> AsyncGenerator:
-    print(10 * "-", "START CLIENT FIXTURE", 10 * "-")
+    logger.info("START CLIENT FIXTURE", datetime.now().isoformat())
     app = get_application(settings=settings)
     async with AsyncClient(app=app, base_url="http://testserver") as client:
         yield client
-        print(10 * "-", "END CLIENT FIXTURE", 10 * "-")
+        logger.info("END CLIENT FIXTURE", datetime.now().isoformat())
 
 
 @pytest_asyncio.fixture

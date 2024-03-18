@@ -2,17 +2,17 @@
 # SPDX-License-Identifier: Apache-2.0
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.backend.config import Settings
-from syncmaster.db import AuthData
+from syncmaster.config import Settings
+from syncmaster.db.models import AuthData
 from syncmaster.db.repositories import (
     ConnectionRepository,
+    CredentialsRepository,
     GroupRepository,
     QueueRepository,
     RunRepository,
     TransferRepository,
     UserRepository,
 )
-from syncmaster.db.repositories.credentials_repository import CredentialsRepository
 
 
 class UnitOfWork:

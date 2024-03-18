@@ -12,12 +12,12 @@ from syncmaster.backend.api.deps import (
     UnitOfWorkMarker,
 )
 from syncmaster.backend.api.router import api_router
-from syncmaster.backend.config import Settings
 from syncmaster.backend.handler import (
     http_exception_handler,
     syncmsater_exception_handler,
 )
 from syncmaster.backend.services import get_auth_scheme
+from syncmaster.config import Settings
 from syncmaster.db.factory import create_engine, create_session_factory, get_uow
 from syncmaster.exceptions import SyncmasterError
 

@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from syncmaster.backend.config import Settings
+from syncmaster.config import Settings
 from syncmaster.db import Connection, Group, Run, Status, Transfer, User
 
 logger = logging.getLogger(__name__)
@@ -202,7 +202,7 @@ async def drop_database(connection: AsyncConnection, db_name: str) -> None:
 
 async def get_run_on_end(client: AsyncClient, run_id: int, token: str) -> dict[str, Any]:
     while True:
-        print(10 * "-", "WAITING FOR THE RUN STATUS", 10 * "-")
+        logger.info("WAITING FOR THE RUN STATUS", datetime.now().isoformat())
         result = await client.get(
             f"v1/runs/{run_id}",
             headers={"Authorization": f"Bearer {token}"},

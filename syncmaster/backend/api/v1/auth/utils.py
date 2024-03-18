@@ -5,7 +5,7 @@ import time
 from jose import JWTError, jwt
 from pydantic import ValidationError
 
-from syncmaster.backend.config import Settings
+from syncmaster.config import Settings
 from syncmaster.schemas.v1.auth import TokenPayloadSchema
 
 

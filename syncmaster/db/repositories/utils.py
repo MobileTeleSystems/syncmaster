@@ -4,7 +4,7 @@ import json
 
 from cryptography.fernet import Fernet
 
-from syncmaster.backend.config import Settings
+from syncmaster.config import Settings
 
 
 def decrypt_auth_data(
