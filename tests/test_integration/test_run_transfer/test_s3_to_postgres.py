@@ -5,8 +5,8 @@ from pyspark.sql import DataFrame
 
 from syncmaster.db.models import Status, Transfer
 from tests.mocks import MockUser
-from tests.utils import get_run_on_end
 from tests.test_integration.test_run_transfer.conftest import df_schema
+from tests.utils import get_run_on_end
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.worker, pytest.mark.s3, pytest.mark.postgres]
 

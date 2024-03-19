@@ -39,10 +39,7 @@ from tests.test_unit.utils import (
     create_transfer,
     create_user,
 )
-from tests.utils import (
-    prepare_new_database,
-    run_async_migrations,
-)
+from tests.utils import prepare_new_database, run_async_migrations
 
 PROJECT_PATH = Path(__file__).parent.parent.resolve()
 
