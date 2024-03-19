@@ -11,14 +11,15 @@ from sqlalchemy.orm import selectinload
 from syncmaster.db.models import Transfer
 from syncmaster.db.repositories.repository_with_owner import RepositoryWithOwner
 from syncmaster.db.utils import Pagination
-from syncmaster.exceptions import (
-    EntityNotFoundError,
-    SyncmasterError,
-)
+from syncmaster.exceptions import EntityNotFoundError, SyncmasterError
 from syncmaster.exceptions.connection import ConnectionNotFoundError
 from syncmaster.exceptions.group import GroupNotFoundError
 from syncmaster.exceptions.queue import QueueNotFoundError
-from syncmaster.exceptions.transfer import TransferNotFoundError, TransferOwnerError, DuplicatedTransferNameError
+from syncmaster.exceptions.transfer import (
+    DuplicatedTransferNameError,
+    TransferNotFoundError,
+    TransferOwnerError,
+)
 from syncmaster.exceptions.user import UserNotFoundError
 
 

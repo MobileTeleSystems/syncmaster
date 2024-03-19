@@ -13,16 +13,10 @@ from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.db.models import Status, User
 from syncmaster.db.utils import Permission
 from syncmaster.exceptions.base import ActionNotAllowedError
-from syncmaster.exceptions.connection import (
-    ConnectionNotFoundError,
-)
-from syncmaster.exceptions.group import (
-    GroupNotFoundError,
-)
+from syncmaster.exceptions.connection import ConnectionNotFoundError
+from syncmaster.exceptions.group import GroupNotFoundError
 from syncmaster.exceptions.queue import DifferentTransferAndQueueGroupError
-from syncmaster.exceptions.run import (
-    CannotConnectToTaskQueueError,
-)
+from syncmaster.exceptions.run import CannotConnectToTaskQueueError
 from syncmaster.exceptions.transfer import (
     DifferentTransferAndConnectionsGroupsError,
     DifferentTypeConnectionsAndParamsError,

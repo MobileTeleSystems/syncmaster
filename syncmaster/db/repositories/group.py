@@ -10,12 +10,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from syncmaster.db.models import Group, User, UserGroup
 from syncmaster.db.repositories.base import Repository
 from syncmaster.db.utils import Pagination, Permission
-from syncmaster.exceptions import (
-    EntityNotFoundError,
-    SyncmasterError,
+from syncmaster.exceptions import EntityNotFoundError, SyncmasterError
+from syncmaster.exceptions.group import (
+    AlreadyIsGroupMemberError,
+    AlreadyIsNotGroupMemberError,
+    GroupAdminNotFoundError,
+    GroupAlreadyExistsError,
+    GroupNotFoundError,
 )
-from syncmaster.exceptions.group import AlreadyIsGroupMemberError, AlreadyIsNotGroupMemberError
-from syncmaster.exceptions.group import GroupAdminNotFoundError, GroupAlreadyExistsError, GroupNotFoundError
 from syncmaster.exceptions.user import UserNotFoundError
 
 

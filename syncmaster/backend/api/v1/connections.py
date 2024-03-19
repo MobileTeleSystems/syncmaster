@@ -10,9 +10,7 @@ from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.db.models import User
 from syncmaster.db.utils import Permission
-from syncmaster.exceptions import (
-    ActionNotAllowedError,
-)
+from syncmaster.exceptions import ActionNotAllowedError
 from syncmaster.exceptions.connection import (
     ConnectionDeleteError,
     ConnectionNotFoundError,

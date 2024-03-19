@@ -5,10 +5,7 @@ import logging
 from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
 
-from syncmaster.exceptions import (
-    ActionNotAllowedError,
-    SyncmasterError,
-)
+from syncmaster.exceptions import ActionNotAllowedError, SyncmasterError
 from syncmaster.exceptions.connection import (
     ConnectionDeleteError,
     ConnectionNotFoundError,
@@ -24,22 +21,23 @@ from syncmaster.exceptions.group import (
     GroupNotFoundError,
 )
 from syncmaster.exceptions.queue import (
+    DifferentTransferAndQueueGroupError,
     QueueDeleteError,
     QueueNotFoundError,
-    DifferentTransferAndQueueGroupError,
 )
-from syncmaster.exceptions.run import CannotConnectToTaskQueueError, CannotStopRunError, RunNotFoundError
+from syncmaster.exceptions.run import (
+    CannotConnectToTaskQueueError,
+    CannotStopRunError,
+    RunNotFoundError,
+)
 from syncmaster.exceptions.transfer import (
     DifferentTransferAndConnectionsGroupsError,
+    DifferentTypeConnectionsAndParamsError,
     DuplicatedTransferNameError,
     TransferNotFoundError,
     TransferOwnerError,
-    DifferentTypeConnectionsAndParamsError,
 )
-from syncmaster.exceptions.user import (
-    UsernameAlreadyExistsError,
-    UserNotFoundError,
-)
+from syncmaster.exceptions.user import UsernameAlreadyExistsError, UserNotFoundError
 from syncmaster.schemas.v1.status import StatusResponseSchema
 
 logger = logging.getLogger(__name__)

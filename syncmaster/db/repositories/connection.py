@@ -9,12 +9,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from syncmaster.db.models import Connection
 from syncmaster.db.repositories.repository_with_owner import RepositoryWithOwner
 from syncmaster.db.utils import Pagination
-from syncmaster.exceptions import (
-    EntityNotFoundError,
-    SyncmasterError,
+from syncmaster.exceptions import EntityNotFoundError, SyncmasterError
+from syncmaster.exceptions.connection import (
+    ConnectionNotFoundError,
+    ConnectionOwnerError,
+    DuplicatedConnectionNameError,
 )
-from syncmaster.exceptions.connection import (ConnectionNotFoundError, ConnectionOwnerError,
-                                              DuplicatedConnectionNameError)
 from syncmaster.exceptions.group import GroupNotFoundError
 from syncmaster.exceptions.user import UserNotFoundError
 

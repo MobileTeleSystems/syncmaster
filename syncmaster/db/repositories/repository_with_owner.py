@@ -4,9 +4,9 @@ from typing import Generic, TypeVar
 
 from sqlalchemy import select
 
-from syncmaster.db.models import Group, GroupMemberRole, UserGroup, Base, User
-from syncmaster.db.utils import Permission
+from syncmaster.db.models import Base, Group, GroupMemberRole, User, UserGroup
 from syncmaster.db.repositories.base import Repository
+from syncmaster.db.utils import Permission
 from syncmaster.exceptions.group import GroupNotFoundError
 
 Model = TypeVar("Model", bound=Base)

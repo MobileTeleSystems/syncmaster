@@ -8,14 +8,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from syncmaster.db.models import Group, GroupMemberRole, Queue, User, UserGroup
-from syncmaster.db.utils import Permission
 from syncmaster.db.repositories.repository_with_owner import RepositoryWithOwner
-from syncmaster.exceptions import (
-    EntityNotFoundError,
-    SyncmasterError,
-)
+from syncmaster.db.utils import Permission
+from syncmaster.exceptions import EntityNotFoundError, SyncmasterError
 from syncmaster.exceptions.group import GroupNotFoundError
 from syncmaster.exceptions.queue import QueueNotFoundError
+
 # TODO: remove HTTP response schemes from repositories, these are different layers
 from syncmaster.schemas.v1.queue import UpdateQueueSchema
 

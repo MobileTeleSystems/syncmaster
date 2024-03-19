@@ -51,12 +51,12 @@ async def run_async_migrations(config: Config, target_metadata: MetaData, revisi
         return script._downgrade_revs(revision, rev)
 
     with EnvironmentContext(
-            config,
-            script=script,
-            fn=upgrade if action == "up" else downgrade,
-            as_sql=False,
-            starting_rev=None,
-            destination_rev=revision,
+        config,
+        script=script,
+        fn=upgrade if action == "up" else downgrade,
+        as_sql=False,
+        starting_rev=None,
+        destination_rev=revision,
     ) as context:
         connectable = async_engine_from_config(
             config.get_section(config.config_ini_section, {}),

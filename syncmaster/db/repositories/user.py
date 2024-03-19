@@ -9,14 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from syncmaster.db.models import User
 from syncmaster.db.repositories.base import Repository
 from syncmaster.db.utils import Pagination
-from syncmaster.exceptions import (
-    EntityNotFoundError,
-    SyncmasterError,
-)
-from syncmaster.exceptions.user import (
-    UsernameAlreadyExistsError,
-    UserNotFoundError,
-)
+from syncmaster.exceptions import EntityNotFoundError, SyncmasterError
+from syncmaster.exceptions.user import UsernameAlreadyExistsError, UserNotFoundError
 
 
 class UserRepository(Repository[User]):
