@@ -29,8 +29,6 @@ from tests.mocks import (
     MockTransfer,
     MockUser,
     UserTestRoles,
-    prepare_new_database,
-    run_async_migrations,
 )
 from tests.test_unit.conftest import add_user_to_group, create_group_member
 from tests.test_unit.utils import (
@@ -40,6 +38,10 @@ from tests.test_unit.utils import (
     create_queue,
     create_transfer,
     create_user,
+)
+from tests.utils import (
+    prepare_new_database,
+    run_async_migrations,
 )
 
 PROJECT_PATH = Path(__file__).parent.parent.resolve()
