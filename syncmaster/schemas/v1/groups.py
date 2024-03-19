@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 from pydantic import BaseModel
 
-from syncmaster.db import GroupMemberRole
-from syncmaster.schemas.v1.page_schema import PageSchema
+from syncmaster.db.models import GroupMemberRole
+from syncmaster.schemas.v1.page import PageSchema
 from syncmaster.schemas.v1.types import NameConstr
 
 

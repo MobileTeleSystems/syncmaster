@@ -1,7 +1,5 @@
 #!/bin/env python3
 
-# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
-# SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
 import csv

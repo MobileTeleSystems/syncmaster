@@ -7,32 +7,40 @@ from fastapi.responses import JSONResponse
 
 from syncmaster.exceptions import (
     ActionNotAllowedError,
-    AlreadyIsGroupMemberError,
-    AlreadyIsNotGroupMemberError,
-    AuthDataNotFoundError,
-    CannotConnectToTaskQueueError,
-    CannotStopRunError,
+    SyncmasterError,
+)
+from syncmaster.exceptions.connection import (
     ConnectionDeleteError,
     ConnectionNotFoundError,
     ConnectionOwnerError,
-    DifferentTransferAndConnectionsGroupsError,
-    DifferentTransferAndQueueGroupError,
-    DifferentTypeConnectionsAndParamsError,
     DuplicatedConnectionNameError,
-    DuplicatedTransferNameError,
+)
+from syncmaster.exceptions.credentials import AuthDataNotFoundError
+from syncmaster.exceptions.group import (
+    AlreadyIsGroupMemberError,
+    AlreadyIsNotGroupMemberError,
     GroupAdminNotFoundError,
     GroupAlreadyExistsError,
     GroupNotFoundError,
+)
+from syncmaster.exceptions.queue import (
     QueueDeleteError,
     QueueNotFoundError,
-    RunNotFoundError,
-    SyncmasterError,
+    DifferentTransferAndQueueGroupError,
+)
+from syncmaster.exceptions.run import CannotConnectToTaskQueueError, CannotStopRunError, RunNotFoundError
+from syncmaster.exceptions.transfer import (
+    DifferentTransferAndConnectionsGroupsError,
+    DuplicatedTransferNameError,
     TransferNotFoundError,
     TransferOwnerError,
+    DifferentTypeConnectionsAndParamsError,
+)
+from syncmaster.exceptions.user import (
     UsernameAlreadyExistsError,
     UserNotFoundError,
 )
-from syncmaster.schemas.v1.status_schema import StatusResponseSchema
+from syncmaster.schemas.v1.status import StatusResponseSchema
 
 logger = logging.getLogger(__name__)
 

@@ -7,7 +7,8 @@ from sqlalchemy import ScalarResult, Select, and_, delete, func, insert, select,
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.db import Base, Pagination
+from syncmaster.db.utils import Pagination
+from syncmaster.db.base import Base
 from syncmaster.exceptions import EntityNotFoundError
 
 Model = TypeVar("Model", bound=Base)

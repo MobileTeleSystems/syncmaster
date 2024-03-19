@@ -1,5 +1,3 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
-# SPDX-License-Identifier: Apache-2.0
 import asyncio
 import logging
 import os
@@ -22,7 +20,7 @@ from sqlalchemy.ext.asyncio import (
 from syncmaster.backend.api.v1.auth.utils import sign_jwt
 from syncmaster.backend.main import get_application
 from syncmaster.config import Settings, TestSettings
-from syncmaster.db import Base, Connection, Queue
+from syncmaster.db.models import Base, Connection, Queue
 from syncmaster.db.repositories.utils import decrypt_auth_data
 from tests.mocks import (
     MockConnection,

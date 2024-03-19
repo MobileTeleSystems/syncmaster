@@ -8,16 +8,17 @@ from pydantic import SecretStr
 
 from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.services import UnitOfWork, get_user
-from syncmaster.db import Permission, User
+from syncmaster.db.models import User
+from syncmaster.db.utils import Permission
 from syncmaster.exceptions import (
     ActionNotAllowedError,
-    AuthDataNotFoundError,
-    GroupNotFoundError,
 )
 from syncmaster.exceptions.connection import (
     ConnectionDeleteError,
     ConnectionNotFoundError,
 )
+from syncmaster.exceptions.credentials import AuthDataNotFoundError
+from syncmaster.exceptions.group import GroupNotFoundError
 from syncmaster.schemas.v1.connection_types import ORACLE_TYPE, POSTGRES_TYPE
 from syncmaster.schemas.v1.connections.connection import (
     ConnectionCopySchema,
@@ -26,8 +27,8 @@ from syncmaster.schemas.v1.connections.connection import (
     ReadConnectionSchema,
     UpdateConnectionSchema,
 )
-from syncmaster.schemas.v1.page_schema import MetaPageSchema
-from syncmaster.schemas.v1.status_schema import StatusResponseSchema
+from syncmaster.schemas.v1.page import MetaPageSchema
+from syncmaster.schemas.v1.status import StatusResponseSchema
 
 router = APIRouter(tags=["Connections"])
 

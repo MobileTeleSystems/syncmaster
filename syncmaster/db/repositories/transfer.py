@@ -8,19 +8,18 @@ from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from syncmaster.db import Pagination, Transfer
+from syncmaster.db.models import Transfer
 from syncmaster.db.repositories.repository_with_owner import RepositoryWithOwner
+from syncmaster.db.utils import Pagination
 from syncmaster.exceptions import (
-    ConnectionNotFoundError,
-    DuplicatedTransferNameError,
     EntityNotFoundError,
-    GroupNotFoundError,
-    QueueNotFoundError,
     SyncmasterError,
-    TransferNotFoundError,
-    TransferOwnerError,
-    UserNotFoundError,
 )
+from syncmaster.exceptions.connection import ConnectionNotFoundError
+from syncmaster.exceptions.group import GroupNotFoundError
+from syncmaster.exceptions.queue import QueueNotFoundError
+from syncmaster.exceptions.transfer import TransferNotFoundError, TransferOwnerError, DuplicatedTransferNameError
+from syncmaster.exceptions.user import UserNotFoundError
 
 
 class TransferRepository(RepositoryWithOwner[Transfer]):

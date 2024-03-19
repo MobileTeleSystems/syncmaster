@@ -10,18 +10,25 @@ from syncmaster.backend.api.v1.transfers.utils import (
     process_file_transfer_directory_path,
 )
 from syncmaster.backend.services import UnitOfWork, get_user
-from syncmaster.db import Permission, Status, User
-from syncmaster.exceptions import (
-    CannotConnectToTaskQueueError,
+from syncmaster.db.models import Status, User
+from syncmaster.db.utils import Permission
+from syncmaster.exceptions.base import ActionNotAllowedError
+from syncmaster.exceptions.connection import (
     ConnectionNotFoundError,
-    DifferentTransferAndConnectionsGroupsError,
-    DifferentTransferAndQueueGroupError,
-    DifferentTypeConnectionsAndParamsError,
+)
+from syncmaster.exceptions.group import (
     GroupNotFoundError,
+)
+from syncmaster.exceptions.queue import DifferentTransferAndQueueGroupError
+from syncmaster.exceptions.run import (
+    CannotConnectToTaskQueueError,
+)
+from syncmaster.exceptions.transfer import (
+    DifferentTransferAndConnectionsGroupsError,
+    DifferentTypeConnectionsAndParamsError,
     TransferNotFoundError,
 )
-from syncmaster.exceptions.base import ActionNotAllowedError
-from syncmaster.schemas.v1.status_schema import (
+from syncmaster.schemas.v1.status import (
     StatusCopyTransferResponseSchema,
     StatusResponseSchema,
 )

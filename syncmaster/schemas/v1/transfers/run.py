@@ -6,8 +6,8 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from syncmaster.db import Status
-from syncmaster.schemas.v1.page_schema import PageSchema
+from syncmaster.db.models import Status
+from syncmaster.schemas.v1.page import PageSchema
 
 
 class ShortRunSchema(BaseModel):

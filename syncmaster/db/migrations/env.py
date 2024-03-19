@@ -10,7 +10,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from syncmaster.config import Settings
-from syncmaster.db import Base
+from syncmaster.db.base import Base
 
 config = context.config
 

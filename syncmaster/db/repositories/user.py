@@ -6,11 +6,14 @@ from sqlalchemy import ScalarResult, insert, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.db import Pagination, User
+from syncmaster.db.models import User
 from syncmaster.db.repositories.base import Repository
+from syncmaster.db.utils import Pagination
 from syncmaster.exceptions import (
     EntityNotFoundError,
     SyncmasterError,
+)
+from syncmaster.exceptions.user import (
     UsernameAlreadyExistsError,
     UserNotFoundError,
 )

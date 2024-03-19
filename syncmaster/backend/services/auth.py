@@ -10,7 +10,7 @@ from syncmaster.backend.api.deps import AuthMarker, SettingsMarker, UnitOfWorkMa
 from syncmaster.backend.api.v1.auth.utils import decode_jwt
 from syncmaster.backend.services.unit_of_work import UnitOfWork
 from syncmaster.config import Settings
-from syncmaster.db import User
+from syncmaster.db.models import User
 
 
 def get_user(

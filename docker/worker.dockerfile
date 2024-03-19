@@ -20,15 +20,15 @@ RUN apt-get update && apt-get install -y \
 
 RUN pip install --no-cache-dir --timeout 3 --retries 3 poetry && poetry config virtualenvs.create false
 
-WORKDIR /syncmaster
+WORKDIR /app
 
-COPY ./pyproject.toml ./poetry.lock* /syncmaster/
+COPY ./pyproject.toml ./poetry.lock* /app/
 
 RUN pip install --upgrade pip setuptools wheel packaging
 
 RUN poetry install --no-root --extras "worker"
 
-COPY . /syncmaster/
+COPY . /app/
 
 # https://docs.celeryq.dev/en/stable/userguide/workers.html#max-tasks-per-child-setting
 # Required to start each Celery task in separated process, avoiding issues with global Spark session object

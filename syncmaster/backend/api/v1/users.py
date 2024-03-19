@@ -6,9 +6,9 @@ from fastapi import APIRouter, Depends, Query
 
 from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.services import UnitOfWork, get_user
-from syncmaster.db import User
+from syncmaster.db.models import User
 from syncmaster.exceptions import ActionNotAllowedError
-from syncmaster.schemas.v1.status_schema import StatusResponseSchema
+from syncmaster.schemas.v1.status import StatusResponseSchema
 from syncmaster.schemas.v1.users import ReadUserSchema, UpdateUserSchema, UserPageSchema
 
 logger = logging.getLogger(__name__)

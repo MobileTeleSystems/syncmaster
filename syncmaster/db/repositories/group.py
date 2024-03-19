@@ -7,18 +7,16 @@ from sqlalchemy import ScalarResult, insert, or_, select, update
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.db import Group, Pagination, Permission, User, UserGroup
+from syncmaster.db.models import Group, User, UserGroup
 from syncmaster.db.repositories.base import Repository
+from syncmaster.db.utils import Pagination, Permission
 from syncmaster.exceptions import (
-    AlreadyIsGroupMemberError,
-    AlreadyIsNotGroupMemberError,
     EntityNotFoundError,
-    GroupAdminNotFoundError,
-    GroupAlreadyExistsError,
-    GroupNotFoundError,
     SyncmasterError,
-    UserNotFoundError,
 )
+from syncmaster.exceptions.group import AlreadyIsGroupMemberError, AlreadyIsNotGroupMemberError
+from syncmaster.exceptions.group import GroupAdminNotFoundError, GroupAlreadyExistsError, GroupNotFoundError
+from syncmaster.exceptions.user import UserNotFoundError
 
 
 class GroupRepository(Repository[Group]):

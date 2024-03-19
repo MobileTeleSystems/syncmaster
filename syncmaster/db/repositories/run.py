@@ -7,14 +7,14 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from syncmaster.db import Pagination, Run, Status, Transfer
+from syncmaster.db.models import Run, Status, Transfer
 from syncmaster.db.repositories.base import Repository
+from syncmaster.db.utils import Pagination
 from syncmaster.exceptions import (
-    CannotStopRunError,
-    RunNotFoundError,
     SyncmasterError,
-    TransferNotFoundError,
 )
+from syncmaster.exceptions.run import CannotStopRunError, RunNotFoundError
+from syncmaster.exceptions.transfer import TransferNotFoundError
 from syncmaster.schemas.v1.transfers import ReadFullTransferSchema
 
 

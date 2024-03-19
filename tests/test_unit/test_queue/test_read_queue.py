@@ -1,9 +1,7 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
-# SPDX-License-Identifier: Apache-2.0
 import pytest
 from httpx import AsyncClient
 
-from syncmaster.db import Queue
+from syncmaster.db.models import Queue
 from tests.mocks import MockGroup, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]

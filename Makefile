@@ -37,7 +37,7 @@ run: ##@Application Run backend locally (without docker)
 	RABBITMQ_USER=${RABBITMQ_USER} \
 	RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD} \
 	PYTHONPATH=${APP_PATH} \
-	${POETRY} run python ./syncmaster/app/main.py
+	${POETRY} run python ./syncmaster/backend/main.py
 
 revision: ##@Database Create new revision of migrations
 	@POSTGRES_HOST=${POSTGRES_HOST} \
@@ -107,16 +107,14 @@ check-fixtures: ##@Test Check declared fixtures without using
 
 run_back_docker:
 	docker run --env-file ./.env.docker \
-	-v ./syncmaster:/syncmaster \
-	-v ./tests:/syncmaster/tests \
+	-v .:/app \
 	-v ./cached_jars:/root/.ivy2 \
 	--net syncmaster_network -p 8000:8000 --rm \
 	 -it --name backend syncmaster_back /bin/bash
 
 run_worker_docker:
 	docker run --env-file ./.env.docker \
-	-v ./syncmaster:/syncmaster \
-	-v ./tests:/syncmaster/tests \
+	-v .:/app \
 	-v ./cached_jars:/root/.ivy2 \
 	--net syncmaster_network --rm \
 	-it --name worker syncmaster_worker /bin/bash

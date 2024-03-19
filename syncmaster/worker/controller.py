@@ -4,7 +4,7 @@ import logging
 from typing import Any
 
 from syncmaster.config import Settings
-from syncmaster.db import Connection, Transfer
+from syncmaster.db.models import Connection, Transfer
 from syncmaster.dto.connections import (
     HDFSConnectionDTO,
     HiveConnectionDTO,
@@ -19,7 +19,7 @@ from syncmaster.dto.transfers import (
     PostgresTransferDTO,
     S3TransferDTO,
 )
-from syncmaster.exceptions import ConnectionTypeNotRecognizedError
+from syncmaster.exceptions.connection import ConnectionTypeNotRecognizedError
 from syncmaster.worker.handlers.base import Handler
 from syncmaster.worker.handlers.file.hdfs import HDFSHandler
 from syncmaster.worker.handlers.file.s3 import S3Handler

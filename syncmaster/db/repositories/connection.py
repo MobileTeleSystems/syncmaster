@@ -6,17 +6,17 @@ from sqlalchemy import ScalarResult, insert, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.db import Connection, Pagination
+from syncmaster.db.models import Connection
 from syncmaster.db.repositories.repository_with_owner import RepositoryWithOwner
+from syncmaster.db.utils import Pagination
 from syncmaster.exceptions import (
-    ConnectionNotFoundError,
-    ConnectionOwnerError,
-    DuplicatedConnectionNameError,
     EntityNotFoundError,
-    GroupNotFoundError,
     SyncmasterError,
-    UserNotFoundError,
 )
+from syncmaster.exceptions.connection import (ConnectionNotFoundError, ConnectionOwnerError,
+                                              DuplicatedConnectionNameError)
+from syncmaster.exceptions.group import GroupNotFoundError
+from syncmaster.exceptions.user import UserNotFoundError
 
 
 class ConnectionRepository(RepositoryWithOwner[Connection]):

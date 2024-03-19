@@ -5,7 +5,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from syncmaster.db import Pagination
+from syncmaster.db.utils import Pagination
 
 
 class MetaPageSchema(BaseModel):

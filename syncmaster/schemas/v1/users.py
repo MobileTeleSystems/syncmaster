@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 from pydantic import BaseModel, constr
 
-from syncmaster.db import GroupMemberRole, Pagination
-from syncmaster.schemas.v1.page_schema import MetaPageSchema, PageSchema
+from syncmaster.db.models import GroupMemberRole
+from syncmaster.db.utils import Pagination
+from syncmaster.schemas.v1.page import MetaPageSchema, PageSchema
 
 
 class UpdateUserSchema(BaseModel):
