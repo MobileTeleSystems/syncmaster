@@ -28,13 +28,15 @@ from syncmaster.schemas.v1.status import (
 )
 from syncmaster.schemas.v1.transfers import (
     CopyTransferSchema,
-    CreateRunSchema,
     CreateTransferSchema,
-    ReadRunSchema,
     ReadTransferSchema,
-    RunPageSchema,
     TransferPageSchema,
     UpdateTransferSchema,
+)
+from syncmaster.schemas.v1.transfers.run import (
+    CreateRunSchema,
+    ReadRunSchema,
+    RunPageSchema,
 )
 from syncmaster.worker.config import celery
 
