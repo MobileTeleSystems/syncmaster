@@ -32,4 +32,4 @@ COPY ./syncmaster /app/
 
 ENV PYTHONPATH=/app
 
-CMD [ "python", "syncmaster/backend/main.py" ]
+CMD [ "python", "/app/syncmaster/backend/main.py" ]

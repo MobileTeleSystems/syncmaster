@@ -54,7 +54,7 @@ services:
       - ./cached_jars:/root/.ivy2
       - ./reports:/app/reports
     env_file: .env.docker
-    command: [coverage, run, backend/main.py]
+    command: [coverage, run, /app/syncmaster/backend/main.py]
 
   rabbitmq:
     image: rabbitmq
