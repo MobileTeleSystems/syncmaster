@@ -302,20 +302,14 @@ async def update_transfer(
     if queue.group_id != transfer.group_id:
         raise DifferentTransferAndQueueGroupError
 
-    if (
-        transfer_data.target_params
-        and target_connection.data["type"] != transfer_data.target_params.type  # type: ignore
-    ):
+    if transfer_data.target_params and target_connection.data["type"] != transfer_data.target_params.type:
         raise DifferentTypeConnectionsAndParamsError(
             connection_type=target_connection.data["type"],
             conn="target",
             params_type=transfer_data.target_params.type,
         )
 
-    if (
-        transfer_data.source_params
-        and source_connection.data["type"] != transfer_data.source_params.type  # type: ignore
-    ):
+    if transfer_data.source_params and source_connection.data["type"] != transfer_data.source_params.type:
         raise DifferentTypeConnectionsAndParamsError(
             connection_type=source_connection.data["type"],
             conn="source",
@@ -331,8 +325,8 @@ async def update_transfer(
             description=transfer_data.description,
             target_connection_id=transfer_data.target_connection_id,
             source_connection_id=transfer_data.source_connection_id,
-            source_params=transfer_data.source_params.dict() if transfer_data.source_params else {},  # type: ignore
-            target_params=transfer_data.target_params.dict() if transfer_data.target_params else {},  # type: ignore
+            source_params=transfer_data.source_params.dict() if transfer_data.source_params else {},
+            target_params=transfer_data.target_params.dict() if transfer_data.target_params else {},
             strategy_params=transfer_data.strategy_params.dict() if transfer_data.strategy_params else {},
             is_scheduled=transfer_data.is_scheduled,
             schedule=transfer_data.schedule,

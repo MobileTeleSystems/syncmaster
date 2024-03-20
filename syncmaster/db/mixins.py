@@ -11,7 +11,7 @@ class TimestampMixin:
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
         server_default=func.now(),
-        server_onupdate=func.now(),  # type: ignore
+        server_onupdate=func.now(),
         onupdate=datetime.now,
         nullable=False,
     )

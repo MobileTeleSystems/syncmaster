@@ -169,7 +169,7 @@ def s3(test_settings: TestSettings) -> S3ConnectionDTO:
 @pytest.fixture
 def init_df(spark: SparkSession) -> DataFrame:
     logger.info("START INIT DF", datetime.datetime.now().isoformat())
-    df = spark.createDataFrame(data, df_schema)  # type: ignore
+    df = spark.createDataFrame(data, df_schema)
     logger.info("END INIT DF", datetime.datetime.now().isoformat())
 
     return df
@@ -673,7 +673,7 @@ async def transfers(
             role=UserTestRoles.Owner,
         ),
     }
-    data.update(transfers)  # type: ignore
+    data.update(transfers)
     logger.info("END TRANSFERS FIXTURE", datetime.datetime.now().isoformat())
     yield data
     for transfer in transfers.values():
@@ -924,7 +924,7 @@ async def transfers_with_mixed_column_naming(
             role=UserTestRoles.Owner,
         ),
     }
-    data.update(transfers)  # type: ignore
+    data.update(transfers)
     yield data
     for transfer in transfers.values():
         await session.delete(transfer)

@@ -177,7 +177,7 @@ def upgrade() -> None:
     if exists_table("celery_taskmeta"):
         return
     task_id_sequence = sa.Sequence("task_id_sequence")
-    op.execute(sa.schema.CreateSequence(task_id_sequence, if_not_exists=True))  # type: ignore[arg-type]
+    op.execute(sa.schema.CreateSequence(task_id_sequence, if_not_exists=True))
 
     op.create_table(
         "celery_taskmeta",
@@ -199,7 +199,7 @@ def upgrade() -> None:
     )
 
     taskset_id_sequence = sa.Sequence("taskset_id_sequence")
-    op.execute(sa.schema.CreateSequence(taskset_id_sequence, if_not_exists=True))  # type: ignore[arg-type]
+    op.execute(sa.schema.CreateSequence(taskset_id_sequence, if_not_exists=True))
 
     op.create_table(
         "celery_tasksetmeta",

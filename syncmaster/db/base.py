@@ -14,7 +14,7 @@ convention = {
     "pk": "pk__%(table_name)s",
 }
 
-model_metadata = MetaData(naming_convention=convention)  # type: ignore
+model_metadata = MetaData(naming_convention=convention)
 
 
 # as_declarative decorator causes mypy errors.
@@ -22,7 +22,7 @@ model_metadata = MetaData(naming_convention=convention)  # type: ignore
 class Base(DeclarativeBase):
     metadata = model_metadata
 
-    @declared_attr  # type: ignore
+    @declared_attr
     def __tablename__(cls) -> str:
         name_list = re.findall(r"[A-Z][a-z\d]*", cls.__name__)
         return "_".join(name_list).lower()

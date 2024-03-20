@@ -24,8 +24,8 @@ async def test_run_hdfs_transfer_csv(
     spark,
 ):
     # Arrange
-    user: MockUser = transfers["group_owner"]  # type: ignore
-    transfer: Transfer = transfers["hdfs_postgres"]  # type: ignore
+    user: MockUser = transfers["group_owner"]
+    transfer: Transfer = transfers["hdfs_postgres"]
 
     # Act
     result = await client.post(
@@ -66,8 +66,8 @@ async def test_run_hdfs_transfer_jsonline(
     spark,
 ):
     # Arrange
-    user: MockUser = transfers["group_owner"]  # type: ignore
-    transfer: Transfer = transfers["hdfs_postgres"]  # type: ignore
+    user: MockUser = transfers["group_owner"]
+    transfer: Transfer = transfers["hdfs_postgres"]
 
     # Act
     result = await client.post(
@@ -108,8 +108,8 @@ async def test_run_hdfs_transfer_json(
     spark,
 ):
     # Arrange
-    user: MockUser = transfers["group_owner"]  # type: ignore
-    transfer: Transfer = transfers["hdfs_postgres"]  # type: ignore
+    user: MockUser = transfers["group_owner"]
+    transfer: Transfer = transfers["hdfs_postgres"]
 
     # Act
     result = await client.post(

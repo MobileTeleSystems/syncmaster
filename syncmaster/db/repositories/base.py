@@ -73,7 +73,7 @@ class Repository(Generic[Model], ABC):
     async def _delete(self, id: int) -> Model:
         if hasattr(self._model, "is_deleted"):
             return await self._update(
-                and_(self._model.is_deleted.is_(False), self._model.id == id),  # type: ignore
+                and_(self._model.is_deleted.is_(False), self._model.id == id),
                 is_deleted=True,
             )
 
@@ -84,7 +84,7 @@ class Repository(Generic[Model], ABC):
 
     async def _paginate_raw_result(self, query: Select, page: int, page_size: int) -> Pagination:
         items_result = await self._session.execute(query.limit(page_size).offset((page - 1) * page_size))
-        total: int = await self._session.scalar(select(func.count()).select_from(query.subquery()))  # type: ignore
+        total: int = await self._session.scalar(select(func.count()).select_from(query.subquery()))
         return Pagination(
             items=items_result.all(),
             total=total,
@@ -100,7 +100,7 @@ class Repository(Generic[Model], ABC):
         items_result: ScalarResult[Model] = await self._session.scalars(
             query.limit(page_size).offset((page - 1) * page_size)
         )
-        total: int = await self._session.scalar(select(func.count()).select_from(query.subquery()))  # type: ignore
+        total: int = await self._session.scalar(select(func.count()).select_from(query.subquery()))
         return Pagination(
             items=items_result.all(),
             total=total,

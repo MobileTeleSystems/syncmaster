@@ -116,10 +116,10 @@ class TransferController:
         connection_data.update(connection_auth_data)
         handler_type = connection_data["type"]
 
-        if connection_handler_proxy.get(handler_type, None) is None:  # type: ignore
+        if connection_handler_proxy.get(handler_type, None) is None:
             raise ConnectionTypeNotRecognizedError
 
-        handler, connection_dto, transfer_dto = connection_handler_proxy[handler_type]  # type: ignore
+        handler, connection_dto, transfer_dto = connection_handler_proxy[handler_type]
 
         return handler(
             connection_dto=connection_dto(**connection_data),

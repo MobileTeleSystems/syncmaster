@@ -49,7 +49,7 @@ def get_worker_spark_session(
     for k, v in get_spark_session_conf(source, target).items():
         spark_builder = spark_builder.config(k, v)
 
-    if source.type == "hive" or target.type == "hive":  # type: ignore
+    if source.type == "hive" or target.type == "hive":
         log.debug("Enabling Hive support")
         spark_builder = spark_builder.enableHiveSupport()
 

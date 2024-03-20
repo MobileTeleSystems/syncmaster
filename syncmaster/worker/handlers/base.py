@@ -46,5 +46,4 @@ class Handler(ABC):
             raise ValueError("Writer is not initialized")
         return self.writer.run(df=df)
 
-    def normalize_column_name(self, df: DataFrame) -> DataFrame:  # type: ignore
-        ...
+    def normalize_column_name(self, df: DataFrame) -> DataFrame: ...

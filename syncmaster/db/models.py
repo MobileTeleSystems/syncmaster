@@ -81,7 +81,7 @@ class Connection(Base, ResourceMixin, DeletableMixin, TimestampMixin):
     def __repr__(self):
         return f"<Connection " f"name={self.name} " f"description={self.description} " f"group_id={self.group_id}>"
 
-    @declared_attr  # type: ignore
+    @declared_attr
     def __table_args__(cls) -> tuple:
         return (UniqueConstraint("name", "group_id"),)
 
@@ -129,7 +129,7 @@ class Transfer(
     target_connection: Mapped[Connection] = relationship(foreign_keys=target_connection_id)
     queue: Mapped[Queue] = relationship(back_populates="transfers")
 
-    @declared_attr  # type: ignore
+    @declared_attr
     def __table_args__(cls) -> tuple:
         return (UniqueConstraint("name", "group_id"),)
 

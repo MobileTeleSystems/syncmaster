@@ -64,7 +64,7 @@ class UserRepository(Repository[User]):
             return result.one()
 
     def _raise_error(self, err: DBAPIError) -> NoReturn:
-        constraint = err.__cause__.__cause__.constraint_name  # type: ignore
+        constraint = err.__cause__.__cause__.constraint_name
 
         if constraint == "ix__user__username":
             raise UsernameAlreadyExistsError from err

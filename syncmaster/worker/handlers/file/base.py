@@ -42,7 +42,7 @@ class FileHandler(Handler):
             options=self.transfer_dto.options,
         )
 
-    def normalize_column_name(self, df: DataFrame) -> DataFrame:  # type: ignore
+    def normalize_column_name(self, df: DataFrame) -> DataFrame:
         return df
 
     def _get_format(self):

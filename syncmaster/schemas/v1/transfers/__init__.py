@@ -80,9 +80,9 @@ UpdateTransferSchemaTarget = (
 class CopyTransferSchema(BaseModel):
     new_group_id: int
     new_queue_id: int
-    new_source_connection_name: NameConstr | None = None  # type: ignore # noqa: F722
-    new_target_connection_name: NameConstr | None = None  # type: ignore # noqa: F722
-    new_name: NameConstr | None  # type: ignore # noqa: F722
+    new_source_connection_name: NameConstr | None = None  # noqa: F722
+    new_target_connection_name: NameConstr | None = None  # noqa: F722
+    new_name: NameConstr | None  # noqa: F722
     remove_source: bool = False
 
 
@@ -117,7 +117,7 @@ class CreateTransferSchema(BaseModel):
     group_id: int = Field(..., description="Transfer owner group id")
     source_connection_id: int = Field(..., description="id of the connection that will be the data source")
     target_connection_id: int = Field(..., description="id of the connection that will be the data receiver")
-    name: NameConstr = Field(..., description="Transfer name")  # type: ignore # noqa: F722
+    name: NameConstr = Field(..., description="Transfer name")  # noqa: F722
     description: str = Field(..., description="Additional description")
     is_scheduled: bool = Field(..., description="Is the transfer on schedule")
     queue_id: int = Field(..., description="id of the queue in which the transfer will be performed")
@@ -150,7 +150,7 @@ class CreateTransferSchema(BaseModel):
 class UpdateTransferSchema(BaseModel):
     source_connection_id: int | None
     target_connection_id: int | None
-    name: NameConstr | None  # type: ignore # noqa: F722
+    name: NameConstr | None  # noqa: F722
     description: str | None
     is_scheduled: bool | None
     schedule: str | None

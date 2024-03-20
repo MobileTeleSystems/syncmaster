@@ -72,7 +72,7 @@ class RunRepository(Repository[Run]):
         return ReadFullTransferSchema.from_orm(transfer.one()).dict()
 
     def _raise_error(self, e: DBAPIError) -> NoReturn:
-        constraint = e.__cause__.__cause__.constraint_name  # type: ignore[union-attr]
+        constraint = e.__cause__.__cause__.constraint_name
         if constraint == "fk__run__transfer_id__transfer":
             raise TransferNotFoundError from e
         raise SyncmasterError from e

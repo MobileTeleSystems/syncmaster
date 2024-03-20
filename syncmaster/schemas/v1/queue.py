@@ -6,7 +6,7 @@ from syncmaster.schemas.v1.page import PageSchema
 
 
 class CreateQueueSchema(BaseModel):
-    name: constr(max_length=128, regex=r"^[-_a-zA-Z0-9]+$") = Field(  # type: ignore # noqa: F722
+    name: constr(max_length=128, regex=r"^[-_a-zA-Z0-9]+$") = Field(  # noqa: F722
         ...,
         description="Queue name",
     )

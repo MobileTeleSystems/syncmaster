@@ -96,7 +96,7 @@ class ReadConnectionSchema(BaseModel):
 
 
 class UpdateConnectionSchema(BaseModel):
-    name: NameConstr | None = None  # type: ignore # noqa: F722
+    name: NameConstr | None = None  # noqa: F722
     description: str | None = None
     auth_data: UpdateConnectionAuthDataSchema | None = Field(discriminator="type", default=None)
     data: UpdateConnectionDataSchema | None = Field(discriminator="type", alias="connection_data", default=None)
@@ -111,7 +111,7 @@ class UpdateConnectionSchema(BaseModel):
 
 class CreateConnectionSchema(BaseModel):
     group_id: int = Field(..., description="Connection owner group id")
-    name: NameConstr = Field(..., description="Connection name")  # type: ignore # noqa: F722
+    name: NameConstr = Field(..., description="Connection name")  # noqa: F722
     description: str = Field(..., description="Additional description")
     data: CreateConnectionDataSchema = Field(
         ...,
@@ -138,7 +138,7 @@ class CreateConnectionSchema(BaseModel):
 
 class ConnectionCopySchema(BaseModel):
     new_group_id: int
-    new_name: NameConstr | None = None  # type: ignore # noqa: F722
+    new_name: NameConstr | None = None  # noqa: F722
     remove_source: bool = False
 
 

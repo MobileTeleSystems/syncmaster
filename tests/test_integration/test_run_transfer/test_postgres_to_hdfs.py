@@ -25,8 +25,8 @@ async def test_run_pg_to_hdfs_transfer_csv(
     # Arrange
     hdfs_file_format, file_object = choice_file_format
     hdfs_connection, _, _ = prepare_hdfs
-    user: MockUser = transfers["group_owner"]  # type: ignore
-    transfer: Transfer = transfers["postgres_hdfs"]  # type: ignore
+    user: MockUser = transfers["group_owner"]
+    transfer: Transfer = transfers["postgres_hdfs"]
 
     # Act
     result = await client.post(
@@ -73,8 +73,8 @@ async def test_run_pg_to_hdfs_transfer_jsonline(
     # Arrange
     hdfs_file_format, file_object = choice_file_format
     hdfs_connection, _, _ = prepare_hdfs
-    user: MockUser = transfers["group_owner"]  # type: ignore
-    transfer: Transfer = transfers["postgres_hdfs"]  # type: ignore
+    user: MockUser = transfers["group_owner"]
+    transfer: Transfer = transfers["postgres_hdfs"]
 
     # Act
     result = await client.post(

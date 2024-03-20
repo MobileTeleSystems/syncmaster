@@ -8,7 +8,7 @@ from syncmaster.schemas.v1.page import MetaPageSchema, PageSchema
 
 
 class UpdateUserSchema(BaseModel):
-    username: constr(regex=r"^[_a-z0-9]+$")  # type: ignore # noqa: F722
+    username: constr(regex=r"^[_a-z0-9]+$")  # noqa: F722
 
 
 class ReadGroupMember(BaseModel):

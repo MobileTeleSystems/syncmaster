@@ -8,7 +8,7 @@ def process_file_transfer_directory_path(
 ) -> UpdateTransferSchema | CreateTransferSchema:
     if transfer_data.source_params is not None:
         if hasattr(transfer_data.source_params, "directory_path"):  # s3 or hdfs connection
-            transfer_data.source_params.directory_path = str(transfer_data.source_params.directory_path)  # type: ignore
+            transfer_data.source_params.directory_path = str(transfer_data.source_params.directory_path)
 
     if transfer_data.target_params is not None:
         if hasattr(transfer_data.source_params, "directory_path"):  # s3 or hdfs connection

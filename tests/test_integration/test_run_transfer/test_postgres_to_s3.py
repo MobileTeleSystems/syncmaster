@@ -25,8 +25,8 @@ async def test_run_pg_to_s3_transfer_csv(
     # Arrange
     s3_file_format, file_object = choice_file_format
     s3_connection, _, _ = prepare_s3
-    user: MockUser = transfers["group_owner"]  # type: ignore
-    transfer: Transfer = transfers["postgres_s3"]  # type: ignore
+    user: MockUser = transfers["group_owner"]
+    transfer: Transfer = transfers["postgres_s3"]
 
     # Act
     result = await client.post(
@@ -73,8 +73,8 @@ async def test_run_pg_to_s3_transfer_jsonline(
     # Arrange
     s3_file_format, file_object = choice_file_format
     s3_connection, _, _ = prepare_s3
-    user: MockUser = transfers["group_owner"]  # type: ignore
-    transfer: Transfer = transfers["postgres_s3"]  # type: ignore
+    user: MockUser = transfers["group_owner"]
+    transfer: Transfer = transfers["postgres_s3"]
 
     # Act
     result = await client.post(
