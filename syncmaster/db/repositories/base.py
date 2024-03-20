@@ -32,7 +32,7 @@ class Repository(Generic[Model], ABC):
     @staticmethod
     def _model_as_dict(model: Model) -> dict[str, Any]:
         d = []
-        for c in model.__table__.columns:  # type: ignore[attr-defined]
+        for c in model.__table__.columns:
             if c.name == "id":  # 'id' is PK autoincrement
                 continue
             d.append(c.name)

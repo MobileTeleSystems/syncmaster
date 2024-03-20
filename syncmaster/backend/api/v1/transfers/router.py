@@ -98,18 +98,18 @@ async def create_transfer(
     ):
         raise DifferentTransferAndConnectionsGroupsError
 
-    if target_connection.data["type"] != transfer_data.target_params.type:  # type: ignore[attr-defined]
+    if target_connection.data["type"] != transfer_data.target_params.type:
         raise DifferentTypeConnectionsAndParamsError(
             connection_type=target_connection.data["type"],
             conn="target",
-            params_type=transfer_data.target_params.type,  # type: ignore[attr-defined]
+            params_type=transfer_data.target_params.type,
         )
 
-    if source_connection.data["type"] != transfer_data.source_params.type:  # type: ignore[attr-defined]
+    if source_connection.data["type"] != transfer_data.source_params.type:
         raise DifferentTypeConnectionsAndParamsError(
             connection_type=source_connection.data["type"],
             conn="source",
-            params_type=transfer_data.source_params.type,  # type: ignore[attr-defined]
+            params_type=transfer_data.source_params.type,
         )
 
     if transfer_data.group_id != queue.group_id:
@@ -124,8 +124,8 @@ async def create_transfer(
             description=transfer_data.description,
             target_connection_id=transfer_data.target_connection_id,
             source_connection_id=transfer_data.source_connection_id,
-            source_params=transfer_data.source_params.dict(),  # type: ignore[attr-defined]
-            target_params=transfer_data.target_params.dict(),  # type: ignore[attr-defined]
+            source_params=transfer_data.source_params.dict(),
+            target_params=transfer_data.target_params.dict(),
             strategy_params=transfer_data.strategy_params.dict(),
             queue_id=transfer_data.queue_id,
         )
@@ -309,7 +309,7 @@ async def update_transfer(
         raise DifferentTypeConnectionsAndParamsError(
             connection_type=target_connection.data["type"],
             conn="target",
-            params_type=transfer_data.target_params.type,  # type: ignore[attr-defined]
+            params_type=transfer_data.target_params.type,
         )
 
     if (
@@ -319,7 +319,7 @@ async def update_transfer(
         raise DifferentTypeConnectionsAndParamsError(
             connection_type=source_connection.data["type"],
             conn="source",
-            params_type=transfer_data.source_params.type,  # type: ignore[attr-defined]
+            params_type=transfer_data.source_params.type,
         )
 
     transfer_data = process_file_transfer_directory_path(transfer_data)  # type: ignore
