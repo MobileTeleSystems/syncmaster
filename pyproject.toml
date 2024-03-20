@@ -28,15 +28,11 @@ classifiers = [
 keywords = ["Syncmaster", "REST", "API", "Worker", "Replication"]
 
 packages = [
-    { include = "syncmaster/app" },
-]
-
-include = [
-    {path = "syncmaster/*.ini"},
+    { include = "syncmaster" },
 ]
 
 exclude = [
-    {path = "syncmaster/tests"},
+    {path = "tests"},
 ]
 
 [tool.poetry.urls]  # Optional
