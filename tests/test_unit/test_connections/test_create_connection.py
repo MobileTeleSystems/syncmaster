@@ -266,7 +266,7 @@ async def test_check_fields_validation_on_create_connection(
             {
                 "ctx": {
                     "discriminator": "'type'",
-                    "expected_tags": f"{ALLOWED_SOURCES}",
+                    "expected_tags": ALLOWED_SOURCES,
                     "tag": "POSTGRESQL",
                 },
                 "input": {

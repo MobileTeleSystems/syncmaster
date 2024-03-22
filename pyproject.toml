@@ -45,7 +45,7 @@ exclude = [
 python = "^3.11"
 sqlalchemy = "^2.0.18"
 sqlalchemy-utils = "^0.41.1"
-pydantic = "2.6.4"
+pydantic = "^2.6.4"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 python-multipart = "^0.0.6"
 celery = "^5.3.3"
