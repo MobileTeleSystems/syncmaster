@@ -13,13 +13,13 @@ from syncmaster.schemas.v1.page import PageSchema
 class ShortRunSchema(BaseModel):
     id: int
     transfer_id: int
-    started_at: datetime | None
-    ended_at: datetime | None
+    started_at: datetime | None = None
+    ended_at: datetime | None = None
     status: Status
-    log_url: str | None
+    log_url: str | None = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class RunPageSchema(PageSchema):
@@ -30,7 +30,7 @@ class ReadRunSchema(ShortRunSchema):
     transfer_dump: dict
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class CreateRunSchema(BaseModel):

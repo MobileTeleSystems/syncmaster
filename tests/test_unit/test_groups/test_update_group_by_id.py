@@ -121,7 +121,17 @@ async def test_validation_on_update_group(
     )
     # Assert
     assert result.status_code == 422
-    assert result.json() == {"detail": [{"loc": ["body"], "msg": "field required", "type": "value_error.missing"}]}
+    assert result.json() == {
+        "detail": [
+            {
+                "input": None,
+                "loc": ["body"],
+                "msg": "Field required",
+                "type": "missing",
+                "url": "https://errors.pydantic.dev/2.6/v/missing",
+            }
+        ]
+    }
 
     # Arrange
     group_data = {

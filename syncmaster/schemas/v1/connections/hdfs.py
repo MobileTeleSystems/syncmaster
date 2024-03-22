@@ -9,6 +9,9 @@ from syncmaster.schemas.v1.connection_types import HDFS_TYPE
 class HDFSConnectionBaseSchema(BaseModel):
     type: HDFS_TYPE
 
+    class Config:
+        from_attributes = True
+
 
 class HDFSReadConnectionSchema(HDFSConnectionBaseSchema):
     cluster: str

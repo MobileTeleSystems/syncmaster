@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 import json
 
-import pydantic
 from onetl.base.base_file_df_connection import BaseFileDFConnection
 from onetl.file import FileDFReader, FileDFWriter
 from onetl.file.format import CSV, JSON, JSONLine
@@ -48,10 +47,10 @@ class FileHandler(Handler):
     def _get_format(self):
         file_type = self.transfer_dto.file_format["type"]
         if file_type == "csv":
-            return pydantic.parse_obj_as(CSV, self.transfer_dto.file_format)
+            return CSV.parse_obj(self.transfer_dto.file_format)
         elif file_type == "jsonline":
-            return pydantic.parse_obj_as(JSONLine, self.transfer_dto.file_format)
+            return JSONLine.parse_obj(self.transfer_dto.file_format)
         elif file_type == "json":
-            return pydantic.parse_obj_as(JSON, self.transfer_dto.file_format)
+            return JSON.parse_obj(self.transfer_dto.file_format)
         else:
             raise ValueError("Unknown file type")

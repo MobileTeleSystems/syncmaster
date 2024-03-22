@@ -387,12 +387,14 @@ async def test_check_validate_copy_transfer_parameter_new_name(
     assert result.json() == {
         "detail": [
             {
-                "ctx": {"limit_value": 1},
+                "ctx": {"min_length": 1},
+                "input": "",
                 "loc": ["body", "new_name"],
-                "msg": "ensure this value has at least 1 characters",
-                "type": "value_error.any_str.min_length",
+                "msg": "String should have at least 1 character",
+                "type": "string_too_short",
+                "url": "https://errors.pydantic.dev/2.6/v/string_too_short",
             }
-        ],
+        ]
     }
 
 

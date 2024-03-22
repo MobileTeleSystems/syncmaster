@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
 
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, Field, model_validator
 
 from syncmaster.schemas.v1.connections.hdfs import (
     HDFSCreateAuthSchema,
@@ -83,7 +83,7 @@ class ReadConnectionSchema(BaseModel):
     group_id: int
     name: str
     description: str
-    auth_data: ReadConnectionAuthDataSchema | None
+    auth_data: ReadConnectionAuthDataSchema | None = None
     data: ReadConnectionDataSchema = Field(
         ...,
         discriminator="type",
@@ -91,8 +91,8 @@ class ReadConnectionSchema(BaseModel):
     )
 
     class Config:
-        orm_mode = True
-        allow_population_by_field_name = True
+        from_attributes = True
+        populate_by_name = True
 
 
 class UpdateConnectionSchema(BaseModel):
@@ -101,7 +101,7 @@ class UpdateConnectionSchema(BaseModel):
     auth_data: UpdateConnectionAuthDataSchema | None = Field(discriminator="type", default=None)
     data: UpdateConnectionDataSchema | None = Field(discriminator="type", alias="connection_data", default=None)
 
-    @root_validator
+    @model_validator(mode="before")
     def check_types(cls, values):
         data, auth_data = values.get("connection_data"), values.get("auth_data")
         if data and auth_data and data.get("type") != auth_data.get("type"):
@@ -128,7 +128,7 @@ class CreateConnectionSchema(BaseModel):
         description="Credentials for authorization",
     )
 
-    @root_validator
+    @model_validator(mode="before")
     def check_types(cls, values):
         data, auth_data = values.get("data"), values.get("auth_data")
         if data and auth_data and data.type != auth_data.type:

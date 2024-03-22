@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, Field, model_validator
 
 from syncmaster.schemas.v1.connections.connection import ReadConnectionSchema
 from syncmaster.schemas.v1.page import PageSchema
@@ -82,7 +82,7 @@ class CopyTransferSchema(BaseModel):
     new_queue_id: int
     new_source_connection_name: NameConstr | None = None  # noqa: F722
     new_target_connection_name: NameConstr | None = None  # noqa: F722
-    new_name: NameConstr | None  # noqa: F722
+    new_name: NameConstr | None = None  # noqa: F722
     remove_source: bool = False
 
 
@@ -110,7 +110,7 @@ class ReadTransferSchema(BaseModel):
     )
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class CreateTransferSchema(BaseModel):
@@ -138,7 +138,7 @@ class CreateTransferSchema(BaseModel):
         description="Incremental or archive download options",
     )
 
-    @root_validator
+    @model_validator(mode="before")
     def check_owner_id(cls, values):
         is_scheduled, schedule = values.get("is_scheduled"), values.get("schedule")
         if is_scheduled and schedule is None:
@@ -148,13 +148,13 @@ class CreateTransferSchema(BaseModel):
 
 
 class UpdateTransferSchema(BaseModel):
-    source_connection_id: int | None
-    target_connection_id: int | None
-    name: NameConstr | None  # noqa: F722
-    description: str | None
-    is_scheduled: bool | None
-    schedule: str | None
-    new_queue_id: int | None
+    source_connection_id: int | None = None
+    target_connection_id: int | None = None
+    name: NameConstr | None = None  # noqa: F722
+    description: str | None = None
+    is_scheduled: bool | None = None
+    schedule: str | None = None
+    new_queue_id: int | None = None
     source_params: UpdateTransferSchemaSource = Field(discriminator="type", default=None)
     target_params: UpdateTransferSchemaTarget = Field(discriminator="type", default=None)
     strategy_params: FullStrategy | IncrementalStrategy | None = Field(discriminator="type", default=None)
@@ -165,7 +165,7 @@ class ReadFullTransferSchema(ReadTransferSchema):
     target_connection: ReadConnectionSchema
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class TransferPageSchema(PageSchema):

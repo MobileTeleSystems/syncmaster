@@ -160,12 +160,14 @@ async def test_check_fields_validation_on_create_connection(
     assert result.json() == {
         "detail": [
             {
-                "ctx": {"limit_value": 1},
+                "ctx": {"min_length": 1},
+                "input": "",
                 "loc": ["body", "name"],
-                "msg": "ensure this value has at least 1 characters",
-                "type": "value_error.any_str.min_length",
+                "msg": "String should have at least 1 character",
+                "type": "string_too_short",
+                "url": "https://errors.pydantic.dev/2.6/v/string_too_short",
             }
-        ],
+        ]
     }
 
     # Act
@@ -195,9 +197,11 @@ async def test_check_fields_validation_on_create_connection(
     assert result.json() == {
         "detail": [
             {
+                "input": None,
                 "loc": ["body", "name"],
-                "msg": "none is not an allowed value",
-                "type": "type_error.none.not_allowed",
+                "msg": "Input should be a valid string",
+                "type": "string_type",
+                "url": "https://errors.pydantic.dev/2.6/v/string_type",
             }
         ]
     }
@@ -226,9 +230,11 @@ async def test_check_fields_validation_on_create_connection(
     assert result.json() == {
         "detail": [
             {
+                "input": None,
                 "loc": ["body", "description"],
-                "msg": "none is not an allowed value",
-                "type": "type_error.none.not_allowed",
+                "msg": "Input should be a valid string",
+                "type": "string_type",
+                "url": "https://errors.pydantic.dev/2.6/v/string_type",
             }
         ]
     }
@@ -258,16 +264,23 @@ async def test_check_fields_validation_on_create_connection(
     assert result.json() == {
         "detail": [
             {
-                "loc": ["body", "connection_data"],
-                "msg": (
-                    f"No match for discriminator 'type' and value 'POSTGRESQL' (allowed values: {ALLOWED_SOURCES})"
-                ),
-                "type": "value_error.discriminated_union.invalid_discriminator",
                 "ctx": {
-                    "discriminator_key": "type",
-                    "discriminator_value": "POSTGRESQL",
-                    "allowed_values": ALLOWED_SOURCES,
+                    "discriminator": "'type'",
+                    "expected_tags": f"{ALLOWED_SOURCES}",
+                    "tag": "POSTGRESQL",
                 },
+                "input": {
+                    "database_name": "postgres",
+                    "host": "127.0.0.1",
+                    "port": 5432,
+                    "type": "POSTGRESQL",
+                    "user": "user",
+                },
+                "loc": ["body", "connection_data"],
+                "msg": "Input tag 'POSTGRESQL' found using 'type' does not match "
+                f"any of the expected tags: {ALLOWED_SOURCES}",
+                "type": "union_tag_invalid",
+                "url": "https://errors.pydantic.dev/2.6/v/union_tag_invalid",
             }
         ]
     }

@@ -9,6 +9,9 @@ from syncmaster.schemas.v1.connection_types import HIVE_TYPE
 class HiveBaseSchema(BaseModel):
     type: HIVE_TYPE
 
+    class Config:
+        from_attributes = True
+
 
 class ReadHiveConnectionSchema(HiveBaseSchema):
     cluster: str
@@ -19,7 +22,7 @@ class ReadHiveAuthSchema(HiveBaseSchema):
 
 
 class UpdateHiveConnectionSchema(HiveBaseSchema):
-    cluster: str | None
+    cluster: str | None = None
 
 
 class UpdateHiveAuthSchema(HiveBaseSchema):

@@ -188,14 +188,18 @@ async def test_developer_plus_create_oracle_connection_with_sid_and_service_name
     assert result.json() == {
         "detail": [
             {
-                "loc": [
-                    "body",
-                    "connection_data",
-                    "CreateOracleConnectionSchema",
-                    "__root__",
-                ],
-                "msg": "You must specify either sid or service_name but not both",
+                "ctx": {"error": {}},
+                "input": {
+                    "host": "127.0.0.1",
+                    "port": 1521,
+                    "service_name": "service_name",
+                    "sid": "sid_name",
+                    "type": "oracle",
+                },
+                "loc": ["body", "connection_data", "oracle"],
+                "msg": "Value error, You must specify either sid or service_name but not both",
                 "type": "value_error",
+                "url": "https://errors.pydantic.dev/2.6/v/value_error",
             }
         ]
     }

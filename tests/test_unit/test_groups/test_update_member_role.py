@@ -69,17 +69,18 @@ async def test_owner_of_group_can_not_update_user_role_with_wrong_role(
     )
 
     # Assert
+    assert result.status_code == 422
     assert result.json() == {
         "detail": [
             {
-                "ctx": {"enum_values": ["Maintainer", "Developer", "Guest"]},
+                "ctx": {"expected": "'Maintainer', 'Developer' or 'Guest'"},
+                "input": "Unknown",
                 "loc": ["body", "role"],
-                "msg": "value is not a valid enumeration member; permitted: 'Maintainer', 'Developer', 'Guest'",
-                "type": "type_error.enum",
+                "msg": "Input should be 'Maintainer', 'Developer' or 'Guest'",
+                "type": "enum",
             }
         ]
     }
-    assert result.status_code == 422
 
 
 async def test_maintainer_below_can_not_update_user_role(

@@ -9,6 +9,9 @@ from syncmaster.schemas.v1.connection_types import POSTGRES_TYPE
 class PostgresBaseSchema(BaseModel):
     type: POSTGRES_TYPE
 
+    class Config:
+        from_attributes = True
+
 
 class ReadPostgresConnectionSchema(PostgresBaseSchema):
     host: str
@@ -24,7 +27,7 @@ class ReadPostgresAuthSchema(PostgresBaseSchema):
 class UpdatePostgresConnectionSchema(PostgresBaseSchema):
     host: str | None = None
     port: int | None = None
-    database_name: str | None
+    database_name: str | None = None
     additional_params: dict | None = Field(default_factory=dict)
 
 

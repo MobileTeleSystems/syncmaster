@@ -2,13 +2,16 @@
 # SPDX-License-Identifier: Apache-2.0
 from typing import Literal
 
-from pydantic import BaseModel, SecretStr, root_validator
+from pydantic import BaseModel, SecretStr, model_validator
 
 from syncmaster.schemas.v1.connection_types import S3_TYPE
 
 
 class S3BaseSchema(BaseModel):
     type: S3_TYPE
+
+    class Config:
+        from_attributes = True
 
 
 class S3ReadConnectionSchema(S3BaseSchema):
@@ -28,7 +31,7 @@ class S3CreateConnectionSchema(S3BaseSchema):
     protocol: Literal["http", "https"] = "https"
     bucket_style: Literal["domain", "path"] = "domain"
 
-    @root_validator
+    @model_validator(mode="before")
     def validate_port(cls, values: dict) -> dict:
         port = values.get("port")
         protocol = values.get("protocol")
@@ -41,7 +44,7 @@ class S3CreateConnectionSchema(S3BaseSchema):
 
 
 class S3UpdateConnectionSchema(S3BaseSchema):
-    host: str | None
+    host: str | None = None
     bucket: str | None = None
     port: int | None = None
     region: str | None = None

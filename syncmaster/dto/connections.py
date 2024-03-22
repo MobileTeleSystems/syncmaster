@@ -26,8 +26,8 @@ class OracleConnectionDTO(ConnectionDTO):
     user: str
     password: str
     additional_params: dict
-    sid: str | None
-    service_name: str | None
+    sid: str | None = None
+    service_name: str | None = None
     type: str = "oracle"
 
 

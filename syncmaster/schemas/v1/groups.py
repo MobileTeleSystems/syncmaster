@@ -22,7 +22,7 @@ class AddUserSchema(BaseModel):
     role: GroupMemberRole
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ReadGroupSchema(BaseModel):
@@ -32,7 +32,7 @@ class ReadGroupSchema(BaseModel):
     owner_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class GroupPageSchema(PageSchema):

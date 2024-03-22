@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
 
-from pydantic import BaseModel, Field, SecretStr, root_validator
+from pydantic import BaseModel, Field, SecretStr, model_validator
 
 from syncmaster.schemas.v1.connection_types import ORACLE_TYPE
 from syncmaster.schemas.v1.types import NameConstr
@@ -9,6 +9,9 @@ from syncmaster.schemas.v1.types import NameConstr
 
 class OracleBaseSchema(BaseModel):
     type: ORACLE_TYPE
+
+    class Config:
+        from_attributes = True
 
 
 class ReadOracleConnectionSchema(OracleBaseSchema):
@@ -42,7 +45,7 @@ class CreateOracleConnectionSchema(OracleBaseSchema):
     sid: str | None = None
     additional_params: dict = Field(default_factory=dict)
 
-    @root_validator
+    @model_validator(mode="before")
     def check_owner_id(cls, values):
         sid, service_name = values.get("sid"), values.get("service_name")
         if sid and service_name:

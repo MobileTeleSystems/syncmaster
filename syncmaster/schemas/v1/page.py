@@ -15,8 +15,8 @@ class MetaPageSchema(BaseModel):
     page_size: int
     has_next: bool
     has_previous: bool
-    next_page: int | None
-    previous_page: int | None
+    next_page: int | None = None
+    previous_page: int | None = None
 
 
 class PageSchema(BaseModel, abc.ABC):
