@@ -125,10 +125,11 @@ async def test_owner_cannot_add_user_to_group_with_wrong_role(
     assert result.json() == {
         "detail": [
             {
-                "ctx": {"enum_values": ["Maintainer", "Developer", "Guest"]},
+                "ctx": {"expected": "'Maintainer', 'Developer' or 'Guest'"},
+                "input": "WrongRole",
                 "loc": ["body", "role"],
-                "msg": "value is not a valid enumeration member; permitted: 'Maintainer', 'Developer', 'Guest'",
-                "type": "type_error.enum",
+                "msg": "Input should be 'Maintainer', 'Developer' or 'Guest'",
+                "type": "enum",
             }
         ]
     }
@@ -153,11 +154,13 @@ async def test_owner_cannot_add_user_to_group_without_role(
     assert result.json() == {
         "detail": [
             {
+                "input": None,
                 "loc": ["body"],
-                "msg": "field required",
-                "type": "value_error.missing",
-            },
-        ],
+                "msg": "Field required",
+                "type": "missing",
+                "url": "https://errors.pydantic.dev/2.6/v/missing",
+            }
+        ]
     }
     assert result.status_code == 422
 

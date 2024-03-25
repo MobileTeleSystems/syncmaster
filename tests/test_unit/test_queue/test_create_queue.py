@@ -222,54 +222,90 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
         (
             "очередь",
             {
-                "ctx": {"pattern": "^[-_a-zA-Z0-9]+$"},
-                "loc": ["body", "name"],
-                "msg": 'string does not match regex "^[-_a-zA-Z0-9]+$"',
-                "type": "value_error.str.regex",
+                "detail": [
+                    {
+                        "ctx": {"pattern": "^[-_a-zA-Z0-9]+$"},
+                        "input": "очередь",
+                        "loc": ["body", "name"],
+                        "msg": "String should match pattern '^[-_a-zA-Z0-9]+$'",
+                        "type": "string_pattern_mismatch",
+                        "url": "https://errors.pydantic.dev/2.6/v/string_pattern_mismatch",
+                    }
+                ]
             },
         ),
         (
             "Queue name",
             {
-                "ctx": {"pattern": "^[-_a-zA-Z0-9]+$"},
-                "loc": ["body", "name"],
-                "msg": 'string does not match regex "^[-_a-zA-Z0-9]+$"',
-                "type": "value_error.str.regex",
+                "detail": [
+                    {
+                        "ctx": {"pattern": "^[-_a-zA-Z0-9]+$"},
+                        "input": "Queue name",
+                        "loc": ["body", "name"],
+                        "msg": "String should match pattern '^[-_a-zA-Z0-9]+$'",
+                        "type": "string_pattern_mismatch",
+                        "url": "https://errors.pydantic.dev/2.6/v/string_pattern_mismatch",
+                    }
+                ]
             },
         ),
         (
             "♥︎",
             {
-                "ctx": {"pattern": "^[-_a-zA-Z0-9]+$"},
-                "loc": ["body", "name"],
-                "msg": 'string does not match regex "^[-_a-zA-Z0-9]+$"',
-                "type": "value_error.str.regex",
+                "detail": [
+                    {
+                        "ctx": {"pattern": "^[-_a-zA-Z0-9]+$"},
+                        "input": "♥︎",
+                        "loc": ["body", "name"],
+                        "msg": "String should match pattern '^[-_a-zA-Z0-9]+$'",
+                        "type": "string_pattern_mismatch",
+                        "url": "https://errors.pydantic.dev/2.6/v/string_pattern_mismatch",
+                    }
+                ]
             },
         ),
         (
             "q" * 129,
             {
-                "ctx": {"limit_value": 128},
-                "loc": ["body", "name"],
-                "msg": "ensure this value has at most 128 characters",
-                "type": "value_error.any_str.max_length",
+                "detail": [
+                    {
+                        "type": "string_too_long",
+                        "loc": ["body", "name"],
+                        "msg": "String should have at most 128 characters",
+                        "input": 129 * "q",
+                        "ctx": {"max_length": 128},
+                        "url": "https://errors.pydantic.dev/2.6/v/string_too_long",
+                    }
+                ]
             },
         ),
         (
             "",
             {
-                "ctx": {"pattern": "^[-_a-zA-Z0-9]+$"},
-                "loc": ["body", "name"],
-                "msg": 'string does not match regex "^[-_a-zA-Z0-9]+$"',
-                "type": "value_error.str.regex",
+                "detail": [
+                    {
+                        "ctx": {"pattern": "^[-_a-zA-Z0-9]+$"},
+                        "input": "",
+                        "loc": ["body", "name"],
+                        "msg": "String should match pattern '^[-_a-zA-Z0-9]+$'",
+                        "type": "string_pattern_mismatch",
+                        "url": "https://errors.pydantic.dev/2.6/v/string_pattern_mismatch",
+                    }
+                ]
             },
         ),
         (
             None,
             {
-                "loc": ["body", "name"],
-                "msg": "none is not an allowed value",
-                "type": "type_error.none.not_allowed",
+                "detail": [
+                    {
+                        "input": None,
+                        "loc": ["body", "name"],
+                        "msg": "Input should be a valid string",
+                        "type": "string_type",
+                        "url": "https://errors.pydantic.dev/2.6/v/string_type",
+                    }
+                ]
             },
         ),
     ],
@@ -297,4 +333,4 @@ async def test_maintainer_plus_cannot_create_queue_with_wrong_name(
     )
 
     # Assert
-    assert result.json() == {"detail": [error]}
+    assert result.json() == error

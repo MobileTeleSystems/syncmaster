@@ -240,34 +240,55 @@ async def test_superuser_can_create_transfer(
         (
             {"name": ""},
             {
-                "ctx": {"limit_value": 1},
+                "ctx": {"min_length": 1},
+                "input": "",
                 "loc": ["body", "name"],
-                "msg": "ensure this value has at least 1 characters",
-                "type": "value_error.any_str.min_length",
+                "msg": "String should have at least 1 character",
+                "type": "string_too_short",
+                "url": "https://errors.pydantic.dev/2.6/v/string_too_short",
             },
         ),
         (
             {"name": None},
             {
+                "input": None,
                 "loc": ["body", "name"],
-                "msg": "none is not an allowed value",
-                "type": "type_error.none.not_allowed",
+                "msg": "Input should be a valid string",
+                "type": "string_type",
+                "url": "https://errors.pydantic.dev/2.6/v/string_type",
             },
         ),
         (
             {"is_scheduled": 2},
             {
+                "input": 2,
                 "loc": ["body", "is_scheduled"],
-                "msg": "value could not be parsed to a boolean",
-                "type": "type_error.bool",
+                "msg": "Input should be a valid boolean, unable to interpret input",
+                "type": "bool_parsing",
+                "url": "https://errors.pydantic.dev/2.6/v/bool_parsing",
             },
         ),
         (
             {"schedule": None},
             {
-                "loc": ["body", "__root__"],
-                "msg": "If transfer must be scheduled than set schedule param",
+                "ctx": {"error": {}},
+                "input": {
+                    "description": "",
+                    "group_id": 1,
+                    "is_scheduled": True,
+                    "name": "new test transfer",
+                    "queue_id": 1,
+                    "schedule": None,
+                    "source_connection_id": 1,
+                    "source_params": {"table_name": "source_table", "type": "postgres"},
+                    "strategy_params": {"type": "full"},
+                    "target_connection_id": 2,
+                    "target_params": {"table_name": "target_table", "type": "postgres"},
+                },
+                "loc": ["body"],
+                "msg": "Value error, If transfer must be scheduled than set schedule param",
                 "type": "value_error",
+                "url": "https://errors.pydantic.dev/2.6/v/value_error",
             },
         ),
         (
@@ -275,17 +296,18 @@ async def test_superuser_can_create_transfer(
                 "strategy_params": {"type": "new some strategy type"},
             },
             {
-                "loc": ["body", "strategy_params"],
-                "msg": (
-                    "No match for discriminator 'type' and value 'new some strategy type' (allowed values: "
-                    "'full', 'incremental')"
-                ),
-                "type": "value_error.discriminated_union.invalid_discriminator",
                 "ctx": {
-                    "discriminator_key": "type",
-                    "discriminator_value": "new some strategy type",
-                    "allowed_values": "'full', 'incremental'",
+                    "discriminator": "'type'",
+                    "expected_tags": "'full', 'incremental'",
+                    "tag": "new some strategy type",
                 },
+                "input": {"type": "new some strategy type"},
+                "loc": ["body", "strategy_params"],
+                "msg": "Input tag 'new some strategy type' found using 'type' "
+                "does not match any of the expected tags: 'full', "
+                "'incremental'",
+                "type": "union_tag_invalid",
+                "url": "https://errors.pydantic.dev/2.6/v/union_tag_invalid",
             },
         ),
         (
@@ -296,17 +318,18 @@ async def test_superuser_can_create_transfer(
                 },
             },
             {
-                "loc": ["body", "source_params"],
-                "msg": (
-                    "No match for discriminator 'type' and value 'new some connection type' "
-                    "(allowed values: 'postgres', 'hdfs', 'hive', 'oracle', 's3')"
-                ),
-                "type": "value_error.discriminated_union.invalid_discriminator",
                 "ctx": {
-                    "discriminator_key": "type",
-                    "discriminator_value": "new some connection type",
-                    "allowed_values": "'postgres', 'hdfs', 'hive', 'oracle', 's3'",
+                    "discriminator": "'type'",
+                    "expected_tags": "'postgres', 'hdfs', 'hive', 'oracle', 's3'",
+                    "tag": "new some connection type",
                 },
+                "input": {"table_name": "source_table", "type": "new some connection type"},
+                "loc": ["body", "source_params"],
+                "msg": "Input tag 'new some connection type' found using 'type' "
+                "does not match any of the expected tags: 'postgres', "
+                "'hdfs', 'hive', 'oracle', 's3'",
+                "type": "union_tag_invalid",
+                "url": "https://errors.pydantic.dev/2.6/v/union_tag_invalid",
             },
         ),
     ),
@@ -347,6 +370,10 @@ async def test_check_fields_validation_on_create_transfer(
 
     # Assert
     assert result.status_code == 422
+
+    if new_data == {"schedule": None}:
+        error_json["input"] = transfer_data
+
     assert result.json() == {"detail": [error_json]}
 
 
@@ -540,14 +567,12 @@ async def test_developer_plus_can_not_create_transfer_with_target_s3_json(
     assert result.json() == {
         "detail": [
             {
-                "loc": ["body", "target_params", "S3CreateTransferTarget", "file_format"],
-                "msg": "No match for discriminator 'type' and value 'json' (allowed values: 'csv', 'jsonline')",
-                "type": "value_error.discriminated_union.invalid_discriminator",
-                "ctx": {
-                    "discriminator_key": "type",
-                    "discriminator_value": "json",
-                    "allowed_values": "'csv', 'jsonline'",
-                },
+                "type": "union_tag_invalid",
+                "loc": ["body", "target_params", "s3", "file_format"],
+                "msg": "Input tag 'json' found using 'type' does not match any of the expected tags: 'csv', 'jsonline'",
+                "input": {"type": "json", "lineSep": "\n", "encoding": "utf-8"},
+                "ctx": {"discriminator": "'type'", "tag": "json", "expected_tags": "'csv', 'jsonline'"},
+                "url": "https://errors.pydantic.dev/2.6/v/union_tag_invalid",
             }
         ]
     }

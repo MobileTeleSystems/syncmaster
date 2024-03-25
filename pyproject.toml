@@ -8,7 +8,6 @@ readme = "README.rst"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Framework :: Pydantic",
-    "Framework :: Pydantic :: 1",
     "Framework :: Pydantic :: 2",
     "Framework :: FastAPI",
     "Intended Audience :: Developers",
@@ -45,16 +44,17 @@ exclude = [
 python = "^3.11"
 sqlalchemy = "^2.0.18"
 sqlalchemy-utils = "^0.41.1"
-pydantic = "^1.10.11"
+pydantic = "^2.6.4"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 python-multipart = "^0.0.6"
 celery = "^5.3.3"
-onetl = {version = "^0.10", extras = ["spark"]}
+onetl = {version = "^0.10.2", extras = ["spark"]}
 psycopg2-binary = {version = "^2.9.7", optional = true }
-fastapi = {version = "^0.99.1", optional = true }
+fastapi = {version = "^0.110.0", optional = true}
 uvicorn = {version = "^0.22.0", optional = true }
 alembic = {version = "^1.11.1", optional = true }
 asyncpg = {version = "^0.28.0", optional = true }
+pydantic-settings = "^2.2.1"
 
 [tool.poetry.extras]
 backend = [
@@ -78,7 +78,7 @@ psycopg2-binary = "^2.9.7"
 pytest-randomly = "^3.13.0"
 pytest-deadfixtures = "^2.2.1"
 pytest-mock = "^3.11.1"
-onetl = {extras = ["spark", "s3", "hdfs"], version = "^0.10"}
+onetl = {extras = ["spark", "s3", "hdfs"], version = "^0.10.2"}
 faker = "^22.6.0"
 coverage = "^7.4.3"
 gevent = "^24.2.1"

@@ -3,7 +3,9 @@
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
-from pydantic import BaseSettings, PyObject, root_validator
+from pydantic import model_validator
+from pydantic.types import ImportString
+from pydantic_settings import BaseSettings
 
 if TYPE_CHECKING:
     pass
@@ -70,7 +72,7 @@ class Settings(BaseSettings):
         )
 
     TOKEN_EXPIRED_TIME: int = 60 * 60 * 10  # 10 hours
-    CREATE_SPARK_SESSION_FUNCTION: PyObject = "syncmaster.worker.spark.get_worker_spark_session"
+    CREATE_SPARK_SESSION_FUNCTION: ImportString = "syncmaster.worker.spark.get_worker_spark_session"
 
 
 class TestSettings(BaseSettings):
@@ -99,7 +101,7 @@ class TestSettings(BaseSettings):
     TEST_S3_PROTOCOL: str = "http"
     TEST_S3_ADDITIONAL_PARAMS: dict = {}
 
-    @root_validator
+    @model_validator(mode="before")
     def check_sid_and_service_name(cls, values):
         sid = values.get("TEST_ORACLE_SID")
         service_name = values.get("TEST_ORACLE_SERVICE_NAME")

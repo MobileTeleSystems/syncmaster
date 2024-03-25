@@ -148,11 +148,13 @@ async def test_update_user(
         "detail": [
             {
                 "ctx": {"pattern": "^[_a-z0-9]+$"},
+                "input": "new            username",
                 "loc": ["body", "username"],
-                "msg": 'string does not match regex "^[_a-z0-9]+$"',
-                "type": "value_error.str.regex",
+                "msg": "String should match pattern '^[_a-z0-9]+$'",
+                "type": "string_pattern_mismatch",
+                "url": "https://errors.pydantic.dev/2.6/v/string_pattern_mismatch",
             }
-        ],
+        ]
     }
 
     # check change other user from simple

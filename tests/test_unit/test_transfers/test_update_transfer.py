@@ -135,12 +135,14 @@ async def test_check_name_field_validation_on_update_transfer(
     assert result.json() == {
         "detail": [
             {
-                "ctx": {"limit_value": 1},
+                "ctx": {"min_length": 1},
+                "input": "",
                 "loc": ["body", "name"],
-                "msg": "ensure this value has at least 1 characters",
-                "type": "value_error.any_str.min_length",
+                "msg": "String should have at least 1 character",
+                "type": "string_too_short",
+                "url": "https://errors.pydantic.dev/2.6/v/string_too_short",
             }
-        ],
+        ]
     }
 
 
