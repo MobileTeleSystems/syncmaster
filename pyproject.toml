@@ -8,7 +8,6 @@ readme = "README.rst"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Framework :: Pydantic",
-    "Framework :: Pydantic :: 1",
     "Framework :: Pydantic :: 2",
     "Framework :: FastAPI",
     "Intended Audience :: Developers",
