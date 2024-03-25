@@ -23,7 +23,7 @@ jobs:
 
     environment:
       name: test-pypi
-      url: https://test.pypi.org/p/data-syncmaster
+      url: https://test.pypi.org/project/data-syncmaster/
     permissions:
       id-token: write # to auth in Test PyPI
 
