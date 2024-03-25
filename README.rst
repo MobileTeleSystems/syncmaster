@@ -55,7 +55,7 @@ Example:
     }
 
 Group
-----
+-----
 
 Other objects (like connection, transfer, run, queue) can be created only within some group (see ``group_id``).
 
