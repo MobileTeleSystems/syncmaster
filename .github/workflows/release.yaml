@@ -1,0 +1,52 @@
+name: PyPI release
+
+on:
+  push:
+    branches-ignore:
+      - dependabot/**
+      - pre-commit-ci-update-config
+      - master
+  workflow_dispatch:
+
+env:
+  DEFAULT_PYTHON: '3.12'
+
+jobs:
+  release:
+    name: Release package
+    runs-on: ubuntu-latest
+    if: github.repository == 'MobileTeleSystems/syncmaster'  # prevent running on forks
+
+    environment:
+      name: pypi
+      url: https://pypi.org/p/data-syncmaster
+    permissions:
+      id-token: write # to auth in PyPI
+      contents: write # to create Github release
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+        id: python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.DEFAULT_PYTHON }}
+
+      - name: Install system dependencies
+        # this step is needed for successful installation of "bonsai" library in python dependencies
+        run: sudo apt-get update && sudo apt-get install -y libldap2-dev libsasl2-dev
+
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+
+      - name: Fix logo in Readme
+        run: |
+          sed -i "s#image:: docs/#image:: https://raw.githubusercontent.com/MobileTeleSystems/syncmaster/$GITHUB_SHA/docs/#g" README.rst
+
+      - name: Build package
+        run: poetry build
+
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@release/v1
