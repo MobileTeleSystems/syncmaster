@@ -113,4 +113,3 @@ jobs:
           body_path: changelog.md
           files: |-
             dist/*
-            openapi.json
