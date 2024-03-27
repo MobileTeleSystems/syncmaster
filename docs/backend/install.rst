@@ -66,6 +66,14 @@ Start Postgres instance somewhere, and set up environment variables:
     POSTGRES_USER=user
     POSTGRES_PASSWORD=password
 
+set variables to connect to RabbitMQ
+
+.. code-block:: bash
+    RABBITMQ_HOST=somehost
+    RABBITMQ_PORT=5672
+    RABBITMQ_USER=user
+    RABBITMQ_PASSWORD=password
+
 You can use virtually any database supported by `SQLAlchemy <https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls>`_,
 but the only one we really tested is Postgres.
 

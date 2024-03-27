@@ -4,151 +4,54 @@
 SyncMaster
 ==========
 
-|Coverage|
+|Repo Status| |PyPI| |PyPI License| |PyPI Python Version| |Docker image| |Documentation|
+|Build Status| |Coverage|  |pre-commit.ci|
 
+.. |Repo Status| image:: https://www.repostatus.org/badges/latest/active.svg
+    :target: https://github.com/MobileTeleSystems/syncmaster
+.. |PyPI| image:: https://img.shields.io/pypi/v/data-syncmaster
+    :target: https://pypi.org/project/data-syncmaster/
+.. |PyPI License| image:: https://img.shields.io/pypi/l/data-syncmaster.svg
+    :target: https://github.com/MobileTeleSystems/syncmaster/blob/develop/LICENSE.txt
+.. |PyPI Python Version| image:: https://img.shields.io/pypi/pyversions/data-syncmaster.svg
+    :target: https://badge.fury.io/py/data-syncmaster
+.. |Docker image| image:: https://img.shields.io/docker/v/mtsrus/syncmaster-backend?sort=semver&label=docker
+    :target: https://hub.docker.com/r/mtsrus/syncmaster-backend
+.. |Documentation| image:: https://readthedocs.org/projects/data-syncmaster/badge/?version=stable
+    :target: https://data-syncmaster.readthedocs.io/
+.. |Build Status| image:: https://github.com/MobileTeleSystems/syncmaster/workflows/Tests/badge.svg
+    :target: https://github.com/MobileTeleSystems/syncmaster/actions
 .. |Coverage| image:: https://codecov.io/gh/MobileTeleSystems/syncmaster/graph/badge.svg?token=ky7UyUxolB
- :target: https://codecov.io/gh/MobileTeleSystems/syncmaster
+    :target: https://codecov.io/gh/MobileTeleSystems/syncmaster
+.. |pre-commit.ci| image:: https://results.pre-commit.ci/badge/github/MobileTeleSystems/syncmaster/develop.svg
+    :target: https://results.pre-commit.ci/latest/github/MobileTeleSystems/syncmaster/develop
 
 
-Requirements
-============
+What is Syncmaster?
+----------------
 
-Python 3.11+
+Syncmaster is designed to make data replication easier.
 
-Roles and rules
-===============
+* REST API
+* Worker
+* Queue
 
-- Object within the group can be seen/interacted with only by users which are members of the group.
-- Permissions are limited by role assigned to user within specific group.
-- There can be only one user in a group with the Owner role, all other roles are not limited in
-  number.
-- Superuser can read, write to the table and delete without being in the group.
+Goals
+-----
 
-Roles are:
+* simplification of database and file storage replication
+* provides a role model for sharing rights
+* contains automatic start of spark session to simplify data transfer
+* contains groups for separating storage and management of entities
 
-* ``GUEST`` - read-only
-* ``DEVELOPER`` - read-write
-* ``MAINTAINER`` (DevOps) - read-write + manage queues
-* ``OWNER`` (Product Owner) - read-write + manage queues + manage user-group mapping
-* ``SUPERUSER`` - meta role assigned to specific users (NOT within group). Read-write + manage queues + manage user-group mapping + create/delete groups.
+Non-goals
+---------
 
+* this is not a backup system
 
-Groups
--------
+.. documentation
 
-.. list-table:: Rights to work with the groups repository.
-   :header-rows: 1
+Documentation
+-------------
 
-   * - Rule \ Role
-     - Guest
-     - Developer
-     - Maintainer
-     - Owner
-     - Superuser
-   * - READ
-     - x
-     - x
-     - x
-     - x
-     - x
-   * - UPDATE
-     -
-     -
-     -
-     - x
-     - x
-   * - CREATE
-     - x
-     - x
-     - x
-     - x
-     - x
-   * - DELETE
-     -
-     -
-     -
-     -
-     - x
-
-Add user to the group and delete
----------------------------------
-Each user has the right to remove himself from a group, regardless of his role in the group.
-
-.. list-table:: Rights to delete and add users to a group.
-   :header-rows: 1
-
-   * - Rule \ Role
-     - Guest
-     - Developer
-     - Maintainer
-     - Owner
-     - Superuser
-   * - READ
-     - x
-     - x
-     - x
-     - x
-     - x
-   * - ADD, UPDATE
-     -
-     -
-     -
-     - x
-     - x
-
-Transfers, Runs and Connections
---------------------------------
-
-.. list-table:: Right to work wirh Transfers, Runs and Connections repositories.
-   :header-rows: 1
-
-
-   * - Rule \ Role
-     - Guest
-     - Developer
-     - Maintainer
-     - Owner
-     - Superuser
-   * - READ
-     - x
-     - x
-     - x
-     - x
-     - x
-   * - UPDATE, CREATE
-     -
-     - x
-     - x
-     - x
-     - x
-   * - DELETE
-     -
-     -
-     - x
-     - x
-     - x
-
-Queues
-------
-
-.. list-table:: Rights to read, delete and update queues.
-   :header-rows: 1
-
-   * - Rule \ Role
-     - Guest
-     - Developer
-     - Maintainer
-     - Owner
-     - Superuser
-   * - READ
-     - x
-     - x
-     - x
-     - x
-     - x
-   * - UPDATE, DELETE, CREATE
-     -
-     -
-     - x
-     - x
-     - x
+See https://data-syncmaster.readthedocs.io/
