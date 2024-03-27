@@ -97,7 +97,7 @@ Example:
         "queue_id": "1",
         "name": "My beautiful transfer.",
         "description": "What a great transfer !",
-        "is_scheduled": "false",
+        "is_scheduled": false,
         "schedule": "",
         "source_connection_id": "1",
         "target_connection_id": "2",
