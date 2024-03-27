@@ -28,7 +28,7 @@ SyncMaster
 
 
 What is Syncmaster?
-----------------
+-------------------
 
 Syncmaster is designed to make data replication easier.
 
