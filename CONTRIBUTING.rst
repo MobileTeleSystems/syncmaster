@@ -59,7 +59,7 @@ If you already have venv, but need to install dependencies required for developm
 We are using `poetry <https://python-poetry.org/docs/managing-dependencies/>`_ for managing dependencies and building the package.
 It allows to keep development environment the same for all developers due to using lock file with fixed dependency versions.
 
-There are dependency **groups*:
+There are dependency **groups**:
 
 * ``backend`` - for running backend
 * ``worker`` - for running Celery workers

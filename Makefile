@@ -90,7 +90,7 @@ test: ##@Test Run tests
 	HADOOP_CONF_DIR=${HADOOP_CONF_DIR} \
 	HIVE_CONF_DIR=${HIVE_CONF_DIR} \
 	PYTHONPATH=${APP_PATH} \
-	${POETRY}  run pytest -vx ./syncmaster/tests/
+	${POETRY}  run pytest
 
 check-fixtures: ##@Test Check declared fixtures without using
 	@POSTGRES_HOST=${POSTGRES_HOST} \
@@ -103,7 +103,7 @@ check-fixtures: ##@Test Check declared fixtures without using
 	RABBITMQ_USER=${RABBITMQ_USER} \
 	RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD} \
 	PYTHONPATH=${APP_PATH} \
-	${POETRY} run pytest --dead-fixtures ./syncmaster/tests/
+	${POETRY} run pytest --dead-fixtures
 
 run_back_docker:
 	docker run --env-file ./.env.docker \
