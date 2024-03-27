@@ -2,12 +2,8 @@ name: PyPI release
 
 on:
   push:
-    branches:
-      - develop
-  pull_request:
-    branches-ignore:
-      - master
-  workflow_dispatch:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
 
 env:
   DEFAULT_PYTHON: '3.12'
