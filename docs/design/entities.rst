@@ -123,7 +123,7 @@ Example:
         "status": "STARTED",
         "log_url": "https://kinaba.url/...",
         "transfer_dump": {
-            # transfer object JSON
+            "transfer object JSON"
         },
     }
 
