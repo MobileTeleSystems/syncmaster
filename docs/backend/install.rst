@@ -56,11 +56,15 @@ Available *extras* are:
 Run database
 ~~~~~~~~~~~~
 
-Start Postgres instance somewhere, and set up database url using environment variables:
+Start Postgres instance somewhere, and set up environment variables:
 
 .. code-block:: bash
 
-    SYNCMASTER__DATABASE__URL=postgresql+asyncpg://user:password@postgres-host:5432/database_name
+    POSTGRES_HOST=localhost
+    POSTGRES_PORT=5432
+    POSTGRES_DB=postgres
+    POSTGRES_USER=user
+    POSTGRES_PASSWORD=password
 
 You can use virtually any database supported by `SQLAlchemy <https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls>`_,
 but the only one we really tested is Postgres.
@@ -73,7 +77,7 @@ Run worker
     Before starting the worker you need to create a queue.
     The queue is created by sending a post request to ``/queues`` endpoint (See Swagger doc for details).
 
-для запуска воркера нужно выполнить команду
+to start the worker you need to run the command
 
 .. code-block:: console
 
