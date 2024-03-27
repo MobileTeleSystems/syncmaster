@@ -119,7 +119,7 @@ Example:
     {
         "transfer_id": 123,
         "started_at: "2024-01-19T16:30:07+03:00",
-        "ended_at: null,
+        "ended_at": null,
         "status": "STARTED",
         "log_url: "https://kinaba.url/...",
         "transfer_dump": {
