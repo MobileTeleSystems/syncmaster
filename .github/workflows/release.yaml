@@ -67,8 +67,8 @@ jobs:
       - name: Build package
         run: poetry build
 
-#      - name: Publish package
-#        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@release/v1
 
       - name: Get changelog
         run: |

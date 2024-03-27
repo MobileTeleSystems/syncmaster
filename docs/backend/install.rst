@@ -68,21 +68,24 @@ but the only one we really tested is Postgres.
 
 See :ref:`Database settings <backend-configuration-database>` for more options.
 
-Run migrations
-~~~~~~~~~~~~~~
-
-To apply migrations (database structure changes) you need to execute following command:
-
-.. code-block:: console
-
-    $ python -m syncmaster.backend.db.migrations upgrade head
-
-This is a thin wrapper around `alembic <https://alembic.sqlalchemy.org/en/latest/tutorial.html#running-our-first-migration>`_ cli,
-options and commands are just the same.
+Run worker
+~~~~~~~~~~
 
 .. note::
 
-    This command should be executed after each upgrade to new syncmaster version.
+    Before starting the worker you need to create a queue.
+    The queue is created by sending a post request to ``/queues`` endpoint (See Swagger doc for details).
+
+для запуска воркера нужно выполнить команду
+
+.. code-block:: console
+
+    $ celery -A syncmaster.worker.config.celery worker --loglevel=info --max-tasks-per-child=1 -Q queue_name
+
+.. note::
+
+    The specified celery options are given as an example, you can specify other options you need.
+
 
 Run backend
 ~~~~~~~~~~~
@@ -91,9 +94,6 @@ To start backend server you need to execute following command:
 
 .. code-block:: console
 
-    $ python -m syncmaster.backend.main --host 0.0.0.0 --port 8000
-
-This is a thin wrapper around `uvicorn <https://www.uvicorn.org/#command-line-options>`_ cli,
-options and commands are just the same.
+    $ python -m syncmaster.backend.main
 
 After server is started and ready, open http://localhost:8000/docs.
