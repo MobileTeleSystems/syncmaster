@@ -34,7 +34,6 @@ Syncmaster is designed to make data replication easier.
 
 * REST API
 * Worker
-* Queue
 
 Goals
 -----
