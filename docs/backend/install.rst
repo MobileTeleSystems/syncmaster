@@ -36,7 +36,6 @@ Requirements
 
 * Python 3.7 or above
 * Pydantic 2.x
-* ``libldap2-dev``, ``libsasl2-dev``, ``libkrb5-dev`` (for :ref:`backend-auth-ldap`)
 * Some relation database instance, like `Postgres <https://www.postgresql.org/>`_
 
 Installation process
@@ -65,8 +64,6 @@ Start Postgres instance somewhere, and set up database url using environment var
 
 You can use virtually any database supported by `SQLAlchemy <https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls>`_,
 but the only one we really tested is Postgres.
-
-See :ref:`Database settings <backend-configuration-database>` for more options.
 
 Run worker
 ~~~~~~~~~~
