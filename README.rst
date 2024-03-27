@@ -30,10 +30,19 @@ SyncMaster
 What is Syncmaster?
 -------------------
 
-Syncmaster is designed to make data replication easier.
+Syncmaster is as low-code ETL tool for moving data between databases and file systems.
+List of currently supported connections:
+
+* Apache Hive
+* Postgres
+* Oracle
+* HDFS
+* S3
+
+Current SyncMaster implementation provides following components:
 
 * REST API
-* Worker
+* Celery Worker
 
 Goals
 -----
