@@ -15,21 +15,6 @@ Requirements
 
 Python 3.11+
 
-
-.. documentation
-
-Documentation
-=============
-
-.. wiki
-
-Wiki page
-=========
-
-.. install
-
-Installation
-============
 Roles and rules
 ===============
 
