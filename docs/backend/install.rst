@@ -46,17 +46,13 @@ Install ``data-syncmaster`` package with following *extra* dependencies:
 
 .. code-block:: console
 
-    $ pip install data-syncmaster[backend,postgres,ldap]
+    $ pip install data-syncmaster[backend,worker]
 
 Available *extras* are:
 
 * ``backend`` - main backend requirements, like FastAPI, SQLAlchemy and so on.
-* ``postgres`` - requirements required to use Postgres as backend data storage.
-* ``ldap`` - requirements used by :ref:`backend-auth-ldap`.
+* ``worker`` - this dependency is needed to install the worker.
 
-.. note::
-
-      For **macOS** users, an additional step is required. `You need to install the "bonsai" Python library from source code <https://bonsai.readthedocs.io/en/latest/install.html#install-from-source-on-macos>`_. This installation is necessary to work with LDAP.
 
 Run database
 ~~~~~~~~~~~~
@@ -65,7 +61,7 @@ Start Postgres instance somewhere, and set up database url using environment var
 
 .. code-block:: bash
 
-    syncmaster__DATABASE__URL=postgresql+asyncpg://user:password@postgres-host:5432/database_name
+    SYNCMASTER__DATABASE__URL=postgresql+asyncpg://user:password@postgres-host:5432/database_name
 
 You can use virtually any database supported by `SQLAlchemy <https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls>`_,
 but the only one we really tested is Postgres.
@@ -95,7 +91,7 @@ To start backend server you need to execute following command:
 
 .. code-block:: console
 
-    $ python -m syncmaster.backend --host 0.0.0.0 --port 8000
+    $ python -m syncmaster.backend.main --host 0.0.0.0 --port 8000
 
 This is a thin wrapper around `uvicorn <https://www.uvicorn.org/#command-line-options>`_ cli,
 options and commands are just the same.

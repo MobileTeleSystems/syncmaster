@@ -1,109 +1,139 @@
 .. _role-permissions:
 
-Role Permissions
-================
+Roles and rules
+===============
 
-syncmaster implements a role-based access control model to manage permissions across different entities in the service.
+- Object within the group can be seen/interacted with only by users which are members of the group.
+- Permissions are limited by role assigned to user within specific group.
+- There can be only one user in a group with the Owner role, all other roles are not limited in
+  number.
+- Superuser can read, write to the table and delete without being in the group.
 
-Role Model Overview
--------------------
+Roles are:
 
-Roles are defined within the context of namespaces, with the exception of the superadmin role. A user can be associated with one, several, or no namespaces at all.
-
-- **GUEST**: User without a specific namespace assignment, having limited access rights. This is a default role.
-- **DEVELOPER**: Users with development-related permissions.
-- **MAINTAINER**: Users with permissions similar to developers but with additional rights in certain areas.
-- **OWNER**: Users with full permissions within their owned namespaces and associated HWMs.
-- **SUPERADMIN**: Users with full system-wide permissions.
-
-Namespace Permissions
----------------------
-
-.. list-table::
-    :header-rows: 1
-    :widths: 20 10 10 10 10 10
-
-    * - Role
-      - Create
-      - Read
-      - Update
-      - Delete
-      - Manage Users
-    * - GUEST
-      - ``+``
-      - ``+``
-      - ``-``
-      - ``-``
-      - ``-``
-    * - DEVELOPER
-      - ``+``
-      - ``+``
-      - ``-``
-      - ``-``
-      - ``-``
-    * - MAINTAINER
-      - ``+``
-      - ``+``
-      - ``-``
-      - ``-``
-      - ``-``
-    * - OWNER
-      - ``+``
-      - ``+``
-      - ``+``
-      - ``+``
-      - ``+``
-    * - SUPERADMIN
-      - ``+``
-      - ``+``
-      - ``+``
-      - ``+``
-      - ``+``
+* ``GUEST`` - read-only
+* ``DEVELOPER`` - read-write
+* ``MAINTAINER`` (DevOps) - read-write + manage queues
+* ``OWNER`` (Product Owner) - read-write + manage queues + manage user-group mapping
+* ``SUPERUSER`` - meta role assigned to specific users (NOT within group). Read-write + manage queues + manage user-group mapping + create/delete groups.
 
 
-HWM Permissions
----------------
+Groups
+-------
 
-.. list-table::
-    :header-rows: 1
-    :widths: 20 10 10 10 10
+.. list-table:: Rights to work with the groups repository.
+   :header-rows: 1
 
-    * - Role
-      - Create
-      - Read
-      - Update
-      - Delete
-    * - GUEST
-      - ``-``
-      - ``+``
-      - ``-``
-      - ``-``
-    * - DEVELOPER
-      - ``+``
-      - ``+``
-      - ``+``
-      - ``-``
-    * - MAINTAINER
-      - ``+``
-      - ``+``
-      - ``+``
-      - ``+``
-    * - OWNER
-      - ``+``
-      - ``+``
-      - ``+``
-      - ``+``
-    * - SUPERADMIN
-      - ``+``
-      - ``+``
-      - ``+``
-      - ``+``
+   * - Rule \ Role
+     - Guest
+     - Developer
+     - Maintainer
+     - Owner
+     - Superuser
+   * - READ
+     - x
+     - x
+     - x
+     - x
+     - x
+   * - UPDATE
+     -
+     -
+     -
+     - x
+     - x
+   * - CREATE
+     - x
+     - x
+     - x
+     - x
+     - x
+   * - DELETE
+     -
+     -
+     -
+     -
+     - x
 
-Superadmin Role
----------------
+Add user to the group and delete
+---------------------------------
+Each user has the right to remove himself from a group, regardless of his role in the group.
 
-The ``SUPERADMIN`` role grants a user unrestricted access across all entities and operations within the syncmaster service.
-Users with the ``SUPERADMIN`` role can create, read, update, delete, and manage users across all ``namespaces`` and ``HWMs`` without any restrictions.
+.. list-table:: Rights to delete and add users to a group.
+   :header-rows: 1
 
-For details on how to update ``SUPERADMIN`` roles via the command-line script, see the :ref:`manage-admins-script`.
+   * - Rule \ Role
+     - Guest
+     - Developer
+     - Maintainer
+     - Owner
+     - Superuser
+   * - READ
+     - x
+     - x
+     - x
+     - x
+     - x
+   * - ADD, UPDATE
+     -
+     -
+     -
+     - x
+     - x
 
+Transfers, Runs and Connections
+--------------------------------
+
+.. list-table:: Right to work wirh Transfers, Runs and Connections repositories.
+   :header-rows: 1
+
+
+   * - Rule \ Role
+     - Guest
+     - Developer
+     - Maintainer
+     - Owner
+     - Superuser
+   * - READ
+     - x
+     - x
+     - x
+     - x
+     - x
+   * - UPDATE, CREATE
+     -
+     - x
+     - x
+     - x
+     - x
+   * - DELETE
+     -
+     -
+     - x
+     - x
+     - x
+
+Queues
+------
+
+.. list-table:: Rights to read, delete and update queues.
+   :header-rows: 1
+
+   * - Rule \ Role
+     - Guest
+     - Developer
+     - Maintainer
+     - Owner
+     - Superuser
+   * - READ
+     - x
+     - x
+     - x
+     - x
+     - x
+   * - UPDATE, DELETE, CREATE
+     -
+     -
+     - x
+     - x
+     - x
