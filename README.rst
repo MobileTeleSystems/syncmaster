@@ -47,10 +47,9 @@ Current SyncMaster implementation provides following components:
 Goals
 -----
 
-* simplification of database and file storage replication
-* provides a role model for sharing rights
-* contains automatic start of spark session to simplify data transfer
-* contains groups for separating storage and management of entities
+* Make moving data between databases and file systems as simple as possible
+* Provide a lot of builtin connectors to move data in heterogeneous environment
+* RBAC and multitenancy support
 
 Non-goals
 ---------
