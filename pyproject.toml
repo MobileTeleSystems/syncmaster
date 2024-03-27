@@ -195,3 +195,68 @@ exclude_lines = [
   "\\.\\.\\.",
   "def downgrade\\(\\)",
 ]
+
+[tool.poetry.group.docs.dependencies]
+autodoc-pydantic = {version = "^2.0.1", python = ">=3.8"}
+numpydoc = {version = "^1.6.0", python = ">=3.8"}
+sphinx = [
+  {version = "^7.1.2", python = ">=3.8"},
+  {version = "^7.2.6", python = ">=3.9"},
+]
+furo = {version = "^2024.1.29", python = ">=3.8"}
+sphinx-copybutton = {version = "^0.5.2", python = ">=3.8"}
+sphinxcontrib-towncrier = {version = "^0.4.0a0", python = ">=3.8"}
+towncrier = {version = "^23.11.0", python = ">=3.8"}
+sphinx-issues = {version = ">=3.0.1,<5.0.0", python = ">=3.8"}
+sphinx-design = {version = "^0.5.0", python = ">=3.8"}
+sphinx-favicon = {version = "^1.0.1", python = ">=3.8"}
+# uncomment after https://github.com/zqmillet/sphinx-plantuml/pull/4
+# sphinx-plantuml = {version = "^1.0.0", python = ">=3.8"}
+
+[tool.towncrier]
+name = "Horizon"
+package = "horizon"
+filename = "docs/changelog/NEXT_RELEASE.rst"
+directory = "docs/changelog/next_release/"
+title_format = "{version} ({project_date})"
+issue_format = ":issue:`{issue}`"
+
+[[tool.towncrier.type]]
+directory = "breaking"
+name = "Breaking Changes"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "significant"
+name = "Significant Changes"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "feature"
+name = "Features"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "improvement"
+name = "Improvements"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "bugfix"
+name = "Bug Fixes"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "dependency"
+name = "Dependencies"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "doc"
+name = "Doc only Changes"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "misc"
+name = "Misc"
+showcontent = true

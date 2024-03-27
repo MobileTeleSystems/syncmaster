@@ -38,6 +38,11 @@ jobs:
       - name: Install poetry
         uses: snok/install-poetry@v1
 
+      - name: Generate OpenAPI Schema
+        run: |
+          source .env.local
+          poetry run python -m syncmaster.backend.export_openapi_schema openapi.json
+
       - name: Fix logo in Readme
         run: |
           sed -i "s#image:: docs/#image:: https://raw.githubusercontent.com/MobileTeleSystems/syncmaster/$GITHUB_SHA/docs/#g" README.rst
