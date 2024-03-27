@@ -54,7 +54,9 @@ Goals
 Non-goals
 ---------
 
-* this is not a backup system
+* This is not a backup system
+* Only batch. no streaming
+* This is not a CDC solution
 
 .. documentation
 
