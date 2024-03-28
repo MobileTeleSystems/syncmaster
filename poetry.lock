@@ -2514,6 +2514,23 @@ lint = ["docutils-stubs", "flake8 (>=3.5.0)", "flake8-simplify", "isort", "mypy 
 test = ["cython (>=3.0)", "filelock", "html5lib", "pytest (>=4.6)", "setuptools (>=67.0)"]
 
 [[package]]
+name = "sphinx-argparse"
+version = "0.2.5"
+description = "A sphinx extension that automatically documents argparse commands and options"
+optional = false
+python-versions = "*"
+files = [
+    {file = "sphinx-argparse-0.2.5.tar.gz", hash = "sha256:60ab98f80ffd38731d62e267171388a421abbc96c74901b7785a8e058b438c17"},
+]
+
+[package.dependencies]
+sphinx = ">=1.2.0"
+
+[package.extras]
+dev = ["pytest", "sphinx_rtd_theme"]
+markdown = ["CommonMark (>=0.5.6)"]
+
+[[package]]
 name = "sphinx-basic-ng"
 version = "1.0.0b2"
 description = "A modern skeleton for Sphinx themes."
@@ -3125,4 +3142,4 @@ worker = ["onetl", "psycopg2-binary"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "5eeea2374665d56e7cbbc95d8fd9b087653c535929b780bebe18bd03e1908ed4"
+content-hash = "70fedb86632d682d49730c0f698614e28b3573de197c667db0b521e5cffac4c6"
