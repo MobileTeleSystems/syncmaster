@@ -216,8 +216,8 @@ sphinx-argparse = {version = "^0.2.5", python = ">=3.8"}
 # sphinx-plantuml = {version = "^1.0.0", python = ">=3.8"}
 
 [tool.towncrier]
-name = "Horizon"
-package = "horizon"
+name = "Syncmaster"
+package = "syncmaster"
 filename = "docs/changelog/NEXT_RELEASE.rst"
 directory = "docs/changelog/next_release/"
 title_format = "{version} ({project_date})"
@@ -262,3 +262,11 @@ showcontent = true
 directory = "misc"
 name = "Misc"
 showcontent = true
+
+[tool.poetry_bumpversion.file."syncmaster/__init__.py"]
+search = '_raw_version = "{current_version}"'
+replace = '_raw_version = "{new_version}"'
+
+[tool.poetry_bumpversion.file."docs/conf.py"]
+search = 'ver = Version.parse("{current_version}")'
+replace = 'ver = Version.parse("{new_version}")'

@@ -186,3 +186,8 @@ Then open Gitlab interface and `create merge request <https://docs.gitlab.com/ee
 Please follow guide from MR body template.
 
 After pull request is created, it get a corresponding number, e.g. 123 (``mr_number``).
+
+How to skip change notes check?
+-------------------------------
+
+Just add ```ci:skip-changelog``` label to pull request.
