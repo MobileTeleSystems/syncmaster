@@ -156,42 +156,6 @@ Get fixtures not used by any test:
 
     make check-fixtures
 
-
-Review process
---------------
-
-Please create a new Jira issue for any significant changes and
-enhancements that you wish to make. Provide the feature you would like
-to see, why you need it, and how it will work. Discuss your ideas
-transparently and get community feedback before proceeding.
-
-Significant Changes that you wish to contribute to the project should be
-discussed first in a Jira issue that clearly outlines the changes and
-benefits of the feature.
-
-Small Changes can directly be crafted and submitted to the Gitlab
-Repository as a Merge Request.
-
-Create merge request
-~~~~~~~~~~~~~~~~~~~~
-
-Commit your changes:
-
-.. code:: bash
-
-    git commit -m "Commit message"
-    git push
-
-Then open Gitlab interface and `create merge request <https://docs.gitlab.com/ee/user/project/merge_requests/>`_.
-Please follow guide from MR body template.
-
-After pull request is created, it get a corresponding number, e.g. 123 (``mr_number``).
-
-How to skip change notes check?
--------------------------------
-
-Just add ```ci:skip-changelog``` label to pull request.
-
 Build documentation
 -------------------
 
