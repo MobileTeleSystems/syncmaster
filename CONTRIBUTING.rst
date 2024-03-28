@@ -193,7 +193,7 @@ How to skip change notes check?
 Just add ```ci:skip-changelog``` label to pull request.
 
 Build documentation
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 Build documentation using Sphinx & open it:
 
