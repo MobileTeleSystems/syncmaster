@@ -15,8 +15,7 @@ build:
       - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH python -m poetry install --no-root --all-extras --with docs --without dev,test
       - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH python -m poetry show -v
       - python -m pip list -v
-      - /bin/bash source .env.docker
-      - python -m syncmaster.backend.export_openapi_schema docs/_static/openapi.json
+      - POSTGRES_HOST=db POSTGRES_PORT=5432 POSTGRES_DB=syncmaster POSTGRES_USER=user POSTGRES_PASSWORD=password RABBITMQ_HOST=rabbitmq RABBITMQ_PORT=5672 RABBITMQ_USER=user RABBITMQ_PASSWORD=password python -m syncmaster.backend.export_openapi_schema docs/_static/openapi.json
 
 sphinx:
   configuration: docs/conf.py
