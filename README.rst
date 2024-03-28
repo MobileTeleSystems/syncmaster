@@ -18,7 +18,7 @@ SyncMaster
 .. |Docker image| image:: https://img.shields.io/docker/v/mtsrus/syncmaster-backend?sort=semver&label=docker
     :target: https://hub.docker.com/r/mtsrus/syncmaster-backend
 .. |Documentation| image:: https://readthedocs.org/projects/data-syncmaster/badge/?version=stable
-    :target: https://syncmaster.readthedocs.io/en/latest/
+    :target: https://syncmaster.readthedocs.io
 .. |Build Status| image:: https://github.com/MobileTeleSystems/syncmaster/workflows/Tests/badge.svg
     :target: https://github.com/MobileTeleSystems/syncmaster/actions
 .. |Coverage| image:: https://codecov.io/gh/MobileTeleSystems/syncmaster/graph/badge.svg?token=ky7UyUxolB
@@ -63,4 +63,4 @@ Non-goals
 Documentation
 -------------
 
-See https://syncmaster.readthedocs.io/en/latest/
+See https://syncmaster.readthedocs.io
