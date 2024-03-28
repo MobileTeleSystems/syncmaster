@@ -75,6 +75,7 @@ Set environment variables to connect to RabbitMQ
 Set variables to connect to RabbitMQ
 
 .. code-block:: bash
+
     RABBITMQ_HOST=somehost
     RABBITMQ_PORT=5672
     RABBITMQ_USER=user
