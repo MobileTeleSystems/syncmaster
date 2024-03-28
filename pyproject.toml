@@ -263,6 +263,11 @@ directory = "misc"
 name = "Misc"
 showcontent = true
 
+[[tool.towncrier.type]]
+directory = "removal"
+name = "Removal"
+showcontent = true
+
 [tool.poetry_bumpversion.file."syncmaster/__init__.py"]
 search = '_raw_version = "{current_version}"'
 replace = '_raw_version = "{new_version}"'
