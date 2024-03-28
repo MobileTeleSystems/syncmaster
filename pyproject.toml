@@ -47,14 +47,14 @@ sqlalchemy = "^2.0.18"
 sqlalchemy-utils = "^0.41.1"
 pydantic = "^2.6.4"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
-python-multipart = "^0.0.6"
+python-multipart = "^0.0.9"
 celery = "^5.3.3"
 onetl = {version = "^0.10.2", extras = ["spark"]}
 psycopg2-binary = {version = "^2.9.7", optional = true }
 fastapi = {version = "^0.110.0", optional = true}
-uvicorn = {version = "^0.22.0", optional = true }
+uvicorn = {version = "^0.29.0", optional = true }
 alembic = {version = "^1.11.1", optional = true }
-asyncpg = {version = "^0.28.0", optional = true }
+asyncpg = {version = "^0.29.0", optional = true }
 pydantic-settings = "^2.2.1"
 
 [tool.poetry.extras]
@@ -72,26 +72,26 @@ worker = [
 
 [tool.poetry.group.test.dependencies]
 pandas-stubs = "^2.1.4.231227"
-pytest = "^7.4.0"
-httpx = "^0.24.1"
-pytest-asyncio = "^0.21.0"
+pytest = "^8.1.1"
+httpx = "^0.27.0"
+pytest-asyncio = "^0.23.6"
 psycopg2-binary = "^2.9.7"
 pytest-randomly = "^3.13.0"
 pytest-deadfixtures = "^2.2.1"
 pytest-mock = "^3.11.1"
 onetl = {extras = ["spark", "s3", "hdfs"], version = "^0.10.2"}
-faker = "^22.6.0"
+faker = "^24.4.0"
 coverage = "^7.4.3"
 gevent = "^24.2.1"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.3.3"
 mypy = "^1.4.1"
-black = "^23.3.0"
+black = "^24.3.0"
 isort = "^5.12.0"
-flake8 = "^6.0.0"
+flake8 = "^7.0.0"
 bandit = "^1.7.5"
-platformdirs = "3.8.0"
+platformdirs = "4.2.0"
 sqlalchemy = {extras = ["mypy"], version = "^2.0.18"}
 types-python-jose = "^3.3.4.7"
 
@@ -211,7 +211,7 @@ towncrier = {version = "^23.11.0", python = ">=3.8"}
 sphinx-issues = {version = ">=3.0.1,<5.0.0", python = ">=3.8"}
 sphinx-design = {version = "^0.5.0", python = ">=3.8"}
 sphinx-favicon = {version = "^1.0.1", python = ">=3.8"}
-sphinx-argparse = {version = "^0.2.5", python = ">=3.8"}
+sphinx-argparse = {version = "^0.4.0", python = ">=3.8"}
 # uncomment after https://github.com/zqmillet/sphinx-plantuml/pull/4
 # sphinx-plantuml = {version = "^1.0.0", python = ">=3.8"}
 
