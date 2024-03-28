@@ -36,6 +36,7 @@ exclude = [
 
 [tool.poetry.urls]  # Optional
 "Homepage" = "https://github.com/MobileTeleSystems/syncmaster"
+"Documentation" = "https://syncmaster.readthedocs.io/en/latest/"
 "Source" = "https://github.com/MobileTeleSystems/syncmaster"
 "CI/CD" = "https://github.com/MobileTeleSystems/syncmaster/actions"
 "Tracker" = "https://github.com/MobileTeleSystems/syncmaster/issues"

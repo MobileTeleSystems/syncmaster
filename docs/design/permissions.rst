@@ -1,7 +1,7 @@
 .. _role-permissions:
 
-Roles and rules
-===============
+Roles and permissions
+=====================
 
 - Object within the group can be seen/interacted with only by users which are members of the group.
 - Permissions are limited by role assigned to user within specific group.

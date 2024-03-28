@@ -63,4 +63,4 @@ Non-goals
 Documentation
 -------------
 
-See https://data-syncmaster.readthedocs.io/
+See https://syncmaster.readthedocs.io/en/latest/
