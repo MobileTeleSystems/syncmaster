@@ -18,8 +18,8 @@
     description: Backend-related changes
     color: '5319e7'
 
-  - name: component:client
-    description: Client-related changes
+  - name: component:worker
+    description: Worker-related changes
     color: 75f526
 
   - name: kind:bug
