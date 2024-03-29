@@ -119,10 +119,7 @@ run_worker_docker:
 	--net syncmaster_network --rm \
 	-it --name worker syncmaster_worker /bin/bash
 
-# TODO: find out why it is and why it doesn’t work without it
-.PHONY: docs
-
-docs: docs-build docs-open ##@Docs Generate & open docs
+generate-docs: docs-build docs-open ##@Docs Generate & open docs
 
 docs-build: ##@Docs Generate docs
 	$(MAKE) -C docs html
