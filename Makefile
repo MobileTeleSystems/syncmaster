@@ -122,12 +122,12 @@ run_worker_docker:
 generate-docs: docs-build docs-open ##@Docs Generate & open docs
 
 docs-build: ##@Docs Generate docs
-	$(MAKE) -C docs html
+	$(MAKE) -C generate-docs html
 
 docs-open: ##@Docs Open docs
 	xdg-open docs/_build/html/index.html
 
 docs-cleanup: ##@Docs Cleanup docs
-	$(MAKE) -C docs clean
+	$(MAKE) -C generate-docs clean
 
 docs-fresh: docs-cleanup docs-build ##@Docs Cleanup & build docs
