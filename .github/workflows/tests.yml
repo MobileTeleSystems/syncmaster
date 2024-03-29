@@ -1,0 +1,84 @@
+name: Run All Tests
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches-ignore:
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEFAULT_PYTHON: '3.11'
+
+jobs:
+  oracle_tests:
+    name: Oracle tests
+    uses: ./.github/workflows/oracle-tests.yml
+
+  hive_tests:
+    name: Hive tests
+    uses: ./.github/workflows/hive-tests.yml
+
+  s3_tests:
+    name: S3 tests
+    uses: ./.github/workflows/s3-tests.yml
+
+  unit_tests:
+    name: Unit tests
+    uses: ./.github/workflows/unit-test.yml
+
+  all_done:
+    name: Tests done
+    runs-on: ubuntu-latest
+
+    env:
+      POETRY_VERSION: 1.6.1
+
+    needs: [oracle_tests, hive_tests, s3_tests, unit_tests]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.DEFAULT_PYTHON }}
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-coverage
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip setuptools wheel
+
+      - name: Install dependencies
+        run: pip install -I coverage pytest
+
+      - name: Download all coverage reports
+        uses: actions/download-artifact@v4
+        with:
+          path: reports
+
+      - name: Move coverage data to the root folder
+        run: find reports -type f -exec mv '{}' reports \;
+
+      - name: Generate coverage reports
+        run: ./combine_coverage.sh
+
+      - name: Check coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./reports/coverage.xml
+          fail_ci_if_error: true
+          plugin: noop
+
+      - name: All done
+        run: echo 1
