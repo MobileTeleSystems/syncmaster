@@ -119,7 +119,7 @@ run_worker_docker:
 	--net syncmaster_network --rm \
 	-it --name worker syncmaster_worker /bin/bash
 
-# TODO: necessary because the command and directory have the same name 'docs'
+# Necessary because the command and directory have the same name 'docs'
 .PHONY: docs
 
 docs: docs-build docs-open ##@Docs Generate & open docs
