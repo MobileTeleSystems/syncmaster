@@ -1,0 +1,16 @@
+
+
+
+0.1.1 (2024-03-29)
+==================
+
+Features
+--------
+
+- Automation of work with Github. (:issue:`26`)
+
+
+Doc only Changes
+----------------
+
+- Improve documentation. (:issue:`28`)
