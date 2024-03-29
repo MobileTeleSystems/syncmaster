@@ -119,15 +119,15 @@ run_worker_docker:
 	--net syncmaster_network --rm \
 	-it --name worker syncmaster_worker /bin/bash
 
-generate-docs: docs-build docs-open ##@Docs Generate & open docs
+doc: docs-build docs-open ##@Docs Generate & open docs
 
 docs-build: ##@Docs Generate docs
-	$(MAKE) -C generate-docs html
+	$(MAKE) -C doc html
 
 docs-open: ##@Docs Open docs
 	xdg-open docs/_build/html/index.html
 
 docs-cleanup: ##@Docs Cleanup docs
-	$(MAKE) -C generate-docs clean
+	$(MAKE) -C doc clean
 
 docs-fresh: docs-cleanup docs-build ##@Docs Cleanup & build docs

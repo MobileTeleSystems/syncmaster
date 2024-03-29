@@ -163,7 +163,7 @@ Build documentation using Sphinx & open it:
 
 .. code:: bash
 
-    make generate-docs
+    make doc
 
 If documentation should be build cleanly instead of reusing existing build result:
 
