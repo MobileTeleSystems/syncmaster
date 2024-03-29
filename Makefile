@@ -119,15 +119,18 @@ run_worker_docker:
 	--net syncmaster_network --rm \
 	-it --name worker syncmaster_worker /bin/bash
 
-doc: docs-build docs-open ##@Docs Generate & open docs
+# TODO: find out why it is and why it doesn’t work without it
+.PHONY: docs
+
+docs: docs-build docs-open ##@Docs Generate & open docs
 
 docs-build: ##@Docs Generate docs
-	$(MAKE) -C doc html
+	$(MAKE) -C docs html
 
 docs-open: ##@Docs Open docs
 	xdg-open docs/_build/html/index.html
 
 docs-cleanup: ##@Docs Cleanup docs
-	$(MAKE) -C doc clean
+	$(MAKE) -C docs clean
 
 docs-fresh: docs-cleanup docs-build ##@Docs Cleanup & build docs
