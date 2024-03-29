@@ -118,3 +118,19 @@ run_worker_docker:
 	-v ./cached_jars:/root/.ivy2 \
 	--net syncmaster_network --rm \
 	-it --name worker syncmaster_worker /bin/bash
+
+# Necessary because the command and directory have the same name 'docs'
+.PHONY: docs
+
+docs: docs-build docs-open ##@Docs Generate & open docs
+
+docs-build: ##@Docs Generate docs
+	$(MAKE) -C docs html
+
+docs-open: ##@Docs Open docs
+	xdg-open docs/_build/html/index.html
+
+docs-cleanup: ##@Docs Cleanup docs
+	$(MAKE) -C docs clean
+
+docs-fresh: docs-cleanup docs-build ##@Docs Cleanup & build docs
