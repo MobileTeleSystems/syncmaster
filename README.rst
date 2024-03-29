@@ -30,7 +30,7 @@ SyncMaster
 What is Syncmaster?
 -------------------
 
-Syncmaster is as low-code ETL tool for moving data between databases and file systems.
+Syncmaster is as low-code ETL tool for transfering data between databases and file systems.
 List of currently supported connections:
 
 * Apache Hive
@@ -47,16 +47,16 @@ Current SyncMaster implementation provides following components:
 Goals
 -----
 
-* Make moving data between databases and file systems as simple as possible
-* Provide a lot of builtin connectors to move data in heterogeneous environment
+* Make transfering data between databases and file systems as simple as possible
+* Provide a lot of builtin connectors to transfer data in heterogeneous environment
 * RBAC and multitenancy support
 
 Non-goals
 ---------
 
 * This is not a backup system
-* Only batch. no streaming
 * This is not a CDC solution
+* Only batch, no streaming
 
 .. documentation
 
