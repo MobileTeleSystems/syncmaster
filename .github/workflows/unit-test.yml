@@ -52,22 +52,17 @@ jobs:
         run: |
           docker compose -f docker-compose.test.yml down -v --remove-orphans
           docker compose -f docker-compose.test.yml up -d db --wait --wait-timeout 200
-        env:
-          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
-      - name: Run Unit Tests.
+      - name: Run Unit Tests
         run: |
           source .env.local
-          ./pytest_runner.sh -m backend
-        env:
-          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
+          poetry run python -m syncmaster.db.migrations upgrade head
+          poetry run coverage run -m pytest -vvv -s -m backend
 
       - name: Shutdown
         if: always()
         run: |
           docker compose -f docker-compose.test.yml down -v --remove-orphans
-        env:
-          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
       - name: Upload coverage results
         uses: actions/upload-artifact@v4

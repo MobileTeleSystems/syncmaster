@@ -1,19 +1,12 @@
-FROM python:3.11-slim
+ARG BASE_IMAGE=python:3.11-slim
+FROM $BASE_IMAGE AS prod
 
 RUN apt-get update && apt-get install -y \
-        libkrb5-dev \
-        libsasl2-dev \
-        libsasl2-modules-gssapi-mit \
-        libsasl2-modules-ldap \
-        libsasl2-modules \
-        openjdk-17-jdk \
         libssl-dev \
-        libldap2-dev \
         autoconf \
         gcc \
         g++ \
         make \
-        libnghttp2-dev \
         libffi-dev \
     && rm -rf /var/lib/apt/lists/*
 
@@ -25,11 +18,16 @@ WORKDIR /app
 COPY ./pyproject.toml ./poetry.lock* /app/
 
 RUN pip install --upgrade pip setuptools wheel packaging
-
 RUN poetry install --no-root --extras "backend"
 
-COPY ./syncmaster /app/
-
+COPY ./syncmaster/ /app/syncmaster/
 ENV PYTHONPATH=/app
 
-CMD [ "python", "/app/syncmaster/backend/main.py" ]
+COPY ./docker/entrypoint_backend.sh /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+
+FROM prod as test
+
+RUN poetry install --no-root --extras "backend" --with test
+RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh

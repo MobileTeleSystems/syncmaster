@@ -50,7 +50,7 @@ revision: ##@Database Create new revision of migrations
 	RABBITMQ_USER=${RABBITMQ_USER} \
 	RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD} \
 	PYTHONPATH=${APP_PATH} \
-	${POETRY} run alembic -c ${APP_PATH}/alembic.ini revision --autogenerate
+	${POETRY} run python -m syncmaster.db.migrations --autogenerate
 
 migrate: ##@Database Upgdade database to last migration
 	@POSTGRES_HOST=${POSTGRES_HOST} \
@@ -63,7 +63,7 @@ migrate: ##@Database Upgdade database to last migration
 	RABBITMQ_USER=${RABBITMQ_USER} \
 	RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD} \
 	PYTHONPATH=${APP_PATH} \
-	${POETRY} run alembic -c ${APP_PATH}/alembic.ini upgrade head
+	${POETRY} run python -m syncmaster.db.migrations upgrade head
 
 test: ##@Test Run tests
 	@POSTGRES_HOST=${POSTGRES_HOST} \

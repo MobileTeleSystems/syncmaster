@@ -40,13 +40,13 @@ repos:
       - id: chmod
         args: ['644']
         exclude_types: [shell]
-      #  exclude: ^(.*__main__\.py)$
-      #- id: chmod
-      #  args: ['755']
-      #  types: [shell]
-      #- id: chmod
-      #  args: ['755']
-      #  files: ^(.*__main__\.py)$
+        exclude: ^(.*__main__\.py)$
+      - id: chmod
+        args: ['755']
+        types: [shell]
+      - id: chmod
+        args: ['755']
+        files: ^(.*__main__\.py)$
       - id: insert-license
         files: .*\.py$
         exclude: ^(tests/.*\.py)$

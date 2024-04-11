@@ -48,7 +48,7 @@ jobs:
         with:
           tags: ${{ env.TAG }}
           context: .
-          file: docker/backend.dockerfile
+          file: docker/Dockerfile.backend
           pull: true
           push: true
           cache-to: type=gha,mode=max

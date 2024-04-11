@@ -69,10 +69,26 @@ Start Postgres instance somewhere, and set up environment variables:
 You can use virtually any database supported by `SQLAlchemy <https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls>`_,
 but the only one we really tested is Postgres.
 
-Set environment variables to connect to RabbitMQ
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Run migrations
+~~~~~~~~~~~~~~
 
-Set variables to connect to RabbitMQ
+To apply migrations (database structure changes) you need to execute following command:
+
+.. code-block:: console
+
+    $ python -m syncmaster.db.migrations upgrade head
+
+This is a thin wrapper around `alembic <https://alembic.sqlalchemy.org/en/latest/tutorial.html#running-our-first-migration>`_ cli,
+options and commands are just the same.
+
+.. note::
+
+    This command should be executed after each upgrade to new SyncMaster version.
+
+Run RabbitMQ
+~~~~~~~~~~~~
+
+Start RabbitMQ instance somewhere, and set up environment variables:
 
 .. code-block:: bash
 
@@ -107,6 +123,6 @@ To start backend server you need to execute following command:
 
 .. code-block:: console
 
-    $ python -m syncmaster.backend.main
+    $ python -m horizon.backend --host 0.0.0.0 --port 8000
 
 After server is started and ready, open http://localhost:8000/docs.
