@@ -49,7 +49,7 @@ jobs:
           tags: ${{ env.TAG }}
           context: .
           target: prod
-          file: docker/worker.dockerfile
+          file: docker/Dockerfile.worker
           pull: true
           push: true
           cache-to: type=gha,mode=max

@@ -8,61 +8,77 @@ services:
       - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - network
+    healthcheck:
+      test: pg_isready
+      start_period: 5s
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   worker:
-    image: syncmaster_worker:${WORKER_IMAGE_TAG:-latest}
+    image: mtsrus/syncmaster-worker:${WORKER_IMAGE_TAG:-test}
     restart: unless-stopped
     build:
-      dockerfile: docker/worker.dockerfile
+      dockerfile: docker/Dockerfile.worker
       context: .
+      target: test
       network: host
-    networks:
-      - network
-    depends_on:
-      - db
-      - rabbitmq
-      - test-oracle
-      - test-postgres
-      - test-hive
-      - test-s3
+    command: --loglevel=info -Q test_queue
+    env_file: .env.docker
     volumes:
       - ./cached_jars:/root/.ivy2
       - ./reports:/app/reports
-    env_file: .env.docker
+      - ./tests:/app/tests
+      - ./pyproject.toml:/app/pyproject.toml
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      test-oracle:
+        condition: service_started  # Oracle image does not have healthcheck
+      test-postgres:
+        condition: service_healthy
+      test-hive:
+        condition: service_healthy
+      test-s3:
+        condition: service_healthy
 
   backend:
-    image: syncmaster_back
+    image: mtsrus/syncmaster-backend::${BACKEND_IMAGE_TAG:-test}
     restart: unless-stopped
     build:
-      dockerfile: docker/backend.dockerfile
+      dockerfile: docker/Dockerfile.backend
       context: .
+      target: test
       network: host
+    env_file: .env.docker
     ports:
       - 8000:8000
-    networks:
-      - network
-    depends_on:
-      - db
-      - rabbitmq
-      - test-oracle
-      - test-postgres
-      - test-hive
-      - test-s3
     volumes:
       - ./cached_jars:/root/.ivy2
       - ./reports:/app/reports
-    env_file: .env.docker
-    command: [coverage, run, /app/syncmaster/backend/main.py]
+      - ./tests:/app/tests
+      - ./pyproject.toml:/app/pyproject.toml
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   rabbitmq:
     image: rabbitmq
     restart: unless-stopped
     ports:
       - 5672:5672
-    networks:
-      - network
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      start_period: 5s
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   test-s3:
     image: bitnami/minio:latest
@@ -72,8 +88,12 @@ services:
     ports:
       - 9010:9000
       - 9011:9001
-    networks:
-      - network
+    healthcheck:
+      test: curl -f http://localhost:9000/minio/health/live
+      start_period: 5s
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   test-postgres:
     image: postgres:15
@@ -81,8 +101,12 @@ services:
     ports:
       - 5433:5432
     env_file: .env.docker
-    networks:
-      - network
+    healthcheck:
+      test: pg_isready
+      start_period: 5s
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   test-oracle:
     image: gvenzl/oracle-xe:slim-faststart
@@ -95,8 +119,6 @@ services:
       ORACLE_DATABASE: test_oracle
       APP_USER: test_user
       APP_USER_PASSWORD: test_password
-    networks:
-      - network
 
   metastore-hive:
     image: postgres:15
@@ -107,15 +129,20 @@ services:
       POSTGRES_PASSWORD: test_hive
     ports:
       - 5440:5432
-    networks:
-      - network
+    healthcheck:
+      test: pg_isready
+      start_period: 5s
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   test-hive:
     image: mtsrus/hadoop:hadoop2.7.3-hive2.3.9
     restart: unless-stopped
     hostname: test-hive
     depends_on:
-      - metastore-hive
+      metastore-hive:
+        condition: service_healthy
     ports:
       - 9820:9820  # HDFS IPC
       - 9870:9870  # HDFS WebHDFS
@@ -132,11 +159,7 @@ services:
       HIVE_METASTORE_DB_DRIVER: org.postgresql.Driver
       HIVE_METASTORE_DB_USER: test_hive
       HIVE_METASTORE_DB_PASSWORD: test_hive
-    networks:
-      - network
-
-networks:
-  network:
 
 volumes:
   postgres_data:
+  rabbitmq_data:

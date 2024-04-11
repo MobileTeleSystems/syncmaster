@@ -7,7 +7,7 @@ import sys
 
 from fastapi import FastAPI
 
-from syncmaster.backend.main import get_application
+from syncmaster.backend import application_factory
 from syncmaster.config import Settings
 
 
@@ -17,7 +17,7 @@ def get_openapi_schema(app: FastAPI) -> dict:
 
 if __name__ == "__main__":
     settings = Settings()
-    app = get_application(settings)
+    app = application_factory(settings)
     schema = get_openapi_schema(app)
     file_path = sys.argv[1]
     if not file_path:

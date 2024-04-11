@@ -47,8 +47,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          tags: syncmaster_worker:${{ github.sha }}
-          file: docker/worker.dockerfile
+          tags: mtsrus/syncmaster-worker:${{ github.sha }}
+          file: docker/Dockerfile.worker
           target: test
           load: true
           cache-to: type=gha,mode=max
@@ -60,22 +60,16 @@ jobs:
           docker compose -f docker-compose.test.yml up -d db worker rabbitmq test-s3 test-postgres --wait --wait-timeout 200
         env:
           WORKER_IMAGE_TAG: ${{ github.sha }}
-          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
-      - name: Run S3 Tests.
-        # Tests for the backend are run on the worker.
-        # Backend and worker on the same container.
+      - name: Run S3 Tests
         run: |
-          docker compose -f ./docker-compose.test.yml exec -T worker coverage run -m pytest -vvv -s -m s3
-        env:
-          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
+          docker compose -f ./docker-compose.test.yml exec -T worker coverage run -m pytest -vvv -s -m "worker and s3"
 
+      # This is important, as coverage is exported after receiving SIGTERM
       - name: Shutdown
         if: always()
         run: |
           docker compose -f docker-compose.test.yml down -v --remove-orphans
-        env:
-          COMPOSE_PROJECT_NAME: ${{ github.run_id }}-syncmaster
 
       - name: Upload coverage results
         uses: actions/upload-artifact@v4

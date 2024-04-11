@@ -17,8 +17,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+from syncmaster.backend import application_factory
 from syncmaster.backend.api.v1.auth.utils import sign_jwt
-from syncmaster.backend.main import get_application
 from syncmaster.config import Settings, TestSettings
 from syncmaster.db.models import Base, Connection, Queue
 from syncmaster.db.repositories.utils import decrypt_auth_data
@@ -110,7 +110,7 @@ async def client(
     async_engine: AsyncEngine,
 ) -> AsyncGenerator:
     logger.info("START CLIENT FIXTURE", datetime.now().isoformat())
-    app = get_application(settings=settings)
+    app = application_factory(settings=settings)
     async with AsyncClient(app=app, base_url="http://testserver") as client:
         yield client
         logger.info("END CLIENT FIXTURE", datetime.now().isoformat())

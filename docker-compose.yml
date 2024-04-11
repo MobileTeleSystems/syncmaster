@@ -8,34 +8,36 @@ services:
       - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - network
+    healthcheck:
+      test: pg_isready
+      start_period: 5s
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   worker:
     image: syncmaster_worker
     restart: unless-stopped
     build:
-      dockerfile: docker/worker.dockerfile
+      dockerfile: docker/Dockerfile.worker
       context: .
       network: host
-    networks:
-      - network
     env_file: .env.docker
 
   backend:
     image: syncmaster_back
     restart: unless-stopped
     build:
-      dockerfile: docker/backend.dockerfile
+      dockerfile: docker/Dockerfile.backend
       context: .
       network: host
     ports:
       - 8000:8000
-    networks:
-      - network
     depends_on:
-      - db
-      - rabbitmq
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     env_file: .env.docker
 
   rabbitmq:
@@ -43,10 +45,15 @@ services:
     restart: unless-stopped
     ports:
       - 5672:5672
-    networks:
-      - network
-networks:
-  network:
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      start_period: 5s
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
 volumes:
   postgres_data:
+  rabbitmq_data:

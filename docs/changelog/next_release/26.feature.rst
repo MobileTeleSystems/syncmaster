@@ -1,1 +1,0 @@
-Automation of work with Github.
