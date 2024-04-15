@@ -140,7 +140,7 @@ async def test_check_name_field_validation_on_update_transfer(
                 "loc": ["body", "name"],
                 "msg": "String should have at least 1 character",
                 "type": "string_too_short",
-                "url": "https://errors.pydantic.dev/2.6/v/string_too_short",
+                "url": "https://errors.pydantic.dev/2.7/v/string_too_short",
             }
         ]
     }
