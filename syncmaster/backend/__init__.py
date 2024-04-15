@@ -54,3 +54,7 @@ def application_factory(settings: Settings) -> FastAPI:
     )
 
     return application
+
+
+def get_application() -> FastAPI:
+    return application_factory(settings=Settings())
