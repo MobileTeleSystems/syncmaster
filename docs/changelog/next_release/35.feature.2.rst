@@ -1,1 +1,0 @@
-Add ``syncmaster.db.migrations`` module to run ``alembic`` with proper config.

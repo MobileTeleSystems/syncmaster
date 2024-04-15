@@ -1,1 +1,0 @@
-Run database migrations in the entrypoint of backend image, before starting the backend server.

@@ -1,1 +1,0 @@
-Rename ``syncmaster.backend.main`` module to ``syncmaster.backend``. It now also accepts the same args as ``uvicorn``.
