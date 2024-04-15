@@ -783,7 +783,7 @@ test-randomorder = ["pytest-randomly"]
 name = "decorator"
 version = "5.1.1"
 description = "Decorators for Humans"
-optional = false
+optional = true
 python-versions = ">=3.5"
 files = [
     {file = "decorator-5.1.1-py3-none-any.whl", hash = "sha256:b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186"},
@@ -1135,7 +1135,7 @@ test = ["objgraph", "psutil"]
 name = "gssapi"
 version = "1.8.3"
 description = "Python GSSAPI Wrapper"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "gssapi-1.8.3-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:4e4a83e9b275fe69b5d40be6d5479889866b80333a12c51a9243f2712d4f0554"},
@@ -1405,7 +1405,7 @@ zookeeper = ["kazoo (>=2.8.0)"]
 name = "krb5"
 version = "0.5.1"
 description = "Kerberos API bindings for Python"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "krb5-0.5.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:e51c700cf148e63fef60bc4b2c453018218a3170dedbfe2840f122aee5a453e7"},
@@ -1734,7 +1734,6 @@ platformdirs = "*"
 pydantic = ">=1.9.2,<1.10.2 || >1.10.2,<3"
 pyspark = {version = "*", optional = true, markers = "extra == \"spark\""}
 pyyaml = "*"
-requests-kerberos = {version = ">=0.7.0", optional = true, markers = "extra == \"kerberos\""}
 typing-extensions = {version = ">=4.5.0", markers = "python_version > \"3.7\""}
 
 [package.extras]
@@ -2247,7 +2246,7 @@ sql = ["numpy (>=1.15)", "pandas (>=1.0.5)", "pyarrow (>=4.0.0)"]
 name = "pyspnego"
 version = "0.10.2"
 description = "Windows Negotiate Authentication Client and Server"
-optional = false
+optional = true
 python-versions = ">=3.8"
 files = [
     {file = "pyspnego-0.10.2-py3-none-any.whl", hash = "sha256:3d5c5c28dbd0cd6a679acf45219630254db3c0e5ad4a16de521caa0585b088c0"},
@@ -2496,7 +2495,7 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 name = "requests-kerberos"
 version = "0.14.0"
 description = "A Kerberos authentication handler for python-requests"
-optional = false
+optional = true
 python-versions = ">=3.6"
 files = [
     {file = "requests-kerberos-0.14.0.tar.gz", hash = "sha256:cda9d1240ae5392e081869881c8742d0e171fd6a893a7ac0875db2748e966fd1"},
@@ -2975,7 +2974,7 @@ url = ["furl (>=0.4.1)"]
 name = "sspilib"
 version = "0.1.0"
 description = "SSPI API bindings for Python"
-optional = false
+optional = true
 python-versions = ">=3.8"
 files = [
     {file = "sspilib-0.1.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:5e43f3e684e9d29c80324bd54f52dac65ac4b18d81a2dcd529dce3994369a14d"},
@@ -3297,9 +3296,10 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [extras]
 backend = ["alembic", "asyncpg", "fastapi", "uvicorn"]
+kerberos = ["requests-kerberos"]
 worker = ["onetl", "psycopg2-binary"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "d7ccf6b7a56333be37973074706e0638929e349f2c80b384e847afe6f40984ff"
+content-hash = "7f3cb7e67bade09a3d4be6c42496eeab07574e334b6cab42e6ddef43c9f5018d"
