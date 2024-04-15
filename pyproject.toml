@@ -1,3 +1,7 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "data-syncmaster"
 version = "0.1.5"
@@ -95,9 +99,23 @@ platformdirs = "4.2.0"
 sqlalchemy = {extras = ["mypy"], version = "^2.0.18"}
 types-python-jose = "^3.3.4.7"
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.poetry.group.docs.dependencies]
+autodoc-pydantic = {version = "^2.0.1", python = ">=3.8"}
+numpydoc = {version = "^1.6.0", python = ">=3.8"}
+sphinx = [
+  {version = "^7.1.2", python = ">=3.8"},
+  {version = "^7.2.6", python = ">=3.9"},
+]
+furo = {version = "^2024.1.29", python = ">=3.8"}
+sphinx-copybutton = {version = "^0.5.2", python = ">=3.8"}
+sphinxcontrib-towncrier = {version = "^0.4.0a0", python = ">=3.8"}
+towncrier = {version = "^23.11.0", python = ">=3.8"}
+sphinx-issues = {version = ">=3.0.1,<5.0.0", python = ">=3.8"}
+sphinx-design = {version = "^0.5.0", python = ">=3.8"}
+sphinx-favicon = {version = "^1.0.1", python = ">=3.8"}
+sphinx-argparse = {version = "^0.4.0", python = ">=3.8"}
+# uncomment after https://github.com/zqmillet/sphinx-plantuml/pull/4
+# sphinx-plantuml = {version = "^1.0.0", python = ">=3.8"}
 
 [tool.black]
 line-length = 120
@@ -196,29 +214,6 @@ exclude_lines = [
   "\\.\\.\\.",
   "def downgrade\\(\\)",
 ]
-
-
-
-
-
-
-[tool.poetry.group.docs.dependencies]
-autodoc-pydantic = {version = "^2.0.1", python = ">=3.8"}
-numpydoc = {version = "^1.6.0", python = ">=3.8"}
-sphinx = [
-  {version = "^7.1.2", python = ">=3.8"},
-  {version = "^7.2.6", python = ">=3.9"},
-]
-furo = {version = "^2024.1.29", python = ">=3.8"}
-sphinx-copybutton = {version = "^0.5.2", python = ">=3.8"}
-sphinxcontrib-towncrier = {version = "^0.4.0a0", python = ">=3.8"}
-towncrier = {version = "^23.11.0", python = ">=3.8"}
-sphinx-issues = {version = ">=3.0.1,<5.0.0", python = ">=3.8"}
-sphinx-design = {version = "^0.5.0", python = ">=3.8"}
-sphinx-favicon = {version = "^1.0.1", python = ">=3.8"}
-sphinx-argparse = {version = "^0.4.0", python = ">=3.8"}
-# uncomment after https://github.com/zqmillet/sphinx-plantuml/pull/4
-# sphinx-plantuml = {version = "^1.0.0", python = ">=3.8"}
 
 [tool.towncrier]
 name = "Syncmaster"

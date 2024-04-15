@@ -48,6 +48,7 @@ jobs:
         with:
           tags: ${{ env.TAG }}
           context: .
+          target: prod
           file: docker/Dockerfile.backend
           pull: true
           push: true

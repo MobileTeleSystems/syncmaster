@@ -18,7 +18,7 @@ WORKDIR /app
 COPY ./pyproject.toml ./poetry.lock* /app/
 
 RUN pip install --upgrade pip setuptools wheel packaging
-RUN poetry install --no-root --extras "backend"
+RUN poetry install --no-root --extras "backend" --without test,docs,dev
 
 COPY ./syncmaster/ /app/syncmaster/
 ENV PYTHONPATH=/app
@@ -29,5 +29,5 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 
 FROM prod as test
 
-RUN poetry install --no-root --extras "backend" --with test
+RUN poetry install --no-root --extras "backend" --with test --without docs,dev
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
