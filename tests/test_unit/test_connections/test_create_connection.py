@@ -165,7 +165,7 @@ async def test_check_fields_validation_on_create_connection(
                 "loc": ["body", "name"],
                 "msg": "String should have at least 1 character",
                 "type": "string_too_short",
-                "url": "https://errors.pydantic.dev/2.6/v/string_too_short",
+                "url": "https://errors.pydantic.dev/2.7/v/string_too_short",
             }
         ]
     }
@@ -201,7 +201,7 @@ async def test_check_fields_validation_on_create_connection(
                 "loc": ["body", "name"],
                 "msg": "Input should be a valid string",
                 "type": "string_type",
-                "url": "https://errors.pydantic.dev/2.6/v/string_type",
+                "url": "https://errors.pydantic.dev/2.7/v/string_type",
             }
         ]
     }
@@ -234,7 +234,7 @@ async def test_check_fields_validation_on_create_connection(
                 "loc": ["body", "description"],
                 "msg": "Input should be a valid string",
                 "type": "string_type",
-                "url": "https://errors.pydantic.dev/2.6/v/string_type",
+                "url": "https://errors.pydantic.dev/2.7/v/string_type",
             }
         ]
     }
@@ -280,7 +280,7 @@ async def test_check_fields_validation_on_create_connection(
                 "msg": "Input tag 'POSTGRESQL' found using 'type' does not match "
                 f"any of the expected tags: {ALLOWED_SOURCES}",
                 "type": "union_tag_invalid",
-                "url": "https://errors.pydantic.dev/2.6/v/union_tag_invalid",
+                "url": "https://errors.pydantic.dev/2.7/v/union_tag_invalid",
             }
         ]
     }

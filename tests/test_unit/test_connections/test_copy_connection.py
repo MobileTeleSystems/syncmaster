@@ -473,7 +473,7 @@ async def test_check_name_validation_copy_connection_with_new_connection_name(
                 "loc": ["body", "new_name"],
                 "msg": "String should have at least 1 character",
                 "type": "string_too_short",
-                "url": "https://errors.pydantic.dev/2.6/v/string_too_short",
+                "url": "https://errors.pydantic.dev/2.7/v/string_too_short",
             }
         ]
     }
