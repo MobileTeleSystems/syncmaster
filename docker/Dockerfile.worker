@@ -2,8 +2,6 @@ ARG BASE_IMAGE=python:3.11-slim
 FROM $BASE_IMAGE AS prod
 
 RUN apt-get update && apt-get install -y \
-        krb5-user \
-        libkrb5-dev \
         libsasl2-dev \
         libsasl2-modules-gssapi-mit \
         libsasl2-modules-ldap \
@@ -26,7 +24,7 @@ WORKDIR /app
 COPY ./pyproject.toml ./poetry.lock* /app/
 
 RUN pip install --upgrade pip setuptools wheel packaging
-RUN poetry install --no-root --extras "worker kerberos" --without test,docs,dev
+RUN poetry install --no-root --extras "worker" --without test,docs,dev
 
 COPY ./syncmaster/ /app/syncmaster/
 ENV PYTHONPATH=/app
@@ -41,5 +39,5 @@ FROM prod as test
 ENV CREATE_SPARK_SESSION_FUNCTION=tests.spark.get_worker_spark_session.get_worker_spark_session
 
 # CI runs tests in the worker container, so we need backend dependencies too
-RUN poetry install --no-root --extras "worker backend kerberos" --with test --without docs,dev
+RUN poetry install --no-root --extras "worker backend" --with test --without docs,dev
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
