@@ -43,6 +43,7 @@ jobs:
       - name: Generate unique version and update test version
         run: |
           poetry self add poetry-bumpversion
+          poetry self install
           version=$(poetry version -s)
           poetry version "${version}.dev${GITHUB_RUN_ID}"
 
