@@ -1,0 +1,16 @@
+0.1.2 (2024-04-15)
+==================
+
+Features
+--------
+
+- Rename ``syncmaster.backend.main`` module to ``syncmaster.backend``. It now also accepts the same args as ``uvicorn``. (:issue:`35`)
+- Add ``syncmaster.db.migrations`` module to run ``alembic`` with proper config. (:issue:`35`)
+- Change backend and worker images to use entrypoint. (:issue:`35`)
+
+
+Improvements
+------------
+
+- Run database migrations in the entrypoint of backend image, before starting the backend server. (:issue:`35`)
+- Add healthchecks to example ``docker-compose.yml``. (:issue:`35`)

@@ -245,7 +245,7 @@ async def test_superuser_can_create_transfer(
                 "loc": ["body", "name"],
                 "msg": "String should have at least 1 character",
                 "type": "string_too_short",
-                "url": "https://errors.pydantic.dev/2.6/v/string_too_short",
+                "url": "https://errors.pydantic.dev/2.7/v/string_too_short",
             },
         ),
         (
@@ -255,7 +255,7 @@ async def test_superuser_can_create_transfer(
                 "loc": ["body", "name"],
                 "msg": "Input should be a valid string",
                 "type": "string_type",
-                "url": "https://errors.pydantic.dev/2.6/v/string_type",
+                "url": "https://errors.pydantic.dev/2.7/v/string_type",
             },
         ),
         (
@@ -265,7 +265,7 @@ async def test_superuser_can_create_transfer(
                 "loc": ["body", "is_scheduled"],
                 "msg": "Input should be a valid boolean, unable to interpret input",
                 "type": "bool_parsing",
-                "url": "https://errors.pydantic.dev/2.6/v/bool_parsing",
+                "url": "https://errors.pydantic.dev/2.7/v/bool_parsing",
             },
         ),
         (
@@ -288,7 +288,7 @@ async def test_superuser_can_create_transfer(
                 "loc": ["body"],
                 "msg": "Value error, If transfer must be scheduled than set schedule param",
                 "type": "value_error",
-                "url": "https://errors.pydantic.dev/2.6/v/value_error",
+                "url": "https://errors.pydantic.dev/2.7/v/value_error",
             },
         ),
         (
@@ -307,7 +307,7 @@ async def test_superuser_can_create_transfer(
                 "does not match any of the expected tags: 'full', "
                 "'incremental'",
                 "type": "union_tag_invalid",
-                "url": "https://errors.pydantic.dev/2.6/v/union_tag_invalid",
+                "url": "https://errors.pydantic.dev/2.7/v/union_tag_invalid",
             },
         ),
         (
@@ -329,7 +329,7 @@ async def test_superuser_can_create_transfer(
                 "does not match any of the expected tags: 'postgres', "
                 "'hdfs', 'hive', 'oracle', 's3'",
                 "type": "union_tag_invalid",
-                "url": "https://errors.pydantic.dev/2.6/v/union_tag_invalid",
+                "url": "https://errors.pydantic.dev/2.7/v/union_tag_invalid",
             },
         ),
     ),
@@ -572,7 +572,7 @@ async def test_developer_plus_can_not_create_transfer_with_target_s3_json(
                 "msg": "Input tag 'json' found using 'type' does not match any of the expected tags: 'csv', 'jsonline'",
                 "input": {"type": "json", "lineSep": "\n", "encoding": "utf-8"},
                 "ctx": {"discriminator": "'type'", "tag": "json", "expected_tags": "'csv', 'jsonline'"},
-                "url": "https://errors.pydantic.dev/2.6/v/union_tag_invalid",
+                "url": "https://errors.pydantic.dev/2.7/v/union_tag_invalid",
             }
         ]
     }

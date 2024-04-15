@@ -18,7 +18,9 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", Settings().build_db_connection_uri())
+if not config.get_main_option("sqlalchemy.url"):
+    # read application settings only if sqlalchemy.url is not being passed via cli arguments
+    config.set_main_option("sqlalchemy.url", Settings().build_db_connection_uri())
 
 target_metadata = (
     Base.metadata,

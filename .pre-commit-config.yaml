@@ -3,7 +3,7 @@ default_language_version:
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: check-added-large-files
       - id: check-ast
@@ -40,13 +40,13 @@ repos:
       - id: chmod
         args: ['644']
         exclude_types: [shell]
-      #  exclude: ^(.*__main__\.py)$
-      #- id: chmod
-      #  args: ['755']
-      #  types: [shell]
-      #- id: chmod
-      #  args: ['755']
-      #  files: ^(.*__main__\.py)$
+        exclude: ^(.*__main__\.py)$
+      - id: chmod
+        args: ['755']
+        types: [shell]
+      - id: chmod
+        args: ['755']
+        files: ^(.*__main__\.py)$
       - id: insert-license
         files: .*\.py$
         exclude: ^(tests/.*\.py)$
@@ -111,7 +111,7 @@ repos:
       - id: docker-compose-check
 
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.12.0
+    rev: v2.13.0
     hooks:
       - id: pretty-format-yaml
         args: [--autofix, --indent, '2', --offset, '2']

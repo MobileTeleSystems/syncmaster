@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "data-syncmaster"
-version = "0.1.1"
+version = "0.1.2"
 license = "Apache-2.0"
 description = "Syncmaster REST API + Worker"
 authors = ["DataOps.ETL <onetools@mts.ru>"]
@@ -196,6 +196,8 @@ exclude_lines = [
   "\\.\\.\\.",
   "def downgrade\\(\\)",
 ]
+
+
 
 [tool.poetry.group.docs.dependencies]
 autodoc-pydantic = {version = "^2.0.1", python = ">=3.8"}
