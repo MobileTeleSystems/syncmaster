@@ -143,12 +143,12 @@ async def test_run_transfer_postgres_to_oracle_mixed_naming(
         token=group_owner.token,
     )
     assert run_data["status"] == Status.FINISHED.value
+
     reader = DBReader(
         connection=oracle,
         table=f"{oracle.user}.target_table",
     )
     df = reader.run()
-
     assert df.columns != init_df_with_mixed_column_naming.columns
     assert df.columns == [column.upper() for column in init_df_with_mixed_column_naming.columns]
 

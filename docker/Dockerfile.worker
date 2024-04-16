@@ -39,7 +39,7 @@ COPY ./syncmaster/ /app/syncmaster/
 
 FROM base as test
 
-ENV CREATE_SPARK_SESSION_FUNCTION=tests.spark.get_worker_spark_session.get_worker_spark_session
+ENV CREATE_SPARK_SESSION_FUNCTION=tests.spark.get_worker_spark_session
 
 # CI runs tests in the worker container, so we need backend dependencies too
 RUN poetry install --no-root --extras "worker backend" --with test --without docs,dev

@@ -1,56 +1,45 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-import json
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from onetl.base.base_file_df_connection import BaseFileDFConnection
 from onetl.file import FileDFReader, FileDFWriter
-from onetl.file.format import CSV, JSON, JSONLine
-from pyspark.sql.dataframe import DataFrame
-from pyspark.sql.types import StructType
 
 from syncmaster.dto.connections import ConnectionDTO
-from syncmaster.dto.transfers import TransferDTO
+from syncmaster.dto.transfers import FileTransferDTO
 from syncmaster.worker.handlers.base import Handler
+
+if TYPE_CHECKING:
+    from pyspark.sql.dataframe import DataFrame
 
 
 class FileHandler(Handler):
     connection: BaseFileDFConnection
     connection_dto: ConnectionDTO
-    transfer_dto: TransferDTO
+    transfer_dto: FileTransferDTO
 
-    def init_connection(self): ...
+    def read(self) -> DataFrame:
+        from pyspark.sql.types import StructType
 
-    def init_reader(self):
-        super().init_reader()
-
-        self.reader = FileDFReader(
+        reader = FileDFReader(
             connection=self.connection,
-            format=self._get_format(),
+            format=self.transfer_dto.file_format,
             source_path=self.transfer_dto.directory_path,
-            df_schema=StructType.fromJson(json.loads(self.transfer_dto.df_schema)),
+            df_schema=StructType.fromJson(self.transfer_dto.df_schema) if self.transfer_dto.df_schema else None,
             options=self.transfer_dto.options,
         )
 
-    def init_writer(self):
-        super().init_writer()
+        return reader.run()
 
-        self.writer = FileDFWriter(
+    def write(self, df: DataFrame):
+        writer = FileDFWriter(
             connection=self.connection,
-            format=self._get_format(),
+            format=self.transfer_dto.file_format,
             target_path=self.transfer_dto.directory_path,
             options=self.transfer_dto.options,
         )
 
-    def normalize_column_name(self, df: DataFrame) -> DataFrame:
-        return df
-
-    def _get_format(self):
-        file_type = self.transfer_dto.file_format["type"]
-        if file_type == "csv":
-            return CSV.parse_obj(self.transfer_dto.file_format)
-        elif file_type == "jsonline":
-            return JSONLine.parse_obj(self.transfer_dto.file_format)
-        elif file_type == "json":
-            return JSON.parse_obj(self.transfer_dto.file_format)
-        else:
-            raise ValueError("Unknown file type")
+        return writer.run(df=df)
