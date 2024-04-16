@@ -98,7 +98,6 @@ def get_spark_session(connection_settings: Settings) -> SparkSession:
 )
 def hive(test_settings: TestSettings) -> HiveConnectionDTO:
     return HiveConnectionDTO(
-        type="hive",
         cluster=test_settings.TEST_HIVE_CLUSTER,
         user=test_settings.TEST_HIVE_USER,
         password=test_settings.TEST_HIVE_PASSWORD,
@@ -111,7 +110,6 @@ def hive(test_settings: TestSettings) -> HiveConnectionDTO:
 )
 def hdfs(test_settings: TestSettings) -> HDFSConnectionDTO:
     return HDFSConnectionDTO(
-        type="hdfs",
         cluster=test_settings.TEST_HIVE_CLUSTER,
         user=test_settings.TEST_HIVE_USER,
         password=test_settings.TEST_HIVE_PASSWORD,
@@ -124,7 +122,6 @@ def hdfs(test_settings: TestSettings) -> HDFSConnectionDTO:
 )
 def oracle(test_settings: TestSettings) -> OracleConnectionDTO:
     return OracleConnectionDTO(
-        type="oracle",
         host=test_settings.TEST_ORACLE_HOST,
         port=test_settings.TEST_ORACLE_PORT,
         user=test_settings.TEST_ORACLE_USER,
@@ -141,7 +138,6 @@ def oracle(test_settings: TestSettings) -> OracleConnectionDTO:
 )
 def postgres(test_settings: TestSettings) -> PostgresConnectionDTO:
     return PostgresConnectionDTO(
-        type="postgres",
         host=test_settings.TEST_POSTGRES_HOST,
         port=test_settings.TEST_POSTGRES_PORT,
         user=test_settings.TEST_POSTGRES_USER,
@@ -157,7 +153,6 @@ def postgres(test_settings: TestSettings) -> PostgresConnectionDTO:
 )
 def s3(test_settings: TestSettings) -> S3ConnectionDTO:
     return S3ConnectionDTO(
-        type="s3",
         host=test_settings.TEST_S3_HOST,
         port=test_settings.TEST_S3_PORT,
         bucket=test_settings.TEST_S3_BUCKET,

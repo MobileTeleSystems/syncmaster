@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
 from dataclasses import dataclass
+from typing import ClassVar
 
 
 @dataclass
 class ConnectionDTO:
-    pass
+    type: ClassVar[str]
 
 
 @dataclass
@@ -16,7 +17,7 @@ class PostgresConnectionDTO(ConnectionDTO):
     password: str
     additional_params: dict
     database_name: str
-    type: str = "postgres"
+    type: ClassVar[str] = "postgres"
 
 
 @dataclass
@@ -28,7 +29,7 @@ class OracleConnectionDTO(ConnectionDTO):
     additional_params: dict
     sid: str | None = None
     service_name: str | None = None
-    type: str = "oracle"
+    type: ClassVar[str] = "oracle"
 
 
 @dataclass
@@ -36,7 +37,7 @@ class HiveConnectionDTO(ConnectionDTO):
     user: str
     password: str
     cluster: str
-    type: str = "hive"
+    type: ClassVar[str] = "hive"
 
 
 @dataclass
@@ -44,7 +45,7 @@ class HDFSConnectionDTO(ConnectionDTO):
     user: str
     password: str
     cluster: str
-    type: str = "hdfs"
+    type: ClassVar[str] = "hdfs"
 
 
 @dataclass
@@ -57,4 +58,4 @@ class S3ConnectionDTO(ConnectionDTO):
     additional_params: dict
     region: str | None = None
     protocol: str = "https"
-    type: str = "s3"
+    type: ClassVar[str] = "s3"
