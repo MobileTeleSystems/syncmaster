@@ -81,19 +81,19 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         connection_id: int,
         name: str | None,
         description: str | None,
-        connection_data: dict[str, Any],
+        data: dict[str, Any],
     ) -> Connection:
         try:
             connection = await self.read_by_id(connection_id=connection_id)
             for key in connection.data:
-                if key not in connection_data or connection_data[key] is None:
-                    connection_data[key] = connection.data[key]
+                data[key] = data.get(key, None) or connection.data[key]
+
             return await self._update(
                 Connection.id == connection_id,
                 Connection.is_deleted.is_(False),
                 name=name or connection.name,
                 description=description or connection.description,
-                data=connection_data,
+                data=data,
             )
         except IntegrityError as e:
             self._raise_error(e)
