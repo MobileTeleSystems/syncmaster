@@ -1,6 +1,5 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-import asyncio
 
 from fastapi import APIRouter, Depends, Query, status
 from kombu.exceptions import KombuError
@@ -76,16 +75,11 @@ async def create_transfer(
         user=current_user,
         group_id=transfer_data.group_id,
     )
-
     if group_permission < Permission.WRITE:
         raise ActionNotAllowedError
 
-    target_connection = await unit_of_work.connection.read_by_id(
-        connection_id=transfer_data.target_connection_id,
-    )
-    source_connection = await unit_of_work.connection.read_by_id(
-        connection_id=transfer_data.source_connection_id,
-    )
+    target_connection = await unit_of_work.connection.read_by_id(transfer_data.target_connection_id)
+    source_connection = await unit_of_work.connection.read_by_id(transfer_data.source_connection_id)
     queue = await unit_of_work.queue.read_by_id(transfer_data.queue_id)
 
     if (
@@ -153,44 +147,39 @@ async def copy_transfer(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> StatusCopyTransferResponseSchema:
-    # Check: user can copy transfer
-    target_source_transfer_rules = await asyncio.gather(
-        unit_of_work.transfer.get_resource_permission(
-            user=current_user,
-            resource_id=transfer_id,
-        ),
-        unit_of_work.transfer.get_group_permission(
-            user=current_user,
-            group_id=transfer_data.new_group_id,
-        ),
+    resource_role = await unit_of_work.transfer.get_resource_permission(
+        user=current_user,
+        resource_id=transfer_id,
     )
-    resource_role, target_group_role = target_source_transfer_rules
-
     if resource_role == Permission.NONE:
         raise TransferNotFoundError
-
-    if target_group_role < Permission.WRITE:
-        raise ActionNotAllowedError
 
     # Check: user can delete transfer
     if transfer_data.remove_source and resource_role < Permission.DELETE:
         raise ActionNotAllowedError
 
-    transfer = await unit_of_work.transfer.read_by_id(transfer_id=transfer_id)
-    # Check: user can copy connection
-    target_source_connection_rules = await asyncio.gather(
-        unit_of_work.connection.get_resource_permission(
-            user=current_user,
-            resource_id=transfer.source_connection_id,
-        ),
-        unit_of_work.connection.get_resource_permission(
-            user=current_user,
-            resource_id=transfer.target_connection_id,
-        ),
+    target_group_role = await unit_of_work.transfer.get_group_permission(
+        user=current_user,
+        group_id=transfer_data.new_group_id,
     )
-    source_connection_role, target_connection_role = target_source_connection_rules
+    if target_group_role < Permission.WRITE:
+        raise ActionNotAllowedError
 
-    if source_connection_role == Permission.NONE or target_connection_role == Permission.NONE:
+    transfer = await unit_of_work.transfer.read_by_id(transfer_id=transfer_id)
+
+    # Check: user can copy connection
+    source_connection_role = await unit_of_work.connection.get_resource_permission(
+        user=current_user,
+        resource_id=transfer.source_connection_id,
+    )
+    if source_connection_role == Permission.NONE:
+        raise ConnectionNotFoundError
+
+    target_connection_role = await unit_of_work.connection.get_resource_permission(
+        user=current_user,
+        resource_id=transfer.target_connection_id,
+    )
+    if target_connection_role == Permission.NONE:
         raise ConnectionNotFoundError
 
     # Check: new queue exists
