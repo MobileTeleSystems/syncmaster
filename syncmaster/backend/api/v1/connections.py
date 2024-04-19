@@ -1,6 +1,5 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-import asyncio
 from typing import get_args
 
 from fastapi import APIRouter, Depends, Query, status
@@ -59,19 +58,17 @@ async def read_connections(
     items: list[ReadConnectionSchema] = []
 
     if pagination.items:
-        creds = await asyncio.gather(
-            *[unit_of_work.credentials.get_for_connection(connection_id=item.id) for item in pagination.items]
-        )
+        credentials = await unit_of_work.credentials.read_bulk([item.id for item in pagination.items])
         items = [
             ReadConnectionSchema(
                 id=item.id,
                 group_id=item.group_id,
                 name=item.name,
                 description=item.description,
-                auth_data=creds[n_item],
+                auth_data=credentials.get(item.id, None),
                 data=item.data,
             )
-            for n_item, item in enumerate(pagination.items)
+            for item in pagination.items
         ]
 
     return ConnectionPageSchema(
@@ -121,7 +118,7 @@ async def create_connection(
             data=data,
         )
 
-        await unit_of_work.credentials.add_to_connection(
+        await unit_of_work.credentials.create(
             connection_id=connection.id,
             data=auth_data,
         )
@@ -155,12 +152,9 @@ async def read_connection(
     if resource_role == Permission.NONE:
         raise ConnectionNotFoundError
 
-    connection = await unit_of_work.connection.read_by_id(connection_id=connection_id)
-
+    connection = await unit_of_work.connection.read_by_id(connection_id)
     try:
-        credentials = await unit_of_work.credentials.get_for_connection(
-            connection_id=connection.id,
-        )
+        credentials = await unit_of_work.credentials.read(connection.id)
     except AuthDataNotFoundError:
         credentials = None
 
@@ -206,7 +200,7 @@ async def update_connection(
                 credential_data=connection_data.auth_data.dict(),
             )
 
-    auth_data = await unit_of_work.credentials.get_for_connection(connection_id)
+    auth_data = await unit_of_work.credentials.read(connection_id)
     return ReadConnectionSchema(
         id=connection.id,
         group_id=connection.group_id,
@@ -227,28 +221,26 @@ async def delete_connection(
         user=current_user,
         resource_id=connection_id,
     )
-
     if resource_role == Permission.NONE:
         raise ConnectionNotFoundError
 
     if resource_role < Permission.DELETE:
         raise ActionNotAllowedError
 
-    connection = await unit_of_work.connection.read_by_id(connection_id=connection_id)
+    connection = await unit_of_work.connection.read_by_id(connection_id)
+    transfers = await unit_of_work.transfer.list_by_connection_id(connection.id)
+    if transfers:
+        raise ConnectionDeleteError(
+            f"The connection has an associated transfers. Number of the connected transfers: {len(transfers)}",
+        )
 
-    transfers = await unit_of_work.transfer.list_by_connection_id(conn_id=connection.id)
     async with unit_of_work:
-        if not transfers:
-            await unit_of_work.connection.delete(connection_id=connection_id)
+        await unit_of_work.connection.delete(connection_id)
 
-            return StatusResponseSchema(
-                ok=True,
-                status_code=status.HTTP_200_OK,
-                message="Connection was deleted",
-            )
-
-    raise ConnectionDeleteError(
-        f"The connection has an associated transfers. Number of the connected transfers: {len(transfers)}",
+    return StatusResponseSchema(
+        ok=True,
+        status_code=status.HTTP_200_OK,
+        message="Connection was deleted",
     )
 
 
@@ -259,24 +251,20 @@ async def copy_connection(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> StatusResponseSchema:
-    target_source_rules = await asyncio.gather(
-        unit_of_work.connection.get_resource_permission(
-            user=current_user,
-            resource_id=connection_id,
-        ),
-        unit_of_work.connection.get_group_permission(
-            user=current_user,
-            group_id=copy_connection_data.new_group_id,
-        ),
+    resource_role = await unit_of_work.connection.get_resource_permission(
+        user=current_user,
+        resource_id=connection_id,
     )
-    resource_role, target_group_role = target_source_rules
+    if resource_role == Permission.NONE:
+        raise ConnectionNotFoundError
 
     if copy_connection_data.remove_source and resource_role < Permission.DELETE:
         raise ActionNotAllowedError
 
-    if resource_role == Permission.NONE:
-        raise ConnectionNotFoundError
-
+    target_group_role = await unit_of_work.connection.get_group_permission(
+        user=current_user,
+        group_id=copy_connection_data.new_group_id,
+    )
     if target_group_role == Permission.NONE:
         raise GroupNotFoundError
 
@@ -291,7 +279,7 @@ async def copy_connection(
         )
 
         if copy_connection_data.remove_source:
-            await unit_of_work.connection.delete(connection_id=connection_id)
+            await unit_of_work.connection.delete(connection_id)
 
     return StatusResponseSchema(
         ok=True,
