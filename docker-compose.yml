@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   db:
-    image: postgres:15
+    image: postgres
     restart: unless-stopped
     env_file: .env.docker
     ports:
@@ -16,7 +16,7 @@ services:
       retries: 3
 
   worker:
-    image: syncmaster_worker
+    image: mtsrus/syncmaster-worker
     restart: unless-stopped
     build:
       dockerfile: docker/Dockerfile.worker
@@ -25,7 +25,7 @@ services:
     env_file: .env.docker
 
   backend:
-    image: syncmaster_back
+    image: mtsrus/syncmaster-backend
     restart: unless-stopped
     build:
       dockerfile: docker/Dockerfile.backend

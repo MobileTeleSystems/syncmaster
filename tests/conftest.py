@@ -3,7 +3,6 @@ import logging
 import os
 import secrets
 from collections.abc import AsyncGenerator
-from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -105,15 +104,12 @@ async def session(sessionmaker: async_sessionmaker[AsyncSession]):
 
 
 @pytest_asyncio.fixture(scope="session")
-async def client(
-    settings: Settings,
-    async_engine: AsyncEngine,
-) -> AsyncGenerator:
-    logger.info("START CLIENT FIXTURE", datetime.now().isoformat())
+async def client(settings: Settings) -> AsyncGenerator:
+    logger.info("START CLIENT FIXTURE")
     app = application_factory(settings=settings)
     async with AsyncClient(app=app, base_url="http://testserver") as client:
         yield client
-        logger.info("END CLIENT FIXTURE", datetime.now().isoformat())
+        logger.info("END CLIENT FIXTURE")
 
 
 @pytest_asyncio.fixture
