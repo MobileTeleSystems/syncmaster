@@ -94,9 +94,15 @@ async def drop_database(connection: AsyncConnection, db_name: str) -> None:
     await connection.execute(text(query))
 
 
-async def get_run_on_end(client: AsyncClient, run_id: int, token: str) -> dict[str, Any]:
+async def get_run_on_end(
+    client: AsyncClient,
+    run_id: int,
+    token: str,
+    timeout: int = 120,
+) -> dict[str, Any]:
+    end_time = datetime.now().timestamp() + timeout
     while True:
-        logger.info("WAITING FOR THE RUN STATUS", datetime.now().isoformat())
+        logger.info("Waiting for end of run")
         result = await client.get(
             f"v1/runs/{run_id}",
             headers={"Authorization": f"Bearer {token}"},
@@ -107,5 +113,8 @@ async def get_run_on_end(client: AsyncClient, run_id: int, token: str) -> dict[s
         data = result.json()
         if data["status"] in [Status.FINISHED, Status.FAILED]:
             return data
-        logger.info("%s Try get end of run", datetime.now().isoformat())
+
+        if datetime.now().timestamp() > end_time:
+            raise TimeoutError()
+
         await asyncio.sleep(1)
