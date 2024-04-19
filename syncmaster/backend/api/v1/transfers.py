@@ -6,9 +6,6 @@ from fastapi import APIRouter, Depends, Query, status
 from kombu.exceptions import KombuError
 
 from syncmaster.backend.api.deps import UnitOfWorkMarker
-from syncmaster.backend.api.v1.transfers.utils import (
-    process_file_transfer_directory_path,
-)
 from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.db.models import Status, User
 from syncmaster.db.utils import Permission
@@ -114,8 +111,6 @@ async def create_transfer(
 
     if transfer_data.group_id != queue.group_id:
         raise DifferentTransferAndQueueGroupError
-
-    transfer_data = process_file_transfer_directory_path(transfer_data)  # type: ignore
 
     async with unit_of_work:
         transfer = await unit_of_work.transfer.create(
@@ -315,8 +310,6 @@ async def update_transfer(
             conn="source",
             params_type=transfer_data.source_params.type,
         )
-
-    transfer_data = process_file_transfer_directory_path(transfer_data)  # type: ignore
 
     async with unit_of_work:
         transfer = await unit_of_work.transfer.update(
