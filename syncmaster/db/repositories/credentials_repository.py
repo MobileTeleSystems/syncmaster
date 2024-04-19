@@ -65,17 +65,15 @@ class CredentialsRepository(Repository[AuthData]):
     async def update(
         self,
         connection_id: int,
-        credential_data: dict,
+        data: dict,
     ) -> AuthData:
         creds = await self.read(connection_id)
         try:
             for key in creds:
-                if key not in credential_data or credential_data[key] is None:
-                    credential_data[key] = creds[key]
-
+                data[key] = data.get(key, None) or creds[key]
             return await self._update(
                 AuthData.connection_id == connection_id,
-                value=encrypt_auth_data(value=credential_data, settings=self._settings),
+                value=encrypt_auth_data(value=data, settings=self._settings),
             )
         except IntegrityError as e:
             self._raise_error(e)

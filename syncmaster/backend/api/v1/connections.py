@@ -3,7 +3,6 @@
 from typing import get_args
 
 from fastapi import APIRouter, Depends, Query, status
-from pydantic import SecretStr
 
 from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.services import UnitOfWork, get_user
@@ -103,33 +102,27 @@ async def create_connection(
     if group_permission < Permission.WRITE:
         raise ActionNotAllowedError
 
-    data = connection_data.data.dict()
-    auth_data = connection_data.auth_data.dict()
-
-    # Trick to serialize SecretStr to JSON
-    for k, v in auth_data.items():
-        if isinstance(v, SecretStr):
-            auth_data[k] = v.get_secret_value()
     async with unit_of_work:
         connection = await unit_of_work.connection.create(
             name=connection_data.name,
             description=connection_data.description,
             group_id=connection_data.group_id,
-            data=data,
+            data=connection_data.data.dict(),
         )
 
         await unit_of_work.credentials.create(
             connection_id=connection.id,
-            data=auth_data,
+            data=connection_data.auth_data.dict(),
         )
 
+    credentials = await unit_of_work.credentials.read(connection.id)
     return ReadConnectionSchema(
         id=connection.id,
         group_id=connection.group_id,
         name=connection.name,
         description=connection.description,
         data=connection.data,
-        auth_data=auth_data,
+        auth_data=credentials,
     )
 
 
@@ -171,7 +164,7 @@ async def read_connection(
 @router.patch("/connections/{connection_id}")
 async def update_connection(
     connection_id: int,
-    connection_data: UpdateConnectionSchema,
+    changes: UpdateConnectionSchema,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadConnectionSchema:
@@ -189,25 +182,25 @@ async def update_connection(
     async with unit_of_work:
         connection = await unit_of_work.connection.update(
             connection_id=connection_id,
-            name=connection_data.name,
-            description=connection_data.description,
-            connection_data=connection_data.data.dict(exclude={"auth_data"}) if connection_data.data else {},
+            name=changes.name,
+            description=changes.description,
+            data=changes.data.dict(exclude={"auth_data"}) if changes.data else {},
         )
 
-        if connection_data.auth_data:
+        if changes.auth_data:
             await unit_of_work.credentials.update(
                 connection_id=connection_id,
-                credential_data=connection_data.auth_data.dict(),
+                data=changes.auth_data.dict(),
             )
 
-    auth_data = await unit_of_work.credentials.read(connection_id)
+    credentials = await unit_of_work.credentials.read(connection_id)
     return ReadConnectionSchema(
         id=connection.id,
         group_id=connection.group_id,
         name=connection.name,
         description=connection.description,
         data=connection.data,
-        auth_data=auth_data,
+        auth_data=credentials,
     )
 
 
