@@ -521,7 +521,7 @@ async def test_developer_plus_cannot_create_transfer_with_other_group_queue(
     }
 
 
-async def test_developer_plus_can_not_create_transfer_with_target_s3_json(
+async def test_developer_plus_can_not_create_transfer_with_target_format_json(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
     session: AsyncSession,
@@ -548,7 +548,7 @@ async def test_developer_plus_can_not_create_transfer_with_target_s3_json(
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {
                 "type": "s3",
-                "directory_path": "some/dir",
+                "directory_path": "/some/dir",
                 "df_schema": {},
                 "options": {},
                 "file_format": {

@@ -173,3 +173,81 @@ async def test_developer_plus_can_create_hdfs_transfer(
         "strategy_params": transfer.strategy_params,
         "queue_id": transfer.queue_id,
     }
+
+
+@pytest.mark.parametrize(
+    "create_connection_data",
+    [
+        {
+            "type": "s3",
+            "host": "localhost",
+            "port": 443,
+        },
+    ],
+    indirect=True,
+)
+@pytest.mark.parametrize(
+    "target_source_params",
+    [
+        {
+            "type": "s3",
+            "directory_path": "some/path",
+            "file_format": {
+                "type": "csv",
+            },
+        },
+    ],
+)
+async def test_cannot_create_file_transfer_with_relative_path(
+    client: AsyncClient,
+    two_group_connections: tuple[MockConnection, MockConnection],
+    group_queue: Queue,
+    mock_group: MockGroup,
+    target_source_params: dict,
+    create_connection_data: dict,
+):
+    # Arrange
+    first_connection, second_connection = two_group_connections
+    user = mock_group.get_member_of_role(UserTestRoles.Developer)
+
+    # Act
+    result = await client.post(
+        "v1/transfers",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "group_id": mock_group.group.id,
+            "name": "new test transfer",
+            "description": "",
+            "is_scheduled": False,
+            "schedule": "",
+            "source_connection_id": first_connection.id,
+            "target_connection_id": second_connection.id,
+            "source_params": target_source_params,
+            "target_params": target_source_params,
+            "strategy_params": {"type": "full"},
+            "queue_id": group_queue.id,
+        },
+    )
+
+    # Assert
+    assert result.status_code == 422
+    assert result.json() == {
+        "detail": [
+            {
+                "ctx": {"error": {}},
+                "input": "some/path",
+                "loc": ["body", "source_params", "s3", "directory_path"],
+                "msg": "Value error, Directory path must be absolute",
+                "type": "value_error",
+                "url": "https://errors.pydantic.dev/2.7/v/value_error",
+            },
+            {
+                "ctx": {"error": {}},
+                "input": "some/path",
+                "loc": ["body", "target_params", "s3", "directory_path"],
+                "msg": "Value error, Directory path must be absolute",
+                "type": "value_error",
+                "url": "https://errors.pydantic.dev/2.7/v/value_error",
+            },
+        ],
+    }
