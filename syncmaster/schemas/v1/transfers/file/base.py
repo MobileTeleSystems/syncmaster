@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import PurePosixPath
+from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -14,11 +15,13 @@ from syncmaster.schemas.v1.transfers.file_format import CSV, JSON, JSONLine
 class ReadFileTransferSource(BaseModel):
     directory_path: str
     file_format: CSV | JSONLine | JSON = Field(..., discriminator="type")
+    options: dict[str, Any]
 
 
 class ReadFileTransferTarget(BaseModel):
     directory_path: str
     file_format: CSV | JSONLine = Field(..., discriminator="type")  # JSON format is not supported for writing
+    options: dict[str, Any]
 
 
 # At the moment the CreateTransferSourceParams and CreateTransferTargetParams
@@ -26,6 +29,7 @@ class ReadFileTransferTarget(BaseModel):
 class CreateFileTransferSource(BaseModel):
     directory_path: str
     file_format: CSV | JSONLine | JSON = Field(..., discriminator="type")
+    options: dict[str, Any] = Field(default_factory=dict)
 
     class Config:
         arbitrary_types_allowed = True
@@ -41,6 +45,7 @@ class CreateFileTransferSource(BaseModel):
 class CreateFileTransferTarget(BaseModel):
     directory_path: str
     file_format: CSV | JSONLine = Field(..., discriminator="type")  # JSON FORMAT IS NOT SUPPORTED AS A TARGET !
+    options: dict[str, Any] = Field(default_factory=dict)
 
     class Config:
         arbitrary_types_allowed = True

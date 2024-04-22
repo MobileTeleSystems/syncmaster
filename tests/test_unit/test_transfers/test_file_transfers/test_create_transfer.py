@@ -29,6 +29,9 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
             "file_format": {
                 "type": "csv",
             },
+            "options": {
+                "some": "option",
+            },
         },
     ],
 )
@@ -90,6 +93,12 @@ async def test_developer_plus_can_create_s3_transfer(
         "strategy_params": transfer.strategy_params,
         "queue_id": transfer.queue_id,
     }
+
+    for params in (transfer.source_params, transfer.target_params):
+        assert params["type"] == "s3"
+        assert params["directory_path"] == "/some/pure/path"
+        assert params["file_format"]["type"] == "csv"
+        assert params["options"] == {"some": "option"}
 
 
 @pytest.mark.parametrize(
@@ -173,6 +182,12 @@ async def test_developer_plus_can_create_hdfs_transfer(
         "strategy_params": transfer.strategy_params,
         "queue_id": transfer.queue_id,
     }
+
+    for params in (transfer.source_params, transfer.target_params):
+        assert params["type"] == "hdfs"
+        assert params["directory_path"] == "/some/pure/path"
+        assert params["file_format"]["type"] == "csv"
+        assert params["options"] == {}
 
 
 @pytest.mark.parametrize(
