@@ -1,15 +1,6 @@
 ARG BASE_IMAGE=python:3.11-slim
 FROM $BASE_IMAGE AS base
 
-RUN apt-get update && apt-get install -y \
-        libssl-dev \
-        autoconf \
-        gcc \
-        g++ \
-        make \
-        libffi-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 RUN pip install --no-cache-dir --timeout 3 --retries 3 poetry \
     && poetry config virtualenvs.create false
 
