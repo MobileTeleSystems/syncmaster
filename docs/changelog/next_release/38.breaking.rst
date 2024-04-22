@@ -1,2 +1,0 @@
-Pass current ``Run`` to ``CREATE_SPARK_SESSION_FUNCTION``. This allows using run/transfer/group information for Spark session options,
-like ``appName`` or custom ones.

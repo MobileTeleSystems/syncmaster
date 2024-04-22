@@ -1,1 +1,0 @@
-Fix 500 error in case of ``PATCH v1/connections/:id`` request with passed ``auth_data.password`` field value

@@ -5,8 +5,6 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from onetl.connection import Oracle, Postgres, SparkS3
-
 from syncmaster.config import Settings
 from syncmaster.db.models import Run
 from syncmaster.dto.connections import ConnectionDTO
@@ -40,6 +38,8 @@ def get_worker_spark_session(
 
 
 def get_packages(db_type: str) -> list[str]:
+    from onetl.connection import Oracle, Postgres, SparkS3
+
     if db_type == "postgres":
         return Postgres.get_packages()
     if db_type == "oracle":

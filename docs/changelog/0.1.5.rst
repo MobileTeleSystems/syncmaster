@@ -1,0 +1,23 @@
+0.1.5 (2024-04-22)
+==================
+
+Breaking Changes
+----------------
+
+- Pass current ``Run`` to ``CREATE_SPARK_SESSION_FUNCTION``. This allows using run/transfer/group information for Spark session options,
+  like ``appName`` or custom ones. (:issue:`38`)
+
+
+Improvements
+------------
+
+- Reduce backend image size (:issue:`44`)
+
+
+Bug Fixes
+---------
+
+- Fix 500 error in case of ``PATCH v1/connections/:id`` request with passed ``auth_data.password`` field value (:issue:`39`)
+- Do not use ``asyncio.gather`` with SQLAlchemy requests (:issue:`40`)
+- Fix 500 error while creating HDFS connection (:issue:`41`)
+- Fix missing ``options`` field from Transfer params with ``hdfs`` and ``s3`` type (:issue:`39`)
