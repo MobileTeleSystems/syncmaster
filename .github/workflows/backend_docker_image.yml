@@ -52,8 +52,8 @@ jobs:
           file: docker/Dockerfile.backend
           pull: true
           push: true
-          cache-to: type=gha,mode=max
-          cache-from: type=gha
+          cache-to: type=inline
+          cache-from: mtsrus/syncmaster-backend:develop
           platforms: |
             linux/amd64
             linux/arm64/v8
