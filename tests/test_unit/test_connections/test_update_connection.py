@@ -87,7 +87,6 @@ async def test_check_name_field_validation_on_update_connection(
                 "loc": ["body", "name"],
                 "msg": "String should have at least 1 character",
                 "type": "string_too_short",
-                "url": "https://errors.pydantic.dev/2.7/v/string_too_short",
             }
         ]
     }
@@ -175,7 +174,6 @@ async def test_update_connection_data_fields(
                 "loc": ["body", "connection_data"],
                 "msg": "Unable to extract tag using discriminator 'type'",
                 "type": "union_tag_not_found",
-                "url": "https://errors.pydantic.dev/2.7/v/union_tag_not_found",
             }
         ]
     }
