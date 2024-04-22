@@ -20,4 +20,4 @@ Bug Fixes
 - Fix 500 error in case of ``PATCH v1/connections/:id`` request with passed ``auth_data.password`` field value (:issue:`39`)
 - Do not use ``asyncio.gather`` with SQLAlchemy requests (:issue:`40`)
 - Fix 500 error while creating HDFS connection (:issue:`41`)
-- Fix missing ``options`` field from Transfer params with ``hdfs`` and ``s3`` type (:issue:`39`)
+- Fix missing ``options`` field from Transfer params with ``hdfs`` and ``s3`` type
