@@ -24,11 +24,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./cached_jars
-          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-s3-jars
+          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-jars
           restore-keys: |
-            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-s3-jars
-            ${{ runner.os }}-python
-            ${{ runner.os }}
+            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-jars
+            ${{ runner.os }}-python-
 
       - name: Build Worker Image
         uses: docker/build-push-action@v5
