@@ -254,7 +254,6 @@ async def test_cannot_create_file_transfer_with_relative_path(
                 "loc": ["body", "source_params", "s3", "directory_path"],
                 "msg": "Value error, Directory path must be absolute",
                 "type": "value_error",
-                "url": "https://errors.pydantic.dev/2.7/v/value_error",
             },
             {
                 "ctx": {"error": {}},
@@ -262,7 +261,6 @@ async def test_cannot_create_file_transfer_with_relative_path(
                 "loc": ["body", "target_params", "s3", "directory_path"],
                 "msg": "Value error, Directory path must be absolute",
                 "type": "value_error",
-                "url": "https://errors.pydantic.dev/2.7/v/value_error",
             },
         ],
     }
