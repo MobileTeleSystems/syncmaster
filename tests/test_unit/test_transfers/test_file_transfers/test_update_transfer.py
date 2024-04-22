@@ -21,6 +21,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
                 "quote": '"',
                 "type": "csv",
             },
+            "options": {},
         },
     ],
 )
@@ -54,12 +55,13 @@ async def test_developer_plus_can_update_s3_transfer(
                 "type": "s3",
                 "directory_path": "/some/new/test/directory",
                 "file_format": {"type": "jsonline"},
+                "options": {"some": "option"},
             }
         },
     )
 
     # Pre-Assert
-    source_params = group_transfer.source_params
+    source_params = group_transfer.source_params.copy()
     source_params.update(
         {
             "directory_path": "/some/new/test/directory",
@@ -68,6 +70,7 @@ async def test_developer_plus_can_update_s3_transfer(
                 "line_sep": "\n",
                 "type": "jsonline",
             },
+            "options": {"some": "option"},
         }
     )
     # Assert

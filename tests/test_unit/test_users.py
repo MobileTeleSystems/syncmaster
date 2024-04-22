@@ -152,7 +152,6 @@ async def test_update_user(
                 "loc": ["body", "username"],
                 "msg": "String should match pattern '^[_a-z0-9]+$'",
                 "type": "string_pattern_mismatch",
-                "url": "https://errors.pydantic.dev/2.7/v/string_pattern_mismatch",
             }
         ]
     }

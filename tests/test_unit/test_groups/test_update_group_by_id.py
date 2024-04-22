@@ -128,7 +128,6 @@ async def test_validation_on_update_group(
                 "loc": ["body"],
                 "msg": "Field required",
                 "type": "missing",
-                "url": "https://errors.pydantic.dev/2.7/v/missing",
             }
         ]
     }

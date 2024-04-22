@@ -1,24 +1,31 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-import logging
+from __future__ import annotations
 
-import pyspark
-from onetl.connection import Oracle, Postgres, SparkS3
-from pyspark.sql import SparkSession
+import logging
+from typing import TYPE_CHECKING
 
 from syncmaster.config import Settings
+from syncmaster.db.models import Run
 from syncmaster.dto.connections import ConnectionDTO
+
+if TYPE_CHECKING:
+    from pyspark.sql import SparkSession
 
 log = logging.getLogger(__name__)
 
 
 def get_worker_spark_session(
-    settings: Settings,  # used in test spark session definition
+    settings: Settings,
+    run: Run,
     source: ConnectionDTO,
     target: ConnectionDTO,
 ) -> SparkSession:
-    """Through the source and target parameters you can get credentials for authorization at the source"""
-    spark_builder = SparkSession.builder.appName("celery_worker")
+    """Construct Spark Session using run parameters and application settings"""
+    from pyspark.sql import SparkSession
+
+    name = run.transfer.group.name + "_" + run.transfer.name
+    spark_builder = SparkSession.builder.appName(f"syncmaster_{name}")
 
     for k, v in get_spark_session_conf(source, target).items():
         spark_builder = spark_builder.config(k, v)
@@ -31,11 +38,15 @@ def get_worker_spark_session(
 
 
 def get_packages(db_type: str) -> list[str]:
+    from onetl.connection import Oracle, Postgres, SparkS3
+
     if db_type == "postgres":
         return Postgres.get_packages()
     if db_type == "oracle":
         return Oracle.get_packages()
     if db_type == "s3":
+        import pyspark
+
         spark_version = pyspark.__version__
         return SparkS3.get_packages(spark_version=spark_version)
 

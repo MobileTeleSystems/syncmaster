@@ -87,7 +87,6 @@ async def test_check_name_field_validation_on_update_connection(
                 "loc": ["body", "name"],
                 "msg": "String should have at least 1 character",
                 "type": "string_too_short",
-                "url": "https://errors.pydantic.dev/2.7/v/string_too_short",
             }
         ]
     }
@@ -175,7 +174,6 @@ async def test_update_connection_data_fields(
                 "loc": ["body", "connection_data"],
                 "msg": "Unable to extract tag using discriminator 'type'",
                 "type": "union_tag_not_found",
-                "url": "https://errors.pydantic.dev/2.7/v/union_tag_not_found",
             }
         ]
     }
@@ -209,7 +207,42 @@ async def test_update_connection_data_fields(
     assert result.status_code == 200
 
 
-async def test_update_connection_auth_data_fields(
+async def test_update_connection_auth_data_all_felds(
+    client: AsyncClient,
+    group_connection: MockConnection,
+    role_developer_plus: UserTestRoles,
+):
+    # Arrange
+    user = group_connection.owner_group.get_member_of_role(role_developer_plus)
+    # Act
+    result = await client.patch(
+        f"v1/connections/{group_connection.id}",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={"auth_data": {"type": "postgres", "user": "new_user", "password": "new_password"}},
+    )
+
+    # Assert
+    assert result.json() == {
+        "id": group_connection.id,
+        "name": group_connection.name,
+        "description": group_connection.description,
+        "group_id": group_connection.group_id,
+        "connection_data": {
+            "type": group_connection.data["type"],
+            "host": "127.0.0.1",
+            "port": group_connection.data["port"],
+            "additional_params": group_connection.data["additional_params"],
+            "database_name": group_connection.data["database_name"],
+        },
+        "auth_data": {
+            "type": group_connection.credentials.value["type"],
+            "user": "new_user",
+        },
+    }
+    assert result.status_code == 200
+
+
+async def test_update_connection_auth_data_partial(
     client: AsyncClient,
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,

@@ -21,6 +21,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
                 "quote": '"',
                 "type": "csv",
             },
+            "options": {},
         },
     ],
 )

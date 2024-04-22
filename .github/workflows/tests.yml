@@ -20,6 +20,10 @@ jobs:
     name: Oracle tests
     uses: ./.github/workflows/oracle-tests.yml
 
+  hdfs_tests:
+    name: HDFS tests
+    uses: ./.github/workflows/hdfs-tests.yml
+
   hive_tests:
     name: Hive tests
     uses: ./.github/workflows/hive-tests.yml

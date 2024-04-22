@@ -130,7 +130,6 @@ async def test_owner_cannot_add_user_to_group_with_wrong_role(
                 "loc": ["body", "role"],
                 "msg": "Input should be 'Maintainer', 'Developer' or 'Guest'",
                 "type": "enum",
-                "url": "https://errors.pydantic.dev/2.7/v/enum",
             }
         ]
     }
@@ -159,7 +158,6 @@ async def test_owner_cannot_add_user_to_group_without_role(
                 "loc": ["body"],
                 "msg": "Field required",
                 "type": "missing",
-                "url": "https://errors.pydantic.dev/2.7/v/missing",
             }
         ]
     }

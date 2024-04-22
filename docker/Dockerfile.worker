@@ -1,9 +1,7 @@
 ARG BASE_IMAGE=python:3.11-slim
-FROM $BASE_IMAGE AS prod
+FROM $BASE_IMAGE AS base
 
 RUN apt-get update && apt-get install -y \
-        krb5-user \
-        libkrb5-dev \
         libsasl2-dev \
         libsasl2-modules-gssapi-mit \
         libsasl2-modules-ldap \
@@ -22,24 +20,27 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --no-cache-dir --timeout 3 --retries 3 poetry && poetry config virtualenvs.create false
 
 WORKDIR /app
+ENV PYTHONPATH=/app
 
 COPY ./pyproject.toml ./poetry.lock* /app/
 
 RUN pip install --upgrade pip setuptools wheel packaging
-RUN poetry install --no-root --extras "worker"
-
-COPY ./syncmaster/ /app/syncmaster/
-ENV PYTHONPATH=/app
+RUN poetry install --no-root --extras "worker" --without test,docs,dev
 
 COPY ./docker/entrypoint_worker.sh /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["--loglevel=info"]
 
 
-FROM prod as test
+FROM base as prod
 
-ENV CREATE_SPARK_SESSION_FUNCTION=tests.spark.get_worker_spark_session.get_worker_spark_session
+COPY ./syncmaster/ /app/syncmaster/
+
+
+FROM base as test
+
+ENV CREATE_SPARK_SESSION_FUNCTION=tests.spark.get_worker_spark_session
 
 # CI runs tests in the worker container, so we need backend dependencies too
-RUN poetry install --no-root --extras "worker backend" --with test
+RUN poetry install --no-root --extras "worker backend" --with test --without docs,dev
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh

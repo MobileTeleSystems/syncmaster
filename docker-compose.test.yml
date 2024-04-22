@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   db:
-    image: postgres:15
+    image: postgres
     restart: unless-stopped
     env_file: .env.docker
     ports:
@@ -26,6 +26,7 @@ services:
     command: --loglevel=info -Q test_queue
     env_file: .env.docker
     volumes:
+      - ./syncmaster:/app/syncmaster
       - ./cached_jars:/root/.ivy2
       - ./reports:/app/reports
       - ./tests:/app/tests
@@ -34,14 +35,6 @@ services:
       db:
         condition: service_healthy
       rabbitmq:
-        condition: service_healthy
-      test-oracle:
-        condition: service_started  # Oracle image does not have healthcheck
-      test-postgres:
-        condition: service_healthy
-      test-hive:
-        condition: service_healthy
-      test-s3:
         condition: service_healthy
 
   backend:
@@ -56,6 +49,7 @@ services:
     ports:
       - 8000:8000
     volumes:
+      - ./syncmaster:/app/syncmaster
       - ./cached_jars:/root/.ivy2
       - ./reports:/app/reports
       - ./tests:/app/tests
@@ -96,7 +90,7 @@ services:
       retries: 3
 
   test-postgres:
-    image: postgres:15
+    image: postgres
     restart: unless-stopped
     ports:
       - 5433:5432
@@ -121,7 +115,7 @@ services:
       APP_USER_PASSWORD: test_password
 
   metastore-hive:
-    image: postgres:15
+    image: postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: metastore

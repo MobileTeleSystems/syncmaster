@@ -199,7 +199,6 @@ async def test_developer_plus_create_oracle_connection_with_sid_and_service_name
                 "loc": ["body", "connection_data", "oracle"],
                 "msg": "Value error, You must specify either sid or service_name but not both",
                 "type": "value_error",
-                "url": "https://errors.pydantic.dev/2.7/v/value_error",
             }
         ]
     }
