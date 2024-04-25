@@ -76,17 +76,20 @@ def get_spark_session_conf(
         maven_packages.extend(get_packages(db_type=db_type.type))  # type: ignore
         excluded_packages.extend(get_excluded_packages(db_type=db_type.type))  # type: ignore
 
-    log.debug("Passing Maven packages: %s", maven_packages)
-
     config = {
         "spark.jars.packages": ",".join(maven_packages),
         "spark.sql.pyspark.jvmStacktrace.enabled": "true",
     }
 
+    if maven_packages:
+        log.debug("Include Maven packages: %s", maven_packages)
+        config["spark.jars.packages"] = ",".join(maven_packages)
+
     if excluded_packages:
+        log.debug("Exclude Maven packages: %s", excluded_packages)
         config["spark.jars.excludes"] = ",".join(excluded_packages)
 
-    if source.type == "s3":  # type: ignore
+    if target.type == "s3":  # type: ignore
         config.update(
             {
                 "spark.hadoop.fs.s3a.committer.magic.enabled": "true",

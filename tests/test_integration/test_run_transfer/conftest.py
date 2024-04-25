@@ -5,6 +5,7 @@ import secrets
 from collections import namedtuple
 from pathlib import Path, PurePosixPath
 
+import pyspark
 import pytest
 import pytest_asyncio
 from onetl.connection import Hive, Oracle, Postgres, SparkS3
@@ -48,46 +49,61 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope="session")
-def spark(settings: Settings) -> SparkSession:
-    return get_spark_session(settings)
-
-
-def get_spark_session(connection_settings: Settings) -> SparkSession:
+def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
     logger.info("START GET SPARK SESSION")
-    maven_packages = [p for connection in (Postgres, Oracle) for p in connection.get_packages()]
-    maven_s3_packages = [p for p in SparkS3.get_packages(spark_version="3.4.1")]
-    maven_packages.extend(maven_s3_packages)
+
+    # get markers from all downstream tests
+    markers = set()
+    for func in request.session.items:
+        markers.update(marker.name for marker in func.iter_markers())
+
+    maven_packages: list[str] = []
+    excluded_packages: list[str] = []
 
     spark = (
         SparkSession.builder.appName("celery_worker")
-        .config("spark.jars.packages", ",".join(maven_packages))
-        .config("spark.sql.pyspark.jvmStacktrace.enabled", "true")
         .enableHiveSupport()
+        .config("spark.sql.pyspark.jvmStacktrace.enabled", "true")
     )
 
-    excluded_packages = [
-        "com.google.cloud.bigdataoss:gcs-connector",
-        "org.apache.hadoop:hadoop-aliyun",
-        "org.apache.hadoop:hadoop-azure-datalake",
-        "org.apache.hadoop:hadoop-azure",
-    ]
-    spark = (
-        spark.config("spark.jars.excludes", ",".join(excluded_packages))
-        .config("spark.hadoop.fs.s3a.committer.magic.enabled", "true")
-        .config("spark.hadoop.fs.s3a.committer.name", "magic")
-        .config(
-            "spark.hadoop.mapreduce.outputcommitter.factory.scheme.s3a",
-            "org.apache.hadoop.fs.s3a.commit.S3ACommitterFactory",
+    if "postgres" in markers:
+        maven_packages.extend(Postgres.get_packages())
+
+    if "oracle" in markers:
+        maven_packages.extend(Oracle.get_packages())
+
+    if "s3" in markers:
+        maven_packages.extend(SparkS3.get_packages(spark_version=pyspark.__version__))
+        excluded_packages.extend(
+            [
+                "com.google.cloud.bigdataoss:gcs-connector",
+                "org.apache.hadoop:hadoop-aliyun",
+                "org.apache.hadoop:hadoop-azure-datalake",
+                "org.apache.hadoop:hadoop-azure",
+            ]
         )
-        .config(
-            "spark.sql.parquet.output.committer.class",
-            "org.apache.spark.internal.io.cloud.BindingParquetOutputCommitter",
+        spark = (
+            spark.config("spark.hadoop.fs.s3a.committer.magic.enabled", "true")
+            .config("spark.hadoop.fs.s3a.committer.name", "magic")
+            .config(
+                "spark.hadoop.mapreduce.outputcommitter.factory.scheme.s3a",
+                "org.apache.hadoop.fs.s3a.commit.S3ACommitterFactory",
+            )
+            .config(
+                "spark.sql.parquet.output.committer.class",
+                "org.apache.spark.internal.io.cloud.BindingParquetOutputCommitter",
+            )
+            .config(
+                "spark.sql.sources.commitProtocolClass",
+                "org.apache.spark.internal.io.cloud.PathOutputCommitProtocol",
+            )
         )
-        .config(
-            "spark.sql.sources.commitProtocolClass",
-            "org.apache.spark.internal.io.cloud.PathOutputCommitProtocol",
-        )
-    )
+
+    if maven_packages:
+        spark = spark.config("spark.jars.packages", ",".join(maven_packages))
+
+    if excluded_packages:
+        spark = spark.config("spark.jars.excludes", ",".join(excluded_packages))
 
     return spark.getOrCreate()
 
