@@ -128,8 +128,8 @@ async def test_validation_on_update_group(
                 "loc": ["body"],
                 "msg": "Field required",
                 "type": "missing",
-            }
-        ]
+            },
+        ],
     }
 
     # Arrange

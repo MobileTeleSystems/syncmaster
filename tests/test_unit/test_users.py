@@ -152,8 +152,8 @@ async def test_update_user(
                 "loc": ["body", "username"],
                 "msg": "String should match pattern '^[_a-z0-9]+$'",
                 "type": "string_pattern_mismatch",
-            }
-        ]
+            },
+        ],
     }
 
     # check change other user from simple

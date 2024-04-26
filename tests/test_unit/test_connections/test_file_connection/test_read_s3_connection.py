@@ -25,7 +25,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend, pytest.mark.s3]
                 "access_key": "access_key",
                 "secret_key": "secret_key",
             },
-        )
+        ),
     ],
     indirect=True,
 )

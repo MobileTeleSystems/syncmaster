@@ -78,8 +78,8 @@ async def test_owner_of_group_can_not_update_user_role_with_wrong_role(
                 "loc": ["body", "role"],
                 "msg": "Input should be 'Maintainer', 'Developer' or 'Guest'",
                 "type": "enum",
-            }
-        ]
+            },
+        ],
     }
 
 

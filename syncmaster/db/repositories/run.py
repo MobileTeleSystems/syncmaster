@@ -67,7 +67,7 @@ class RunRepository(Repository[Run]):
             .options(
                 selectinload(Transfer.source_connection),
                 selectinload(Transfer.target_connection),
-            )
+            ),
         )
         return ReadFullTransferSchema.from_orm(transfer.one()).dict()
 

@@ -50,7 +50,7 @@ def application_factory(settings: Settings) -> FastAPI:
             DatabaseSessionMarker: lambda: session_factory,
             UnitOfWorkMarker: get_uow(session_factory, settings),
             AuthMarker: auth_scheme,
-        }
+        },
     )
 
     return application

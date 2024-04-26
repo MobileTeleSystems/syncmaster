@@ -46,7 +46,7 @@ async def test_developer_plus_can_create_transfer(
             select(Transfer).filter_by(
                 name="new test transfer",
                 group_id=mock_group.group.id,
-            )
+            ),
         )
     ).one()
 
@@ -213,7 +213,7 @@ async def test_superuser_can_create_transfer(
             select(Transfer).filter_by(
                 name="new test group transfer",
                 group_id=mock_group.id,
-            )
+            ),
         )
     ).one()
 
@@ -566,8 +566,8 @@ async def test_developer_plus_can_not_create_transfer_with_target_format_json(
                 "msg": "Input tag 'json' found using 'type' does not match any of the expected tags: 'csv', 'jsonline'",
                 "input": {"type": "json", "lineSep": "\n", "encoding": "utf-8"},
                 "ctx": {"discriminator": "'type'", "tag": "json", "expected_tags": "'csv', 'jsonline'"},
-            }
-        ]
+            },
+        ],
     }
 
 

@@ -50,7 +50,7 @@ async def test_developer_plus_can_create_connection(
         await session.scalars(
             select(Connection).filter_by(
                 name="New connection",
-            )
+            ),
         )
     ).first()
 
@@ -58,7 +58,7 @@ async def test_developer_plus_can_create_connection(
         await session.scalars(
             select(AuthData).filter_by(
                 connection_id=connection.id,
-            )
+            ),
         )
     ).one()
 
@@ -165,8 +165,8 @@ async def test_check_fields_validation_on_create_connection(
                 "loc": ["body", "name"],
                 "msg": "String should have at least 1 character",
                 "type": "string_too_short",
-            }
-        ]
+            },
+        ],
     }
 
     # Act
@@ -200,8 +200,8 @@ async def test_check_fields_validation_on_create_connection(
                 "loc": ["body", "name"],
                 "msg": "Input should be a valid string",
                 "type": "string_type",
-            }
-        ]
+            },
+        ],
     }
 
     result = await client.post(
@@ -232,8 +232,8 @@ async def test_check_fields_validation_on_create_connection(
                 "loc": ["body", "description"],
                 "msg": "Input should be a valid string",
                 "type": "string_type",
-            }
-        ]
+            },
+        ],
     }
 
     result = await client.post(
@@ -277,8 +277,8 @@ async def test_check_fields_validation_on_create_connection(
                 "msg": "Input tag 'POSTGRESQL' found using 'type' does not match "
                 f"any of the expected tags: {ALLOWED_SOURCES}",
                 "type": "union_tag_invalid",
-            }
-        ]
+            },
+        ],
     }
 
 
@@ -354,7 +354,7 @@ async def test_superuser_can_create_connection(
             select(Connection).filter_by(
                 name="New connection from superuser",
                 group_id=group.id,
-            )
+            ),
         )
     ).first()
 
@@ -362,7 +362,7 @@ async def test_superuser_can_create_connection(
         await session.scalars(
             select(AuthData).filter_by(
                 connection_id=connection.id,
-            )
+            ),
         )
     ).one()
     decrypted = decrypt_auth_data(creds.value, settings=settings)

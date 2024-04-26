@@ -25,7 +25,9 @@ async def get_users(
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> UserPageSchema:
     pagination = await unit_of_work.user.paginate(
-        page=page, page_size=page_size, is_superuser=current_user.is_superuser
+        page=page,
+        page_size=page_size,
+        is_superuser=current_user.is_superuser,
     )
     return UserPageSchema.from_pagination(pagination)
 

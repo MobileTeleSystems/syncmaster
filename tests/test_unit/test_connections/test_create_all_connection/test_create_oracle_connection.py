@@ -46,7 +46,7 @@ async def test_developer_plus_can_create_oracle_connection_with_service_name(
         await session.scalars(
             select(Connection).filter_by(
                 name="New connection",
-            )
+            ),
         )
     ).first()
 
@@ -54,7 +54,7 @@ async def test_developer_plus_can_create_oracle_connection_with_service_name(
         await session.scalars(
             select(AuthData).filter_by(
                 connection_id=connection.id,
-            )
+            ),
         )
     ).one()
 
@@ -116,7 +116,7 @@ async def test_developer_plus_can_create_oracle_connection_with_sid(
         await session.scalars(
             select(Connection).filter_by(
                 name="New connection",
-            )
+            ),
         )
     ).first()
 
@@ -124,7 +124,7 @@ async def test_developer_plus_can_create_oracle_connection_with_sid(
         await session.scalars(
             select(AuthData).filter_by(
                 connection_id=connection.id,
-            )
+            ),
         )
     ).one()
 
@@ -199,6 +199,6 @@ async def test_developer_plus_create_oracle_connection_with_sid_and_service_name
                 "loc": ["body", "connection_data", "oracle"],
                 "msg": "Value error, You must specify either sid or service_name but not both",
                 "type": "value_error",
-            }
-        ]
+            },
+        ],
     }

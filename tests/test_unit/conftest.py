@@ -54,7 +54,7 @@ async def create_group_member(
             group_id=group_id,
             user_id=user.id,
             role=role,
-        )
+        ),
     )
 
     return MockUser(
@@ -75,7 +75,7 @@ async def add_user_to_group(
             group_id=group_id,
             user_id=user.id,
             role=role,
-        )
+        ),
     )
     await session.commit()
 
@@ -170,7 +170,7 @@ async def group(session: AsyncSession, settings: Settings) -> MockGroup:
                 group_id=group.id,
                 session=session,
                 settings=settings,
-            )
+            ),
         )
 
     await session.commit()
@@ -218,7 +218,7 @@ async def mock_group(
                 group_id=group.id,
                 session=session,
                 settings=settings,
-            )
+            ),
         )
 
     await session.commit()
@@ -372,7 +372,7 @@ async def group_connection(
                 group_id=group.id,
                 session=session,
                 settings=settings,
-            )
+            ),
         )
 
     await session.commit()

@@ -392,8 +392,8 @@ async def test_check_validate_copy_transfer_parameter_new_name(
                 "loc": ["body", "new_name"],
                 "msg": "String should have at least 1 character",
                 "type": "string_too_short",
-            }
-        ]
+            },
+        ],
     }
 
 

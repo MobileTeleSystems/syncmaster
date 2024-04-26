@@ -22,7 +22,7 @@ async def test_developer_plus_can_create_run_of_transfer_his_group(
 
     run = (
         await session.scalars(
-            select(Run).filter_by(transfer_id=group_transfer.id, status=Status.CREATED).order_by(desc(Run.created_at))
+            select(Run).filter_by(transfer_id=group_transfer.id, status=Status.CREATED).order_by(desc(Run.created_at)),
         )
     ).one_or_none()
 
@@ -38,7 +38,7 @@ async def test_developer_plus_can_create_run_of_transfer_his_group(
     # Assert
     run = (
         await session.scalars(
-            select(Run).filter_by(transfer_id=group_transfer.id, status=Status.CREATED).order_by(desc(Run.created_at))
+            select(Run).filter_by(transfer_id=group_transfer.id, status=Status.CREATED).order_by(desc(Run.created_at)),
         )
     ).first()
 
@@ -109,7 +109,7 @@ async def test_group_member_cannot_create_run_of_other_group_transfer(
 
     assert (
         await session.scalars(
-            select(Run).filter_by(transfer_id=group_transfer.id, status=Status.CREATED).order_by(desc(Run.created_at))
+            select(Run).filter_by(transfer_id=group_transfer.id, status=Status.CREATED).order_by(desc(Run.created_at)),
         )
     ).first() is None
 
@@ -132,7 +132,7 @@ async def test_superuser_can_create_run(
     )
     run = (
         await session.scalars(
-            select(Run).filter_by(transfer_id=group_transfer.id, status=Status.CREATED).order_by(desc(Run.created_at))
+            select(Run).filter_by(transfer_id=group_transfer.id, status=Status.CREATED).order_by(desc(Run.created_at)),
         )
     ).first()
 

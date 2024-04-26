@@ -172,7 +172,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
             or_(
                 Transfer.source_connection_id == conn_id,
                 Transfer.target_connection_id == conn_id,
-            )
+            ),
         )
         result = await self._session.scalars(query)
         return result.fetchall()

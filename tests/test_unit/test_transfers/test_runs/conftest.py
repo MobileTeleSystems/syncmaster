@@ -40,7 +40,7 @@ async def group_run(session: AsyncSession, settings: Settings) -> MockTransfer:
                 group_id=group.id,
                 session=session,
                 settings=settings,
-            )
+            ),
         )
     await session.commit()
     mock_group = MockGroup(

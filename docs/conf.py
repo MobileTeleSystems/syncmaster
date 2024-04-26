@@ -69,7 +69,7 @@ swagger = [
         "options": {
             "url": "_static/openapi.json",
         },
-    }
+    },
 ]
 numpydoc_show_class_members = True
 autodoc_pydantic_model_show_config = False

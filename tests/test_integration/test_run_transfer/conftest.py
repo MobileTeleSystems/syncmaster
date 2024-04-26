@@ -80,7 +80,7 @@ def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
                 "org.apache.hadoop:hadoop-aliyun",
                 "org.apache.hadoop:hadoop-azure-datalake",
                 "org.apache.hadoop:hadoop-azure",
-            ]
+            ],
         )
         spark = (
             spark.config("spark.hadoop.fs.s3a.committer.magic.enabled", "true")

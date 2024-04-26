@@ -36,7 +36,7 @@ async def test_group_member_can_read_groups(
                 "name": group.name,
                 "description": group.description,
                 "owner_id": group.owner_id,
-            }
+            },
         ],
     }
     assert result.status_code == 200

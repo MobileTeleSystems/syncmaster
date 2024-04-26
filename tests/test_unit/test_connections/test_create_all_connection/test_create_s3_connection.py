@@ -49,7 +49,7 @@ async def test_developer_plus_can_create_s3_connection(
         await session.scalars(
             select(Connection).filter_by(
                 name="New connection",
-            )
+            ),
         )
     ).first()
 
@@ -57,7 +57,7 @@ async def test_developer_plus_can_create_s3_connection(
         await session.scalars(
             select(AuthData).filter_by(
                 connection_id=connection.id,
-            )
+            ),
         )
     ).one()
 
@@ -125,7 +125,7 @@ async def test_developer_plus_can_create_s3_connection_auto_generate_port(
         await session.scalars(
             select(Connection).filter_by(
                 name="New connection",
-            )
+            ),
         )
     ).first()
 
@@ -133,7 +133,7 @@ async def test_developer_plus_can_create_s3_connection_auto_generate_port(
         await session.scalars(
             select(AuthData).filter_by(
                 connection_id=connection.id,
-            )
+            ),
         )
     ).one()
 

@@ -63,7 +63,10 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.ForeignKeyConstraint(
-            ["group_id"], ["group.id"], name=op.f("fk__connection__group_id__group"), ondelete="CASCADE"
+            ["group_id"],
+            ["group.id"],
+            name=op.f("fk__connection__group_id__group"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk__connection")),
         sa.UniqueConstraint("name", "group_id", name=op.f("uq__connection__name_group_id")),
@@ -79,7 +82,10 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
         sa.ForeignKeyConstraint(
-            ["group_id"], ["group.id"], name=op.f("fk__queue__group_id__group"), ondelete="CASCADE"
+            ["group_id"],
+            ["group.id"],
+            name=op.f("fk__queue__group_id__group"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk__queue")),
         sa.UniqueConstraint("name", name=op.f("uq__queue__name")),
@@ -91,10 +97,16 @@ def upgrade() -> None:
         sa.Column("group_id", sa.BigInteger(), nullable=False),
         sa.Column("role", sa.String(255), nullable=False),
         sa.ForeignKeyConstraint(
-            ["group_id"], ["group.id"], name=op.f("fk__user_group__group_id__group"), ondelete="CASCADE"
+            ["group_id"],
+            ["group.id"],
+            name=op.f("fk__user_group__group_id__group"),
+            ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
-            ["user_id"], ["user.id"], name=op.f("fk__user_group__user_id__user"), ondelete="CASCADE"
+            ["user_id"],
+            ["user.id"],
+            name=op.f("fk__user_group__user_id__user"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("user_id", "group_id", name=op.f("pk__user_group")),
     )
@@ -132,10 +144,16 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.ForeignKeyConstraint(
-            ["group_id"], ["group.id"], name=op.f("fk__transfer__group_id__group"), ondelete="CASCADE"
+            ["group_id"],
+            ["group.id"],
+            name=op.f("fk__transfer__group_id__group"),
+            ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
-            ["queue_id"], ["queue.id"], name=op.f("fk__transfer__queue_id__queue"), ondelete="CASCADE"
+            ["queue_id"],
+            ["queue.id"],
+            name=op.f("fk__transfer__queue_id__queue"),
+            ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
             ["source_connection_id"],
@@ -167,7 +185,10 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.ForeignKeyConstraint(
-            ["transfer_id"], ["transfer.id"], name=op.f("fk__run__transfer_id__transfer"), ondelete="CASCADE"
+            ["transfer_id"],
+            ["transfer.id"],
+            name=op.f("fk__run__transfer_id__transfer"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk__run")),
     )

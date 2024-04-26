@@ -56,7 +56,7 @@ async def test_developer_plus_can_update_s3_transfer(
                 "directory_path": "/some/new/test/directory",
                 "file_format": {"type": "jsonline"},
                 "options": {"some": "option"},
-            }
+            },
         },
     )
 
@@ -71,7 +71,7 @@ async def test_developer_plus_can_update_s3_transfer(
                 "type": "jsonline",
             },
             "options": {"some": "option"},
-        }
+        },
     )
     # Assert
     assert result.status_code == 200

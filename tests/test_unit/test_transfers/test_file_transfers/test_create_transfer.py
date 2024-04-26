@@ -74,7 +74,7 @@ async def test_developer_plus_can_create_s3_transfer(
             select(Transfer).filter_by(
                 name="new test transfer",
                 group_id=mock_group.group.id,
-            )
+            ),
         )
     ).one()
     # Assert
@@ -162,7 +162,7 @@ async def test_developer_plus_can_create_hdfs_transfer(
             select(Transfer).filter_by(
                 name="new test transfer",
                 group_id=mock_group.group.id,
-            )
+            ),
         )
     ).one()
 

@@ -16,7 +16,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend, pytest.mark.hdfs]
                 "user": "user",
                 "password": "password",
             },
-        )
+        ),
     ],
     indirect=True,
 )

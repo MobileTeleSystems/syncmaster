@@ -124,7 +124,7 @@ class GroupRepository(Repository[Group]):
                     user_id=user_id,
                     role=role,
                 )
-                .returning(UserGroup)
+                .returning(UserGroup),
             )
             await self._session.flush()
             obj = row_res.one_or_none()
@@ -176,7 +176,7 @@ class GroupRepository(Repository[Group]):
                     group_id=group_id,
                     user_id=new_user_id,
                     role=role,
-                )
+                ),
             )
         except IntegrityError as integrity_error:
             self._raise_error(integrity_error)

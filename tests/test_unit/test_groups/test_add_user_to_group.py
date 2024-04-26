@@ -52,7 +52,7 @@ async def test_owner_can_add_user_to_group(
                 "id": simple_user.id,
                 "username": simple_user.username,
                 "role": role_maintainer_or_below,
-            }
+            },
         ],
     }
 
@@ -130,8 +130,8 @@ async def test_owner_cannot_add_user_to_group_with_wrong_role(
                 "loc": ["body", "role"],
                 "msg": "Input should be 'Maintainer', 'Developer' or 'Guest'",
                 "type": "enum",
-            }
-        ]
+            },
+        ],
     }
     assert result.status_code == 422
 
@@ -158,8 +158,8 @@ async def test_owner_cannot_add_user_to_group_without_role(
                 "loc": ["body"],
                 "msg": "Field required",
                 "type": "missing",
-            }
-        ]
+            },
+        ],
     }
     assert result.status_code == 422
 
@@ -208,7 +208,7 @@ async def test_superuser_can_add_user_to_group(
                 "id": simple_user.id,
                 "username": simple_user.username,
                 "role": simple_user.role,
-            }
+            },
         ],
     }
 
@@ -253,7 +253,9 @@ async def test_owner_cannot_add_user_to_group_twice(
 
 
 async def test_not_authorized_user_cannot_add_user_to_group(
-    client: AsyncClient, empty_group: MockGroup, simple_user: MockUser
+    client: AsyncClient,
+    empty_group: MockGroup,
+    simple_user: MockUser,
 ):
     # Act
     result = await client.post(f"v1/groups/{empty_group.id}/users/{simple_user.id}")

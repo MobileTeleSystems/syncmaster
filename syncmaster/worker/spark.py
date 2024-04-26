@@ -101,7 +101,7 @@ def get_spark_session_conf(
                     "org.apache.spark.internal.io.cloud.BindingParquetOutputCommitter"
                 ),
                 "spark.sql.sources.commitProtocolClass": "org.apache.spark.internal.io.cloud.PathOutputCommitProtocol",
-            }
+            },
         )
 
     return config

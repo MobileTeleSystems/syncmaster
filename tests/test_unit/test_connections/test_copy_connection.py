@@ -432,13 +432,13 @@ async def test_developer_plus_can_copy_connection_with_new_connection_name(
         select(Connection).filter(
             Connection.name == new_name,
             Connection.group_id == empty_group.group.id,
-        )
+        ),
     )
     conn_with_old_name = await session.scalars(
         select(Connection).filter(
             Connection.name == group_connection.connection.name,
             Connection.group_id == empty_group.group.id,
-        )
+        ),
     )
     assert new_connection.one()
     assert not conn_with_old_name.one_or_none()
@@ -473,8 +473,8 @@ async def test_check_name_validation_copy_connection_with_new_connection_name(
                 "loc": ["body", "new_name"],
                 "msg": "String should have at least 1 character",
                 "type": "string_too_short",
-            }
-        ]
+            },
+        ],
     }
 
 

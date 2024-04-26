@@ -44,7 +44,7 @@ async def test_developer_plus_can_create_hive_connection(
         await session.scalars(
             select(Connection).filter_by(
                 name="New connection",
-            )
+            ),
         )
     ).first()
 
@@ -52,7 +52,7 @@ async def test_developer_plus_can_create_hive_connection(
         await session.scalars(
             select(AuthData).filter_by(
                 connection_id=connection.id,
-            )
+            ),
         )
     ).one()
 

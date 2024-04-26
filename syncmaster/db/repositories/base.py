@@ -98,7 +98,7 @@ class Repository(Generic[Model], ABC):
         the scalars method discards all fields except the first
         """
         items_result: ScalarResult[Model] = await self._session.scalars(
-            query.limit(page_size).offset((page - 1) * page_size)
+            query.limit(page_size).offset((page - 1) * page_size),
         )
         total: int = await self._session.scalar(select(func.count()).select_from(query.subquery()))
         return Pagination(

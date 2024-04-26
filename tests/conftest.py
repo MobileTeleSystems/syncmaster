@@ -162,7 +162,7 @@ async def group_transfer(
                 group_id=group.id,
                 session=session,
                 settings=settings,
-            )
+            ),
         )
 
     await session.commit()
@@ -441,7 +441,7 @@ async def group_transfer_and_group_developer_or_below(
         UserTestRoles.Developer,
         UserTestRoles.Maintainer,
         UserTestRoles.Owner,
-    ]
+    ],
 )
 async def role_guest_plus(request):
     """
@@ -458,7 +458,7 @@ async def role_guest_plus(request):
         UserTestRoles.Guest,
         UserTestRoles.Developer,
         UserTestRoles.Maintainer,
-    ]
+    ],
 )
 async def role_guest_plus_without_owner(request):
     """
@@ -475,7 +475,7 @@ async def role_guest_plus_without_owner(request):
         UserTestRoles.Developer,
         UserTestRoles.Owner,
         UserTestRoles.Maintainer,
-    ]
+    ],
 )
 async def role_developer_plus(request):
     """
@@ -490,7 +490,7 @@ async def role_developer_plus(request):
     params=[
         UserTestRoles.Maintainer,
         UserTestRoles.Owner,
-    ]
+    ],
 )
 async def role_maintainer_plus(request):
     """
@@ -504,7 +504,7 @@ async def role_maintainer_plus(request):
     params=[
         UserTestRoles.Guest,
         UserTestRoles.Developer,
-    ]
+    ],
 )
 async def role_developer_or_below(request):
     """
@@ -518,7 +518,7 @@ async def role_developer_or_below(request):
     params=[
         UserTestRoles.Developer,
         UserTestRoles.Maintainer,
-    ]
+    ],
 )
 async def role_maintainer_or_below_without_guest(request):
     """
@@ -535,7 +535,7 @@ async def role_maintainer_or_below_without_guest(request):
         UserTestRoles.Guest,
         UserTestRoles.Developer,
         UserTestRoles.Maintainer,
-    ]
+    ],
 )
 async def role_maintainer_or_below(request):
     """
