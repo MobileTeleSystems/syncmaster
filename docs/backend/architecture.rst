@@ -12,27 +12,28 @@ Architecture
 
         actor "User"
 
-        frame "Syncmaster" {
-            component "REST API"
-            database "Database"
+        frame "SyncMaster" {
+            rectangle "Backend" {
+                component "REST API"
+                database "Database"
+                queue "Task Queue"
+            }
+            rectangle "Workers" {
+                collections "Worker"
+            }
         }
 
-        frame "Worker node" {
-            component "Worker"
-            component "Spark Session"
-        }
-
-        database "Source"
-        database "Target"
-
-        component "Queue"
+        database "Data Source"
+        database "Data Target"
 
         [User] --> [REST API]
         [REST API] --> [Database]
-        [REST API] ..> [Queue]
-        [Worker] ..> [Queue]
-        [Worker] ..> [Database]
-        [Spark Session] ..> [Source]
-        [Spark Session] ..> [Target]
+        [REST API] --> [Task Queue]
+
+        [Task Queue] --> [Worker]
+        [Worker] --> [Database]
+
+        [Worker] --> [Data Source]
+        [Worker] --> [Data Target]
 
     @enduml

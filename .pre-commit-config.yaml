@@ -1,5 +1,5 @@
 default_language_version:
-  python: python3.11
+  python: python3.12
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -81,7 +81,6 @@ repos:
     rev: 24.4.2
     hooks:
       - id: black
-        language_version: python3.11
 
   - repo: https://github.com/pycqa/bandit
     rev: 1.7.8
@@ -105,7 +104,6 @@ repos:
         name: mypy
         entry: mypy ./syncmaster/backend --config-file ./pyproject.toml
         language: python
-        language_version: python3.11
         require_serial: true
         pass_filenames: false
 
