@@ -1,6 +1,5 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-import json
 from typing import get_args
 
 from fastapi import APIRouter, Depends, Query, status
