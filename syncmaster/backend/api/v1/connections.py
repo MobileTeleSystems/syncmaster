@@ -191,7 +191,7 @@ async def update_connection(
         if changes.auth_data:
             await unit_of_work.credentials.update(
                 connection_id=connection_id,
-                data=json.loads(changes.auth_data.model_dump_json()),
+                data=changes.auth_data.model_dump(mode="json"),
             )
 
     credentials = await unit_of_work.credentials.read(connection_id)
