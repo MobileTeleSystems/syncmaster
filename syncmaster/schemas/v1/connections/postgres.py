@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
 
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import BaseModel, Field, SecretStr, field_serializer
 
 from syncmaster.schemas.v1.connection_types import POSTGRES_TYPE
 
@@ -34,6 +34,12 @@ class UpdatePostgresConnectionSchema(PostgresBaseSchema):
 class UpdatePostgresAuthSchema(PostgresBaseSchema):
     user: str | None = None
     password: SecretStr | None = None
+
+    @field_serializer("password", when_used="json")
+    def dump_secret(self, v):
+        if v:
+            return v.get_secret_value()
+        return v
 
 
 class CreatePostgresConnectionSchema(PostgresBaseSchema):

@@ -103,10 +103,13 @@ class UpdateConnectionSchema(BaseModel):
 
     @model_validator(mode="before")
     def check_types(cls, values):
-        data, auth_data = values.get("connection_data"), values.get("auth_data")
+        import json
+
+        input = json.loads(values)
+        data, auth_data = input.get("connection_data"), input.get("auth_data")
         if data and auth_data and data.get("type") != auth_data.get("type"):
             raise ValueError("Connection data and auth data must have same types")
-        return values
+        return input
 
 
 class CreateConnectionSchema(BaseModel):
@@ -130,10 +133,13 @@ class CreateConnectionSchema(BaseModel):
 
     @model_validator(mode="before")
     def check_types(cls, values):
-        data, auth_data = values.get("data"), values.get("auth_data")
-        if data and auth_data and data.type != auth_data.type:
+        import json
+
+        input = json.loads(values)
+        data, auth_data = input.get("connection_data"), input.get("auth_data")
+        if data and auth_data and data.get("type") != auth_data.get("type"):
             raise ValueError("Connection data and auth data must have same types")
-        return values
+        return input
 
 
 class ConnectionCopySchema(BaseModel):

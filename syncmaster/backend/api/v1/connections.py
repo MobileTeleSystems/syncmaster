@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
+import json
 from typing import get_args
 
 from fastapi import APIRouter, Depends, Query, status
@@ -190,7 +191,7 @@ async def update_connection(
         if changes.auth_data:
             await unit_of_work.credentials.update(
                 connection_id=connection_id,
-                data=changes.auth_data.dict(),
+                data=json.loads(changes.auth_data.model_dump_json()),
             )
 
     credentials = await unit_of_work.credentials.read(connection_id)
