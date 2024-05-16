@@ -1,0 +1,7 @@
+0.1.6 (2024-05-16)
+==================
+
+Bug Fixes
+----------
+
+- checking service_name and sid when editing oracle connection
