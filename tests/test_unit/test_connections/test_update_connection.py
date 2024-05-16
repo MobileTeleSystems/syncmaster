@@ -516,6 +516,6 @@ async def test_developer_plus_update_connection_with_diff_type(
                 "loc": ["body"],
                 "msg": "Value error, Connection data and auth data must have same types",
                 "type": "value_error",
-            }
-        ]
+            },
+        ],
     }
