@@ -68,7 +68,7 @@ async def test_developer_plus_can_update_oracle_connection(
 ):
     # Arrange
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
-    group_id = group_connection.connection.group.id
+    group_connection.connection.group.id
 
     # Act
     result = await client.patch(
