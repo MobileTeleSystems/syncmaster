@@ -633,6 +633,6 @@ async def test_developer_plus_create_connection_with_not_same_types_error(
                     "auth_data": {"type": "oracle", "user": "user", "password": "secret"},
                 },
                 "ctx": {"error": {}},
-            }
-        ]
+            },
+        ],
     }
