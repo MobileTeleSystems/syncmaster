@@ -357,7 +357,7 @@ async def test_superuser_cannot_update_unknown_connection_error(
     ],
     indirect=True,
 )
-async def test_developer_plus_edit_oracle_connection_with_sid_and_service_name_error(
+async def test_developer_plus_update_oracle_connection_with_sid_and_service_name_error(
     client: AsyncClient,
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
