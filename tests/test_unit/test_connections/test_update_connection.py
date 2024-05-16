@@ -475,3 +475,47 @@ async def test_developer_plus_update_oracle_connection_both_sid_and_service_name
             },
         ],
     }
+
+
+async def test_developer_plus_update_connection_with_diff_type(
+    client: AsyncClient,
+    group_connection: MockConnection,
+    role_developer_plus: UserTestRoles,
+):
+    # Arrange
+    user = group_connection.owner_group.get_member_of_role(role_developer_plus)
+
+    # Act
+    result = await client.patch(
+        f"v1/connections/{group_connection.id}",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "name": "New connection name",
+            "connection_data": {
+                "type": "postgres",
+                "host": "new_host",
+            },
+            "auth_data": {
+                "type": "oracle",
+                "user": "new_user",
+            },
+        },
+    )
+
+    # Assert
+    assert result.status_code == 422
+    assert result.json() == {
+        "detail": [
+            {
+                "ctx": {"error": {}},
+                "input": {
+                    "auth_data": {"type": "oracle", "user": "new_user"},
+                    "connection_data": {"host": "new_host", "type": "postgres"},
+                    "name": "New connection name",
+                },
+                "loc": ["body"],
+                "msg": "Value error, Connection data and auth data must have same types",
+                "type": "value_error",
+            }
+        ]
+    }
