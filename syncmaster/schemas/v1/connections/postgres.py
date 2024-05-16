@@ -35,12 +35,6 @@ class UpdatePostgresAuthSchema(PostgresBaseSchema):
     user: str | None = None
     password: SecretStr | None = None
 
-    @field_serializer("password", when_used="json")
-    def dump_secret(self, v):
-        if v:
-            return v.get_secret_value()
-        return v
-
 
 class CreatePostgresConnectionSchema(PostgresBaseSchema):
     host: str

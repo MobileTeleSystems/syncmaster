@@ -336,3 +336,75 @@ async def test_superuser_cannot_update_unknown_connection_error(
         "ok": False,
         "status_code": 404,
     }
+
+
+@pytest.mark.parametrize(
+    "create_connection_data,create_connection_auth_data",
+    [
+        (
+            {
+                "type": "oracle",
+                "host": "127.0.0.1",
+                "port": 1521,
+                "sid": "sid_name",
+            },
+            {
+                "type": "oracle",
+                "user": "user",
+                "password": "secret",
+            },
+        ),
+    ],
+    indirect=True,
+)
+async def test_developer_plus_edit_oracle_connection_with_sid_and_service_name_error(
+    client: AsyncClient,
+    group_connection: MockConnection,
+    role_developer_plus: UserTestRoles,
+):
+    # Arrange
+    user = group_connection.owner_group.get_member_of_role(role_developer_plus)
+    group_id = group_connection.connection.group.id
+
+    # Act
+    result = await client.patch(
+        f"v1/connections/{group_connection.id}",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "group_id": group_id,
+            "name": "New connection",
+            "description": "",
+            "connection_data": {
+                "type": "oracle",
+                "host": "127.0.0.1",
+                "port": 1521,
+                "sid": "sid_name",
+                "service_name": "service_name",
+            },
+            "auth_data": {
+                "type": "oracle",
+                "user": "user",
+                "password": "secret",
+            },
+        },
+    )
+
+    # Assert
+    assert result.status_code == 422
+    assert result.json() == {
+        "detail": [
+            {
+                "ctx": {"error": {}},
+                "input": {
+                    "host": "127.0.0.1",
+                    "port": 1521,
+                    "service_name": "service_name",
+                    "sid": "sid_name",
+                    "type": "oracle",
+                },
+                "loc": ["body", "connection_data", "oracle"],
+                "msg": "Value error, You must specify either sid or service_name but not both",
+                "type": "value_error",
+            }
+        ]
+    }

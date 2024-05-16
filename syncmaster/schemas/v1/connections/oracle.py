@@ -42,7 +42,7 @@ class UpdateOracleConnectionSchema(OracleBaseSchema):
 
 
 class UpdateOracleAuthSchema(OracleBaseSchema):
-    user: NameConstr | None = None  # noqa: F722
+    user: str | None = None  # noqa: F722
     password: SecretStr | None = None
 
 
