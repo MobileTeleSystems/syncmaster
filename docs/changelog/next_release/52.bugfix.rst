@@ -1,0 +1,1 @@
+- checking service_name and sid when editing oracle connection
