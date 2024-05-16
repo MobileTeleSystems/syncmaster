@@ -42,6 +42,73 @@ async def test_developer_plus_can_update_connection(
     assert result.status_code == 200
 
 
+@pytest.mark.parametrize(
+    "create_connection_data,create_connection_auth_data",
+    [
+        (
+            {
+                "type": "oracle",
+                "host": "127.0.0.1",
+                "port": 1521,
+                "sid": "sid_name",
+            },
+            {
+                "type": "oracle",
+                "user": "user",
+                "password": "secret",
+            },
+        ),
+    ],
+    indirect=True,
+)
+async def test_developer_plus_can_update_oracle_connection(
+    client: AsyncClient,
+    group_connection: MockConnection,
+    role_developer_plus: UserTestRoles,
+):
+    # Arrange
+    user = group_connection.owner_group.get_member_of_role(role_developer_plus)
+    group_id = group_connection.connection.group.id
+
+    # Act
+    result = await client.patch(
+        f"v1/connections/{group_connection.id}",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "connection_data": {
+                "type": "oracle",
+                "host": "127.0.1.1",
+                "sid": "new_sid_name",
+            },
+            "auth_data": {
+                "type": "oracle",
+                "user": "new_user",
+            },
+        },
+    )
+
+    # Assert
+    assert result.status_code == 200
+    assert result.json() == {
+        "id": group_connection.id,
+        "name": group_connection.name,
+        "description": group_connection.description,
+        "group_id": group_connection.group_id,
+        "connection_data": {
+            "type": group_connection.data["type"],
+            "host": "127.0.1.1",
+            "port": group_connection.data["port"],
+            "sid": "new_sid_name",
+            "additional_params": {},
+            "service_name": None,
+        },
+        "auth_data": {
+            "type": group_connection.credentials.value["type"],
+            "user": "new_user",
+        },
+    }
+
+
 async def test_groupless_user_cannot_update_connection(
     client: AsyncClient,
     group_connection: MockConnection,
