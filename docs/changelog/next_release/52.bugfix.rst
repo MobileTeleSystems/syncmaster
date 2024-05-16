@@ -1,1 +1,1 @@
-- checking service_name and sid when editing oracle connection
+Check that ``service_name`` and ``sid`` are mutually exclusive when editing oracle connection
