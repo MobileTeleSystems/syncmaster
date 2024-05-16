@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
 
-from pydantic import BaseModel, Field, SecretStr, field_serializer
+from pydantic import BaseModel, Field, SecretStr
 
 from syncmaster.schemas.v1.connection_types import POSTGRES_TYPE
 

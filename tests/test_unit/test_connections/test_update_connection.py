@@ -405,6 +405,6 @@ async def test_developer_plus_edit_oracle_connection_with_sid_and_service_name_e
                 "loc": ["body", "connection_data", "oracle"],
                 "msg": "Value error, You must specify either sid or service_name but not both",
                 "type": "value_error",
-            }
-        ]
+            },
+        ],
     }

@@ -4,7 +4,6 @@
 from pydantic import BaseModel, Field, SecretStr, model_validator
 
 from syncmaster.schemas.v1.connection_types import ORACLE_TYPE
-from syncmaster.schemas.v1.types import NameConstr
 
 
 class OracleBaseSchema(BaseModel):

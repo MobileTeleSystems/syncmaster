@@ -7,7 +7,6 @@ from syncmaster.config import Settings
 from syncmaster.db.models import AuthData, Connection
 from syncmaster.db.repositories.utils import decrypt_auth_data
 from tests.mocks import MockConnection, MockGroup, MockUser, UserTestRoles
-from tests.test_unit.conftest import ALLOWED_SOURCES
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
@@ -276,8 +275,8 @@ async def test_check_fields_validation_on_create_connection(
                     "tag": "POSTGRESQL",
                     "expected_tags": "'hive', 'oracle', 'postgres', 'hdfs', 's3'",
                 },
-            }
-        ]
+            },
+        ],
     }
 
 
