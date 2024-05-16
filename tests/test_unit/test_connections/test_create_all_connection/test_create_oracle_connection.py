@@ -202,3 +202,62 @@ async def test_developer_plus_create_oracle_connection_with_sid_and_service_name
             },
         ],
     }
+
+
+async def test_developer_plus_cannot_create_connection_with_type_mismatch(
+    client: AsyncClient,
+    group: MockGroup,
+    session: AsyncSession,
+    settings: Settings,
+    role_developer_plus: UserTestRoles,
+    event_loop,
+    request,
+):
+    # Arrange
+    user = group.get_member_of_role(role_developer_plus)
+
+    # Act
+    result = await client.post(
+        "v1/connections",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "group_id": group.id,
+            "name": "New connection",
+            "description": "",
+            "connection_data": {
+                "type": "postgres",
+                "host": "127.0.0.1",
+                "port": 5432,
+                "database_name": "postgres",
+            },
+            "auth_data": {
+                "type": "oracle",
+                "user": "user",
+                "password": "secret",
+            },
+        },
+    )
+
+    # Assert
+    assert result.json() == {
+        "detail": [
+            {
+                "type": "value_error",
+                "loc": ["body"],
+                "msg": "Value error, Connection data and auth data must have same types",
+                "input": {
+                    "group_id": group.id,
+                    "name": "New connection",
+                    "description": "",
+                    "connection_data": {
+                        "type": "postgres",
+                        "host": "127.0.0.1",
+                        "port": 5432,
+                        "database_name": "postgres",
+                    },
+                    "auth_data": {"type": "oracle", "user": "user", "password": "secret"},
+                },
+                "ctx": {"error": {}},
+            },
+        ],
+    }
