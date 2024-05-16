@@ -477,7 +477,7 @@ async def test_developer_plus_update_oracle_connection_both_sid_and_service_name
     }
 
 
-async def test_developer_plus_update_connection_with_diff_type(
+async def test_developer_plus_update_connection_with_diff_type_error(
     client: AsyncClient,
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
