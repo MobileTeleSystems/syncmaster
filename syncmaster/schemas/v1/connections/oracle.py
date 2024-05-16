@@ -4,7 +4,6 @@
 from pydantic import BaseModel, Field, SecretStr, model_validator
 
 from syncmaster.schemas.v1.connection_types import ORACLE_TYPE
-from syncmaster.schemas.v1.types import NameConstr
 
 
 class OracleBaseSchema(BaseModel):
@@ -28,13 +27,21 @@ class ReadOracleAuthSchema(OracleBaseSchema):
 
 class UpdateOracleConnectionSchema(OracleBaseSchema):
     host: str | None = None
+    port: int | None = None
     sid: str | None = None
     service_name: str | None = None
     additional_params: dict | None = Field(default_factory=dict)
 
+    @model_validator(mode="before")
+    def check_owner_id(cls, values):
+        sid, service_name = values.get("sid"), values.get("service_name")
+        if sid and service_name:
+            raise ValueError("You must specify either sid or service_name but not both")
+        return values
+
 
 class UpdateOracleAuthSchema(OracleBaseSchema):
-    user: NameConstr | None = None  # noqa: F722
+    user: str | None = None  # noqa: F722
     password: SecretStr | None = None
 
 

@@ -101,10 +101,10 @@ class UpdateConnectionSchema(BaseModel):
     auth_data: UpdateConnectionAuthDataSchema | None = Field(discriminator="type", default=None)
     data: UpdateConnectionDataSchema | None = Field(discriminator="type", alias="connection_data", default=None)
 
-    @model_validator(mode="before")
+    @model_validator(mode="after")
     def check_types(cls, values):
-        data, auth_data = values.get("connection_data"), values.get("auth_data")
-        if data and auth_data and data.get("type") != auth_data.get("type"):
+        data, auth_data = values.data, values.auth_data
+        if data and auth_data and data.type != auth_data.type:
             raise ValueError("Connection data and auth data must have same types")
         return values
 
@@ -128,9 +128,9 @@ class CreateConnectionSchema(BaseModel):
         description="Credentials for authorization",
     )
 
-    @model_validator(mode="before")
+    @model_validator(mode="after")
     def check_types(cls, values):
-        data, auth_data = values.get("data"), values.get("auth_data")
+        data, auth_data = values.data, values.auth_data
         if data and auth_data and data.type != auth_data.type:
             raise ValueError("Connection data and auth data must have same types")
         return values

@@ -7,7 +7,6 @@ from syncmaster.config import Settings
 from syncmaster.db.models import AuthData, Connection
 from syncmaster.db.repositories.utils import decrypt_auth_data
 from tests.mocks import MockConnection, MockGroup, MockUser, UserTestRoles
-from tests.test_unit.conftest import ALLOWED_SOURCES
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
@@ -261,22 +260,21 @@ async def test_check_fields_validation_on_create_connection(
     assert result.json() == {
         "detail": [
             {
-                "ctx": {
-                    "discriminator": "'type'",
-                    "expected_tags": ALLOWED_SOURCES,
-                    "tag": "POSTGRESQL",
-                },
+                "type": "union_tag_invalid",
+                "loc": ["body", "connection_data"],
+                "msg": "Input tag 'POSTGRESQL' found using 'type' does not match any of the expected tags: 'hive', 'oracle', 'postgres', 'hdfs', 's3'",
                 "input": {
-                    "database_name": "postgres",
+                    "type": "POSTGRESQL",
                     "host": "127.0.0.1",
                     "port": 5432,
-                    "type": "POSTGRESQL",
                     "user": "user",
+                    "database_name": "postgres",
                 },
-                "loc": ["body", "connection_data"],
-                "msg": "Input tag 'POSTGRESQL' found using 'type' does not match "
-                f"any of the expected tags: {ALLOWED_SOURCES}",
-                "type": "union_tag_invalid",
+                "ctx": {
+                    "discriminator": "'type'",
+                    "tag": "POSTGRESQL",
+                    "expected_tags": "'hive', 'oracle', 'postgres', 'hdfs', 's3'",
+                },
             },
         ],
     }
