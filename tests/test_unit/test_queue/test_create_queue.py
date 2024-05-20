@@ -328,3 +328,33 @@ async def test_maintainer_plus_cannot_create_queue_with_wrong_name(
 
     # Assert
     assert result.json() == error
+
+
+async def test_maintainer_plus_can_not_create_queue_with_duplicate_name_error(
+    client: AsyncClient,
+    session: AsyncSession,
+    role_maintainer_plus: UserTestRoles,
+    mock_group: MockGroup,
+    group_queue: Queue,
+):
+    # Arrange
+    user = mock_group.get_member_of_role(role_maintainer_plus)
+
+    # Act
+    result = await client.post(
+        "v1/queues",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "name": group_queue.name,  # duplicated name
+            "description": "Some interesting description",
+            "group_id": group_queue.group.id,
+        },
+    )
+
+    # Assert
+    assert result.status_code == 409
+    assert result.json() == {
+        "ok": False,
+        "status_code": 409,
+        "message": "The queue name already exists in the target group, please specify a new one",
+    }

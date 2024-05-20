@@ -12,7 +12,7 @@ from syncmaster.db.repositories.repository_with_owner import RepositoryWithOwner
 from syncmaster.db.utils import Permission
 from syncmaster.exceptions import EntityNotFoundError, SyncmasterError
 from syncmaster.exceptions.group import GroupNotFoundError
-from syncmaster.exceptions.queue import QueueNotFoundError
+from syncmaster.exceptions.queue import DuplicatedQueueNameError, QueueNotFoundError
 
 # TODO: remove HTTP response schemes from repositories, these are different layers
 from syncmaster.schemas.v1.queue import UpdateQueueSchema
@@ -192,4 +192,8 @@ class QueueRepository(RepositoryWithOwner[Queue]):
 
     @staticmethod
     def _raise_error(err: DBAPIError) -> NoReturn:
+        constraint = err.__cause__.__cause__.constraint_name
+        if constraint == "uq__queue__name":
+            raise DuplicatedQueueNameError
+
         raise SyncmasterError from err
