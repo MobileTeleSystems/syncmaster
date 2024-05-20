@@ -14,3 +14,7 @@ class QueueDeleteError(SyncmasterError):
 
 class DifferentTransferAndQueueGroupError(SyncmasterError):
     pass
+
+
+class DuplicatedQueueNameError(SyncmasterError):
+    pass

@@ -22,6 +22,7 @@ from syncmaster.exceptions.group import (
 )
 from syncmaster.exceptions.queue import (
     DifferentTransferAndQueueGroupError,
+    DuplicatedQueueNameError,
     QueueDeleteError,
     QueueNotFoundError,
 )
@@ -171,6 +172,12 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterError):
         return exception_json_response(
             status_code=status.HTTP_409_CONFLICT,
             detail="The transfer name already exists in the target group, please specify a new one",
+        )
+
+    if isinstance(exc, DuplicatedQueueNameError):
+        return exception_json_response(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="The queue name already exists in the target group, please specify a new one",
         )
 
     if isinstance(exc, CannotConnectToTaskQueueError):
