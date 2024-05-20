@@ -1,1 +1,1 @@
-Checking for duplicate queue name
+Check for duplicate queue name
