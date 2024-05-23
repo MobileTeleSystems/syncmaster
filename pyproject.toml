@@ -60,6 +60,7 @@ python-multipart = { version = "^0.0.9", optional = true }
 celery = { version = "^5.3.3", optional = true }
 onetl = { version = "^0.10.2", extras = ["spark"], optional = true }
 psycopg2-binary = { version = "^2.9.7", optional = true }
+mypy = "^1.10.0"
 
 [tool.poetry.extras]
 backend = [
