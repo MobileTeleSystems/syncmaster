@@ -10,6 +10,7 @@ from syncmaster.exceptions.connection import (
     ConnectionDeleteError,
     ConnectionNotFoundError,
     ConnectionOwnerError,
+    ConnectionTypeUpdateError,
     DuplicatedConnectionNameError,
 )
 from syncmaster.exceptions.credentials import AuthDataNotFoundError
@@ -136,6 +137,12 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterError):
         return exception_json_response(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot create transfer with that group_id value",
+        )
+
+    if isinstance(exc, ConnectionTypeUpdateError):
+        return exception_json_response(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You cannot update the connection type of a connection already associated with a transfer.",
         )
 
     if isinstance(exc, DifferentTransferAndConnectionsGroupsError):

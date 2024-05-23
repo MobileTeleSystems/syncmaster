@@ -1,12 +1,12 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-from typing import get_args
+from typing import Sequence, get_args
 
 from fastapi import APIRouter, Depends, Query, status
 
 from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.services import UnitOfWork, get_user
-from syncmaster.db.models import User
+from syncmaster.db.models import Transfer, User
 from syncmaster.db.utils import Permission
 from syncmaster.exceptions import ActionNotAllowedError
 from syncmaster.exceptions.connection import (
@@ -27,7 +27,6 @@ from syncmaster.schemas.v1.page import MetaPageSchema
 from syncmaster.schemas.v1.status import StatusResponseSchema
 
 router = APIRouter(tags=["Connections"])
-
 
 CONNECTION_TYPES = ORACLE_TYPE, POSTGRES_TYPE
 
@@ -180,11 +179,13 @@ async def update_connection(
         raise ActionNotAllowedError
 
     async with unit_of_work:
+        linked_transfers: Sequence[Transfer] = await unit_of_work.transfer.list_by_connection_id(connection_id)
         connection = await unit_of_work.connection.update(
             connection_id=connection_id,
             name=changes.name,
             description=changes.description,
             data=changes.data.dict(exclude={"auth_data"}) if changes.data else {},
+            linked_transfers=linked_transfers,
         )
 
         if changes.auth_data:

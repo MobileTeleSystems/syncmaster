@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 
-from tests.mocks import MockConnection, MockGroup, MockUser, UserTestRoles
+from tests.mocks import MockConnection, MockGroup, MockTransfer, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
@@ -518,4 +518,34 @@ async def test_developer_plus_update_connection_with_diff_type_error(
                 "type": "value_error",
             },
         ],
+    }
+
+
+async def test_maintainer_plus_cannot_update_connection_with_linked_transfer_error(
+    client: AsyncClient,
+    group_transfer: MockTransfer,
+    role_maintainer_plus: UserTestRoles,
+):
+    # Arrange
+    user = group_transfer.owner_group.get_member_of_role(role_maintainer_plus)
+
+    # Act
+    result = await client.patch(
+        f"v1/connections/{group_transfer.source_connection.id}",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "name": "New connection name",
+            "connection_data": {
+                "type": "oracle",
+                "host": "new_host",
+            },
+        },
+    )
+
+    # Assert
+    assert result.status_code == 400
+    assert result.json() == {
+        "ok": False,
+        "status_code": 400,
+        "message": "You cannot update the connection type of a connection already associated with a transfer.",
     }
