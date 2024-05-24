@@ -549,3 +549,22 @@ async def test_maintainer_plus_cannot_update_connection_type_with_linked_transfe
         "status_code": 400,
         "message": "You cannot update the connection type of a connection already associated with a transfer.",
     }
+
+
+async def test_guest_cannot_update_connection_error(
+    client: AsyncClient,
+    group_connection: MockConnection,
+):
+    # Arrange
+    user = group_connection.owner_group.get_member_of_role(UserTestRoles.Guest)
+
+    # Act
+    result = await client.patch(
+        f"v1/connections/{group_connection.id}",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={"name": "New connection name"},
+    )
+
+    # Assert
+    assert result.status_code == 403
+    assert result.json() == {"ok": False, "status_code": 403, "message": "You have no power here"}
