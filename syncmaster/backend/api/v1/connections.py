@@ -181,11 +181,11 @@ async def update_connection(
         raise ActionNotAllowedError
 
     async with unit_of_work:
-        linked_transfers: Sequence[Transfer] = await unit_of_work.transfer.list_by_connection_id(connection_id)
-        connection: Connection = await unit_of_work.connection.read_by_id(connection_id=connection_id)
         data = changes.data.dict(exclude={"auth_data"}) if changes.data else {}
         if data.get("type", None) is not None:
-            if data["type"] != connection.data["type"]:
+            linked_transfers: Sequence[Transfer] = await unit_of_work.transfer.list_by_connection_id(connection_id)
+            source_connection: Connection = await unit_of_work.connection.read_by_id(connection_id=connection_id)
+            if data["type"] != source_connection.data["type"]:
                 if linked_transfers:
                     raise ConnectionTypeUpdateError
         connection = await unit_of_work.connection.update(
