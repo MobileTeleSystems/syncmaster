@@ -100,6 +100,7 @@ coverage = "^7.4.3"
 gevent = "^24.2.1"
 
 [tool.poetry.group.dev.dependencies]
+mypy = "^1.4.1"
 pre-commit = "^3.3.3"
 black = "^24.3.0"
 isort = "^5.12.0"
