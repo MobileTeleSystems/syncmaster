@@ -1,1 +1,1 @@
-When updating a connection type, it is prohibited to update it if there is a transfer associated with this connection
+Prohibit updating connection type it if there is a transfer associated with this connection

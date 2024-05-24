@@ -1,20 +1,18 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
 # SPDX-License-Identifier: Apache-2.0
-from collections.abc import Sequence
 from typing import Any, NoReturn
 
 from sqlalchemy import ScalarResult, insert, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.db.models import Connection, Transfer
+from syncmaster.db.models import Connection
 from syncmaster.db.repositories.repository_with_owner import RepositoryWithOwner
 from syncmaster.db.utils import Pagination
 from syncmaster.exceptions import EntityNotFoundError, SyncmasterError
 from syncmaster.exceptions.connection import (
     ConnectionNotFoundError,
     ConnectionOwnerError,
-    ConnectionTypeUpdateError,
     DuplicatedConnectionNameError,
 )
 from syncmaster.exceptions.group import GroupNotFoundError
@@ -84,14 +82,9 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         name: str | None,
         description: str | None,
         data: dict[str, Any],
-        linked_transfers: Sequence[Transfer],
     ) -> Connection:
         try:
             connection = await self.read_by_id(connection_id=connection_id)
-            if data.get("type", None) is not None:
-                if data["type"] != connection.data["type"]:
-                    if linked_transfers:
-                        raise ConnectionTypeUpdateError
             for key in connection.data:
                 data[key] = data.get(key, None) or connection.data[key]
 

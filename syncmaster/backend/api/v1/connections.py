@@ -7,12 +7,13 @@ from fastapi import APIRouter, Depends, Query, status
 
 from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.services import UnitOfWork, get_user
-from syncmaster.db.models import Transfer, User
+from syncmaster.db.models import Connection, Transfer, User
 from syncmaster.db.utils import Permission
 from syncmaster.exceptions import ActionNotAllowedError
 from syncmaster.exceptions.connection import (
     ConnectionDeleteError,
     ConnectionNotFoundError,
+    ConnectionTypeUpdateError,
 )
 from syncmaster.exceptions.credentials import AuthDataNotFoundError
 from syncmaster.exceptions.group import GroupNotFoundError
@@ -181,12 +182,17 @@ async def update_connection(
 
     async with unit_of_work:
         linked_transfers: Sequence[Transfer] = await unit_of_work.transfer.list_by_connection_id(connection_id)
+        connection: Connection = await unit_of_work.connection.read_by_id(connection_id=connection_id)
+        data = changes.data.dict(exclude={"auth_data"}) if changes.data else {}
+        if data.get("type", None) is not None:
+            if data["type"] != connection.data["type"]:
+                if linked_transfers:
+                    raise ConnectionTypeUpdateError
         connection = await unit_of_work.connection.update(
             connection_id=connection_id,
             name=changes.name,
             description=changes.description,
-            data=changes.data.dict(exclude={"auth_data"}) if changes.data else {},
-            linked_transfers=linked_transfers,
+            data=data,
         )
 
         if changes.auth_data:
