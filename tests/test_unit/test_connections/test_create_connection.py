@@ -494,3 +494,37 @@ async def test_superuser_cannot_create_connection_with_unknown_group_error(
         "ok": False,
         "status_code": 404,
     }
+
+
+async def test_guest_cannot_create_connection_error(
+    client: AsyncClient,
+    group: MockGroup,
+):
+    # Arrange
+    user = group.get_member_of_role(UserTestRoles.Guest)
+
+    # Act
+    result = await client.post(
+        "v1/connections",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "group_id": group.id,
+            "name": "New connection",
+            "description": "",
+            "connection_data": {
+                "type": "postgres",
+                "host": "127.0.0.1",
+                "port": 5432,
+                "database_name": "postgres",
+            },
+            "auth_data": {
+                "type": "postgres",
+                "user": "user",
+                "password": "secret",
+            },
+        },
+    )
+
+    # Assert
+    assert result.status_code == 403
+    assert result.json() == {"ok": False, "status_code": 403, "message": "You have no power here"}
