@@ -183,9 +183,9 @@ async def update_connection(
     async with unit_of_work:
         data = changes.data.dict(exclude={"auth_data"}) if changes.data else {}
         if data.get("type", None) is not None:
-            linked_transfers: Sequence[Transfer] = await unit_of_work.transfer.list_by_connection_id(connection_id)
             source_connection: Connection = await unit_of_work.connection.read_by_id(connection_id=connection_id)
             if data["type"] != source_connection.data["type"]:
+                linked_transfers: Sequence[Transfer] = await unit_of_work.transfer.list_by_connection_id(connection_id)
                 if linked_transfers:
                     raise ConnectionTypeUpdateError
         connection = await unit_of_work.connection.update(
