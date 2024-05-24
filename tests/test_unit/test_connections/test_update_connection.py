@@ -521,7 +521,7 @@ async def test_developer_plus_update_connection_with_diff_type_error(
     }
 
 
-async def test_maintainer_plus_cannot_update_connection_with_linked_transfer_error(
+async def test_maintainer_plus_cannot_update_connection_type_with_linked_transfer_error(
     client: AsyncClient,
     group_transfer: MockTransfer,
     role_maintainer_plus: UserTestRoles,
