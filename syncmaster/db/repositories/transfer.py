@@ -124,7 +124,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
                 name=name or transfer.name,
                 description=description or transfer.description,
                 strategy_params=strategy_params,
-                is_scheduled=is_scheduled or transfer.is_scheduled,
+                is_scheduled=is_scheduled if is_scheduled is not None else transfer.is_scheduled,
                 schedule=schedule or transfer.schedule,
                 source_connection_id=source_connection_id or transfer.source_connection_id,
                 target_connection_id=target_connection_id or transfer.target_connection_id,

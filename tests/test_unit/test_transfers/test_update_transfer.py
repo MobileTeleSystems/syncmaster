@@ -19,7 +19,7 @@ async def test_developer_plus_can_update_transfer(
     result = await client.patch(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"name": "New transfer name"},
+        json={"name": "New transfer name", "is_scheduled": False},
     )
 
     # Assert
@@ -30,7 +30,7 @@ async def test_developer_plus_can_update_transfer(
         "name": "New transfer name",
         "description": group_transfer.description,
         "schedule": group_transfer.schedule,
-        "is_scheduled": group_transfer.is_scheduled,
+        "is_scheduled": False,
         "source_connection_id": group_transfer.source_connection_id,
         "target_connection_id": group_transfer.target_connection_id,
         "source_params": group_transfer.source_params,
