@@ -30,7 +30,7 @@ jobs:
             ${{ runner.os }}-python-
 
       - name: Build Worker Image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           tags: mtsrus/syncmaster-worker:${{ github.sha }}
@@ -66,12 +66,12 @@ jobs:
       - name: Upload coverage results
         uses: actions/upload-artifact@v4
         with:
-          name: hive-tests
+          name: coverage-hive
           path: reports/*
 
       - name: Upload worker logs
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: hive-worker-logs
+          name: worker-logs-hive
           path: logs/*

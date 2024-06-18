@@ -66,5 +66,5 @@ jobs:
       - name: Upload coverage results
         uses: actions/upload-artifact@v4
         with:
-          name: unit-tests
+          name: coverage-unit
           path: reports/*
