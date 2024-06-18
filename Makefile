@@ -14,7 +14,7 @@ HELP_FUN = \
 
 venv: ##@Env Init venv and install poetry dependencies
 	@rm -rf .venv || true && \
-	python3.11 -m venv .venv && \
+	python3.12 -m venv .venv && \
 	.venv/bin/pip install poetry && \
 	${POETRY} install --no-root
 
