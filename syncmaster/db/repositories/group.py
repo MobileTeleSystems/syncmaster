@@ -44,6 +44,7 @@ class GroupRepository(Repository[Group]):
             .join(
                 UserGroup,
                 UserGroup.group_id == Group.id,
+                isouter=True,
             )
             .where(
                 Group.is_deleted.is_(False),
