@@ -18,7 +18,6 @@ from syncmaster.exceptions.transfer import (
     DifferentTypeConnectionsAndParamsError,
     TransferNotFoundError,
 )
-from syncmaster.schemas.v1.connections.connection import ReadConnectionAuthDataSchema
 from syncmaster.schemas.v1.status import (
     StatusCopyTransferResponseSchema,
     StatusResponseSchema,
@@ -415,7 +414,7 @@ async def start_run(
     credentials_source = await unit_of_work.credentials.read(
         transfer.source_connection_id,
     )
-    credentials_target: ReadConnectionAuthDataSchema = await unit_of_work.credentials.read(
+    credentials_target = await unit_of_work.credentials.read(
         transfer.target_connection_id,
     )
 

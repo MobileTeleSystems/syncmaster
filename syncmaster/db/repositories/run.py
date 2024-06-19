@@ -13,10 +13,7 @@ from syncmaster.db.utils import Pagination
 from syncmaster.exceptions import SyncmasterError
 from syncmaster.exceptions.run import CannotStopRunError, RunNotFoundError
 from syncmaster.exceptions.transfer import TransferNotFoundError
-from syncmaster.schemas.v1.connections.connection import (
-    ReadConnectionAuthDataSchema,
-    ReadConnectionSchema,
-)
+from syncmaster.schemas.v1.connections.connection import ReadConnectionSchema
 from syncmaster.schemas.v1.transfers import ReadFullTransferSchema
 
 
@@ -42,8 +39,8 @@ class RunRepository(Repository[Run]):
     async def create(
         self,
         transfer_id: int,
-        source_creds: ReadConnectionAuthDataSchema,
-        target_creds: ReadConnectionAuthDataSchema,
+        source_creds: dict,
+        target_creds: dict,
     ) -> Run:
         run = Run()
         run.transfer_id = transfer_id
@@ -72,8 +69,8 @@ class RunRepository(Repository[Run]):
     async def read_full_serialized_transfer(
         self,
         transfer_id: int,
-        source_creds: ReadConnectionAuthDataSchema,
-        target_creds: ReadConnectionAuthDataSchema,
+        source_creds: dict,
+        target_creds: dict,
     ) -> dict[str, Any]:
         transfer = await self._session.scalars(
             select(Transfer)
