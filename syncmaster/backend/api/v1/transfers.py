@@ -412,7 +412,7 @@ async def start_run(
 
     transfer = await unit_of_work.transfer.read_by_id(transfer_id=create_run_data.transfer_id)
 
-    credentials_source: ReadConnectionAuthDataSchema = await unit_of_work.credentials.read(
+    credentials_source = await unit_of_work.credentials.read(
         transfer.source_connection_id,
     )
     credentials_target: ReadConnectionAuthDataSchema = await unit_of_work.credentials.read(
