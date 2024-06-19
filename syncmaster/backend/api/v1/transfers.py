@@ -18,6 +18,7 @@ from syncmaster.exceptions.transfer import (
     DifferentTypeConnectionsAndParamsError,
     TransferNotFoundError,
 )
+from syncmaster.schemas.v1.connections.connection import ReadConnectionAuthDataSchema
 from syncmaster.schemas.v1.status import (
     StatusCopyTransferResponseSchema,
     StatusResponseSchema,
@@ -411,8 +412,17 @@ async def start_run(
 
     transfer = await unit_of_work.transfer.read_by_id(transfer_id=create_run_data.transfer_id)
 
+    credentials_source: ReadConnectionAuthDataSchema = await unit_of_work.credentials.read(
+        transfer.source_connection_id
+    )
+    credentials_target: ReadConnectionAuthDataSchema = await unit_of_work.credentials.read(
+        transfer.target_connection_id
+    )
+
     async with unit_of_work:
-        run = await unit_of_work.run.create(transfer_id=create_run_data.transfer_id)
+        run = await unit_of_work.run.create(
+            transfer_id=create_run_data.transfer_id, source_creds=credentials_source, target_creds=credentials_target
+        )
     try:
         celery.send_task("run_transfer_task", kwargs={"run_id": run.id}, queue=transfer.queue.name)
     except KombuError as e:

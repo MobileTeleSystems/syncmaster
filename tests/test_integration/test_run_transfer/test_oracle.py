@@ -104,6 +104,9 @@ async def test_run_transfer_postgres_to_oracle(
         token=group_owner.token,
     )
     assert run_data["status"] == Status.FINISHED.value
+    assert run_data["transfer_dump"][""]
+    assert run_data["transfer_dump"]["source_connection"]["auth_data"]
+    assert run_data["transfer_dump"]["target_connection"]["auth_data"]
     reader = DBReader(
         connection=oracle,
         table=f"{oracle.user}.target_table",
@@ -143,6 +146,8 @@ async def test_run_transfer_postgres_to_oracle_mixed_naming(
         token=group_owner.token,
     )
     assert run_data["status"] == Status.FINISHED.value
+    assert run_data["transfer_dump"]["source_connection"]["auth_data"]
+    assert run_data["transfer_dump"]["target_connection"]["auth_data"]
 
     reader = DBReader(
         connection=oracle,
@@ -186,6 +191,8 @@ async def test_run_transfer_oracle_to_postgres(
         token=group_owner.token,
     )
     assert run_data["status"] == Status.FINISHED.value
+    assert run_data["transfer_dump"]["source_connection"]["auth_data"]
+    assert run_data["transfer_dump"]["target_connection"]["auth_data"]
 
     reader = DBReader(
         connection=postgres,
@@ -227,6 +234,8 @@ async def test_run_transfer_oracle_to_postgres_mixed_naming(
         token=group_owner.token,
     )
     assert run_data["status"] == Status.FINISHED.value
+    assert run_data["transfer_dump"]["source_connection"]["auth_data"]
+    assert run_data["transfer_dump"]["target_connection"]["auth_data"]
 
     reader = DBReader(
         connection=postgres,
