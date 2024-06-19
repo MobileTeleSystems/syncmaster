@@ -1,0 +1,1 @@
+When creating a group without linked users, the group disappears from the list of groups.
