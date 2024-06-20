@@ -13,7 +13,6 @@ from syncmaster.db.utils import Pagination
 from syncmaster.exceptions import SyncmasterError
 from syncmaster.exceptions.run import CannotStopRunError, RunNotFoundError
 from syncmaster.exceptions.transfer import TransferNotFoundError
-from syncmaster.schemas.v1.transfers import ReadFullTransferSchema
 
 
 class RunRepository(Repository[Run]):
@@ -35,10 +34,15 @@ class RunRepository(Repository[Run]):
             raise RunNotFoundError
         return run
 
-    async def create(self, transfer_id: int) -> Run:
+    async def create(
+        self,
+        transfer_id: int,
+        source_creds: dict,
+        target_creds: dict,
+    ) -> Run:
         run = Run()
         run.transfer_id = transfer_id
-        run.transfer_dump = await self.read_full_serialized_transfer(transfer_id)
+        run.transfer_dump = await self.read_full_serialized_transfer(transfer_id, source_creds, target_creds)
         try:
             self._session.add(run)
             await self._session.flush()
@@ -60,7 +64,12 @@ class RunRepository(Repository[Run]):
         await self._session.flush()
         return run
 
-    async def read_full_serialized_transfer(self, transfer_id: int) -> dict[str, Any]:
+    async def read_full_serialized_transfer(
+        self,
+        transfer_id: int,
+        source_creds: dict,
+        target_creds: dict,
+    ) -> dict[str, Any]:
         transfer = await self._session.scalars(
             select(Transfer)
             .where(Transfer.id == transfer_id)
@@ -69,7 +78,38 @@ class RunRepository(Repository[Run]):
                 selectinload(Transfer.target_connection),
             ),
         )
-        return ReadFullTransferSchema.from_orm(transfer.one()).dict()
+        transfer = transfer.one()
+
+        return dict(
+            id=transfer.id,
+            name=transfer.name,
+            group_id=transfer.group_id,
+            queue_id=transfer.queue_id,
+            source_connection_id=transfer.source_connection_id,
+            target_connection_id=transfer.target_connection_id,
+            is_scheduled=transfer.is_scheduled,
+            description=transfer.description,
+            schedule=transfer.schedule,
+            source_params=transfer.source_params,
+            target_params=transfer.target_params,
+            strategy_params=transfer.strategy_params,
+            source_connection=dict(
+                id=transfer.source_connection.id,
+                group_id=transfer.source_connection.group_id,
+                name=transfer.source_connection.name,
+                description=transfer.source_connection.description,
+                data=transfer.source_connection.data,
+                auth_data=source_creds["auth_data"],
+            ),
+            target_connection=dict(
+                id=transfer.target_connection.id,
+                group_id=transfer.target_connection.group_id,
+                name=transfer.target_connection.name,
+                description=transfer.target_connection.description,
+                data=transfer.target_connection.data,
+                auth_data=target_creds["auth_data"],
+            ),
+        )
 
     def _raise_error(self, e: DBAPIError) -> NoReturn:
         constraint = e.__cause__.__cause__.constraint_name

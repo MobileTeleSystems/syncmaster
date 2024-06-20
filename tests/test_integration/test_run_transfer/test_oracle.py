@@ -103,7 +103,14 @@ async def test_run_transfer_postgres_to_oracle(
         run_id=result.json()["id"],
         token=group_owner.token,
     )
+    source_auth_data = run_data["transfer_dump"]["source_connection"]["auth_data"]
+    target_auth_data = run_data["transfer_dump"]["target_connection"]["auth_data"]
+
     assert run_data["status"] == Status.FINISHED.value
+    assert source_auth_data["user"]
+    assert "password" not in source_auth_data
+    assert target_auth_data["user"]
+    assert "password" not in target_auth_data
     reader = DBReader(
         connection=oracle,
         table=f"{oracle.user}.target_table",
@@ -142,7 +149,14 @@ async def test_run_transfer_postgres_to_oracle_mixed_naming(
         run_id=result.json()["id"],
         token=group_owner.token,
     )
+    source_auth_data = run_data["transfer_dump"]["source_connection"]["auth_data"]
+    target_auth_data = run_data["transfer_dump"]["target_connection"]["auth_data"]
+
     assert run_data["status"] == Status.FINISHED.value
+    assert source_auth_data["user"]
+    assert "password" not in source_auth_data
+    assert target_auth_data["user"]
+    assert "password" not in target_auth_data
 
     reader = DBReader(
         connection=oracle,
@@ -185,7 +199,14 @@ async def test_run_transfer_oracle_to_postgres(
         run_id=result.json()["id"],
         token=group_owner.token,
     )
+    source_auth_data = run_data["transfer_dump"]["source_connection"]["auth_data"]
+    target_auth_data = run_data["transfer_dump"]["target_connection"]["auth_data"]
+
     assert run_data["status"] == Status.FINISHED.value
+    assert source_auth_data["user"]
+    assert "password" not in source_auth_data
+    assert target_auth_data["user"]
+    assert "password" not in target_auth_data
 
     reader = DBReader(
         connection=postgres,
@@ -226,7 +247,14 @@ async def test_run_transfer_oracle_to_postgres_mixed_naming(
         run_id=result.json()["id"],
         token=group_owner.token,
     )
+    source_auth_data = run_data["transfer_dump"]["source_connection"]["auth_data"]
+    target_auth_data = run_data["transfer_dump"]["target_connection"]["auth_data"]
+
     assert run_data["status"] == Status.FINISHED.value
+    assert source_auth_data["user"]
+    assert "password" not in source_auth_data
+    assert target_auth_data["user"]
+    assert "password" not in target_auth_data
 
     reader = DBReader(
         connection=postgres,

@@ -18,6 +18,7 @@ from syncmaster.exceptions.transfer import (
     DifferentTypeConnectionsAndParamsError,
     TransferNotFoundError,
 )
+from syncmaster.schemas.v1.connections.connection import ReadAuthDataSchema
 from syncmaster.schemas.v1.status import (
     StatusCopyTransferResponseSchema,
     StatusResponseSchema,
@@ -411,8 +412,23 @@ async def start_run(
 
     transfer = await unit_of_work.transfer.read_by_id(transfer_id=create_run_data.transfer_id)
 
+    # The credentials.read method is used rather than credentials.read_bulk deliberately
+    # it’s more convenient to transfer credits in this place
+    credentials_source = await unit_of_work.credentials.read(
+        transfer.source_connection_id,
+    )
+    credentials_target = await unit_of_work.credentials.read(
+        transfer.target_connection_id,
+    )
+
     async with unit_of_work:
-        run = await unit_of_work.run.create(transfer_id=create_run_data.transfer_id)
+        run = await unit_of_work.run.create(
+            transfer_id=create_run_data.transfer_id,
+            # Since fields with credentials may have different names (for example, S3 and Postgres have different names)
+            # the work of checking fields and removing passwords is delegated to the ReadAuthDataSchema class
+            source_creds=ReadAuthDataSchema(auth_data=credentials_source).dict(),
+            target_creds=ReadAuthDataSchema(auth_data=credentials_target).dict(),
+        )
     try:
         celery.send_task("run_transfer_task", kwargs={"run_id": run.id}, queue=transfer.queue.name)
     except KombuError as e:
