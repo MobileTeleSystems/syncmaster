@@ -101,8 +101,10 @@ async def test_run_transfer_postgres_to_hive(
         token=group_owner.token,
     )
     assert run_data["status"] == Status.FINISHED.value
-    assert run_data["transfer_dump"]["source_connection"]["auth_data"]
-    assert run_data["transfer_dump"]["target_connection"]["auth_data"]
+    assert run_data["transfer_dump"]["source_connection"]["auth_data"]["user"]
+    assert not run_data["transfer_dump"]["source_connection"]["auth_data"]["password"]
+    assert run_data["transfer_dump"]["target_connection"]["auth_data"]["user"]
+    assert not run_data["transfer_dump"]["target_connection"]["auth_data"]["password"]
 
     reader = DBReader(
         connection=hive,
@@ -143,8 +145,10 @@ async def test_run_transfer_postgres_to_hive_mixed_naming(
         token=group_owner.token,
     )
     assert run_data["status"] == Status.FINISHED.value
-    assert run_data["transfer_dump"]["source_connection"]["auth_data"]
-    assert run_data["transfer_dump"]["target_connection"]["auth_data"]
+    assert run_data["transfer_dump"]["source_connection"]["auth_data"]["user"]
+    assert not run_data["transfer_dump"]["source_connection"]["auth_data"]["password"]
+    assert run_data["transfer_dump"]["target_connection"]["auth_data"]["user"]
+    assert not run_data["transfer_dump"]["target_connection"]["auth_data"]["password"]
     reader = DBReader(
         connection=hive,
         table="default.target_table",
@@ -188,8 +192,10 @@ async def test_run_transfer_hive_to_postgres(
         token=group_owner.token,
     )
     assert run_data["status"] == Status.FINISHED.value
-    assert run_data["transfer_dump"]["source_connection"]["auth_data"]
-    assert run_data["transfer_dump"]["target_connection"]["auth_data"]
+    assert run_data["transfer_dump"]["source_connection"]["auth_data"]["user"]
+    assert not run_data["transfer_dump"]["source_connection"]["auth_data"]["password"]
+    assert run_data["transfer_dump"]["target_connection"]["auth_data"]["user"]
+    assert not run_data["transfer_dump"]["target_connection"]["auth_data"]["password"]
     reader = DBReader(
         connection=postgres,
         table="public.target_table",
@@ -229,8 +235,10 @@ async def test_run_transfer_hive_to_postgres_mixes_naming(
         token=group_owner.token,
     )
     assert run_data["status"] == Status.FINISHED.value
-    assert run_data["transfer_dump"]["source_connection"]["auth_data"]
-    assert run_data["transfer_dump"]["target_connection"]["auth_data"]
+    assert run_data["transfer_dump"]["source_connection"]["auth_data"]["user"]
+    assert not run_data["transfer_dump"]["source_connection"]["auth_data"]["password"]
+    assert run_data["transfer_dump"]["target_connection"]["auth_data"]["user"]
+    assert not run_data["transfer_dump"]["target_connection"]["auth_data"]["password"]
 
     reader = DBReader(
         connection=postgres,

@@ -411,6 +411,8 @@ async def start_run(
 
     transfer = await unit_of_work.transfer.read_by_id(transfer_id=create_run_data.transfer_id)
 
+    # The credentials.read method is used rather than credentials.read_bulk deliberately
+    # it’s more convenient to transfer credits in this place
     credentials_source = await unit_of_work.credentials.read(
         transfer.source_connection_id,
     )

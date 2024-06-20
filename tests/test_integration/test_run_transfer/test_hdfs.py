@@ -151,8 +151,10 @@ async def test_run_transfer_hdfs_to_postgres(
         token=group_owner.token,
     )
     assert run_data["status"] == Status.FINISHED.value
-    assert run_data["transfer_dump"]["source_connection"]["auth_data"]
-    assert run_data["transfer_dump"]["target_connection"]["auth_data"]
+    assert run_data["transfer_dump"]["source_connection"]["auth_data"]["user"]
+    assert not run_data["transfer_dump"]["source_connection"]["auth_data"]["password"]
+    assert run_data["transfer_dump"]["target_connection"]["auth_data"]["user"]
+    assert not run_data["transfer_dump"]["target_connection"]["auth_data"]["password"]
 
     reader = DBReader(
         connection=postgres,
@@ -213,8 +215,10 @@ async def test_run_transfer_postgres_to_hdfs(
         token=group_owner.token,
     )
     assert run_data["status"] == Status.FINISHED.value
-    assert run_data["transfer_dump"]["source_connection"]["auth_data"]
-    assert run_data["transfer_dump"]["target_connection"]["auth_data"]
+    assert run_data["transfer_dump"]["source_connection"]["auth_data"]["user"]
+    assert not run_data["transfer_dump"]["source_connection"]["auth_data"]["password"]
+    assert run_data["transfer_dump"]["target_connection"]["auth_data"]["user"]
+    assert not run_data["transfer_dump"]["target_connection"]["auth_data"]["password"]
 
     reader = FileDFReader(
         connection=hdfs_file_df_connection,
