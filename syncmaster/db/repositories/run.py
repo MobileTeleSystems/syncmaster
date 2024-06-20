@@ -13,8 +13,6 @@ from syncmaster.db.utils import Pagination
 from syncmaster.exceptions import SyncmasterError
 from syncmaster.exceptions.run import CannotStopRunError, RunNotFoundError
 from syncmaster.exceptions.transfer import TransferNotFoundError
-from syncmaster.schemas.v1.connections.connection import ReadConnectionSchema
-from syncmaster.schemas.v1.transfers import ReadFullTransferSchema
 
 
 class RunRepository(Repository[Run]):
@@ -82,7 +80,7 @@ class RunRepository(Repository[Run]):
         )
         transfer = transfer.one()
 
-        return ReadFullTransferSchema(
+        return dict(
             id=transfer.id,
             name=transfer.name,
             group_id=transfer.group_id,
@@ -95,7 +93,7 @@ class RunRepository(Repository[Run]):
             source_params=transfer.source_params,
             target_params=transfer.target_params,
             strategy_params=transfer.strategy_params,
-            source_connection=ReadConnectionSchema(
+            source_connection=dict(
                 id=transfer.source_connection.id,
                 group_id=transfer.source_connection.group_id,
                 name=transfer.source_connection.name,
@@ -103,7 +101,7 @@ class RunRepository(Repository[Run]):
                 data=transfer.source_connection.data,
                 auth_data=source_creds,
             ),
-            target_connection=ReadConnectionSchema(
+            target_connection=dict(
                 id=transfer.target_connection.id,
                 group_id=transfer.target_connection.group_id,
                 name=transfer.target_connection.name,
@@ -111,7 +109,7 @@ class RunRepository(Repository[Run]):
                 data=transfer.target_connection.data,
                 auth_data=target_creds,
             ),
-        ).dict()
+        )
 
     def _raise_error(self, e: DBAPIError) -> NoReturn:
         constraint = e.__cause__.__cause__.constraint_name
