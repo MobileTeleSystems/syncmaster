@@ -424,6 +424,8 @@ async def start_run(
     async with unit_of_work:
         run = await unit_of_work.run.create(
             transfer_id=create_run_data.transfer_id,
+            # Since fields with credentials may have different names (for example, S3 and Postgres have different names)
+            # the work of checking fields and removing passwords is delegated to the ReadAuthDataSchema class
             source_creds=ReadAuthDataSchema(auth_data=credentials_source).dict(),
             target_creds=ReadAuthDataSchema(auth_data=credentials_target).dict(),
         )
