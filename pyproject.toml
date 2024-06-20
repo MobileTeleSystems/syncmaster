@@ -125,6 +125,7 @@ sphinx-issues = {version = ">=3.0.1,<5.0.0", python = ">=3.8"}
 sphinx-design = {version = ">=0.5,<0.7", python = ">=3.8"}
 sphinx-favicon = {version = "^1.0.1", python = ">=3.8"}
 sphinx-argparse = {version = "^0.4.0", python = ">=3.8"}
+sphinx-last-updated-by-git = {version = "^0.3.7", python = ">=3.8"}
 # uncomment after https://github.com/zqmillet/sphinx-plantuml/pull/4
 # sphinx-plantuml = {version = "^1.0.0", python = ">=3.8"}
 
