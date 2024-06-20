@@ -105,9 +105,9 @@ async def test_run_transfer_postgres_to_oracle(
     )
     assert run_data["status"] == Status.FINISHED.value
     assert run_data["transfer_dump"]["source_connection"]["auth_data"]["user"]
-    assert not run_data["transfer_dump"]["source_connection"]["auth_data"]["password"]
+    assert not run_data["transfer_dump"]["source_connection"]["auth_data"].get("password", None)
     assert run_data["transfer_dump"]["target_connection"]["auth_data"]["user"]
-    assert not run_data["transfer_dump"]["target_connection"]["auth_data"]["password"]
+    assert not run_data["transfer_dump"]["target_connection"]["auth_data"].get("password", None)
     reader = DBReader(
         connection=oracle,
         table=f"{oracle.user}.target_table",
@@ -148,9 +148,9 @@ async def test_run_transfer_postgres_to_oracle_mixed_naming(
     )
     assert run_data["status"] == Status.FINISHED.value
     assert run_data["transfer_dump"]["source_connection"]["auth_data"]["user"]
-    assert not run_data["transfer_dump"]["source_connection"]["auth_data"]["password"]
+    assert not run_data["transfer_dump"]["source_connection"]["auth_data"].get("password", None)
     assert run_data["transfer_dump"]["target_connection"]["auth_data"]["user"]
-    assert not run_data["transfer_dump"]["target_connection"]["auth_data"]["password"]
+    assert not run_data["transfer_dump"]["target_connection"]["auth_data"].get("password", None)
 
     reader = DBReader(
         connection=oracle,
@@ -195,9 +195,9 @@ async def test_run_transfer_oracle_to_postgres(
     )
     assert run_data["status"] == Status.FINISHED.value
     assert run_data["transfer_dump"]["source_connection"]["auth_data"]["user"]
-    assert not run_data["transfer_dump"]["source_connection"]["auth_data"]["password"]
+    assert not run_data["transfer_dump"]["source_connection"]["auth_data"].get("password", None)
     assert run_data["transfer_dump"]["target_connection"]["auth_data"]["user"]
-    assert not run_data["transfer_dump"]["target_connection"]["auth_data"]["password"]
+    assert not run_data["transfer_dump"]["target_connection"]["auth_data"].get("password", None)
 
     reader = DBReader(
         connection=postgres,
@@ -240,9 +240,9 @@ async def test_run_transfer_oracle_to_postgres_mixed_naming(
     )
     assert run_data["status"] == Status.FINISHED.value
     assert run_data["transfer_dump"]["source_connection"]["auth_data"]["user"]
-    assert not run_data["transfer_dump"]["source_connection"]["auth_data"]["password"]
+    assert not run_data["transfer_dump"]["source_connection"]["auth_data"].get("password", None)
     assert run_data["transfer_dump"]["target_connection"]["auth_data"]["user"]
-    assert not run_data["transfer_dump"]["target_connection"]["auth_data"]["password"]
+    assert not run_data["transfer_dump"]["target_connection"]["auth_data"].get("password", None)
 
     reader = DBReader(
         connection=postgres,

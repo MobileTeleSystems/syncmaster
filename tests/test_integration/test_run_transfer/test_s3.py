@@ -152,9 +152,9 @@ async def test_run_transfer_s3_to_postgres(
     )
     assert run_data["status"] == Status.FINISHED.value
     assert run_data["transfer_dump"]["source_connection"]["auth_data"]["access_key"]
-    assert not run_data["transfer_dump"]["source_connection"]["auth_data"]["secret_key"]
-    assert run_data["transfer_dump"]["target_connection"]["auth_data"]["access_key"]
-    assert not run_data["transfer_dump"]["target_connection"]["auth_data"]["secret_key"]
+    assert not run_data["transfer_dump"]["source_connection"]["auth_data"].get("secret_key", None)
+    assert run_data["transfer_dump"]["target_connection"]["auth_data"]["user"]
+    assert not run_data["transfer_dump"]["target_connection"]["auth_data"].get("password")
 
     reader = DBReader(
         connection=postgres,
@@ -215,9 +215,9 @@ async def test_run_transfer_postgres_to_s3(
     )
     assert run_data["status"] == Status.FINISHED.value
     assert run_data["transfer_dump"]["source_connection"]["auth_data"]["user"]
-    assert not run_data["transfer_dump"]["source_connection"]["auth_data"]["password"]
-    assert run_data["transfer_dump"]["target_connection"]["auth_data"]["user"]
-    assert not run_data["transfer_dump"]["target_connection"]["auth_data"]["password"]
+    assert not run_data["transfer_dump"]["source_connection"]["auth_data"].get("password")
+    assert run_data["transfer_dump"]["target_connection"]["auth_data"]["access_key"]
+    assert not run_data["transfer_dump"]["target_connection"]["auth_data"].get("secret_key")
 
     reader = FileDFReader(
         connection=s3_file_df_connection,
