@@ -221,8 +221,8 @@ async def test_run_transfer_postgres_to_s3(
     target_auth_data = run_data["transfer_dump"]["target_connection"]["auth_data"]
 
     assert run_data["status"] == Status.FINISHED.value
-    assert source_auth_data["access_key"]
-    assert "secret_key" not in source_auth_data
+    assert source_auth_data["user"]
+    assert "password" not in source_auth_data
     assert target_auth_data["access_key"]
     assert "secret_key" not in target_auth_data
 
