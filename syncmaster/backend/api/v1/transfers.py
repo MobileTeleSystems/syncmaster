@@ -18,7 +18,7 @@ from syncmaster.exceptions.transfer import (
     DifferentTypeConnectionsAndParamsError,
     TransferNotFoundError,
 )
-from syncmaster.schemas.v1.connections.connection import ReadAuthDataSchema, ReadConnectionAuthDataSchema
+from syncmaster.schemas.v1.connections.connection import ReadAuthDataSchema
 from syncmaster.schemas.v1.status import (
     StatusCopyTransferResponseSchema,
     StatusResponseSchema,
