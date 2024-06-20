@@ -150,11 +150,14 @@ async def test_run_transfer_hdfs_to_postgres(
         run_id=result.json()["id"],
         token=group_owner.token,
     )
+    source_auth_data = run_data["transfer_dump"]["source_connection"]["auth_data"]
+    target_auth_data = run_data["transfer_dump"]["target_connection"]["auth_data"]
+
     assert run_data["status"] == Status.FINISHED.value
-    assert run_data["transfer_dump"]["source_connection"]["auth_data"]["user"]
-    assert not run_data["transfer_dump"]["source_connection"]["auth_data"].get("password", None)
-    assert run_data["transfer_dump"]["target_connection"]["auth_data"]["user"]
-    assert not run_data["transfer_dump"]["target_connection"]["auth_data"].get("password", None)
+    assert source_auth_data["user"]
+    assert "password" not in source_auth_data
+    assert target_auth_data["user"]
+    assert "password" not in target_auth_data
 
     reader = DBReader(
         connection=postgres,
@@ -214,11 +217,14 @@ async def test_run_transfer_postgres_to_hdfs(
         run_id=result.json()["id"],
         token=group_owner.token,
     )
+    source_auth_data = run_data["transfer_dump"]["source_connection"]["auth_data"]
+    target_auth_data = run_data["transfer_dump"]["target_connection"]["auth_data"]
+
     assert run_data["status"] == Status.FINISHED.value
-    assert run_data["transfer_dump"]["source_connection"]["auth_data"]["user"]
-    assert not run_data["transfer_dump"]["source_connection"]["auth_data"].get("password", None)
-    assert run_data["transfer_dump"]["target_connection"]["auth_data"]["user"]
-    assert not run_data["transfer_dump"]["target_connection"]["auth_data"].get("password", None)
+    assert source_auth_data["user"]
+    assert "password" not in source_auth_data
+    assert target_auth_data["user"]
+    assert "password" not in target_auth_data
 
     reader = FileDFReader(
         connection=hdfs_file_df_connection,
