@@ -18,6 +18,7 @@ from syncmaster.exceptions.transfer import (
     DifferentTypeConnectionsAndParamsError,
     TransferNotFoundError,
 )
+from syncmaster.schemas.v1.connections.connection import ReadAuthDataSchema, ReadConnectionAuthDataSchema
 from syncmaster.schemas.v1.status import (
     StatusCopyTransferResponseSchema,
     StatusResponseSchema,
@@ -423,8 +424,8 @@ async def start_run(
     async with unit_of_work:
         run = await unit_of_work.run.create(
             transfer_id=create_run_data.transfer_id,
-            source_creds=credentials_source,
-            target_creds=credentials_target,
+            source_creds=ReadAuthDataSchema(auth_data=credentials_source).dict(),
+            target_creds=ReadAuthDataSchema(auth_data=credentials_target).dict(),
         )
     try:
         celery.send_task("run_transfer_task", kwargs={"run_id": run.id}, queue=transfer.queue.name)

@@ -151,10 +151,10 @@ async def test_run_transfer_s3_to_postgres(
         token=group_owner.token,
     )
     assert run_data["status"] == Status.FINISHED.value
-    assert run_data["transfer_dump"]["source_connection"]["auth_data"]["user"]
-    assert not run_data["transfer_dump"]["source_connection"]["auth_data"]["password"]
-    assert run_data["transfer_dump"]["target_connection"]["auth_data"]["user"]
-    assert not run_data["transfer_dump"]["target_connection"]["auth_data"]["password"]
+    assert run_data["transfer_dump"]["source_connection"]["auth_data"]["access_key"]
+    assert not run_data["transfer_dump"]["source_connection"]["auth_data"]["secret_key"]
+    assert run_data["transfer_dump"]["target_connection"]["auth_data"]["access_key"]
+    assert not run_data["transfer_dump"]["target_connection"]["auth_data"]["secret_key"]
 
     reader = DBReader(
         connection=postgres,

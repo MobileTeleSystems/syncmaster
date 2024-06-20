@@ -99,7 +99,7 @@ class RunRepository(Repository[Run]):
                 name=transfer.source_connection.name,
                 description=transfer.source_connection.description,
                 data=transfer.source_connection.data,
-                auth_data=source_creds,
+                auth_data=source_creds["auth_data"],
             ),
             target_connection=dict(
                 id=transfer.target_connection.id,
@@ -107,7 +107,7 @@ class RunRepository(Repository[Run]):
                 name=transfer.target_connection.name,
                 description=transfer.target_connection.description,
                 data=transfer.target_connection.data,
-                auth_data=target_creds,
+                auth_data=target_creds["auth_data"],
             ),
         )
 

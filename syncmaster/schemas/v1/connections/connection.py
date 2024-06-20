@@ -83,7 +83,7 @@ class ReadConnectionSchema(BaseModel):
     group_id: int
     name: str
     description: str
-    auth_data: ReadConnectionAuthDataSchema | None = None
+    auth_data: ReadConnectionAuthDataSchema | None = Field(discriminator="type", default=None)
     data: ReadConnectionDataSchema = Field(
         ...,
         discriminator="type",
@@ -93,6 +93,10 @@ class ReadConnectionSchema(BaseModel):
     class Config:
         from_attributes = True
         populate_by_name = True
+
+
+class ReadAuthDataSchema(BaseModel):
+    auth_data: ReadConnectionAuthDataSchema = Field(discriminator="type", default=...)
 
 
 class UpdateConnectionSchema(BaseModel):
