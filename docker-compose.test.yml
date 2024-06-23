@@ -38,7 +38,7 @@ services:
         condition: service_healthy
 
   backend:
-    image: mtsrus/syncmaster-backend::${BACKEND_IMAGE_TAG:-test}
+    image: mtsrus/syncmaster-backend:${BACKEND_IMAGE_TAG:-test}
     restart: unless-stopped
     build:
       dockerfile: docker/Dockerfile.backend
