@@ -8,7 +8,7 @@ SyncMaster
 |Build Status| |Coverage|  |pre-commit.ci|
 
 .. |Repo Status| image:: https://www.repostatus.org/badges/latest/wip.svg
-    :target: https://github.com/MobileTeleSystems/syncmaster
+    :target: https://www.repostatus.org/#wip
 .. |PyPI| image:: https://img.shields.io/pypi/v/data-syncmaster
     :target: https://pypi.org/project/data-syncmaster/
 .. |PyPI License| image:: https://img.shields.io/pypi/l/data-syncmaster.svg
