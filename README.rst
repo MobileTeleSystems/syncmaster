@@ -7,7 +7,7 @@ SyncMaster
 |Repo Status| |PyPI| |PyPI License| |PyPI Python Version| |Docker image| |Documentation|
 |Build Status| |Coverage|  |pre-commit.ci|
 
-.. |Repo Status| image:: https://www.repostatus.org/badges/latest/active.svg
+.. |Repo Status| image:: https://www.repostatus.org/badges/latest/wip.svg
     :target: https://github.com/MobileTeleSystems/syncmaster
 .. |PyPI| image:: https://img.shields.io/pypi/v/data-syncmaster
     :target: https://pypi.org/project/data-syncmaster/
@@ -43,6 +43,8 @@ Current SyncMaster implementation provides following components:
 
 * REST API
 * Celery Worker
+
+**Note**: service is under active development, and is not ready to use.
 
 Goals
 -----
