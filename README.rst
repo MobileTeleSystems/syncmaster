@@ -1,8 +1,7 @@
-.. title
+.. _readme:
 
-==========
-SyncMaster
-==========
+Data.SyncMaster
+===============
 
 |Repo Status| |PyPI| |PyPI License| |PyPI Python Version| |Docker image| |Documentation|
 |Build Status| |Coverage|  |pre-commit.ci|
@@ -27,10 +26,10 @@ SyncMaster
     :target: https://results.pre-commit.ci/latest/github/MobileTeleSystems/syncmaster/develop
 
 
-What is Syncmaster?
--------------------
+What is Data.SyncMaster?
+------------------------
 
-Syncmaster is as low-code ETL tool for transfering data between databases and file systems.
+Data.SyncMaster is as low-code ETL tool for transfering data between databases and file systems.
 List of currently supported connections:
 
 * Apache Hive
@@ -39,7 +38,7 @@ List of currently supported connections:
 * HDFS
 * S3
 
-Current SyncMaster implementation provides following components:
+Current Data.SyncMaster implementation provides following components:
 
 * REST API
 * Celery Worker
