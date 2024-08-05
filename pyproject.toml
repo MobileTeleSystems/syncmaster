@@ -51,7 +51,7 @@ pydantic = "^2.7.0"
 pydantic-settings = { version = "^2.2.1", optional = true }
 sqlalchemy = { version = "^2.0.18", optional = true }
 sqlalchemy-utils = { version = "^0.41.1", optional = true }
-fastapi = { version = ">=0.110,<0.112", optional = true}
+fastapi = { version = ">=0.110,<0.113", optional = true}
 uvicorn = { version = ">=0.29,<0.31", optional = true }
 alembic = { version = "^1.11.1", optional = true }
 asyncpg = { version = "^0.29.0", optional = true }
@@ -120,7 +120,7 @@ sphinx = [
 furo = {version = "^2024.1.29", python = ">=3.8"}
 sphinx-copybutton = {version = "^0.5.2", python = ">=3.8"}
 sphinxcontrib-towncrier = {version = "^0.4.0a0", python = ">=3.8"}
-towncrier = {version = "^23.11.0", python = ">=3.8"}
+towncrier = {version = ">=23.11,<25.0", python = ">=3.8"}
 sphinx-issues = {version = ">=3.0.1,<5.0.0", python = ">=3.8"}
 sphinx-design = {version = ">=0.5,<0.7", python = ">=3.8"}
 sphinx-favicon = {version = "^1.0.1", python = ">=3.8"}
