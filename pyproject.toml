@@ -121,7 +121,7 @@ furo = {version = "^2024.1.29", python = ">=3.8"}
 sphinx-copybutton = {version = "^0.5.2", python = ">=3.8"}
 sphinxcontrib-towncrier = {version = "^0.4.0a0", python = ">=3.8"}
 # TODO: remove upper limit after https://github.com/sphinx-contrib/sphinxcontrib-towncrier/issues/92
-towncrier = {version = ">=23.11,<24.7", python = ">=3.8"}
+towncrier = {version = ">=23.11,<24.8", python = ">=3.8"}
 sphinx-issues = {version = ">=3.0.1,<5.0.0", python = ">=3.8"}
 sphinx-design = {version = ">=0.5,<0.7", python = ">=3.8"}
 sphinx-favicon = {version = "^1.0.1", python = ">=3.8"}
