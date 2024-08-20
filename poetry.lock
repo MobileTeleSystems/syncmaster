@@ -3237,4 +3237,4 @@ worker = ["celery", "onetl", "psycopg2-binary", "pydantic-settings", "sqlalchemy
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "6ad519cf327cfe081f089fc35f21ef8d804236b081ad51bf677c338f17e58032"
+content-hash = "25672768007d9c2e36c85e3a7c11b52a820d232dc3ee0fee06732f2709bf3536"
