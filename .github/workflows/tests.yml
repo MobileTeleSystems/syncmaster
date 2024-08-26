@@ -70,7 +70,9 @@ jobs:
           merge-multiple: true
 
       - name: Generate coverage reports
-        run: ./combine_coverage.sh
+        run: |
+          coverage combine
+          coverage xml -o reports/coverage.xml -i
 
       - name: Check coverage
         uses: codecov/codecov-action@v4
