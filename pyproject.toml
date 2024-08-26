@@ -89,13 +89,13 @@ worker = [
 pandas-stubs = "^2.1.4.231227"
 pytest = "^8.1.1"
 httpx = "^0.27.0"
-pytest-asyncio = "^0.23.6"
+pytest-asyncio = ">=0.23.6,<0.25.0"
 psycopg2-binary = "^2.9.7"
 pytest-randomly = "^3.13.0"
 pytest-deadfixtures = "^2.2.1"
 pytest-mock = "^3.11.1"
 onetl = {extras = ["spark", "s3", "hdfs"], version = ">=0.10.2,<0.12.0"}
-faker = ">=26.0.0,<28.0"
+faker = ">=26.0.0,<29.0"
 coverage = "^7.4.3"
 gevent = "^24.2.1"
 
@@ -121,7 +121,7 @@ furo = {version = "^2024.1.29", python = ">=3.8"}
 sphinx-copybutton = {version = "^0.5.2", python = ">=3.8"}
 sphinxcontrib-towncrier = {version = "^0.4.0a0", python = ">=3.8"}
 # TODO: remove upper limit after https://github.com/sphinx-contrib/sphinxcontrib-towncrier/issues/92
-towncrier = {version = ">=23.11,<24.7", python = ">=3.8"}
+towncrier = {version = ">=23.11,<24.9", python = ">=3.8"}
 sphinx-issues = {version = ">=3.0.1,<5.0.0", python = ">=3.8"}
 sphinx-design = {version = ">=0.5,<0.7", python = ">=3.8"}
 sphinx-favicon = {version = "^1.0.1", python = ">=3.8"}
