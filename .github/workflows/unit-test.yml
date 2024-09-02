@@ -68,3 +68,5 @@ jobs:
         with:
           name: coverage-unit
           path: reports/*
+          # https://github.com/actions/upload-artifact/issues/602
+          include-hidden-files: true

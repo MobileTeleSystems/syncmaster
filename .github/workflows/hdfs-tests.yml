@@ -63,15 +63,17 @@ jobs:
         run: |
           docker compose -f docker-compose.test.yml down -v --remove-orphans
 
-      - name: Upload coverage results
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-hdfs
-          path: reports/*
-
       - name: Upload worker logs
         uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: worker-logs-hdfs
           path: logs/*
+
+      - name: Upload coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-hdfs
+          path: reports/*
+          # https://github.com/actions/upload-artifact/issues/602
+          include-hidden-files: true
