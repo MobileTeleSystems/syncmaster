@@ -136,10 +136,26 @@ def hdfs(test_settings: TestSettings) -> HDFSConnectionDTO:
     scope="session",
     params=[pytest.param("oracle", marks=[pytest.mark.oracle])],
 )
-def oracle(test_settings: TestSettings) -> OracleConnectionDTO:
+def oracle_for_conftest(test_settings: TestSettings) -> OracleConnectionDTO:
     return OracleConnectionDTO(
-        host=test_settings.TEST_ORACLE_HOST,
-        port=test_settings.TEST_ORACLE_PORT,
+        host=test_settings.TEST_ORACLE_HOST_FOR_CONFTEST,
+        port=test_settings.TEST_ORACLE_PORT_FOR_CONFTEST,
+        user=test_settings.TEST_ORACLE_USER,
+        password=test_settings.TEST_ORACLE_PASSWORD,
+        service_name=test_settings.TEST_ORACLE_SERVICE_NAME,
+        sid=test_settings.TEST_ORACLE_SID,
+        additional_params={},
+    )
+
+
+@pytest.fixture(
+    scope="session",
+    params=[pytest.param("oracle", marks=[pytest.mark.oracle])],
+)
+def oracle_for_worker(test_settings: TestSettings) -> OracleConnectionDTO:
+    return OracleConnectionDTO(
+        host=test_settings.TEST_ORACLE_HOST_FOR_WORKER,
+        port=test_settings.TEST_ORACLE_PORT_FOR_WORKER,
         user=test_settings.TEST_ORACLE_USER,
         password=test_settings.TEST_ORACLE_PASSWORD,
         service_name=test_settings.TEST_ORACLE_SERVICE_NAME,
@@ -152,10 +168,25 @@ def oracle(test_settings: TestSettings) -> OracleConnectionDTO:
     scope="session",
     params=[pytest.param("postgres", marks=[pytest.mark.postgres])],
 )
-def postgres(test_settings: TestSettings) -> PostgresConnectionDTO:
+def postgres_for_conftest(test_settings: TestSettings) -> PostgresConnectionDTO:
     return PostgresConnectionDTO(
-        host=test_settings.TEST_POSTGRES_HOST,
-        port=test_settings.TEST_POSTGRES_PORT,
+        host=test_settings.TEST_POSTGRES_HOST_FOR_CONFTEST,
+        port=test_settings.TEST_POSTGRES_PORT_FOR_CONFTEST,
+        user=test_settings.TEST_POSTGRES_USER,
+        password=test_settings.TEST_POSTGRES_PASSWORD,
+        database_name=test_settings.TEST_POSTGRES_DB,
+        additional_params={},
+    )
+
+
+@pytest.fixture(
+    scope="session",
+    params=[pytest.param("postgres", marks=[pytest.mark.postgres])],
+)
+def postgres_for_worker(test_settings: TestSettings) -> PostgresConnectionDTO:
+    return PostgresConnectionDTO(
+        host=test_settings.TEST_POSTGRES_HOST_FOR_WORKER,
+        port=test_settings.TEST_POSTGRES_PORT_FOR_WORKER,
         user=test_settings.TEST_POSTGRES_USER,
         password=test_settings.TEST_POSTGRES_PASSWORD,
         database_name=test_settings.TEST_POSTGRES_DB,
@@ -167,10 +198,26 @@ def postgres(test_settings: TestSettings) -> PostgresConnectionDTO:
     scope="session",
     params=[pytest.param("s3", marks=[pytest.mark.s3])],
 )
-def s3(test_settings: TestSettings) -> S3ConnectionDTO:
+def s3_for_conftest(test_settings: TestSettings) -> S3ConnectionDTO:
     return S3ConnectionDTO(
-        host=test_settings.TEST_S3_HOST,
-        port=test_settings.TEST_S3_PORT,
+        host=test_settings.TEST_S3_HOST_FOR_CONFTEST,
+        port=test_settings.TEST_S3_PORT_FOR_CONFTEST,
+        bucket=test_settings.TEST_S3_BUCKET,
+        access_key=test_settings.TEST_S3_ACCESS_KEY,
+        secret_key=test_settings.TEST_S3_SECRET_KEY,
+        protocol=test_settings.TEST_S3_PROTOCOL,
+        additional_params=test_settings.TEST_S3_ADDITIONAL_PARAMS,
+    )
+
+
+@pytest.fixture(
+    scope="session",
+    params=[pytest.param("s3", marks=[pytest.mark.s3])],
+)
+def s3_for_worker(test_settings: TestSettings) -> S3ConnectionDTO:
+    return S3ConnectionDTO(
+        host=test_settings.TEST_S3_HOST_FOR_WORKER,
+        port=test_settings.TEST_S3_PORT_FOR_WORKER,
         bucket=test_settings.TEST_S3_BUCKET,
         access_key=test_settings.TEST_S3_ACCESS_KEY,
         secret_key=test_settings.TEST_S3_SECRET_KEY,
@@ -201,9 +248,10 @@ def init_df(spark: SparkSession) -> DataFrame:
 @pytest.fixture
 def prepare_postgres(
     spark: SparkSession,
-    postgres: PostgresConnectionDTO,
+    postgres_for_conftest: PostgresConnectionDTO,
 ):
-    result = Postgres(
+    postgres = postgres_for_conftest
+    onetl_conn = Postgres(
         host=postgres.host,
         port=postgres.port,
         user=postgres.user,
@@ -211,35 +259,35 @@ def prepare_postgres(
         database=postgres.database_name,
         spark=spark,
     ).check()
-    result.execute("DROP TABLE IF EXISTS public.source_table")
-    result.execute("DROP TABLE IF EXISTS public.target_table")
+    onetl_conn.execute("DROP TABLE IF EXISTS public.source_table")
+    onetl_conn.execute("DROP TABLE IF EXISTS public.target_table")
 
     def fill_with_data(df: DataFrame):
         logger.info("START PREPARE POSTGRES")
         db_writer = DBWriter(
-            connection=result,
+            connection=onetl_conn,
             target="public.source_table",
             options=Postgres.WriteOptions(if_exists="append"),
         )
         db_writer.run(df)
         logger.info("END PREPARE POSTGRES")
 
-    yield result, fill_with_data
-    result.execute("DROP TABLE IF EXISTS public.source_table")
-    result.execute("DROP TABLE IF EXISTS public.target_table")
+    yield onetl_conn, fill_with_data
+    onetl_conn.execute("DROP TABLE IF EXISTS public.source_table")
+    onetl_conn.execute("DROP TABLE IF EXISTS public.target_table")
 
 
 @pytest.fixture(scope="session")
-def s3_server(s3):
+def s3_server(s3_for_conftest):
     S3Server = namedtuple("S3Server", ["host", "port", "bucket", "access_key", "secret_key", "protocol"])
 
     return S3Server(
-        host=s3.host,
-        port=s3.port,
-        bucket=s3.bucket,
-        access_key=s3.access_key,
-        secret_key=s3.secret_key,
-        protocol=s3.protocol,
+        host=s3_for_conftest.host,
+        port=s3_for_conftest.port,
+        bucket=s3_for_conftest.bucket,
+        access_key=s3_for_conftest.access_key,
+        secret_key=s3_for_conftest.secret_key,
+        protocol=s3_for_conftest.protocol,
     )
 
 
@@ -323,9 +371,9 @@ def prepare_s3(resource_path, s3_file_connection, s3_file_df_connection_with_pat
 def hdfs_server():
     HDFSServer = namedtuple("HDFSServer", ["host", "webhdfs_port", "ipc_port"])
     return HDFSServer(
-        host=os.getenv("HDFS_HOST"),
-        webhdfs_port=os.getenv("HDFS_WEBHDFS_PORT"),
-        ipc_port=os.getenv("HDFS_IPC_PORT"),
+        host=os.getenv("TEST_HDFS_HOST"),
+        webhdfs_port=os.getenv("TEST_HDFS_WEBHDFS_PORT"),
+        ipc_port=os.getenv("TEST_HDFS_IPC_PORT"),
     )
 
 
@@ -417,12 +465,13 @@ def prepare_hive(
 
 @pytest.fixture
 def prepare_oracle(
-    oracle: OracleConnectionDTO,
+    oracle_for_conftest: OracleConnectionDTO,
     spark: SparkSession,
 ):
-    result = Oracle(
+    oracle = oracle_for_conftest
+    onetl_conn = Oracle(
         host=oracle.host,
-        port=oracle.port,
+        port=oracle_for_conftest.port,
         user=oracle.user,
         password=oracle.password,
         sid=oracle.sid,
@@ -430,32 +479,32 @@ def prepare_oracle(
         spark=spark,
     ).check()
     try:
-        result.execute(f"DROP TABLE {oracle.user}.source_table")
+        onetl_conn.execute(f"DROP TABLE {oracle.user}.source_table")
     except Exception:
         pass
     try:
-        result.execute(f"DROP TABLE {oracle.user}.target_table")
+        onetl_conn.execute(f"DROP TABLE {oracle.user}.target_table")
     except Exception:
         pass
 
     def fill_with_data(df: DataFrame):
         logger.info("START PREPARE ORACLE")
         db_writer = DBWriter(
-            connection=result,
+            connection=onetl_conn,
             target=f"{oracle.user}.source_table",
             options=Oracle.WriteOptions(if_exists="append"),
         )
         db_writer.run(df)
         logger.info("END PREPARE ORACLE")
 
-    yield result, fill_with_data
+    yield onetl_conn, fill_with_data
 
     try:
-        result.execute(f"DROP TABLE {oracle.user}.source_table")
+        onetl_conn.execute(f"DROP TABLE {oracle.user}.source_table")
     except Exception:
         pass
     try:
-        result.execute(f"DROP TABLE {oracle.user}.target_table")
+        onetl_conn.execute(f"DROP TABLE {oracle.user}.target_table")
     except Exception:
         pass
 
@@ -559,12 +608,13 @@ async def queue(
 
 @pytest_asyncio.fixture
 async def postgres_connection(
-    postgres: PostgresConnectionDTO,
+    postgres_for_worker: PostgresConnectionDTO,
     settings: Settings,
     session: AsyncSession,
     group: Group,
 ):
-    result = await create_connection(
+    postgres = postgres_for_worker
+    syncmaster_conn = await create_connection(
         session=session,
         name=secrets.token_hex(5),
         data=dict(
@@ -580,7 +630,7 @@ async def postgres_connection(
     await create_credentials(
         session=session,
         settings=settings,
-        connection_id=result.id,
+        connection_id=syncmaster_conn.id,
         auth_data=dict(
             type="postgres",
             user=postgres.user,
@@ -588,8 +638,8 @@ async def postgres_connection(
         ),
     )
 
-    yield result
-    await session.delete(result)
+    yield syncmaster_conn
+    await session.delete(syncmaster_conn)
     await session.commit()
 
 
@@ -628,12 +678,13 @@ async def hive_connection(
 
 @pytest_asyncio.fixture
 async def oracle_connection(
-    oracle: OracleConnectionDTO,
+    oracle_for_worker: OracleConnectionDTO,
     settings: Settings,
     session: AsyncSession,
     group: Group,
 ):
-    result = await create_connection(
+    oracle = oracle_for_worker
+    syncmaster_conn = await create_connection(
         session=session,
         name=secrets.token_hex(5),
         data=dict(
@@ -650,7 +701,7 @@ async def oracle_connection(
     await create_credentials(
         session=session,
         settings=settings,
-        connection_id=result.id,
+        connection_id=syncmaster_conn.id,
         auth_data=dict(
             type="oracle",
             user=oracle.user,
@@ -658,8 +709,8 @@ async def oracle_connection(
         ),
     )
 
-    yield result
-    await session.delete(result)
+    yield syncmaster_conn
+    await session.delete(syncmaster_conn)
     await session.commit()
 
 
@@ -698,12 +749,13 @@ async def hdfs_connection(
 
 @pytest_asyncio.fixture
 async def s3_connection(
-    s3: S3ConnectionDTO,
+    s3_for_worker: S3ConnectionDTO,
     settings: Settings,
     session: AsyncSession,
     group: Group,
 ):
-    result = await create_connection(
+    s3 = s3_for_worker
+    syncmaster_conn = await create_connection(
         session=session,
         name=secrets.token_hex(5),
         data=dict(
@@ -722,7 +774,7 @@ async def s3_connection(
     await create_credentials(
         session=session,
         settings=settings,
-        connection_id=result.id,
+        connection_id=syncmaster_conn.id,
         auth_data=dict(
             type="s3",
             access_key=s3.access_key,
@@ -730,8 +782,8 @@ async def s3_connection(
         ),
     )
 
-    yield result
-    await session.delete(result)
+    yield syncmaster_conn
+    await session.delete(syncmaster_conn)
     await session.commit()
 
 

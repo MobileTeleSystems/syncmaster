@@ -14,27 +14,19 @@ services:
       timeout: 5s
       retries: 3
 
-  worker:
-    image: mtsrus/syncmaster-worker:${WORKER_IMAGE_TAG:-test}
+  rabbitmq:
+    image: rabbitmq
     restart: unless-stopped
-    build:
-      dockerfile: docker/Dockerfile.worker
-      context: .
-      target: test
-      network: host
-    command: --loglevel=info -Q test_queue
-    env_file: .env.docker
+    ports:
+      - 5672:5672
     volumes:
-      - ./syncmaster:/app/syncmaster
-      - ./cached_jars:/root/.ivy2
-      - ./reports:/app/reports
-      - ./tests:/app/tests
-      - ./pyproject.toml:/app/pyproject.toml
-    depends_on:
-      db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      start_period: 5s
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   backend:
     image: mtsrus/syncmaster-backend:${BACKEND_IMAGE_TAG:-test}
@@ -43,7 +35,6 @@ services:
       dockerfile: docker/Dockerfile.backend
       context: .
       target: test
-      network: host
     env_file: .env.docker
     ports:
       - 8000:8000
@@ -58,20 +49,43 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    profiles: [backend, all]
 
-  rabbitmq:
-    image: rabbitmq
+  worker:
+    image: mtsrus/syncmaster-worker:${WORKER_IMAGE_TAG:-test}
+    restart: unless-stopped
+    build:
+      dockerfile: docker/Dockerfile.worker
+      context: .
+      target: test
+    command: --loglevel=info -Q test_queue
+    env_file: .env.docker
+    volumes:
+      - ./syncmaster:/app/syncmaster
+      - ./cached_jars:/root/.ivy2
+      - ./reports:/app/reports
+      - ./tests:/app/tests
+      - ./pyproject.toml:/app/pyproject.toml
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    profiles: [worker, s3, oracle, hdfs, hive, all]
+
+  test-postgres:
+    image: postgres
     restart: unless-stopped
     ports:
-      - 5672:5672
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+      - 5433:5432
+    env_file: .env.docker
     healthcheck:
-      test: rabbitmq-diagnostics -q ping
+      test: pg_isready
       start_period: 5s
       interval: 30s
       timeout: 5s
       retries: 3
+    profiles: [s3, oracle, hdfs, hive, all]
 
   test-s3:
     image: bitnami/minio:latest
@@ -87,19 +101,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-
-  test-postgres:
-    image: postgres
-    restart: unless-stopped
-    ports:
-      - 5433:5432
-    env_file: .env.docker
-    healthcheck:
-      test: pg_isready
-      start_period: 5s
-      interval: 30s
-      timeout: 5s
-      retries: 3
+    profiles: [s3, all]
 
   test-oracle:
     image: gvenzl/oracle-xe:slim-faststart
@@ -108,10 +110,11 @@ services:
       - 1522:1521
     environment:
       TZ: UTC
-      ORACLE_PASSWORD: test_password
-      ORACLE_DATABASE: test_oracle
-      APP_USER: test_user
-      APP_USER_PASSWORD: test_password
+      ORACLE_PASSWORD: changeme
+      ORACLE_DATABASE: syncmaster
+      APP_USER: syncmaster
+      APP_USER_PASSWORD: changeme
+    profiles: [oracle, all]
 
   metastore-hive:
     image: postgres
@@ -128,6 +131,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+    profiles: [hive, hdfs, all]
 
   test-hive:
     image: mtsrus/hadoop:hadoop2.7.3-hive2.3.9
@@ -152,6 +156,7 @@ services:
       HIVE_METASTORE_DB_DRIVER: org.postgresql.Driver
       HIVE_METASTORE_DB_USER: test_hive
       HIVE_METASTORE_DB_PASSWORD: test_hive
+    profiles: [hive, hdfs, all]
 
 volumes:
   postgres_data:
