@@ -2,15 +2,17 @@
 # SPDX-License-Identifier: Apache-2.0
 from collections.abc import Awaitable, Callable
 
-from fastapi import Depends, Request, status
+from fastapi import Depends, status
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
-from syncmaster.backend.api.deps import AuthMarker, SettingsMarker, UnitOfWorkMarker
+from syncmaster.backend.api.deps import SettingsMarker, UnitOfWorkMarker
 from syncmaster.backend.api.v1.auth.utils import decode_jwt
 from syncmaster.backend.services.unit_of_work import UnitOfWork
 from syncmaster.config import Settings
 from syncmaster.db.models import User
+
+oauth_schema = OAuth2PasswordBearer(tokenUrl="v1/auth/token")
 
 
 def get_user(
@@ -18,7 +20,7 @@ def get_user(
     is_superuser: bool = False,
 ) -> Callable[[str, Settings, UnitOfWork], Awaitable[User]]:
     async def wrapper(
-        token: str = Depends(AuthMarker),
+        token: str = Depends(oauth_schema),
         settings: Settings = Depends(SettingsMarker),
         unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
     ) -> User:
@@ -48,11 +50,3 @@ def get_user(
         return user
 
     return wrapper
-
-
-def get_auth_scheme(
-    settings: Settings,
-) -> Callable[[Request], str] | OAuth2PasswordBearer:
-    if settings.DEBUG:
-        return OAuth2PasswordBearer(tokenUrl=settings.AUTH_TOKEN_URL)
-    return lambda request: "Here will be keycloak"
