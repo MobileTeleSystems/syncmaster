@@ -160,3 +160,4 @@ cython_debug/
 cached_jars/
 
 .DS_Store
+.python-version
