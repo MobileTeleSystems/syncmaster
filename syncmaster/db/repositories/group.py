@@ -41,6 +41,7 @@ class GroupRepository(Repository[Group]):
     ):
         stmt = (
             select(Group)
+            .distinct()
             .join(
                 UserGroup,
                 UserGroup.group_id == Group.id,
@@ -53,7 +54,6 @@ class GroupRepository(Repository[Group]):
                     Group.owner_id == current_user_id,
                 ),
             )
-            .group_by(Group.id)
         )
 
         return await self._paginate_scalar_result(query=stmt.order_by(Group.name), page=page, page_size=page_size)
