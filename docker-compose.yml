@@ -3,8 +3,6 @@ services:
     image: postgres
     restart: unless-stopped
     env_file: .env.docker
-    ports:
-      - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -14,36 +12,9 @@ services:
       timeout: 5s
       retries: 3
 
-  worker:
-    image: mtsrus/syncmaster-worker
-    restart: unless-stopped
-    build:
-      dockerfile: docker/Dockerfile.worker
-      context: .
-      network: host
-    env_file: .env.docker
-
-  backend:
-    image: mtsrus/syncmaster-backend
-    restart: unless-stopped
-    build:
-      dockerfile: docker/Dockerfile.backend
-      context: .
-      network: host
-    ports:
-      - 8000:8000
-    depends_on:
-      db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    env_file: .env.docker
-
   rabbitmq:
     image: rabbitmq
     restart: unless-stopped
-    ports:
-      - 5672:5672
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
@@ -52,6 +23,34 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+
+  backend:
+    image: mtsrus/syncmaster-backend:${TAG:-develop}
+    restart: unless-stopped
+    build:
+      dockerfile: docker/Dockerfile.backend
+      context: .
+    ports:
+      - 8000:8000
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  worker:
+    image: mtsrus/syncmaster-worker:${TAG:-develop}
+    restart: unless-stopped
+    build:
+      dockerfile: docker/Dockerfile.worker
+      context: .
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
 volumes:
   postgres_data:

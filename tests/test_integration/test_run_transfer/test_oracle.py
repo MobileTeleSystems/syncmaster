@@ -21,7 +21,7 @@ async def postgres_to_oracle(
     session: AsyncSession,
     group: Group,
     queue: Queue,
-    oracle: Oracle,
+    oracle_for_conftest: Oracle,
     oracle_connection: Connection,
     postgres_connection: Connection,
 ):
@@ -37,7 +37,7 @@ async def postgres_to_oracle(
         },
         target_params={
             "type": "oracle",
-            "table_name": f"{oracle.user}.target_table",
+            "table_name": f"{oracle_for_conftest.user}.target_table",
         },
         queue_id=queue.id,
     )
@@ -51,7 +51,7 @@ async def oracle_to_postgres(
     session: AsyncSession,
     group: Group,
     queue: Queue,
-    oracle: Oracle,
+    oracle_for_conftest: Oracle,
     oracle_connection: Connection,
     postgres_connection: Connection,
 ):
@@ -63,7 +63,7 @@ async def oracle_to_postgres(
         target_connection_id=postgres_connection.id,
         source_params={
             "type": "oracle",
-            "table_name": f"{oracle.user}.source_table",
+            "table_name": f"{oracle_for_conftest.user}.source_table",
         },
         target_params={
             "type": "postgres",
