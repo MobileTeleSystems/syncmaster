@@ -6,7 +6,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_test_data:/var/lib/postgresql/data
     healthcheck:
       test: pg_isready
       start_period: 5s
@@ -20,7 +20,7 @@ services:
     ports:
       - 5672:5672
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_test_data:/var/lib/rabbitmq
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       start_period: 5s
@@ -159,5 +159,5 @@ services:
     profiles: [hive, hdfs, all]
 
 volumes:
-  postgres_data:
-  rabbitmq_data:
+  postgres_test_data:
+  rabbitmq_test_data:
