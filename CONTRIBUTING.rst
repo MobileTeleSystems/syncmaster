@@ -91,7 +91,7 @@ Start DB container:
 
 .. code:: bash
 
-    make db-prepare
+    make db
 
 Then start development server:
 
