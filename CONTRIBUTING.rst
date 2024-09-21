@@ -91,7 +91,7 @@ Start DB container:
 
 .. code:: bash
 
-    make db
+    make db-prepare
 
 Then start development server:
 
@@ -103,7 +103,7 @@ And open http://localhost:8000/docs
 
 Settings are stored in ``.env.local`` file.
 
-To start developlment worker, open a new terminal window/tab, and run:
+To start development worker, open a new terminal window/tab, and run:
 
 .. code:: bash
 

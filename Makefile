@@ -40,10 +40,10 @@ venv-install: ##@Env Install requirements to venv
 
 
 
-db: db-start db-upgrade ##@DB Prepare database (in docker)
+db-prepare: db-start db-upgrade ##@DB Prepare database (in docker)
 
 db-start: ##@DB Start database
-	docker compose -f docker-compose.test.yml up -d --wait db $(DOCKER_COMPOSE_ARGS)
+	docker compose up -d --wait db $(DOCKER_COMPOSE_ARGS)
 
 db-revision: ##@DB Generate migration file
 	${POETRY} run python -m syncmaster.db.migrations revision --autogenerate $(ARGS)
@@ -58,30 +58,43 @@ db-downgrade: ##@DB Downgrade head migration
 broker: broker-start ##@Broker Prepare broker (in docker)
 
 broker-start: ##Broker Start broker
+	docker compose up -d --wait rabbitmq $(DOCKER_COMPOSE_ARGS)
+
+
+
+test: test-db-prepare test-broker-prepare ##@Test Run tests
+	${POETRY} run pytest $(PYTEST_ARGS)
+
+test-db-prepare: test-db-start df-upgrade db-partitions ##@TestDB Prepare database (in docker)
+
+test-db-start: ##@TestDB Start database
+	docker compose -f docker-compose.test.yml up -d --wait db $(DOCKER_COMPOSE_ARGS)
+
+test-broker-prepare: test-broker-start ##@TestBroker Prepare broker (in docker)
+
+test-broker-start: ##@TestBroker Start broker
 	docker compose -f docker-compose.test.yml up -d --wait rabbitmq $(DOCKER_COMPOSE_ARGS)
 
-
-
-test-unit: db ##@Test Run unit tests
+test-unit: test-db-prepare ##@Test Run unit tests
 	${POETRY} run pytest ./tests/test_unit ./tests/test_database $(PYTEST_ARGS)
 
-test-integration-hdfs: db ##@Test Run integration tests for HDFS
+test-integration-hdfs: test-db-prepare ##@Test Run integration tests for HDFS
 	docker compose -f docker-compose.test.yml --profile hdfs up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration -m hdfs $(PYTEST_ARGS)
 
-test-integration-hive: db ##@Test Run integration tests for Hive
+test-integration-hive: test-db-prepare ##@Test Run integration tests for Hive
 	docker compose -f docker-compose.test.yml --profile hive up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration -m hive $(PYTEST_ARGS)
 
-test-integration-oracle: db ##@Test Run integration tests for Oracle
+test-integration-oracle: test-db-prepare ##@Test Run integration tests for Oracle
 	docker compose -f docker-compose.test.yml --profile oracle up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration -m oracle $(PYTEST_ARGS)
 
-test-integration-s3: db ##@Test Run integration tests for S3
+test-integration-s3: test-db-prepare ##@Test Run integration tests for S3
 	docker compose -f docker-compose.test.yml --profile s3 up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration -m s3 $(PYTEST_ARGS)
 
-test-integration: db ##@Test Run all integration tests
+test-integration: test-db-prepare ##@Test Run all integration tests
 	docker compose -f docker-compose.test.yml --profile all up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration $(PYTEST_ARGS)
 
@@ -93,10 +106,10 @@ test-cleanup: ##@Test Cleanup tests dependencies
 
 
 
-dev-server: db-start ##@Application Run development server (without docker)
+dev-server: db-prepare ##@Application Run development server (without docker)
 	${POETRY} run python -m syncmaster.backend $(ARGS)
 
-dev-worker: db-start broker-start ##@Application Run development broker (without docker)
+dev-worker: db-prepare broker-prepare ##@Application Run development broker (without docker)
 	${POETRY} run python -m celery -A syncmaster.worker.config.celery worker --max-tasks-per-child=1 $(ARGS)
 
 
