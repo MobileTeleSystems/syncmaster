@@ -91,7 +91,7 @@ Start DB container:
 
 .. code:: bash
 
-    make db
+    make db broker
 
 Then start development server:
 
