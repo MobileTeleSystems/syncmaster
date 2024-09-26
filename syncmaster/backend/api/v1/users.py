@@ -35,10 +35,8 @@ async def get_users(
 @router.get("/users/me")
 async def read_current_user(
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadUserSchema:
-    user = await unit_of_work.user.read_by_id(user_id=current_user.id, is_active=True)
-    return ReadUserSchema.from_orm(user)
+    return ReadUserSchema.from_orm(current_user)
 
 
 @router.get("/users/{user_id}", dependencies=[Depends(get_user(is_active=True))])
