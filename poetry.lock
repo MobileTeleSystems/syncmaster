@@ -13,13 +13,13 @@ files = [
 
 [[package]]
 name = "alembic"
-version = "1.13.2"
+version = "1.13.3"
 description = "A database migration tool for SQLAlchemy."
 optional = true
 python-versions = ">=3.8"
 files = [
-    {file = "alembic-1.13.2-py3-none-any.whl", hash = "sha256:6b8733129a6224a9a711e17c99b08462dbf7cc9670ba8f2e2ae9af860ceb1953"},
-    {file = "alembic-1.13.2.tar.gz", hash = "sha256:1ff0ae32975f4fd96028c39ed9bb3c867fe3af956bd7bb37343b54c9fe7445ef"},
+    {file = "alembic-1.13.3-py3-none-any.whl", hash = "sha256:908e905976d15235fae59c9ac42c4c5b75cfcefe3d27c0fbf7ae15a37715d80e"},
+    {file = "alembic-1.13.3.tar.gz", hash = "sha256:203503117415561e203aa14541740643a611f641517f0209fcae63e9fa09f1a2"},
 ]
 
 [package.dependencies]
@@ -1473,13 +1473,13 @@ files = [
 
 [[package]]
 name = "minio"
-version = "7.2.8"
+version = "7.2.9"
 description = "MinIO Python SDK for Amazon S3 Compatible Cloud Storage"
 optional = false
 python-versions = ">3.8"
 files = [
-    {file = "minio-7.2.8-py3-none-any.whl", hash = "sha256:aa3b485788b63b12406a5798465d12a57e4be2ac2a58a8380959b6b748e64ddd"},
-    {file = "minio-7.2.8.tar.gz", hash = "sha256:f8af2dafc22ebe1aef3ac181b8e217037011c430aa6da276ed627e55aaf7c815"},
+    {file = "minio-7.2.9-py3-none-any.whl", hash = "sha256:fe5523d9c4a4d6cfc07e96905852841bccdb22b22770e1efca4bf5ae8b65774b"},
+    {file = "minio-7.2.9.tar.gz", hash = "sha256:a83c2fcd981944602a8dc11e8e07543ed9cda0a9462264e3f46a13171c56bccb"},
 ]
 
 [package.dependencies]
@@ -1780,13 +1780,13 @@ virtualenv = ">=20.10.0"
 
 [[package]]
 name = "prompt-toolkit"
-version = "3.0.47"
+version = "3.0.48"
 description = "Library for building powerful interactive command lines in Python"
 optional = true
 python-versions = ">=3.7.0"
 files = [
-    {file = "prompt_toolkit-3.0.47-py3-none-any.whl", hash = "sha256:0d7bfa67001d5e39d02c224b663abc33687405033a8c422d0d675a5a13361d10"},
-    {file = "prompt_toolkit-3.0.47.tar.gz", hash = "sha256:1e1b29cb58080b1e69f207c893a1a7bf16d127a5c30c9d17a25a5d77792e5360"},
+    {file = "prompt_toolkit-3.0.48-py3-none-any.whl", hash = "sha256:f49a827f90062e411f1ce1f854f2aedb3c23353244f8108b89283587397ac10e"},
+    {file = "prompt_toolkit-3.0.48.tar.gz", hash = "sha256:d6623ab0477a80df74e646bdbc93621143f5caf104206aa29294d53de1a03d90"},
 ]
 
 [package.dependencies]
@@ -2158,12 +2158,12 @@ windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "pyspark"
-version = "3.5.2"
+version = "3.5.3"
 description = "Apache Spark Python API"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pyspark-3.5.2.tar.gz", hash = "sha256:bbb36eba09fa24e86e0923d7e7a986041b90c714e11c6aa976f9791fe9edde5e"},
+    {file = "pyspark-3.5.3.tar.gz", hash = "sha256:68b7cc0c0c570a7d8644f49f40d2da8709b01d30c9126cc8cf93b4f84f3d9747"},
 ]
 
 [package.dependencies]
@@ -2710,22 +2710,6 @@ files = [
 test = ["flake8", "mypy", "pytest"]
 
 [[package]]
-name = "sphinxcontrib-plantuml"
-version = "0.30"
-description = "Sphinx \"plantuml\" extension"
-optional = false
-python-versions = "*"
-files = [
-    {file = "sphinxcontrib-plantuml-0.30.tar.gz", hash = "sha256:2a1266ca43bddf44640ae44107003df4490de2b3c3154a0d627cfb63e9a169bf"},
-]
-
-[package.dependencies]
-Sphinx = ">=1.6"
-
-[package.extras]
-test = ["Pillow", "flake8", "pytest"]
-
-[[package]]
 name = "sphinxcontrib-qthelp"
 version = "2.0.0"
 description = "sphinxcontrib-qthelp is a sphinx extension which outputs QtHelp documents"
@@ -2987,13 +2971,13 @@ files = [
 
 [[package]]
 name = "tzdata"
-version = "2024.1"
+version = "2024.2"
 description = "Provider of IANA time zone data"
 optional = true
 python-versions = ">=2"
 files = [
-    {file = "tzdata-2024.1-py2.py3-none-any.whl", hash = "sha256:9068bc196136463f5245e51efda838afa15aaeca9903f49050dfa2679db4d252"},
-    {file = "tzdata-2024.1.tar.gz", hash = "sha256:2674120f8d891909751c38abcdfd386ac0a5a1127954fbc332af6b5ceae07efd"},
+    {file = "tzdata-2024.2-py2.py3-none-any.whl", hash = "sha256:a48093786cdcde33cad18c2555e8532f34422074448fbc874186f0abd79565cd"},
+    {file = "tzdata-2024.2.tar.gz", hash = "sha256:7d85cc416e9382e69095b7bdf4afd9e3880418a2413feec7069d533d6b4e31cc"},
 ]
 
 [[package]]
@@ -3168,4 +3152,4 @@ worker = ["celery", "onetl", "psycopg2-binary", "pydantic-settings", "sqlalchemy
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "bcb2f5f21ff82271bece630d69f7342bd130b0cc1062fe88c22b7648788f6928"
+content-hash = "d7fb092f0455200cc021ef0c3ed022167bba67a413314bf1866dfc43f616f136"
