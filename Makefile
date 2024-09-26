@@ -37,6 +37,7 @@ venv-install: ##@Env Install requirements to venv
 	${POETRY} config virtualenvs.create false
 	${POETRY} self add poetry-bumpversion
 	${POETRY} install --no-root --all-extras --with dev,test,docs $(ARGS)
+	${PIP} install --no-deps sphinx-plantuml
 
 
 
@@ -130,6 +131,7 @@ prod-stop: ##@Application Stop production server
 
 
 .PHONY: docs
+
 
 docs: docs-build docs-open ##@Docs Generate & open docs
 
