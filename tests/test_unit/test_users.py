@@ -54,6 +54,45 @@ async def test_get_users(
     }
 
 
+async def test_get_current_user(
+    client: AsyncClient,
+    simple_user: MockUser,
+    inactive_user: MockUser,
+):
+    # without authentication
+    response = await client.get("/v1/users/me")
+    assert response.status_code == 401
+    assert response.json() == {
+        "ok": False,
+        "status_code": 401,
+        "message": "Not authenticated",
+    }
+
+    # active user
+    response = await client.get(
+        "/v1/users/me",
+        headers={"Authorization": f"Bearer {simple_user.token}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": simple_user.id,
+        "is_superuser": simple_user.is_superuser,
+        "username": simple_user.username,
+    }
+
+    # inactive user
+    response = await client.get(
+        "/v1/users/me",
+        headers={"Authorization": f"Bearer {inactive_user.token}"},
+    )
+    assert response.status_code == 403
+    assert response.json() == {
+        "ok": False,
+        "status_code": 403,
+        "message": "Inactive user",
+    }
+
+
 async def test_get_user(
     client: AsyncClient,
     simple_user: MockUser,
