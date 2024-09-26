@@ -65,7 +65,7 @@ broker-start: ##Broker Start broker
 test: test-db test-broker ##@Test Run tests
 	${POETRY} run pytest $(PYTEST_ARGS)
 
-test-db: test-db-start df-upgrade db-partitions ##@TestDB Prepare database (in docker)
+test-db: test-db-start db-upgrade ##@TestDB Prepare database (in docker)
 
 test-db-start: ##@TestDB Start database
 	docker compose -f docker-compose.test.yml up -d --wait db $(DOCKER_COMPOSE_ARGS)
@@ -134,7 +134,7 @@ prod-stop: ##@Application Stop production server
 docs: docs-build docs-open ##@Docs Generate & open docs
 
 docs-build: ##@Docs Generate docs
-	$(MAKE) -C docs html
+	${POETRY} run $(MAKE) -C docs html
 
 docs-open: ##@Docs Open docs
 	xdg-open docs/_build/html/index.html
