@@ -32,6 +32,13 @@ async def get_users(
     return UserPageSchema.from_pagination(pagination)
 
 
+@router.get("/users/me")
+async def read_current_user(
+    current_user: User = Depends(get_user(is_active=True)),
+) -> ReadUserSchema:
+    return ReadUserSchema.from_orm(current_user)
+
+
 @router.get("/users/{user_id}", dependencies=[Depends(get_user(is_active=True))])
 async def read_user(
     user_id: int,
