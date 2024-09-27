@@ -3,6 +3,8 @@ services:
     image: postgres
     restart: unless-stopped
     env_file: .env.docker
+    ports:
+      - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -15,6 +17,8 @@ services:
   rabbitmq:
     image: rabbitmq
     restart: unless-stopped
+    ports:
+      - 5672:5672
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
