@@ -3,7 +3,7 @@
 from collections.abc import Sequence
 from typing import Any, NoReturn
 
-from sqlalchemy import ScalarResult, insert, or_, select
+from sqlalchemy import ScalarResult, func, insert, or_, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -32,8 +32,18 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         page: int,
         page_size: int,
         group_id: int | None = None,
+        search_query: str | None = None,
     ) -> Pagination:
         stmt = select(Transfer).where(Transfer.is_deleted.is_(False))
+
+        if search_query:
+            processed_query = search_query.replace("/", " ").replace(".", " ")
+            combined_query = f"{search_query} {processed_query}"
+            ts_query = func.plainto_tsquery("english", combined_query)
+            stmt = stmt.where(Transfer.search_vector.op("@@")(ts_query))
+            stmt = stmt.add_columns(func.ts_rank(Transfer.search_vector, ts_query).label("rank"))
+            # sort by ts_rank relevance
+            stmt = stmt.order_by(func.ts_rank(Transfer.search_vector, ts_query).desc())
 
         return await self._paginate_scalar_result(
             query=stmt.where(Transfer.group_id == group_id).order_by(Transfer.name),

@@ -45,6 +45,11 @@ async def read_transfers(
     group_id: int,
     page: int = Query(gt=0, default=1),
     page_size: int = Query(gt=0, le=200, default=20),
+    search_query: str | None = Query(
+        None,
+        title="Search Query",
+        description="full-text search for transfers",
+    ),
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> TransferPageSchema:
@@ -61,6 +66,7 @@ async def read_transfers(
         page=page,
         page_size=page_size,
         group_id=group_id,
+        search_query=search_query,
     )
 
     return TransferPageSchema.from_pagination(pagination=pagination)

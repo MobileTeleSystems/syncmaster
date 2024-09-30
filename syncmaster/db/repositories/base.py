@@ -33,7 +33,7 @@ class Repository(Generic[Model], ABC):
     def _model_as_dict(model: Model) -> dict[str, Any]:
         d = []
         for c in model.__table__.columns:
-            if c.name == "id":  # 'id' is PK autoincrement
+            if c.name in ("id", "search_vector"):
                 continue
             d.append(c.name)
 
@@ -51,6 +51,7 @@ class Repository(Generic[Model], ABC):
                 kwargs.update({k: getattr(origin_model, k)})
 
         d.update(kwargs)  # Process kwargs in order to keep only what needs to be updated
+        d.pop("search_vector", None)  # 'search_vector' is computed field
         query_insert_new_row = insert(self._model).values(**d).returning(self._model)
         try:
             new_row = await self._session.scalars(query_insert_new_row)
