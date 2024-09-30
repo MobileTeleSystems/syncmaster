@@ -120,7 +120,7 @@ repos:
         args: [--autofix, --indent, '2', --offset, '2']
 
   - repo: https://github.com/sbrunner/hooks
-    rev: 1.0.0
+    rev: 1.1.0
     hooks:
       - id: poetry-check
         additional_dependencies:
