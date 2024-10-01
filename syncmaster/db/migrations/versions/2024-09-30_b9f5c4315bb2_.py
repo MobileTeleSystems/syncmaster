@@ -23,11 +23,11 @@ def upgrade() -> None:
     sql_expression = (
         "to_tsvector('english'::regconfig, "
         "name || ' ' || "
-        "translate(name, './', '  ') || ' ' || "
         "COALESCE(json_extract_path_text(source_params, 'table_name'), '') || ' ' || "
         "COALESCE(json_extract_path_text(target_params, 'table_name'), '') || ' ' || "
         "COALESCE(json_extract_path_text(source_params, 'directory_path'), '') || ' ' || "
         "COALESCE(json_extract_path_text(target_params, 'directory_path'), '') || ' ' || "
+        "translate(name, './', '  ') || ' ' || "
         "COALESCE(translate(json_extract_path_text(source_params, 'table_name'), './', '  '), '') || ' ' || "
         "COALESCE(translate(json_extract_path_text(target_params, 'table_name'), './', '  '), '') || ' ' || "
         "COALESCE(translate(json_extract_path_text(source_params, 'directory_path'), './', '  '), '') || ' ' || "
