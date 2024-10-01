@@ -10,12 +10,15 @@ from sqlalchemy import (
     JSON,
     BigInteger,
     Boolean,
+    Computed,
     DateTime,
     ForeignKey,
+    Index,
     PrimaryKeyConstraint,
     String,
     UniqueConstraint,
 )
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
 from sqlalchemy_utils import ChoiceType
 
@@ -129,9 +132,36 @@ class Transfer(
     target_connection: Mapped[Connection] = relationship(foreign_keys=target_connection_id)
     queue: Mapped[Queue] = relationship(back_populates="transfers")
 
+    search_vector: Mapped[str] = mapped_column(
+        TSVECTOR,
+        Computed(
+            """
+            to_tsvector(
+                'english'::regconfig,
+                name || ' ' ||
+                COALESCE(json_extract_path_text(source_params, 'table_name'), '') || ' ' ||
+                COALESCE(json_extract_path_text(target_params, 'table_name'), '') || ' ' ||
+                COALESCE(json_extract_path_text(source_params, 'directory_path'), '') || ' ' ||
+                COALESCE(json_extract_path_text(target_params, 'directory_path'), '') || ' ' ||
+                translate(name, './', '  ') || ' ' ||
+                COALESCE(translate(json_extract_path_text(source_params, 'table_name'), './', '  '), '') || ' ' ||
+                COALESCE(translate(json_extract_path_text(target_params, 'table_name'), './', '  '), '') || ' ' ||
+                COALESCE(translate(json_extract_path_text(source_params, 'directory_path'), './', '  '), '') || ' ' ||
+                COALESCE(translate(json_extract_path_text(target_params, 'directory_path'), './', '  '), '')
+            )
+            """,
+            persisted=True,
+        ),
+        nullable=False,
+        deferred=True,
+    )
+
     @declared_attr
     def __table_args__(cls) -> tuple:
-        return (UniqueConstraint("name", "group_id"),)
+        return (
+            UniqueConstraint("name", "group_id"),
+            Index("idx_transfer_search_vector", "search_vector", postgresql_using="gin"),
+        )
 
 
 class Status(enum.StrEnum):

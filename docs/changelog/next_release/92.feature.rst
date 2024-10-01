@@ -1,0 +1,1 @@
+Add full-text search for **transfers**
