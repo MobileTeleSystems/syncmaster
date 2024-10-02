@@ -49,7 +49,7 @@ async def read_transfers(
     search_query: str | None = Query(
         None,
         title="Search Query",
-        description="full-text search for transfer_fixtures",
+        description="full-text search for transfer",
     ),
     source_connection_id: int | None = Query(None),
     target_connection_id: int | None = Query(None),
@@ -60,7 +60,7 @@ async def read_transfers(
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> TransferPageSchema:
-    """Return transfer_fixtures in page format"""
+    """Return transfers in page format"""
     resource_role = await unit_of_work.transfer.get_group_permission(
         user=current_user,
         group_id=group_id,
@@ -68,6 +68,9 @@ async def read_transfers(
 
     if resource_role == Permission.NONE:
         raise GroupNotFoundError
+
+    source_connection_str_type = None if source_connection_type is None else [ct.value for ct in source_connection_type]
+    target_connection_str_type = None if target_connection_type is None else [ct.value for ct in target_connection_type]
 
     pagination = await unit_of_work.transfer.paginate(
         page=page,
@@ -77,8 +80,8 @@ async def read_transfers(
         source_connection_id=source_connection_id,
         target_connection_id=target_connection_id,
         queue_id=queue_id,
-        source_connection_type=source_connection_type,
-        target_connection_type=target_connection_type,
+        source_connection_type=source_connection_str_type,
+        target_connection_type=target_connection_str_type,
         is_scheduled=is_scheduled,
     )
 

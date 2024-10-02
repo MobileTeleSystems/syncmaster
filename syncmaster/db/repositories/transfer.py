@@ -21,7 +21,6 @@ from syncmaster.exceptions.transfer import (
     TransferOwnerError,
 )
 from syncmaster.exceptions.user import UserNotFoundError
-from syncmaster.schemas.v1.connection_types import ConnectionType
 
 
 class TransferRepository(RepositoryWithOwner[Transfer]):
@@ -37,8 +36,8 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         source_connection_id: int | None = None,
         target_connection_id: int | None = None,
         queue_id: int | None = None,
-        source_connection_type: list[ConnectionType] | None = None,
-        target_connection_type: list[ConnectionType] | None = None,
+        source_connection_type: list[str] | None = None,
+        target_connection_type: list[str] | None = None,
         is_scheduled: bool | None = None,
     ) -> Pagination:
         stmt = select(Transfer).where(
@@ -74,23 +73,21 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         TargetConnection = aliased(Connection)
 
         if source_connection_type is not None:
-            source_types = [ct.value for ct in source_connection_type]
             stmt = stmt.join(
                 SourceConnection,
                 Transfer.source_connection_id == SourceConnection.id,
             )
             stmt = stmt.where(
-                SourceConnection.data.op("->>")("type").in_(source_types),
+                SourceConnection.data.op("->>")("type").in_(source_connection_type),
             )
 
         if target_connection_type is not None:
-            target_types = [ct.value for ct in target_connection_type]
             stmt = stmt.join(
                 TargetConnection,
                 Transfer.target_connection_id == TargetConnection.id,
             )
             stmt = stmt.where(
-                TargetConnection.data.op("->>")("type").in_(target_types),
+                TargetConnection.data.op("->>")("type").in_(target_connection_type),
             )
 
         return await self._paginate_scalar_result(
