@@ -70,11 +70,13 @@ async def test_simple_user_cannot_create_group_twice(
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json=group_data,
     )
-    assert second_result.status_code == 400
+    assert second_result.status_code == 409
     assert second_result.json() == {
-        "ok": False,
-        "status_code": 400,
-        "message": "Group name already taken",
+        "error": {
+            "code": "conflict",
+            "message": "Group name already taken",
+            "details": None,
+        },
     }
 
 
@@ -94,8 +96,10 @@ async def test_not_authorized_user_cannot_create_group(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
     assert result.status_code == 401

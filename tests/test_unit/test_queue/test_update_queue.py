@@ -97,9 +97,11 @@ async def test_groupless_user_cannot_update_queue(
     )
     # Assert
     assert result.json() == {
-        "message": "Queue not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Queue not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -117,9 +119,11 @@ async def test_anon_user_cannot_update_queue(
     # Assert
     assert result.status_code == 401
     assert result.json() == {
-        "message": "Not authenticated",
-        "ok": False,
-        "status_code": 401,
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
 
 
@@ -144,9 +148,11 @@ async def test_developer_or_below_cannot_update_queue(
 
     # Assert
     assert result.json() == {
-        "message": "You have no power here",
-        "ok": False,
-        "status_code": 403,
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
     }
     assert result.status_code == 403
 
@@ -168,9 +174,11 @@ async def test_other_group_member_cannot_update_queue(
     )
     # Assert
     assert result.json() == {
-        "message": "Queue not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Queue not found",
+            "details": None,
+        },
     }
 
 
@@ -195,9 +203,11 @@ async def test_maintainer_plus_cannot_update_unknown_queue_error(
 
     # Assert
     assert result.json() == {
-        "message": "Queue not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Queue not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -220,8 +230,10 @@ async def test_superuser_cannot_update_unknown_queue_error(
 
     # Assert
     assert result.json() == {
-        "message": "Queue not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Queue not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404

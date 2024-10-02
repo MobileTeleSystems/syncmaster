@@ -15,9 +15,11 @@ async def test_get_users(
     response = await client.get("v1/users")
     assert response.status_code == 401
     assert response.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
 
     response = await client.get(
@@ -47,9 +49,11 @@ async def test_get_users(
     )
     assert response.status_code == 403
     assert response.json() == {
-        "ok": False,
-        "status_code": response.status_code,
-        "message": "Inactive user",
+        "error": {
+            "code": "forbidden",
+            "message": "Inactive user",
+            "details": None,
+        },
     }
 
 
@@ -62,9 +66,11 @@ async def test_get_current_user(
     response = await client.get("/v1/users/me")
     assert response.status_code == 401
     assert response.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
 
     # active user
@@ -86,9 +92,11 @@ async def test_get_current_user(
     )
     assert response.status_code == 403
     assert response.json() == {
-        "ok": False,
-        "status_code": 403,
-        "message": "Inactive user",
+        "error": {
+            "code": "forbidden",
+            "message": "Inactive user",
+            "details": None,
+        },
     }
 
 
@@ -101,9 +109,11 @@ async def test_get_user(
     response = await client.get(f"/v1/users/{simple_user.id}")
     assert response.status_code == 401
     assert response.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
 
     # check from simple user
@@ -125,9 +135,11 @@ async def test_get_user(
     )
     assert response.status_code == 404
     assert response.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "User not found",
+        "error": {
+            "code": "not_found",
+            "message": "User not found",
+            "details": None,
+        },
     }
 
     # check from inactive user
@@ -137,7 +149,9 @@ async def test_get_user(
     )
     assert response.status_code == 403
     assert response.json() == {
-        "ok": False,
-        "status_code": response.status_code,
-        "message": "Inactive user",
+        "error": {
+            "code": "forbidden",
+            "message": "Inactive user",
+            "details": None,
+        },
     }

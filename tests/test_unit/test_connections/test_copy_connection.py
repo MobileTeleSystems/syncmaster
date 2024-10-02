@@ -208,9 +208,11 @@ async def test_unauthorized_user_cannot_copy_connection(
     )
     assert result.status_code == 401
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
 
 
@@ -229,9 +231,11 @@ async def test_groupless_user_cannot_copy_connection(
     )
     assert result.status_code == 404
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Connection not found",
+        "error": {
+            "code": "not_found",
+            "message": "Connection not found",
+            "details": None,
+        },
     }
 
 
@@ -254,9 +258,11 @@ async def test_other_group_member_cannot_copy_connection(
     )
     assert result.status_code == 404
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Connection not found",
+        "error": {
+            "code": "not_found",
+            "message": "Connection not found",
+            "details": None,
+        },
     }
 
 
@@ -307,9 +313,11 @@ async def test_not_in_both_groups_user_can_not_copy_connection(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -364,9 +372,11 @@ async def test_groupless_user_can_not_copy_connection(
     # Assert
     assert result.status_code == 404
     assert result.json() == {
-        "message": "Connection not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Connection not found",
+            "details": None,
+        },
     }
 
 
@@ -466,15 +476,19 @@ async def test_check_name_validation_copy_connection_with_new_connection_name(
 
     # Assert
     assert result.json() == {
-        "detail": [
-            {
-                "ctx": {"min_length": 1},
-                "input": "",
-                "loc": ["body", "new_name"],
-                "msg": "String should have at least 1 character",
-                "type": "string_too_short",
-            },
-        ],
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {"min_length": 1},
+                    "input": "",
+                    "location": ["body", "new_name"],
+                    "message": "String should have at least 1 character",
+                    "code": "string_too_short",
+                },
+            ],
+        },
     }
 
 
@@ -501,9 +515,11 @@ async def test_maintainer_plus_cannot_copy_connection_with_same_name_in_new_grou
 
     # Assert
     assert result.json() == {
-        "message": "The connection name already exists in the target group, please specify a new one",
-        "ok": False,
-        "status_code": 409,
+        "error": {
+            "code": "conflict",
+            "message": "The connection name already exists in the target group, please specify a new one",
+            "details": None,
+        },
     }
 
 
@@ -530,9 +546,11 @@ async def test_developer_below_can_not_copy_connection_with_remove_source(
 
     # Assert
     assert result.json() == {
-        "message": "You have no power here",
-        "ok": False,
-        "status_code": 403,
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
     }
     assert result.status_code == 403
 
@@ -559,9 +577,11 @@ async def test_cannot_copy_connection_with_unknown_connection_error(
 
     # Assert
     assert result.json() == {
-        "message": "Connection not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Connection not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -582,9 +602,11 @@ async def test_superuser_cannot_copy_unknown_connection_error(
 
     # Assert
     assert result.json() == {
-        "message": "Connection not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Connection not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -610,9 +632,11 @@ async def test_cannot_copy_connection_with_unknown_new_group_id_error(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -633,8 +657,10 @@ async def test_superuser_cannot_copy_connection_with_unknown_new_group_id_error(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404

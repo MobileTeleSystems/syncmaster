@@ -6,6 +6,7 @@ from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.db.models import User
 from syncmaster.db.utils import Permission
+from syncmaster.errors.registration import get_error_responses
 from syncmaster.exceptions import ActionNotAllowedError
 from syncmaster.exceptions.group import GroupNotFoundError
 from syncmaster.schemas.v1.groups import (
@@ -18,7 +19,7 @@ from syncmaster.schemas.v1.groups import (
 from syncmaster.schemas.v1.status import StatusResponseSchema
 from syncmaster.schemas.v1.users import UserPageSchemaAsGroupMember
 
-router = APIRouter(tags=["Groups"])
+router = APIRouter(tags=["Groups"], responses=get_error_responses())
 
 
 @router.get("/groups")

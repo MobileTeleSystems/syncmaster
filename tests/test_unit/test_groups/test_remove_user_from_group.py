@@ -43,9 +43,11 @@ async def test_groupless_user_cannot_remove_user_from_group(
     )
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Group not found",
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -67,9 +69,11 @@ async def test_other_group_member_cannot_remove_user_from_group(
     )
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Group not found",
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -108,11 +112,13 @@ async def test_owner_cannot_delete_self_from_group(
     )
     # Assert
     assert result.json() == {
-        "message": "User already is not group member",
-        "ok": False,
-        "status_code": 400,
+        "error": {
+            "code": "conflict",
+            "message": "User already is not group member",
+            "details": None,
+        },
     }
-    assert result.status_code == 400
+    assert result.status_code == 409
 
 
 async def test_maintainer_or_below_cannot_delete_others_from_group(
@@ -132,9 +138,11 @@ async def test_maintainer_or_below_cannot_delete_others_from_group(
         )
         # Assert
         assert result.json() == {
-            "ok": False,
-            "status_code": 403,
-            "message": "You have no power here",
+            "error": {
+                "code": "forbidden",
+                "message": "You have no power here",
+                "details": None,
+            },
         }
         assert result.status_code == 403
 
@@ -168,9 +176,11 @@ async def test_not_authorized_user_cannot_remove_user_from_group(client: AsyncCl
     result = await client.delete(f"v1/groups/{group.id}/users/{user.id}")
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
     assert result.status_code == 401
 
@@ -188,11 +198,13 @@ async def test_owner_delete_unknown_user_error(
     )
     # Assert
     assert result.json() == {
-        "message": "User already is not group member",
-        "ok": False,
-        "status_code": 400,
+        "error": {
+            "code": "conflict",
+            "message": "User already is not group member",
+            "details": None,
+        },
     }
-    assert result.status_code == 400
+    assert result.status_code == 409
 
 
 async def test_owner_delete_user_from_unknown_group_error(
@@ -210,9 +222,11 @@ async def test_owner_delete_user_from_unknown_group_error(
     )
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -229,11 +243,13 @@ async def test_superuser_delete_unknown_user_error(
     )
     # Assert
     assert result.json() == {
-        "message": "User already is not group member",
-        "ok": False,
-        "status_code": 400,
+        "error": {
+            "code": "conflict",
+            "message": "User already is not group member",
+            "details": None,
+        },
     }
-    assert result.status_code == 400
+    assert result.status_code == 409
 
 
 async def test_superuser_delete_user_from_unknown_group_error(
@@ -251,8 +267,10 @@ async def test_superuser_delete_user_from_unknown_group_error(
     )
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404

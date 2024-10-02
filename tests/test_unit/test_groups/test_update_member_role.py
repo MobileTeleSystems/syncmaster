@@ -71,15 +71,19 @@ async def test_owner_of_group_can_not_update_user_role_with_wrong_role(
     # Assert
     assert result.status_code == 422
     assert result.json() == {
-        "detail": [
-            {
-                "ctx": {"expected": "'Maintainer', 'Developer' or 'Guest'"},
-                "input": "Unknown",
-                "loc": ["body", "role"],
-                "msg": "Input should be 'Maintainer', 'Developer' or 'Guest'",
-                "type": "enum",
-            },
-        ],
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {"expected": "'Maintainer', 'Developer' or 'Guest'"},
+                    "input": "Unknown",
+                    "location": ["body", "role"],
+                    "message": "Input should be 'Maintainer', 'Developer' or 'Guest'",
+                    "code": "enum",
+                },
+            ],
+        },
     }
 
 
@@ -104,9 +108,11 @@ async def test_maintainer_below_can_not_update_user_role(
 
     # Assert
     assert result.json() == {
-        "message": "You have no power here",
-        "ok": False,
-        "status_code": 403,
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
     }
     assert result.status_code == 403
 
@@ -132,9 +138,11 @@ async def test_other_group_member_can_not_update_user_role(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -159,9 +167,11 @@ async def test_superuser_update_unknown_group_error(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
 
 
@@ -182,9 +192,11 @@ async def test_superuser_update_unknown_user_error(
 
     # Assert
     assert result.json() == {
-        "message": "User not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "User not found",
+            "details": None,
+        },
     }
 
 
@@ -207,9 +219,11 @@ async def test_owner_of_group_update_unknown_user_error(
 
     # Assert
     assert result.json() == {
-        "message": "User not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "User not found",
+            "details": None,
+        },
     }
 
 
@@ -232,7 +246,9 @@ async def test_owner_of_group_update_unknown_group_error(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }

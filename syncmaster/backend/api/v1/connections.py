@@ -9,6 +9,7 @@ from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.db.models import Connection, Transfer, User
 from syncmaster.db.utils import Permission
+from syncmaster.errors.registration import get_error_responses
 from syncmaster.exceptions import ActionNotAllowedError
 from syncmaster.exceptions.connection import (
     ConnectionDeleteError,
@@ -34,7 +35,7 @@ from syncmaster.schemas.v1.connections.connection import (
 from syncmaster.schemas.v1.page import MetaPageSchema
 from syncmaster.schemas.v1.status import StatusResponseSchema
 
-router = APIRouter(tags=["Connections"])
+router = APIRouter(tags=["Connections"], responses=get_error_responses())
 
 CONNECTION_TYPES = ORACLE_TYPE, POSTGRES_TYPE, HIVE_TYPE, S3_TYPE, HDFS_TYPE
 

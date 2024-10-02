@@ -56,9 +56,11 @@ async def test_groupless_user_cannot_read_connection(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Connection not found",
+        "error": {
+            "code": "not_found",
+            "message": "Connection not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -80,9 +82,11 @@ async def test_other_group_member_cannot_read_connection(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Connection not found",
+        "error": {
+            "code": "not_found",
+            "message": "Connection not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -126,9 +130,11 @@ async def test_unauthorized_user_cannot_read_connection(client: AsyncClient, gro
     # Assert
     assert result.status_code == 401
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
 
 
@@ -148,9 +154,11 @@ async def test_guest_plus_cannot_read_unknown_connection_error(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Connection not found",
+        "error": {
+            "code": "not_found",
+            "message": "Connection not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -168,8 +176,10 @@ async def test_superuser_cannot_read_unknown_connection_error(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Connection not found",
+        "error": {
+            "code": "not_found",
+            "message": "Connection not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404

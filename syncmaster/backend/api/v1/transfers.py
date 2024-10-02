@@ -8,6 +8,7 @@ from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.db.models import Status, User
 from syncmaster.db.utils import Permission
+from syncmaster.errors.registration import get_error_responses
 from syncmaster.exceptions.base import ActionNotAllowedError
 from syncmaster.exceptions.connection import ConnectionNotFoundError
 from syncmaster.exceptions.group import GroupNotFoundError
@@ -37,7 +38,7 @@ from syncmaster.schemas.v1.transfers.run import (
 )
 from syncmaster.worker.config import celery
 
-router = APIRouter(tags=["Transfers"])
+router = APIRouter(tags=["Transfers"], responses=get_error_responses())
 
 
 @router.get("/transfers")

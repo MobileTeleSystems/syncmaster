@@ -74,9 +74,11 @@ async def test_groupless_user_cannot_delete_transfer(
     # Assert
     assert result.status_code == 404
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Transfer not found",
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }
 
 
@@ -97,9 +99,11 @@ async def test_developer_or_below_cannot_delete_transfer(
 
     # Assert
     assert result.json() == {
-        "message": "You have no power here",
-        "ok": False,
-        "status_code": 403,
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
     }
     assert result.status_code == 403
     await session.refresh(group_transfer.transfer)
@@ -123,9 +127,11 @@ async def test_group_member_cannot_delete_other_group_transfer(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Transfer not found",
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -141,9 +147,11 @@ async def test_unauthorized_user_cannot_delete_transfer(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
     assert result.status_code == 401
 
@@ -162,9 +170,11 @@ async def test_superuser_cannot_delete_unknown_transfer_error(
 
     # Assert
     assert result.json() == {
-        "message": "Transfer not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -186,7 +196,9 @@ async def test_maintainer_plus_cannot_delete_unknown_transfer_error(
 
     # Assert
     assert result.json() == {
-        "message": "Transfer not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }

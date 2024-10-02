@@ -15,9 +15,11 @@ async def test_unauthorized_user_cannot_read_connection_types(client: AsyncClien
     # Assert
     assert result.status_code == 401
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
 
 

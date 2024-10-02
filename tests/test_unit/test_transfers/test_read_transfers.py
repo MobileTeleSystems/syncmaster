@@ -67,9 +67,11 @@ async def test_groupless_user_cannot_read_transfers(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -124,9 +126,11 @@ async def test_unauthorized_user_cannot_read_transfers(client: AsyncClient):
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
     assert result.status_code == 401
 
@@ -148,9 +152,11 @@ async def test_developer_plus_cannot_read_unknown_group_transfers_error(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
 
 
@@ -168,7 +174,9 @@ async def test_superuser_cannot_read_unknown_group_transfers_error(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }

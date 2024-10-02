@@ -52,9 +52,11 @@ async def test_not_superuser_cannot_delete_group(
     )
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 403,
-        "message": "You have no power here",
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
     }
     assert result.status_code == 403
 
@@ -65,9 +67,11 @@ async def test_not_authorized_user_cannot_delete_group(client: AsyncClient, empt
     # Assert
     assert result.status_code == 401
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
 
 
@@ -85,9 +89,11 @@ async def test_groupless_user_cannot_delete_group(
     )
     # Assert
     assert result.json() == {
-        "message": "You have no power here",
-        "ok": False,
-        "status_code": 403,
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
     }
     assert result.status_code == 403
 
@@ -105,8 +111,10 @@ async def test_superuser_cannot_delete_unknown_group_error(
     )
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404

@@ -72,9 +72,11 @@ async def test_groupless_user_cannot_add_user_to_group(
     )
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Group not found",
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -99,9 +101,11 @@ async def test_maintainer_or_below_cannot_add_user_to_group(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 403,
-        "message": "You have no power here",
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
     }
     assert result.status_code == 403
 
@@ -123,15 +127,19 @@ async def test_owner_cannot_add_user_to_group_with_wrong_role(
         },
     )
     assert result.json() == {
-        "detail": [
-            {
-                "ctx": {"expected": "'Maintainer', 'Developer' or 'Guest'"},
-                "input": "WrongRole",
-                "loc": ["body", "role"],
-                "msg": "Input should be 'Maintainer', 'Developer' or 'Guest'",
-                "type": "enum",
-            },
-        ],
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {"expected": "'Maintainer', 'Developer' or 'Guest'"},
+                    "input": "WrongRole",
+                    "location": ["body", "role"],
+                    "message": "Input should be 'Maintainer', 'Developer' or 'Guest'",
+                    "code": "enum",
+                },
+            ],
+        },
     }
     assert result.status_code == 422
 
@@ -152,14 +160,19 @@ async def test_owner_cannot_add_user_to_group_without_role(
 
     # Assert
     assert result.json() == {
-        "detail": [
-            {
-                "input": None,
-                "loc": ["body"],
-                "msg": "Field required",
-                "type": "missing",
-            },
-        ],
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {},
+                    "input": None,
+                    "location": ["body"],
+                    "message": "Field required",
+                    "code": "missing",
+                },
+            ],
+        },
     }
     assert result.status_code == 422
 
@@ -245,11 +258,13 @@ async def test_owner_cannot_add_user_to_group_twice(
         },
     )
     assert result.json() == {
-        "ok": False,
-        "status_code": 400,
-        "message": "User already is group member",
+        "error": {
+            "code": "conflict",
+            "message": "User already is group member",
+            "details": None,
+        },
     }
-    assert result.status_code == 400
+    assert result.status_code == 409
 
 
 async def test_not_authorized_user_cannot_add_user_to_group(
@@ -263,9 +278,11 @@ async def test_not_authorized_user_cannot_add_user_to_group(
     # Assert
     assert result.status_code == 401
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
 
 
@@ -286,9 +303,11 @@ async def test_owner_add_user_to_unknown_group_error(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -310,9 +329,11 @@ async def test_owner_add_unknown_user_to_group_error(
 
     # Assert
     assert result.json() == {
-        "message": "User not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "User not found",
+            "details": None,
+        },
     }
 
 
@@ -332,9 +353,11 @@ async def test_superuser_add_user_to_unknown_group_error(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Group not found",
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -356,8 +379,10 @@ async def test_superuser_add_unknown_user_error(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "User not found",
+        "error": {
+            "code": "not_found",
+            "message": "User not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404

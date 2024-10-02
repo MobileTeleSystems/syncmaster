@@ -73,9 +73,11 @@ async def test_groupless_user_cannot_create_run(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Transfer not found",
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -101,9 +103,11 @@ async def test_group_member_cannot_create_run_of_other_group_transfer(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Transfer not found",
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -165,9 +169,11 @@ async def test_unauthorized_user_cannot_create_run(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
     assert result.status_code == 401
 
@@ -192,9 +198,11 @@ async def test_group_member_cannot_create_run_of_unknown_transfer_error(
 
     # Assert
     assert result.json() == {
-        "message": "Transfer not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }
 
 
@@ -217,7 +225,9 @@ async def test_superuser_cannot_create_run_of_unknown_transfer_error(
 
     # Assert
     assert result.json() == {
-        "message": "Transfer not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }

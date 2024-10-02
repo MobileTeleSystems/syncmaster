@@ -75,9 +75,11 @@ async def test_groupless_user_cannot_delete_queue(
     )
     # Assert
     assert result.json() == {
-        "message": "Queue not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Queue not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -99,9 +101,11 @@ async def test_developer_or_below_cannot_delete_queue(
     )
     # Assert
     assert result.json() == {
-        "message": "You have no power here",
-        "ok": False,
-        "status_code": 403,
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
     }
 
 
@@ -122,9 +126,11 @@ async def test_other_group_member_cannot_delete_queue(
     )
     # Assert
     assert result.json() == {
-        "message": "Queue not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Queue not found",
+            "details": None,
+        },
     }
 
 
@@ -144,9 +150,11 @@ async def test_maintainer_plus_cannot_delete_queue_with_linked_transfer(
 
     # Assert
     assert result.json() == {
-        "message": "The queue has an associated transfers(s). Number of the linked transfers: 1",
-        "ok": False,
-        "status_code": 409,
+        "error": {
+            "code": "conflict",
+            "message": "The queue has an associated transfers(s). Number of the linked transfers: 1",
+            "details": None,
+        },
     }
     assert result.status_code == 409
 
@@ -164,9 +172,11 @@ async def test_superuser_cannot_delete_queue_with_linked_transfer(
 
     # Assert
     assert result.json() == {
-        "message": "The queue has an associated transfers(s). Number of the linked transfers: 1",
-        "ok": False,
-        "status_code": 409,
+        "error": {
+            "code": "conflict",
+            "message": "The queue has an associated transfers(s). Number of the linked transfers: 1",
+            "details": None,
+        },
     }
     assert result.status_code == 409
 
@@ -182,9 +192,11 @@ async def test_anon_user_cannot_delete_queue(
     )
     # Assert
     assert result.json() == {
-        "message": "Not authenticated",
-        "ok": False,
-        "status_code": 401,
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
     assert result.status_code == 401
 
@@ -205,9 +217,11 @@ async def test_maintainer_plus_cannot_delete_unknown_queue_error(
     )
     # Assert
     assert result.json() == {
-        "message": "Queue not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Queue not found",
+            "details": None,
+        },
     }
 
 
@@ -225,7 +239,9 @@ async def test_superuser_cannot_delete_unknown_queue_error(
     )
     # Assert
     assert result.json() == {
-        "message": "Queue not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Queue not found",
+            "details": None,
+        },
     }

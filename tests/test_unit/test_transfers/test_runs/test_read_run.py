@@ -46,9 +46,11 @@ async def test_groupless_user_cannot_read_run(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Transfer not found",
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -70,9 +72,11 @@ async def test_another_group_member_cannot_read_run(
 
     # Assert
     assert result.json() == {
-        "message": "Transfer not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }
 
 
@@ -109,9 +113,11 @@ async def test_unauthorized_user_cannot_read_run(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
     assert result.status_code == 401
 
@@ -132,9 +138,11 @@ async def test_group_member_cannot_read_unknown_run_error(
 
     # Assert
     assert result.json() == {
-        "message": "Run not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Run not found",
+            "details": None,
+        },
     }
 
 
@@ -151,7 +159,9 @@ async def test_superuser_cannot_read_unknown_run_error(
 
     # Assert
     assert result.json() == {
-        "message": "Run not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Run not found",
+            "details": None,
+        },
     }

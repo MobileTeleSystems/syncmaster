@@ -105,9 +105,11 @@ async def test_other_group_member_cannot_read_queues(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
 
 
@@ -129,9 +131,11 @@ async def test_group_member_cannot_read__unknown_group_queues_error(
     )
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
 
 
@@ -151,7 +155,9 @@ async def test_superuser_cannot_read_unknown_group_queues_error(
     )
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }

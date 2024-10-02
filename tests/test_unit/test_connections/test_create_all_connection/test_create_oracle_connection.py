@@ -186,21 +186,25 @@ async def test_developer_plus_create_oracle_connection_with_sid_and_service_name
     # Assert
     assert result.status_code == 422
     assert result.json() == {
-        "detail": [
-            {
-                "ctx": {"error": {}},
-                "input": {
-                    "host": "127.0.0.1",
-                    "port": 1521,
-                    "service_name": "service_name",
-                    "sid": "sid_name",
-                    "type": "oracle",
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {},
+                    "input": {
+                        "host": "127.0.0.1",
+                        "port": 1521,
+                        "service_name": "service_name",
+                        "sid": "sid_name",
+                        "type": "oracle",
+                    },
+                    "location": ["body", "connection_data", "oracle"],
+                    "message": "Value error, You must specify either sid or service_name but not both",
+                    "code": "value_error",
                 },
-                "loc": ["body", "connection_data", "oracle"],
-                "msg": "Value error, You must specify either sid or service_name but not both",
-                "type": "value_error",
-            },
-        ],
+            ],
+        },
     }
 
 
@@ -240,24 +244,28 @@ async def test_developer_plus_cannot_create_connection_with_type_mismatch(
 
     # Assert
     assert result.json() == {
-        "detail": [
-            {
-                "type": "value_error",
-                "loc": ["body"],
-                "msg": "Value error, Connection data and auth data must have same types",
-                "input": {
-                    "group_id": group.id,
-                    "name": "New connection",
-                    "description": "",
-                    "connection_data": {
-                        "type": "postgres",
-                        "host": "127.0.0.1",
-                        "port": 5432,
-                        "database_name": "postgres",
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {},
+                    "input": {
+                        "group_id": group.id,
+                        "name": "New connection",
+                        "description": "",
+                        "connection_data": {
+                            "type": "postgres",
+                            "host": "127.0.0.1",
+                            "port": 5432,
+                            "database_name": "postgres",
+                        },
+                        "auth_data": {"type": "oracle", "user": "user", "password": "secret"},
                     },
-                    "auth_data": {"type": "oracle", "user": "user", "password": "secret"},
+                    "location": ["body"],
+                    "message": "Value error, Connection data and auth data must have same types",
+                    "code": "value_error",
                 },
-                "ctx": {"error": {}},
-            },
-        ],
+            ],
+        },
     }
