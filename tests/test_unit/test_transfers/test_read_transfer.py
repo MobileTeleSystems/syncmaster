@@ -1,6 +1,3 @@
-import random
-import string
-
 import pytest
 from httpx import AsyncClient
 
@@ -112,67 +109,6 @@ async def test_superuser_can_read_transfer(
         "queue_id": group_transfer.transfer.queue_id,
     }
     assert result.status_code == 200
-
-
-@pytest.mark.parametrize(
-    "search_value_extractor",
-    [
-        lambda transfer: transfer.name,
-        lambda transfer: transfer.source_params.get("table_name"),
-        lambda transfer: transfer.target_params.get("table_name"),
-        lambda transfer: transfer.source_params.get("directory_path"),
-        lambda transfer: transfer.target_params.get("directory_path"),
-    ],
-    ids=["name", "source_table_name", "target_table_name", "source_directory_path", "target_directory_path"],
-)
-async def test_search_transfers_with_query(
-    client: AsyncClient,
-    superuser: MockUser,
-    group_transfer: MockTransfer,
-    search_value_extractor,
-):
-    transfer = group_transfer.transfer
-    search_query = search_value_extractor(transfer)
-
-    result = await client.get(
-        "v1/transfers",
-        headers={"Authorization": f"Bearer {superuser.token}"},
-        params={"group_id": group_transfer.group_id, "search_query": search_query},
-    )
-
-    transfer_data = result.json()["items"][0]
-
-    assert transfer_data == {
-        "id": group_transfer.id,
-        "group_id": group_transfer.group_id,
-        "name": group_transfer.name,
-        "description": group_transfer.description,
-        "schedule": group_transfer.schedule,
-        "is_scheduled": group_transfer.is_scheduled,
-        "source_connection_id": group_transfer.source_connection_id,
-        "target_connection_id": group_transfer.target_connection_id,
-        "source_params": group_transfer.source_params,
-        "target_params": group_transfer.target_params,
-        "strategy_params": group_transfer.strategy_params,
-        "queue_id": group_transfer.transfer.queue_id,
-    }
-
-
-async def test_search_transfers_with_nonexistent_query(
-    client: AsyncClient,
-    superuser: MockUser,
-    group_transfer: MockTransfer,
-):
-    random_search_query = "".join(random.choices(string.ascii_lowercase + string.digits, k=12))
-
-    result = await client.get(
-        "v1/transfers",
-        headers={"Authorization": f"Bearer {superuser.token}"},
-        params={"group_id": group_transfer.group_id, "search_query": random_search_query},
-    )
-
-    assert result.status_code == 200
-    assert result.json()["items"] == []
 
 
 async def test_unauthorized_user_cannot_read_transfer(

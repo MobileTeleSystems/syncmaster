@@ -18,6 +18,7 @@ from syncmaster.exceptions.transfer import (
     DifferentTypeConnectionsAndParamsError,
     TransferNotFoundError,
 )
+from syncmaster.schemas.v1.connection_types import ConnectionType
 from syncmaster.schemas.v1.connections.connection import ReadAuthDataSchema
 from syncmaster.schemas.v1.status import (
     StatusCopyTransferResponseSchema,
@@ -48,8 +49,14 @@ async def read_transfers(
     search_query: str | None = Query(
         None,
         title="Search Query",
-        description="full-text search for transfers",
+        description="full-text search for transfer",
     ),
+    source_connection_id: int | None = Query(None),
+    target_connection_id: int | None = Query(None),
+    queue_id: int | None = Query(None),
+    source_connection_type: list[ConnectionType] | None = Query(None),
+    target_connection_type: list[ConnectionType] | None = Query(None),
+    is_scheduled: bool | None = Query(None),
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> TransferPageSchema:
@@ -62,11 +69,20 @@ async def read_transfers(
     if resource_role == Permission.NONE:
         raise GroupNotFoundError
 
+    source_connection_str_type = None if source_connection_type is None else [ct.value for ct in source_connection_type]
+    target_connection_str_type = None if target_connection_type is None else [ct.value for ct in target_connection_type]
+
     pagination = await unit_of_work.transfer.paginate(
         page=page,
         page_size=page_size,
         group_id=group_id,
         search_query=search_query,
+        source_connection_id=source_connection_id,
+        target_connection_id=target_connection_id,
+        queue_id=queue_id,
+        source_connection_type=source_connection_str_type,
+        target_connection_type=target_connection_str_type,
+        is_scheduled=is_scheduled,
     )
 
     return TransferPageSchema.from_pagination(pagination=pagination)
