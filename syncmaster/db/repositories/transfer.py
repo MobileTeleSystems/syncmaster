@@ -6,9 +6,9 @@ from typing import Any, NoReturn
 from sqlalchemy import ScalarResult, func, insert, or_, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import aliased, selectinload
 
-from syncmaster.db.models import Transfer
+from syncmaster.db.models import Connection, Transfer
 from syncmaster.db.repositories.repository_with_owner import RepositoryWithOwner
 from syncmaster.db.utils import Pagination
 from syncmaster.exceptions import EntityNotFoundError, SyncmasterError
@@ -33,8 +33,17 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         page_size: int,
         group_id: int | None = None,
         search_query: str | None = None,
+        source_connection_id: int | None = None,
+        target_connection_id: int | None = None,
+        queue_id: int | None = None,
+        source_connection_type: list[str] | None = None,
+        target_connection_type: list[str] | None = None,
+        is_scheduled: bool | None = None,
     ) -> Pagination:
-        stmt = select(Transfer).where(Transfer.is_deleted.is_(False))
+        stmt = select(Transfer).where(
+            Transfer.is_deleted.is_(False),
+            Transfer.group_id == group_id,
+        )
 
         if search_query:
             processed_query = search_query.replace("/", " ").replace(".", " ")
@@ -42,11 +51,47 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
             ts_query = func.plainto_tsquery("english", combined_query)
             stmt = stmt.where(Transfer.search_vector.op("@@")(ts_query))
             stmt = stmt.add_columns(func.ts_rank(Transfer.search_vector, ts_query).label("rank"))
-            # sort by ts_rank relevance
-            stmt = stmt.order_by(func.ts_rank(Transfer.search_vector, ts_query).desc())
+            # sort by ts_rank relevance, transfer.name
+            stmt = stmt.order_by(func.ts_rank(Transfer.search_vector, ts_query).desc(), Transfer.name)
+        else:
+            # if no search query, order only by transfer name
+            stmt = stmt.order_by(Transfer.name)
+
+        if source_connection_id is not None:
+            stmt = stmt.where(Transfer.source_connection_id == source_connection_id)
+
+        if target_connection_id is not None:
+            stmt = stmt.where(Transfer.target_connection_id == target_connection_id)
+
+        if queue_id is not None:
+            stmt = stmt.where(Transfer.queue_id == queue_id)
+
+        if is_scheduled is not None:
+            stmt = stmt.where(Transfer.is_scheduled == is_scheduled)
+
+        SourceConnection = aliased(Connection)
+        TargetConnection = aliased(Connection)
+
+        if source_connection_type is not None:
+            stmt = stmt.join(
+                SourceConnection,
+                Transfer.source_connection_id == SourceConnection.id,
+            )
+            stmt = stmt.where(
+                SourceConnection.data.op("->>")("type").in_(source_connection_type),
+            )
+
+        if target_connection_type is not None:
+            stmt = stmt.join(
+                TargetConnection,
+                Transfer.target_connection_id == TargetConnection.id,
+            )
+            stmt = stmt.where(
+                TargetConnection.data.op("->>")("type").in_(target_connection_type),
+            )
 
         return await self._paginate_scalar_result(
-            query=stmt.where(Transfer.group_id == group_id).order_by(Transfer.name),
+            query=stmt,
             page=page,
             page_size=page_size,
         )
