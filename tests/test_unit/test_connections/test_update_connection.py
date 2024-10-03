@@ -123,9 +123,11 @@ async def test_groupless_user_cannot_update_connection(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Connection not found",
+        "error": {
+            "code": "not_found",
+            "message": "Connection not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -147,15 +149,19 @@ async def test_check_name_field_validation_on_update_connection(
 
     # Assert
     assert result.json() == {
-        "detail": [
-            {
-                "ctx": {"min_length": 1},
-                "input": "",
-                "loc": ["body", "name"],
-                "msg": "String should have at least 1 character",
-                "type": "string_too_short",
-            },
-        ],
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {"min_length": 1},
+                    "input": "",
+                    "location": ["body", "name"],
+                    "message": "String should have at least 1 character",
+                    "code": "string_too_short",
+                },
+            ],
+        },
     }
 
 
@@ -177,9 +183,11 @@ async def test_group_member_cannot_update_other_group_connection(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Connection not found",
+        "error": {
+            "code": "not_found",
+            "message": "Connection not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -233,18 +241,22 @@ async def test_update_connection_data_fields(
     )
 
     # Assert
-    assert result.json() == {
-        "detail": [
-            {
-                "ctx": {"discriminator": "'type'"},
-                "input": {"host": "localhost"},
-                "loc": ["body", "connection_data"],
-                "msg": "Unable to extract tag using discriminator 'type'",
-                "type": "union_tag_not_found",
-            },
-        ],
-    }
     assert result.status_code == 422
+    assert result.json() == {
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {"discriminator": "'type'"},
+                    "input": {"host": "localhost"},
+                    "location": ["body", "connection_data"],
+                    "message": "Unable to extract tag using discriminator 'type'",
+                    "code": "union_tag_not_found",
+                },
+            ],
+        },
+    }
 
     # Act
     result = await client.patch(
@@ -356,9 +368,11 @@ async def test_unauthorized_user_cannot_update_connection(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
     assert result.status_code == 401
 
@@ -380,9 +394,11 @@ async def test_developer_plus_cannot_update_unknown_connection_error(
 
     # Assert
     assert result.json() == {
-        "message": "Connection not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Connection not found",
+            "details": None,
+        },
     }
 
 
@@ -399,9 +415,11 @@ async def test_superuser_cannot_update_unknown_connection_error(
 
     # Assert
     assert result.json() == {
-        "message": "Connection not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Connection not found",
+            "details": None,
+        },
     }
 
 
@@ -459,21 +477,25 @@ async def test_developer_plus_update_oracle_connection_both_sid_and_service_name
     # Assert
     assert result.status_code == 422
     assert result.json() == {
-        "detail": [
-            {
-                "ctx": {"error": {}},
-                "input": {
-                    "host": "127.0.0.1",
-                    "port": 1521,
-                    "service_name": "service_name",
-                    "sid": "sid_name",
-                    "type": "oracle",
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {},
+                    "input": {
+                        "host": "127.0.0.1",
+                        "port": 1521,
+                        "service_name": "service_name",
+                        "sid": "sid_name",
+                        "type": "oracle",
+                    },
+                    "location": ["body", "connection_data", "oracle"],
+                    "message": "Value error, You must specify either sid or service_name but not both",
+                    "code": "value_error",
                 },
-                "loc": ["body", "connection_data", "oracle"],
-                "msg": "Value error, You must specify either sid or service_name but not both",
-                "type": "value_error",
-            },
-        ],
+            ],
+        },
     }
 
 
@@ -505,19 +527,23 @@ async def test_developer_plus_update_connection_with_diff_type_error(
     # Assert
     assert result.status_code == 422
     assert result.json() == {
-        "detail": [
-            {
-                "ctx": {"error": {}},
-                "input": {
-                    "auth_data": {"type": "oracle", "user": "new_user"},
-                    "connection_data": {"host": "new_host", "type": "postgres"},
-                    "name": "New connection name",
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {},
+                    "input": {
+                        "auth_data": {"type": "oracle", "user": "new_user"},
+                        "connection_data": {"host": "new_host", "type": "postgres"},
+                        "name": "New connection name",
+                    },
+                    "location": ["body"],
+                    "message": "Value error, Connection data and auth data must have same types",
+                    "code": "value_error",
                 },
-                "loc": ["body"],
-                "msg": "Value error, Connection data and auth data must have same types",
-                "type": "value_error",
-            },
-        ],
+            ],
+        },
     }
 
 
@@ -543,11 +569,13 @@ async def test_maintainer_plus_cannot_update_connection_type_with_linked_transfe
     )
 
     # Assert
-    assert result.status_code == 400
+    assert result.status_code == 409
     assert result.json() == {
-        "ok": False,
-        "status_code": 400,
-        "message": "You cannot update the connection type of a connection already associated with a transfer.",
+        "error": {
+            "code": "conflict",
+            "message": "You cannot update the connection type of a connection already associated with a transfer.",
+            "details": None,
+        },
     }
 
 
@@ -567,4 +595,10 @@ async def test_guest_cannot_update_connection_error(
 
     # Assert
     assert result.status_code == 403
-    assert result.json() == {"ok": False, "status_code": 403, "message": "You have no power here"}
+    assert result.json() == {
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
+    }

@@ -152,8 +152,10 @@ async def test_unauthorized_user_cannot_read_groups(
     result = await client.get("v1/groups")
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
     assert result.status_code == 401

@@ -54,9 +54,11 @@ async def test_groupless_user_cannot_update_transfer(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Transfer not found",
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -109,9 +111,11 @@ async def test_other_group_member_cannot_update_transfer(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Transfer not found",
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -133,15 +137,19 @@ async def test_check_name_field_validation_on_update_transfer(
 
     # Assert
     assert result.json() == {
-        "detail": [
-            {
-                "ctx": {"min_length": 1},
-                "input": "",
-                "loc": ["body", "name"],
-                "msg": "String should have at least 1 character",
-                "type": "string_too_short",
-            },
-        ],
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {"min_length": 1},
+                    "input": "",
+                    "location": ["body", "name"],
+                    "message": "String should have at least 1 character",
+                    "code": "string_too_short",
+                },
+            ],
+        },
     }
 
 
@@ -165,9 +173,11 @@ async def test_check_connection_types_and_its_params_transfer(
     # Assert
     assert result.status_code == 400
     assert result.json() == {
-        "ok": False,
-        "status_code": 400,
-        "message": "Source connection has type `postgres` but its params has `oracle` type",
+        "error": {
+            "code": "bad_request",
+            "message": "Source connection has type `postgres` but its params has `oracle` type",
+            "details": None,
+        },
     }
 
     # Act
@@ -219,9 +229,11 @@ async def test_check_different_connection_groups_for_transfer(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 400,
-        "message": "Connections should belong to the transfer group",
+        "error": {
+            "code": "bad_request",
+            "message": "Connections should belong to the transfer group",
+            "details": None,
+        },
     }
     assert result.status_code == 400
 
@@ -244,9 +256,11 @@ async def test_check_different_queue_groups_for_transfer(
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 400,
-        "message": "Queue should belong to the transfer group",
+        "error": {
+            "code": "bad_request",
+            "message": "Queue should belong to the transfer group",
+            "details": None,
+        },
     }
     assert result.status_code == 400
 
@@ -269,9 +283,11 @@ async def test_developer_plus_not_in_new_connection_group_cannot_update_transfer
 
     # Arrange
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Connection not found",
+        "error": {
+            "code": "not_found",
+            "message": "Connection not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -289,9 +305,11 @@ async def test_unauthorized_user_cannot_update_transfer(
     # Assert
     assert result.status_code == 401
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
 
 
@@ -313,9 +331,11 @@ async def test_developer_plus_cannot_update_transfer_with_other_group_queue(
 
     # Assert
     assert result.json() == {
-        "message": "Queue should belong to the transfer group",
-        "ok": False,
-        "status_code": 400,
+        "error": {
+            "code": "bad_request",
+            "message": "Queue should belong to the transfer group",
+            "details": None,
+        },
     }
     assert result.status_code == 400
 
@@ -335,9 +355,11 @@ async def test_superuser_cannot_update_transfer_with_other_group_queue(
 
     # Assert
     assert result.json() == {
-        "message": "Queue should belong to the transfer group",
-        "ok": False,
-        "status_code": 400,
+        "error": {
+            "code": "bad_request",
+            "message": "Queue should belong to the transfer group",
+            "details": None,
+        },
     }
     assert result.status_code == 400
 
@@ -359,9 +381,11 @@ async def test_group_member_cannot_update_unknow_transfer_error(
 
     # Assert
     assert result.json() == {
-        "message": "Transfer not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -380,9 +404,11 @@ async def test_superuser_cannot_update_unknown_transfer_error(
 
     # Assert
     assert result.json() == {
-        "message": "Transfer not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -404,9 +430,11 @@ async def test_developer_plus_cannot_update_transfer_with_unknown_queue_id_error
 
     # Assert
     assert result.json() == {
-        "message": "Queue not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Queue not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -425,9 +453,11 @@ async def test_superuser_cannot_update_transfer_with_unknown_queue_id(
 
     # Assert
     assert result.json() == {
-        "message": "Queue not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Queue not found",
+            "details": None,
+        },
     }
 
     assert result.status_code == 404

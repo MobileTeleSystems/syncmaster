@@ -64,9 +64,11 @@ async def test_groupless_user_cannot_read_group_members(
     )
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Group not found",
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -86,9 +88,11 @@ async def test_other_group_member_cannot_read_group_members(
     )
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Group not found",
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -141,9 +145,11 @@ async def test_not_authorized_user_cannot_read_group_members(client: AsyncClient
     # Assert
     assert result.status_code == 401
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
 
 
@@ -164,9 +170,11 @@ async def test_member_of_group_cannot_read_unknown_group_members_error(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
 
 
@@ -184,7 +192,9 @@ async def test_superuser_read_unknown_group_members_error(
     )
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }

@@ -52,9 +52,11 @@ async def test_groupless_user_cannot_stop_run(
     )
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Transfer not found",
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -76,9 +78,11 @@ async def test_other_group_member_cannot_stop_run_of_other_group_transfer(
     )
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Transfer not found",
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
     await session.refresh(group_run.run)
@@ -134,9 +138,11 @@ async def test_developer_plus_cannot_stop_run_in_status_except_started_or_create
 
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 400,
-        "message": f"Cannot stop run {group_run.id}. Current status is {group_run.status}",
+        "error": {
+            "code": "bad_request",
+            "message": f"Cannot stop run {group_run.id}. Current status is {group_run.status}",
+            "details": None,
+        },
     }
     assert result.status_code == 400
 
@@ -151,9 +157,11 @@ async def test_unauthorized_user_cannot_stop_run(
     # Assert
     assert result.status_code == 401
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
 
 
@@ -177,9 +185,11 @@ async def test_developer_plus_cannot_stop_unknown_run_of_transfer_error(
     assert group_run.status == Status.CREATED
 
     assert result.json() == {
-        "message": "Run not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Run not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -200,7 +210,9 @@ async def test_superuser_cannot_stop_unknown_run_error(
     assert group_run.status == Status.CREATED
 
     assert result.json() == {
-        "message": "Run not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Run not found",
+            "details": None,
+        },
     }

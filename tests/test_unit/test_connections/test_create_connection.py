@@ -118,9 +118,11 @@ async def test_unauthorized_user_cannot_create_connection(
     )
     assert result.status_code == 401
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
 
 
@@ -157,15 +159,19 @@ async def test_check_fields_validation_on_create_connection(
     # Assert
     assert result.status_code == 422
     assert result.json() == {
-        "detail": [
-            {
-                "ctx": {"min_length": 1},
-                "input": "",
-                "loc": ["body", "name"],
-                "msg": "String should have at least 1 character",
-                "type": "string_too_short",
-            },
-        ],
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {"min_length": 1},
+                    "input": "",
+                    "location": ["body", "name"],
+                    "message": "String should have at least 1 character",
+                    "code": "string_too_short",
+                },
+            ],
+        },
     }
 
     # Act
@@ -193,14 +199,19 @@ async def test_check_fields_validation_on_create_connection(
     # Assert
     assert result.status_code == 422
     assert result.json() == {
-        "detail": [
-            {
-                "input": None,
-                "loc": ["body", "name"],
-                "msg": "Input should be a valid string",
-                "type": "string_type",
-            },
-        ],
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {},
+                    "input": None,
+                    "location": ["body", "name"],
+                    "message": "Input should be a valid string",
+                    "code": "string_type",
+                },
+            ],
+        },
     }
 
     result = await client.post(
@@ -225,14 +236,19 @@ async def test_check_fields_validation_on_create_connection(
     )
     assert result.status_code == 422
     assert result.json() == {
-        "detail": [
-            {
-                "input": None,
-                "loc": ["body", "description"],
-                "msg": "Input should be a valid string",
-                "type": "string_type",
-            },
-        ],
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {},
+                    "input": None,
+                    "location": ["body", "description"],
+                    "message": "Input should be a valid string",
+                    "code": "string_type",
+                },
+            ],
+        },
     }
 
     result = await client.post(
@@ -258,25 +274,29 @@ async def test_check_fields_validation_on_create_connection(
     )
     assert result.status_code == 422
     assert result.json() == {
-        "detail": [
-            {
-                "type": "union_tag_invalid",
-                "loc": ["body", "connection_data"],
-                "msg": "Input tag 'POSTGRESQL' found using 'type' does not match any of the expected tags: 'hive', 'oracle', 'postgres', 'hdfs', 's3'",
-                "input": {
-                    "type": "POSTGRESQL",
-                    "host": "127.0.0.1",
-                    "port": 5432,
-                    "user": "user",
-                    "database_name": "postgres",
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {
+                        "discriminator": "'type'",
+                        "tag": "POSTGRESQL",
+                        "expected_tags": "'hive', 'oracle', 'postgres', 'hdfs', 's3'",
+                    },
+                    "input": {
+                        "type": "POSTGRESQL",
+                        "host": "127.0.0.1",
+                        "port": 5432,
+                        "user": "user",
+                        "database_name": "postgres",
+                    },
+                    "location": ["body", "connection_data"],
+                    "message": "Input tag 'POSTGRESQL' found using 'type' does not match any of the expected tags: 'hive', 'oracle', 'postgres', 'hdfs', 's3'",
+                    "code": "union_tag_invalid",
                 },
-                "ctx": {
-                    "discriminator": "'type'",
-                    "tag": "POSTGRESQL",
-                    "expected_tags": "'hive', 'oracle', 'postgres', 'hdfs', 's3'",
-                },
-            },
-        ],
+            ],
+        },
     }
 
 
@@ -313,9 +333,11 @@ async def test_other_group_member_cannot_create_group_connection(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -411,9 +433,11 @@ async def test_groupless_user_cannot_create_connection(
         },
     )
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -453,9 +477,11 @@ async def test_group_member_cannot_create_connection_with_unknown_group_error(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
 
 
@@ -490,9 +516,11 @@ async def test_superuser_cannot_create_connection_with_unknown_group_error(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
 
 
@@ -527,4 +555,10 @@ async def test_guest_cannot_create_connection_error(
 
     # Assert
     assert result.status_code == 403
-    assert result.json() == {"ok": False, "status_code": 403, "message": "You have no power here"}
+    assert result.json() == {
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
+    }

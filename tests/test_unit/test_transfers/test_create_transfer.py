@@ -99,9 +99,11 @@ async def test_guest_cannot_create_transfer(
 
     # Assert
     assert result.json() == {
-        "message": "You have no power here",
-        "ok": False,
-        "status_code": 403,
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
     }
 
 
@@ -136,9 +138,11 @@ async def test_groupless_user_cannot_create_transfer(
     # Assert
     assert result.status_code == 403
     assert result.json() == {
-        "ok": False,
-        "status_code": 403,
-        "message": "You have no power here",
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
     }
 
 
@@ -173,9 +177,11 @@ async def test_other_group_user_plus_cannot_create_group_transfer(
     )
     assert result.status_code == 403
     assert result.json() == {
-        "ok": False,
-        "status_code": 403,
-        "message": "You have no power here",
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
     }
 
 
@@ -240,51 +246,85 @@ async def test_superuser_can_create_transfer(
         (
             {"name": ""},
             {
-                "ctx": {"min_length": 1},
-                "input": "",
-                "loc": ["body", "name"],
-                "msg": "String should have at least 1 character",
-                "type": "string_too_short",
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "location": ["body", "name"],
+                            "message": "String should have at least 1 character",
+                            "code": "string_too_short",
+                            "context": {"min_length": 1},
+                            "input": "",
+                        },
+                    ],
+                },
             },
         ),
         (
             {"name": None},
             {
-                "input": None,
-                "loc": ["body", "name"],
-                "msg": "Input should be a valid string",
-                "type": "string_type",
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "location": ["body", "name"],
+                            "message": "Input should be a valid string",
+                            "code": "string_type",
+                            "context": {},
+                            "input": None,
+                        },
+                    ],
+                },
             },
         ),
         (
             {"is_scheduled": 2},
             {
-                "input": 2,
-                "loc": ["body", "is_scheduled"],
-                "msg": "Input should be a valid boolean, unable to interpret input",
-                "type": "bool_parsing",
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "location": ["body", "is_scheduled"],
+                            "message": "Input should be a valid boolean, unable to interpret input",
+                            "code": "bool_parsing",
+                            "context": {},
+                            "input": 2,
+                        },
+                    ],
+                },
             },
         ),
         (
             {"schedule": None},
             {
-                "ctx": {"error": {}},
-                "input": {
-                    "description": "",
-                    "group_id": 1,
-                    "is_scheduled": True,
-                    "name": "new test transfer",
-                    "queue_id": 1,
-                    "schedule": None,
-                    "source_connection_id": 1,
-                    "source_params": {"table_name": "source_table", "type": "postgres"},
-                    "strategy_params": {"type": "full"},
-                    "target_connection_id": 2,
-                    "target_params": {"table_name": "target_table", "type": "postgres"},
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "location": ["body"],
+                            "message": "Value error, If transfer must be scheduled than set schedule param",
+                            "code": "value_error",
+                            "context": {},
+                            "input": {
+                                "description": "",
+                                "group_id": 1,
+                                "is_scheduled": True,
+                                "name": "new test transfer",
+                                "queue_id": 1,
+                                "schedule": None,
+                                "source_connection_id": 1,
+                                "source_params": {"table_name": "source_table", "type": "postgres"},
+                                "strategy_params": {"type": "full"},
+                                "target_connection_id": 2,
+                                "target_params": {"table_name": "target_table", "type": "postgres"},
+                            },
+                        },
+                    ],
                 },
-                "loc": ["body"],
-                "msg": "Value error, If transfer must be scheduled than set schedule param",
-                "type": "value_error",
             },
         ),
         (
@@ -292,17 +332,26 @@ async def test_superuser_can_create_transfer(
                 "strategy_params": {"type": "new some strategy type"},
             },
             {
-                "ctx": {
-                    "discriminator": "'type'",
-                    "expected_tags": "'full', 'incremental'",
-                    "tag": "new some strategy type",
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "location": ["body", "strategy_params"],
+                            "message": (
+                                "Input tag 'new some strategy type' found using 'type' "
+                                "does not match any of the expected tags: 'full', 'incremental'"
+                            ),
+                            "code": "union_tag_invalid",
+                            "context": {
+                                "discriminator": "'type'",
+                                "expected_tags": "'full', 'incremental'",
+                                "tag": "new some strategy type",
+                            },
+                            "input": {"type": "new some strategy type"},
+                        },
+                    ],
                 },
-                "input": {"type": "new some strategy type"},
-                "loc": ["body", "strategy_params"],
-                "msg": "Input tag 'new some strategy type' found using 'type' "
-                "does not match any of the expected tags: 'full', "
-                "'incremental'",
-                "type": "union_tag_invalid",
             },
         ),
         (
@@ -313,17 +362,29 @@ async def test_superuser_can_create_transfer(
                 },
             },
             {
-                "ctx": {
-                    "discriminator": "'type'",
-                    "expected_tags": "'postgres', 'hdfs', 'hive', 'oracle', 's3'",
-                    "tag": "new some connection type",
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "location": ["body", "source_params"],
+                            "message": (
+                                "Input tag 'new some connection type' found using 'type' "
+                                "does not match any of the expected tags: 'postgres', 'hdfs', 'hive', 'oracle', 's3'"
+                            ),
+                            "code": "union_tag_invalid",
+                            "context": {
+                                "discriminator": "'type'",
+                                "expected_tags": "'postgres', 'hdfs', 'hive', 'oracle', 's3'",
+                                "tag": "new some connection type",
+                            },
+                            "input": {
+                                "table_name": "source_table",
+                                "type": "new some connection type",
+                            },
+                        },
+                    ],
                 },
-                "input": {"table_name": "source_table", "type": "new some connection type"},
-                "loc": ["body", "source_params"],
-                "msg": "Input tag 'new some connection type' found using 'type' "
-                "does not match any of the expected tags: 'postgres', "
-                "'hdfs', 'hive', 'oracle', 's3'",
-                "type": "union_tag_invalid",
             },
         ),
     ),
@@ -366,9 +427,9 @@ async def test_check_fields_validation_on_create_transfer(
     assert result.status_code == 422
 
     if new_data == {"schedule": None}:
-        error_json["input"] = transfer_data
+        error_json["error"]["details"][0]["input"] = transfer_data
 
-    assert result.json() == {"detail": [error_json]}
+    assert result.json() == error_json
 
 
 async def test_check_connection_types_and_its_params_on_create_transfer(
@@ -404,9 +465,11 @@ async def test_check_connection_types_and_its_params_on_create_transfer(
     # Assert
     assert result.status_code == 400
     assert result.json() == {
-        "ok": False,
-        "status_code": 400,
-        "message": "Target connection has type `postgres` but its params has `oracle` type",
+        "error": {
+            "code": "bad_request",
+            "message": "Target connection has type `postgres` but its params has `oracle` type",
+            "details": None,
+        },
     }
 
 
@@ -443,9 +506,11 @@ async def test_check_different_connections_owner_group_on_create_transfer(
 
     # Assert
     assert result.json() == {
-        "message": "Connections should belong to the transfer group",
-        "ok": False,
-        "status_code": 400,
+        "error": {
+            "code": "bad_request",
+            "message": "Connections should belong to the transfer group",
+            "details": None,
+        },
     }
     assert result.status_code == 400
 
@@ -472,9 +537,11 @@ async def test_unauthorized_user_cannot_create_transfer(
     # Assert
     assert result.status_code == 401
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
 
 
@@ -509,9 +576,11 @@ async def test_developer_plus_cannot_create_transfer_with_other_group_queue(
 
     # Assert
     assert result.json() == {
-        "message": "Queue should belong to the transfer group",
-        "ok": False,
-        "status_code": 400,
+        "error": {
+            "code": "bad_request",
+            "message": "Queue should belong to the transfer group",
+            "details": None,
+        },
     }
 
 
@@ -559,15 +628,19 @@ async def test_developer_plus_can_not_create_transfer_with_target_format_json(
     # Assert
     assert result.status_code == 422
     assert result.json() == {
-        "detail": [
-            {
-                "type": "union_tag_invalid",
-                "loc": ["body", "target_params", "s3", "file_format"],
-                "msg": "Input tag 'json' found using 'type' does not match any of the expected tags: 'csv', 'jsonline'",
-                "input": {"type": "json", "lineSep": "\n", "encoding": "utf-8"},
-                "ctx": {"discriminator": "'type'", "tag": "json", "expected_tags": "'csv', 'jsonline'"},
-            },
-        ],
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {"discriminator": "'type'", "tag": "json", "expected_tags": "'csv', 'jsonline'"},
+                    "input": {"type": "json", "lineSep": "\n", "encoding": "utf-8"},
+                    "location": ["body", "target_params", "s3", "file_format"],
+                    "message": "Input tag 'json' found using 'type' does not match any of the expected tags: 'csv', 'jsonline'",
+                    "code": "union_tag_invalid",
+                },
+            ],
+        },
     }
 
 
@@ -601,9 +674,11 @@ async def test_superuser_cannot_create_transfer_with_other_group_queue(
 
     # Assert
     assert result.json() == {
-        "message": "Queue should belong to the transfer group",
-        "ok": False,
-        "status_code": 400,
+        "error": {
+            "code": "bad_request",
+            "message": "Queue should belong to the transfer group",
+            "details": None,
+        },
     }
 
 
@@ -641,9 +716,11 @@ async def test_group_member_cannot_create_transfer_with_unknown_connection_error
 
     # Assert
     assert result.json() == {
-        "message": "Connection not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Connection not found",
+            "details": None,
+        },
     }
 
 
@@ -678,9 +755,11 @@ async def test_developer_plus_cannot_create_transfer_with_unknown_group_error(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
 
 
@@ -716,9 +795,11 @@ async def test_superuser_cannot_create_transfer_with_unknown_connection_error(
 
     # Assert
     assert result.json() == {
-        "message": "Connection not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Connection not found",
+            "details": None,
+        },
     }
 
 
@@ -752,9 +833,11 @@ async def test_developer_plus_cannot_create_transfer_with_unknown_queue_error(
 
     # Assert
     assert result.json() == {
-        "message": "Queue not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Queue not found",
+            "details": None,
+        },
     }
 
 
@@ -788,9 +871,11 @@ async def test_superuser_cannot_create_transfer_with_unknown_group_error(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
 
 
@@ -823,7 +908,9 @@ async def test_superuser_cannot_create_transfer_with_unknown_queue_error(
 
     # Assert
     assert result.json() == {
-        "message": "Queue not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Queue not found",
+            "details": None,
+        },
     }

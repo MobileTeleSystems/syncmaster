@@ -247,20 +247,24 @@ async def test_cannot_create_file_transfer_with_relative_path(
     # Assert
     assert result.status_code == 422
     assert result.json() == {
-        "detail": [
-            {
-                "ctx": {"error": {}},
-                "input": "some/path",
-                "loc": ["body", "source_params", "s3", "directory_path"],
-                "msg": "Value error, Directory path must be absolute",
-                "type": "value_error",
-            },
-            {
-                "ctx": {"error": {}},
-                "input": "some/path",
-                "loc": ["body", "target_params", "s3", "directory_path"],
-                "msg": "Value error, Directory path must be absolute",
-                "type": "value_error",
-            },
-        ],
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {},
+                    "input": "some/path",
+                    "location": ["body", "source_params", "s3", "directory_path"],
+                    "message": "Value error, Directory path must be absolute",
+                    "code": "value_error",
+                },
+                {
+                    "context": {},
+                    "input": "some/path",
+                    "location": ["body", "target_params", "s3", "directory_path"],
+                    "message": "Value error, Directory path must be absolute",
+                    "code": "value_error",
+                },
+            ],
+        },
     }

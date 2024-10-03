@@ -40,9 +40,11 @@ async def test_groupless_user_cannot_read_group(
     )
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Group not found",
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -63,9 +65,11 @@ async def test_other_member_group_cannot_read_group(
     )
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Group not found",
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -98,9 +102,11 @@ async def test_not_authorized_user_cannot_read_by_id(
     result = await client.get(f"v1/groups/{empty_group.id}")
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
     assert result.status_code == 401
 
@@ -119,9 +125,11 @@ async def test_member_of_group_read_unknown_group_error(
     )
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -137,8 +145,10 @@ async def test_superuser_read_unknown_group_error(
     )
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Group not found",
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404

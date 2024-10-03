@@ -47,9 +47,11 @@ async def test_groupless_user_cannot_update_group(client: AsyncClient, empty_gro
     )
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Group not found",
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -75,9 +77,11 @@ async def test_other_group_member_cannot_update_group(
     )
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Group not found",
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -122,14 +126,19 @@ async def test_validation_on_update_group(
     # Assert
     assert result.status_code == 422
     assert result.json() == {
-        "detail": [
-            {
-                "input": None,
-                "loc": ["body"],
-                "msg": "Field required",
-                "type": "missing",
-            },
-        ],
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {},
+                    "input": None,
+                    "location": ["body"],
+                    "message": "Field required",
+                    "code": "missing",
+                },
+            ],
+        },
     }
 
     # Arrange
@@ -145,11 +154,13 @@ async def test_validation_on_update_group(
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
     # Assert
-    assert result.status_code == 400
+    assert result.status_code == 404
     assert result.json() == {
-        "ok": False,
-        "status_code": 400,
-        "message": "Admin not found",
+        "error": {
+            "code": "not_found",
+            "message": "Admin not found",
+            "details": None,
+        },
     }
     # Arrange
     group_data = {
@@ -164,11 +175,13 @@ async def test_validation_on_update_group(
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
     # Assert
-    assert result.status_code == 400
+    assert result.status_code == 409
     assert result.json() == {
-        "ok": False,
-        "status_code": 400,
-        "message": "Group name already taken",
+        "error": {
+            "code": "conflict",
+            "message": "Group name already taken",
+            "details": None,
+        },
     }
 
 
@@ -213,9 +226,11 @@ async def test_maintainer_or_below_cannot_change_group_owner(
     )
     # Assert
     assert result.json() == {
-        "message": "You have no power here",
-        "ok": False,
-        "status_code": 403,
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
     }
     assert result.status_code == 403
 
@@ -225,9 +240,11 @@ async def test_not_authorized_user_cannot_update_group(client: AsyncClient, empt
     result = await client.patch(f"v1/groups/{empty_group.id}")
     # Assert
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
     assert result.status_code == 401
 
@@ -248,9 +265,11 @@ async def test_owner_of_group_update_unknown_group_error(client: AsyncClient, em
     # Assert
     group_data.update({"id": empty_group.id})
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
 
 
@@ -270,9 +289,11 @@ async def test_owner_of_group_update_group_unknown_owner_error(client: AsyncClie
     # Assert
     group_data.update({"id": empty_group.id})
     assert result.json() == {
-        "message": "Admin not found",
-        "ok": False,
-        "status_code": 400,
+        "error": {
+            "code": "not_found",
+            "message": "Admin not found",
+            "details": None,
+        },
     }
 
 
@@ -292,9 +313,11 @@ async def test_superuser_update_unknown_group_error(client: AsyncClient, empty_g
     # Assert
     group_data.update({"id": empty_group.id})
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
 
 
@@ -318,7 +341,9 @@ async def test_superuser_update_group_unknown_owner_error(
     # Assert
     group_data.update({"id": empty_group.id})
     assert result.json() == {
-        "message": "Admin not found",
-        "ok": False,
-        "status_code": 400,
+        "error": {
+            "code": "not_found",
+            "message": "Admin not found",
+            "details": None,
+        },
     }

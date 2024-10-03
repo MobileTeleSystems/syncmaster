@@ -177,9 +177,11 @@ async def test_developer_or_below_cannot_copy_transfer_with_remove_source(
     # Assert
     result_json = result_response.json()
     assert result_json == {
-        "message": "You have no power here",
-        "ok": False,
-        "status_code": 403,
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
     }
     assert result_response.status_code == 403
 
@@ -203,7 +205,13 @@ async def test_groupless_user_cannot_copy_transfer(
 
     # Assert
     assert result.status_code == 404
-    assert result.json()["message"] == "Transfer not found"
+    assert result.json() == {
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
+    }
 
 
 async def test_other_group_guest_plus_member_cannot_copy_transfer(
@@ -229,11 +237,12 @@ async def test_other_group_guest_plus_member_cannot_copy_transfer(
     )
 
     # Assert
-    result_json = result.json()
-    assert result_json == {
-        "ok": False,
-        "status_code": 404,
-        "message": "Transfer not found",
+    assert result.json() == {
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -385,15 +394,19 @@ async def test_check_validate_copy_transfer_parameter_new_name(
 
     # Assert
     assert result.json() == {
-        "detail": [
-            {
-                "ctx": {"min_length": 1},
-                "input": "",
-                "loc": ["body", "new_name"],
-                "msg": "String should have at least 1 character",
-                "type": "string_too_short",
-            },
-        ],
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {"min_length": 1},
+                    "input": "",
+                    "location": ["body", "new_name"],
+                    "message": "String should have at least 1 character",
+                    "code": "string_too_short",
+                },
+            ],
+        },
     }
 
 
@@ -423,9 +436,11 @@ async def test_maintainer_plus_can_not_copy_transfer_with_same_name_in_new_group
 
     # Assert
     assert result.json() == {
-        "message": "The transfer name already exists in the target group, please specify a new one",
-        "ok": False,
-        "status_code": 409,
+        "error": {
+            "code": "conflict",
+            "message": "The transfer name already exists in the target group, please specify a new one",
+            "details": None,
+        },
     }
 
 
@@ -451,9 +466,11 @@ async def test_developer_plus_cannot_copy_transfer_if_new_queue_in_another_group
     )
 
     assert result.json() == {
-        "message": "Queue should belong to the transfer group",
-        "ok": False,
-        "status_code": 400,
+        "error": {
+            "code": "bad_request",
+            "message": "Queue should belong to the transfer group",
+            "details": None,
+        },
     }
     assert result.status_code == 400
 
@@ -478,9 +495,11 @@ async def test_superuser_cannot_copy_unknown_transfer_error(
     # Assert
     result_json = result_response.json()
     assert result_json == {
-        "message": "Transfer not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
     }
     assert result_response.status_code == 404
 
@@ -505,9 +524,11 @@ async def test_superuser_cannot_copy_transfer_with_unknown_new_group_error(
     # Assert
     result_json = result_response.json()
     assert result_json == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result_response.status_code == 404
 
@@ -533,7 +554,7 @@ async def test_developer_plus_cannot_copy_transfer_with_unknown_new_group_error(
         },
     )
 
-    assert result.json()["message"] == "Group not found"
+    assert result.json()["error"]["message"] == "Group not found"
     assert result.status_code == 404
 
 
@@ -558,7 +579,7 @@ async def test_copy_unknown_transfer_error(
     )
 
     # Assert
-    assert result.json()["message"] == "Transfer not found"
+    assert result.json()["error"]["message"] == "Transfer not found"
     assert result.status_code == 404
 
 
@@ -585,9 +606,11 @@ async def test_developer_plus_cannot_copy_transfer_with_unknown_new_queue_id_err
 
     # Assert
     assert result.json() == {
-        "message": "Queue not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Queue not found",
+            "details": None,
+        },
     }
 
 
@@ -611,7 +634,9 @@ async def test_superuser_cannot_copy_transfer_with_unknown_new_queue_id_error(
 
     # Assert
     assert result.json() == {
-        "message": "Queue not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Queue not found",
+            "details": None,
+        },
     }

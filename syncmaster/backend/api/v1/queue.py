@@ -6,6 +6,7 @@ from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.db.models import User
 from syncmaster.db.utils import Permission
+from syncmaster.errors.registration import get_error_responses
 from syncmaster.exceptions import ActionNotAllowedError
 from syncmaster.exceptions.group import GroupNotFoundError
 from syncmaster.exceptions.queue import QueueDeleteError, QueueNotFoundError
@@ -17,7 +18,7 @@ from syncmaster.schemas.v1.queue import (
 )
 from syncmaster.schemas.v1.status import StatusResponseSchema
 
-router = APIRouter(tags=["Queues"])
+router = APIRouter(tags=["Queues"], responses=get_error_responses())
 
 
 @router.get("/queues/{queue_id}", description="Read queue by id")

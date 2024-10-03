@@ -106,9 +106,11 @@ async def test_developer_or_below_cannot_create_queue(
 
     # Assert
     assert result.json() == {
-        "message": "You have no power here",
-        "ok": False,
-        "status_code": 403,
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
     }
 
 
@@ -134,9 +136,11 @@ async def test_other_group_member_cannot_create_queue(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
 
 
@@ -159,9 +163,11 @@ async def test_groupless_user_cannot_create_queue_error(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
     assert result.status_code == 404
 
@@ -187,9 +193,11 @@ async def test_maintainer_plus_cannot_create_queue_with_unknown_group_error(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
 
 
@@ -210,9 +218,11 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
 
     # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
 
 
@@ -222,84 +232,109 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
         (
             "очередь",
             {
-                "detail": [
-                    {
-                        "ctx": {"pattern": "^[-_a-zA-Z0-9]+$"},
-                        "input": "очередь",
-                        "loc": ["body", "name"],
-                        "msg": "String should match pattern '^[-_a-zA-Z0-9]+$'",
-                        "type": "string_pattern_mismatch",
-                    },
-                ],
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "context": {"pattern": "^[-_a-zA-Z0-9]+$"},
+                            "input": "очередь",
+                            "location": ["body", "name"],
+                            "message": "String should match pattern '^[-_a-zA-Z0-9]+$'",
+                            "code": "string_pattern_mismatch",
+                        },
+                    ],
+                },
             },
         ),
         (
             "Queue name",
             {
-                "detail": [
-                    {
-                        "ctx": {"pattern": "^[-_a-zA-Z0-9]+$"},
-                        "input": "Queue name",
-                        "loc": ["body", "name"],
-                        "msg": "String should match pattern '^[-_a-zA-Z0-9]+$'",
-                        "type": "string_pattern_mismatch",
-                    },
-                ],
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "context": {"pattern": "^[-_a-zA-Z0-9]+$"},
+                            "input": "Queue name",
+                            "location": ["body", "name"],
+                            "message": "String should match pattern '^[-_a-zA-Z0-9]+$'",
+                            "code": "string_pattern_mismatch",
+                        },
+                    ],
+                },
             },
         ),
         (
             "♥︎",
             {
-                "detail": [
-                    {
-                        "ctx": {"pattern": "^[-_a-zA-Z0-9]+$"},
-                        "input": "♥︎",
-                        "loc": ["body", "name"],
-                        "msg": "String should match pattern '^[-_a-zA-Z0-9]+$'",
-                        "type": "string_pattern_mismatch",
-                    },
-                ],
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "context": {"pattern": "^[-_a-zA-Z0-9]+$"},
+                            "input": "♥︎",
+                            "location": ["body", "name"],
+                            "message": "String should match pattern '^[-_a-zA-Z0-9]+$'",
+                            "code": "string_pattern_mismatch",
+                        },
+                    ],
+                },
             },
         ),
         (
             "q" * 129,
             {
-                "detail": [
-                    {
-                        "type": "string_too_long",
-                        "loc": ["body", "name"],
-                        "msg": "String should have at most 128 characters",
-                        "input": 129 * "q",
-                        "ctx": {"max_length": 128},
-                    },
-                ],
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "context": {"max_length": 128},
+                            "input": 129 * "q",
+                            "location": ["body", "name"],
+                            "message": "String should have at most 128 characters",
+                            "code": "string_too_long",
+                        },
+                    ],
+                },
             },
         ),
         (
             "",
             {
-                "detail": [
-                    {
-                        "ctx": {"pattern": "^[-_a-zA-Z0-9]+$"},
-                        "input": "",
-                        "loc": ["body", "name"],
-                        "msg": "String should match pattern '^[-_a-zA-Z0-9]+$'",
-                        "type": "string_pattern_mismatch",
-                    },
-                ],
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "context": {"pattern": "^[-_a-zA-Z0-9]+$"},
+                            "input": "",
+                            "location": ["body", "name"],
+                            "message": "String should match pattern '^[-_a-zA-Z0-9]+$'",
+                            "code": "string_pattern_mismatch",
+                        },
+                    ],
+                },
             },
         ),
         (
             None,
             {
-                "detail": [
-                    {
-                        "input": None,
-                        "loc": ["body", "name"],
-                        "msg": "Input should be a valid string",
-                        "type": "string_type",
-                    },
-                ],
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "context": {},
+                            "input": None,
+                            "location": ["body", "name"],
+                            "message": "Input should be a valid string",
+                            "code": "string_type",
+                        },
+                    ],
+                },
             },
         ),
     ],
@@ -354,7 +389,9 @@ async def test_maintainer_plus_can_not_create_queue_with_duplicate_name_error(
     # Assert
     assert result.status_code == 409
     assert result.json() == {
-        "ok": False,
-        "status_code": 409,
-        "message": "The queue name already exists in the target group, please specify a new one",
+        "error": {
+            "code": "conflict",
+            "message": "The queue name already exists in the target group, please specify a new one",
+            "details": None,
+        },
     }
