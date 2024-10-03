@@ -12,6 +12,7 @@ class UserTestRoles(enum.StrEnum):
     Maintainer = "Maintainer"
     Developer = "Developer"
     Guest = "Guest"
+    _Superuser = "Superuser"
 
 
 class MockUser:

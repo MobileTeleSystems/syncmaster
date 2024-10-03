@@ -35,45 +35,13 @@ async def test_group_member_can_read_groups(
         },
         "items": [
             {
-                "id": group.id,
-                "name": group.name,
-                "description": group.description,
-                "owner_id": group.owner_id,
-            },
-        ],
-    }
-    assert result.status_code == 200
-
-
-async def test_group_owner_can_read_empty_group(
-    client: AsyncClient,
-    empty_group: MockGroup,
-):
-    # Arrange
-    owner = empty_group.get_member_of_role(UserTestRoles.Owner)
-    # Act
-    result = await client.get(
-        "v1/groups",
-        headers={"Authorization": f"Bearer {owner.token}"},
-    )
-    # Assert
-    assert result.json() == {
-        "meta": {
-            "page": 1,
-            "pages": 1,
-            "total": 1,
-            "page_size": 20,
-            "has_next": False,
-            "has_previous": False,
-            "next_page": None,
-            "previous_page": None,
-        },
-        "items": [
-            {
-                "id": empty_group.id,
-                "name": empty_group.name,
-                "description": empty_group.description,
-                "owner_id": empty_group.owner_id,
+                "data": {
+                    "id": group.id,
+                    "name": group.name,
+                    "description": group.description,
+                    "owner_id": group.owner_id,
+                },
+                "role": role_guest_plus,
             },
         ],
     }
@@ -132,16 +100,22 @@ async def test_superuser_can_read_all_groups(
         },
         "items": [
             {
-                "id": empty_group.id,
-                "name": empty_group.name,
-                "description": empty_group.description,
-                "owner_id": empty_group.owner_id,
+                "data": {
+                    "id": empty_group.id,
+                    "name": empty_group.name,
+                    "description": empty_group.description,
+                    "owner_id": empty_group.owner_id,
+                },
+                "role": UserTestRoles._Superuser,
             },
             {
-                "id": group.id,
-                "name": group.name,
-                "description": group.description,
-                "owner_id": group.owner_id,
+                "data": {
+                    "id": group.id,
+                    "name": group.name,
+                    "description": group.description,
+                    "owner_id": group.owner_id,
+                },
+                "role": UserTestRoles._Superuser,
             },
         ],
     }

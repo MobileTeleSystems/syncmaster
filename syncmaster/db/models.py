@@ -29,7 +29,21 @@ from syncmaster.db.mixins import DeletableMixin, ResourceMixin, TimestampMixin
 class GroupMemberRole(enum.StrEnum):
     Maintainer = "Maintainer"
     Developer = "Developer"
+    Owner = "Owner"
     Guest = "Guest"
+    _Superuser = "Superuser"
+
+    @classmethod
+    def public_roles(cls):
+        return [cls.Maintainer, cls.Developer, cls.Guest]
+
+    @classmethod
+    def public_roles_str(cls):
+        return ", ".join([role for role in cls.public_roles()])
+
+    @classmethod
+    def is_public_role(cls, role: str):
+        return role in cls.public_roles()
 
 
 class User(Base, TimestampMixin, DeletableMixin):
@@ -82,6 +96,7 @@ class UserGroup(Base):
         ChoiceType(GroupMemberRole),
         nullable=False,
     )
+    group: Mapped[Group] = relationship("Group")
 
 
 class Connection(Base, ResourceMixin, DeletableMixin, TimestampMixin):

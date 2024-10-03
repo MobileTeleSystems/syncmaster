@@ -158,6 +158,7 @@ async def group(session: AsyncSession, settings: Settings) -> MockGroup:
         is_active=True,
     )
     group = await create_group(session=session, name="notempty_group", owner_id=owner.id)
+
     members: list[MockUser] = []
     for username in (
         "not_empty_group_member_maintainer",

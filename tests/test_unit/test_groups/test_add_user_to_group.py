@@ -132,11 +132,11 @@ async def test_owner_cannot_add_user_to_group_with_wrong_role(
             "message": "Invalid request",
             "details": [
                 {
-                    "context": {"expected": "'Maintainer', 'Developer' or 'Guest'"},
-                    "input": "WrongRole",
-                    "location": ["body", "role"],
-                    "message": "Input should be 'Maintainer', 'Developer' or 'Guest'",
-                    "code": "enum",
+                    "location": ["body"],
+                    "message": "Value error, Input should be one of: Maintainer, Developer, Guest",
+                    "code": "value_error",
+                    "context": {},
+                    "input": {"role": "WrongRole"},
                 },
             ],
         },
