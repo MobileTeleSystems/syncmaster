@@ -138,6 +138,39 @@ async def test_unauthorized_user_cannot_read_groups(
     assert result.status_code == 401
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "role,expected_total,expected_roles",
+    [
+        (None, 4, {"Guest", "Developer", "Maintainer", "Owner"}),  # No role filter
+        ("Guest", 4, {"Guest", "Developer", "Maintainer", "Owner"}),
+        ("Developer", 3, {"Developer", "Maintainer", "Owner"}),
+        ("Maintainer", 2, {"Maintainer", "Owner"}),
+        ("Owner", 1, {"Owner"}),
+    ],
+)
+async def test_filter_groups_by_role(
+    client: AsyncClient,
+    user_with_many_roles: MockUser,
+    role: str,
+    expected_total: int,
+    expected_roles: set,
+):
+    role_query = f"?role={role}" if role else ""
+    response = await client.get(
+        f"v1/groups{role_query}",
+        headers={"Authorization": f"Bearer {user_with_many_roles.token}"},
+    )
+
+    assert response.status_code == 200
+    response_json = response.json()
+
+    assert response_json["meta"]["total"] == expected_total
+    assert len(response_json["items"]) == expected_total
+
+    assert {item.get("role") for item in response_json["items"]} == expected_roles
+
+
 @pytest.mark.parametrize(
     "user_role, search_value_extractor",
     [

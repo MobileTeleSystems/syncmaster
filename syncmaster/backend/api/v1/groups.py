@@ -26,6 +26,7 @@ router = APIRouter(tags=["Groups"], responses=get_error_responses())
 async def read_groups(
     page: int = Query(gt=0, default=1),
     page_size: int = Query(gt=0, le=200, default=20),
+    role: str | None = Query(default=None),
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
     search_query: str | None = Query(
@@ -45,6 +46,7 @@ async def read_groups(
             page=page,
             page_size=page_size,
             current_user_id=current_user.id,
+            role=role,
             search_query=search_query,
         )
     return GroupPageSchema.from_pagination(pagination=pagination)

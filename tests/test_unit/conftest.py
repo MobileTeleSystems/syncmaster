@@ -125,6 +125,50 @@ async def deleted_user(session: AsyncSession, settings: Settings):
 
 
 @pytest_asyncio.fixture
+async def user_with_many_roles(session: AsyncSession, settings: Settings, simple_user: MockUser) -> MockUser:
+    user = await create_user(
+        session=session,
+        username="multi_role_user",
+        is_active=True,
+    )
+
+    roles = [
+        UserTestRoles.Owner,
+        UserTestRoles.Maintainer,
+        UserTestRoles.Developer,
+        UserTestRoles.Guest,
+    ]
+
+    groups = []
+
+    for role in roles:
+        group = await create_group(
+            session=session,
+            name=f"group_for_{role}",
+            owner_id=user.id if role == UserTestRoles.Owner else simple_user.user.id,
+        )
+
+        if role != UserTestRoles.Owner:
+            await add_user_to_group(user=user, group_id=group.id, session=session, role=role)
+        groups.append(group)
+
+    await session.commit()
+
+    mock_user = MockUser(
+        user=user,
+        auth_token=sign_jwt(user.id, settings),
+    )
+
+    yield mock_user
+
+    for group in groups:
+        await session.delete(group)
+
+    await session.delete(user)
+    await session.commit()
+
+
+@pytest_asyncio.fixture
 async def empty_group(session: AsyncSession, settings) -> MockGroup:
     owner = await create_user(
         session=session,

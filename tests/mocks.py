@@ -16,7 +16,7 @@ class UserTestRoles(enum.StrEnum):
 
 
 class MockUser:
-    def __init__(self, user: User, auth_token: str, role: str) -> None:
+    def __init__(self, user: User, auth_token: str, role: str | None = None) -> None:
         self.user = user
         self.token = auth_token
         self.role = role
