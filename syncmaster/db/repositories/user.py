@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from typing import Any, NoReturn
 
-from sqlalchemy import ScalarResult, insert, select
+from sqlalchemy import ScalarResult, func, insert, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,11 +17,24 @@ class UserRepository(Repository[User]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(model=User, session=session)
 
-    async def paginate(self, page: int, page_size: int, is_superuser: bool) -> Pagination:
+    async def paginate(
+        self,
+        page: int,
+        page_size: int,
+        is_superuser: bool,
+        search_query: str | None = None,
+    ) -> Pagination:
         stmt = select(User).where(User.is_deleted.is_(False))
+
+        if search_query:
+            ts_query = func.plainto_tsquery("english", search_query)
+            stmt = stmt.where(User.search_vector.op("@@")(ts_query))
+            stmt = stmt.add_columns(func.ts_rank(User.search_vector, ts_query).label("rank"))
+            stmt = stmt.order_by(func.ts_rank(User.search_vector, ts_query).desc())
 
         if not is_superuser:
             stmt = stmt.where(User.is_active.is_(True))
+
         return await self._paginate_scalar_result(query=stmt.order_by(User.username), page=page, page_size=page_size)
 
     async def read_by_id(self, user_id: int, **kwargs: Any) -> User:

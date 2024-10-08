@@ -22,11 +22,17 @@ async def get_users(
     page_size: int = Query(gt=0, le=200, default=20),
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    search_query: str | None = Query(
+        None,
+        title="Search Query",
+        description="full-text search for users",
+    ),
 ) -> UserPageSchema:
     pagination = await unit_of_work.user.paginate(
         page=page,
         page_size=page_size,
         is_superuser=current_user.is_superuser,
+        search_query=search_query,
     )
     return UserPageSchema.from_pagination(pagination)
 

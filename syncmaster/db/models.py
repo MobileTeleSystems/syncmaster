@@ -37,6 +37,16 @@ class User(Base, TimestampMixin, DeletableMixin):
     username: Mapped[str] = mapped_column(String(256), nullable=False, unique=True, index=True)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    search_vector: Mapped[str] = mapped_column(
+        TSVECTOR,
+        Computed(
+            "to_tsvector('english'::regconfig, username)",
+            persisted=True,
+        ),
+        nullable=False,
+        deferred=True,
+        doc="Full-text search vector",
+    )
 
     def __repr__(self) -> str:
         return f"User(username={self.username}, is_superuser={self.is_superuser}, is_active={self.is_active})"
