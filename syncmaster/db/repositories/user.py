@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from typing import Any, NoReturn
 
-from sqlalchemy import ScalarResult, func, insert, select
+from sqlalchemy import ScalarResult, insert, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -27,10 +27,7 @@ class UserRepository(Repository[User]):
         stmt = select(User).where(User.is_deleted.is_(False))
 
         if search_query:
-            ts_query = func.plainto_tsquery("english", search_query)
-            stmt = stmt.where(User.search_vector.op("@@")(ts_query))
-            stmt = stmt.add_columns(func.ts_rank(User.search_vector, ts_query).label("rank"))
-            stmt = stmt.order_by(func.ts_rank(User.search_vector, ts_query).desc())
+            stmt = stmt.where(User.username.bool_op("%")(search_query))  # similarity_threshold defaults to 0.3
 
         if not is_superuser:
             stmt = stmt.where(User.is_active.is_(True))

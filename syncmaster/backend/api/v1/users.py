@@ -25,7 +25,7 @@ async def get_users(
     search_query: str | None = Query(
         None,
         title="Search Query",
-        description="full-text search for users",
+        description="fuzzy search for users",
     ),
 ) -> UserPageSchema:
     pagination = await unit_of_work.user.paginate(

@@ -6,13 +6,8 @@ from tests.mocks import MockUser
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
 
-async def test_get_user(
-    client: AsyncClient,
-    simple_user: MockUser,
-    inactive_user: MockUser,
-    deleted_user: MockUser,
-):
-    response = await client.get(f"/v1/users/{simple_user.id}")
+async def test_get_user_unauthorized(client: AsyncClient):
+    response = await client.get("/v1/users/some_user_id")
     assert response.status_code == 401
     assert response.json() == {
         "error": {
@@ -22,9 +17,10 @@ async def test_get_user(
         },
     }
 
-    # check from simple user
+
+async def test_get_user_authorized(client: AsyncClient, simple_user: MockUser):
     response = await client.get(
-        f"v1/users/{simple_user.id}",
+        f"/v1/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
     assert response.status_code == 200
@@ -34,9 +30,10 @@ async def test_get_user(
         "username": simple_user.username,
     }
 
-    # check from simple user deleted user
+
+async def test_get_deleted_user(client: AsyncClient, simple_user: MockUser, deleted_user: MockUser):
     response = await client.get(
-        f"v1/users/{deleted_user.id}",
+        f"/v1/users/{deleted_user.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
     assert response.status_code == 404
@@ -48,9 +45,10 @@ async def test_get_user(
         },
     }
 
-    # check from inactive user
+
+async def test_get_user_inactive(client: AsyncClient, simple_user: MockUser, inactive_user: MockUser):
     response = await client.get(
-        f"v1/users/{simple_user.id}",
+        f"/v1/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {inactive_user.token}"},
     )
     assert response.status_code == 403
@@ -63,12 +61,7 @@ async def test_get_user(
     }
 
 
-async def test_get_current_user(
-    client: AsyncClient,
-    simple_user: MockUser,
-    inactive_user: MockUser,
-):
-    # not authenticated user
+async def test_get_current_user_unauthorized(client: AsyncClient):
     response = await client.get("/v1/users/me")
     assert response.status_code == 401
     assert response.json() == {
@@ -79,7 +72,8 @@ async def test_get_current_user(
         },
     }
 
-    # active user
+
+async def test_get_current_user_authorized(client: AsyncClient, simple_user: MockUser):
     response = await client.get(
         "/v1/users/me",
         headers={"Authorization": f"Bearer {simple_user.token}"},
@@ -91,7 +85,8 @@ async def test_get_current_user(
         "username": simple_user.username,
     }
 
-    # inactive user
+
+async def test_get_current_user_inactive(client: AsyncClient, inactive_user: MockUser):
     response = await client.get(
         "/v1/users/me",
         headers={"Authorization": f"Bearer {inactive_user.token}"},
