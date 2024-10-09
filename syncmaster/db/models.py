@@ -52,6 +52,14 @@ class Group(Base, TimestampMixin, DeletableMixin):
     members: Mapped[list[User]] = relationship("User", secondary="user_group")
     queue: Mapped[Queue] = relationship(back_populates="group")
 
+    search_vector: Mapped[str] = mapped_column(
+        TSVECTOR,
+        Computed("to_tsvector('english'::regconfig, name)", persisted=True),
+        nullable=False,
+        deferred=True,
+        doc="Full-text search vector",
+    )
+
     def __repr__(self) -> str:
         return f"Group(name={self.name}, owner_id={self.owner_id})"
 

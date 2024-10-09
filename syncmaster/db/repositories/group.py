@@ -3,9 +3,10 @@
 import re
 from typing import NoReturn
 
-from sqlalchemy import ScalarResult, insert, or_, select, update
+from sqlalchemy import ScalarResult, func, insert, or_, select, update
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.selectable import Select
 
 from syncmaster.db.models import Group, User, UserGroup
 from syncmaster.db.repositories.base import Repository
@@ -29,8 +30,11 @@ class GroupRepository(Repository[Group]):
         self,
         page: int,
         page_size: int,
+        search_query: str | None = None,
     ) -> Pagination:
         stmt = select(Group).where(Group.is_deleted.is_(False))
+        if search_query:
+            stmt = await GroupRepository._apply_search_query(search_query, stmt)
         return await self._paginate_scalar_result(query=stmt.order_by(Group.name), page=page, page_size=page_size)
 
     async def paginate_for_user(
@@ -38,6 +42,7 @@ class GroupRepository(Repository[Group]):
         page: int,
         page_size: int,
         current_user_id: int,
+        search_query: str | None = None,
     ):
         stmt = (
             select(Group)
@@ -55,6 +60,8 @@ class GroupRepository(Repository[Group]):
                 ),
             )
         )
+        if search_query:
+            stmt = await GroupRepository._apply_search_query(search_query, stmt)
 
         return await self._paginate_scalar_result(query=stmt.order_by(Group.name), page=page, page_size=page_size)
 
@@ -237,6 +244,16 @@ class GroupRepository(Repository[Group]):
             raise AlreadyIsNotGroupMemberError
         await self._session.delete(user_group)
         await self._session.flush()
+
+    @staticmethod
+    async def _apply_search_query(search_query: str, stmt: Select) -> Select:
+        ts_query = func.plainto_tsquery("english", search_query)
+        stmt = (
+            stmt.where(Group.search_vector.op("@@")(ts_query))
+            .add_columns(func.ts_rank(Group.search_vector, ts_query).label("rank"))
+            .order_by(func.ts_rank(Group.search_vector, ts_query).desc())
+        )
+        return stmt
 
     def _raise_error(self, err: DBAPIError) -> NoReturn:
         constraint = err.__cause__.__cause__.constraint_name
