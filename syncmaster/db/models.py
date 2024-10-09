@@ -65,22 +65,16 @@ class GroupMemberRole(enum.StrEnum):
         role1: str | GroupMemberRole,
         role2: str | GroupMemberRole,
     ) -> bool:
-        try:
-            role1_enum = cls(role1) if isinstance(role1, str) else role1
-            role2_enum = cls(role2) if isinstance(role2, str) else role2
-            hierarchy = cls.role_hierarchy()
-            return hierarchy.get(role1_enum, 0) >= hierarchy.get(role2_enum, 0)
-        except ValueError:
-            raise ValueError(f"Invalid role(s): {role1}, {role2}")
+        role1_enum = cls(role1) if isinstance(role1, str) else role1
+        role2_enum = cls(role2) if isinstance(role2, str) else role2
+        hierarchy = cls.role_hierarchy()
+        return hierarchy.get(role1_enum, 0) >= hierarchy.get(role2_enum, 0)
 
     @classmethod
     def roles_at_least(cls, role: str | GroupMemberRole) -> list[str]:
-        try:
-            role_enum = cls(role) if isinstance(role, str) else role
-            required_level = cls.role_hierarchy()[role_enum]
-            return [r.value for r, level in cls.role_hierarchy().items() if level >= required_level]
-        except KeyError:
-            raise ValueError(f"Invalid role: {role}")
+        role_enum = cls(role) if isinstance(role, str) else role
+        required_level = cls.role_hierarchy()[role_enum]
+        return [r.value for r, level in cls.role_hierarchy().items() if level >= required_level]
 
 
 class User(Base, TimestampMixin, DeletableMixin):
