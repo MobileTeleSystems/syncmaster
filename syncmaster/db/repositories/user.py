@@ -17,11 +17,21 @@ class UserRepository(Repository[User]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(model=User, session=session)
 
-    async def paginate(self, page: int, page_size: int, is_superuser: bool) -> Pagination:
+    async def paginate(
+        self,
+        page: int,
+        page_size: int,
+        is_superuser: bool,
+        search_query: str | None = None,
+    ) -> Pagination:
         stmt = select(User).where(User.is_deleted.is_(False))
+
+        if search_query:
+            stmt = stmt.where(User.username.bool_op("%")(search_query))  # similarity_threshold defaults to 0.3
 
         if not is_superuser:
             stmt = stmt.where(User.is_active.is_(True))
+
         return await self._paginate_scalar_result(query=stmt.order_by(User.username), page=page, page_size=page_size)
 
     async def read_by_id(self, user_id: int, **kwargs: Any) -> User:
