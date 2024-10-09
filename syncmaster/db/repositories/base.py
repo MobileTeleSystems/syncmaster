@@ -108,3 +108,12 @@ class Repository(Generic[Model], ABC):
             page=page,
             page_size=page_size,
         )
+
+    def _construct_vector_search(self, query: Select, search_query: str) -> Select:
+        ts_query = func.plainto_tsquery("english", search_query)
+        query = (
+            query.where(self._model.search_vector.op("@@")(ts_query))
+            .add_columns(func.ts_rank(self._model.search_vector, ts_query).label("rank"))
+            .order_by(func.ts_rank(self._model.search_vector, ts_query).desc())
+        )
+        return query

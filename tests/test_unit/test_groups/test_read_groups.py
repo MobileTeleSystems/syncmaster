@@ -165,31 +165,38 @@ async def test_unauthorized_user_cannot_read_groups(
 
 
 @pytest.mark.parametrize(
-    "search_value_extractor",
+    "user_role, search_value_extractor",
     [
-        lambda group: group.name,
-        lambda group: "_".join(group.name.split("_")[:1]),
-        lambda group: "_".join(group.name.split("_")[:2]),
-        lambda group: "_".join(group.name.split("_")[-1:]),
+        ("superuser", lambda group: group.name),
+        ("guest", lambda group: group.name),
+        ("guest", lambda group: "_".join(group.name.split("_")[:1])),
+        ("guest", lambda group: "_".join(group.name.split("_")[:2])),
+        ("guest", lambda group: "_".join(group.name.split("_")[-1:])),
     ],
     ids=[
-        "search_by_name_full_match",
-        "search_by_name_first_token",
-        "search_by_name_two_tokens",
-        "search_by_name_last_token",
+        "superuser_search_by_name_full_match",
+        "guest_search_by_name_full_match",
+        "guest_search_by_name_first_token",
+        "guest_search_by_name_two_tokens",
+        "guest_search_by_name_last_token",
     ],
 )
 async def test_search_groups_with_query(
     client: AsyncClient,
-    superuser: MockUser,
     mock_group: MockGroup,
+    superuser: MockUser,
+    user_role,
     search_value_extractor,
 ):
+    user = superuser
+    if user_role == "guest":
+        user = mock_group.get_member_of_role(UserTestRoles.Guest)
+
     search_query = search_value_extractor(mock_group)
 
     result = await client.get(
         "v1/groups",
-        headers={"Authorization": f"Bearer {superuser.token}"},
+        headers={"Authorization": f"Bearer {user.token}"},
         params={"search_query": search_query},
     )
 

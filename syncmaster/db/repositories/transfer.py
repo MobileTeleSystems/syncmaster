@@ -3,7 +3,7 @@
 from collections.abc import Sequence
 from typing import Any, NoReturn
 
-from sqlalchemy import ScalarResult, func, insert, or_, select
+from sqlalchemy import ScalarResult, insert, or_, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased, selectinload
@@ -48,14 +48,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         if search_query:
             processed_query = search_query.replace("/", " ").replace(".", " ")
             combined_query = f"{search_query} {processed_query}"
-            ts_query = func.plainto_tsquery("english", combined_query)
-            stmt = stmt.where(Transfer.search_vector.op("@@")(ts_query))
-            stmt = stmt.add_columns(func.ts_rank(Transfer.search_vector, ts_query).label("rank"))
-            # sort by ts_rank relevance, transfer.name
-            stmt = stmt.order_by(func.ts_rank(Transfer.search_vector, ts_query).desc(), Transfer.name)
-        else:
-            # if no search query, order only by transfer name
-            stmt = stmt.order_by(Transfer.name)
+            stmt = self._construct_vector_search(stmt, combined_query)
 
         if source_connection_id is not None:
             stmt = stmt.where(Transfer.source_connection_id == source_connection_id)
@@ -91,7 +84,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
             )
 
         return await self._paginate_scalar_result(
-            query=stmt,
+            query=stmt.order_by(Transfer.name),
             page=page,
             page_size=page_size,
         )
