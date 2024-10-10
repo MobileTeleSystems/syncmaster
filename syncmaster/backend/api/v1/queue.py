@@ -21,6 +21,36 @@ from syncmaster.schemas.v1.status import StatusResponseSchema
 router = APIRouter(tags=["Queues"], responses=get_error_responses())
 
 
+@router.get("/queues", description="Queues in page format")
+async def read_queues(
+    group_id: int,
+    page: int = Query(gt=0, default=1),
+    page_size: int = Query(gt=0, le=200, default=20),
+    current_user: User = Depends(get_user(is_active=True)),
+    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    search_query: str | None = Query(
+        None,
+        title="Search Query",
+        description="full-text search for queues",
+    ),
+) -> QueuePageSchema:
+    resource_role = await unit_of_work.queue.get_group_permission(
+        user=current_user,
+        group_id=group_id,
+    )
+
+    if resource_role == Permission.NONE:
+        raise GroupNotFoundError
+
+    pagination = await unit_of_work.queue.paginate(
+        page=page,
+        page_size=page_size,
+        group_id=group_id,
+        search_query=search_query,
+    )
+    return QueuePageSchema.from_pagination(pagination=pagination)
+
+
 @router.get("/queues/{queue_id}", description="Read queue by id")
 async def read_queue(
     queue_id: int,
@@ -123,27 +153,3 @@ async def delete_queue(
         status_code=status.HTTP_200_OK,
         message="Queue was deleted",
     )
-
-
-@router.get("/queues", description="Queues in page format")
-async def read_queues(
-    group_id: int,
-    page: int = Query(gt=0, default=1),
-    page_size: int = Query(gt=0, le=200, default=20),
-    current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
-) -> QueuePageSchema:
-    resource_role = await unit_of_work.queue.get_group_permission(
-        user=current_user,
-        group_id=group_id,
-    )
-
-    if resource_role == Permission.NONE:
-        raise GroupNotFoundError
-
-    pagination = await unit_of_work.queue.paginate(
-        page=page,
-        page_size=page_size,
-        group_id=group_id,
-    )
-    return QueuePageSchema.from_pagination(pagination=pagination)
