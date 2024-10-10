@@ -46,7 +46,8 @@ PROJECT_PATH = Path(__file__).parent.parent.resolve()
 logger = logging.getLogger(__name__)
 
 pytest_plugins = [
-    "tests.test_unit.test_transfers.transfer_fixtures.group_transfers_fixture",
+    "tests.test_unit.test_transfers.transfer_fixtures",
+    "tests.test_unit.test_runs.run_fixtures",
 ]
 
 
