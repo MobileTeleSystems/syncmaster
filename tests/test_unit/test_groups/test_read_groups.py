@@ -1,5 +1,6 @@
 import random
 import string
+from collections.abc import Callable
 
 import pytest
 from httpx import AsyncClient
@@ -106,7 +107,7 @@ async def test_superuser_can_read_all_groups(
                     "description": empty_group.description,
                     "owner_id": empty_group.owner_id,
                 },
-                "role": UserTestRoles._Superuser,
+                "role": UserTestRoles.Superuser,
             },
             {
                 "data": {
@@ -115,7 +116,7 @@ async def test_superuser_can_read_all_groups(
                     "description": group.description,
                     "owner_id": group.owner_id,
                 },
-                "role": UserTestRoles._Superuser,
+                "role": UserTestRoles.Superuser,
             },
         ],
     }
@@ -146,6 +147,7 @@ async def test_unauthorized_user_cannot_read_groups(
         ("Developer", 3, {"Developer", "Maintainer", "Owner"}),
         ("Maintainer", 2, {"Maintainer", "Owner"}),
         ("Owner", 1, {"Owner"}),
+        ("Superuser", 0, set()),
     ],
 )
 async def test_filter_groups_by_role(
@@ -156,13 +158,13 @@ async def test_filter_groups_by_role(
     expected_roles: set,
 ):
     role_query = f"?role={role}" if role else ""
-    response = await client.get(
+    result = await client.get(
         f"v1/groups{role_query}",
         headers={"Authorization": f"Bearer {user_with_many_roles.token}"},
     )
 
-    assert response.status_code == 200
-    response_json = response.json()
+    assert result.status_code == 200
+    response_json = result.json()
 
     assert response_json["meta"]["total"] == expected_total
     assert len(response_json["items"]) == expected_total
@@ -178,6 +180,7 @@ async def test_filter_groups_by_role(
         ("Developer", 4),
         ("Maintainer", 4),
         ("Owner", 4),
+        ("Superuser", 4),
     ],
 )
 async def test_filter_groups_not_applied_to_superuser(
@@ -188,54 +191,82 @@ async def test_filter_groups_not_applied_to_superuser(
     expected_total: int,
 ):
     role_query = f"?role={role}" if role else ""
-    response = await client.get(
+    result = await client.get(
         f"v1/groups{role_query}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 
-    assert response.status_code == 200
-    response_json = response.json()
+    assert result.status_code == 200
+    response_json = result.json()
 
     assert response_json["meta"]["total"] == expected_total
     assert len(response_json["items"]) == expected_total
 
     for item in response_json["items"]:
-        assert item.get("role") == "Superuser"
+        assert item.get("role") == UserTestRoles.Superuser
 
 
 @pytest.mark.parametrize(
-    "user_role, search_value_extractor",
+    "search_value, expected_total",
     [
-        ("superuser", lambda group: group.name),
-        ("guest", lambda group: group.name),
-        ("guest", lambda group: "_".join(group.name.split("_")[:1])),
-        ("guest", lambda group: "_".join(group.name.split("_")[:2])),
-        ("guest", lambda group: "_".join(group.name.split("_")[-1:])),
+        ("group_for", 4),
+        ("group_for_Owner", 1),
+        ("group_for_Maintainer", 1),
+        ("group_for_Developer", 1),
+        ("group_for_Guest", 1),
     ],
     ids=[
-        "superuser_search_by_name_full_match",
+        "search_by_name_partial_match",
+        "owner_search_by_group_name",
+        "maintainer_search_by_group_name",
+        "developer_search_by_group_name",
+        "guest_search_by_group_name",
+    ],
+)
+async def test_search_groups_with_query(
+    client: AsyncClient,
+    user_with_many_roles: MockUser,
+    search_value: str,
+    expected_total: int,
+):
+
+    result = await client.get(
+        "v1/groups",
+        headers={"Authorization": f"Bearer {user_with_many_roles.token}"},
+        params={"search_query": search_value},
+    )
+
+    assert result.status_code == 200
+    assert result.json()["meta"]["total"] == expected_total
+    assert len(result.json()["items"]) == expected_total
+
+
+@pytest.mark.parametrize(
+    "search_value_extractor",
+    [
+        lambda group: group.name,
+        lambda group: "_".join(group.name.split("_")[:1]),
+        lambda group: "_".join(group.name.split("_")[:2]),
+        lambda group: "_".join(group.name.split("_")[-1:]),
+    ],
+    ids=[
         "guest_search_by_name_full_match",
         "guest_search_by_name_first_token",
         "guest_search_by_name_two_tokens",
         "guest_search_by_name_last_token",
     ],
 )
-async def test_search_groups_with_query(
+async def test_superuser_search_groups_with_query(
     client: AsyncClient,
-    mock_group: MockGroup,
+    group: MockGroup,
     superuser: MockUser,
-    user_role,
-    search_value_extractor,
+    search_value_extractor: Callable,
 ):
-    user = superuser
-    if user_role == "guest":
-        user = mock_group.get_member_of_role(UserTestRoles.Guest)
-
-    search_query = search_value_extractor(mock_group)
+    search_query = search_value_extractor(group)
 
     result = await client.get(
         "v1/groups",
-        headers={"Authorization": f"Bearer {user.token}"},
+        headers={"Authorization": f"Bearer {superuser.token}"},
         params={"search_query": search_query},
     )
 
@@ -252,10 +283,13 @@ async def test_search_groups_with_query(
         },
         "items": [
             {
-                "id": mock_group.id,
-                "name": mock_group.name,
-                "description": mock_group.description,
-                "owner_id": mock_group.owner_id,
+                "data": {
+                    "id": group.id,
+                    "name": group.name,
+                    "description": group.description,
+                    "owner_id": group.owner_id,
+                },
+                "role": superuser.role,
             },
         ],
     }

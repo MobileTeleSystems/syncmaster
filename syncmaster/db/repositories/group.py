@@ -41,7 +41,7 @@ class GroupRepository(Repository[Group]):
             page=page,
             page_size=page_size,
         )
-        items = [{"data": group, "role": GroupMemberRole._Superuser} for group in paginated_result.items]
+        items = [{"data": group, "role": GroupMemberRole.Superuser} for group in paginated_result.items]
 
         return Pagination(
             items=items,
@@ -56,18 +56,9 @@ class GroupRepository(Repository[Group]):
         page_size: int,
         current_user_id: int,
         role: str | None = None,
+        search_query: str | None = None,
     ) -> Pagination:
         roles_at_least = GroupMemberRole.roles_at_least(role) if role else None
-
-        # query for groups where the user is the owner
-        owned_groups_stmt = (
-            select(Group)
-            .where(
-                Group.owner_id == current_user_id,
-                Group.is_deleted.is_(False),
-            )
-            .order_by(Group.name)
-        )
 
         # if a role is specified and 'Owner' does not meet the required level, exclude owned groups
         if role and not GroupMemberRole.is_at_least_privilege_level(
@@ -77,6 +68,20 @@ class GroupRepository(Repository[Group]):
             owned_groups = []
             total_owned_groups = 0
         else:
+            # query for groups where the user is the owner
+            owned_groups_stmt = (
+                select(Group)
+                .where(
+                    Group.owner_id == current_user_id,
+                    Group.is_deleted.is_(False),
+                )
+                .order_by(Group.name)
+            )
+
+            # apply search filtering if a search query is provided
+            if search_query:
+                owned_groups_stmt = self._construct_vector_search(owned_groups_stmt, search_query)
+
             # get total count of owned groups
             total_owned_groups = (
                 await self._session.scalar(
@@ -109,6 +114,10 @@ class GroupRepository(Repository[Group]):
             user_groups_stmt = user_groups_stmt.where(
                 UserGroup.role.in_(roles_at_least),
             )
+
+        # apply search filtering if a search query is provided
+        if search_query:
+            user_groups_stmt = self._construct_vector_search(user_groups_stmt, search_query)
 
         # get total count of user groups
         total_user_groups = (

@@ -31,7 +31,7 @@ class GroupMemberRole(enum.StrEnum):
     Developer = "Developer"
     Owner = "Owner"
     Guest = "Guest"
-    _Superuser = "Superuser"
+    Superuser = "Superuser"
 
     @classmethod
     def public_roles(cls) -> list[GroupMemberRole]:
@@ -56,7 +56,7 @@ class GroupMemberRole(enum.StrEnum):
             cls.Developer: 2,
             cls.Maintainer: 3,
             cls.Owner: 4,
-            cls._Superuser: 5,
+            cls.Superuser: 5,
         }
 
     @classmethod

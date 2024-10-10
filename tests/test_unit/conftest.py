@@ -86,7 +86,7 @@ async def superuser(session: AsyncSession, settings: Settings):
         yield MockUser(
             user=user,
             auth_token=sign_jwt(user.id, settings),
-            role=UserTestRoles.Developer,
+            role=UserTestRoles.Superuser,
         )
 
 
