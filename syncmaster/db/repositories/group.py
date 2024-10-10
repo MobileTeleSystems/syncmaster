@@ -29,8 +29,11 @@ class GroupRepository(Repository[Group]):
         self,
         page: int,
         page_size: int,
+        search_query: str | None = None,
     ) -> Pagination:
         stmt = select(Group).where(Group.is_deleted.is_(False))
+        if search_query:
+            stmt = self._construct_vector_search(stmt, search_query)
         return await self._paginate_scalar_result(query=stmt.order_by(Group.name), page=page, page_size=page_size)
 
     async def paginate_for_user(
@@ -38,6 +41,7 @@ class GroupRepository(Repository[Group]):
         page: int,
         page_size: int,
         current_user_id: int,
+        search_query: str | None = None,
     ):
         stmt = (
             select(Group)
@@ -55,6 +59,8 @@ class GroupRepository(Repository[Group]):
                 ),
             )
         )
+        if search_query:
+            stmt = self._construct_vector_search(stmt, search_query)
 
         return await self._paginate_scalar_result(query=stmt.order_by(Group.name), page=page, page_size=page_size)
 

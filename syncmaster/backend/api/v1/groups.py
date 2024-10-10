@@ -28,17 +28,24 @@ async def read_groups(
     page_size: int = Query(gt=0, le=200, default=20),
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    search_query: str | None = Query(
+        None,
+        title="Search Query",
+        description="full-text search for groups",
+    ),
 ) -> GroupPageSchema:
     if current_user.is_superuser:
         pagination = await unit_of_work.group.paginate_all(
             page=page,
             page_size=page_size,
+            search_query=search_query,
         )
     else:
         pagination = await unit_of_work.group.paginate_for_user(
             page=page,
             page_size=page_size,
             current_user_id=current_user.id,
+            search_query=search_query,
         )
     return GroupPageSchema.from_pagination(pagination=pagination)
 
