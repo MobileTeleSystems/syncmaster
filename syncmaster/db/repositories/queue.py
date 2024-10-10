@@ -53,11 +53,15 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         page: int,
         page_size: int,
         group_id: int,
+        search_query: str | None = None,
     ):
         stmt = select(Queue).where(
             Queue.is_deleted.is_(False),
             Queue.group_id == group_id,
         )
+        if search_query:
+            stmt = self._construct_vector_search(stmt, search_query)
+
         return await self._paginate_scalar_result(
             query=stmt.order_by(Queue.id),
             page=page,

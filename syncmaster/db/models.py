@@ -274,5 +274,13 @@ class Queue(Base, ResourceMixin, TimestampMixin, DeletableMixin):
     transfers: Mapped[list[Transfer]] = relationship(back_populates="queue")
     group: Mapped[Group] = relationship(back_populates="queue")
 
+    search_vector: Mapped[str] = mapped_column(
+        TSVECTOR,
+        Computed("to_tsvector('english'::regconfig, name)", persisted=True),
+        nullable=False,
+        deferred=True,
+        doc="Full-text search vector",
+    )
+
     def __repr__(self):
         return f"<Queue name={self.name} description={self.description}>"
