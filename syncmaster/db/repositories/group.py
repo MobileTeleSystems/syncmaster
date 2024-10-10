@@ -3,11 +3,12 @@
 import re
 from typing import NoReturn
 
-from sqlalchemy import ScalarResult, insert, or_, select, update
+from sqlalchemy import ScalarResult, func, insert, select, update
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
-from syncmaster.db.models import Group, User, UserGroup
+from syncmaster.db.models import Group, GroupMemberRole, User, UserGroup
 from syncmaster.db.repositories.base import Repository
 from syncmaster.db.utils import Pagination, Permission
 from syncmaster.exceptions import EntityNotFoundError, SyncmasterError
@@ -34,35 +35,120 @@ class GroupRepository(Repository[Group]):
         stmt = select(Group).where(Group.is_deleted.is_(False))
         if search_query:
             stmt = self._construct_vector_search(stmt, search_query)
-        return await self._paginate_scalar_result(query=stmt.order_by(Group.name), page=page, page_size=page_size)
+
+        paginated_result = await self._paginate_scalar_result(
+            query=stmt.order_by(Group.name),
+            page=page,
+            page_size=page_size,
+        )
+        items = [{"data": group, "role": GroupMemberRole.Superuser} for group in paginated_result.items]
+
+        return Pagination(
+            items=items,
+            total=paginated_result.total,
+            page=page,
+            page_size=page_size,
+        )
 
     async def paginate_for_user(
         self,
         page: int,
         page_size: int,
         current_user_id: int,
+        role: str | None = None,
         search_query: str | None = None,
-    ):
-        stmt = (
-            select(Group)
-            .distinct()
-            .join(
-                UserGroup,
-                UserGroup.group_id == Group.id,
-                isouter=True,
-            )
-            .where(
-                Group.is_deleted.is_(False),
-                or_(
-                    UserGroup.user_id == current_user_id,
-                    Group.owner_id == current_user_id,
-                ),
-            )
-        )
-        if search_query:
-            stmt = self._construct_vector_search(stmt, search_query)
+    ) -> Pagination:
+        roles_at_least = GroupMemberRole.roles_at_least(role) if role else None
 
-        return await self._paginate_scalar_result(query=stmt.order_by(Group.name), page=page, page_size=page_size)
+        # if a role is specified and 'Owner' does not meet the required level, exclude owned groups
+        if role and not GroupMemberRole.is_at_least_privilege_level(
+            GroupMemberRole.Owner,
+            role,
+        ):
+            owned_groups = []
+            total_owned_groups = 0
+        else:
+            # query for groups where the user is the owner
+            owned_groups_stmt = (
+                select(Group)
+                .where(
+                    Group.owner_id == current_user_id,
+                    Group.is_deleted.is_(False),
+                )
+                .order_by(Group.name)
+            )
+
+            # apply search filtering if a search query is provided
+            if search_query:
+                owned_groups_stmt = self._construct_vector_search(owned_groups_stmt, search_query)
+
+            # get total count of owned groups
+            total_owned_groups = (
+                await self._session.scalar(
+                    select(func.count()).select_from(owned_groups_stmt.subquery()),
+                )
+                or 0
+            )
+
+            # fetch owned groups
+            owned_groups_result = await self._session.execute(
+                owned_groups_stmt,
+            )
+            owned_groups = [
+                {"data": group, "role": GroupMemberRole.Owner.value} for group in owned_groups_result.scalars().all()
+            ]
+
+        #  query for groups where the user is a member (not Owner)
+        user_groups_stmt = (
+            select(UserGroup)
+            .join(Group, UserGroup.group_id == Group.id)
+            .where(
+                UserGroup.user_id == current_user_id,
+                Group.is_deleted.is_(False),
+            )
+            .order_by(Group.name)
+        )
+
+        # apply role-based filtering if a role is specified
+        if roles_at_least:
+            user_groups_stmt = user_groups_stmt.where(
+                UserGroup.role.in_(roles_at_least),
+            )
+
+        # apply search filtering if a search query is provided
+        if search_query:
+            user_groups_stmt = self._construct_vector_search(user_groups_stmt, search_query)
+
+        # get total count of user groups
+        total_user_groups = (
+            await self._session.scalar(
+                select(func.count()).select_from(user_groups_stmt.subquery()),
+            )
+            or 0
+        )
+
+        user_groups_result = await self._session.execute(
+            user_groups_stmt.options(joinedload(UserGroup.group)),
+        )
+        user_groups = [
+            {"data": user_group.group, "role": user_group.role.value}
+            for user_group in user_groups_result.scalars().all()
+        ]
+
+        # combine owned groups and user groups
+        combined_groups = owned_groups + user_groups
+        total_count = total_owned_groups + total_user_groups
+
+        start = (page - 1) * page_size
+        end = start + page_size
+        paginated_items = combined_groups[start:end]
+
+        return Pagination(
+            items=paginated_items,
+            total=total_count,
+            page=page,
+            page_size=page_size,
+        )
 
     async def read_by_id(
         self,

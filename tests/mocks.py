@@ -12,10 +12,11 @@ class UserTestRoles(enum.StrEnum):
     Maintainer = "Maintainer"
     Developer = "Developer"
     Guest = "Guest"
+    Superuser = "Superuser"
 
 
 class MockUser:
-    def __init__(self, user: User, auth_token: str, role: str) -> None:
+    def __init__(self, user: User, auth_token: str, role: str | None = None) -> None:
         self.user = user
         self.token = auth_token
         self.role = role

@@ -69,22 +69,22 @@ async def test_owner_of_group_can_not_update_user_role_with_wrong_role(
     )
 
     # Assert
-    assert result.status_code == 422
     assert result.json() == {
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",
             "details": [
                 {
-                    "context": {"expected": "'Maintainer', 'Developer' or 'Guest'"},
-                    "input": "Unknown",
-                    "location": ["body", "role"],
-                    "message": "Input should be 'Maintainer', 'Developer' or 'Guest'",
-                    "code": "enum",
+                    "location": ["body"],
+                    "message": "Value error, Input should be one of: Maintainer, Developer, Guest",
+                    "code": "value_error",
+                    "context": {},
+                    "input": {"role": "Unknown"},
                 },
             ],
         },
     }
+    assert result.status_code == 422
 
 
 async def test_maintainer_below_can_not_update_user_role(
