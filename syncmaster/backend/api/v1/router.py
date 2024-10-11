@@ -6,6 +6,7 @@ from syncmaster.backend.api.v1.auth.router import router as auth_router
 from syncmaster.backend.api.v1.connections import router as connection_router
 from syncmaster.backend.api.v1.groups import router as group_router
 from syncmaster.backend.api.v1.queue import router as queue_router
+from syncmaster.backend.api.v1.runs import router as runs_router
 from syncmaster.backend.api.v1.transfers import router as transfer_router
 from syncmaster.backend.api.v1.users import router as user_router
 
@@ -16,3 +17,4 @@ router.include_router(group_router)
 router.include_router(connection_router)
 router.include_router(transfer_router)
 router.include_router(queue_router)
+router.include_router(runs_router)

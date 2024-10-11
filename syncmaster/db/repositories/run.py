@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
+from datetime import datetime
 from typing import Any, NoReturn
 
 from sqlalchemy import desc, select
@@ -24,8 +25,22 @@ class RunRepository(Repository[Run]):
         transfer_id: int,
         page: int,
         page_size: int,
+        status: list[Status] | None = None,
+        started_at_since: datetime | None = None,
+        started_at_until: datetime | None = None,
     ) -> Pagination:
-        query = select(Run).where(Run.transfer_id == transfer_id).order_by(desc(Run.created_at))
+        query = select(Run).where(Run.transfer_id == transfer_id)
+
+        if status:
+            query = query.where(Run.status.in_(status))
+
+        if started_at_since:
+            query = query.where(Run.started_at >= started_at_since)
+
+        if started_at_until:
+            query = query.where(Run.started_at <= started_at_until)
+
+        query = query.order_by(desc(Run.created_at))
         return await self._paginate_scalar_result(query=query, page=page, page_size=page_size)
 
     async def read_by_id(self, run_id: int) -> Run:
