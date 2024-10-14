@@ -28,11 +28,15 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         page: int,
         page_size: int,
         group_id: int,
+        connection_type: list[str] | None = None,
     ) -> Pagination:
         stmt = select(Connection).where(
             Connection.is_deleted.is_(False),
             Connection.group_id == group_id,
         )
+
+        if connection_type is not None:
+            stmt = stmt.where(Connection.data.op("->>")("type").in_(connection_type))
 
         return await self._paginate_scalar_result(
             query=stmt.order_by(Connection.name),

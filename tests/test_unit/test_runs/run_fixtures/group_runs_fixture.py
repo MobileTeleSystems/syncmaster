@@ -8,7 +8,7 @@ from tests.mocks import MockRun
 
 
 @pytest_asyncio.fixture
-async def group_runs(group_run, session: AsyncSession) -> list[MockRun]:
+async def group_runs(group_run: MockRun, session: AsyncSession) -> list[MockRun]:
     # extract necessary data from the existing group_run fixture
     transfer = group_run.transfer.transfer
     mock_transfer = group_run.transfer

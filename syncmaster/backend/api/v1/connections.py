@@ -24,6 +24,7 @@ from syncmaster.schemas.v1.connection_types import (
     ORACLE_TYPE,
     POSTGRES_TYPE,
     S3_TYPE,
+    ConnectionType,
 )
 from syncmaster.schemas.v1.connections.connection import (
     ConnectionCopySchema,
@@ -45,6 +46,7 @@ async def read_connections(
     group_id: int,
     page: int = Query(gt=0, default=1),
     page_size: int = Query(gt=0, le=200, default=20),
+    type: list[ConnectionType] | None = Query(None),
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ConnectionPageSchema:
@@ -57,10 +59,13 @@ async def read_connections(
     if resource_role == Permission.NONE:
         raise GroupNotFoundError
 
+    connection_str_type = None if type is None else [ct.value for ct in type]
+
     pagination = await unit_of_work.connection.paginate(
         page=page,
         page_size=page_size,
         group_id=group_id,
+        connection_type=connection_str_type,
     )
     items: list[ReadConnectionSchema] = []
 
