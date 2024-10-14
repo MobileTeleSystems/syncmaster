@@ -235,13 +235,13 @@ async def test_superuser_cannot_read_runs_of_unknown_transfer_error(
         ),
     ],
     ids=[
+        "no_filters",
         "status_single",
         "status_multiple",
-        "no_filters",
         "started_at_since",
         "started_at_until",
         "started_at_range",
-        "status_and_started_at",
+        "status_and_started_at_range",
     ],
 )
 async def test_filter_runs(
