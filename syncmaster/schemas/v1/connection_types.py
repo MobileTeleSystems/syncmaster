@@ -11,8 +11,8 @@ HDFS_TYPE = Literal["hdfs"]
 
 
 class ConnectionType(str, Enum):
+    POSTGRES = "postgres"
     HIVE = "hive"
     ORACLE = "oracle"
-    POSTGRES = "postgres"
     S3 = "s3"
     HDFS = "hdfs"

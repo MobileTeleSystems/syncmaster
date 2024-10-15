@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -223,3 +225,66 @@ async def test_superuser_cannot_read_from_unknown_group_error(
         },
     }
     assert result.status_code == 404
+
+
+@pytest.mark.parametrize(
+    "filter_params, expected_total",
+    [
+        ({}, 5),  # No filters applied, expecting all connections
+        ({"type": ["oracle"]}, 1),
+        ({"type": ["postgres", "hive"]}, 2),
+        ({"type": ["postgres", "hive", "oracle", "hdfs", "s3"]}, 5),
+    ],
+    ids=[
+        "no_filters",
+        "single_type",
+        "multiple_types",
+        "all_types",
+    ],
+)
+async def test_filter_connections(
+    client: AsyncClient,
+    superuser: MockUser,
+    filter_params: dict[str, Any],
+    expected_total: int,
+    group_connections: list[MockConnection],
+):
+    # Arrange
+    params = {**filter_params, "group_id": group_connections[0].connection.group_id}
+
+    # Act
+    result = await client.get(
+        "v1/connections",
+        headers={"Authorization": f"Bearer {superuser.token}"},
+        params=params,
+    )
+
+    # Assert
+    assert result.status_code == 200
+    assert result.json()["meta"]["total"] == expected_total
+    assert len(result.json()["items"]) == expected_total
+
+    # check that the types match
+    if "type" in params and params["type"]:
+        returned_types = [conn["connection_data"]["type"] for conn in result.json()["items"]]
+        assert all(type in params["type"] for type in returned_types)
+
+
+async def test_filter_connections_unknown_type(
+    client: AsyncClient,
+    superuser: MockUser,
+    group_connections: list[MockConnection],
+):
+    # Arrange
+    params = {"type": "unknown", "group_id": group_connections[0].connection.group_id}
+
+    # Act
+    result = await client.get(
+        "v1/connections",
+        headers={"Authorization": f"Bearer {superuser.token}"},
+        params=params,
+    )
+
+    # Assert
+    assert result.status_code == 422
+    assert result.json()["error"]["details"][0]["code"] == "enum"

@@ -25,7 +25,7 @@ from tests.test_unit.utils import (
 
 
 @pytest_asyncio.fixture
-async def group_run(session: AsyncSession, settings: Settings) -> MockTransfer:
+async def group_run(session: AsyncSession, settings: Settings) -> MockRun:
     group_owner = await create_user(session=session, username="group_owner_connection", is_active=True)
     group = await create_group(session=session, name="connection_group", owner_id=group_owner.id)
     members: list[MockUser] = []
