@@ -1,87 +1,30 @@
-import secrets
 from collections.abc import AsyncGenerator
 
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.backend.api.v1.auth.utils import sign_jwt
 from syncmaster.config import Settings
 from syncmaster.db.repositories.utils import decrypt_auth_data
 from syncmaster.schemas.v1.connection_types import ConnectionType
-from tests.mocks import (
-    MockConnection,
-    MockCredentials,
-    MockGroup,
-    MockTransfer,
-    MockUser,
-    UserTestRoles,
-)
-from tests.test_unit.conftest import create_group_member
-from tests.test_unit.utils import (
-    create_connection,
-    create_credentials,
-    create_group,
-    create_queue,
-    create_transfer,
-    create_user,
-)
+from tests.mocks import MockConnection, MockCredentials, MockTransfer
+from tests.test_unit.utils import create_connection, create_credentials, create_transfer
 
 
 @pytest_asyncio.fixture
 async def group_transfers(
+    group_transfer: MockTransfer,
     session: AsyncSession,
     settings: Settings,
 ) -> AsyncGenerator[list[MockTransfer], None]:
-    # create a group owner
-    group_owner = await create_user(
-        session=session,
-        username="group_transfer_owner",
-        is_active=True,
-    )
-    # Create a group
-    group = await create_group(
-        session=session,
-        name="group_for_group_transfers",
-        owner_id=group_owner.id,
-    )
-    # create a queue
-    queue = await create_queue(
-        session=session,
-        name=f"{secrets.token_hex(5)}_test_queue",
-        group_id=group.id,
-    )
-    # create members
-    members = []
-    for username in (
-        "transfer_group_member_maintainer",
-        "transfer_group_member_developer",
-        "transfer_group_member_guest",
-    ):
-        members.append(
-            await create_group_member(
-                username=username,
-                group_id=group.id,
-                session=session,
-                settings=settings,
-            ),
-        )
-    await session.commit()
-    mock_group = MockGroup(
-        group=group,
-        owner=MockUser(
-            user=group_owner,
-            auth_token=sign_jwt(group_owner.id, settings),
-            role=UserTestRoles.Owner,
-        ),
-        members=members,
-    )
+    group = group_transfer.owner_group.group
+    queue = group_transfer.transfer.queue
+    mock_group = group_transfer.owner_group
 
-    transfers = []
-    source_connections = []
-    target_connections = []
+    transfers = [group_transfer]
+    source_connections = [group_transfer.source_connection.connection]
+    target_connections = [group_transfer.target_connection.connection]
 
     for connection_type in ConnectionType:
-        # create source connection with this type
         source_connection = await create_connection(
             session=session,
             name=f"group_transfer_source_connection_{connection_type.value}",
@@ -93,7 +36,7 @@ async def group_transfers(
             settings=settings,
             connection_id=source_connection.id,
         )
-        # create target connection with the same type
+
         target_connection = await create_connection(
             session=session,
             name=f"group_transfer_target_connection_{connection_type.value}",
@@ -105,6 +48,7 @@ async def group_transfers(
             settings=settings,
             connection_id=target_connection.id,
         )
+
         source_params = {"type": connection_type.value}
         target_params = {"type": connection_type.value}
 
@@ -122,12 +66,16 @@ async def group_transfers(
                 "file_format": file_format,
                 "options": {},
             }
-            source_params.update(common_params, directory_path="/path/to/source")
-            target_params.update(common_params, directory_path="/path/to/target")
+            source_params.update(common_params)
+            source_params["directory_path"] = "/path/to/source"
+            target_params.update(common_params)
+            target_params["directory_path"] = "/path/to/target"
         elif connection_type == ConnectionType.HDFS:
             common_params = {"options": {}}
-            source_params.update(common_params, directory_path="/path/to/source")
-            target_params.update(common_params, directory_path="/path/to/target")
+            source_params.update(common_params)
+            source_params["directory_path"] = "/path/to/source"
+            target_params.update(common_params)
+            target_params["directory_path"] = "/path/to/target"
         elif connection_type in [ConnectionType.HIVE, ConnectionType.POSTGRES, ConnectionType.ORACLE]:
             source_params["table_name"] = "source_table"
             target_params["table_name"] = "target_table"
@@ -145,7 +93,7 @@ async def group_transfers(
             schedule="0 0 * * *",
             strategy_params={"type": "full"},
         )
-        # create MockTransfer
+
         mock_transfer = MockTransfer(
             transfer=transfer,
             source_connection=MockConnection(
@@ -174,14 +122,9 @@ async def group_transfers(
 
     yield transfers
 
-    # cleanup
-    for transfer in transfers:
+    for transfer in transfers[1:]:  # skip the transfer from group_transfer
         await session.delete(transfer.transfer)
-    for connection in source_connections + target_connections:
+    for connection in source_connections[1:] + target_connections[1:]:  # skip connections from group_transfer
         await session.delete(connection)
-    await session.delete(queue)
-    await session.delete(group)
-    await session.delete(group_owner)
-    for member in members:
-        await session.delete(member.user)
+
     await session.commit()
