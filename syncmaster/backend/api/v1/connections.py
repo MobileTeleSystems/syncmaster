@@ -49,6 +49,11 @@ async def read_connections(
     type: list[ConnectionType] | None = Query(None),
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    search_query: str | None = Query(
+        None,
+        title="Search Query",
+        description="full-text search for connections",
+    ),
 ) -> ConnectionPageSchema:
     """Return connections in page format"""
     resource_role = await unit_of_work.connection.get_group_permission(
@@ -65,6 +70,7 @@ async def read_connections(
         page=page,
         page_size=page_size,
         group_id=group_id,
+        search_query=search_query,
         connection_type=connection_str_type,
     )
     items: list[ReadConnectionSchema] = []
