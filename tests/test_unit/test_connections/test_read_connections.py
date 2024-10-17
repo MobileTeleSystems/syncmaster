@@ -1,3 +1,5 @@
+import random
+import string
 from typing import Any
 
 import pytest
@@ -225,6 +227,81 @@ async def test_superuser_cannot_read_from_unknown_group_error(
         },
     }
     assert result.status_code == 404
+
+
+@pytest.mark.parametrize(
+    "search_value_extractor",
+    [
+        lambda connection: connection.name,
+        lambda connection: "_".join(connection.name.split("_")[:1]),
+        lambda connection: connection.data.get("host"),
+        lambda connection: ".".join(connection.name.split("_")[:1]),
+    ],
+    ids=["name", "name_token", "hostname", "hostname_token"],
+)
+async def test_search_connections_with_query(
+    client: AsyncClient,
+    superuser: MockUser,
+    group_connection: MockConnection,
+    search_value_extractor,
+):
+    search_query = search_value_extractor(group_connection.connection)
+
+    result = await client.get(
+        "v1/connections",
+        headers={"Authorization": f"Bearer {superuser.token}"},
+        params={"group_id": group_connection.connection.group_id, "search_query": search_query},
+    )
+
+    assert result.json() == {
+        "meta": {
+            "page": 1,
+            "pages": 1,
+            "total": 1,
+            "page_size": 20,
+            "has_next": False,
+            "has_previous": False,
+            "next_page": None,
+            "previous_page": None,
+        },
+        "items": [
+            {
+                "id": group_connection.id,
+                "description": group_connection.description,
+                "group_id": group_connection.group_id,
+                "name": group_connection.name,
+                "connection_data": {
+                    "type": group_connection.data["type"],
+                    "host": group_connection.data["host"],
+                    "port": group_connection.data["port"],
+                    "database_name": group_connection.data["database_name"],
+                    "additional_params": group_connection.data["additional_params"],
+                },
+                "auth_data": {
+                    "type": group_connection.credentials.value["type"],
+                    "user": group_connection.credentials.value["user"],
+                },
+            },
+        ],
+    }
+    assert result.status_code == 200
+
+
+async def test_search_connections_with_nonexistent_query(
+    client: AsyncClient,
+    superuser: MockUser,
+    group_connection: MockConnection,
+):
+    random_search_query = "".join(random.choices(string.ascii_lowercase + string.digits, k=12))
+
+    result = await client.get(
+        "v1/connections",
+        headers={"Authorization": f"Bearer {superuser.token}"},
+        params={"group_id": group_connection.connection.group_id, "search_query": random_search_query},
+    )
+
+    assert result.status_code == 200
+    assert result.json()["items"] == []
 
 
 @pytest.mark.parametrize(

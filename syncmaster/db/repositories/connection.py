@@ -28,12 +28,17 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         page: int,
         page_size: int,
         group_id: int,
+        search_query: str | None = None,
         connection_type: list[str] | None = None,
     ) -> Pagination:
         stmt = select(Connection).where(
             Connection.is_deleted.is_(False),
             Connection.group_id == group_id,
         )
+        if search_query:
+            processed_query = search_query.replace(".", " ")
+            combined_query = f"{search_query} {processed_query}"
+            stmt = self._construct_vector_search(stmt, combined_query)
 
         if connection_type is not None:
             stmt = stmt.where(Connection.data.op("->>")("type").in_(connection_type))
