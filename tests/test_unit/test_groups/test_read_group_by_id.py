@@ -20,10 +20,13 @@ async def test_member_of_group_can_read_by_id(
     )
     # Assert
     assert result.json() == {
-        "id": group.id,
-        "name": group.name,
-        "description": group.description,
-        "owner_id": group.owner_id,
+        "data": {
+            "id": group.id,
+            "name": group.name,
+            "description": group.description,
+            "owner_id": group.owner_id,
+        },
+        "role": user.role.value,
     }
     assert result.status_code == 200
 
@@ -86,10 +89,13 @@ async def test_superuser_can_read_group(
     )
     # Assert
     assert result.json() == {
-        "id": group.id,
-        "name": group.name,
-        "description": group.description,
-        "owner_id": group.owner_id,
+        "data": {
+            "id": group.id,
+            "name": group.name,
+            "description": group.description,
+            "owner_id": group.owner_id,
+        },
+        "role": superuser.role.value,
     }
     assert result.status_code == 200
 
