@@ -199,6 +199,30 @@ class GroupRepository(Repository[Group]):
         except IntegrityError as e:
             self._raise_error(e)
 
+    async def get_member_role(self, group_id: int, user_id: int) -> GroupMemberRole:
+        user_group = await self._session.get(
+            UserGroup,
+            {
+                "group_id": group_id,
+                "user_id": user_id,
+            },
+        )
+        if user_group is None:  # then it's either the owner or a superuser because permission exists
+            owner_query = (
+                (
+                    select(Group).where(
+                        Group.owner_id == user_id,
+                        Group.id == group_id,
+                    )
+                )
+                .exists()
+                .select()
+            )
+            is_owner = await self._session.scalar(owner_query)
+            return GroupMemberRole.Owner if is_owner else GroupMemberRole.Superuser
+
+        return user_group.role
+
     async def update_member_role(
         self,
         group_id: int,

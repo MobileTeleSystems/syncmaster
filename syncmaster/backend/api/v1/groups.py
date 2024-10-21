@@ -13,6 +13,7 @@ from syncmaster.schemas.v1.groups import (
     AddUserSchema,
     CreateGroupSchema,
     GroupPageSchema,
+    GroupWithUserRoleSchema,
     ReadGroupSchema,
     UpdateGroupSchema,
 )
@@ -72,7 +73,7 @@ async def read_group(
     group_id: int,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
-) -> ReadGroupSchema:
+) -> GroupWithUserRoleSchema:
     resource_role = await unit_of_work.group.get_group_permission(
         user=current_user,
         group_id=group_id,
@@ -82,7 +83,8 @@ async def read_group(
         raise GroupNotFoundError
 
     group = await unit_of_work.group.read_by_id(group_id=group_id)
-    return ReadGroupSchema.from_orm(group)
+    user_role = await unit_of_work.group.get_member_role(group_id=group_id, user_id=current_user.id)
+    return GroupWithUserRoleSchema.from_orm({"data": group, "role": user_role})
 
 
 @router.patch("/groups/{group_id}")
