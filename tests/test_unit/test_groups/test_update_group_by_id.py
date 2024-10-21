@@ -28,7 +28,10 @@ async def test_owner_of_group_can_update_group(client: AsyncClient, empty_group:
         f"v1/groups/{empty_group.id}",
         headers={"Authorization": f"Bearer {empty_group.get_member_of_role(UserTestRoles.Owner).token}"},
     )
-    assert check_result.json() == group_data
+    assert check_result.json() == {
+        "data": group_data,
+        "role": UserTestRoles.Owner,
+    }
     assert check_result.status_code == 200
 
 
@@ -109,7 +112,10 @@ async def test_superuser_can_update_group(client: AsyncClient, empty_group: Mock
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
     assert result.status_code == 200
-    assert result.json() == group_data
+    assert result.json() == {
+        "data": group_data,
+        "role": UserTestRoles.Superuser,
+    }
 
 
 async def test_validation_on_update_group(
