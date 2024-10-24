@@ -36,6 +36,25 @@ class Settings(BaseSettings):
     RABBITMQ_USER: str
     RABBITMQ_PASSWORD: str
 
+    LOGGING_SYSTEM: str = "elk"
+
+    KIBANA_HOST: str = ""
+    KIBANA_INDEX_PATTERN_ID: str = ""
+
+    GRAFANA_HOST: str = ""
+    GRAFANA_DATASOURCE: str = ""
+
+    #  TODO: implement jinja universal config
+    LOG_URL_TEMPLATE: str = """
+        {% if logging_system == 'elk' %}
+        {{ kibana_host }}?correlation_id={{ correlation_id }}&run_id={{ run.id }}
+        {% elif logging_system == 'grafana' %}
+        {{ grafana_host }}?correlation_id={{ correlation_id }}&run_id={{ run.id }}
+        {% else %}
+        Unsupported logging system: {{ logging_system }}
+        {% endif %}
+        """
+
     def build_db_connection_uri(
         self,
         *,

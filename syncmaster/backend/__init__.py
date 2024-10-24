@@ -1,5 +1,8 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
+import uuid
+
+from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
@@ -34,6 +37,12 @@ def application_factory(settings: Settings) -> FastAPI:
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+    )
+
+    application.add_middleware(
+        CorrelationIdMiddleware,
+        header_name="X-Correlation-ID",
+        generator=lambda: str(uuid.uuid4()),
     )
 
     application.include_router(api_router)

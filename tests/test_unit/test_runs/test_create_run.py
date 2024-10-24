@@ -151,6 +151,8 @@ async def test_superuser_can_create_run(
         "transfer_dump": run.transfer_dump,
     }
     assert result.status_code == 200
+    assert "correlation_id" in result.json().get("log_url")
+    assert "run_id" in result.json().get("log_url")
 
 
 async def test_unauthorized_user_cannot_create_run(

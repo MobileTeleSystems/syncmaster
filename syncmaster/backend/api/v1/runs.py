@@ -1,7 +1,9 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
+import uuid
 from datetime import datetime
 
+from asgi_correlation_id import correlation_id
 from fastapi import APIRouter, Depends, Query
 from kombu.exceptions import KombuError
 
@@ -19,6 +21,7 @@ from syncmaster.schemas.v1.transfers.run import (
     ReadRunSchema,
     RunPageSchema,
 )
+from syncmaster.utils import render_log_url
 from syncmaster.worker.config import celery
 
 router = APIRouter(tags=["Runs"], responses=get_error_responses())
@@ -104,6 +107,10 @@ async def start_run(
         transfer.target_connection_id,
     )
 
+    request_correlation_id = correlation_id.get()
+    if not request_correlation_id:
+        request_correlation_id = str(uuid.uuid4())
+
     async with unit_of_work:
         run = await unit_of_work.run.create(
             transfer_id=create_run_data.transfer_id,
@@ -112,6 +119,12 @@ async def start_run(
             source_creds=ReadAuthDataSchema(auth_data=credentials_source).dict(),
             target_creds=ReadAuthDataSchema(auth_data=credentials_target).dict(),
         )
+        log_url = render_log_url(run=run, correlation_id=request_correlation_id)
+        run = await unit_of_work.run.update(
+            run_id=run.id,
+            log_url=log_url,
+        )
+
     try:
         celery.send_task("run_transfer_task", kwargs={"run_id": run.id}, queue=transfer.queue.name)
     except KombuError as e:
