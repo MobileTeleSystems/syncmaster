@@ -4,6 +4,7 @@ from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Run, Status
+from syncmaster.settings import Settings
 from tests.mocks import MockGroup, MockTransfer, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
@@ -123,9 +124,13 @@ async def test_superuser_can_create_run(
     superuser: MockUser,
     group_transfer: MockTransfer,
     session: AsyncSession,
+    settings: Settings,
     mocker,
-    monkeypatch,
 ) -> None:
+    # Arrange
+    settings.worker.LOG_URL_TEMPLATE = (
+        "https://grafana.example.com?correlation_id={{ correlation_id }}&run_id={{ run.id }}"
+    )
     mocker.patch("syncmaster.worker.config.celery.send_task")
 
     # Act
@@ -141,7 +146,8 @@ async def test_superuser_can_create_run(
     ).first()
 
     # Assert
-    assert result.json() == {
+    response = result.json()
+    assert response == {
         "id": run.id,
         "transfer_id": run.transfer_id,
         "status": run.status.value,
@@ -151,6 +157,8 @@ async def test_superuser_can_create_run(
         "transfer_dump": run.transfer_dump,
     }
     assert result.status_code == 200
+    assert "correlation_id" in response.get("log_url")
+    assert "run_id" in response.get("log_url")
 
 
 async def test_unauthorized_user_cannot_create_run(

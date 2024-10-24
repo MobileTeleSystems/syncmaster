@@ -12,8 +12,8 @@ filters:
     default_value: '-'
 
 formatters:
-  colored:
-    (): coloredlogs.ColoredFormatter
+  plain:
+    (): logging.Formatter
     # Add correlation_id to log records
     fmt: '%(asctime)s.%(msecs)03d %(processName)s:%(process)d %(name)s:%(lineno)d [%(levelname)s] %(correlation_id)s %(message)s'
     datefmt: '%Y-%m-%d %H:%M:%S'
@@ -21,7 +21,12 @@ formatters:
 handlers:
   main:
     class: logging.StreamHandler
-    formatter: colored
+    formatter: plain
+    filters: [correlation_id]
+    stream: ext://sys.stdout
+  celery:
+    class: logging.StreamHandler
+    formatter: plain
     filters: [correlation_id]
     stream: ext://sys.stdout
 
@@ -34,3 +39,7 @@ loggers:
     handlers: [main]
     level: INFO
     propagate: false
+    celery:
+      level: DEBUG
+      handlers: [celery]
+      propagate: false
