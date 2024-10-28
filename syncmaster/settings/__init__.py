@@ -6,6 +6,8 @@ from pydantic import Field, model_validator
 from pydantic.types import ImportString
 from pydantic_settings import BaseSettings
 
+from syncmaster.settings.broker import RabbitMQSettings
+from syncmaster.settings.database import DatabaseSettings
 from syncmaster.settings.server import ServerSettings
 
 
@@ -21,6 +23,9 @@ class Settings(BaseSettings):
     * By explicitly passing ``settings`` object as an argument to :obj:`application_factory <syncmaster.backend.main.application_factory>`
     * By setting up environment variables matching a specific key.
 
+        All environment variable names are written in uppercase and should be prefixed with ``SYNCMASTER__``.
+        Nested items are delimited with ``__``.
+
 
     More details can be found in `Pydantic documentation <https://docs.pydantic.dev/latest/concepts/pydantic_settings/>`_.
 
@@ -29,8 +34,11 @@ class Settings(BaseSettings):
 
     .. code-block:: bash
 
+        # same as settings.database.url = "postgresql+asyncpg://postgres:postgres@localhost:5432/syncmaster"
+        SYNCMASTER__DATABASE__URL=postgresql+asyncpg://postgres:postgres@localhost:5432/syncmaster
+
         # same as settings.server.debug = True
-        SERVER_DEBUG=True
+        SYNCMASTER__SERVER__DEBUG=True
     """
 
     SERVER_DEBUG: bool = True
@@ -41,63 +49,22 @@ class Settings(BaseSettings):
     SECURITY_ALGORITHM: str = "HS256"
     CRYPTO_KEY: str = "UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94="
 
-    POSTGRES_HOST: str
-    POSTGRES_PORT: int
-    POSTGRES_DB: str
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-
-    RABBITMQ_HOST: str
-    RABBITMQ_PORT: int
-    RABBITMQ_USER: str
-    RABBITMQ_PASSWORD: str
-
-    LOGGING_SYSTEM: str = "elk"
-
     LOG_URL_TEMPLATE: str = ""
     CORRELATION_CELERY_HEADER_ID: str = "CORRELATION_CELERY_HEADER_ID"
-
-    def build_db_connection_uri(
-        self,
-        *,
-        driver: str | None = None,
-        host: str | None = None,
-        port: int | None = None,
-        user: str | None = None,
-        password: str | None = None,
-        database: str | None = None,
-    ) -> str:
-        return "postgresql+{}://{}:{}@{}:{}/{}".format(
-            driver or "asyncpg",
-            user or self.POSTGRES_USER,
-            password or self.POSTGRES_PASSWORD,
-            host or self.POSTGRES_HOST,
-            port or self.POSTGRES_PORT,
-            database or self.POSTGRES_DB,
-        )
-
-    def build_rabbit_connection_uri(
-        self,
-        *,
-        host: str | None = None,
-        port: int | None = None,
-        user: str | None = None,
-        password: str | None = None,
-    ) -> str:
-        return "amqp://{}:{}@{}:{}//".format(
-            user or self.RABBITMQ_USER,
-            password or self.RABBITMQ_PASSWORD,
-            host or self.RABBITMQ_HOST,
-            port or self.RABBITMQ_PORT,
-        )
 
     TOKEN_EXPIRED_TIME: int = 60 * 60 * 10  # 10 hours
     CREATE_SPARK_SESSION_FUNCTION: ImportString = "syncmaster.worker.spark.get_worker_spark_session"
 
+    database: DatabaseSettings = Field(description=":ref:`Database settings <backend-configuration-database>`")
+    broker: RabbitMQSettings = Field(description=":ref:`Broker settings <backend-configuration-broker>`")
     server: ServerSettings = Field(
         default_factory=ServerSettings,
         description=":ref:`Server settings <backend-configuration>`",
     )
+
+    class Config:
+        env_prefix = "SYNCMASTER__"
+        env_nested_delimiter = "__"
 
 
 class TestSettings(BaseSettings):

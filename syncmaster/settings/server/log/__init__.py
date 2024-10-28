@@ -20,21 +20,21 @@ class LoggingSettings(BaseModel):
 
     .. code-block:: bash
 
-        SERVER_LOGGING_SETUP=True
-        SERVER_LOGGING_PRESET=json
+        SYNCMASTER__SERVER__LOGGING__SETUP=True
+        SYNCMASTER__SERVER__LOGGING__PRESET=json
 
     Passing custom logging config file:
 
     .. code-block:: bash
 
-        SERVER_LOGGING_SETUP=True
-        SERVER_LOGGING_CUSTOM_CONFIG_PATH=/some/logging.yml
+        SYNCMASTER__SERVER__LOGGING__SETUP=True
+        SYNCMASTER__SERVER__LOGGING__CUSTOM__CONFIG_PATH=/some/logging.yml
 
     Setup logging in some other way, e.g. using `uvicorn args <https://www.uvicorn.org/settings/#logging>`_:
 
     .. code-block:: bash
 
-        $ export SERVER_LOGGING_SETUP=False
+        $ export SYNCMASTER__SERVER__LOGGING__SETUP=False
         $ python -m syncmaster.backend --log-level debug
     """
 

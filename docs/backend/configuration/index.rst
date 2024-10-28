@@ -8,6 +8,8 @@ Configuration
     :caption: Configuration
     :hidden:
 
+    database
+    broker
     logging
     debug
 

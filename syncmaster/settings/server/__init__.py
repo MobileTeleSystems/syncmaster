@@ -16,8 +16,8 @@ class ServerSettings(BaseModel):
 
     .. code-block:: bash
 
-        SERVER_DEBUG=True
-        SERVER_LOGGING_PRESET=colored
+        SYNCMASTER__SERVER__DEBUG=True
+        SYNCMASTER__SERVER__LOGGING__PRESET=colored
     """
 
     debug: bool = Field(

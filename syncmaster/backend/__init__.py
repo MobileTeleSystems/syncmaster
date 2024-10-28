@@ -6,6 +6,7 @@ from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
+from sqlalchemy.ext.asyncio import async_engine_from_config
 from starlette.middleware.cors import CORSMiddleware
 
 from syncmaster.backend.api.deps import (
@@ -53,7 +54,7 @@ def application_factory(settings: Settings) -> FastAPI:
     application.exception_handler(HTTPException)(http_exception_handler)
     application.exception_handler(Exception)(unknown_exception_handler)
 
-    engine = create_engine(connection_uri=settings.build_db_connection_uri())
+    engine = async_engine_from_config(settings.database.dict(), prefix="")
     session_factory = create_session_factory(engine=engine)
 
     application.dependency_overrides.update(
