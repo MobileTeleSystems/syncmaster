@@ -16,8 +16,8 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from syncmaster.backend import application_factory
-from syncmaster.config import Settings, TestSettings
 from syncmaster.db.models import Base
+from syncmaster.settings import Settings, TestSettings
 from tests.mocks import UserTestRoles
 from tests.utils import prepare_new_database, run_async_migrations
 

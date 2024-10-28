@@ -4,18 +4,23 @@ import logging
 from datetime import datetime, timezone
 
 import onetl
+from asgi_correlation_id import correlation_id
+from celery.signals import before_task_publish, task_prerun
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from syncmaster.config import Settings
 from syncmaster.db.models import AuthData, Run, Status, Transfer
 from syncmaster.db.repositories.utils import decrypt_auth_data
 from syncmaster.exceptions.run import RunNotFoundError
+from syncmaster.settings import Settings
 from syncmaster.worker.base import WorkerTask
 from syncmaster.worker.config import celery
 from syncmaster.worker.controller import TransferController
 
 logger = logging.getLogger(__name__)
+
+
+CORRELATION_CELERY_HEADER_ID = Settings().CORRELATION_CELERY_HEADER_ID
 
 
 @celery.task(name="run_transfer_task", bind=True, track_started=True)
@@ -75,3 +80,18 @@ def run_transfer(session: Session, run_id: int, settings: Settings):
     run.ended_at = datetime.now(tz=timezone.utc)
     session.add(run)
     session.commit()
+
+
+@before_task_publish.connect()
+def transfer_correlation_id(headers, *args, **kwargs) -> None:
+    # This is called before task.delay() finishes
+    # Here we're able to transfer the correlation ID via the headers kept in our backend
+    headers[CORRELATION_CELERY_HEADER_ID] = correlation_id.get()
+
+
+@task_prerun.connect()
+def load_correlation_id(task, *args, **kwargs) -> None:
+    # This is called when the worker picks up the task
+    # Here we're able to load the correlation ID from the headers
+    id_value = task.request.get(CORRELATION_CELERY_HEADER_ID)
+    correlation_id.set(id_value)

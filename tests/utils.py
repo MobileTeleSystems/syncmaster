@@ -17,8 +17,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from syncmaster.config import Settings
 from syncmaster.db.models import Status
+from syncmaster.settings import Settings
 
 logger = logging.getLogger(__name__)
 

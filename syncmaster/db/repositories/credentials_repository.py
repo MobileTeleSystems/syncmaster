@@ -8,12 +8,12 @@ from sqlalchemy import ScalarResult, insert, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.config import Settings
 from syncmaster.db.models import AuthData
 from syncmaster.db.repositories.base import Repository
 from syncmaster.db.repositories.utils import decrypt_auth_data, encrypt_auth_data
 from syncmaster.exceptions import SyncmasterError
 from syncmaster.exceptions.credentials import AuthDataNotFoundError
+from syncmaster.settings import Settings
 
 
 class CredentialsRepository(Repository[AuthData]):

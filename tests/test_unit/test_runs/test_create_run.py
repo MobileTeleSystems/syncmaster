@@ -124,8 +124,14 @@ async def test_superuser_can_create_run(
     group_transfer: MockTransfer,
     session: AsyncSession,
     mocker,
+    monkeypatch,
 ) -> None:
     # Arrange
+    monkeypatch.setenv(
+        "LOG_URL_TEMPLATE",
+        "https://grafana.example.com?correlation_id={{ correlation_id }}&run_id={{ run.id }}",
+    )
+
     mocker.patch("syncmaster.worker.config.celery.send_task")
 
     # Act

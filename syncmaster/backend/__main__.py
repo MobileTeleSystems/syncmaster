@@ -24,6 +24,7 @@ def main(prog_name: str | None = None, args: list[str] | None = None):
 
     args = args.copy()
     # prepend config path before command line arguments
+    print("SCREAM")
     args.insert(0, "--factory")
     args.insert(1, "syncmaster.backend:get_application")
 

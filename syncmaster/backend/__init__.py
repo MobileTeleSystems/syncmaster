@@ -11,7 +11,6 @@ from starlette.middleware.cors import CORSMiddleware
 from syncmaster.backend.api.deps import (
     DatabaseEngineMarker,
     DatabaseSessionMarker,
-    SettingsMarker,
     UnitOfWorkMarker,
 )
 from syncmaster.backend.api.router import api_router
@@ -21,16 +20,18 @@ from syncmaster.backend.handler import (
     unknown_exception_handler,
     validation_exception_handler,
 )
-from syncmaster.config import Settings
 from syncmaster.db.factory import create_engine, create_session_factory, get_uow
 from syncmaster.exceptions import SyncmasterError
+from syncmaster.settings import Settings
 
 
 def application_factory(settings: Settings) -> FastAPI:
     application = FastAPI(
         title=settings.PROJECT_NAME,
-        debug=settings.DEBUG,
+        debug=settings.SERVER_DEBUG,
     )
+    application.state.settings = settings
+
     application.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -57,7 +58,7 @@ def application_factory(settings: Settings) -> FastAPI:
 
     application.dependency_overrides.update(
         {
-            SettingsMarker: lambda: settings,
+            Settings: lambda: settings,
             DatabaseEngineMarker: lambda: engine,
             DatabaseSessionMarker: lambda: session_factory,
             UnitOfWorkMarker: get_uow(session_factory, settings),

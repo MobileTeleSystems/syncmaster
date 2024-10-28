@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.config import Settings
 from syncmaster.db.models import AuthData
 from syncmaster.db.repositories import (
     ConnectionRepository,
@@ -13,6 +12,7 @@ from syncmaster.db.repositories import (
     TransferRepository,
     UserRepository,
 )
+from syncmaster.settings import Settings
 
 
 class UnitOfWork:

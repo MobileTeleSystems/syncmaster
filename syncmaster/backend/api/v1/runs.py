@@ -126,7 +126,11 @@ async def start_run(
         )
 
     try:
-        celery.send_task("run_transfer_task", kwargs={"run_id": run.id}, queue=transfer.queue.name)
+        celery.send_task(
+            "run_transfer_task",
+            kwargs={"run_id": run.id},
+            queue=transfer.queue.name,
+        )
     except KombuError as e:
         async with unit_of_work:
             run = await unit_of_work.run.update(

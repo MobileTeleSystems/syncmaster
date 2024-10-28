@@ -9,8 +9,8 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from syncmaster.config import Settings
-from syncmaster.db.base import Base
+from syncmaster.db.models.base import Base
+from syncmaster.settings import Settings
 
 config = context.config
 

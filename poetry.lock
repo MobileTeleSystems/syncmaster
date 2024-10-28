@@ -3182,10 +3182,10 @@ test = ["coverage[toml]", "zope.event", "zope.testing"]
 testing = ["coverage[toml]", "zope.event", "zope.testing"]
 
 [extras]
-backend = ["alembic", "asgi-correlation-id", "asyncpg", "celery", "fastapi", "pydantic-settings", "python-jose", "python-multipart", "sqlalchemy", "sqlalchemy-utils", "uvicorn"]
-worker = ["celery", "onetl", "psycopg2-binary", "pydantic-settings", "sqlalchemy", "sqlalchemy-utils"]
+backend = ["alembic", "asgi-correlation-id", "asyncpg", "celery", "fastapi", "jinja2", "pydantic-settings", "python-jose", "python-multipart", "sqlalchemy", "sqlalchemy-utils", "uvicorn"]
+worker = ["asgi-correlation-id", "celery", "jinja2", "onetl", "psycopg2-binary", "pydantic-settings", "sqlalchemy", "sqlalchemy-utils"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "60c32f9162f13c2b42cf48fef53b2f5a86d726403650e6190888c8c878dbf461"
+content-hash = "4fed7c533715d582f9accc850422eaaf8ad2325a8bdac753f94614b63efd228e"

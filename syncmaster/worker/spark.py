@@ -5,9 +5,9 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from syncmaster.config import Settings
 from syncmaster.db.models import Run
 from syncmaster.dto.connections import ConnectionDTO
+from syncmaster.settings import Settings
 
 if TYPE_CHECKING:
     from pyspark.sql import SparkSession

@@ -1,14 +1,12 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from enum import StrEnum
-from typing import TYPE_CHECKING
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 from pydantic.types import ImportString
 from pydantic_settings import BaseSettings
 
-if TYPE_CHECKING:
-    pass
+from syncmaster.settings.server import ServerSettings
 
 
 class EnvTypes(StrEnum):
@@ -16,8 +14,26 @@ class EnvTypes(StrEnum):
 
 
 class Settings(BaseSettings):
-    ENV: EnvTypes = EnvTypes.LOCAL
-    DEBUG: bool = True
+    """Syncmaster backend settings.
+
+    Backend can be configured in 2 ways:
+
+    * By explicitly passing ``settings`` object as an argument to :obj:`application_factory <syncmaster.backend.main.application_factory>`
+    * By setting up environment variables matching a specific key.
+
+
+    More details can be found in `Pydantic documentation <https://docs.pydantic.dev/latest/concepts/pydantic_settings/>`_.
+
+    Examples
+    --------
+
+    .. code-block:: bash
+
+        # same as settings.server.debug = True
+        SERVER_DEBUG=True
+    """
+
+    SERVER_DEBUG: bool = True
 
     PROJECT_NAME: str = "SyncMaster"
 
@@ -38,22 +54,8 @@ class Settings(BaseSettings):
 
     LOGGING_SYSTEM: str = "elk"
 
-    KIBANA_HOST: str = ""
-    KIBANA_INDEX_PATTERN_ID: str = ""
-
-    GRAFANA_HOST: str = ""
-    GRAFANA_DATASOURCE: str = ""
-
-    #  TODO: implement jinja universal config
-    LOG_URL_TEMPLATE: str = """
-        {% if logging_system == 'elk' %}
-        {{ kibana_host }}?correlation_id={{ correlation_id }}&run_id={{ run.id }}
-        {% elif logging_system == 'grafana' %}
-        {{ grafana_host }}?correlation_id={{ correlation_id }}&run_id={{ run.id }}
-        {% else %}
-        Unsupported logging system: {{ logging_system }}
-        {% endif %}
-        """
+    LOG_URL_TEMPLATE: str = ""
+    CORRELATION_CELERY_HEADER_ID: str = "CORRELATION_CELERY_HEADER_ID"
 
     def build_db_connection_uri(
         self,
@@ -91,6 +93,11 @@ class Settings(BaseSettings):
 
     TOKEN_EXPIRED_TIME: int = 60 * 60 * 10  # 10 hours
     CREATE_SPARK_SESSION_FUNCTION: ImportString = "syncmaster.worker.spark.get_worker_spark_session"
+
+    server: ServerSettings = Field(
+        default_factory=ServerSettings,
+        description=":ref:`Server settings <backend-configuration>`",
+    )
 
 
 class TestSettings(BaseSettings):

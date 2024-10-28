@@ -6,11 +6,11 @@ from fastapi import Depends, status
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
-from syncmaster.backend.api.deps import SettingsMarker, UnitOfWorkMarker
+from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.api.v1.auth.utils import decode_jwt
 from syncmaster.backend.services.unit_of_work import UnitOfWork
-from syncmaster.config import Settings
 from syncmaster.db.models import User
+from syncmaster.settings import Settings
 
 oauth_schema = OAuth2PasswordBearer(tokenUrl="v1/auth/token")
 
@@ -18,14 +18,13 @@ oauth_schema = OAuth2PasswordBearer(tokenUrl="v1/auth/token")
 def get_user(
     is_active: bool = False,
     is_superuser: bool = False,
-) -> Callable[[str, Settings, UnitOfWork], Awaitable[User]]:
+) -> Callable[[str, UnitOfWork], Awaitable[User]]:
     async def wrapper(
         token: str = Depends(oauth_schema),
-        settings: Settings = Depends(SettingsMarker),
         unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
     ) -> User:
         async with unit_of_work:
-            token_data = decode_jwt(token, settings=settings)
+            token_data = decode_jwt(token, settings=Settings())
             if token_data is None:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,

@@ -3,7 +3,7 @@
 """add search_vector with GIN indexed to Transfer table
 
 Revision ID: b9f5c4315bb2
-Revises: 478240cdad4b
+Revises: 2023_11_23_0009_create_celery_tables
 Create Date: 2024-09-30 14:25:37.264273
 
 """
@@ -13,7 +13,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = "b9f5c4315bb2"
-down_revision = "478240cdad4b"
+down_revision = "2023_11_23_0009_create_celery_tables"
 branch_labels = None
 depends_on = None
 
