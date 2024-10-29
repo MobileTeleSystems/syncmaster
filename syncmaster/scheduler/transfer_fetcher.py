@@ -8,7 +8,7 @@ from syncmaster.config import Settings
 from syncmaster.db.models import Transfer
 
 DATABASE_URL = Settings().build_db_connection_uri()
-engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(DATABASE_URL)
 AsyncSessionLocal = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
 
@@ -20,7 +20,7 @@ class TransferFetcher:
 
         async with AsyncSessionLocal() as session:
             if self.last_updated_at is None:
-                query = select(Transfer).filter(Transfer.is_scheduled == True)
+                query = select(Transfer).filter(Transfer.is_scheduled)
             else:
                 query = select(Transfer).filter(Transfer.updated_at > self.last_updated_at)
             result = await session.execute(query)

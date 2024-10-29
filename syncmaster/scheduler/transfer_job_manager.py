@@ -1,5 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
+import asyncio
+
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from kombu.exceptions import KombuError
@@ -15,7 +17,7 @@ from syncmaster.worker.config import celery
 
 class TransferJobManager:
     def __init__(self):
-        self.scheduler = AsyncIOScheduler()
+        self.scheduler = AsyncIOScheduler(timezone=Settings().TZ)
         self.scheduler.add_jobstore("sqlalchemy", url=Settings().build_db_connection_uri(driver="psycopg2"))
 
     def update_jobs(self, transfers: list[Transfer]) -> None:
@@ -37,8 +39,8 @@ class TransferJobManager:
             else:
                 self.scheduler.add_job(
                     func=TransferJobManager.send_job_to_celery,
-                    trigger=CronTrigger.from_crontab(transfer.schedule),
                     id=job_id,
+                    trigger=CronTrigger.from_crontab(transfer.schedule),
                     args=(transfer.id,),
                 )
 
@@ -61,7 +63,12 @@ class TransferJobManager:
                 )
 
             try:
-                celery.send_task("run_transfer_task", kwargs={"run_id": run.id}, queue=transfer.queue.name)
+                await asyncio.to_thread(
+                    celery.send_task,
+                    "run_transfer_task",
+                    kwargs={"run_id": run.id},
+                    queue=transfer.queue.name,
+                )
             except KombuError as e:
                 async with unit_of_work:
                     await unit_of_work.run.update(run_id=run.id, status=Status.FAILED)
