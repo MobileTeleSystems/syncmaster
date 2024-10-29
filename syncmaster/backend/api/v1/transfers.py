@@ -131,6 +131,8 @@ async def create_transfer(
             target_params=transfer_data.target_params.dict(),
             strategy_params=transfer_data.strategy_params.dict(),
             queue_id=transfer_data.queue_id,
+            is_scheduled=transfer_data.is_scheduled,
+            schedule=transfer_data.schedule,
         )
     return ReadTransferSchema.from_orm(transfer)
 
