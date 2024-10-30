@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
+# SPDX-License-Identifier: Apache-2.0
+"""Create connection table
+
+Revision ID: 0004_create_connection_table
+Revises: 0003_create_queue_table
+Create Date: 2023-11-23 11:38:00.000000
+"""
+
+import sqlalchemy as sa
+from alembic import op
+
+# revision identifiers, used by Alembic.
+revision = "0004_create_connection_table"
+down_revision = "0003_create_queue_table"
+branch_labels = None
+depends_on = None
+
+
+def upgrade():
+    op.create_table(
+        "connection",
+        sa.Column("id", sa.BigInteger(), nullable=False),
+        sa.Column("group_id", sa.BigInteger(), nullable=False),
+        sa.Column("name", sa.String(length=128), nullable=False),
+        sa.Column("description", sa.String(length=512), nullable=False),
+        sa.Column("data", sa.JSON(), nullable=False),
+        sa.Column("is_deleted", sa.Boolean(), nullable=False),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["group_id"],
+            ["group.id"],
+            name=op.f("fk__connection__group_id__group"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk__connection")),
+        sa.UniqueConstraint("name", "group_id", name=op.f("uq__connection__name_group_id")),
+    )
+    op.create_index(op.f("ix__connection__group_id"), "connection", ["group_id"], unique=False)
+
+
+def downgrade():
+    op.drop_index(op.f("ix__connection__group_id"), table_name="connection")
+    op.drop_table("connection")
