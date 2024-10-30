@@ -3,7 +3,6 @@
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
-from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.api.v1.auth.utils import sign_jwt
 from syncmaster.backend.services import UnitOfWork
 from syncmaster.errors.registration import get_error_responses
@@ -23,7 +22,7 @@ router = APIRouter(
 @router.post("/token")
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> AuthTokenSchema:
     """This is the test auth method!!! Not for production!!!!"""
     try:

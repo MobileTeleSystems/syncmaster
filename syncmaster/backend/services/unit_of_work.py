@@ -1,7 +1,11 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
+from typing import Annotated
+
+from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from syncmaster.backend.dependencies import Stub
 from syncmaster.db.models import AuthData
 from syncmaster.db.repositories import (
     ConnectionRepository,
@@ -12,14 +16,12 @@ from syncmaster.db.repositories import (
     TransferRepository,
     UserRepository,
 )
-from syncmaster.settings import Settings
 
 
 class UnitOfWork:
     def __init__(
         self,
-        session: AsyncSession,
-        settings: Settings,
+        session: Annotated[AsyncSession, Depends(Stub(AsyncSession))],
     ):
         self._session = session
         self.user = UserRepository(session=session)
@@ -29,7 +31,6 @@ class UnitOfWork:
         self.run = RunRepository(session=session)
         self.credentials = CredentialsRepository(
             session=session,
-            settings=settings,
             model=AuthData,
         )
         self.queue = QueueRepository(session=session)

@@ -19,8 +19,8 @@ from syncmaster.worker.controller import TransferController
 
 logger = logging.getLogger(__name__)
 
-
-CORRELATION_CELERY_HEADER_ID = Settings().CORRELATION_CELERY_HEADER_ID
+# TODO: configure correlation id from settings: settings.CORRELATION_CELERY_HEADER_ID
+CORRELATION_CELERY_HEADER_ID = "CORRELATION_CELERY_HEADER_ID"
 
 
 @celery.task(name="run_transfer_task", bind=True, track_started=True)

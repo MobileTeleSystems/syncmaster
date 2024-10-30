@@ -9,11 +9,6 @@ from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from starlette.middleware.cors import CORSMiddleware
 
-from syncmaster.backend.api.deps import (
-    DatabaseEngineMarker,
-    DatabaseSessionMarker,
-    UnitOfWorkMarker,
-)
 from syncmaster.backend.api.router import api_router
 from syncmaster.backend.handler import (
     http_exception_handler,
@@ -21,7 +16,8 @@ from syncmaster.backend.handler import (
     unknown_exception_handler,
     validation_exception_handler,
 )
-from syncmaster.db.factory import create_engine, create_session_factory, get_uow
+from syncmaster.backend.services.unit_of_work import UnitOfWork
+from syncmaster.db.factory import create_session_factory, get_uow
 from syncmaster.exceptions import SyncmasterError
 from syncmaster.settings import Settings
 
@@ -29,7 +25,7 @@ from syncmaster.settings import Settings
 def application_factory(settings: Settings) -> FastAPI:
     application = FastAPI(
         title=settings.PROJECT_NAME,
-        debug=settings.SERVER_DEBUG,
+        debug=settings.server.debug,
     )
     application.state.settings = settings
 
@@ -60,9 +56,7 @@ def application_factory(settings: Settings) -> FastAPI:
     application.dependency_overrides.update(
         {
             Settings: lambda: settings,
-            DatabaseEngineMarker: lambda: engine,
-            DatabaseSessionMarker: lambda: session_factory,
-            UnitOfWorkMarker: get_uow(session_factory, settings),
+            UnitOfWork: get_uow(session_factory),
         },
     )
 

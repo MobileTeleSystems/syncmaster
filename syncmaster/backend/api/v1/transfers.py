@@ -3,7 +3,6 @@
 
 from fastapi import APIRouter, Depends, Query, status
 
-from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.db.models import User
 from syncmaster.db.utils import Permission
@@ -50,7 +49,7 @@ async def read_transfers(
     target_connection_type: list[ConnectionType] | None = Query(None),
     is_scheduled: bool | None = Query(None),
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> TransferPageSchema:
     """Return transfers in page format"""
     resource_role = await unit_of_work.transfer.get_group_permission(
@@ -84,7 +83,7 @@ async def read_transfers(
 async def create_transfer(
     transfer_data: CreateTransferSchema,
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadTransferSchema:
     group_permission = await unit_of_work.transfer.get_group_permission(
         user=current_user,
@@ -140,7 +139,7 @@ async def create_transfer(
 async def read_transfer(
     transfer_id: int,
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadTransferSchema:
     """Return transfer data by transfer ID"""
     resource_role = await unit_of_work.transfer.get_resource_permission(
@@ -160,7 +159,7 @@ async def copy_transfer(
     transfer_id: int,
     transfer_data: CopyTransferSchema,
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> StatusCopyTransferResponseSchema:
     resource_role = await unit_of_work.transfer.get_resource_permission(
         user=current_user,
@@ -247,7 +246,7 @@ async def update_transfer(
     transfer_id: int,
     transfer_data: UpdateTransferSchema,
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadTransferSchema:
     # Check: user can update transfer
     resource_role = await unit_of_work.transfer.get_resource_permission(
@@ -336,7 +335,7 @@ async def update_transfer(
 async def delete_transfer(
     transfer_id: int,
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> StatusResponseSchema:
     resource_role = await unit_of_work.transfer.get_resource_permission(
         user=current_user,

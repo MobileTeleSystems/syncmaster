@@ -6,7 +6,6 @@ from fastapi import Depends, status
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
-from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.api.v1.auth.utils import decode_jwt
 from syncmaster.backend.services.unit_of_work import UnitOfWork
 from syncmaster.db.models import User
@@ -21,7 +20,7 @@ def get_user(
 ) -> Callable[[str, UnitOfWork], Awaitable[User]]:
     async def wrapper(
         token: str = Depends(oauth_schema),
-        unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+        unit_of_work: UnitOfWork = Depends(UnitOfWork),
     ) -> User:
         async with unit_of_work:
             token_data = decode_jwt(token, settings=Settings())

@@ -49,7 +49,7 @@ repos:
         files: ^(.*__main__\.py)$
       - id: insert-license
         files: .*\.py$
-        exclude: ^(tests/.*\.py)$
+        exclude: ^(syncmaster/backend/dependencies/stub.py|docs/.*\.py|tests/.*\.py)$
         args:
           - --license-filepath
           - .spdx-license-header.txt

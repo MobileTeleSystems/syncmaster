@@ -20,11 +20,10 @@ class CredentialsRepository(Repository[AuthData]):
     def __init__(
         self,
         session: AsyncSession,
-        settings: Settings,
         model: type[AuthData],
     ):
         super().__init__(model=model, session=session)
-        self._settings = settings
+        self._settings = Settings()
 
     async def read(
         self,

@@ -4,7 +4,6 @@ import logging
 
 from fastapi import APIRouter, Depends, Query
 
-from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.db.models import User
 from syncmaster.errors.registration import get_error_responses
@@ -21,7 +20,7 @@ async def get_users(
     page: int = Query(gt=0, default=1),
     page_size: int = Query(gt=0, le=200, default=20),
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
     search_query: str | None = Query(
         None,
         title="Search Query",
@@ -47,7 +46,7 @@ async def read_current_user(
 @router.get("/users/{user_id}", dependencies=[Depends(get_user(is_active=True))])
 async def read_user(
     user_id: int,
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadUserSchema:
     user = await unit_of_work.user.read_by_id(user_id=user_id, is_active=True)
     return ReadUserSchema.from_orm(user)

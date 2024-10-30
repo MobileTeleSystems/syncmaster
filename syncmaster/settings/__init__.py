@@ -20,14 +20,16 @@ class Settings(BaseSettings):
 
     Backend can be configured in 2 ways:
 
-    * By explicitly passing ``settings`` object as an argument to :obj:`application_factory <syncmaster.backend.main.application_factory>`
+    * By explicitly passing ``settings`` object as an argument to :obj:`application_factory
+     <syncmaster.backend.main.application_factory>`
     * By setting up environment variables matching a specific key.
 
         All environment variable names are written in uppercase and should be prefixed with ``SYNCMASTER__``.
         Nested items are delimited with ``__``.
 
 
-    More details can be found in `Pydantic documentation <https://docs.pydantic.dev/latest/concepts/pydantic_settings/>`_.
+    More details can be found in
+    `Pydantic documentation <https://docs.pydantic.dev/latest/concepts/pydantic_settings/>`_.
 
     Examples
     --------
@@ -41,15 +43,12 @@ class Settings(BaseSettings):
         SYNCMASTER__SERVER__DEBUG=True
     """
 
-    SERVER_DEBUG: bool = True
-
     PROJECT_NAME: str = "SyncMaster"
 
     SECRET_KEY: str = "secret"
     SECURITY_ALGORITHM: str = "HS256"
     CRYPTO_KEY: str = "UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94="
 
-    LOG_URL_TEMPLATE: str = ""
     CORRELATION_CELERY_HEADER_ID: str = "CORRELATION_CELERY_HEADER_ID"
 
     TOKEN_EXPIRED_TIME: int = 60 * 60 * 10  # 10 hours

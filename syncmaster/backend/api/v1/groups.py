@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 from fastapi import APIRouter, Depends, Query
 
-from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.db.models import User
 from syncmaster.db.utils import Permission
@@ -29,7 +28,7 @@ async def read_groups(
     page_size: int = Query(gt=0, le=200, default=20),
     role: str | None = Query(default=None),
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
     search_query: str | None = Query(
         None,
         title="Search Query",
@@ -56,7 +55,7 @@ async def read_groups(
 @router.post("/groups")
 async def create_group(
     group_data: CreateGroupSchema,
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
     current_user: User = Depends(get_user(is_active=True)),
 ) -> ReadGroupSchema:
     async with unit_of_work:
@@ -72,7 +71,7 @@ async def create_group(
 async def read_group(
     group_id: int,
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> GroupWithUserRoleSchema:
     resource_role = await unit_of_work.group.get_group_permission(
         user=current_user,
@@ -92,7 +91,7 @@ async def update_group(
     group_id: int,
     group_data: UpdateGroupSchema,
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadGroupSchema:
     resource_rule = await unit_of_work.group.get_group_permission(
         user=current_user,
@@ -117,7 +116,7 @@ async def update_group(
 @router.delete("/groups/{group_id}", dependencies=[Depends(get_user(is_superuser=True))])
 async def delete_group(
     group_id: int,
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> StatusResponseSchema:
     async with unit_of_work:
         await unit_of_work.group.delete(group_id=group_id)
@@ -130,7 +129,7 @@ async def read_group_users(
     page: int = Query(gt=0, default=1),
     page_size: int = Query(gt=0, le=200, default=20),
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> UserPageSchemaAsGroupMember:
     resource_role = await unit_of_work.group.get_group_permission(
         user=current_user,
@@ -154,7 +153,7 @@ async def update_user_role_group(
     user_id: int,
     update_user_data: AddUserSchema,
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> AddUserSchema:
     resource_rule = await unit_of_work.group.get_group_permission(
         user=current_user,
@@ -183,7 +182,7 @@ async def add_user_to_group(
     user_id: int,
     add_user_data: AddUserSchema,
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> StatusResponseSchema:
     resource_rule = await unit_of_work.group.get_group_permission(
         user=current_user,
@@ -214,7 +213,7 @@ async def delete_user_from_group(
     group_id: int,
     user_id: int,
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> StatusResponseSchema:
     resource_rule = await unit_of_work.group.get_group_permission(
         user=current_user,
