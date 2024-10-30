@@ -43,7 +43,7 @@ class DatabaseSettings(BaseModel):
     def sync_url(self) -> str:
         parsed_url = urlparse(self.url)
         # replace '+asyncpg' with '+psycopg2' in the scheme - needed for celery
-        scheme = parsed_url.scheme.replace("+asyncpg", "+psycopg2")
+        scheme = parsed_url.scheme.replace("+asyncpg", "+psycopg")
         sync_parsed_url = parsed_url._replace(scheme=scheme)
         return urlunparse(sync_parsed_url)
 

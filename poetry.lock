@@ -970,6 +970,22 @@ pycodestyle = ">=2.12.0,<2.13.0"
 pyflakes = ">=3.2.0,<3.3.0"
 
 [[package]]
+name = "flake8-pyproject"
+version = "1.2.3"
+description = "Flake8 plug-in loading the configuration from pyproject.toml"
+optional = false
+python-versions = ">= 3.6"
+files = [
+    {file = "flake8_pyproject-1.2.3-py3-none-any.whl", hash = "sha256:6249fe53545205af5e76837644dc80b4c10037e73a0e5db87ff562d75fb5bd4a"},
+]
+
+[package.dependencies]
+Flake8 = ">=5"
+
+[package.extras]
+dev = ["pyTest", "pyTest-cov"]
+
+[[package]]
 name = "frozendict"
 version = "2.4.6"
 description = "A simple immutable dictionary"
@@ -3275,4 +3291,4 @@ worker = ["asgi-correlation-id", "celery", "jinja2", "onetl", "psycopg", "pydant
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "a9ee358f74e6c8e7b1c472522e5a536fd51763d9049db3cb48555fa32d41e0f2"
+content-hash = "2db69ba935a3cc8094ce9a4203236f4902c5cea5d4d4d0a1ceab3c453617b712"
