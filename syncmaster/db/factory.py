@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from syncmaster.backend.services import UnitOfWork
+from syncmaster.settings import Settings
 
 
 def create_engine(connection_uri: str, **engine_kwargs: Any) -> AsyncEngine:
@@ -27,9 +28,10 @@ def create_session_factory(engine: AsyncEngine) -> async_sessionmaker[AsyncSessi
 
 def get_uow(
     session_factory: async_sessionmaker[AsyncSession],
+    settings: Settings,
 ) -> Callable[[], AsyncGenerator[UnitOfWork, None]]:
     async def wrapper():
         async with session_factory() as session:
-            yield UnitOfWork(session=session)
+            yield UnitOfWork(session=session, settings=settings)
 
     return wrapper

@@ -19,7 +19,7 @@ from syncmaster.backend import application_factory
 from syncmaster.db.models import Base
 from syncmaster.settings import Settings, TestSettings
 from tests.mocks import UserTestRoles
-from tests.utils import run_async_migrations
+from tests.utils import prepare_new_database, run_async_migrations
 
 PROJECT_PATH = Path(__file__).parent.parent.resolve()
 
@@ -61,6 +61,7 @@ def alembic_config(settings: Settings) -> AlembicConfig:
 
 @pytest_asyncio.fixture(scope="session")
 async def async_engine(settings: Settings, alembic_config: AlembicConfig):
+    await prepare_new_database(settings=settings)
     try:
         await run_async_migrations(alembic_config, Base.metadata, "-1", "down")
     except Exception:

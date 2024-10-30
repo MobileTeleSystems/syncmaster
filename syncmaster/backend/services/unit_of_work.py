@@ -16,11 +16,13 @@ from syncmaster.db.repositories import (
     TransferRepository,
     UserRepository,
 )
+from syncmaster.settings import Settings
 
 
 class UnitOfWork:
     def __init__(
         self,
+        settings: Annotated[Settings, Depends(Stub(Settings))],
         session: Annotated[AsyncSession, Depends(Stub(AsyncSession))],
     ):
         self._session = session
@@ -32,6 +34,7 @@ class UnitOfWork:
         self.credentials = CredentialsRepository(
             session=session,
             model=AuthData,
+            settings=settings,
         )
         self.queue = QueueRepository(session=session)
 

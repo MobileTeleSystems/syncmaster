@@ -56,7 +56,7 @@ def application_factory(settings: Settings) -> FastAPI:
     application.dependency_overrides.update(
         {
             Settings: lambda: settings,
-            UnitOfWork: get_uow(session_factory),
+            UnitOfWork: get_uow(session_factory, settings=settings),
         },
     )
 

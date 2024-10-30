@@ -1,12 +1,14 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from collections.abc import Awaitable, Callable
+from typing import Annotated
 
 from fastapi import Depends, status
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
 from syncmaster.backend.api.v1.auth.utils import decode_jwt
+from syncmaster.backend.dependencies import Stub
 from syncmaster.backend.services.unit_of_work import UnitOfWork
 from syncmaster.db.models import User
 from syncmaster.settings import Settings
@@ -19,11 +21,12 @@ def get_user(
     is_superuser: bool = False,
 ) -> Callable[[str, UnitOfWork], Awaitable[User]]:
     async def wrapper(
+        settings: Annotated[Settings, Depends(Stub(Settings))],
         token: str = Depends(oauth_schema),
         unit_of_work: UnitOfWork = Depends(UnitOfWork),
     ) -> User:
         async with unit_of_work:
-            token_data = decode_jwt(token, settings=Settings())
+            token_data = decode_jwt(token, settings=settings)
             if token_data is None:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -47,4 +50,4 @@ def get_user(
                 )
         return user
 
-    return wrapper
+    return wrapper  # type: ignore

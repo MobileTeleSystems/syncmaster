@@ -11,11 +11,27 @@ from alembic.script import ScriptDirectory
 from httpx import AsyncClient
 from sqlalchemy import Connection as AlchConnection
 from sqlalchemy import MetaData, pool, text
-from sqlalchemy.ext.asyncio import AsyncConnection, async_engine_from_config
+from sqlalchemy.ext.asyncio import (
+    AsyncConnection,
+    async_engine_from_config,
+    create_async_engine,
+)
 
 from syncmaster.db.models import Status
+from syncmaster.settings import Settings
 
 logger = logging.getLogger(__name__)
+
+
+async def prepare_new_database(settings: Settings) -> None:
+    """Using default postgres db for creating new test db"""
+    connection_url = settings.database.url
+    engine = create_async_engine(connection_url, echo=True)
+
+    async with engine.begin() as conn:
+        if not await database_exists(conn, "postgres"):
+            await create_database(conn, "postgres")
+    await engine.dispose()
 
 
 def do_run_migrations(connection: AlchConnection, target_metadata: MetaData, context: EnvironmentContext) -> None:

@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import textwrap
-from urllib.parse import urlparse, urlunparse
 
 from pydantic import BaseModel, Field
 
@@ -41,11 +40,3 @@ class DatabaseSettings(BaseModel):
 
     class Config:
         extra = "allow"
-
-    @property
-    def sync_url(self) -> str:
-        parsed_url = urlparse(self.url)
-        # replace '+asyncpg' with '+psycopg2' in the scheme - needed for celery
-        scheme = parsed_url.scheme.replace("+asyncpg", "+psycopg2")
-        sync_parsed_url = parsed_url._replace(scheme=scheme)
-        return urlunparse(sync_parsed_url)

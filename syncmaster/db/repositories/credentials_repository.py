@@ -19,11 +19,12 @@ from syncmaster.settings import Settings
 class CredentialsRepository(Repository[AuthData]):
     def __init__(
         self,
+        settings: Settings,
         session: AsyncSession,
         model: type[AuthData],
     ):
         super().__init__(model=model, session=session)
-        self._settings = Settings()
+        self._settings = settings
 
     async def read(
         self,

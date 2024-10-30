@@ -10,7 +10,7 @@ settings = Settings()
 celery = Celery(
     __name__,
     broker=settings.broker.url,
-    backend="db+" + settings.database.sync_url,
+    backend="db+" + settings.database.url,
     task_cls=WorkerTask,
     imports=[
         "syncmaster.worker.transfer",

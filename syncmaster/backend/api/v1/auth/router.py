@@ -1,9 +1,12 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
+from typing import Annotated
+
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
 from syncmaster.backend.api.v1.auth.utils import sign_jwt
+from syncmaster.backend.dependencies import Stub
 from syncmaster.backend.services import UnitOfWork
 from syncmaster.errors.registration import get_error_responses
 from syncmaster.errors.schemas.invalid_request import InvalidRequestSchema
@@ -21,6 +24,7 @@ router = APIRouter(
 
 @router.post("/token")
 async def login(
+    settings: Annotated[Settings, Depends(Stub(Settings))],
     form_data: OAuth2PasswordRequestForm = Depends(),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> AuthTokenSchema:
@@ -33,5 +37,5 @@ async def login(
                 username=form_data.username,
                 is_active=True,
             )
-    token = sign_jwt(user_id=user.id, settings=Settings())
+    token = sign_jwt(user_id=user.id, settings=settings)
     return AuthTokenSchema(access_token=token, refresh_token="refresh_token")
