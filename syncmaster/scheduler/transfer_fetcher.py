@@ -1,28 +1,24 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
 
 from syncmaster.config import Settings
 from syncmaster.db.models import Transfer
-
-DATABASE_URL = Settings().build_db_connection_uri()
-engine = create_async_engine(DATABASE_URL)
-AsyncSessionLocal = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+from syncmaster.scheduler.utils import get_async_session
 
 
 class TransferFetcher:
-    def __init__(self):
+    def __init__(self, settings: Settings):
+        self.settings = settings
         self.last_updated_at = None
 
     async def fetch_updated_jobs(self):
 
-        async with AsyncSessionLocal() as session:
-            if self.last_updated_at is None:
-                query = select(Transfer).filter(Transfer.is_scheduled)
-            else:
-                query = select(Transfer).filter(Transfer.updated_at > self.last_updated_at)
+        async with get_async_session(self.settings) as session:
+            query = select(Transfer)
+            if self.last_updated_at is not None:
+                query = query.filter(Transfer.updated_at > self.last_updated_at)
+
             result = await session.execute(query)
             transfers = result.scalars().all()
 

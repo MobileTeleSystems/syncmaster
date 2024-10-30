@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import asyncio
 
+from syncmaster.config import Settings
 from syncmaster.scheduler.transfer_fetcher import TransferFetcher
 from syncmaster.scheduler.transfer_job_manager import TransferJobManager
 
@@ -9,8 +10,9 @@ TIMEOUT = 180  # seconds
 
 
 async def main():
-    transfer_fetcher = TransferFetcher()
-    transfer_job_manager = TransferJobManager()
+    settings = Settings()
+    transfer_fetcher = TransferFetcher(settings)
+    transfer_job_manager = TransferJobManager(settings)
     transfer_job_manager.scheduler.start()
 
     while True:

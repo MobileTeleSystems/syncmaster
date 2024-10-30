@@ -10,15 +10,16 @@ from syncmaster.backend.services.unit_of_work import UnitOfWork
 from syncmaster.config import Settings
 from syncmaster.db.models import RunType, Status, Transfer
 from syncmaster.exceptions.run import CannotConnectToTaskQueueError
-from syncmaster.scheduler.transfer_fetcher import AsyncSessionLocal
+from syncmaster.scheduler.transfer_fetcher import get_async_session
 from syncmaster.schemas.v1.connections.connection import ReadAuthDataSchema
 from syncmaster.worker.config import celery
 
 
 class TransferJobManager:
-    def __init__(self):
-        self.scheduler = AsyncIOScheduler(timezone=Settings().TZ)
-        self.scheduler.add_jobstore("sqlalchemy", url=Settings().build_db_connection_uri(driver="psycopg2"))
+    def __init__(self, settings: Settings):
+        self.scheduler = AsyncIOScheduler(timezone=settings.TZ)
+        self.scheduler.add_jobstore("sqlalchemy", url=settings.build_db_connection_uri(driver="psycopg2"))
+        self.settings = settings
 
     def update_jobs(self, transfers: list[Transfer]) -> None:
         for transfer in transfers:
@@ -34,21 +35,21 @@ class TransferJobManager:
                 self.scheduler.modify_job(
                     job_id=job_id,
                     trigger=CronTrigger.from_crontab(transfer.schedule),
-                    args=(transfer.id,),
+                    args=(transfer.id, self.settings),
                 )
             else:
                 self.scheduler.add_job(
                     func=TransferJobManager.send_job_to_celery,
                     id=job_id,
                     trigger=CronTrigger.from_crontab(transfer.schedule),
-                    args=(transfer.id,),
+                    args=(transfer.id, self.settings),
                 )
 
     @staticmethod
-    async def send_job_to_celery(transfer_id: int) -> None:
+    async def send_job_to_celery(transfer_id: int, settings: Settings) -> None:
 
-        async with AsyncSessionLocal() as session:
-            unit_of_work = UnitOfWork(session=session, settings=Settings())
+        async with get_async_session(settings) as session:
+            unit_of_work = UnitOfWork(session=session, settings=settings)
 
             transfer = await unit_of_work.transfer.read_by_id(transfer_id)
             credentials_source = await unit_of_work.credentials.read(transfer.source_connection_id)
