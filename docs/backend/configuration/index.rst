@@ -11,6 +11,7 @@ Configuration
     database
     broker
     logging
+    cors
     debug
 
 .. autopydantic_settings:: syncmaster.settings.Settings

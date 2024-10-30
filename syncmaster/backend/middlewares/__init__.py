@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
+# SPDX-License-Identifier: Apache-2.0
+
+from fastapi import FastAPI
+
+from syncmaster.backend.middlewares.cors import apply_cors_middleware
+from syncmaster.backend.middlewares.logging import setup_logging
+from syncmaster.backend.middlewares.request_id import apply_request_id_middleware
+from syncmaster.settings import Settings
+
+
+def apply_middlewares(
+    application: FastAPI,
+    settings: Settings,
+) -> FastAPI:
+    """Add middlewares to the application."""
+
+    if settings.server.logging.setup:
+        setup_logging(settings.server.logging.get_log_config_path())
+
+    apply_cors_middleware(application, settings.server.cors)
+    apply_request_id_middleware(application, settings.server.request_id)
+
+    return application

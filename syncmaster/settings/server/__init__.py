@@ -5,7 +5,9 @@ import textwrap
 
 from pydantic import BaseModel, Field
 
+from syncmaster.settings.server.cors import CORSSettings
 from syncmaster.settings.server.log import LoggingSettings
+from syncmaster.settings.server.request_id import RequestIDSettings
 
 
 class ServerSettings(BaseModel):
@@ -24,7 +26,7 @@ class ServerSettings(BaseModel):
         default=False,
         description=textwrap.dedent(
             """
-            :ref:`Enable debug output in responses <backend-configuration-debug>`.
+            Enable debug output in responses.
             Do not use this on production!
             """,
         ),
@@ -32,4 +34,11 @@ class ServerSettings(BaseModel):
     logging: LoggingSettings = Field(
         default_factory=LoggingSettings,
         description=":ref:`Logging settings <backend-configuration-logging>`",
+    )
+    request_id: RequestIDSettings = Field(
+        default_factory=RequestIDSettings,
+    )
+    cors: CORSSettings = Field(
+        default_factory=CORSSettings,
+        description=":ref:`CORS settings <backend-configuration-cors>`",
     )

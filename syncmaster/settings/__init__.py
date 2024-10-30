@@ -20,8 +20,7 @@ class Settings(BaseSettings):
 
     Backend can be configured in 2 ways:
 
-    * By explicitly passing ``settings`` object as an argument to :obj:`application_factory
-     <syncmaster.backend.main.application_factory>`
+    * By explicitly passing ``settings`` object as an argument to :obj:`application_factory <syncmaster.backend.main.application_factory>`
     * By setting up environment variables matching a specific key.
 
         All environment variable names are written in uppercase and should be prefixed with ``SYNCMASTER__``.
