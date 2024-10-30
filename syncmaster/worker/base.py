@@ -10,5 +10,5 @@ class WorkerTask(Task):
     def __init__(self) -> None:
         self.settings = Settings()
         self.engine = create_engine(
-            url=self.settings.database.url,
+            url=self.settings.database.sync_url,
         )
