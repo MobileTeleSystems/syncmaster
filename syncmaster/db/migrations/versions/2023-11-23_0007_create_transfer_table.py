@@ -2,22 +2,37 @@
 # SPDX-License-Identifier: Apache-2.0
 """Create transfer table
 
-Revision ID: 0007_create_transfer_table
-Revises: 0006_create_auth_data_table
+Revision ID: abf59b649053
+Revises: e610f752a7b0
 Create Date: 2023-11-23 11:41:00.000000
 """
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "0007_create_transfer_table"
-down_revision = "0006_create_auth_data_table"
+revision = "abf59b649053"
+down_revision = "e610f752a7b0"
 branch_labels = None
 depends_on = None
 
 
 def upgrade():
+    sql_expression = (
+        "to_tsvector('english'::regconfig, "
+        "name || ' ' || "
+        "COALESCE(json_extract_path_text(source_params, 'table_name'), '') || ' ' || "
+        "COALESCE(json_extract_path_text(target_params, 'table_name'), '') || ' ' || "
+        "COALESCE(json_extract_path_text(source_params, 'directory_path'), '') || ' ' || "
+        "COALESCE(json_extract_path_text(target_params, 'directory_path'), '') || ' ' || "
+        "translate(name, './', '  ') || ' ' || "
+        "COALESCE(translate(json_extract_path_text(source_params, 'table_name'), './', '  '), '') || ' ' || "
+        "COALESCE(translate(json_extract_path_text(target_params, 'table_name'), './', '  '), '') || ' ' || "
+        "COALESCE(translate(json_extract_path_text(source_params, 'directory_path'), './', '  '), '') || ' ' || "
+        "COALESCE(translate(json_extract_path_text(target_params, 'directory_path'), './', '  '), '')"
+        ")"
+    )
     op.create_table(
         "transfer",
         sa.Column("id", sa.BigInteger(), nullable=False),
@@ -59,16 +74,24 @@ def upgrade():
             name=op.f("fk__transfer__target_connection_id__connection"),
             ondelete="CASCADE",
         ),
+        sa.Column(
+            "search_vector",
+            postgresql.TSVECTOR(),
+            sa.Computed(sql_expression, persisted=True),
+            nullable=False,
+        ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk__transfer")),
         sa.UniqueConstraint("name", "group_id", name=op.f("uq__transfer__name_group_id")),
     )
     op.create_index(op.f("ix__transfer__group_id"), "transfer", ["group_id"], unique=False)
     op.create_index(op.f("ix__transfer__source_connection_id"), "transfer", ["source_connection_id"], unique=False)
     op.create_index(op.f("ix__transfer__target_connection_id"), "transfer", ["target_connection_id"], unique=False)
+    op.create_index("idx_transfer_search_vector", "transfer", ["search_vector"], unique=False, postgresql_using="gin")
 
 
 def downgrade():
     op.drop_index(op.f("ix__transfer__target_connection_id"), table_name="transfer")
     op.drop_index(op.f("ix__transfer__source_connection_id"), table_name="transfer")
     op.drop_index(op.f("ix__transfer__group_id"), table_name="transfer")
+    op.drop_index("idx_transfer_search_vector", table_name="transfer", postgresql_using="gin")
     op.drop_table("transfer")

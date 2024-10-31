@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """Create auth_data table
 
-Revision ID: 0006_create_auth_data_table
-Revises: 0005_create_user_group_table
+Revision ID: e610f752a7b0
+Revises: 376aace59499
 Create Date: 2023-11-23 11:40:00.000000
 """
 
@@ -11,8 +11,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "0006_create_auth_data_table"
-down_revision = "0005_create_user_group_table"
+revision = "e610f752a7b0"
+down_revision = "376aace59499"
 branch_labels = None
 depends_on = None
 

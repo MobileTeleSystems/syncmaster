@@ -2,17 +2,18 @@
 # SPDX-License-Identifier: Apache-2.0
 """Create queue table
 
-Revision ID: 0003_create_queue_table
-Revises: 0002_create_group_table
+Revision ID: eceeafe5e0a1
+Revises: 1f993415ce95
 Create Date: 2023-11-23 11:37:00.000000
 """
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "0003_create_queue_table"
-down_revision = "0002_create_group_table"
+revision = "eceeafe5e0a1"
+down_revision = "1f993415ce95"
 branch_labels = None
 depends_on = None
 
@@ -27,6 +28,12 @@ def upgrade():
         sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
+        sa.Column(
+            "search_vector",
+            postgresql.TSVECTOR(),
+            sa.Computed("to_tsvector('english'::regconfig, name)", persisted=True),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(
             ["group_id"],
             ["group.id"],

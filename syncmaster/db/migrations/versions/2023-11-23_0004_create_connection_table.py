@@ -2,22 +2,30 @@
 # SPDX-License-Identifier: Apache-2.0
 """Create connection table
 
-Revision ID: 0004_create_connection_table
-Revises: 0003_create_queue_table
+Revision ID: f14edb7244b0
+Revises: eceeafe5e0a1
 Create Date: 2023-11-23 11:38:00.000000
 """
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "0004_create_connection_table"
-down_revision = "0003_create_queue_table"
+revision = "f14edb7244b0"
+down_revision = "eceeafe5e0a1"
 branch_labels = None
 depends_on = None
 
 
 def upgrade():
+    sql_expression = (
+        "to_tsvector('english'::regconfig, "
+        "name || ' ' || "
+        "COALESCE(json_extract_path_text(data, 'host'), '') || ' ' || "
+        "COALESCE(translate(json_extract_path_text(data, 'host'), '.', ' '), '')"
+        ")"
+    )
     op.create_table(
         "connection",
         sa.Column("id", sa.BigInteger(), nullable=False),
@@ -28,6 +36,7 @@ def upgrade():
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
         sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("search_vector", postgresql.TSVECTOR(), sa.Computed(sql_expression, persisted=True), nullable=False),
         sa.ForeignKeyConstraint(
             ["group_id"],
             ["group.id"],
@@ -38,8 +47,16 @@ def upgrade():
         sa.UniqueConstraint("name", "group_id", name=op.f("uq__connection__name_group_id")),
     )
     op.create_index(op.f("ix__connection__group_id"), "connection", ["group_id"], unique=False)
+    op.create_index(
+        "idx_connection_search_vector",
+        "connection",
+        ["search_vector"],
+        unique=False,
+        postgresql_using="gin",
+    )
 
 
 def downgrade():
     op.drop_index(op.f("ix__connection__group_id"), table_name="connection")
+    op.drop_index("idx_connection_search_vector", table_name="connection", postgresql_using="gin")
     op.drop_table("connection")

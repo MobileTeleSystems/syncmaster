@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """Create run table
 
-Revision ID: 0008_create_run_table
-Revises: 0007_create_transfer_table
+Revision ID: 6f74183f1505
+Revises: abf59b649053
 Create Date: 2023-11-23 11:42:00.000000
 """
 
@@ -11,8 +11,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "0008_create_run_table"
-down_revision = "0007_create_transfer_table"
+revision = "6f74183f1505"
+down_revision = "abf59b649053"
 branch_labels = None
 depends_on = None
 

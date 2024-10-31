@@ -2,17 +2,18 @@
 # SPDX-License-Identifier: Apache-2.0
 """Create group table
 
-Revision ID: 0002_create_group_table
-Revises: 0001_create_user_table
+Revision ID: 1f993415ce95
+Revises: bac1a53e568c
 Create Date: 2023-11-23 11:36:00.000000
 """
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "0002_create_group_table"
-down_revision = "0001_create_user_table"
+revision = "1f993415ce95"
+down_revision = "bac1a53e568c"
 branch_labels = None
 depends_on = None
 
@@ -27,6 +28,12 @@ def upgrade():
         sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
+        sa.Column(
+            "search_vector",
+            postgresql.TSVECTOR(),
+            sa.Computed("to_tsvector('english'::regconfig, name)", persisted=True),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(["owner_id"], ["user.id"], name=op.f("fk__group__owner_id__user"), ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id", name=op.f("pk__group")),
         sa.UniqueConstraint("name", name=op.f("uq__group__name")),
