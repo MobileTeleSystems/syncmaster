@@ -5,8 +5,8 @@ import time
 from jose import JWTError, jwt
 from pydantic import ValidationError
 
-from syncmaster.config import Settings
 from syncmaster.schemas.v1.auth import TokenPayloadSchema
+from syncmaster.settings import Settings
 
 
 def sign_jwt(user_id: int, settings: Settings) -> str:

@@ -16,9 +16,10 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from syncmaster.backend import application_factory
-from syncmaster.config import Settings, TestSettings
 from syncmaster.db.models import Base
+from syncmaster.settings import Settings
 from tests.mocks import UserTestRoles
+from tests.settings import TestSettings
 from tests.utils import prepare_new_database, run_async_migrations
 
 PROJECT_PATH = Path(__file__).parent.parent.resolve()
@@ -55,7 +56,7 @@ def test_settings():
 def alembic_config(settings: Settings) -> AlembicConfig:
     alembic_cfg = AlembicConfig(PROJECT_PATH / "syncmaster" / "db" / "alembic.ini")
     alembic_cfg.set_main_option("script_location", os.fspath(PROJECT_PATH / "syncmaster/db/migrations"))
-    alembic_cfg.set_main_option("sqlalchemy.url", settings.build_db_connection_uri())
+    alembic_cfg.set_main_option("sqlalchemy.url", settings.database.url)
     return alembic_cfg
 
 
@@ -67,7 +68,7 @@ async def async_engine(settings: Settings, alembic_config: AlembicConfig):
     except Exception:
         pass
     await run_async_migrations(alembic_config, Base.metadata, "head")
-    engine = create_async_engine(settings.build_db_connection_uri())
+    engine = create_async_engine(settings.database.url)
     yield engine
     await engine.dispose()
 

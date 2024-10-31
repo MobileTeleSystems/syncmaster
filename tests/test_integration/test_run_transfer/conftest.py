@@ -25,7 +25,6 @@ from pytest import FixtureRequest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.backend.api.v1.auth.utils import sign_jwt
-from syncmaster.config import Settings, TestSettings
 from syncmaster.db.models import Group
 from syncmaster.dto.connections import (
     HDFSConnectionDTO,
@@ -34,8 +33,10 @@ from syncmaster.dto.connections import (
     PostgresConnectionDTO,
     S3ConnectionDTO,
 )
+from syncmaster.settings import Settings
 from tests.mocks import MockUser, UserTestRoles
 from tests.resources.file_df_connection.test_data import data
+from tests.settings import TestSettings
 from tests.test_unit.utils import (
     create_connection,
     create_credentials,

@@ -4,7 +4,7 @@ import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.backend.api.v1.auth.utils import sign_jwt
-from syncmaster.config import Settings
+from syncmaster.settings import Settings
 from tests.mocks import (
     MockConnection,
     MockGroup,

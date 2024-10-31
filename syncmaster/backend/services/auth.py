@@ -1,16 +1,17 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from collections.abc import Awaitable, Callable
+from typing import Annotated
 
 from fastapi import Depends, status
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
-from syncmaster.backend.api.deps import SettingsMarker, UnitOfWorkMarker
 from syncmaster.backend.api.v1.auth.utils import decode_jwt
+from syncmaster.backend.dependencies import Stub
 from syncmaster.backend.services.unit_of_work import UnitOfWork
-from syncmaster.config import Settings
 from syncmaster.db.models import User
+from syncmaster.settings import Settings
 
 oauth_schema = OAuth2PasswordBearer(tokenUrl="v1/auth/token")
 
@@ -18,11 +19,11 @@ oauth_schema = OAuth2PasswordBearer(tokenUrl="v1/auth/token")
 def get_user(
     is_active: bool = False,
     is_superuser: bool = False,
-) -> Callable[[str, Settings, UnitOfWork], Awaitable[User]]:
+) -> Callable[[Settings, str, UnitOfWork], Awaitable[User]]:
     async def wrapper(
+        settings: Annotated[Settings, Depends(Stub(Settings))],
         token: str = Depends(oauth_schema),
-        settings: Settings = Depends(SettingsMarker),
-        unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+        unit_of_work: UnitOfWork = Depends(UnitOfWork),
     ) -> User:
         async with unit_of_work:
             token_data = decode_jwt(token, settings=settings)

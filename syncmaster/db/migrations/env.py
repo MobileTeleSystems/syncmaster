@@ -9,8 +9,8 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from syncmaster.config import Settings
 from syncmaster.db.base import Base
+from syncmaster.settings import Settings
 
 config = context.config
 
@@ -20,7 +20,8 @@ if config.config_file_name is not None:
 
 if not config.get_main_option("sqlalchemy.url"):
     # read application settings only if sqlalchemy.url is not being passed via cli arguments
-    config.set_main_option("sqlalchemy.url", Settings().build_db_connection_uri())
+    # TODO: remove settings object creating during import
+    config.set_main_option("sqlalchemy.url", Settings().database.url)
 
 target_metadata = (
     Base.metadata,

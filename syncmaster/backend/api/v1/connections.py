@@ -5,7 +5,6 @@ from typing import get_args
 
 from fastapi import APIRouter, Depends, Query, status
 
-from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.db.models import Connection, Transfer, User
 from syncmaster.db.utils import Permission
@@ -48,7 +47,7 @@ async def read_connections(
     page_size: int = Query(gt=0, le=200, default=20),
     type: list[ConnectionType] | None = Query(None),
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
     search_query: str | None = Query(
         None,
         title="Search Query",
@@ -108,7 +107,7 @@ async def read_connections(
 async def create_connection(
     connection_data: CreateConnectionSchema,
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadConnectionSchema:
     """Create new connection"""
     group_permission = await unit_of_work.connection.get_group_permission(
@@ -154,7 +153,7 @@ async def read_connection_types() -> list[str]:
 async def read_connection(
     connection_id: int,
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadConnectionSchema:
     resource_role = await unit_of_work.connection.get_resource_permission(
         user=current_user,
@@ -185,7 +184,7 @@ async def update_connection(
     connection_id: int,
     changes: UpdateConnectionSchema,
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadConnectionSchema:
     resource_role = await unit_of_work.connection.get_resource_permission(
         user=current_user,
@@ -234,7 +233,7 @@ async def update_connection(
 async def delete_connection(
     connection_id: int,
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> StatusResponseSchema:
     resource_role = await unit_of_work.connection.get_resource_permission(
         user=current_user,
@@ -268,7 +267,7 @@ async def copy_connection(
     connection_id: int,
     copy_connection_data: ConnectionCopySchema,
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> StatusResponseSchema:
     resource_role = await unit_of_work.connection.get_resource_permission(
         user=current_user,

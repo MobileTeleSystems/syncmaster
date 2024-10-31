@@ -124,8 +124,8 @@ async def test_superuser_can_create_run(
     group_transfer: MockTransfer,
     session: AsyncSession,
     mocker,
+    monkeypatch,
 ) -> None:
-    # Arrange
     mocker.patch("syncmaster.worker.config.celery.send_task")
 
     # Act

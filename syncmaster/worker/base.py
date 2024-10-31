@@ -3,12 +3,13 @@
 from celery import Task
 from sqlalchemy import create_engine
 
-from syncmaster.config import Settings
+from syncmaster.settings import Settings
 
 
 class WorkerTask(Task):
     def __init__(self) -> None:
+        # TODO: remove settings object creating during import
         self.settings = Settings()
         self.engine = create_engine(
-            url=self.settings.build_db_connection_uri(driver="psycopg2"),
+            url=self.settings.database.sync_url,
         )

@@ -17,20 +17,20 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from syncmaster.config import Settings
 from syncmaster.db.models import Status
+from syncmaster.settings import Settings
 
 logger = logging.getLogger(__name__)
 
 
 async def prepare_new_database(settings: Settings) -> None:
     """Using default postgres db for creating new test db"""
-    connection_url = settings.build_db_connection_uri(database="postgres")
-
+    connection_url = settings.database.url
     engine = create_async_engine(connection_url, echo=True)
+
     async with engine.begin() as conn:
-        if not await database_exists(conn, settings.POSTGRES_DB):
-            await create_database(conn, settings.POSTGRES_DB)
+        if not await database_exists(conn, "postgres"):
+            await create_database(conn, "postgres")
     await engine.dispose()
 
 

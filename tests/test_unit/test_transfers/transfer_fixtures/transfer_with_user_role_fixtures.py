@@ -3,8 +3,8 @@ import secrets
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.config import Settings
 from syncmaster.db.models import Connection, Queue
+from syncmaster.settings import Settings
 from tests.mocks import MockTransfer, UserTestRoles
 from tests.test_unit.conftest import add_user_to_group
 from tests.test_unit.utils import create_connection, create_credentials, create_transfer

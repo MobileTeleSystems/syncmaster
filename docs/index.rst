@@ -17,6 +17,7 @@
     backend/install
     backend/architecture
     backend/openapi
+    backend/configuration/index
 
 .. toctree::
     :maxdepth: 2

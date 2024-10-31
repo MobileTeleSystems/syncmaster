@@ -5,7 +5,6 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, Query
 from kombu.exceptions import KombuError
 
-from syncmaster.backend.api.deps import UnitOfWorkMarker
 from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.db.models import Status, User
 from syncmaster.db.utils import Permission
@@ -27,13 +26,13 @@ router = APIRouter(tags=["Runs"], responses=get_error_responses())
 @router.get("/runs")
 async def read_runs(
     transfer_id: int,
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
     page: int = Query(gt=0, default=1),
     page_size: int = Query(gt=0, le=200, default=20),
     status: list[Status] | None = Query(default=None),
     started_at_since: datetime | None = Query(default=None),
     started_at_until: datetime | None = Query(default=None),
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> RunPageSchema:
     """Return runs of transfer with pagination"""
     resource_rule = await unit_of_work.transfer.get_resource_permission(
@@ -59,8 +58,8 @@ async def read_runs(
 @router.get("/runs/{run_id}")
 async def read_run(
     run_id: int,
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadRunSchema:
     run = await unit_of_work.run.read_by_id(run_id=run_id)
 
@@ -78,8 +77,8 @@ async def read_run(
 @router.post("/runs")
 async def start_run(
     create_run_data: CreateRunSchema,
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadRunSchema:
     # Check: user can start transfer
     resource_rule = await unit_of_work.transfer.get_resource_permission(
@@ -112,8 +111,13 @@ async def start_run(
             source_creds=ReadAuthDataSchema(auth_data=credentials_source).dict(),
             target_creds=ReadAuthDataSchema(auth_data=credentials_target).dict(),
         )
+
     try:
-        celery.send_task("run_transfer_task", kwargs={"run_id": run.id}, queue=transfer.queue.name)
+        celery.send_task(
+            "run_transfer_task",
+            kwargs={"run_id": run.id},
+            queue=transfer.queue.name,
+        )
     except KombuError as e:
         async with unit_of_work:
             run = await unit_of_work.run.update(
@@ -127,8 +131,8 @@ async def start_run(
 @router.post("/runs/{run_id}/stop")
 async def stop_run(
     run_id: int,
+    unit_of_work: UnitOfWork = Depends(UnitOfWork),
     current_user: User = Depends(get_user(is_active=True)),
-    unit_of_work: UnitOfWork = Depends(UnitOfWorkMarker),
 ) -> ReadRunSchema:
     run = await unit_of_work.run.read_by_id(run_id=run_id)
 
