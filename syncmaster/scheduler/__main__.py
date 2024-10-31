@@ -5,8 +5,7 @@ import asyncio
 from syncmaster.config import Settings
 from syncmaster.scheduler.transfer_fetcher import TransferFetcher
 from syncmaster.scheduler.transfer_job_manager import TransferJobManager
-
-TIMEOUT = 180  # seconds
+from syncmaster.scheduler.utils import TRANSFER_FETCHING_TIMEOUT
 
 
 async def main():
@@ -20,7 +19,7 @@ async def main():
         if transfers:
             transfer_job_manager.update_jobs(transfers)
             transfer_fetcher.last_updated_at = max(t.updated_at for t in transfers)
-        await asyncio.sleep(TIMEOUT)
+        await asyncio.sleep(TRANSFER_FETCHING_TIMEOUT)
 
 
 if __name__ == "__main__":

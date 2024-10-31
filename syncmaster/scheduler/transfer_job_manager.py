@@ -11,6 +11,7 @@ from syncmaster.config import Settings
 from syncmaster.db.models import RunType, Status, Transfer
 from syncmaster.exceptions.run import CannotConnectToTaskQueueError
 from syncmaster.scheduler.transfer_fetcher import get_async_session
+from syncmaster.scheduler.utils import MISFIRE_GRACE_TIME
 from syncmaster.schemas.v1.connections.connection import ReadAuthDataSchema
 from syncmaster.worker.config import celery
 
@@ -35,18 +36,25 @@ class TransferJobManager:
                 self.scheduler.modify_job(
                     job_id=job_id,
                     trigger=CronTrigger.from_crontab(transfer.schedule),
-                    args=(transfer.id, self.settings),
+                    misfire_grace_time=MISFIRE_GRACE_TIME,
+                    args=(transfer.id,),
                 )
             else:
                 self.scheduler.add_job(
                     func=TransferJobManager.send_job_to_celery,
                     id=job_id,
                     trigger=CronTrigger.from_crontab(transfer.schedule),
-                    args=(transfer.id, self.settings),
+                    misfire_grace_time=MISFIRE_GRACE_TIME,
+                    args=(transfer.id,),
                 )
 
     @staticmethod
-    async def send_job_to_celery(transfer_id: int, settings: Settings) -> None:
+    async def send_job_to_celery(transfer_id: int) -> None:
+        """
+        Do not pass additional arguments like settings,
+        otherwise they will be serialized in jobs table.
+        """
+        settings = Settings()
 
         async with get_async_session(settings) as session:
             unit_of_work = UnitOfWork(session=session, settings=settings)
