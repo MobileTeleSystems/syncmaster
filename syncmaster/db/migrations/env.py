@@ -1,15 +1,17 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import asyncio
+import os
 from logging.config import fileConfig
 
 from alembic import context
+from alembic.script import ScriptDirectory
 from celery.backends.database.session import ResultModelBase
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from syncmaster.db.base import Base
+from syncmaster.db.models import Base
 from syncmaster.settings import Settings
 
 config = context.config
@@ -29,6 +31,39 @@ target_metadata = (
 )
 
 
+def get_next_revision_id():
+    script_directory = ScriptDirectory.from_config(context.config)
+    versions_path = script_directory.versions
+
+    existing_filenames = os.listdir(versions_path)
+    existing_ids = []
+
+    for filename in existing_filenames:
+        # Assuming filename format: YYYY-MM-DD_XXXX_slug.py
+        parts = filename.split("_")
+        if len(parts) >= 2:
+            id_part = parts[1]
+            try:
+                id_num = int(id_part)
+                existing_ids.append(id_num)
+            except ValueError:
+                continue
+
+    if existing_ids:
+        next_id = max(existing_ids) + 1
+    else:
+        next_id = 1
+
+    return next_id
+
+
+def process_revision_directives(context, revision, directives):
+    if directives:
+        script = directives[0]
+        next_id = get_next_revision_id()
+        script.rev_id = f"{next_id:04d}"
+
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
@@ -46,6 +81,7 @@ def run_migrations_offline() -> None:
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
+        process_revision_directives=process_revision_directives,
         dialect_opts={"paramstyle": "named"},
     )
 
@@ -54,7 +90,11 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        process_revision_directives=process_revision_directives,
+    )
 
     with context.begin_transaction():
         context.run_migrations()

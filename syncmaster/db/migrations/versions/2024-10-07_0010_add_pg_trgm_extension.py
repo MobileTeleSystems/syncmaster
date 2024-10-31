@@ -1,17 +1,17 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-"""add pg_trgm extension to apply fuzzy search
+"""Add pg_trgm extension to apply fuzzy search
 
-Revision ID: 1df3778daf4f
-Revises: b9f5c4315bb2
+Revision ID: 0010
+Revises: 0009
 Create Date: 2024-10-07 06:59:12.667067
 
 """
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "1df3778daf4f"
-down_revision = "b9f5c4315bb2"
+revision = "0010"
+down_revision = "0009"
 branch_labels = None
 depends_on = None
 
