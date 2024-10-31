@@ -5,6 +5,7 @@ from celery import Celery
 from syncmaster.settings import Settings
 from syncmaster.worker.base import WorkerTask
 
+# TODO: remove settings object creating during import
 settings = Settings()
 
 celery = Celery(

@@ -15,6 +15,7 @@ class EnvTypes(StrEnum):
     LOCAL = "LOCAL"
 
 
+# TODO: split settings into syncmaster/server/settings and syncmaster/worker/settings
 class Settings(BaseSettings):
     """Syncmaster backend settings.
 

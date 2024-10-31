@@ -20,6 +20,7 @@ if config.config_file_name is not None:
 
 if not config.get_main_option("sqlalchemy.url"):
     # read application settings only if sqlalchemy.url is not being passed via cli arguments
+    # TODO: remove settings object creating during import
     config.set_main_option("sqlalchemy.url", Settings().database.url)
 
 target_metadata = (
