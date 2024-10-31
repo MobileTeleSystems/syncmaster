@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """Create transfer table
 
-Revision ID: abf59b649053
-Revises: e610f752a7b0
+Revision ID: 0007
+Revises: 0006
 Create Date: 2023-11-23 11:41:00.000000
 """
 
@@ -12,8 +12,8 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "abf59b649053"
-down_revision = "e610f752a7b0"
+revision = "0007"
+down_revision = "0006"
 branch_labels = None
 depends_on = None
 

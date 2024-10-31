@@ -2,16 +2,16 @@
 # SPDX-License-Identifier: Apache-2.0
 """Add pg_trgm extension to apply fuzzy search
 
-Revision ID: 3ca18ea8a846
-Revises: 2711f48097fb
+Revision ID: 0010
+Revises: 0009
 Create Date: 2024-10-07 06:59:12.667067
 
 """
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "3ca18ea8a846"
-down_revision = "2711f48097fb"
+revision = "0010"
+down_revision = "0009"
 branch_labels = None
 depends_on = None
 

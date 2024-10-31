@@ -2,16 +2,16 @@
 # SPDX-License-Identifier: Apache-2.0
 """Create celery_taskmeta and celery_tasksetmeta tables
 
-Revision ID: 2711f48097fb
-Revises: 6f74183f1505
+Revision ID: 0009
+Revises: 0008
 Create Date: 2023-11-23 11:43:00.000000
 """
 
 import sqlalchemy as sa
 from alembic import op
 
-revision = "2711f48097fb"
-down_revision = "6f74183f1505"
+revision = "0009"
+down_revision = "0008"
 branch_labels = None
 depends_on = None
 

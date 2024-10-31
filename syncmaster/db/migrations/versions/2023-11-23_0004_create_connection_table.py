@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """Create connection table
 
-Revision ID: f14edb7244b0
-Revises: eceeafe5e0a1
+Revision ID: 0004
+Revises: 0003
 Create Date: 2023-11-23 11:38:00.000000
 """
 
@@ -12,8 +12,8 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "f14edb7244b0"
-down_revision = "eceeafe5e0a1"
+revision = "0004"
+down_revision = "0003"
 branch_labels = None
 depends_on = None
 
