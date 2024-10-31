@@ -17,8 +17,9 @@ from sqlalchemy.ext.asyncio import (
 
 from syncmaster.backend import application_factory
 from syncmaster.db.models import Base
-from syncmaster.settings import Settings, TestSettings
+from syncmaster.settings import Settings
 from tests.mocks import UserTestRoles
+from tests.settings import TestSettings
 from tests.utils import prepare_new_database, run_async_migrations
 
 PROJECT_PATH = Path(__file__).parent.parent.resolve()

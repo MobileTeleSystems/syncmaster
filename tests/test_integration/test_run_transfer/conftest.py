@@ -33,9 +33,10 @@ from syncmaster.dto.connections import (
     PostgresConnectionDTO,
     S3ConnectionDTO,
 )
-from syncmaster.settings import Settings, TestSettings
+from syncmaster.settings import Settings
 from tests.mocks import MockUser, UserTestRoles
 from tests.resources.file_df_connection.test_data import data
+from tests.settings import TestSettings
 from tests.test_unit.utils import (
     create_connection,
     create_credentials,

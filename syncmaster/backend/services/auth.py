@@ -19,7 +19,7 @@ oauth_schema = OAuth2PasswordBearer(tokenUrl="v1/auth/token")
 def get_user(
     is_active: bool = False,
     is_superuser: bool = False,
-) -> Callable[[str, UnitOfWork], Awaitable[User]]:
+) -> Callable[[Settings, str, UnitOfWork], Awaitable[User]]:
     async def wrapper(
         settings: Annotated[Settings, Depends(Stub(Settings))],
         token: str = Depends(oauth_schema),
@@ -50,4 +50,4 @@ def get_user(
                 )
         return user
 
-    return wrapper  # type: ignore
+    return wrapper

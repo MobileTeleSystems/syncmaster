@@ -23,7 +23,7 @@ from syncmaster.settings import Settings
 
 def application_factory(settings: Settings) -> FastAPI:
     application = FastAPI(
-        title=settings.PROJECT_NAME,
+        title="Syncmaster",
         debug=settings.server.debug,
     )
     application.state.settings = settings

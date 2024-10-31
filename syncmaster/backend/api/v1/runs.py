@@ -1,9 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-import uuid
 from datetime import datetime
 
-from asgi_correlation_id import correlation_id
 from fastapi import APIRouter, Depends, Query
 from kombu.exceptions import KombuError
 
@@ -104,10 +102,6 @@ async def start_run(
     credentials_target = await unit_of_work.credentials.read(
         transfer.target_connection_id,
     )
-
-    request_correlation_id = correlation_id.get()
-    if not request_correlation_id:
-        request_correlation_id = str(uuid.uuid4())
 
     async with unit_of_work:
         run = await unit_of_work.run.create(
