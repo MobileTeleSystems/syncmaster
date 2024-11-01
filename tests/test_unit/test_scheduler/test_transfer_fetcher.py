@@ -39,7 +39,7 @@ async def test_fetch_jobs_with_outdated_last_updated_at(
 
     # Assert
     assert len(fetched_transfers) == len(wanted_transfers)
-    {t.id for t in fetched_transfers} == {t.transfer.id for t in wanted_transfers}
+    assert {t.id for t in fetched_transfers} == {t.transfer.id for t in wanted_transfers}
 
 
 async def test_fetch_jobs_with_up_to_date_last_updated_at(

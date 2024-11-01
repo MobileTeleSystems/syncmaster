@@ -50,6 +50,8 @@ class Settings(BaseSettings):
     CRYPTO_KEY: str = "UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94="
 
     TZ: str = "UTC"
+    SCHEDULER_TRANSFER_FETCHING_TIMEOUT: int = 180  # seconds
+    SCHEDULER_MISFIRE_GRACE_TIME: int = 300  # seconds
 
     CORRELATION_CELERY_HEADER_ID: str = "CORRELATION_CELERY_HEADER_ID"
 

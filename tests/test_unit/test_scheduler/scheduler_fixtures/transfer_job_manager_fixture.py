@@ -16,5 +16,5 @@ async def transfer_job_manager(session: AsyncSession, settings: Settings) -> Asy
     yield transfer_job_manager
 
     transfer_job_manager.scheduler.shutdown()
-    await session.execute(text("DELETE FROM apscheduler_jobs"))
+    await session.execute(text("TRUNCATE TABLE apscheduler_jobs"))
     await session.commit()

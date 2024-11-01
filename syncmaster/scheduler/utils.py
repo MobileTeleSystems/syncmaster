@@ -4,9 +4,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from syncmaster.settings import Settings
 
-TRANSFER_FETCHING_TIMEOUT = 180  # seconds
-MISFIRE_GRACE_TIME = 300  # seconds
-
 
 def get_async_session(settings: Settings) -> AsyncSession:
     engine = create_async_engine(settings.database.url)

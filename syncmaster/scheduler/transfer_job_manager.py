@@ -10,7 +10,6 @@ from syncmaster.backend.services.unit_of_work import UnitOfWork
 from syncmaster.db.models import RunType, Status, Transfer
 from syncmaster.exceptions.run import CannotConnectToTaskQueueError
 from syncmaster.scheduler.transfer_fetcher import get_async_session
-from syncmaster.scheduler.utils import MISFIRE_GRACE_TIME
 from syncmaster.schemas.v1.connections.connection import ReadAuthDataSchema
 from syncmaster.settings import Settings
 from syncmaster.worker.config import celery
@@ -36,7 +35,7 @@ class TransferJobManager:
                 self.scheduler.modify_job(
                     job_id=job_id,
                     trigger=CronTrigger.from_crontab(transfer.schedule),
-                    misfire_grace_time=MISFIRE_GRACE_TIME,
+                    misfire_grace_time=self.settings.SCHEDULER_MISFIRE_GRACE_TIME,
                     args=(transfer.id,),
                 )
             else:
@@ -44,7 +43,7 @@ class TransferJobManager:
                     func=TransferJobManager.send_job_to_celery,
                     id=job_id,
                     trigger=CronTrigger.from_crontab(transfer.schedule),
-                    misfire_grace_time=MISFIRE_GRACE_TIME,
+                    misfire_grace_time=self.settings.SCHEDULER_MISFIRE_GRACE_TIME,
                     args=(transfer.id,),
                 )
 
