@@ -218,6 +218,7 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 markers = [
     "backend: tests for backend (require running database)",
+    "scheduler: tests for scheduler (require running database)",
     "worker: tests for syncmaster worker",
     "hive: tests for Hive",
     "postgres: tests on Postgres",
