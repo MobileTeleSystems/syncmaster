@@ -9,7 +9,6 @@ Create Date: 2024-11-01 08:37:47.078657
 """
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = "0011"
@@ -32,8 +31,8 @@ def upgrade() -> None:
     op.create_table(
         "apscheduler_jobs",
         sa.Column("id", sa.VARCHAR(length=191), autoincrement=False, nullable=False),
-        sa.Column("next_run_time", sa.DOUBLE_PRECISION(precision=53), autoincrement=False, nullable=True),
-        sa.Column("job_state", postgresql.BYTEA(), autoincrement=False, nullable=False),
+        sa.Column("next_run_time", sa.Float(25), autoincrement=False, nullable=True),
+        sa.Column("job_state", sa.LargeBinary(), autoincrement=False, nullable=False),
         sa.PrimaryKeyConstraint("id", name="apscheduler_jobs_pkey"),
     )
 

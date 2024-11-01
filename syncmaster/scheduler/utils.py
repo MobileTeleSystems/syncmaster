@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from syncmaster.db.factory import create_engine, create_session_factory
 from syncmaster.settings import Settings
 
 
 def get_async_session(settings: Settings) -> AsyncSession:
-    engine = create_async_engine(settings.database.url)
-    session_factory = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+    engine = create_engine(settings.database.sync_url)
+    session_factory = create_session_factory(engine=engine)
     return session_factory()
