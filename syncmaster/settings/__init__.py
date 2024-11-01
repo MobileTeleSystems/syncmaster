@@ -44,7 +44,7 @@ class Settings(BaseSettings):
         SYNCMASTER__SERVER__DEBUG=True
     """
 
-    # TODO: move settings to corresponding classes
+    # TODO: move settings to corresponding classes (scheduler also)
     SECRET_KEY: str = "secret"
     SECURITY_ALGORITHM: str = "HS256"
     CRYPTO_KEY: str = "UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94="
