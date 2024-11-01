@@ -21,7 +21,11 @@ async def main():
         transfers = await transfer_fetcher.fetch_updated_jobs()
 
         if transfers:
-            logger.info("Found %d updated transfers: %s", len(transfers), transfers)
+            logger.info(
+                "Found %d updated transfers with ids: %s",
+                len(transfers),
+                ", ".join(str(t.id) for t in transfers),
+            )
             transfer_job_manager.update_jobs(transfers)
             transfer_fetcher.last_updated_at = max(t.updated_at for t in transfers)
             logger.info("Scheduler state has been updated. Last updated at: %s", transfer_fetcher.last_updated_at)
