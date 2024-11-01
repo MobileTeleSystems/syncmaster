@@ -1,3 +1,4 @@
+# development usage only
 version: 1
 disable_existing_loggers: false
 
@@ -11,16 +12,21 @@ filters:
     default_value: '-'
 
 formatters:
-  json:
-    (): pythonjsonlogger.jsonlogger.JsonFormatter
+  colored:
+    (): coloredlogs.ColoredFormatter
     # Add correlation_id to log records
-    fmt: '%(processName)s %(process)d %(threadName)s %(thread)d %(name)s %(lineno)d %(levelname)s %(message)s %(correlation_id)s'
-    timestamp: true
+    fmt: '%(asctime)s.%(msecs)03d %(processName)s:%(process)d %(name)s:%(lineno)d [%(levelname)s] %(correlation_id)s %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
 
 handlers:
   main:
     class: logging.StreamHandler
-    formatter: json
+    formatter: colored
+    filters: [correlation_id]
+    stream: ext://sys.stdout
+  celery:
+    class: logging.StreamHandler
+    formatter: colored
     filters: [correlation_id]
     stream: ext://sys.stdout
 
@@ -32,4 +38,8 @@ loggers:
   uvicorn:
     handlers: [main]
     level: INFO
+    propagate: false
+  celery:
+    level: DEBUG
+    handlers: [celery]
     propagate: false

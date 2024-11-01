@@ -5,10 +5,12 @@ from datetime import datetime, timezone
 
 import onetl
 from asgi_correlation_id import correlation_id
-from celery.signals import before_task_publish, task_prerun
+from celery.signals import after_setup_logger, before_task_publish, task_prerun
+from celery.utils.log import get_task_logger
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
+from syncmaster.backend.middlewares.logging import setup_logging
 from syncmaster.db.models import AuthData, Run, Status, Transfer
 from syncmaster.db.repositories.utils import decrypt_auth_data
 from syncmaster.exceptions.run import RunNotFoundError
@@ -17,7 +19,7 @@ from syncmaster.worker.base import WorkerTask
 from syncmaster.worker.config import celery
 from syncmaster.worker.controller import TransferController
 
-logger = logging.getLogger(__name__)
+logger = get_task_logger(__name__)
 
 # TODO: configure correlation id from settings: settings.CORRELATION_CELERY_HEADER_ID
 CORRELATION_CELERY_HEADER_ID = "CORRELATION_CELERY_HEADER_ID"
@@ -80,6 +82,12 @@ def run_transfer(session: Session, run_id: int, settings: Settings):
     run.ended_at = datetime.now(tz=timezone.utc)
     session.add(run)
     session.commit()
+
+
+@after_setup_logger.connect
+def setup_loggers(*args, **kwargs):
+    # TODO: remove calling Settings
+    setup_logging(Settings().worker.logging.get_log_config_path())
 
 
 @before_task_publish.connect()

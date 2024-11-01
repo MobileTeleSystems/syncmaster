@@ -9,6 +9,7 @@ from pydantic_settings import BaseSettings
 from syncmaster.settings.broker import RabbitMQSettings
 from syncmaster.settings.database import DatabaseSettings
 from syncmaster.settings.server import ServerSettings
+from syncmaster.settings.worker import WorkerSettings
 
 
 class EnvTypes(StrEnum):
@@ -48,8 +49,6 @@ class Settings(BaseSettings):
     SECURITY_ALGORITHM: str = "HS256"
     CRYPTO_KEY: str = "UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94="
 
-    CORRELATION_CELERY_HEADER_ID: str = "CORRELATION_CELERY_HEADER_ID"
-
     TOKEN_EXPIRED_TIME: int = 60 * 60 * 10  # 10 hours
     CREATE_SPARK_SESSION_FUNCTION: ImportString = "syncmaster.worker.spark.get_worker_spark_session"
 
@@ -57,7 +56,11 @@ class Settings(BaseSettings):
     broker: RabbitMQSettings = Field(description=":ref:`Broker settings <backend-configuration-broker>`")
     server: ServerSettings = Field(
         default_factory=ServerSettings,
-        description=":ref:`Server settings <backend-configuration>`",
+        description="Server settings <backend-configuration",
+    )
+    worker: WorkerSettings = Field(
+        default_factory=WorkerSettings,
+        description="Celery worker settings",
     )
 
     class Config:

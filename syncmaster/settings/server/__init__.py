@@ -5,8 +5,8 @@ import textwrap
 
 from pydantic import BaseModel, Field
 
+from syncmaster.settings.log import LoggingSettings
 from syncmaster.settings.server.cors import CORSSettings
-from syncmaster.settings.server.log import LoggingSettings
 from syncmaster.settings.server.request_id import RequestIDSettings
 
 

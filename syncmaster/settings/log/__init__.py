@@ -20,15 +20,25 @@ class LoggingSettings(BaseModel):
 
     .. code-block:: bash
 
+        # backend logging
         SYNCMASTER__SERVER__LOGGING__SETUP=True
         SYNCMASTER__SERVER__LOGGING__PRESET=json
+
+        # celery logging
+        SYNCMASTER__WORKER__LOGGING__SETUP=True
+        SYNCMASTER__WORKER__LOGGING__PRESET=json
 
     Passing custom logging config file:
 
     .. code-block:: bash
 
+        # backend logging
         SYNCMASTER__SERVER__LOGGING__SETUP=True
         SYNCMASTER__SERVER__LOGGING__CUSTOM__CONFIG_PATH=/some/logging.yml
+
+        # celery logging
+        SYNCMASTER__WORKER__LOGGING__SETUP=True
+        SYNCMASTER__WORKER__LOGGING__CUSTOM__CONFIG_PATH=/some/logging.yml
 
     Setup logging in some other way, e.g. using `uvicorn args <https://www.uvicorn.org/settings/#logging>`_:
 
