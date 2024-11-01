@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 from sqlalchemy import select
 
-from syncmaster.config import Settings
 from syncmaster.db.models import Transfer
 from syncmaster.scheduler.utils import get_async_session
+from syncmaster.settings import Settings
 
 
 class TransferFetcher:
@@ -12,7 +12,7 @@ class TransferFetcher:
         self.settings = settings
         self.last_updated_at = None
 
-    async def fetch_updated_jobs(self):
+    async def fetch_updated_jobs(self) -> list[Transfer]:
 
         async with get_async_session(self.settings) as session:
             query = select(Transfer)

@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """add run type field
 
-Revision ID: 246db1d5ed29
-Revises: 554b28d59e70
+Revision ID: 0011
+Revises: 0010
 Create Date: 2024-10-29 03:49:29.745008
 
 """
@@ -11,8 +11,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "246db1d5ed29"
-down_revision = "554b28d59e70"
+revision = "0011"
+down_revision = "0010"
 branch_labels = None
 depends_on = None
 

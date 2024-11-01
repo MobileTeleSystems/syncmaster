@@ -49,6 +49,10 @@ class Settings(BaseSettings):
     SECURITY_ALGORITHM: str = "HS256"
     CRYPTO_KEY: str = "UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94="
 
+    TZ: str = "UTC"
+
+    CORRELATION_CELERY_HEADER_ID: str = "CORRELATION_CELERY_HEADER_ID"
+
     TOKEN_EXPIRED_TIME: int = 60 * 60 * 10  # 10 hours
     CREATE_SPARK_SESSION_FUNCTION: ImportString = "syncmaster.worker.spark.get_worker_spark_session"
 

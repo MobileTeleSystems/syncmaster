@@ -94,7 +94,7 @@ async def test_send_job_to_celery_with_success(
     # Assert
     mock_to_thread.assert_awaited_once_with(
         mock_send_task,
-        "tick",
+        "run_transfer_task",
         kwargs={"run_id": run.id},
         queue=group_transfer.queue.name,
     )

@@ -932,13 +932,13 @@ files = [
 
 [[package]]
 name = "faker"
-version = "30.8.1"
+version = "30.8.2"
 description = "Faker is a Python package that generates fake data for you."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "Faker-30.8.1-py3-none-any.whl", hash = "sha256:4f7f133560b9d4d2a915581f4ba86f9a6a83421b89e911f36c4c96cff58135a5"},
-    {file = "faker-30.8.1.tar.gz", hash = "sha256:93e8b70813f76d05d98951154681180cb795cfbcff3eced7680d963bcc0da2a9"},
+    {file = "Faker-30.8.2-py3-none-any.whl", hash = "sha256:4a82b2908cd19f3bba1a4da2060cc4eb18a40410ccdf9350d071d79dc92fe3ce"},
+    {file = "faker-30.8.2.tar.gz", hash = "sha256:aa31b52cdae3673d6a78b4857c7bcdc0e98f201a5cb77d7827fa9e6b5876da94"},
 ]
 
 [package.dependencies]
@@ -2466,6 +2466,17 @@ files = [
 ]
 
 [[package]]
+name = "pytz"
+version = "2024.2"
+description = "World timezone definitions, modern and historical"
+optional = true
+python-versions = "*"
+files = [
+    {file = "pytz-2024.2-py2.py3-none-any.whl", hash = "sha256:31c7c1817eb7fae7ca4b8c7ee50c72f93aa2dd863de768e1ef4245d426aa0725"},
+    {file = "pytz-2024.2.tar.gz", hash = "sha256:2aa355083c50a0f93fa581709deac0c9ad65cca8a9e9beac660adcbd493c798a"},
+]
+
+[[package]]
 name = "pyyaml"
 version = "6.0.2"
 description = "YAML parser and emitter for Python"
@@ -3134,6 +3145,23 @@ files = [
 ]
 
 [[package]]
+name = "tzlocal"
+version = "5.2"
+description = "tzinfo object for the local timezone"
+optional = true
+python-versions = ">=3.8"
+files = [
+    {file = "tzlocal-5.2-py3-none-any.whl", hash = "sha256:49816ef2fe65ea8ac19d19aa7a1ae0551c834303d5014c6d5a62e4cbda8047b8"},
+    {file = "tzlocal-5.2.tar.gz", hash = "sha256:8d399205578f1a9342816409cc1e46a93ebd5755e39ea2d85334bea911bf0e6e"},
+]
+
+[package.dependencies]
+tzdata = {version = "*", markers = "platform_system == \"Windows\""}
+
+[package.extras]
+devenv = ["check-manifest", "pytest (>=4.3)", "pytest-cov", "pytest-mock (>=3.3)", "zest.releaser"]
+
+[[package]]
 name = "urllib3"
 version = "2.2.3"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
@@ -3313,11 +3341,11 @@ test = ["coverage[toml]", "zope.event", "zope.testing"]
 testing = ["coverage[toml]", "zope.event", "zope.testing"]
 
 [extras]
-backend = ["alembic", "asgi-correlation-id", "asyncpg", "celery", "coloredlogs", "fastapi", "jinja2", "psycopg", "pydantic-settings", "python-jose", "python-json-logger", "python-multipart", "sqlalchemy", "sqlalchemy-utils", "uuid6", "uvicorn"]
+backend = ["alembic", "apscheduler", "asgi-correlation-id", "asyncpg", "celery", "coloredlogs", "fastapi", "jinja2", "psycopg", "pydantic-settings", "python-jose", "python-json-logger", "python-multipart", "sqlalchemy", "sqlalchemy-utils", "uuid6", "uvicorn"]
+scheduler = ["apscheduler", "asyncpg", "celery", "pydantic-settings", "python-jose", "python-multipart", "sqlalchemy", "sqlalchemy-utils"]
 worker = ["asgi-correlation-id", "celery", "jinja2", "onetl", "psycopg", "pydantic-settings", "sqlalchemy", "sqlalchemy-utils", "uuid6"]
-scheduler = ["apscheduler", "asyncpg", "celery", "psycopg2-binary", "pydantic-settings", "python-jose", "python-multipart", "sqlalchemy", "sqlalchemy-utils"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "2db69ba935a3cc8094ce9a4203236f4902c5cea5d4d4d0a1ceab3c453617b712"
+content-hash = "9872c9cf2dec78cd332c75eeaabc36a03e73f814cfc161ade72f0f673bed374b"

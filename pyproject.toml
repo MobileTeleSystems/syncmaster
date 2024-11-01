@@ -87,6 +87,7 @@ backend = [
     "asyncpg",
     # migrations only
     "celery",
+    "apscheduler",
 ]
 
 worker = [

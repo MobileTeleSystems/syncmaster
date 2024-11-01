@@ -24,6 +24,11 @@ class Status(enum.StrEnum):
     FINISHED = "FINISHED"
 
 
+class RunType(enum.StrEnum):
+    MANUAL = "MANUAL"
+    SCHEDULED = "SCHEDULED"
+
+
 class Run(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(
         BigInteger,
@@ -51,6 +56,12 @@ class Run(Base, TimestampMixin):
         default=Status.CREATED,
         index=True,
     )
+    type: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        default=RunType.MANUAL,
+        index=True,
+    )
     log_url: Mapped[str] = mapped_column(String(512), nullable=True)
     transfer_dump: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
 
@@ -61,5 +72,6 @@ class Run(Base, TimestampMixin):
             f"<Run "
             f"id={self.id} "
             f"transfer_id={self.transfer_id} "
+            f"type={self.type} "
             f"created_at={self.created_at:%Y-%m-%d %H:%M:%S}>"
         )

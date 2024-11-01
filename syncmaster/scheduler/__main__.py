@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 import asyncio
 
-from syncmaster.config import Settings
 from syncmaster.scheduler.transfer_fetcher import TransferFetcher
 from syncmaster.scheduler.transfer_job_manager import TransferJobManager
 from syncmaster.scheduler.utils import TRANSFER_FETCHING_TIMEOUT
+from syncmaster.settings import Settings
 
 
 async def main():
