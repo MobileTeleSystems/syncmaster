@@ -21,10 +21,10 @@ async def main():
         transfers = await transfer_fetcher.fetch_updated_jobs()
 
         if transfers:
-            logger.info(f"Found {len(transfers)} updated transfers: {transfers}")
+            logger.info("Found %d updated transfers: %s", len(transfers), transfers)
             transfer_job_manager.update_jobs(transfers)
             transfer_fetcher.last_updated_at = max(t.updated_at for t in transfers)
-            logger.info(f"Scheduler state has been updated. Last updated at: {transfer_fetcher.last_updated_at}")
+            logger.info("Scheduler state has been updated. Last updated at: %s", transfer_fetcher.last_updated_at)
 
         await asyncio.sleep(settings.SCHEDULER_TRANSFER_FETCHING_TIMEOUT)
 
