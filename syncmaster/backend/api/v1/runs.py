@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
+import asyncio
 from datetime import datetime
 from typing import Annotated
 
@@ -129,7 +130,8 @@ async def start_run(
         )
 
     try:
-        celery.send_task(
+        await asyncio.to_thread(
+            celery.send_task,
             "run_transfer_task",
             kwargs={"run_id": run.id},
             queue=transfer.queue.name,
