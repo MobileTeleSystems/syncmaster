@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.db.models import Status
+from syncmaster.db.models import RunType, Status
 from tests.mocks import MockGroup, MockRun, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
@@ -36,6 +36,7 @@ async def test_developer_plus_can_stop_run_of_transfer_his_group(
         "started_at": group_run.started_at,
         "ended_at": group_run.ended_at,
         "transfer_dump": group_run.transfer_dump,
+        "type": RunType.MANUAL,
     }
 
 
@@ -112,6 +113,7 @@ async def test_superuser_can_stop_run(
         "started_at": group_run.started_at,
         "ended_at": group_run.ended_at,
         "transfer_dump": group_run.transfer_dump,
+        "type": RunType.MANUAL,
     }
     assert result.status_code == 200
 

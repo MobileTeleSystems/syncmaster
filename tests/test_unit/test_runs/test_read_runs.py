@@ -4,7 +4,7 @@ from typing import Any
 import pytest
 from httpx import AsyncClient
 
-from syncmaster.db.models import Status
+from syncmaster.db.models import RunType, Status
 from tests.mocks import MockGroup, MockRun, MockTransfer, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
@@ -52,6 +52,7 @@ async def test_developer_plus_can_read_runs_of_the_transfer(
                 "started_at": group_run.started_at,
                 "ended_at": group_run.ended_at,
                 "log_url": group_run.log_url,
+                "type": RunType.MANUAL,
             },
         ],
     }
@@ -112,6 +113,7 @@ async def test_superuser_can_read_runs(
                 "started_at": group_run.started_at,
                 "ended_at": group_run.ended_at,
                 "log_url": group_run.log_url,
+                "type": RunType.MANUAL,
             },
         ],
     }

@@ -6,7 +6,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from syncmaster.db.models import Status
+from syncmaster.db.models import RunType, Status
 from syncmaster.schemas.v1.page import PageSchema
 
 
@@ -17,6 +17,7 @@ class ShortRunSchema(BaseModel):
     ended_at: datetime | None = None
     status: Status
     log_url: str | None = None
+    type: RunType
 
     class Config:
         from_attributes = True

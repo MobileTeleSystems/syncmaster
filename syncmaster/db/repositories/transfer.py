@@ -118,6 +118,8 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         target_params: dict[str, Any],
         strategy_params: dict[str, Any],
         queue_id: int,
+        is_scheduled: bool,
+        schedule: str | None,
     ) -> Transfer:
         query = (
             insert(Transfer)
@@ -131,6 +133,8 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
                 target_params=target_params,
                 strategy_params=strategy_params,
                 queue_id=queue_id,
+                is_scheduled=is_scheduled,
+                schedule=schedule or "",
             )
             .returning(Transfer)
         )

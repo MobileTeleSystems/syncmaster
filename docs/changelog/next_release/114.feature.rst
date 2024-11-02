@@ -1,0 +1,1 @@
+Implement a scheduler to run celery tasks on a schedule. This can be done via the `Transfer` table by fields `is_scheduled` and `schedule` (cron-like expression). The Run model now has a `type` field with options `MANUAL` and `SCHEDULED`.

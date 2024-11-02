@@ -56,7 +56,7 @@ jobs:
         run: |
           source .env.local
           poetry run python -m syncmaster.db.migrations upgrade head
-          poetry run coverage run -m pytest -vvv -s -m backend
+          poetry run coverage run -m pytest -vvv -s -m "backend or scheduler"
 
       - name: Shutdown
         if: always()

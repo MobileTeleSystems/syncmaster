@@ -10,7 +10,7 @@ from kombu.exceptions import KombuError
 
 from syncmaster.backend.dependencies import Stub
 from syncmaster.backend.services import UnitOfWork, get_user
-from syncmaster.db.models import Status, User
+from syncmaster.db.models import RunType, Status, User
 from syncmaster.db.utils import Permission
 from syncmaster.errors.registration import get_error_responses
 from syncmaster.exceptions.base import ActionNotAllowedError
@@ -116,6 +116,7 @@ async def start_run(
             # the work of checking fields and removing passwords is delegated to the ReadAuthDataSchema class
             source_creds=ReadAuthDataSchema(auth_data=credentials_source).dict(),
             target_creds=ReadAuthDataSchema(auth_data=credentials_target).dict(),
+            type=RunType.MANUAL,
         )
 
         log_url = Template(settings.worker.LOG_URL_TEMPLATE).render(

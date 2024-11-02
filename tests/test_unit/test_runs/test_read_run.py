@@ -1,6 +1,7 @@
 import pytest
 from httpx import AsyncClient
 
+from syncmaster.db.models import RunType
 from tests.mocks import MockGroup, MockRun, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
@@ -29,6 +30,7 @@ async def test_developer_plus_can_read_run(
         "ended_at": group_run.ended_at,
         "log_url": group_run.log_url,
         "transfer_dump": group_run.transfer_dump,
+        "type": RunType.MANUAL,
     }
     assert result.status_code == 200
 
@@ -100,6 +102,7 @@ async def test_superuser_can_read_runs(
         "ended_at": group_run.ended_at,
         "log_url": group_run.log_url,
         "transfer_dump": group_run.transfer_dump,
+        "type": RunType.MANUAL,
     }
     assert result.status_code == 200
 
