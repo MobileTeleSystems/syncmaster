@@ -8,7 +8,7 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from syncmaster.db.models import Run, Status, Transfer
+from syncmaster.db.models import Run, RunType, Status, Transfer
 from syncmaster.db.repositories.base import Repository
 from syncmaster.db.utils import Pagination
 from syncmaster.exceptions import SyncmasterError
@@ -54,10 +54,12 @@ class RunRepository(Repository[Run]):
         transfer_id: int,
         source_creds: dict,
         target_creds: dict,
+        type: RunType,
     ) -> Run:
         run = Run()
         run.transfer_id = transfer_id
         run.transfer_dump = await self.read_full_serialized_transfer(transfer_id, source_creds, target_creds)
+        run.type = type
         try:
             self._session.add(run)
             await self._session.flush()

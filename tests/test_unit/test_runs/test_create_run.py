@@ -3,7 +3,7 @@ from httpx import AsyncClient
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.db.models import Run, Status
+from syncmaster.db.models import Run, RunType, Status
 from syncmaster.settings import Settings
 from tests.mocks import MockGroup, MockTransfer, MockUser, UserTestRoles
 
@@ -51,6 +51,7 @@ async def test_developer_plus_can_create_run_of_transfer_his_group(
         "started_at": run.started_at,
         "ended_at": run.ended_at,
         "transfer_dump": run.transfer_dump,
+        "type": RunType.MANUAL,
     }
     assert result.status_code == 200
 
@@ -155,6 +156,7 @@ async def test_superuser_can_create_run(
         "started_at": run.started_at,
         "ended_at": run.ended_at,
         "transfer_dump": run.transfer_dump,
+        "type": RunType.MANUAL,
     }
     assert result.status_code == 200
     assert "correlation_id" in response.get("log_url")

@@ -44,10 +44,16 @@ class Settings(BaseSettings):
         SYNCMASTER__SERVER__DEBUG=True
     """
 
-    # TODO: move settings to corresponding classes
+    # TODO: move settings to corresponding classes (scheduler also)
     SECRET_KEY: str = "secret"
     SECURITY_ALGORITHM: str = "HS256"
     CRYPTO_KEY: str = "UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94="
+
+    TZ: str = "UTC"
+    SCHEDULER_TRANSFER_FETCHING_TIMEOUT: int = 180  # seconds
+    SCHEDULER_MISFIRE_GRACE_TIME: int = 300  # seconds
+
+    CORRELATION_CELERY_HEADER_ID: str = "CORRELATION_CELERY_HEADER_ID"
 
     TOKEN_EXPIRED_TIME: int = 60 * 60 * 10  # 10 hours
     CREATE_SPARK_SESSION_FUNCTION: ImportString = "syncmaster.worker.spark.get_worker_spark_session"

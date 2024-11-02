@@ -66,6 +66,7 @@ uuid6 = "^2024.7.10"
 coloredlogs = {version = "*", optional = true}
 python-json-logger = {version = "*", optional = true}
 asyncpg = { version = ">=0.29,<0.31", optional = true }
+apscheduler = { version = "^3.10.4", optional = true }
 
 [tool.poetry.extras]
 backend = [
@@ -86,6 +87,7 @@ backend = [
     "asyncpg",
     # migrations only
     "celery",
+    "apscheduler",
 ]
 
 worker = [
@@ -101,6 +103,18 @@ worker = [
     "coloredlogs",
     "python-json-logger",
 ]
+
+scheduler = [
+    "apscheduler",
+    "pydantic-settings",
+    "sqlalchemy",
+    "sqlalchemy-utils",
+    "asyncpg",
+    "python-multipart",
+    "python-jose",
+    "celery",
+]
+
 [tool.poetry.group.test.dependencies]
 pandas-stubs = "^2.2.2.240909"
 pytest = "^8.3.3"
@@ -204,6 +218,7 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 markers = [
     "backend: tests for backend (require running database)",
+    "scheduler: tests for scheduler (require running database)",
     "worker: tests for syncmaster worker",
     "hive: tests for Hive",
     "postgres: tests on Postgres",

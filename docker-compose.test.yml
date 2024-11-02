@@ -51,6 +51,25 @@ services:
         condition: service_healthy
     profiles: [backend, all]
 
+  scheduler:
+    image: mtsrus/syncmaster-backend:${BACKEND_IMAGE_TAG:-test}
+    restart: unless-stopped
+    build:
+      dockerfile: docker/Dockerfile.backend
+      context: .
+      target: test
+    env_file: .env.docker
+    volumes:
+      - ./syncmaster:/app/syncmaster
+      - ./pyproject.toml:/app/pyproject.toml
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    entrypoint: [python, -m, syncmaster.scheduler]
+    profiles: [scheduler, all]
+
   worker:
     image: mtsrus/syncmaster-worker:${WORKER_IMAGE_TAG:-test}
     restart: unless-stopped
