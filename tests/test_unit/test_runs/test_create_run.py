@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock
+
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import desc, select
@@ -19,7 +21,8 @@ async def test_developer_plus_can_create_run_of_transfer_his_group(
 ) -> None:
     # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
-    mocker.patch("syncmaster.worker.config.celery.send_task")
+    mock_send_task = mocker.patch("syncmaster.worker.config.celery.send_task")
+    mock_to_thread = mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
     run = (
         await session.scalars(
@@ -55,6 +58,13 @@ async def test_developer_plus_can_create_run_of_transfer_his_group(
     }
     assert result.status_code == 200
 
+    mock_to_thread.assert_awaited_once_with(
+        mock_send_task,
+        "run_transfer_task",
+        kwargs={"run_id": run.id},
+        queue=group_transfer.queue.name,
+    )
+
 
 async def test_groupless_user_cannot_create_run(
     client: AsyncClient,
@@ -65,6 +75,7 @@ async def test_groupless_user_cannot_create_run(
 ) -> None:
     # Arrange
     mocker.patch("syncmaster.worker.config.celery.send_task")
+    mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
     # Act
     result = await client.post(
@@ -94,6 +105,7 @@ async def test_group_member_cannot_create_run_of_other_group_transfer(
 ):
     # Arrange
     mocker.patch("syncmaster.worker.config.celery.send_task")
+    mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
     user = group.get_member_of_role(role_guest_plus)
 
     # Act
@@ -132,7 +144,8 @@ async def test_superuser_can_create_run(
     settings.worker.LOG_URL_TEMPLATE = (
         "https://grafana.example.com?correlation_id={{ correlation_id }}&run_id={{ run.id }}"
     )
-    mocker.patch("syncmaster.worker.config.celery.send_task")
+    mock_send_task = mocker.patch("syncmaster.worker.config.celery.send_task")
+    mock_to_thread = mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
     # Act
     result = await client.post(
@@ -161,6 +174,12 @@ async def test_superuser_can_create_run(
     assert result.status_code == 200
     assert "correlation_id" in response.get("log_url")
     assert "run_id" in response.get("log_url")
+    mock_to_thread.assert_awaited_once_with(
+        mock_send_task,
+        "run_transfer_task",
+        kwargs={"run_id": run.id},
+        queue=group_transfer.queue.name,
+    )
 
 
 async def test_unauthorized_user_cannot_create_run(
@@ -170,6 +189,7 @@ async def test_unauthorized_user_cannot_create_run(
 ) -> None:
     # Arrange
     mocker.patch("syncmaster.worker.config.celery.send_task")
+    mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
     # Act
     result = await client.post(
@@ -198,6 +218,7 @@ async def test_group_member_cannot_create_run_of_unknown_transfer_error(
     # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_guest_plus)
     mocker.patch("syncmaster.worker.config.celery.send_task")
+    mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
     # Act
     result = await client.post(
@@ -225,6 +246,7 @@ async def test_superuser_cannot_create_run_of_unknown_transfer_error(
 ) -> None:
     # Arrange
     mocker.patch("syncmaster.worker.config.celery.send_task")
+    mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
     # Act
     result = await client.post(
