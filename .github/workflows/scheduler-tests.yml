@@ -49,7 +49,7 @@ jobs:
       # This is important, as coverage is exported after receiving SIGTERM
       - name: Run Scheduler Tests
         run: |
-          docker compose -f ./docker-compose.test.yml --profile worker exec -T worker coverage run -m pytest -vvv -s -m "scheduler"
+          docker compose -f ./docker-compose.test.yml --profile worker exec -T worker coverage run -m pytest -vvv -s -m "worker and scheduler"
 
       - name: Dump worker logs on failure
         if: failure()
