@@ -15,6 +15,5 @@ celery = Celery(
     task_cls=WorkerTask,
     imports=[
         "syncmaster.worker.transfer",
-        "tests.test_integration.test_scheduler.test_task",
     ],
 )

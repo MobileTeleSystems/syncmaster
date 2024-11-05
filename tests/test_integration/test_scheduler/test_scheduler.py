@@ -23,7 +23,7 @@ async def test_scheduler(
     transfer_fetcher = TransferFetcher(settings)
     transfers = await transfer_fetcher.fetch_updated_jobs()
     assert transfers
-    assert group_transfer.transfer.id in [t.id for t in transfers]
+    assert group_transfer.transfer.id in {t.id for t in transfers}
 
     transfer_job_manager.update_jobs(transfers)
 
