@@ -8,10 +8,7 @@ from syncmaster.scheduler.transfer_job_manager import TransferJobManager
 from syncmaster.worker.config import celery
 
 
-@pytest.fixture(
-    scope="session",
-    params=[pytest.param("scheduler", marks=[pytest.mark.scheduler])],
-)
+@pytest.fixture
 def mock_send_task_to_tick(mocker: MockerFixture):
     original_to_thread = asyncio.to_thread
     return mocker.patch(
@@ -20,10 +17,7 @@ def mock_send_task_to_tick(mocker: MockerFixture):
     )
 
 
-@pytest.fixture(
-    scope="session",
-    params=[pytest.param("scheduler", marks=[pytest.mark.scheduler])],
-)
+@pytest.fixture
 def mock_add_job(mocker: MockerFixture, transfer_job_manager: TransferJobManager):
     original_add_job = transfer_job_manager.scheduler.add_job
     return mocker.patch.object(
