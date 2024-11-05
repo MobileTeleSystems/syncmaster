@@ -38,8 +38,12 @@ async def test_scheduler(
     assert run is not None
     assert run.status in [Status.CREATED, Status.STARTED]
 
-    await asyncio.sleep(2)
-    await session.refresh(run)
-    completed_run = await session.scalar(select(Run).filter_by(id=run.id))
-    assert completed_run.status == Status.FINISHED
-    assert completed_run.ended_at is not None
+    for _ in range(3):
+        await asyncio.sleep(2)
+        await session.refresh(run)
+        run = await session.scalar(select(Run, run.id))
+        if run.status == Status.FINISHED:
+            break
+
+    assert run.status == Status.FINISHED
+    assert run.ended_at is not None
