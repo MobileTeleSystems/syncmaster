@@ -9,7 +9,7 @@ from syncmaster.scheduler import TransferFetcher, TransferJobManager
 from syncmaster.settings import Settings
 from tests.mocks import MockTransfer
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.worker]
+pytestmark = [pytest.mark.asyncio, pytest.mark.worker, pytest.mark.scheduler_integration]
 
 
 async def test_scheduler(
