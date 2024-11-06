@@ -1,4 +1,3 @@
-import secrets
 from collections.abc import AsyncGenerator
 
 import pytest_asyncio
@@ -27,7 +26,7 @@ from tests.test_unit.utils import (
 
 
 @pytest_asyncio.fixture
-async def group_transfer(
+async def group_transfer_integration_mock(
     session: AsyncSession,
     settings: Settings,
     create_connection_data: dict | None,
@@ -46,7 +45,7 @@ async def group_transfer(
 
     queue = await create_queue(
         session=session,
-        name=f"{secrets.token_hex(5)}_test_queue",
+        name="test_queue",
         group_id=group.id,
     )
 

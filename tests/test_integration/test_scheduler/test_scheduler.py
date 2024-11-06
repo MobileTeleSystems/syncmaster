@@ -1,6 +1,7 @@
 import asyncio
 
 import pytest
+from pytest_mock import MockType
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,11 +16,12 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.worker, pytest.mark.scheduler_int
 async def test_scheduler(
     session: AsyncSession,
     settings: Settings,
-    group_transfer: MockTransfer,
+    group_transfer_integration_mock: MockTransfer,
     transfer_job_manager: TransferJobManager,
-    mock_send_task_to_tick,
-    mock_add_job,
+    mock_send_task_to_tick: MockType,
+    mock_add_job: MockType,
 ):
+    group_transfer = group_transfer_integration_mock
     transfer_fetcher = TransferFetcher(settings)
     transfers = await transfer_fetcher.fetch_updated_jobs()
     assert transfers
@@ -30,7 +32,7 @@ async def test_scheduler(
     job = transfer_job_manager.scheduler.get_job(str(group_transfer.id))
     assert job is not None
 
-    await asyncio.sleep(1)  # make sure that created job with every-second cron worked
+    await asyncio.sleep(1.5)  # make sure that created job with every-second cron worked
 
     run = await session.scalar(
         select(Run).filter_by(transfer_id=group_transfer.id).order_by(Run.created_at.desc()),

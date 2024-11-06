@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import logging
-import time
 from datetime import datetime, timezone
 
 import onetl
@@ -104,23 +103,3 @@ def load_correlation_id(task, *args, **kwargs) -> None:
     # Here we're able to load the correlation ID from the headers
     id_value = task.request.get(CORRELATION_CELERY_HEADER_ID)
     correlation_id.set(id_value)
-
-
-@celery.task(name="tick", bind=True, track_started=True)
-def tick(self: WorkerTask, run_id: int) -> None:
-    """This task can be used for testing."""
-    with Session(self.engine) as session:
-        run = session.get(Run, run_id)
-        if run is None:
-            raise RunNotFoundError
-
-        run.started_at = datetime.now(tz=timezone.utc)
-        run.status = Status.STARTED
-        session.add(run)
-        session.commit()
-
-        time.sleep(2)  # to make sure that previous status is handled in test
-        run.status = Status.FINISHED
-        run.ended_at = datetime.now(tz=timezone.utc)
-        session.add(run)
-        session.commit()
