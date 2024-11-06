@@ -39,7 +39,7 @@ loggers:
     handlers: [main]
     level: INFO
     propagate: false
-    celery:
-      level: DEBUG
-      handlers: [celery]
-      propagate: false
+  celery:
+    level: DEBUG
+    handlers: [celery]
+    propagate: false
