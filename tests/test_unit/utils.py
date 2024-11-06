@@ -154,7 +154,7 @@ async def create_transfer(
     source_params: dict | None = None,
     target_params: dict | None = None,
     is_scheduled: bool = True,
-    schedule: str = "0 0 * * *",
+    schedule: str = "* * * * *",
     strategy_params: dict | None = None,
     description: str = "",
 ) -> Transfer:

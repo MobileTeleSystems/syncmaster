@@ -32,6 +32,7 @@ pytest_plugins = [
     "tests.test_unit.test_runs.run_fixtures",
     "tests.test_unit.test_connections.connection_fixtures",
     "tests.test_unit.test_scheduler.scheduler_fixtures",
+    "tests.test_integration.test_scheduler.scheduler_fixtures",
 ]
 
 
