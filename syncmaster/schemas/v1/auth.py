@@ -9,4 +9,5 @@ class TokenPayloadSchema(BaseModel):
 
 class AuthTokenSchema(BaseModel):
     access_token: str
-    refresh_token: str
+    token_type: str
+    expires_at: float

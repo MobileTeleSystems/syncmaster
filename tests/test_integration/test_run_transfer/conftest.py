@@ -24,7 +24,6 @@ from pyspark.sql.types import (
 from pytest import FixtureRequest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.backend.api.v1.auth.utils import sign_jwt
 from syncmaster.db.models import Group
 from syncmaster.dto.connections import (
     HDFSConnectionDTO,
@@ -572,7 +571,7 @@ async def group_owner(
 
     yield MockUser(
         user=user,
-        auth_token=sign_jwt(user.id, settings),
+        auth_token=generate_access_token(user.id, settings),
         role=UserTestRoles.Owner,
     )
 

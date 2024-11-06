@@ -6,6 +6,7 @@ from pydantic import Field
 from pydantic.types import ImportString
 from pydantic_settings import BaseSettings
 
+from syncmaster.settings.auth import AuthSettings
 from syncmaster.settings.broker import RabbitMQSettings
 from syncmaster.settings.database import DatabaseSettings
 from syncmaster.settings.server import ServerSettings
@@ -44,16 +45,13 @@ class Settings(BaseSettings):
         SYNCMASTER__SERVER__DEBUG=True
     """
 
-    # TODO: move settings to corresponding classes (scheduler also)
-    SECRET_KEY: str = "secret"
-    SECURITY_ALGORITHM: str = "HS256"
-    CRYPTO_KEY: str = "UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94="
+    crypto_key: str
 
+    # TODO: move settings to corresponding classes (scheduler also)
     TZ: str = "UTC"
     SCHEDULER_TRANSFER_FETCHING_TIMEOUT: int = 180  # seconds
     SCHEDULER_MISFIRE_GRACE_TIME: int = 300  # seconds
 
-    TOKEN_EXPIRED_TIME: int = 60 * 60 * 10  # 10 hours
     CREATE_SPARK_SESSION_FUNCTION: ImportString = "syncmaster.worker.spark.get_worker_spark_session"
 
     database: DatabaseSettings = Field(description=":ref:`Database settings <backend-configuration-database>`")
@@ -61,6 +59,10 @@ class Settings(BaseSettings):
     server: ServerSettings = Field(
         default_factory=ServerSettings,
         description="Server settings <backend-configuration",
+    )
+    auth: AuthSettings = Field(
+        default_factory=AuthSettings,
+        description="Auth settings",
     )
     worker: WorkerSettings = Field(
         default_factory=WorkerSettings,

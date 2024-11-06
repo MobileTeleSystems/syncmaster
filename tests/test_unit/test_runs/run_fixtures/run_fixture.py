@@ -3,8 +3,6 @@ import secrets
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.backend.api.v1.auth.utils import sign_jwt
-from syncmaster.settings import Settings
 from tests.mocks import (
     MockConnection,
     MockGroup,
@@ -25,7 +23,7 @@ from tests.test_unit.utils import (
 
 
 @pytest_asyncio.fixture
-async def group_run(session: AsyncSession, settings: Settings) -> MockRun:
+async def group_run(session: AsyncSession, access_token_factory) -> MockRun:
     group_owner = await create_user(session=session, username="group_owner_connection", is_active=True)
     group = await create_group(session=session, name="connection_group", owner_id=group_owner.id)
     members: list[MockUser] = []
@@ -39,15 +37,16 @@ async def group_run(session: AsyncSession, settings: Settings) -> MockRun:
                 username=username,
                 group_id=group.id,
                 session=session,
-                settings=settings,
+                access_token_factory=access_token_factory,
             ),
         )
     await session.commit()
+    token = access_token_factory(group_owner.id)
     mock_group = MockGroup(
         group=group,
         owner=MockUser(
             user=group_owner,
-            auth_token=sign_jwt(group_owner.id, settings),
+            auth_token=token,
             role=UserTestRoles.Owner,
         ),
         members=members,

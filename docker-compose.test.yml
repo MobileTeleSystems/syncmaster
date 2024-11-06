@@ -156,6 +156,19 @@ services:
       retries: 3
     profiles: [hive, hdfs, all]
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    command: start-dev
+    restart: unless-stopped
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - 8080:8080
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+    profiles: [keycloak, all]
+
   test-hive:
     image: mtsrus/hadoop:hadoop2.7.3-hive2.3.9
     restart: unless-stopped

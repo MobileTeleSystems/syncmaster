@@ -12,7 +12,7 @@ def decrypt_auth_data(
     value: str,
     settings: Settings,
 ) -> dict:
-    decryptor = Fernet(settings.CRYPTO_KEY)
+    decryptor = Fernet(settings.crypto_key)
     decrypted = decryptor.decrypt(value)
     return json.loads(decrypted)
 
@@ -26,7 +26,7 @@ def encrypt_auth_data(
     value: dict,
     settings: Settings,
 ) -> str:
-    encryptor = Fernet(settings.CRYPTO_KEY)
+    encryptor = Fernet(settings.crypto_key)
     serialized = json.dumps(
         value,
         ensure_ascii=False,
