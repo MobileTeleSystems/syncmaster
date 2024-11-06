@@ -53,8 +53,6 @@ class Settings(BaseSettings):
     SCHEDULER_TRANSFER_FETCHING_TIMEOUT: int = 180  # seconds
     SCHEDULER_MISFIRE_GRACE_TIME: int = 300  # seconds
 
-    CORRELATION_CELERY_HEADER_ID: str = "CORRELATION_CELERY_HEADER_ID"
-
     TOKEN_EXPIRED_TIME: int = 60 * 60 * 10  # 10 hours
     CREATE_SPARK_SESSION_FUNCTION: ImportString = "syncmaster.worker.spark.get_worker_spark_session"
 

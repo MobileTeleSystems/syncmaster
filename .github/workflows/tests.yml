@@ -32,6 +32,10 @@ jobs:
     name: S3 tests
     uses: ./.github/workflows/s3-tests.yml
 
+  scheduler_tests:
+    name: Scheduler tests
+    uses: ./.github/workflows/scheduler-tests.yml
+
   unit_tests:
     name: Unit tests
     uses: ./.github/workflows/unit-test.yml
