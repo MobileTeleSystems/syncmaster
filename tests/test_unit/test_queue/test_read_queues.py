@@ -35,6 +35,7 @@ async def test_group_member_can_read_queues(
                 "name": group_queue.name,
                 "description": group_queue.description,
                 "group_id": mock_group.id,
+                "slug": f"{mock_group.id}-{group_queue.name}",
             },
         ],
         "meta": {
@@ -73,6 +74,7 @@ async def test_superuser_can_read_queues(
                 "name": group_queue.name,
                 "description": group_queue.description,
                 "group_id": mock_group.id,
+                "slug": f"{mock_group.id}-{group_queue.name}",
             },
         ],
         "meta": {
@@ -216,6 +218,7 @@ async def test_search_queues_with_query(
                 "name": group_queue.name,
                 "description": group_queue.description,
                 "group_id": mock_group.id,
+                "slug": f"{mock_group.id}-{group_queue.name}",
             },
         ],
     }

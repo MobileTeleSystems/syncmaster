@@ -21,8 +21,9 @@ depends_on = None
 def upgrade():
     op.create_table(
         "queue",
-        sa.Column("name", sa.String(length=128), nullable=False),
         sa.Column("id", sa.BigInteger(), nullable=False),
+        sa.Column("name", sa.String(length=128), nullable=False),
+        sa.Column("slug", sa.String(length=256), nullable=False),
         sa.Column("group_id", sa.BigInteger(), nullable=False),
         sa.Column("description", sa.String(length=512), nullable=False),
         sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
@@ -41,7 +42,7 @@ def upgrade():
             ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk__queue")),
-        sa.UniqueConstraint("name", name=op.f("uq__queue__name")),
+        sa.UniqueConstraint("slug", name=op.f("uq__queue__slug")),
     )
     op.create_index(op.f("ix__queue__group_id"), "queue", ["group_id"], unique=False)
 

@@ -197,7 +197,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
     @staticmethod
     def _raise_error(err: DBAPIError) -> NoReturn:
         constraint = err.__cause__.__cause__.constraint_name
-        if constraint == "uq__queue__name":
+        if constraint == "uq__queue__slug":
             raise DuplicatedQueueNameError
 
         raise SyncmasterError from err

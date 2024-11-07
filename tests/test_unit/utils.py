@@ -77,6 +77,7 @@ async def create_queue(
         name=name,
         description=description,
         group_id=group_id,
+        slug=f"{group_id}-{name}",
     )
     session.add(queue)
     await session.commit()

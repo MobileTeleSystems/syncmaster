@@ -35,6 +35,7 @@ async def test_maintainer_plus_can_create_queue(
         "name": "New_queue",
         "description": "Some interesting description",
         "group_id": mock_group.group.id,
+        "slug": f"{mock_group.group.id}-New_queue",
     }
     assert result.status_code == 200
     queue = (await session.scalars(select(Queue).filter_by(id=result.json()["id"]))).one()
@@ -43,6 +44,7 @@ async def test_maintainer_plus_can_create_queue(
     assert queue.group_id == mock_group.group.id
     assert queue.name == "New_queue"
     assert queue.description == "Some interesting description"
+    assert queue.slug == f"{mock_group.group.id}-New_queue"
 
     await session.delete(queue)
     await session.commit()
@@ -71,6 +73,7 @@ async def test_superuser_can_create_queue(
         "name": "New_queue",
         "description": "Some interesting description",
         "group_id": mock_group.group.id,
+        "slug": f"{mock_group.group.id}-New_queue",
     }
     assert result.status_code == 200
     queue = (await session.scalars(select(Queue).filter_by(id=result.json()["id"]))).one()
@@ -79,6 +82,7 @@ async def test_superuser_can_create_queue(
     assert queue.group_id == mock_group.group.id
     assert queue.name == "New_queue"
     assert queue.description == "Some interesting description"
+    assert queue.slug == f"{mock_group.group.id}-New_queue"
 
     await session.delete(queue)
     await session.commit()

@@ -1,4 +1,5 @@
 import secrets
+from collections.abc import AsyncGenerator
 
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -289,7 +290,7 @@ async def group_queue(
     session: AsyncSession,
     settings: Settings,
     mock_group: MockGroup,
-) -> Queue:
+) -> AsyncGenerator[Queue, None]:
     queue = await create_queue(
         session=session,
         name=f"{secrets.token_hex(5)}_test_queue",

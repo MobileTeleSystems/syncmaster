@@ -28,6 +28,7 @@ async def test_group_member_can_read_queue(
         "name": group_queue.name,
         "description": group_queue.description,
         "group_id": group_queue.group_id,
+        "slug": f"{group_queue.group.id}-{group_queue.name}",
     }
     assert result.status_code == 200
 
@@ -49,6 +50,7 @@ async def test_superuser_can_read_queue(
         "name": group_queue.name,
         "description": group_queue.description,
         "group_id": group_queue.group_id,
+        "slug": f"{group_queue.group.id}-{group_queue.name}",
     }
     assert result.status_code == 200
 
