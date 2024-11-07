@@ -9,7 +9,7 @@ from devtools import pformat
 from fastapi import Depends, FastAPI
 
 from syncmaster.backend.dependencies import Stub
-from syncmaster.backend.providers.auth.base import AuthProvider
+from syncmaster.backend.providers.auth.base_provider import AuthProvider
 from syncmaster.backend.services import UnitOfWork
 from syncmaster.backend.utils.jwt import decode_jwt, sign_jwt
 from syncmaster.db.models import User
@@ -37,17 +37,15 @@ class DummyAuthProvider(AuthProvider):
         app.dependency_overrides[DummyAuthProviderSettings] = lambda: settings
         return app
 
-    async def get_current_user(self, access_token: str) -> User:
+    async def get_current_user(self, access_token: str, *args, **kwargs) -> User:
         if not access_token:
             raise AuthorizationError("Missing auth credentials")
 
         user_id = self._get_user_id_from_token(access_token)
         user = await self._uow.user.read_by_id(user_id)
-        if not user.is_active:
-            raise AuthorizationError(f"User {user.username!r} is disabled")
         return user
 
-    async def get_token(
+    async def get_token_password_grant(
         self,
         grant_type: str | None = None,
         login: str | None = None,
@@ -77,6 +75,16 @@ class DummyAuthProvider(AuthProvider):
             "token_type": "bearer",
             "expires_at": expires_at,
         }
+
+    async def get_token_authorization_code_grant(
+        self,
+        code: str,
+        redirect_uri: str,
+        scopes: list[str] | None = None,
+        client_id: str | None = None,
+        client_secret: str | None = None,
+    ) -> dict[str, Any]:
+        raise NotImplementedError("Authorization code grant is not supported by DummyAuthProvider.")
 
     def _generate_access_token(self, user_id: int) -> tuple[str, float]:
         expires_at = time() + self._settings.access_token.expire_seconds

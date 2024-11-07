@@ -52,7 +52,7 @@ class AuthProvider(ABC):
         ...
 
     @abstractmethod
-    async def get_current_user(self, access_token: str) -> User:
+    async def get_current_user(self, access_token: Any, *args, **kwargs) -> User:
         """
         This method should return currently logged in user.
 
@@ -69,7 +69,7 @@ class AuthProvider(ABC):
         ...
 
     @abstractmethod
-    async def get_token(
+    async def get_token_password_grant(
         self,
         grant_type: str | None = None,
         login: str | None = None,
@@ -99,3 +99,16 @@ class AuthProvider(ABC):
                 }
         """
         ...
+
+    @abstractmethod
+    async def get_token_authorization_code_grant(
+        self,
+        code: str,
+        redirect_uri: str,
+        scopes: list[str] | None = None,
+        client_id: str | None = None,
+        client_secret: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Obtain a token using the Authorization Code grant.
+        """

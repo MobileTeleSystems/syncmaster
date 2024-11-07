@@ -16,7 +16,7 @@ class AuthSettings(BaseModel):
 
     .. code-block:: bash
 
-        SYNCMASTER__AUTH__PROVIDER=syncmaster.backend.providers.auth.dummy.DummyAuthProvider
+        SYNCMASTER__AUTH__PROVIDER=syncmaster.backend.providers.auth.dummy_provider.DummyAuthProvider
 
         # pass access_key.secret_key = "secret" to DummyAuthProviderSettings
         SYNCMASTER__AUTH__ACCESS_KEY__SECRET_KEY=secret

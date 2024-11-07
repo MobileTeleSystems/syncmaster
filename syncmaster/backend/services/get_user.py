@@ -3,35 +3,33 @@
 from collections.abc import Callable, Coroutine
 from typing import Annotated, Any
 
-from fastapi import Depends, status
+from fastapi import Depends, Request, status
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
 from syncmaster.backend.dependencies import Stub
 from syncmaster.backend.providers.auth import AuthProvider
 from syncmaster.db.models import User
-from syncmaster.exceptions.auth import AuthorizationError
 
-oauth_schema = OAuth2PasswordBearer(tokenUrl="v1/auth/token")
+oauth_schema = OAuth2PasswordBearer(tokenUrl="v1/auth/token", auto_error=False)
 
 
 def get_user(
     is_active: bool = False,
     is_superuser: bool = False,
-) -> Callable[[AuthProvider, str], Coroutine[Any, Any, User]]:
+) -> Callable[[Request, AuthProvider, str], Coroutine[Any, Any, User]]:
     async def wrapper(
+        request: Request,
         auth_provider: Annotated[AuthProvider, Depends(Stub(AuthProvider))],
-        auth_schema: Annotated[str, Depends(oauth_schema)],
+        access_token: Annotated[str, Depends(oauth_schema)],
     ) -> User:
-        try:
-            user = await auth_provider.get_current_user(auth_schema)
-        # TODO: replace handling exceptions with get_user to generic handler
-        # user is inactive
-        except AuthorizationError:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Inactive user",
-            )
+        # keycloak provider patches session and store access_token in cookie,
+        # when dummy auth stores it in "Authorization" header
+        access_token = request.session.get("access_token", "") or access_token
+        user = await auth_provider.get_current_user(
+            access_token=access_token,
+            request=request,
+        )
         if user is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

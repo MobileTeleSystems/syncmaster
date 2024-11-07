@@ -68,6 +68,7 @@ python-json-logger = {version = "*", optional = true}
 asyncpg = { version = ">=0.29,<0.31", optional = true }
 apscheduler = { version = "^3.10.4", optional = true }
 starlette-exporter = {version = "^0.23.0", optional = true}
+itsdangerous = {version = "*", optional = true}
 python-keycloak =  {version = "^4.7.0", optional = true}
 devtools = {version = "*", optional = true}
 
@@ -90,6 +91,7 @@ backend = [
     "python-json-logger",
     "asyncpg",
     "devtools",
+    "itsdangerous",
     "python-keycloak",
     # migrations only
     "celery",
@@ -183,6 +185,10 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "pyarrow.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "keycloak.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
