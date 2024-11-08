@@ -413,7 +413,7 @@ async def test_maintainer_plus_can_create_queues_with_the_same_name_but_diff_gro
     group_user = group.get_member_of_role(role_maintainer_plus)
 
     # Act
-    await client.post(
+    queue_1 = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {mock_group_user.token}"},
         json={
@@ -422,7 +422,7 @@ async def test_maintainer_plus_can_create_queues_with_the_same_name_but_diff_gro
             "group_id": mock_group.group.id,
         },
     )
-    result = await client.post(
+    queue_2 = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {group_user.token}"},
         json={
@@ -431,13 +431,24 @@ async def test_maintainer_plus_can_create_queues_with_the_same_name_but_diff_gro
             "group_id": group.group.id,
         },
     )
+    queue_1_json = queue_1.json()
+    queue_2_json = queue_2.json()
 
     # Assert
-    assert result.status_code == 200
-    assert result.json() == {
-        "id": result.json()["id"],
+    assert queue_1.status_code == 200
+    assert queue_1_json == {
+        "id": queue_1_json["id"],
+        "name": "New_queue",
+        "description": "Some interesting description",
+        "group_id": mock_group.group.id,
+        "slug": f"{mock_group.group.id}-New_queue",
+    }
+    assert queue_2.status_code == 200
+    assert queue_2_json == {
+        "id": queue_2_json["id"],
         "name": "New_queue",
         "description": "Some interesting description",
         "group_id": group.group.id,
         "slug": f"{group.group.id}-New_queue",
     }
+    assert queue_1_json["slug"] != queue_2_json["slug"]
