@@ -17,7 +17,8 @@ if TYPE_CHECKING:
 
 
 class Queue(Base, ResourceMixin, TimestampMixin, DeletableMixin):
-    name: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    slug: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
 
     transfers: Mapped[list[Transfer]] = relationship(back_populates="queue")
     group: Mapped[Group] = relationship(back_populates="queue")
@@ -31,4 +32,4 @@ class Queue(Base, ResourceMixin, TimestampMixin, DeletableMixin):
     )
 
     def __repr__(self):
-        return f"<Queue name={self.name} description={self.description}>"
+        return f"<Queue name={self.name} slug={self.slug} description={self.description}>"

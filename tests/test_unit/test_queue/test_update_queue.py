@@ -33,6 +33,7 @@ async def test_maintainer_plus_can_update_queue(
         "name": group_queue.name,
         "description": "New description",
         "group_id": group_queue.group_id,
+        "slug": f"{group_queue.group_id}-{group_queue.name}",
     }
     assert result.status_code == 200
 
@@ -44,6 +45,7 @@ async def test_maintainer_plus_can_update_queue(
         "name": queue.name,
         "description": queue.description,
         "group_id": queue.group_id,
+        "slug": f"{queue.group_id}-{queue.name}",
     }
 
 
@@ -70,6 +72,7 @@ async def test_superuser_can_update_queue(
         "name": group_queue.name,
         "description": "New description",
         "group_id": group_queue.group_id,
+        "slug": f"{group_queue.group_id}-{group_queue.name}",
     }
 
     queue = await session.get(Queue, group_queue.id)
@@ -80,6 +83,7 @@ async def test_superuser_can_update_queue(
         "name": queue.name,
         "description": queue.description,
         "group_id": queue.group_id,
+        "slug": f"{queue.group_id}-{queue.name}",
     }
 
 

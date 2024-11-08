@@ -35,6 +35,7 @@ async def test_maintainer_plus_can_create_queue(
         "name": "New_queue",
         "description": "Some interesting description",
         "group_id": mock_group.group.id,
+        "slug": f"{mock_group.group.id}-New_queue",
     }
     assert result.status_code == 200
     queue = (await session.scalars(select(Queue).filter_by(id=result.json()["id"]))).one()
@@ -43,6 +44,7 @@ async def test_maintainer_plus_can_create_queue(
     assert queue.group_id == mock_group.group.id
     assert queue.name == "New_queue"
     assert queue.description == "Some interesting description"
+    assert queue.slug == f"{mock_group.group.id}-New_queue"
 
     await session.delete(queue)
     await session.commit()
@@ -71,6 +73,7 @@ async def test_superuser_can_create_queue(
         "name": "New_queue",
         "description": "Some interesting description",
         "group_id": mock_group.group.id,
+        "slug": f"{mock_group.group.id}-New_queue",
     }
     assert result.status_code == 200
     queue = (await session.scalars(select(Queue).filter_by(id=result.json()["id"]))).one()
@@ -79,6 +82,7 @@ async def test_superuser_can_create_queue(
     assert queue.group_id == mock_group.group.id
     assert queue.name == "New_queue"
     assert queue.description == "Some interesting description"
+    assert queue.slug == f"{mock_group.group.id}-New_queue"
 
     await session.delete(queue)
     await session.commit()
@@ -395,3 +399,56 @@ async def test_maintainer_plus_can_not_create_queue_with_duplicate_name_error(
             "details": None,
         },
     }
+
+
+async def test_maintainer_plus_can_create_queues_with_the_same_name_but_diff_groups(
+    client: AsyncClient,
+    session: AsyncSession,
+    role_maintainer_plus: UserTestRoles,
+    mock_group: MockGroup,
+    group: MockGroup,
+):
+    # Arrange
+    mock_group_user = mock_group.get_member_of_role(role_maintainer_plus)
+    group_user = group.get_member_of_role(role_maintainer_plus)
+
+    # Act
+    queue_1 = await client.post(
+        "v1/queues",
+        headers={"Authorization": f"Bearer {mock_group_user.token}"},
+        json={
+            "name": "New_queue",
+            "description": "Some interesting description",
+            "group_id": mock_group.group.id,
+        },
+    )
+    queue_2 = await client.post(
+        "v1/queues",
+        headers={"Authorization": f"Bearer {group_user.token}"},
+        json={
+            "name": "New_queue",
+            "description": "Some interesting description",
+            "group_id": group.group.id,
+        },
+    )
+    queue_1_json = queue_1.json()
+    queue_2_json = queue_2.json()
+
+    # Assert
+    assert queue_1.status_code == 200
+    assert queue_1_json == {
+        "id": queue_1_json["id"],
+        "name": "New_queue",
+        "description": "Some interesting description",
+        "group_id": mock_group.group.id,
+        "slug": f"{mock_group.group.id}-New_queue",
+    }
+    assert queue_2.status_code == 200
+    assert queue_2_json == {
+        "id": queue_2_json["id"],
+        "name": "New_queue",
+        "description": "Some interesting description",
+        "group_id": group.group.id,
+        "slug": f"{group.group.id}-New_queue",
+    }
+    assert queue_1_json["slug"] != queue_2_json["slug"]

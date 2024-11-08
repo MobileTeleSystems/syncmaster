@@ -77,7 +77,7 @@ class Group(Base, TimestampMixin, DeletableMixin):
 
     owner: Mapped[User] = relationship(User)
     members: Mapped[list[User]] = relationship(User, secondary="user_group")
-    queue: Mapped[Queue] = relationship(back_populates="group")
+    queue: Mapped[Queue] = relationship(back_populates="group", cascade="all, delete-orphan")
 
     search_vector: Mapped[str] = mapped_column(
         TSVECTOR,
