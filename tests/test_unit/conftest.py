@@ -170,7 +170,7 @@ async def user_with_many_roles(session: AsyncSession, settings: Settings, simple
 
 
 @pytest_asyncio.fixture
-async def empty_group(session: AsyncSession, settings) -> MockGroup:
+async def empty_group(session: AsyncSession, settings) -> AsyncGenerator[MockGroup, None]:
     owner = await create_user(
         session=session,
         username="empty_group_owner",
@@ -196,7 +196,7 @@ async def empty_group(session: AsyncSession, settings) -> MockGroup:
 
 
 @pytest_asyncio.fixture
-async def group(session: AsyncSession, settings: Settings) -> MockGroup:
+async def group(session: AsyncSession, settings: Settings) -> AsyncGenerator[MockGroup, None]:
     owner = await create_user(
         session=session,
         username="notempty_group_owner",
@@ -240,7 +240,7 @@ async def group(session: AsyncSession, settings: Settings) -> MockGroup:
 async def mock_group(
     session: AsyncSession,
     settings: Settings,
-):
+) -> AsyncGenerator[MockGroup, None]:
     group_owner = await create_user(
         session=session,
         username=f"{secrets.token_hex(5)}_group_connection_owner",

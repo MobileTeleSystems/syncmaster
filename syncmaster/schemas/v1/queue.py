@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from pydantic import BaseModel, Field, constr, model_validator
-from pydantic.json_schema import SkipJsonSchema
+from pydantic import BaseModel, Field, computed_field, constr
 
 from syncmaster.schemas.v1.page import PageSchema
 
@@ -13,14 +12,11 @@ class CreateQueueSchema(BaseModel):
     )
     group_id: int = Field(..., description="Queue owner group id")
     description: str = Field(default="", description="Additional description")
-    slug: SkipJsonSchema[str] = Field(description="Generated slug for unique queue identification")
 
-    @model_validator(mode="before")
-    def generate_slug(cls, values):
-        if "group_id" not in values or "name" not in values:
-            raise ValueError("Fields name and group_id are required")
-        values["slug"] = f"{values["group_id"]}-{values["name"]}"
-        return values
+    @computed_field
+    @property
+    def slug(self) -> str:
+        return f"{self.group_id}-{self.name}"
 
 
 class ReadQueueSchema(BaseModel):

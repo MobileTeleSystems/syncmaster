@@ -399,3 +399,45 @@ async def test_maintainer_plus_can_not_create_queue_with_duplicate_name_error(
             "details": None,
         },
     }
+
+
+async def test_maintainer_plus_can_create_queues_with_the_same_name_but_diff_groups(
+    client: AsyncClient,
+    session: AsyncSession,
+    role_maintainer_plus: UserTestRoles,
+    mock_group: MockGroup,
+    group: MockGroup,
+):
+    # Arrange
+    mock_group_user = mock_group.get_member_of_role(role_maintainer_plus)
+    group_user = group.get_member_of_role(role_maintainer_plus)
+
+    # Act
+    await client.post(
+        "v1/queues",
+        headers={"Authorization": f"Bearer {mock_group_user.token}"},
+        json={
+            "name": "New_queue",
+            "description": "Some interesting description",
+            "group_id": mock_group.group.id,
+        },
+    )
+    result = await client.post(
+        "v1/queues",
+        headers={"Authorization": f"Bearer {group_user.token}"},
+        json={
+            "name": "New_queue",
+            "description": "Some interesting description",
+            "group_id": group.group.id,
+        },
+    )
+
+    # Assert
+    assert result.status_code == 200
+    assert result.json() == {
+        "id": result.json()["id"],
+        "name": "New_queue",
+        "description": "Some interesting description",
+        "group_id": group.group.id,
+        "slug": f"{group.group.id}-New_queue",
+    }
