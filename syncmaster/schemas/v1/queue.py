@@ -17,6 +17,8 @@ class CreateQueueSchema(BaseModel):
 
     @model_validator(mode="before")
     def generate_slug(cls, values):
+        if "group_id" not in values or "name" not in values:
+            raise ValueError("Fields name and group_id are required")
         values["slug"] = f"{values["group_id"]}-{values["name"]}"
         return values
 
