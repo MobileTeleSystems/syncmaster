@@ -1,0 +1,1 @@
+Add GET `v1/monitoring/metrics` endpoint to provide basic HTTP server metrics in Prometheus format
