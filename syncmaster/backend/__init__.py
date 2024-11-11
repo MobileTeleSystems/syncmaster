@@ -25,6 +25,10 @@ def application_factory(settings: Settings) -> FastAPI:
     application = FastAPI(
         title="Syncmaster",
         debug=settings.server.debug,
+        # will be set up by middlewares
+        openapi_url=None,
+        docs_url=None,
+        redoc_url=None,
     )
     application.state.settings = settings
     application.include_router(api_router)

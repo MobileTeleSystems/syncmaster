@@ -14,6 +14,8 @@ Configuration
     cors
     debug
     monitoring
+    static_files
+    openapi
 
 .. autopydantic_settings:: syncmaster.settings.Settings
 .. autopydantic_settings:: syncmaster.settings.server.ServerSettings

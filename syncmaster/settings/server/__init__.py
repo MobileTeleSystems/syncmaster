@@ -8,7 +8,9 @@ from pydantic import BaseModel, Field
 from syncmaster.settings.log import LoggingSettings
 from syncmaster.settings.server.cors import CORSSettings
 from syncmaster.settings.server.monitoring import MonitoringSettings
+from syncmaster.settings.server.openapi import OpenAPISettings
 from syncmaster.settings.server.request_id import RequestIDSettings
+from syncmaster.settings.server.static_files import StaticFilesSettings
 
 
 class ServerSettings(BaseModel):
@@ -46,4 +48,12 @@ class ServerSettings(BaseModel):
     monitoring: MonitoringSettings = Field(
         default_factory=MonitoringSettings,
         description=":ref:`Monitoring settings <backend-configuration-monitoring>`",
+    )
+    openapi: OpenAPISettings = Field(
+        default_factory=OpenAPISettings,
+        description=":ref:`OpenAPI.json settings <backend-configuration-openapi>`",
+    )
+    static_files: StaticFilesSettings = Field(
+        default_factory=StaticFilesSettings,
+        description=":ref:`Static files settings <configuration-server-static-files>`",
     )

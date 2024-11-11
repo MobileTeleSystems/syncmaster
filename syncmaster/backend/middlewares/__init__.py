@@ -8,7 +8,9 @@ from syncmaster.backend.middlewares.logging import setup_logging
 from syncmaster.backend.middlewares.monitoring.metrics import (
     apply_monitoring_metrics_middleware,
 )
+from syncmaster.backend.middlewares.openapi import apply_openapi_middleware
 from syncmaster.backend.middlewares.request_id import apply_request_id_middleware
+from syncmaster.backend.middlewares.static_files import apply_static_files
 from syncmaster.settings import Settings
 
 
@@ -24,5 +26,7 @@ def apply_middlewares(
     apply_cors_middleware(application, settings.server.cors)
     apply_monitoring_metrics_middleware(application, settings.server.monitoring)
     apply_request_id_middleware(application, settings.server.request_id)
+    apply_openapi_middleware(application, settings.server.openapi)
+    apply_static_files(application, settings.server.static_files)
 
     return application
