@@ -20,7 +20,7 @@ class AuthProvider(ABC):
     @abstractmethod
     def setup(cls, app: FastAPI) -> FastAPI:
         """
-        This method is called by :obj:`horizon.backend.application_factory`.
+        This method is called by :obj:`syncmaster.backend.application_factory`.
 
         Here you should add dependency overrides for auth provider,
         and return new ``app`` object.
@@ -32,7 +32,7 @@ class AuthProvider(ABC):
 
             from fastapi import FastAPI
             from my_awesome_auth_provider.settings import MyAwesomeAuthProviderSettings
-            from horizon.backend.dependencies import Stub
+            from syncmaster.backend.dependencies import Stub
 
             class MyAwesomeAuthProvider(AuthProvider):
                 def setup(app):
@@ -63,7 +63,7 @@ class AuthProvider(ABC):
 
         Returns
         -------
-        :obj:`horizon.backend.db.models.User`
+        :obj:`syncmaster.backend.db.models.User`
             Current user object
         """
         ...
