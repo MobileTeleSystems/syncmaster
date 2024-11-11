@@ -112,6 +112,8 @@ services:
     container_name: test-s3
     restart: unless-stopped
     env_file: .env.docker
+    environment:
+      - SYNCMASTER__SERVER__STATIC_FILES__ENABLED=False
     ports:
       - 9010:9000
       - 9011:9001
@@ -134,6 +136,7 @@ services:
       ORACLE_DATABASE: syncmaster
       APP_USER: syncmaster
       APP_USER_PASSWORD: changeme
+      SYNCMASTER__SERVER__STATIC_FILES__ENABLED: false
     profiles: [oracle, all]
 
   metastore-hive:
@@ -143,6 +146,7 @@ services:
       POSTGRES_DB: metastore
       POSTGRES_USER: test_hive
       POSTGRES_PASSWORD: test_hive
+      SYNCMASTER__SERVER__STATIC_FILES__ENABLED: false
     ports:
       - 5440:5432
     healthcheck:
@@ -176,6 +180,7 @@ services:
       HIVE_METASTORE_DB_DRIVER: org.postgresql.Driver
       HIVE_METASTORE_DB_USER: test_hive
       HIVE_METASTORE_DB_PASSWORD: test_hive
+      SYNCMASTER__SERVER__STATIC_FILES__ENABLED: false
     profiles: [hive, hdfs, all]
 
 volumes:
