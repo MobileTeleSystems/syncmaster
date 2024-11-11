@@ -13,6 +13,7 @@ Configuration
     logging
     cors
     debug
+    monitoring
 
 .. autopydantic_settings:: syncmaster.settings.Settings
 .. autopydantic_settings:: syncmaster.settings.server.ServerSettings
