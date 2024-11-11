@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 from syncmaster.settings.log import LoggingSettings
 from syncmaster.settings.server.cors import CORSSettings
+from syncmaster.settings.server.monitoring import MonitoringSettings
 from syncmaster.settings.server.request_id import RequestIDSettings
 
 
@@ -41,4 +42,8 @@ class ServerSettings(BaseModel):
     cors: CORSSettings = Field(
         default_factory=CORSSettings,
         description=":ref:`CORS settings <backend-configuration-cors>`",
+    )
+    monitoring: MonitoringSettings = Field(
+        default_factory=MonitoringSettings,
+        description=":ref:`Monitoring settings <backend-configuration-monitoring>`",
     )

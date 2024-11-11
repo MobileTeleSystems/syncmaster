@@ -5,6 +5,9 @@ from fastapi import FastAPI
 
 from syncmaster.backend.middlewares.cors import apply_cors_middleware
 from syncmaster.backend.middlewares.logging import setup_logging
+from syncmaster.backend.middlewares.monitoring.metrics import (
+    apply_monitoring_metrics_middleware,
+)
 from syncmaster.backend.middlewares.request_id import apply_request_id_middleware
 from syncmaster.settings import Settings
 
@@ -19,6 +22,7 @@ def apply_middlewares(
         setup_logging(settings.server.logging.get_log_config_path())
 
     apply_cors_middleware(application, settings.server.cors)
+    apply_monitoring_metrics_middleware(application, settings.server.monitoring)
     apply_request_id_middleware(application, settings.server.request_id)
 
     return application

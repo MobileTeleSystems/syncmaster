@@ -3,10 +3,11 @@
 from fastapi import APIRouter
 
 from syncmaster.errors.registration import get_error_responses
+from syncmaster.schemas import PingResponse
 
-router = APIRouter(tags=["monitoring"], prefix="/monitoring", responses=get_error_responses())
+router = APIRouter(tags=["Monitoring"], prefix="/monitoring", responses=get_error_responses())
 
 
 @router.get("/ping")
-async def ping():
-    return {"status": "ok"}
+async def ping() -> PingResponse:
+    return PingResponse()
