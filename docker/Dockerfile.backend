@@ -19,6 +19,20 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 FROM base AS prod
 
 COPY ./syncmaster/ /app/syncmaster/
+# add this when logo will be ready
+# COPY ./docs/_static/*.svg ./syncmaster/backend/static/
+
+# Swagger UI
+ADD https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui-bundle.js /app/syncmaster/backend/static/swagger/swagger-ui-bundle.js
+ADD https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui.css /app/syncmaster/backend/static/swagger/swagger-ui.css
+
+# Redoc
+ADD https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js /app/syncmaster/backend/static/redoc/redoc.standalone.js
+
+ENV SYNCMASTER__SERVER__OPENAPI__SWAGGER__JS_URL=/static/swagger/swagger-ui-bundle.js \
+    SYNCMASTER__SERVER__OPENAPI__SWAGGER__CSS_URL=/static/swagger/swagger-ui.css \
+    SYNCMASTER__SERVER__OPENAPI__REDOC__JS_URL=/static/redoc/redoc.standalone.js \
+    SYNCMASTER__SERVER__STATIC_FILES__DIRECTORY=/app/syncmaster/backend/static
 
 
 FROM base as test

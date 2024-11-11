@@ -80,6 +80,9 @@ services:
     command: --loglevel=info -Q test_queue
     entrypoint: [python, -m, celery, -A, tests.test_integration.celery_test, worker, --max-tasks-per-child=1]
     env_file: .env.docker
+    environment:
+      # CI runs tests in the worker container, so we need to turn off interaction with static files for it
+      - SYNCMASTER__SERVER__STATIC_FILES__ENABLED=false
     volumes:
       - ./syncmaster:/app/syncmaster
       - ./cached_jars:/root/.ivy2
