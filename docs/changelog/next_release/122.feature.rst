@@ -1,1 +1,0 @@
-Add custom OpenAPI & ReDoc, server is now serving static files
