@@ -7,11 +7,11 @@ from apscheduler.triggers.cron import CronTrigger
 from kombu.exceptions import KombuError
 
 from syncmaster.backend.services.unit_of_work import UnitOfWork
+from syncmaster.backend.settings import BackendSettings as Settings
 from syncmaster.db.models import RunType, Status, Transfer
 from syncmaster.exceptions.run import CannotConnectToTaskQueueError
 from syncmaster.scheduler.utils import get_async_session
 from syncmaster.schemas.v1.connections.connection import ReadAuthDataSchema
-from syncmaster.settings import Settings
 from syncmaster.worker.config import celery
 
 

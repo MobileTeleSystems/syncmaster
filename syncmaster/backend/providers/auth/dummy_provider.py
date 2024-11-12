@@ -11,11 +11,11 @@ from fastapi import Depends, FastAPI
 from syncmaster.backend.dependencies import Stub
 from syncmaster.backend.providers.auth.base_provider import AuthProvider
 from syncmaster.backend.services import UnitOfWork
+from syncmaster.backend.settings.auth.dummy import DummyAuthProviderSettings
 from syncmaster.backend.utils.jwt import decode_jwt, sign_jwt
 from syncmaster.db.models import User
 from syncmaster.exceptions import EntityNotFoundError
 from syncmaster.exceptions.auth import AuthorizationError
-from syncmaster.settings.auth.dummy import DummyAuthProviderSettings
 
 log = logging.getLogger(__name__)
 

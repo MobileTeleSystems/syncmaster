@@ -1,15 +1,11 @@
 import secrets
-import time
 
-import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.backend.utils.jwt import sign_jwt
+from syncmaster.backend.settings import BackendSettings as Settings
 from syncmaster.db.models import Queue, User, UserGroup
 from syncmaster.db.repositories.utils import decrypt_auth_data
-from syncmaster.settings import Settings
-from syncmaster.settings.auth.jwt import JWTSettings
 from tests.mocks import (
     MockConnection,
     MockCredentials,
@@ -27,23 +23,6 @@ from tests.test_unit.utils import (
 )
 
 ALLOWED_SOURCES = "'hive', 'oracle', 'postgres', 'hdfs', 's3'"
-
-
-@pytest.fixture
-def access_token_settings(settings: Settings) -> JWTSettings:
-    return JWTSettings.parse_obj(settings.auth.access_token)
-
-
-@pytest.fixture
-def access_token_factory(access_token_settings: JWTSettings):
-    def _generate_access_token(user_id):
-        return sign_jwt(
-            {"user_id": user_id, "exp": time.time() + 1000},
-            access_token_settings.secret_key.get_secret_value(),
-            access_token_settings.security_algorithm,
-        )
-
-    return _generate_access_token
 
 
 async def create_group_member(
@@ -315,7 +294,6 @@ async def mock_group(
 @pytest_asyncio.fixture
 async def group_queue(
     session: AsyncSession,
-    settings: Settings,
     mock_group: MockGroup,
 ) -> Queue:
     queue = await create_queue(
@@ -333,7 +311,6 @@ async def group_queue(
 @pytest_asyncio.fixture
 async def mock_queue(
     session: AsyncSession,
-    settings: Settings,
     group: MockGroup,
 ) -> Queue:
     queue = await create_queue(

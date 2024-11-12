@@ -198,3 +198,4 @@ services:
 volumes:
   postgres_test_data:
   rabbitmq_test_data:
+  keycloak_data:

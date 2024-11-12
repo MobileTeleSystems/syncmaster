@@ -12,7 +12,7 @@ from fastapi.openapi.utils import get_openapi
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from syncmaster.settings.server.openapi import OpenAPISettings
+from syncmaster.backend.settings.server.openapi import OpenAPISettings
 
 
 async def custom_openapi(request: Request) -> JSONResponse:

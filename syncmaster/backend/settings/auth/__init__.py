@@ -3,7 +3,7 @@
 
 from pydantic import BaseModel, Field, ImportString
 
-from syncmaster.settings.auth.jwt import JWTSettings
+from syncmaster.backend.settings.auth.jwt import JWTSettings
 
 
 class AuthSettings(BaseModel):

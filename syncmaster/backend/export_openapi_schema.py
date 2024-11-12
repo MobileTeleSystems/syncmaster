@@ -8,7 +8,7 @@ import sys
 from fastapi import FastAPI
 
 from syncmaster.backend import application_factory
-from syncmaster.settings import Settings
+from syncmaster.backend.settings import BackendSettings as Settings
 
 
 def get_openapi_schema(app: FastAPI) -> dict:

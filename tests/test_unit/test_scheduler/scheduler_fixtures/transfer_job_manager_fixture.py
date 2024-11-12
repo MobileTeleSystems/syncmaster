@@ -4,8 +4,8 @@ import pytest_asyncio
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from syncmaster.backend.settings import BackendSettings as Settings
 from syncmaster.scheduler.transfer_job_manager import TransferJobManager
-from syncmaster.settings import Settings
 
 
 @pytest_asyncio.fixture

@@ -5,7 +5,7 @@ import json
 from cryptography.fernet import Fernet
 from pydantic import SecretStr
 
-from syncmaster.settings import Settings
+from syncmaster.backend.settings import BackendSettings as Settings
 
 
 def decrypt_auth_data(

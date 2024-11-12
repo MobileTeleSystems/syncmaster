@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 from syncmaster.db.models import Run
 from syncmaster.dto.connections import ConnectionDTO
-from syncmaster.settings import Settings
 
 if TYPE_CHECKING:
     from pyspark.sql import SparkSession
@@ -16,7 +15,6 @@ log = logging.getLogger(__name__)
 
 
 def get_worker_spark_session(
-    settings: Settings,
     run: Run,
     source: ConnectionDTO,
     target: ConnectionDTO,

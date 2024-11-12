@@ -110,6 +110,7 @@ worker = [
     "uuid6",
     "coloredlogs",
     "python-json-logger",
+    "python-keycloak",
 ]
 
 scheduler = [

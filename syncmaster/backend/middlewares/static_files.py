@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from syncmaster.settings.server.static_files import StaticFilesSettings
+from syncmaster.backend.settings.server.static_files import StaticFilesSettings
 
 
 def apply_static_files(app: FastAPI, settings: StaticFilesSettings) -> FastAPI:

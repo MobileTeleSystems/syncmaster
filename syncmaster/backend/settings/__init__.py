@@ -3,18 +3,18 @@
 from enum import StrEnum
 
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic.types import ImportString
 
-from syncmaster.settings.broker import RabbitMQSettings
-from syncmaster.settings.database import DatabaseSettings
-from syncmaster.settings.log import LoggingSettings
+from syncmaster.backend.settings.auth import AuthSettings
+from syncmaster.backend.settings.server import ServerSettings
+from syncmaster.settings import SyncmasterSettings
 
 
 class EnvTypes(StrEnum):
     LOCAL = "LOCAL"
 
 
-class SyncmasterSettings(BaseSettings):
+class BackendSettings(SyncmasterSettings):
     """Syncmaster backend settings.
 
     Backend can be configured in 2 ways:
@@ -41,18 +41,13 @@ class SyncmasterSettings(BaseSettings):
         SYNCMASTER__SERVER__DEBUG=True
     """
 
-    crypto_key: str
-
-    # TODO: move settings to corresponding classes (scheduler also)
-    TZ: str = "UTC"
-    SCHEDULER_TRANSFER_FETCHING_TIMEOUT: int = 180  # seconds
-    SCHEDULER_MISFIRE_GRACE_TIME: int = 300  # seconds
-
-    database: DatabaseSettings = Field(description=":ref:`Database settings <backend-configuration-database>`")
-    broker: RabbitMQSettings = Field(description=":ref:`Broker settings <backend-configuration-broker>`")
-    logging: LoggingSettings = Field(
-        default_factory=LoggingSettings,
-        description=":ref:`Logging settings <backend-configuration-logging>`",
+    server: ServerSettings = Field(
+        default_factory=ServerSettings,
+        description="Server settings <backend-configuration",
+    )
+    auth: AuthSettings = Field(
+        default_factory=AuthSettings,
+        description="Auth settings",
     )
 
     class Config:

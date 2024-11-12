@@ -11,18 +11,18 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from syncmaster.backend.middlewares.logging import setup_logging
+from syncmaster.backend.settings import BackendSettings as Settings
 from syncmaster.db.models import AuthData, Run, Status, Transfer
 from syncmaster.db.repositories.utils import decrypt_auth_data
 from syncmaster.exceptions.run import RunNotFoundError
-from syncmaster.settings import Settings
 from syncmaster.worker.base import WorkerTask
 from syncmaster.worker.config import celery
 from syncmaster.worker.controller import TransferController
+from syncmaster.worker.settings import worker_settings
 
 logger = get_task_logger(__name__)
 
-# TODO: configure correlation id from settings: settings.CORRELATION_CELERY_HEADER_ID
-CORRELATION_CELERY_HEADER_ID = "CORRELATION_CELERY_HEADER_ID"
+CORRELATION_CELERY_HEADER_ID = worker_settings.CORRELATION_CELERY_HEADER_ID
 
 
 @celery.task(name="run_transfer_task", bind=True, track_started=True)
@@ -69,7 +69,6 @@ def run_transfer(session: Session, run_id: int, settings: Settings):
             target_connection=run.transfer.target_connection,
             source_auth_data=source_auth_data,
             target_auth_data=target_auth_data,
-            settings=settings,
         )
         controller.perform_transfer()
     except Exception:
@@ -86,8 +85,7 @@ def run_transfer(session: Session, run_id: int, settings: Settings):
 
 @after_setup_logger.connect
 def setup_loggers(*args, **kwargs):
-    # TODO: remove calling Settings
-    setup_logging(Settings().worker.logging.get_log_config_path())
+    setup_logging(worker_settings.logging.get_log_config_path())
 
 
 @before_task_publish.connect()

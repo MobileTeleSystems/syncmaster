@@ -9,11 +9,11 @@ from keycloak import KeycloakOpenID
 from syncmaster.backend.dependencies import Stub
 from syncmaster.backend.providers.auth.base_provider import AuthProvider
 from syncmaster.backend.services import UnitOfWork
+from syncmaster.backend.settings.auth.keycloak import KeycloakAuthProviderSettings
 from syncmaster.backend.utils.state import generate_state
 from syncmaster.exceptions import EntityNotFoundError
 from syncmaster.exceptions.auth import AuthorizationError
 from syncmaster.exceptions.redirect import RedirectException
-from syncmaster.settings.auth.keycloak import KeycloakAuthProviderSettings
 
 log = logging.getLogger(__name__)
 

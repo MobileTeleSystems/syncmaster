@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from pydantic import BaseModel, Field
 
-from syncmaster.settings.auth.jwt import JWTSettings
+from syncmaster.backend.settings.auth.jwt import JWTSettings
 
 
 class DummyAuthProviderSettings(BaseModel):
