@@ -39,6 +39,12 @@ async def group_connections(
                     "bucket": "bucket",
                 },
             )
+        elif conn_type == ConnectionType.POSTGRES:
+            new_data.update(
+                {
+                    "database_name": "database",
+                },
+            )
         elif conn_type in [ConnectionType.ORACLE, ConnectionType.CLICKHOUSE, ConnectionType.MSSQL]:
             new_data.update(
                 {
