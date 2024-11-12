@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, model_validator
 from syncmaster.schemas.v1.connections.connection import ReadConnectionSchema
 from syncmaster.schemas.v1.page import PageSchema
 from syncmaster.schemas.v1.transfers.db import (
+    ClickhouseReadTransferSourceAndTarget,
     HiveReadTransferSourceAndTarget,
     OracleReadTransferSourceAndTarget,
     PostgresReadTransferSourceAndTarget,
@@ -31,6 +32,7 @@ ReadTransferSchemaSource = (
     | HDFSReadTransferSource
     | HiveReadTransferSourceAndTarget
     | OracleReadTransferSourceAndTarget
+    | ClickhouseReadTransferSourceAndTarget
     | S3ReadTransferSource
 )
 
@@ -39,6 +41,7 @@ ReadTransferSchemaTarget = (
     | HDFSReadTransferTarget
     | HiveReadTransferSourceAndTarget
     | OracleReadTransferSourceAndTarget
+    | ClickhouseReadTransferSourceAndTarget
     | S3ReadTransferTarget
 )
 
@@ -47,6 +50,7 @@ CreateTransferSchemaSource = (
     | HDFSCreateTransferSource
     | HiveReadTransferSourceAndTarget
     | OracleReadTransferSourceAndTarget
+    | ClickhouseReadTransferSourceAndTarget
     | S3CreateTransferSource
 )
 
@@ -55,6 +59,7 @@ CreateTransferSchemaTarget = (
     | HDFSCreateTransferTarget
     | HiveReadTransferSourceAndTarget
     | OracleReadTransferSourceAndTarget
+    | ClickhouseReadTransferSourceAndTarget
     | S3CreateTransferTarget
 )
 
@@ -63,6 +68,7 @@ UpdateTransferSchemaSource = (
     | HDFSReadTransferSource
     | HiveReadTransferSourceAndTarget
     | OracleReadTransferSourceAndTarget
+    | ClickhouseReadTransferSourceAndTarget
     | S3CreateTransferSource
     | None
 )
@@ -72,6 +78,7 @@ UpdateTransferSchemaTarget = (
     | HDFSReadTransferSource
     | HiveReadTransferSourceAndTarget
     | OracleReadTransferSourceAndTarget
+    | ClickhouseReadTransferSourceAndTarget
     | S3CreateTransferTarget
     | None
 )
