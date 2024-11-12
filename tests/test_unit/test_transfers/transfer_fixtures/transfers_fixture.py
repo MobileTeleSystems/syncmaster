@@ -76,7 +76,12 @@ async def group_transfers(
             source_params["directory_path"] = "/path/to/source"
             target_params.update(common_params)
             target_params["directory_path"] = "/path/to/target"
-        elif connection_type in [ConnectionType.HIVE, ConnectionType.POSTGRES, ConnectionType.ORACLE]:
+        elif connection_type in [
+            ConnectionType.HIVE,
+            ConnectionType.POSTGRES,
+            ConnectionType.ORACLE,
+            ConnectionType.CLICKHOUSE,
+        ]:
             source_params["table_name"] = "source_table"
             target_params["table_name"] = "target_table"
 

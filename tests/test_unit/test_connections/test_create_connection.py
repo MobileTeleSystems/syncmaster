@@ -282,7 +282,7 @@ async def test_check_fields_validation_on_create_connection(
                     "context": {
                         "discriminator": "'type'",
                         "tag": "POSTGRESQL",
-                        "expected_tags": "'hive', 'oracle', 'postgres', 'hdfs', 's3'",
+                        "expected_tags": "'hive', 'oracle', 'postgres', 'clickhouse', 'hdfs', 's3'",
                     },
                     "input": {
                         "type": "POSTGRESQL",
@@ -292,7 +292,7 @@ async def test_check_fields_validation_on_create_connection(
                         "database_name": "postgres",
                     },
                     "location": ["body", "connection_data"],
-                    "message": "Input tag 'POSTGRESQL' found using 'type' does not match any of the expected tags: 'hive', 'oracle', 'postgres', 'hdfs', 's3'",
+                    "message": "Input tag 'POSTGRESQL' found using 'type' does not match any of the expected tags: 'hive', 'oracle', 'postgres', 'clickhouse', 'hdfs', 's3'",
                     "code": "union_tag_invalid",
                 },
             ],

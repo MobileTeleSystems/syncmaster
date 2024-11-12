@@ -33,6 +33,7 @@ Data.SyncMaster is as low-code ETL tool for transfering data between databases a
 List of currently supported connections:
 
 * Apache Hive
+* Clickhouse
 * Postgres
 * Oracle
 * HDFS

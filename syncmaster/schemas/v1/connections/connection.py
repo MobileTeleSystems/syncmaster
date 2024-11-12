@@ -3,6 +3,14 @@
 
 from pydantic import BaseModel, Field, model_validator
 
+from syncmaster.schemas.v1.connections.clickhouse import (
+    CreateClickhouseAuthSchema,
+    CreateClickhouseConnectionSchema,
+    ReadClickhouseAuthSchema,
+    ReadClickhouseConnectionSchema,
+    UpdateClickhouseAuthSchema,
+    UpdateClickhouseConnectionSchema,
+)
 from syncmaster.schemas.v1.connections.hdfs import (
     HDFSCreateAuthSchema,
     HDFSCreateConnectionSchema,
@@ -51,12 +59,14 @@ ReadConnectionDataSchema = (
     | HDFSReadConnectionSchema
     | ReadOracleConnectionSchema
     | ReadPostgresConnectionSchema
+    | ReadClickhouseConnectionSchema
     | S3ReadConnectionSchema
 )
 CreateConnectionDataSchema = (
     CreateHiveConnectionSchema
     | CreateOracleConnectionSchema
     | CreatePostgresConnectionSchema
+    | CreateClickhouseConnectionSchema
     | HDFSCreateConnectionSchema
     | S3CreateConnectionSchema
 )
@@ -66,15 +76,31 @@ UpdateConnectionDataSchema = (
     | S3UpdateConnectionSchema
     | UpdateOracleConnectionSchema
     | UpdatePostgresConnectionSchema
+    | UpdateClickhouseConnectionSchema
 )
 ReadConnectionAuthDataSchema = (
-    ReadHiveAuthSchema | ReadOracleAuthSchema | ReadPostgresAuthSchema | S3ReadAuthSchema | HDFSReadAuthSchema
+    ReadHiveAuthSchema
+    | ReadOracleAuthSchema
+    | ReadPostgresAuthSchema
+    | ReadClickhouseAuthSchema
+    | S3ReadAuthSchema
+    | HDFSReadAuthSchema
 )
 CreateConnectionAuthDataSchema = (
-    CreateHiveAuthSchema | CreateOracleAuthSchema | CreatePostgresAuthSchema | S3CreateAuthSchema | HDFSCreateAuthSchema
+    CreateHiveAuthSchema
+    | CreateOracleAuthSchema
+    | CreatePostgresAuthSchema
+    | CreateClickhouseAuthSchema
+    | S3CreateAuthSchema
+    | HDFSCreateAuthSchema
 )
 UpdateConnectionAuthDataSchema = (
-    UpdateHiveAuthSchema | UpdateOracleAuthSchema | UpdatePostgresAuthSchema | S3UpdateAuthSchema | HDFSUpdateAuthSchema
+    UpdateHiveAuthSchema
+    | UpdateOracleAuthSchema
+    | UpdatePostgresAuthSchema
+    | UpdateClickhouseAuthSchema
+    | S3UpdateAuthSchema
+    | HDFSUpdateAuthSchema
 )
 
 
