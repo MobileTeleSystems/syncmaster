@@ -307,10 +307,10 @@ async def test_search_connections_with_nonexistent_query(
 @pytest.mark.parametrize(
     "filter_params, expected_total",
     [
-        ({}, 5),  # No filters applied, expecting all connections
+        ({}, 6),  # No filters applied, expecting all connections
         ({"type": ["oracle"]}, 1),
         ({"type": ["postgres", "hive"]}, 2),
-        ({"type": ["postgres", "hive", "oracle", "hdfs", "s3"]}, 5),
+        ({"type": ["postgres", "hive", "oracle", "clickhouse", "hdfs", "s3"]}, 6),
     ],
     ids=[
         "no_filters",
