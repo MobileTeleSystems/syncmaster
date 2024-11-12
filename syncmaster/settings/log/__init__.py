@@ -65,21 +65,21 @@ class LoggingSettings(BaseModel):
                 This preset is recommended to use in environment which do not support colored output,
                 e.g. CI jobs
 
-                .. literalinclude:: ../../../syncmaster/backend/settings/log/plain.yml
+                .. literalinclude:: ../../../syncmaster/settings/log/plain.yml
 
             .. dropdown:: ``colored`` preset
 
                 This preset is recommended to use in development environment,
                 as it simplifies debugging. Each log record is output with color specific for a log level
 
-                .. literalinclude:: ../../../syncmaster/backend/settings/log/colored.yml
+                .. literalinclude:: ../../../syncmaster/settings/log/colored.yml
 
             .. dropdown:: ``json`` preset
 
                 This preset is recommended to use in production environment,
                 as it allows to avoid writing complex log parsing configs. Each log record is output as JSON line
 
-                .. literalinclude:: ../../../syncmaster/backend/settings/log/json.yml
+                .. literalinclude:: ../../../syncmaster/settings/log/json.yml
             """,
         ),
     )

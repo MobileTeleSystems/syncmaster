@@ -1,4 +1,4 @@
-.. _backend-configuration-cors:
+.. _backend-configuration-server-cors:
 
 CORS settings
 =============

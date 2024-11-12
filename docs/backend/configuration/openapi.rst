@@ -1,4 +1,4 @@
-.. _configuration-server-openapi:
+.. _backend-configuration-server-openapi:
 
 OpenAPI settings
 ================

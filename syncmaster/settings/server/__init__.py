@@ -43,17 +43,17 @@ class ServerSettings(BaseModel):
     )
     cors: CORSSettings = Field(
         default_factory=CORSSettings,
-        description=":ref:`CORS settings <backend-configuration-cors>`",
+        description=":ref:`CORS settings <backend-configuration-server-cors>`",
     )
     monitoring: MonitoringSettings = Field(
         default_factory=MonitoringSettings,
-        description=":ref:`Monitoring settings <backend-configuration-monitoring>`",
+        description=":ref:`Monitoring settings <backend-configuration-server-monitoring>`",
     )
     openapi: OpenAPISettings = Field(
         default_factory=OpenAPISettings,
-        description=":ref:`OpenAPI.json settings <backend-configuration-openapi>`",
+        description=":ref:`OpenAPI.json settings <backend-configuration-server-openapi>`",
     )
     static_files: StaticFilesSettings = Field(
         default_factory=StaticFilesSettings,
-        description=":ref:`Static files settings <configuration-server-static-files>`",
+        description=":ref:`Static files settings <backend-configuration-server-static-files>`",
     )

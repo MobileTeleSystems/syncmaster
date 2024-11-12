@@ -1,7 +1,7 @@
-.. _configuration-server-monitoring:
+.. _backend-configuration-server-monitoring:
 
-Setup monitoring
-================
+Server monitoring
+=================
 
 REST API server provides the following endpoints with Prometheus compatible metrics:
 

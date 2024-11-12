@@ -1,4 +1,4 @@
-.. _configuration-server-static-files:
+.. _backend-configuration-server-static-files:
 
 Serving static files
 ====================
