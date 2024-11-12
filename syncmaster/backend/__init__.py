@@ -1,7 +1,5 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from typing import Type
-
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
@@ -49,7 +47,7 @@ def application_factory(settings: Settings) -> FastAPI:
         },
     )
 
-    auth_class: type[AuthProvider] = settings.auth.provider  # type: ignore[assignment]
+    auth_class = settings.auth.provider
     auth_class.setup(application)
 
     apply_middlewares(application, settings)

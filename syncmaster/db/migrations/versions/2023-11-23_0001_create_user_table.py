@@ -32,6 +32,7 @@ def upgrade():
         sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk__user")),
+        sa.UniqueConstraint("email", name=op.f("uq__user__email")),
     )
     op.create_index(op.f("ix__user__username"), "user", ["username"], unique=True)
 

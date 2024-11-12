@@ -1,1 +1,13 @@
-TODO
+- Implemented ``KeycloakAuthProvider`` for Single Sign-On (SSO) authentication.
+- Implemented ``DummyAuthProvider`` for development and testing environments.
+- Enabled dynamic selection of authentication provider via environment variable SYNCMASTER__AUTH__PROVIDER:
+
+    .. code::
+
+        # syncmaster.backend.providers.auth.keycloak_provider.KeycloakAuthProvider for Keycloak.
+        SYNCMASTER__AUTH__PROVIDER=syncmaster.backend.providers.auth.keycloak_provider.KeycloakAuthProvider
+
+        # syncmaster.backend.providers.auth.dummy_provider.DummyAuthProvider for Dummy authentication.
+        SYNCMASTER__AUTH__PROVIDER=syncmaster.backend.providers.auth.dummy_provider.DummyAuthProvider
+
+- Updated ``User`` model to include ``email``, ``first_name``, ``middle_name``, and ``last_name`` fields.
