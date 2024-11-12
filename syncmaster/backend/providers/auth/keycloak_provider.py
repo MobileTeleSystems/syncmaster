@@ -77,13 +77,8 @@ class KeycloakAuthProvider(AuthProvider):
         refresh_token = request.session.get("refresh_token")
 
         if not access_token:
-            state = generate_state(request.url.path)  # initial url request
-            auth_url = self.keycloak_openid.auth_url(
-                redirect_uri=self.settings.redirect_uri,
-                scope=self.settings.scope,
-                state=state,
-            )
-            raise RedirectException(redirect_url=auth_url)
+            log.debug("No access token found in session.")
+            self.redirect_to_auth(request.url.path)
 
         try:
             token_info = self.keycloak_openid.decode_token(token=access_token)
@@ -93,20 +88,29 @@ class KeycloakAuthProvider(AuthProvider):
 
         if not token_info and refresh_token:
             log.debug("Access token invalid. Attempting to refresh.")
-            new_tokens = await self.refresh_access_token(refresh_token)
 
-            new_access_token = new_tokens.get("access_token")
-            new_refresh_token = new_tokens.get("refresh_token")
-            request.session["access_token"] = new_access_token
-            request.session["refresh_token"] = new_refresh_token
+            try:
+                new_tokens = await self.refresh_access_token(refresh_token)
 
-            token_info = self.keycloak_openid.decode_token(
-                token=new_access_token,
-            )
-            log.debug("Access token refreshed and decoded successfully.")
+                new_access_token = new_tokens.get("access_token")
+                new_refresh_token = new_tokens.get("refresh_token")
+                request.session["access_token"] = new_access_token
+                request.session["refresh_token"] = new_refresh_token
+
+                token_info = self.keycloak_openid.decode_token(
+                    token=new_access_token,
+                )
+                log.debug("Access token refreshed and decoded successfully.")
+            except Exception as e:
+                log.debug("Failed to refresh access token: %s", e)
+                self.redirect_to_auth(request.url.path)
 
         user_id = token_info.get("sub")
         login = token_info.get("preferred_username")
+        email = token_info.get("email")
+        first_name = token_info.get("given_name")
+        middle_name = token_info.get("middle_name")
+        last_name = token_info.get("family_name")
 
         if not user_id:
             raise AuthorizationError("Invalid token payload")
@@ -117,6 +121,10 @@ class KeycloakAuthProvider(AuthProvider):
             except EntityNotFoundError:
                 user = await self._uow.user.create(
                     username=login,
+                    email=email,
+                    first_name=first_name,
+                    middle_name=middle_name,
+                    last_name=last_name,
                     is_active=True,
                 )
         return user
@@ -127,3 +135,12 @@ class KeycloakAuthProvider(AuthProvider):
 
     async def get_user_info(self, access_token: str) -> dict[str, Any]:
         return self.keycloak_openid.userinfo(access_token)
+
+    def redirect_to_auth(self, path: str) -> None:
+        state = generate_state(path)
+        auth_url = self.keycloak_openid.auth_url(
+            redirect_uri=self.settings.redirect_uri,
+            scope=self.settings.scope,
+            state=state,
+        )
+        raise RedirectException(redirect_url=auth_url)

@@ -10,8 +10,8 @@ from syncmaster.backend.middlewares.monitoring.metrics import (
 )
 from syncmaster.backend.middlewares.openapi import apply_openapi_middleware
 from syncmaster.backend.middlewares.request_id import apply_request_id_middleware
-from syncmaster.backend.middlewares.static_files import apply_static_files
 from syncmaster.backend.middlewares.session import apply_session_middleware
+from syncmaster.backend.middlewares.static_files import apply_static_files
 from syncmaster.settings import Settings
 
 

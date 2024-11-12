@@ -55,11 +55,24 @@ class UserRepository(Repository[User]):
         except IntegrityError as e:
             self._raise_error(e)
 
-    async def create(self, username: str, is_active: bool, is_superuser: bool = False) -> User:
+    async def create(
+        self,
+        username: str,
+        email: str,
+        is_active: bool,
+        first_name: str | None,
+        middle_name: str | None,
+        last_name: str | None,
+        is_superuser: bool = False,
+    ) -> User:
         query = (
             insert(User)
             .values(
                 username=username,
+                email=email,
+                first_name=first_name,
+                middle_name=middle_name,
+                last_name=last_name,
                 is_active=is_active,
                 is_superuser=is_superuser,
             )

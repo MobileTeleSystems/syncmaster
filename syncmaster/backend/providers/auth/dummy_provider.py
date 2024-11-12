@@ -62,7 +62,14 @@ class DummyAuthProvider(AuthProvider):
             try:
                 user = await self._uow.user.read_by_username(login)
             except EntityNotFoundError:
-                user = await self._uow.user.create(username=login, is_active=True)
+                user = await self._uow.user.create(
+                    username=login,
+                    email=f"{login}@example.com",
+                    first_name=f"{login}_first",
+                    middle_name=f"{login}_middle",
+                    last_name=f"{login}_last",
+                    is_active=True,
+                )
 
         log.info("User with id %r found", user.id)
         if not user.is_active:

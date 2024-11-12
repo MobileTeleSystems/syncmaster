@@ -33,9 +33,21 @@ async def create_user_cm(
     is_active: bool = False,
     is_superuser: bool = False,
     is_deleted: bool = False,
+    email: str = None,
+    first_name: str = None,
+    middle_name: str = None,
+    last_name: str = None,
 ) -> AsyncGenerator[User, None]:
+    email = email or f"{username}@user.user"
+    first_name = first_name or f"{username}_first"
+    middle_name = middle_name or f"{username}_middle"
+    last_name = last_name or f"{username}_last"
     u = User(
         username=username,
+        email=email,
+        first_name=first_name,
+        middle_name=middle_name,
+        last_name=last_name,
         is_active=is_active,
         is_superuser=is_superuser,
         is_deleted=is_deleted,
@@ -54,9 +66,21 @@ async def create_user(
     is_active: bool = False,
     is_superuser: bool = False,
     is_deleted: bool = False,
+    email: str = None,
+    first_name: str = None,
+    middle_name: str = None,
+    last_name: str = None,
 ) -> User:
+    email = email or f"{username}@user.user"
+    first_name = first_name or f"{username}_first"
+    middle_name = middle_name or f"{username}_middle"
+    last_name = last_name or f"{username}_last"
     u = User(
         username=username,
+        email=email,
+        first_name=first_name,
+        middle_name=middle_name,
+        last_name=last_name,
         is_active=is_active,
         is_superuser=is_superuser,
         is_deleted=is_deleted,
