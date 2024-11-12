@@ -35,6 +35,14 @@ from syncmaster.schemas.v1.connections.mssql import (
     UpdateMSSQLAuthSchema,
     UpdateMSSQLConnectionSchema,
 )
+from syncmaster.schemas.v1.connections.mysql import (
+    CreateMySQLAuthSchema,
+    CreateMySQLConnectionSchema,
+    ReadMySQLAuthSchema,
+    ReadMySQLConnectionSchema,
+    UpdateMySQLAuthSchema,
+    UpdateMySQLConnectionSchema,
+)
 from syncmaster.schemas.v1.connections.oracle import (
     CreateOracleAuthSchema,
     CreateOracleConnectionSchema,
@@ -69,6 +77,7 @@ ReadConnectionDataSchema = (
     | ReadPostgresConnectionSchema
     | ReadClickhouseConnectionSchema
     | ReadMSSQLConnectionSchema
+    | ReadMySQLConnectionSchema
     | S3ReadConnectionSchema
 )
 CreateConnectionDataSchema = (
@@ -77,6 +86,7 @@ CreateConnectionDataSchema = (
     | CreatePostgresConnectionSchema
     | CreateClickhouseConnectionSchema
     | CreateMSSQLConnectionSchema
+    | CreateMySQLConnectionSchema
     | HDFSCreateConnectionSchema
     | S3CreateConnectionSchema
 )
@@ -88,6 +98,7 @@ UpdateConnectionDataSchema = (
     | UpdatePostgresConnectionSchema
     | UpdateClickhouseConnectionSchema
     | UpdateMSSQLConnectionSchema
+    | UpdateMySQLConnectionSchema
 )
 ReadConnectionAuthDataSchema = (
     ReadHiveAuthSchema
@@ -95,6 +106,7 @@ ReadConnectionAuthDataSchema = (
     | ReadPostgresAuthSchema
     | ReadClickhouseAuthSchema
     | ReadMSSQLAuthSchema
+    | ReadMySQLAuthSchema
     | S3ReadAuthSchema
     | HDFSReadAuthSchema
 )
@@ -104,6 +116,7 @@ CreateConnectionAuthDataSchema = (
     | CreatePostgresAuthSchema
     | CreateClickhouseAuthSchema
     | CreateMSSQLAuthSchema
+    | CreateMySQLAuthSchema
     | S3CreateAuthSchema
     | HDFSCreateAuthSchema
 )
@@ -113,6 +126,7 @@ UpdateConnectionAuthDataSchema = (
     | UpdatePostgresAuthSchema
     | UpdateClickhouseAuthSchema
     | UpdateMSSQLAuthSchema
+    | UpdateMySQLAuthSchema
     | S3UpdateAuthSchema
     | HDFSUpdateAuthSchema
 )

@@ -82,6 +82,7 @@ async def group_transfers(
             ConnectionType.ORACLE,
             ConnectionType.CLICKHOUSE,
             ConnectionType.MSSQL,
+            ConnectionType.MYSQL,
         ]:
             source_params["table_name"] = "source_table"
             target_params["table_name"] = "target_table"

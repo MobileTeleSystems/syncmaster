@@ -22,6 +22,7 @@ from syncmaster.schemas.v1.connection_types import (
     HDFS_TYPE,
     HIVE_TYPE,
     MSSQL_TYPE,
+    MYSQL_TYPE,
     ORACLE_TYPE,
     POSTGRES_TYPE,
     S3_TYPE,
@@ -39,7 +40,7 @@ from syncmaster.schemas.v1.status import StatusResponseSchema
 
 router = APIRouter(tags=["Connections"], responses=get_error_responses())
 
-CONNECTION_TYPES = ORACLE_TYPE, POSTGRES_TYPE, CLICKHOUSE_TYPE, HIVE_TYPE, MSSQL_TYPE, S3_TYPE, HDFS_TYPE
+CONNECTION_TYPES = ORACLE_TYPE, POSTGRES_TYPE, CLICKHOUSE_TYPE, HIVE_TYPE, MSSQL_TYPE, MYSQL_TYPE, S3_TYPE, HDFS_TYPE
 
 
 @router.get("/connections")
