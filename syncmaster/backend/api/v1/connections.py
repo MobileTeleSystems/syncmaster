@@ -18,6 +18,7 @@ from syncmaster.exceptions.connection import (
 from syncmaster.exceptions.credentials import AuthDataNotFoundError
 from syncmaster.exceptions.group import GroupNotFoundError
 from syncmaster.schemas.v1.connection_types import (
+    CLICKHOUSE_TYPE,
     HDFS_TYPE,
     HIVE_TYPE,
     ORACLE_TYPE,
@@ -37,7 +38,7 @@ from syncmaster.schemas.v1.status import StatusResponseSchema
 
 router = APIRouter(tags=["Connections"], responses=get_error_responses())
 
-CONNECTION_TYPES = ORACLE_TYPE, POSTGRES_TYPE, HIVE_TYPE, S3_TYPE, HDFS_TYPE
+CONNECTION_TYPES = ORACLE_TYPE, POSTGRES_TYPE, CLICKHOUSE_TYPE, HIVE_TYPE, S3_TYPE, HDFS_TYPE
 
 
 @router.get("/connections")
