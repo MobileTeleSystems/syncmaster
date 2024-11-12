@@ -81,6 +81,7 @@ async def group_transfers(
             ConnectionType.POSTGRES,
             ConnectionType.ORACLE,
             ConnectionType.CLICKHOUSE,
+            ConnectionType.MSSQL,
         ]:
             source_params["table_name"] = "source_table"
             target_params["table_name"] = "target_table"

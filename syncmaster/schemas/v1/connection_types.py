@@ -7,6 +7,7 @@ HIVE_TYPE = Literal["hive"]
 ORACLE_TYPE = Literal["oracle"]
 POSTGRES_TYPE = Literal["postgres"]
 CLICKHOUSE_TYPE = Literal["clickhouse"]
+MSSQL_TYPE = Literal["mssql"]
 S3_TYPE = Literal["s3"]
 HDFS_TYPE = Literal["hdfs"]
 
@@ -16,5 +17,6 @@ class ConnectionType(str, Enum):
     HIVE = "hive"
     ORACLE = "oracle"
     CLICKHOUSE = "clickhouse"
+    MSSQL = "mssql"
     S3 = "s3"
     HDFS = "hdfs"
