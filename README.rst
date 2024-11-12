@@ -36,6 +36,7 @@ List of currently supported connections:
 * Clickhouse
 * Postgres
 * Oracle
+* MSSQL
 * HDFS
 * S3
 
