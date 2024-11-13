@@ -3,13 +3,13 @@
 from collections.abc import Callable, Coroutine
 from typing import Annotated, Any
 
-from fastapi import Depends, Request, status
-from fastapi.exceptions import HTTPException
+from fastapi import Depends, Request
 from fastapi.security import OAuth2PasswordBearer
 
 from syncmaster.backend.dependencies import Stub
 from syncmaster.backend.providers.auth import AuthProvider
 from syncmaster.db.models import User
+from syncmaster.exceptions import ActionNotAllowedError, EntityNotFoundError
 
 oauth_schema = OAuth2PasswordBearer(tokenUrl="v1/auth/token", auto_error=False)
 
@@ -21,7 +21,7 @@ def get_user(
     async def wrapper(
         request: Request,
         auth_provider: Annotated[AuthProvider, Depends(Stub(AuthProvider))],
-        access_token: Annotated[str, Depends(oauth_schema)],
+        access_token: Annotated[str | None, Depends(oauth_schema)],
     ) -> User:
         # keycloak provider patches session and store access_token in cookie,
         # when dummy auth stores it in "Authorization" header
@@ -31,20 +31,11 @@ def get_user(
             request=request,
         )
         if user is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found",
-            )
+            raise EntityNotFoundError("User not found")
         if is_active and not user.is_active:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Inactive user",
-            )
+            raise ActionNotAllowedError("Inactive user")
         if is_superuser and not user.is_superuser:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You have no power here",
-            )
+            raise ActionNotAllowedError("You have no power here")
         return user
 
     return wrapper

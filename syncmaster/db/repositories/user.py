@@ -60,9 +60,9 @@ class UserRepository(Repository[User]):
         username: str,
         email: str,
         is_active: bool,
-        first_name: str | None,
-        middle_name: str | None,
-        last_name: str | None,
+        first_name: str | None = None,
+        middle_name: str | None = None,
+        last_name: str | None = None,
         is_superuser: bool = False,
     ) -> User:
         query = (

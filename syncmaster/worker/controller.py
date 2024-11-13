@@ -25,7 +25,9 @@ from syncmaster.worker.handlers.db.oracle import OracleHandler
 from syncmaster.worker.handlers.db.postgres import PostgresHandler
 from syncmaster.worker.handlers.file.hdfs import HDFSHandler
 from syncmaster.worker.handlers.file.s3 import S3Handler
-from syncmaster.worker.settings import worker_settings
+
+# TODO: remove global import of WorkerSettings
+from syncmaster.worker.settings import WorkerSettings as Settings
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +86,7 @@ class TransferController:
         )
 
     def perform_transfer(self) -> None:
-        spark = worker_settings.CREATE_SPARK_SESSION_FUNCTION(
+        spark = Settings().CREATE_SPARK_SESSION_FUNCTION(
             run=self.run,
             source=self.source_handler.connection_dto,
             target=self.target_handler.connection_dto,

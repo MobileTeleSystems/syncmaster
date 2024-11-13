@@ -6,7 +6,6 @@ from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Run, RunType, Status
-from syncmaster.worker.settings import worker_settings
 from tests.mocks import MockGroup, MockTransfer, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
@@ -140,9 +139,6 @@ async def test_superuser_can_create_run(
     mocker,
 ) -> None:
     # Arrange
-    worker_settings.LOG_URL_TEMPLATE = (
-        "https://grafana.example.com?correlation_id={{ correlation_id }}&run_id={{ run.id }}"
-    )
     mock_send_task = mocker.patch("syncmaster.worker.config.celery.send_task")
     mock_to_thread = mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 

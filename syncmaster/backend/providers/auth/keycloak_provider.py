@@ -105,6 +105,8 @@ class KeycloakAuthProvider(AuthProvider):
                 log.debug("Failed to refresh access token: %s", e)
                 self.redirect_to_auth(request.url.path)
 
+        # these names are hardcoded in keycloak:
+        # https://github.com/keycloak/keycloak/blob/3ca3a4ad349b4d457f6829eaf2ae05f1e01408be/core/src/main/java/org/keycloak/representations/IDToken.java
         user_id = token_info.get("sub")
         login = token_info.get("preferred_username")
         email = token_info.get("email")
@@ -132,9 +134,6 @@ class KeycloakAuthProvider(AuthProvider):
     async def refresh_access_token(self, refresh_token: str) -> dict[str, Any]:
         new_tokens = self.keycloak_openid.refresh_token(refresh_token)
         return new_tokens
-
-    async def get_user_info(self, access_token: str) -> dict[str, Any]:
-        return self.keycloak_openid.userinfo(access_token)
 
     def redirect_to_auth(self, path: str) -> None:
         state = generate_state(path)

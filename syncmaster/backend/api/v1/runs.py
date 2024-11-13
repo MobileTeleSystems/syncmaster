@@ -22,7 +22,9 @@ from syncmaster.schemas.v1.transfers.run import (
     RunPageSchema,
 )
 from syncmaster.worker.config import celery
-from syncmaster.worker.settings import worker_settings
+
+# TODO: remove global import of WorkerSettings
+from syncmaster.worker.settings import WorkerSettings as Settings
 
 router = APIRouter(tags=["Runs"], responses=get_error_responses())
 
@@ -117,7 +119,7 @@ async def start_run(
             type=RunType.MANUAL,
         )
 
-        log_url = Template(worker_settings.LOG_URL_TEMPLATE).render(
+        log_url = Template(Settings().LOG_URL_TEMPLATE).render(
             run=run,
             correlation_id=correlation_id.get(),
         )

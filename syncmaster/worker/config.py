@@ -3,8 +3,11 @@
 from celery import Celery
 
 from syncmaster.worker.base import WorkerTask
-from syncmaster.worker.settings import worker_settings
 
+# TODO: remove global import of WorkerSettings
+from syncmaster.worker.settings import WorkerSettings as Settings
+
+worker_settings = Settings()
 celery = Celery(
     __name__,
     broker=worker_settings.broker.url,

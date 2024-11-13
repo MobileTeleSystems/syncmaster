@@ -20,6 +20,3 @@ class WorkerSettings(SyncmasterSettings):
     LOG_URL_TEMPLATE: str = ""
 
     CREATE_SPARK_SESSION_FUNCTION: ImportString = "syncmaster.worker.spark.get_worker_spark_session"
-
-
-worker_settings = WorkerSettings()

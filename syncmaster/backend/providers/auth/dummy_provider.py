@@ -65,9 +65,6 @@ class DummyAuthProvider(AuthProvider):
                 user = await self._uow.user.create(
                     username=login,
                     email=f"{login}@example.com",
-                    first_name=f"{login}_first",
-                    middle_name=f"{login}_middle",
-                    last_name=f"{login}_last",
                     is_active=True,
                 )
 
