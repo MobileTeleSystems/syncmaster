@@ -23,8 +23,9 @@ class AuthSettings(BaseModel):
     """
 
     provider: ImportString = Field(  # type: ignore[assignment]
-        default="syncmaster.backend.providers.auth.dummy.DummyAuthProvider",
+        default="syncmaster.backend.providers.auth.dummy_provider.DummyAuthProvider",
         description="Full name of auth provider class",
+        validate_default=True,
     )
 
     class Config:

@@ -47,7 +47,7 @@ def application_factory(settings: Settings) -> FastAPI:
         },
     )
 
-    auth_class = settings.auth.provider
+    auth_class: type[AuthProvider] = settings.auth.provider  # type: ignore[assignment]
     auth_class.setup(application)
 
     apply_middlewares(application, settings)
