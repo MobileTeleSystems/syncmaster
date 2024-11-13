@@ -10,6 +10,7 @@ from syncmaster.schemas.v1.transfers.db import (
     ClickhouseReadTransferSourceAndTarget,
     HiveReadTransferSourceAndTarget,
     MSSQLReadTransferSourceAndTarget,
+    MySQLReadTransferSourceAndTarget,
     OracleReadTransferSourceAndTarget,
     PostgresReadTransferSourceAndTarget,
 )
@@ -35,6 +36,7 @@ ReadTransferSchemaSource = (
     | OracleReadTransferSourceAndTarget
     | ClickhouseReadTransferSourceAndTarget
     | MSSQLReadTransferSourceAndTarget
+    | MySQLReadTransferSourceAndTarget
     | S3ReadTransferSource
 )
 
@@ -45,6 +47,7 @@ ReadTransferSchemaTarget = (
     | OracleReadTransferSourceAndTarget
     | ClickhouseReadTransferSourceAndTarget
     | MSSQLReadTransferSourceAndTarget
+    | MySQLReadTransferSourceAndTarget
     | S3ReadTransferTarget
 )
 
@@ -55,6 +58,7 @@ CreateTransferSchemaSource = (
     | OracleReadTransferSourceAndTarget
     | ClickhouseReadTransferSourceAndTarget
     | MSSQLReadTransferSourceAndTarget
+    | MySQLReadTransferSourceAndTarget
     | S3CreateTransferSource
 )
 
@@ -65,6 +69,7 @@ CreateTransferSchemaTarget = (
     | OracleReadTransferSourceAndTarget
     | ClickhouseReadTransferSourceAndTarget
     | MSSQLReadTransferSourceAndTarget
+    | MySQLReadTransferSourceAndTarget
     | S3CreateTransferTarget
 )
 
@@ -75,6 +80,7 @@ UpdateTransferSchemaSource = (
     | OracleReadTransferSourceAndTarget
     | ClickhouseReadTransferSourceAndTarget
     | MSSQLReadTransferSourceAndTarget
+    | MySQLReadTransferSourceAndTarget
     | S3CreateTransferSource
     | None
 )
@@ -86,6 +92,7 @@ UpdateTransferSchemaTarget = (
     | OracleReadTransferSourceAndTarget
     | ClickhouseReadTransferSourceAndTarget
     | MSSQLReadTransferSourceAndTarget
+    | MySQLReadTransferSourceAndTarget
     | S3CreateTransferTarget
     | None
 )

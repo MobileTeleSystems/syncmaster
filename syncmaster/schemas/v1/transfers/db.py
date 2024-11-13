@@ -8,6 +8,7 @@ from syncmaster.schemas.v1.connection_types import (
     CLICKHOUSE_TYPE,
     HIVE_TYPE,
     MSSQL_TYPE,
+    MYSQL_TYPE,
     ORACLE_TYPE,
     POSTGRES_TYPE,
 )
@@ -35,3 +36,7 @@ class ClickhouseReadTransferSourceAndTarget(ReadDBTransfer):
 
 class MSSQLReadTransferSourceAndTarget(ReadDBTransfer):
     type: MSSQL_TYPE
+
+
+class MySQLReadTransferSourceAndTarget(ReadDBTransfer):
+    type: MYSQL_TYPE

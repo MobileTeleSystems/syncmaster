@@ -37,6 +37,7 @@ List of currently supported connections:
 * Postgres
 * Oracle
 * MSSQL
+* MySQL
 * HDFS
 * S3
 

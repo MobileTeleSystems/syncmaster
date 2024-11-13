@@ -39,7 +39,7 @@ async def group_connections(
                     "bucket": "bucket",
                 },
             )
-        elif conn_type == ConnectionType.POSTGRES:
+        elif conn_type in [ConnectionType.POSTGRES, ConnectionType.MYSQL]:
             new_data.update(
                 {
                     "database_name": "database",
