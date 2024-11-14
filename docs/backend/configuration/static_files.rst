@@ -5,4 +5,4 @@ Serving static files
 
 These settings used to control serving static files by a server.
 
-.. autopydantic_model:: syncmaster.settings.server.static_files.StaticFilesSettings
+.. autopydantic_model:: syncmaster.backend.settings.server.static_files.StaticFilesSettings

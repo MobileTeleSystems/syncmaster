@@ -29,6 +29,6 @@ def apply_middlewares(
     apply_request_id_middleware(application, settings.server.request_id)
     apply_openapi_middleware(application, settings.server.openapi)
     apply_static_files(application, settings.server.static_files)
-    apply_session_middleware(application)
+    apply_session_middleware(application, settings.server.session)
 
     return application

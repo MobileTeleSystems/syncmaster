@@ -11,6 +11,7 @@ Configuration
     database
     broker
     logging
+    session
     cors
     debug
     monitoring

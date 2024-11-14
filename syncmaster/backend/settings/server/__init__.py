@@ -9,6 +9,7 @@ from syncmaster.backend.settings.server.cors import CORSSettings
 from syncmaster.backend.settings.server.monitoring import MonitoringSettings
 from syncmaster.backend.settings.server.openapi import OpenAPISettings
 from syncmaster.backend.settings.server.request_id import RequestIDSettings
+from syncmaster.backend.settings.server.session import SessionSettings
 from syncmaster.backend.settings.server.static_files import StaticFilesSettings
 
 
@@ -35,6 +36,10 @@ class ServerSettings(BaseModel):
     )
     request_id: RequestIDSettings = Field(
         default_factory=RequestIDSettings,
+    )
+    session: SessionSettings = Field(
+        default_factory=SessionSettings,  # type: ignore[arg-type]
+        description=":ref:`Session settings <backend-configuration-server-session>`",
     )
     cors: CORSSettings = Field(
         default_factory=CORSSettings,
