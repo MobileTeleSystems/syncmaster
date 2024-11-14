@@ -13,4 +13,4 @@ REST API server provides the following endpoints with Prometheus compatible metr
 
 These endpoints are enabled and configured using settings below:
 
-.. autopydantic_model:: syncmaster.settings.server.monitoring.MonitoringSettings
+.. autopydantic_model:: syncmaster.backend.settings.server.monitoring.MonitoringSettings

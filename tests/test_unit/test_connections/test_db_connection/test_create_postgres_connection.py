@@ -3,9 +3,9 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from syncmaster.backend.settings import BackendSettings as Settings
 from syncmaster.db.models import AuthData, Connection
 from syncmaster.db.repositories.utils import decrypt_auth_data
-from syncmaster.settings import Settings
 from tests.mocks import MockGroup, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend, pytest.mark.postgres]

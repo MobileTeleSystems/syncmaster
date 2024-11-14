@@ -123,6 +123,6 @@ To start backend server you need to execute following command:
 
 .. code-block:: console
 
-    $ python -m horizon.backend --host 0.0.0.0 --port 8000
+    $ python -m syncmaster.backend --host 0.0.0.0 --port 8000
 
 After server is started and ready, open http://localhost:8000/docs.

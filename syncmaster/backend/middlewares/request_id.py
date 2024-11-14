@@ -4,7 +4,7 @@ from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI
 from uuid6 import uuid7
 
-from syncmaster.settings.server import RequestIDSettings
+from syncmaster.backend.settings.server import RequestIDSettings
 
 
 def apply_request_id_middleware(app: FastAPI, settings: RequestIDSettings) -> FastAPI:

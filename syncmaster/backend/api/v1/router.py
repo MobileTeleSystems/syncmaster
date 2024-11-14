@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from fastapi import APIRouter
 
-from syncmaster.backend.api.v1.auth.router import router as auth_router
+from syncmaster.backend.api.v1.auth import router as auth_router
 from syncmaster.backend.api.v1.connections import router as connection_router
 from syncmaster.backend.api.v1.groups import router as group_router
 from syncmaster.backend.api.v1.queue import router as queue_router

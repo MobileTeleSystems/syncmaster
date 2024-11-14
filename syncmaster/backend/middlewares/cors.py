@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from syncmaster.settings.server import CORSSettings
+from syncmaster.backend.settings.server import CORSSettings
 
 
 def apply_cors_middleware(app: FastAPI, settings: CORSSettings) -> FastAPI:

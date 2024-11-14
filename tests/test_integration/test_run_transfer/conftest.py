@@ -24,7 +24,7 @@ from pyspark.sql.types import (
 from pytest import FixtureRequest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.backend.api.v1.auth.utils import sign_jwt
+from syncmaster.backend.settings import BackendSettings as Settings
 from syncmaster.db.models import Group
 from syncmaster.dto.connections import (
     HDFSConnectionDTO,
@@ -33,7 +33,6 @@ from syncmaster.dto.connections import (
     PostgresConnectionDTO,
     S3ConnectionDTO,
 )
-from syncmaster.settings import Settings
 from tests.mocks import MockUser, UserTestRoles
 from tests.resources.file_df_connection.test_data import data
 from tests.settings import TestSettings
@@ -563,6 +562,7 @@ def target_file_format(request: FixtureRequest):
 async def group_owner(
     settings: Settings,
     session: AsyncSession,
+    access_token_factory,
 ):
     user = await create_user(
         session=session,
@@ -570,9 +570,10 @@ async def group_owner(
         is_active=True,
     )
 
+    token = access_token_factory(user.id)
     yield MockUser(
         user=user,
-        auth_token=sign_jwt(user.id, settings),
+        auth_token=token,
         role=UserTestRoles.Owner,
     )
 

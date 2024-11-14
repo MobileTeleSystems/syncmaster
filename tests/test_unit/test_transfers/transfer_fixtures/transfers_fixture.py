@@ -3,9 +3,9 @@ from collections.abc import AsyncGenerator
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from syncmaster.backend.settings import BackendSettings as Settings
 from syncmaster.db.repositories.utils import decrypt_auth_data
 from syncmaster.schemas.v1.connection_types import ConnectionType
-from syncmaster.settings import Settings
 from tests.mocks import MockConnection, MockCredentials, MockTransfer
 from tests.test_unit.utils import create_connection, create_credentials, create_transfer
 

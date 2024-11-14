@@ -5,11 +5,13 @@ import logging
 
 from fastapi import HTTPException, Request, Response, status
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import RedirectResponse
 from pydantic import ValidationError
 
 from syncmaster.errors.base import APIErrorSchema, BaseErrorSchema
 from syncmaster.errors.registration import get_response_for_exception
 from syncmaster.exceptions import ActionNotAllowedError, SyncmasterError
+from syncmaster.exceptions.auth import AuthorizationError
 from syncmaster.exceptions.connection import (
     ConnectionDeleteError,
     ConnectionNotFoundError,
@@ -31,6 +33,7 @@ from syncmaster.exceptions.queue import (
     QueueDeleteError,
     QueueNotFoundError,
 )
+from syncmaster.exceptions.redirect import RedirectException
 from syncmaster.exceptions.run import (
     CannotConnectToTaskQueueError,
     CannotStopRunError,
@@ -118,6 +121,14 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterError):
             status=status.HTTP_404_NOT_FOUND,
             content=content,
         )
+
+    if isinstance(exc, RedirectException):
+        return RedirectResponse(url=exc.redirect_url)
+
+    if isinstance(exc, AuthorizationError):
+        content.code = "unauthorized"
+        content.message = "Not authenticated"
+        return exception_json_response(status=status.HTTP_401_UNAUTHORIZED, content=content)
 
     if isinstance(exc, ConnectionDeleteError):
         content.code = "conflict"

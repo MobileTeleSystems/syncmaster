@@ -4,8 +4,8 @@ from fastapi import APIRouter, FastAPI
 from starlette.responses import PlainTextResponse
 from starlette_exporter import PrometheusMiddleware, handle_metrics
 
+from syncmaster.backend.settings.server.monitoring import MonitoringSettings
 from syncmaster.backend.utils.slug import slugify
-from syncmaster.settings.server.monitoring import MonitoringSettings
 
 DEFAULT_SKIP_PATHS = {
     "/monitoring/metrics",

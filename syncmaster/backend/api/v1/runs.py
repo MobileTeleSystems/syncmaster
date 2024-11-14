@@ -2,14 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 import asyncio
 from datetime import datetime
-from typing import Annotated
 
 from asgi_correlation_id import correlation_id
 from fastapi import APIRouter, Depends, Query
 from jinja2 import Template
 from kombu.exceptions import KombuError
 
-from syncmaster.backend.dependencies import Stub
 from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.db.models import RunType, Status, User
 from syncmaster.db.utils import Permission
@@ -23,8 +21,10 @@ from syncmaster.schemas.v1.transfers.run import (
     ReadRunSchema,
     RunPageSchema,
 )
-from syncmaster.settings import Settings
 from syncmaster.worker.config import celery
+
+# TODO: remove global import of WorkerSettings
+from syncmaster.worker.settings import WorkerSettings as Settings
 
 router = APIRouter(tags=["Runs"], responses=get_error_responses())
 
@@ -83,7 +83,6 @@ async def read_run(
 @router.post("/runs")
 async def start_run(
     create_run_data: CreateRunSchema,
-    settings: Annotated[Settings, Depends(Stub(Settings))],
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
     current_user: User = Depends(get_user(is_active=True)),
 ) -> ReadRunSchema:
@@ -120,7 +119,7 @@ async def start_run(
             type=RunType.MANUAL,
         )
 
-        log_url = Template(settings.worker.LOG_URL_TEMPLATE).render(
+        log_url = Template(Settings().LOG_URL_TEMPLATE).render(
             run=run,
             correlation_id=correlation_id.get(),
         )

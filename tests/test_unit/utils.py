@@ -11,6 +11,7 @@ from onetl.impl import LocalPath, RemotePath
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
+from syncmaster.backend.settings import BackendSettings as Settings
 from syncmaster.db.models import (
     AuthData,
     Connection,
@@ -23,7 +24,6 @@ from syncmaster.db.models import (
 )
 from syncmaster.db.repositories.utils import encrypt_auth_data
 from syncmaster.schemas.v1.transfers import ReadFullTransferSchema
-from syncmaster.settings import Settings
 
 
 @asynccontextmanager
@@ -33,9 +33,21 @@ async def create_user_cm(
     is_active: bool = False,
     is_superuser: bool = False,
     is_deleted: bool = False,
+    email: str = None,
+    first_name: str = None,
+    middle_name: str = None,
+    last_name: str = None,
 ) -> AsyncGenerator[User, None]:
+    email = email or f"{username}@user.user"
+    first_name = first_name or f"{username}_first"
+    middle_name = middle_name or f"{username}_middle"
+    last_name = last_name or f"{username}_last"
     u = User(
         username=username,
+        email=email,
+        first_name=first_name,
+        middle_name=middle_name,
+        last_name=last_name,
         is_active=is_active,
         is_superuser=is_superuser,
         is_deleted=is_deleted,
@@ -54,9 +66,21 @@ async def create_user(
     is_active: bool = False,
     is_superuser: bool = False,
     is_deleted: bool = False,
+    email: str = None,
+    first_name: str = None,
+    middle_name: str = None,
+    last_name: str = None,
 ) -> User:
+    email = email or f"{username}@user.user"
+    first_name = first_name or f"{username}_first"
+    middle_name = middle_name or f"{username}_middle"
+    last_name = last_name or f"{username}_last"
     u = User(
         username=username,
+        email=email,
+        first_name=first_name,
+        middle_name=middle_name,
+        last_name=last_name,
         is_active=is_active,
         is_superuser=is_superuser,
         is_deleted=is_deleted,

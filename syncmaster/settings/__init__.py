@@ -3,21 +3,18 @@
 from enum import StrEnum
 
 from pydantic import Field
-from pydantic.types import ImportString
 from pydantic_settings import BaseSettings
 
 from syncmaster.settings.broker import RabbitMQSettings
 from syncmaster.settings.database import DatabaseSettings
-from syncmaster.settings.server import ServerSettings
-from syncmaster.settings.worker import WorkerSettings
+from syncmaster.settings.log import LoggingSettings
 
 
 class EnvTypes(StrEnum):
     LOCAL = "LOCAL"
 
 
-# TODO: split settings into syncmaster/server/settings and syncmaster/worker/settings
-class Settings(BaseSettings):
+class SyncmasterSettings(BaseSettings):
     """Syncmaster backend settings.
 
     Backend can be configured in 2 ways:
@@ -44,27 +41,18 @@ class Settings(BaseSettings):
         SYNCMASTER__SERVER__DEBUG=True
     """
 
-    # TODO: move settings to corresponding classes (scheduler also)
-    SECRET_KEY: str = "secret"
-    SECURITY_ALGORITHM: str = "HS256"
-    CRYPTO_KEY: str = "UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94="
+    crypto_key: str
 
+    # TODO: move settings to corresponding classes (scheduler also)
     TZ: str = "UTC"
     SCHEDULER_TRANSFER_FETCHING_TIMEOUT: int = 180  # seconds
     SCHEDULER_MISFIRE_GRACE_TIME: int = 300  # seconds
 
-    TOKEN_EXPIRED_TIME: int = 60 * 60 * 10  # 10 hours
-    CREATE_SPARK_SESSION_FUNCTION: ImportString = "syncmaster.worker.spark.get_worker_spark_session"
-
     database: DatabaseSettings = Field(description=":ref:`Database settings <backend-configuration-database>`")
     broker: RabbitMQSettings = Field(description=":ref:`Broker settings <backend-configuration-broker>`")
-    server: ServerSettings = Field(
-        default_factory=ServerSettings,
-        description="Server settings <backend-configuration",
-    )
-    worker: WorkerSettings = Field(
-        default_factory=WorkerSettings,
-        description="Celery worker settings",
+    logging: LoggingSettings = Field(
+        default_factory=LoggingSettings,
+        description=":ref:`Logging settings <backend-configuration-logging>`",
     )
 
     class Config:

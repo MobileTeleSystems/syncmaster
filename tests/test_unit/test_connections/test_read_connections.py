@@ -6,7 +6,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.settings import Settings
+from syncmaster.backend.settings import BackendSettings as Settings
 from tests.mocks import MockConnection, MockGroup, MockUser, UserTestRoles
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]

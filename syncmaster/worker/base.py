@@ -3,12 +3,12 @@
 from celery import Task
 from sqlalchemy import create_engine
 
-from syncmaster.settings import Settings
+# TODO: remove global import of WorkerSettings
+from syncmaster.worker.settings import WorkerSettings as Settings
 
 
 class WorkerTask(Task):
     def __init__(self) -> None:
-        # TODO: remove settings object creating during import
         self.settings = Settings()
         self.engine = create_engine(
             url=self.settings.database.sync_url,

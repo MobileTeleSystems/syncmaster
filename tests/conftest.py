@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import time
 from collections.abc import AsyncGenerator
 from pathlib import Path
 
@@ -16,8 +17,10 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from syncmaster.backend import application_factory
+from syncmaster.backend.settings import BackendSettings as Settings
+from syncmaster.backend.settings.auth.jwt import JWTSettings
+from syncmaster.backend.utils.jwt import sign_jwt
 from syncmaster.db.models import Base
-from syncmaster.settings import Settings
 from tests.mocks import UserTestRoles
 from tests.settings import TestSettings
 from tests.utils import prepare_new_database, run_async_migrations
@@ -34,6 +37,23 @@ pytest_plugins = [
     "tests.test_unit.test_scheduler.scheduler_fixtures",
     "tests.test_integration.test_scheduler.scheduler_fixtures",
 ]
+
+
+@pytest.fixture
+def access_token_settings(settings: Settings) -> JWTSettings:
+    return JWTSettings.parse_obj(settings.auth.access_token)
+
+
+@pytest.fixture
+def access_token_factory(access_token_settings: JWTSettings):
+    def _generate_access_token(user_id):
+        return sign_jwt(
+            {"user_id": user_id, "exp": time.time() + 1000},
+            access_token_settings.secret_key.get_secret_value(),
+            access_token_settings.security_algorithm,
+        )
+
+    return _generate_access_token
 
 
 @pytest.fixture(scope="session")

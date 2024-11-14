@@ -3,9 +3,9 @@
 import asyncio
 import logging
 
+from syncmaster.backend.settings import BackendSettings as Settings
 from syncmaster.scheduler.transfer_fetcher import TransferFetcher
 from syncmaster.scheduler.transfer_job_manager import TransferJobManager
-from syncmaster.settings import Settings
 
 logger = logging.getLogger(__name__)
 

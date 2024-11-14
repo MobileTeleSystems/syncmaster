@@ -40,6 +40,7 @@ services:
       - 8000:8000
     volumes:
       - ./syncmaster:/app/syncmaster
+      - ./docs/_static:/app/docs/_static
       - ./cached_jars:/root/.ivy2
       - ./reports:/app/reports
       - ./tests:/app/tests
@@ -156,6 +157,19 @@ services:
       retries: 3
     profiles: [hive, hdfs, all]
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    command: start-dev
+    restart: unless-stopped
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - 8080:8080
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+    profiles: [keycloak, all]
+
   test-hive:
     image: mtsrus/hadoop:hadoop2.7.3-hive2.3.9
     restart: unless-stopped
@@ -184,3 +198,4 @@ services:
 volumes:
   postgres_test_data:
   rabbitmq_test_data:
+  keycloak_data:

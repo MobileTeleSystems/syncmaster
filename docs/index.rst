@@ -16,6 +16,7 @@
 
     backend/install
     backend/architecture
+    backend/auth/index
     backend/openapi
     backend/configuration/index
 

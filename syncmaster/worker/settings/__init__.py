@@ -1,11 +1,11 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from pydantic import BaseModel, Field
+from pydantic.types import ImportString
 
-from syncmaster.settings.log import LoggingSettings
+from syncmaster.settings import SyncmasterSettings
 
 
-class WorkerSettings(BaseModel):
+class WorkerSettings(SyncmasterSettings):
     """Celery worker settings.
 
     Examples
@@ -16,9 +16,7 @@ class WorkerSettings(BaseModel):
         SYNCMASTER__WORKER__LOGGING__PRESET=colored
     """
 
-    logging: LoggingSettings = Field(
-        default_factory=LoggingSettings,
-        description=":ref:`Logging settings <configuration-logging>`",
-    )
     CORRELATION_CELERY_HEADER_ID: str = "CORRELATION_CELERY_HEADER_ID"
     LOG_URL_TEMPLATE: str = ""
+
+    CREATE_SPARK_SESSION_FUNCTION: ImportString = "syncmaster.worker.spark.get_worker_spark_session"

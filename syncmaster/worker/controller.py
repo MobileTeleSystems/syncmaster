@@ -19,13 +19,15 @@ from syncmaster.dto.transfers import (
     S3TransferDTO,
 )
 from syncmaster.exceptions.connection import ConnectionTypeNotRecognizedError
-from syncmaster.settings import Settings
 from syncmaster.worker.handlers.base import Handler
 from syncmaster.worker.handlers.db.hive import HiveHandler
 from syncmaster.worker.handlers.db.oracle import OracleHandler
 from syncmaster.worker.handlers.db.postgres import PostgresHandler
 from syncmaster.worker.handlers.file.hdfs import HDFSHandler
 from syncmaster.worker.handlers.file.s3 import S3Handler
+
+# TODO: remove global import of WorkerSettings
+from syncmaster.worker.settings import WorkerSettings as Settings
 
 logger = logging.getLogger(__name__)
 
@@ -70,10 +72,8 @@ class TransferController:
         source_auth_data: dict,
         target_connection: Connection,
         target_auth_data: dict,
-        settings: Settings,
     ):
         self.run = run
-        self.settings = settings
         self.source_handler = self.get_handler(
             connection_data=source_connection.data,
             transfer_params=run.transfer.source_params,
@@ -86,8 +86,7 @@ class TransferController:
         )
 
     def perform_transfer(self) -> None:
-        spark = self.settings.CREATE_SPARK_SESSION_FUNCTION(
-            settings=self.settings,
+        spark = Settings().CREATE_SPARK_SESSION_FUNCTION(
             run=self.run,
             source=self.source_handler.connection_dto,
             target=self.target_handler.connection_dto,

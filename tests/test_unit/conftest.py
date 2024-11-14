@@ -1,13 +1,11 @@
 import secrets
-from collections.abc import AsyncGenerator
 
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.backend.api.v1.auth.utils import sign_jwt
+from syncmaster.backend.settings import BackendSettings as Settings
 from syncmaster.db.models import Queue, User, UserGroup
 from syncmaster.db.repositories.utils import decrypt_auth_data
-from syncmaster.settings import Settings
 from tests.mocks import (
     MockConnection,
     MockCredentials,
@@ -31,7 +29,7 @@ async def create_group_member(
     username: str,
     group_id: int,
     session: AsyncSession,
-    settings: Settings,
+    access_token_factory,
 ) -> MockUser:
     role_name = username.split("_")[-1]
 
@@ -58,9 +56,10 @@ async def create_group_member(
         ),
     )
 
+    token = access_token_factory(user.id)
     return MockUser(
         user=user,
-        auth_token=sign_jwt(user.id, settings),
+        auth_token=token,
         role=role,
     )
 
@@ -82,51 +81,55 @@ async def add_user_to_group(
 
 
 @pytest_asyncio.fixture
-async def superuser(session: AsyncSession, settings: Settings):
+async def superuser(session: AsyncSession, access_token_factory) -> MockUser:
     async with create_user_cm(session, username="superuser", is_active=True, is_superuser=True) as user:
+        token = access_token_factory(user.id)
         yield MockUser(
             user=user,
-            auth_token=sign_jwt(user.id, settings),
+            auth_token=token,
             role=UserTestRoles.Superuser,
         )
 
 
 @pytest_asyncio.fixture
-async def simple_user(session: AsyncSession, settings: Settings):
+async def simple_user(session: AsyncSession, access_token_factory) -> MockUser:
     async with create_user_cm(session, username="simple_user", is_active=True) as user:
+        token = access_token_factory(user.id)
         yield MockUser(
             user=user,
-            auth_token=sign_jwt(user.id, settings),
+            auth_token=token,
             role=UserTestRoles.Developer,
         )
 
 
 @pytest_asyncio.fixture
-async def inactive_user(session: AsyncSession, settings: Settings):
+async def inactive_user(session: AsyncSession, access_token_factory) -> MockUser:
     async with create_user_cm(session, username="inactive_user") as user:
+        access_token_factory(user.id)
         yield MockUser(
             user=user,
-            auth_token=sign_jwt(user.id, settings),
+            auth_token=access_token_factory(user.id),
             role=UserTestRoles.Developer,
         )
 
 
 @pytest_asyncio.fixture
-async def deleted_user(session: AsyncSession, settings: Settings):
+async def deleted_user(session: AsyncSession, access_token_factory) -> MockUser:
     async with create_user_cm(
         session,
         username="deleted_user",
         is_deleted=True,
     ) as user:
+        token = access_token_factory(user.id)
         yield MockUser(
             user=user,
-            auth_token=sign_jwt(user.id, settings),
+            auth_token=token,
             role=UserTestRoles.Developer,
         )
 
 
 @pytest_asyncio.fixture
-async def user_with_many_roles(session: AsyncSession, settings: Settings, simple_user: MockUser) -> MockUser:
+async def user_with_many_roles(session: AsyncSession, simple_user: MockUser, access_token_factory) -> MockUser:
     user = await create_user(
         session=session,
         username="multi_role_user",
@@ -155,9 +158,10 @@ async def user_with_many_roles(session: AsyncSession, settings: Settings, simple
 
     await session.commit()
 
+    token = access_token_factory(user.id)
     mock_user = MockUser(
         user=user,
-        auth_token=sign_jwt(user.id, settings),
+        auth_token=token,
     )
 
     yield mock_user
@@ -170,7 +174,7 @@ async def user_with_many_roles(session: AsyncSession, settings: Settings, simple
 
 
 @pytest_asyncio.fixture
-async def empty_group(session: AsyncSession, settings) -> AsyncGenerator[MockGroup, None]:
+async def empty_group(session: AsyncSession, access_token_factory) -> MockGroup:
     owner = await create_user(
         session=session,
         username="empty_group_owner",
@@ -181,11 +185,12 @@ async def empty_group(session: AsyncSession, settings) -> AsyncGenerator[MockGro
         name="empty_group",
         owner_id=owner.id,
     )
+    token = access_token_factory(owner.id)
     yield MockGroup(
         group=group,
         owner=MockUser(
             user=owner,
-            auth_token=sign_jwt(owner.id, settings),
+            auth_token=token,
             role=UserTestRoles.Owner,
         ),
         members=[],
@@ -196,7 +201,7 @@ async def empty_group(session: AsyncSession, settings) -> AsyncGenerator[MockGro
 
 
 @pytest_asyncio.fixture
-async def group(session: AsyncSession, settings: Settings) -> AsyncGenerator[MockGroup, None]:
+async def group(session: AsyncSession, access_token_factory) -> MockGroup:
     owner = await create_user(
         session=session,
         username="notempty_group_owner",
@@ -215,16 +220,17 @@ async def group(session: AsyncSession, settings: Settings) -> AsyncGenerator[Moc
                 username=username,
                 group_id=group.id,
                 session=session,
-                settings=settings,
+                access_token_factory=access_token_factory,
             ),
         )
 
     await session.commit()
+    token = access_token_factory(owner.id)
     yield MockGroup(
         group=group,
         owner=MockUser(
             user=owner,
-            auth_token=sign_jwt(owner.id, settings),
+            auth_token=token,
             role=UserTestRoles.Owner,
         ),
         members=members,
@@ -239,8 +245,8 @@ async def group(session: AsyncSession, settings: Settings) -> AsyncGenerator[Moc
 @pytest_asyncio.fixture
 async def mock_group(
     session: AsyncSession,
-    settings: Settings,
-) -> AsyncGenerator[MockGroup, None]:
+    access_token_factory,
+):
     group_owner = await create_user(
         session=session,
         username=f"{secrets.token_hex(5)}_group_connection_owner",
@@ -263,7 +269,7 @@ async def mock_group(
                 username=username,
                 group_id=group.id,
                 session=session,
-                settings=settings,
+                access_token_factory=access_token_factory,
             ),
         )
 
@@ -273,7 +279,7 @@ async def mock_group(
         group=group,
         owner=MockUser(
             user=group_owner,
-            auth_token=sign_jwt(group_owner.id, settings),
+            auth_token=access_token_factory(group_owner.id),
             role=UserTestRoles.Owner,
         ),
         members=members,
@@ -288,9 +294,8 @@ async def mock_group(
 @pytest_asyncio.fixture
 async def group_queue(
     session: AsyncSession,
-    settings: Settings,
     mock_group: MockGroup,
-) -> AsyncGenerator[Queue, None]:
+) -> Queue:
     queue = await create_queue(
         session=session,
         name=f"{secrets.token_hex(5)}_test_queue",
@@ -306,7 +311,6 @@ async def group_queue(
 @pytest_asyncio.fixture
 async def mock_queue(
     session: AsyncSession,
-    settings: Settings,
     group: MockGroup,
 ) -> Queue:
     queue = await create_queue(

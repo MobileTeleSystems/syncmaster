@@ -55,7 +55,7 @@ async def test_get_user_inactive(client: AsyncClient, simple_user: MockUser, ina
     assert response.json() == {
         "error": {
             "code": "forbidden",
-            "message": "Inactive user",
+            "message": "You have no power here",
             "details": None,
         },
     }
@@ -95,7 +95,7 @@ async def test_get_current_user_inactive(client: AsyncClient, inactive_user: Moc
     assert response.json() == {
         "error": {
             "code": "forbidden",
-            "message": "Inactive user",
+            "message": "You have no power here",
             "details": None,
         },
     }

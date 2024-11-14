@@ -5,12 +5,12 @@ import textwrap
 
 from pydantic import BaseModel, Field
 
-from syncmaster.settings.log import LoggingSettings
-from syncmaster.settings.server.cors import CORSSettings
-from syncmaster.settings.server.monitoring import MonitoringSettings
-from syncmaster.settings.server.openapi import OpenAPISettings
-from syncmaster.settings.server.request_id import RequestIDSettings
-from syncmaster.settings.server.static_files import StaticFilesSettings
+from syncmaster.backend.settings.server.cors import CORSSettings
+from syncmaster.backend.settings.server.monitoring import MonitoringSettings
+from syncmaster.backend.settings.server.openapi import OpenAPISettings
+from syncmaster.backend.settings.server.request_id import RequestIDSettings
+from syncmaster.backend.settings.server.session import SessionSettings
+from syncmaster.backend.settings.server.static_files import StaticFilesSettings
 
 
 class ServerSettings(BaseModel):
@@ -34,12 +34,12 @@ class ServerSettings(BaseModel):
             """,
         ),
     )
-    logging: LoggingSettings = Field(
-        default_factory=LoggingSettings,
-        description=":ref:`Logging settings <backend-configuration-logging>`",
-    )
     request_id: RequestIDSettings = Field(
         default_factory=RequestIDSettings,
+    )
+    session: SessionSettings = Field(
+        default_factory=SessionSettings,  # type: ignore[arg-type]
+        description=":ref:`Session settings <backend-configuration-server-session>`",
     )
     cors: CORSSettings = Field(
         default_factory=CORSSettings,

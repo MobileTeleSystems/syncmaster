@@ -4,9 +4,8 @@ from collections.abc import AsyncGenerator
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.backend.api.v1.auth.utils import sign_jwt
+from syncmaster.backend.settings import BackendSettings as Settings
 from syncmaster.db.repositories.utils import decrypt_auth_data
-from syncmaster.settings import Settings
 from tests.mocks import (
     MockConnection,
     MockCredentials,
@@ -32,6 +31,7 @@ async def group_transfer(
     settings: Settings,
     create_connection_data: dict | None,
     create_transfer_data: dict | None,
+    access_token_factory,
 ) -> AsyncGenerator[MockTransfer, None]:
     group_owner = await create_user(
         session=session,
@@ -61,16 +61,17 @@ async def group_transfer(
                 username=username,
                 group_id=group.id,
                 session=session,
-                settings=settings,
+                access_token_factory=access_token_factory,
             ),
         )
 
     await session.commit()
+    token = access_token_factory(group_owner.id)
     mock_group = MockGroup(
         group=group,
         owner=MockUser(
             user=group_owner,
-            auth_token=sign_jwt(group_owner.id, settings),
+            auth_token=token,
             role=UserTestRoles.Owner,
         ),
         members=members,
