@@ -41,7 +41,7 @@ async def test_developer_plus_can_update_clickhouse_connection(
             "connection_data": {
                 "type": "clickhouse",
                 "host": "127.0.1.1",
-                "database": "new_name",
+                "database_name": "new_name",
             },
             "auth_data": {
                 "type": "clickhouse",
@@ -61,7 +61,7 @@ async def test_developer_plus_can_update_clickhouse_connection(
             "type": group_connection.data["type"],
             "host": "127.0.1.1",
             "port": group_connection.data["port"],
-            "database": "new_name",
+            "database_name": "new_name",
             "additional_params": {},
         },
         "auth_data": {

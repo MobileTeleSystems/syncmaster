@@ -15,7 +15,7 @@ class MSSQLBaseSchema(BaseModel):
 class ReadMSSQLConnectionSchema(MSSQLBaseSchema):
     host: str
     port: int
-    database: str
+    database_name: str
     additional_params: dict = Field(default_factory=dict)
 
 
@@ -26,7 +26,7 @@ class ReadMSSQLAuthSchema(MSSQLBaseSchema):
 class UpdateMSSQLConnectionSchema(MSSQLBaseSchema):
     host: str | None = None
     port: int | None = None
-    database: str | None = None
+    database_name: str | None = None
     additional_params: dict | None = Field(default_factory=dict)
 
 
@@ -38,7 +38,7 @@ class UpdateMSSQLAuthSchema(MSSQLBaseSchema):
 class CreateMSSQLConnectionSchema(MSSQLBaseSchema):
     host: str
     port: int
-    database: str
+    database_name: str
     additional_params: dict = Field(default_factory=dict)
 
 
