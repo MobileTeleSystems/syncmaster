@@ -33,7 +33,7 @@ async def test_developer_plus_can_create_mssql_connection(
                 "type": "mssql",
                 "host": "127.0.0.1",
                 "port": 1433,
-                "database": "database_name",
+                "database_name": "database",
             },
             "auth_data": {
                 "type": "mssql",
@@ -70,7 +70,7 @@ async def test_developer_plus_can_create_mssql_connection(
             "type": connection.data["type"],
             "host": connection.data["host"],
             "port": connection.data["port"],
-            "database": connection.data["database"],
+            "database_name": connection.data["database_name"],
             "additional_params": connection.data["additional_params"],
         },
         "auth_data": {

@@ -15,7 +15,7 @@ class ClickhouseBaseSchema(BaseModel):
 class ReadClickhouseConnectionSchema(ClickhouseBaseSchema):
     host: str
     port: int
-    database: str | None = None
+    database_name: str | None = None
     additional_params: dict = Field(default_factory=dict)
 
 
@@ -26,7 +26,7 @@ class ReadClickhouseAuthSchema(ClickhouseBaseSchema):
 class UpdateClickhouseConnectionSchema(ClickhouseBaseSchema):
     host: str | None = None
     port: int | None = None
-    database: str | None = None
+    database_name: str | None = None
     additional_params: dict | None = Field(default_factory=dict)
 
 
@@ -38,7 +38,7 @@ class UpdateClickhouseAuthSchema(ClickhouseBaseSchema):
 class CreateClickhouseConnectionSchema(ClickhouseBaseSchema):
     host: str
     port: int
-    database: str | None = None
+    database_name: str | None = None
     additional_params: dict = Field(default_factory=dict)
 
 
