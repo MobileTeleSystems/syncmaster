@@ -32,13 +32,13 @@ tz = ["backports.zoneinfo"]
 
 [[package]]
 name = "amqp"
-version = "5.2.0"
+version = "5.3.1"
 description = "Low-level AMQP client for Python (fork of amqplib)."
 optional = true
 python-versions = ">=3.6"
 files = [
-    {file = "amqp-5.2.0-py3-none-any.whl", hash = "sha256:827cb12fb0baa892aad844fd95258143bce4027fdac4fccddbc43330fd281637"},
-    {file = "amqp-5.2.0.tar.gz", hash = "sha256:a1ecff425ad063ad42a486c902807d1482311481c8ad95a72694b2975e75f7fd"},
+    {file = "amqp-5.3.1-py3-none-any.whl", hash = "sha256:43b3319e1b4e7d1251833a93d672b4af1e40f3d632d479b98661a95f117880a2"},
+    {file = "amqp-5.3.1.tar.gz", hash = "sha256:cddc00c725449522023bad949f70fff7b48f0b1ade74d170a6f10ab044739432"},
 ]
 
 [package.dependencies]
@@ -961,13 +961,13 @@ gmpy2 = ["gmpy2"]
 
 [[package]]
 name = "etl-entities"
-version = "2.3.1"
+version = "2.4.0"
 description = "ETL Entities lib for onETL"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "etl_entities-2.3.1-py3-none-any.whl", hash = "sha256:a5513bf4735ec1bf113a22285c04b4b9f42fc7dc4b42507cb72e44ab048b14bb"},
-    {file = "etl_entities-2.3.1.tar.gz", hash = "sha256:81ba23b732cdae5b36e5b5a0e287eece8f1b5cf34f1d728f905b9c7838e6e35a"},
+    {file = "etl_entities-2.4.0-py3-none-any.whl", hash = "sha256:44fcbeb790003124cc1fa7ddd226fadbd979f737995519d5fc6d5a5d8e634b29"},
+    {file = "etl_entities-2.4.0.tar.gz", hash = "sha256:7bbf28a0d2ad2bff4fac954486f2afeda88e3171e37e1e0e7de18e40c797db93"},
 ]
 
 [package.dependencies]
@@ -1330,13 +1330,13 @@ kerberos = ["requests-kerberos (>=0.7.0)"]
 
 [[package]]
 name = "httpcore"
-version = "1.0.6"
+version = "1.0.7"
 description = "A minimal low-level HTTP client."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "httpcore-1.0.6-py3-none-any.whl", hash = "sha256:27b59625743b85577a8c0e10e55b50b5368a4f2cfe8cc7bcfa9cf00829c2682f"},
-    {file = "httpcore-1.0.6.tar.gz", hash = "sha256:73f6dbd6eb8c21bbf7ef8efad555481853f5f6acdeaff1edb0694289269ee17f"},
+    {file = "httpcore-1.0.7-py3-none-any.whl", hash = "sha256:a3fff8f43dc260d5bd363d9f9cf1830fa3a458b332856f34282de498ed420edd"},
+    {file = "httpcore-1.0.7.tar.gz", hash = "sha256:8551cb62a169ec7162ac7be8d4817d561f60e08eaa485234898414bb5a8a0b4c"},
 ]
 
 [package.dependencies]
@@ -2709,6 +2709,25 @@ files = [
 requests = ">=2.0.1,<3.0.0"
 
 [[package]]
+name = "responses"
+version = "0.25.3"
+description = "A utility library for mocking out the `requests` Python library."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "responses-0.25.3-py3-none-any.whl", hash = "sha256:521efcbc82081ab8daa588e08f7e8a64ce79b91c39f6e62199b19159bea7dbcb"},
+    {file = "responses-0.25.3.tar.gz", hash = "sha256:617b9247abd9ae28313d57a75880422d55ec63c29d33d629697590a034358dba"},
+]
+
+[package.dependencies]
+pyyaml = "*"
+requests = ">=2.30.0,<3.0"
+urllib3 = ">=1.25.10,<3.0"
+
+[package.extras]
+tests = ["coverage (>=6.0.0)", "flake8", "mypy", "pytest (>=7.0.0)", "pytest-asyncio", "pytest-cov", "pytest-httpserver", "tomli", "tomli-w", "types-PyYAML", "types-requests"]
+
+[[package]]
 name = "rsa"
 version = "4.9"
 description = "Pure-Python RSA implementation"
@@ -2724,13 +2743,13 @@ pyasn1 = ">=0.1.3"
 
 [[package]]
 name = "setuptools"
-version = "75.4.0"
+version = "75.5.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "setuptools-75.4.0-py3-none-any.whl", hash = "sha256:b3c5d862f98500b06ffdf7cc4499b48c46c317d8d56cb30b5c8bce4d88f5c216"},
-    {file = "setuptools-75.4.0.tar.gz", hash = "sha256:1dc484f5cf56fd3fe7216d7b8df820802e7246cfb534a1db2aa64f14fcb9cdcb"},
+    {file = "setuptools-75.5.0-py3-none-any.whl", hash = "sha256:87cb777c3b96d638ca02031192d40390e0ad97737e27b6b4fa831bea86f2f829"},
+    {file = "setuptools-75.5.0.tar.gz", hash = "sha256:5c4ccb41111392671f02bb5f8436dfc5a9a7185e80500531b133f5775c4163ef"},
 ]
 
 [package.extras]
@@ -3512,4 +3531,4 @@ worker = ["asgi-correlation-id", "celery", "coloredlogs", "jinja2", "onetl", "ps
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "9bc38b7e0a321ae4e2b15c8fdbd0ad09df33e6ac0ff2dfb35b878119928686b5"
+content-hash = "06cb61479a9e8c0857178db7e7e6cff6515cd2ad6d6eb8b9c1bc62ed292a983c"

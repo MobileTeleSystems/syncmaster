@@ -64,9 +64,9 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(scope="session")
-def settings():
-    return Settings()
+@pytest.fixture(scope="session", params=[{}])
+def settings(request: pytest.FixtureRequest) -> Settings:
+    return Settings.parse_obj(request.param)
 
 
 @pytest.fixture(scope="session")
