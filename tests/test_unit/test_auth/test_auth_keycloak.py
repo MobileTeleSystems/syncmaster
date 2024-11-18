@@ -1,26 +1,28 @@
-import time
-
 import pytest
 import responses
 from httpx import AsyncClient
 
 from syncmaster.backend.settings import BackendSettings as Settings
 from tests.mocks import MockUser
-from tests.test_unit.test_auth.mocks.keycloak import (
-    create_session_cookie,
-    mock_keycloak_realm,
-    mock_keycloak_well_known,
-)
 
 KEYCLOAK_PROVIDER = "syncmaster.backend.providers.auth.keycloak_provider.KeycloakAuthProvider"
 pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
 
 @responses.activate
-@pytest.mark.parametrize("settings", [{"auth": {"provider": KEYCLOAK_PROVIDER}}], indirect=True)
-async def test_get_keycloak_user_unauthorized(client: AsyncClient):
-    mock_keycloak_well_known(responses)
-
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {
+            "auth": {
+                "provider": KEYCLOAK_PROVIDER,
+                "server_url": "http://localhost:8080/",
+            },
+        },
+    ],
+    indirect=True,
+)
+async def test_get_keycloak_user_unauthorized(client: AsyncClient, mock_keycloak_well_known):
     response = await client.get("/v1/users/some_user_id")
 
     # redirect unauthorized user to Keycloak
@@ -31,27 +33,27 @@ async def test_get_keycloak_user_unauthorized(client: AsyncClient):
 
 
 @responses.activate
-@pytest.mark.parametrize("settings", [{"auth": {"provider": KEYCLOAK_PROVIDER}}], indirect=True)
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {
+            "auth": {
+                "provider": KEYCLOAK_PROVIDER,
+                "server_url": "http://localhost:8080/",
+            },
+        },
+    ],
+    indirect=True,
+)
 async def test_get_keycloak_user_authorized(
     client: AsyncClient,
     simple_user: MockUser,
     settings: Settings,
-    access_token_factory,
+    create_session_cookie,
+    mock_keycloak_well_known,
+    mock_keycloak_realm,
 ):
-    payload = {
-        "sub": str(simple_user.id),
-        "preferred_username": simple_user.username,
-        "email": simple_user.email,
-        "given_name": simple_user.first_name,
-        "middle_name": simple_user.middle_name,
-        "family_name": simple_user.last_name,
-        "exp": time.time() + 1000,
-    }
-
-    mock_keycloak_well_known(responses)
-    mock_keycloak_realm(responses)
-
-    session_cookie = create_session_cookie(payload, settings.server.session.secret_key)
+    session_cookie = create_session_cookie(simple_user)
     headers = {
         "Cookie": f"session={session_cookie}",
     }
@@ -69,27 +71,28 @@ async def test_get_keycloak_user_authorized(
 
 
 @responses.activate
-@pytest.mark.parametrize("settings", [{"auth": {"provider": KEYCLOAK_PROVIDER}}], indirect=True)
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {
+            "auth": {
+                "provider": KEYCLOAK_PROVIDER,
+                "server_url": "http://localhost:8080/",
+            },
+        },
+    ],
+    indirect=True,
+)
 async def test_get_keycloak_deleted_user(
     client: AsyncClient,
     simple_user: MockUser,
     deleted_user: MockUser,
     settings: Settings,
+    create_session_cookie,
+    mock_keycloak_well_known,
+    mock_keycloak_realm,
 ):
-    payload = {
-        "sub": str(simple_user.id),
-        "preferred_username": simple_user.username,
-        "email": simple_user.email,
-        "given_name": simple_user.first_name,
-        "middle_name": simple_user.middle_name,
-        "family_name": simple_user.last_name,
-        "exp": time.time() + 1000,
-    }
-
-    mock_keycloak_well_known(responses)
-    mock_keycloak_realm(responses)
-
-    session_cookie = create_session_cookie(payload, settings.server.session.secret_key)
+    session_cookie = create_session_cookie(simple_user)
     headers = {
         "Cookie": f"session={session_cookie}",
     }
@@ -108,27 +111,28 @@ async def test_get_keycloak_deleted_user(
 
 
 @responses.activate
-@pytest.mark.parametrize("settings", [{"auth": {"provider": KEYCLOAK_PROVIDER}}], indirect=True)
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {
+            "auth": {
+                "provider": KEYCLOAK_PROVIDER,
+                "server_url": "http://localhost:8080/",
+            },
+        },
+    ],
+    indirect=True,
+)
 async def test_get_keycloak_user_inactive(
     client: AsyncClient,
     simple_user: MockUser,
     inactive_user: MockUser,
     settings: Settings,
+    create_session_cookie,
+    mock_keycloak_well_known,
+    mock_keycloak_realm,
 ):
-    payload = {
-        "sub": str(inactive_user.id),
-        "preferred_username": inactive_user.username,
-        "email": inactive_user.email,
-        "given_name": inactive_user.first_name,
-        "middle_name": inactive_user.middle_name,
-        "family_name": inactive_user.last_name,
-        "exp": time.time() + 1000,
-    }
-
-    mock_keycloak_well_known(responses)
-    mock_keycloak_realm(responses)
-
-    session_cookie = create_session_cookie(payload, settings.server.session.secret_key)
+    session_cookie = create_session_cookie(inactive_user)
     headers = {
         "Cookie": f"session={session_cookie}",
     }
