@@ -120,3 +120,39 @@ def mock_keycloak_realm(settings, rsa_keys):
         status=200,
         content_type="application/json",
     )
+
+
+@pytest.fixture
+def mock_keycloak_token_refresh(settings, rsa_keys):
+    server_url = settings.auth.server_url
+    realm_name = settings.auth.client_id
+    token_url = f"{server_url}/realms/{realm_name}/protocol/openid-connect/token"
+
+    # generate new access and refresh tokens
+    expires_in = int(time.time()) + 1000
+    private_pem = rsa_keys["private_pem"]
+    payload = {
+        "sub": "mock_user_id",
+        "preferred_username": "mock_username",
+        "email": "mock_email@example.com",
+        "given_name": "Mock",
+        "middle_name": "User",
+        "family_name": "Name",
+        "exp": expires_in,
+    }
+
+    new_access_token = jwt.encode(payload, private_pem, algorithm="RS256")
+    new_refresh_token = "mock_new_refresh_token"
+
+    responses.add(
+        responses.POST,
+        token_url,
+        json={
+            "access_token": new_access_token,
+            "refresh_token": new_refresh_token,
+            "token_type": "bearer",
+            "expires_in": expires_in,
+        },
+        status=200,
+        content_type="application/json",
+    )

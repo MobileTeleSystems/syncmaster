@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 import responses
 from httpx import AsyncClient
@@ -59,6 +61,50 @@ async def test_get_keycloak_user_authorized(
         f"/v1/users/{simple_user.id}",
         headers=headers,
     )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": simple_user.id,
+        "is_superuser": simple_user.is_superuser,
+        "username": simple_user.username,
+    }
+
+
+@responses.activate
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {
+            "auth": {
+                "provider": KEYCLOAK_PROVIDER,
+            },
+        },
+    ],
+    indirect=True,
+)
+async def test_get_keycloak_user_expired_access_token(
+    caplog,
+    client: AsyncClient,
+    simple_user: MockUser,
+    settings: Settings,
+    create_session_cookie,
+    mock_keycloak_well_known,
+    mock_keycloak_realm,
+    mock_keycloak_token_refresh,
+):
+    session_cookie = create_session_cookie(simple_user, expire_in_msec=-100000000)  # expired access token
+    headers = {
+        "Cookie": f"session={session_cookie}",
+    }
+
+    with caplog.at_level(logging.DEBUG):
+        response = await client.get(
+            f"/v1/users/{simple_user.id}",
+            headers=headers,
+        )
+
+    assert "Access token is invalid or expired" in caplog.text
+    assert "Access token refreshed and decoded successfully" in caplog.text
 
     assert response.status_code == 200
     assert response.json() == {
