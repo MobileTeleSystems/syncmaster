@@ -21,6 +21,7 @@ from syncmaster.backend.settings import BackendSettings as Settings
 from syncmaster.backend.settings.auth.jwt import JWTSettings
 from syncmaster.backend.utils.jwt import sign_jwt
 from syncmaster.db.models import Base
+from syncmaster.scheduler.settings import SchedulerSettings
 from tests.mocks import UserTestRoles
 from tests.settings import TestSettings
 from tests.utils import prepare_new_database, run_async_migrations
@@ -69,6 +70,11 @@ def event_loop():
 @pytest.fixture(scope="session", params=[{}])
 def settings(request: pytest.FixtureRequest) -> Settings:
     return Settings.parse_obj(request.param)
+
+
+@pytest.fixture(scope="session", params=[{}])
+def scheduler_settings(request: pytest.FixtureRequest) -> SchedulerSettings:
+    return SchedulerSettings.parse_obj(request.param)
 
 
 @pytest.fixture(scope="session")

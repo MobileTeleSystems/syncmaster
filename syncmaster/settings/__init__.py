@@ -41,12 +41,8 @@ class SyncmasterSettings(BaseSettings):
         SYNCMASTER__SERVER__DEBUG=True
     """
 
-    crypto_key: str
-
-    # TODO: move settings to corresponding classes (scheduler also)
     TZ: str = "UTC"
-    SCHEDULER_TRANSFER_FETCHING_TIMEOUT: int = 180  # seconds
-    SCHEDULER_MISFIRE_GRACE_TIME: int = 300  # seconds
+    crypto_key: str = Field(description="Key for encrypt/decrypt credentials data")
 
     database: DatabaseSettings = Field(description=":ref:`Database settings <backend-configuration-database>`")
     broker: RabbitMQSettings = Field(description=":ref:`Broker settings <backend-configuration-broker>`")

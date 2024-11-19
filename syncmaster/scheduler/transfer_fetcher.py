@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 from sqlalchemy import select
 
-from syncmaster.backend.settings import BackendSettings as Settings
 from syncmaster.db.models import Transfer
+from syncmaster.scheduler.settings import SchedulerSettings as Settings
 from syncmaster.scheduler.utils import get_async_session
 
 

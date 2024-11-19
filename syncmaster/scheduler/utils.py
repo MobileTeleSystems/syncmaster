@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from syncmaster.backend.settings import BackendSettings as Settings
+from syncmaster.scheduler.settings import SchedulerSettings as Settings
 
 
 def get_async_session(settings: Settings) -> AsyncSession:

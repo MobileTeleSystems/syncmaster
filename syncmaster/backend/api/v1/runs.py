@@ -167,5 +167,5 @@ async def stop_run(
 
     async with unit_of_work:
         run = await unit_of_work.run.stop(run_id=run_id)
-        # TODO: add immdiate stop transfer after stop Run
+        # TODO: add immediate stop transfer after stop Run
     return ReadRunSchema.from_orm(run)
