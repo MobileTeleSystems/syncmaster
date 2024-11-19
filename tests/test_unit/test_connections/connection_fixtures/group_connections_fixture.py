@@ -41,7 +41,6 @@ async def group_connections(
             )
         elif conn_type in [
             ConnectionType.POSTGRES,
-            ConnectionType.ORACLE,
             ConnectionType.CLICKHOUSE,
             ConnectionType.MSSQL,
             ConnectionType.MYSQL,
