@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 pytest_plugins = [
     "tests.test_unit.test_transfers.transfer_fixtures",
+    "tests.test_unit.test_auth.auth_fixtures",
     "tests.test_unit.test_runs.run_fixtures",
     "tests.test_unit.test_connections.connection_fixtures",
     "tests.test_unit.test_scheduler.scheduler_fixtures",
@@ -64,9 +65,9 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(scope="session")
-def settings():
-    return Settings()
+@pytest.fixture(scope="session", params=[{}])
+def settings(request: pytest.FixtureRequest) -> Settings:
+    return Settings.parse_obj(request.param)
 
 
 @pytest.fixture(scope="session")

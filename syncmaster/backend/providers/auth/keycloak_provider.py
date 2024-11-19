@@ -81,6 +81,8 @@ class KeycloakAuthProvider(AuthProvider):
             self.redirect_to_auth(request.url.path)
 
         try:
+            # if user is disabled or blocked in Keycloak after the token is issued, he will
+            # remain authorized until the token expires (not more than 15 minutes in MTS SSO)
             token_info = self.keycloak_openid.decode_token(token=access_token)
         except Exception as e:
             log.info("Access token is invalid or expired: %s", e)
