@@ -1,0 +1,1 @@
+Provide read-only rights for the previous group owner when ownership is transferred

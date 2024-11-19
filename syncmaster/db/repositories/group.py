@@ -186,9 +186,11 @@ class GroupRepository(Repository[Group]):
         description: str,
         owner_id: int,
     ) -> Group:
+        group = await self.read_by_id(group_id=group_id)
+        previous_owner_id = group.owner_id
         args = [Group.id == group_id, Group.is_deleted.is_(False)]
         try:
-            return await self._update(
+            updated_group = await self._update(
                 *args,
                 name=name,
                 description=description,
@@ -198,6 +200,21 @@ class GroupRepository(Repository[Group]):
             raise GroupNotFoundError from e
         except IntegrityError as e:
             self._raise_error(e)
+
+        if previous_owner_id != owner_id:
+            previous_user_group = await self._session.get(
+                UserGroup,
+                {
+                    "group_id": group_id,
+                    "user_id": previous_owner_id,
+                },
+            )
+            if previous_user_group:
+                await self.update_member_role(group_id=group_id, user_id=previous_owner_id, role=GroupMemberRole.Guest)
+            else:
+                await self.add_user(group_id=group_id, new_user_id=previous_owner_id, role=GroupMemberRole.Guest)
+
+        return updated_group
 
     async def get_member_role(self, group_id: int, user_id: int) -> GroupMemberRole:
         user_group = await self._session.get(

@@ -192,24 +192,87 @@ async def test_validation_on_update_group(
 
 
 async def test_owner_change_group_owner(client: AsyncClient, empty_group: MockGroup, simple_user: MockUser):
+    # Arrange
+    previous_owner = empty_group.owner
+    user = empty_group.get_member_of_role(UserTestRoles.Owner)
     # Act
-    result = await client.patch(
+    patch_result = await client.patch(
         f"v1/groups/{empty_group.id}",
-        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(UserTestRoles.Owner).token}"},
+        headers={"Authorization": f"Bearer {user.token}"},
         json={
             "name": empty_group.name,
             "owner_id": simple_user.id,
             "description": empty_group.description,
         },
     )
+    group_users_result = await client.get(
+        f"v1/groups/{empty_group.id}/users",
+        headers={"Authorization": f"Bearer {user.token}"},
+    )
     # Assert
-    assert result.json() == {
+    assert patch_result.status_code == 200
+    assert patch_result.json() == {
         "id": empty_group.id,
         "name": empty_group.name,
         "owner_id": simple_user.id,
         "description": empty_group.description,
     }
-    assert result.status_code == 200
+    assert group_users_result.status_code == 200
+    assert group_users_result.json()["items"] == [
+        {
+            "id": previous_owner.id,
+            "username": previous_owner.username,
+            "role": UserTestRoles.Guest,
+        },
+    ]
+
+
+async def test_owner_with_existing_role_change_group_owner(
+    client: AsyncClient,
+    empty_group: MockGroup,
+    simple_user: MockUser,
+    role_maintainer_or_below: UserTestRoles,
+):
+    # Arrange
+    previous_owner = empty_group.owner
+    user = empty_group.get_member_of_role(UserTestRoles.Owner)
+    # Act
+    await client.post(
+        f"v1/groups/{empty_group.id}/users/{empty_group.owner_id}",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "role": role_maintainer_or_below,
+        },
+    )
+    patch_result = await client.patch(
+        f"v1/groups/{empty_group.id}",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "name": empty_group.name,
+            "owner_id": simple_user.id,
+            "description": empty_group.description,
+        },
+    )
+    group_users_result = await client.get(
+        f"v1/groups/{empty_group.id}/users",
+        headers={"Authorization": f"Bearer {user.token}"},
+    )
+    # Assert
+    assert patch_result.status_code == 200
+    assert patch_result.json() == {
+        "id": empty_group.id,
+        "name": empty_group.name,
+        "owner_id": simple_user.id,
+        "description": empty_group.description,
+    }
+    assert group_users_result.status_code == 200
+    assert group_users_result.json()["items"] == [
+        {
+            "id": previous_owner.id,
+            "username": previous_owner.username,
+            "role": UserTestRoles.Guest,
+        },
+    ]
 
 
 async def test_maintainer_or_below_cannot_change_group_owner(
