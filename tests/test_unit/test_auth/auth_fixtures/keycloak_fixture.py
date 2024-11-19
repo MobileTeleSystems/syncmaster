@@ -80,9 +80,9 @@ def create_session_cookie(rsa_keys, settings):
 
 
 @pytest.fixture
-def mock_keycloak_well_known(test_settings):
-    server_url = test_settings.TEST_AUTH_SERVER_URL
-    realm_name = test_settings.TEST_AUTH_REALM_NAME
+def mock_keycloak_well_known(settings):
+    server_url = settings.auth.server_url
+    realm_name = settings.auth.client_id
     well_known_url = f"{server_url}/realms/{realm_name}/.well-known/openid-configuration"
 
     responses.add(
@@ -102,9 +102,9 @@ def mock_keycloak_well_known(test_settings):
 
 
 @pytest.fixture
-def mock_keycloak_realm(test_settings, rsa_keys):
-    server_url = test_settings.TEST_AUTH_SERVER_URL
-    realm_name = test_settings.TEST_AUTH_REALM_NAME
+def mock_keycloak_realm(settings, rsa_keys):
+    server_url = settings.auth.server_url
+    realm_name = settings.auth.client_id
     realm_url = f"{server_url}/realms/{realm_name}"
     public_pem_str = get_public_key_pem(rsa_keys["public_key"])
 

@@ -16,7 +16,6 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
         {
             "auth": {
                 "provider": KEYCLOAK_PROVIDER,
-                "server_url": "http://localhost:8080/",
             },
         },
     ],
@@ -39,7 +38,6 @@ async def test_get_keycloak_user_unauthorized(client: AsyncClient, mock_keycloak
         {
             "auth": {
                 "provider": KEYCLOAK_PROVIDER,
-                "server_url": "http://localhost:8080/",
             },
         },
     ],
@@ -77,7 +75,6 @@ async def test_get_keycloak_user_authorized(
         {
             "auth": {
                 "provider": KEYCLOAK_PROVIDER,
-                "server_url": "http://localhost:8080/",
             },
         },
     ],
@@ -117,7 +114,6 @@ async def test_get_keycloak_deleted_user(
         {
             "auth": {
                 "provider": KEYCLOAK_PROVIDER,
-                "server_url": "http://localhost:8080/",
             },
         },
     ],

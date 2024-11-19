@@ -40,14 +40,6 @@ class TestSettings(BaseSettings):
     TEST_S3_PROTOCOL: str = "http"
     TEST_S3_ADDITIONAL_PARAMS: dict = {}
 
-    TEST_AUTH_SERVER_URL: str
-    TEST_AUTH_REALM_NAME: str
-    TEST_AUTH_CLIENT_ID: str
-    TEST_AUTH_CLIENT_SECRET: str
-    TEST_AUTH_REDIRECT_URI: str
-    TEST_AUTH_SCOPE: str
-    TEST_AUTH_PROVIDER: str
-
     @model_validator(mode="before")
     def check_sid_and_service_name(cls, values):
         sid = values.get("TEST_ORACLE_SID")
