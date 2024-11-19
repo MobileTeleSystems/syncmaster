@@ -62,6 +62,7 @@ async def test_get_keycloak_user_authorized(
         headers=headers,
     )
 
+    assert response.cookies.get("session") == session_cookie
     assert response.status_code == 200
     assert response.json() == {
         "id": simple_user.id,
@@ -106,6 +107,7 @@ async def test_get_keycloak_user_expired_access_token(
     assert "Access token is invalid or expired" in caplog.text
     assert "Access token refreshed and decoded successfully" in caplog.text
 
+    assert response.cookies.get("session") != session_cookie  # cookie is updated
     assert response.status_code == 200
     assert response.json() == {
         "id": simple_user.id,
