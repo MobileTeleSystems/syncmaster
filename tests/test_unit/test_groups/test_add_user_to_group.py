@@ -337,6 +337,31 @@ async def test_owner_add_unknown_user_to_group_error(
     }
 
 
+async def test_add_exiting_owner_as_a_group_member(
+    client: AsyncClient,
+    empty_group: MockGroup,
+    role_maintainer_or_below: UserTestRoles,
+):
+    user = empty_group.get_member_of_role(UserTestRoles.Owner)
+
+    result = await client.post(
+        f"v1/groups/{empty_group.id}/users/{empty_group.owner_id}",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "role": role_maintainer_or_below,
+        },
+    )
+
+    assert result.status_code == 409
+    assert result.json() == {
+        "error": {
+            "code": "conflict",
+            "message": "User already is group owner",
+            "details": None,
+        },
+    }
+
+
 async def test_superuser_add_user_to_unknown_group_error(
     client: AsyncClient,
     superuser: MockUser,

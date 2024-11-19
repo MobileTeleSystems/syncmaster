@@ -192,24 +192,93 @@ async def test_validation_on_update_group(
 
 
 async def test_owner_change_group_owner(client: AsyncClient, empty_group: MockGroup, simple_user: MockUser):
-    # Act
-    result = await client.patch(
+    previous_owner = empty_group.owner
+    new_owner = simple_user
+    user = empty_group.get_member_of_role(UserTestRoles.Owner)
+
+    # Change a group owner
+    patch_result = await client.patch(
         f"v1/groups/{empty_group.id}",
-        headers={"Authorization": f"Bearer {empty_group.get_member_of_role(UserTestRoles.Owner).token}"},
+        headers={"Authorization": f"Bearer {user.token}"},
         json={
             "name": empty_group.name,
-            "owner_id": simple_user.id,
+            "owner_id": new_owner.id,
             "description": empty_group.description,
         },
     )
-    # Assert
-    assert result.json() == {
+    group_users_result = await client.get(
+        f"v1/groups/{empty_group.id}/users",
+        headers={"Authorization": f"Bearer {user.token}"},
+    )
+
+    assert patch_result.status_code == 200
+    assert patch_result.json() == {
         "id": empty_group.id,
         "name": empty_group.name,
-        "owner_id": simple_user.id,
+        "owner_id": new_owner.id,
         "description": empty_group.description,
     }
-    assert result.status_code == 200
+    # Make sure previous owner became a guest in group
+    assert group_users_result.status_code == 200
+    assert group_users_result.json()["items"] == [
+        {
+            "id": previous_owner.id,
+            "username": previous_owner.username,
+            "role": UserTestRoles.Guest,
+        },
+    ]
+
+
+async def test_owner_change_group_owner_with_existing_role(
+    client: AsyncClient,
+    empty_group: MockGroup,
+    simple_user: MockUser,
+    role_maintainer_or_below: UserTestRoles,
+):
+    previous_owner = empty_group.owner
+    new_owner = simple_user
+    user = empty_group.get_member_of_role(UserTestRoles.Owner)
+
+    # Make user a group member
+    await client.post(
+        f"v1/groups/{empty_group.id}/users/{new_owner.id}",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "role": role_maintainer_or_below,
+        },
+    )
+    # Upgrade user to a group owner
+    patch_result = await client.patch(
+        f"v1/groups/{empty_group.id}",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "name": empty_group.name,
+            "owner_id": new_owner.id,
+            "description": empty_group.description,
+        },
+    )
+    group_users_result = await client.get(
+        f"v1/groups/{empty_group.id}/users",
+        headers={"Authorization": f"Bearer {user.token}"},
+    )
+
+    assert patch_result.status_code == 200
+    assert patch_result.json() == {
+        "id": empty_group.id,
+        "name": empty_group.name,
+        "owner_id": new_owner.id,
+        "description": empty_group.description,
+    }
+    # Make sure previous owner became a guest in group
+    # As well as upgraded owner is no longer considered a group member
+    assert group_users_result.status_code == 200
+    assert group_users_result.json()["items"] == [
+        {
+            "id": previous_owner.id,
+            "username": previous_owner.username,
+            "role": UserTestRoles.Guest,
+        },
+    ]
 
 
 async def test_maintainer_or_below_cannot_change_group_owner(

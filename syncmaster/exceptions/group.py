@@ -23,5 +23,9 @@ class AlreadyIsNotGroupMemberError(SyncmasterError):
     pass
 
 
+class AlreadyIsGroupOwnerError(SyncmasterError):
+    pass
+
+
 class GroupNotFoundError(SyncmasterError):
     pass

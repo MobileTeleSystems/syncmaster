@@ -22,6 +22,7 @@ from syncmaster.exceptions.connection import (
 from syncmaster.exceptions.credentials import AuthDataNotFoundError
 from syncmaster.exceptions.group import (
     AlreadyIsGroupMemberError,
+    AlreadyIsGroupOwnerError,
     AlreadyIsNotGroupMemberError,
     GroupAdminNotFoundError,
     GroupAlreadyExistsError,
@@ -189,6 +190,14 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterError):
     if isinstance(exc, AlreadyIsGroupMemberError):
         content.code = "conflict"
         content.message = "User already is group member"
+        return exception_json_response(
+            status=status.HTTP_409_CONFLICT,
+            content=content,
+        )
+
+    if isinstance(exc, AlreadyIsGroupOwnerError):
+        content.code = "conflict"
+        content.message = "User already is group owner"
         return exception_json_response(
             status=status.HTTP_409_CONFLICT,
             content=content,

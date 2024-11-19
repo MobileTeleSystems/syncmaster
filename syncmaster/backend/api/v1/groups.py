@@ -4,10 +4,11 @@ from fastapi import APIRouter, Depends, Query
 
 from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.db.models import User
+from syncmaster.db.models.group import GroupMemberRole
 from syncmaster.db.utils import Permission
 from syncmaster.errors.registration import get_error_responses
 from syncmaster.exceptions import ActionNotAllowedError
-from syncmaster.exceptions.group import GroupNotFoundError
+from syncmaster.exceptions.group import AlreadyIsGroupOwnerError, GroupNotFoundError
 from syncmaster.schemas.v1.groups import (
     AddUserSchema,
     CreateGroupSchema,
@@ -104,12 +105,29 @@ async def update_group(
         raise ActionNotAllowedError
 
     async with unit_of_work:
+        group = await unit_of_work.group.read_by_id(group_id=group_id)
+        previous_owner_id = group.owner_id
+
         group = await unit_of_work.group.update(
             group_id=group_id,
             owner_id=group_data.owner_id,
             name=group_data.name,
             description=group_data.description,
         )
+
+        if previous_owner_id != group_data.owner_id:
+            new_owner_user_group = await unit_of_work.group.get_user_group(
+                group_id=group_id,
+                user_id=group_data.owner_id,
+            )
+            if new_owner_user_group:
+                await unit_of_work.group.delete_user(group_id=group_id, target_user_id=group_data.owner_id)
+
+            await unit_of_work.group.add_user(
+                group_id=group_id,
+                new_user_id=previous_owner_id,
+                role=GroupMemberRole.Guest,
+            )
     return ReadGroupSchema.from_orm(group)
 
 
@@ -194,6 +212,10 @@ async def add_user_to_group(
 
     if resource_rule < Permission.DELETE:
         raise ActionNotAllowedError
+
+    group = await unit_of_work.group.read_by_id(group_id=group_id)
+    if group.owner_id == user_id:
+        raise AlreadyIsGroupOwnerError
 
     async with unit_of_work:
         await unit_of_work.group.add_user(

@@ -337,6 +337,15 @@ class GroupRepository(Repository[Group]):
 
         return Permission.READ
 
+    async def get_user_group(self, group_id: int, user_id: int) -> UserGroup | None:
+        return await self._session.get(
+            UserGroup,
+            {
+                "group_id": group_id,
+                "user_id": user_id,
+            },
+        )
+
     async def delete_user(
         self,
         group_id: int,
