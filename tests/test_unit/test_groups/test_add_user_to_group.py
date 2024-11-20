@@ -337,7 +337,7 @@ async def test_owner_add_unknown_user_to_group_error(
     }
 
 
-async def test_add_exiting_owner_as_a_group_member(
+async def test_add_existing_owner_as_a_group_member(
     client: AsyncClient,
     empty_group: MockGroup,
     role_maintainer_or_below: UserTestRoles,

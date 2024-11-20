@@ -28,6 +28,8 @@ Options can be set via ``.env`` file or ``environment`` section in ``docker-comp
 
 After container is started and ready, open http://localhost:8000/docs.
 
+Users listed in ``SYNCMASTER__ENTRYPOINT__SUPERUSERS`` env variable will be automatically promoted to ``SUPERUSER`` role.
+
 Without docker
 --------------
 
