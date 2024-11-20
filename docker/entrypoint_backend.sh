@@ -3,7 +3,6 @@ set -e
 
 python -m syncmaster.db.migrations upgrade head
 
-# use only by entrypoint
 if [[ "x${SYNCMASTER__ENTRYPOINT__SUPERUSERS}" != "x" ]]; then
   superusers=$(echo "${SYNCMASTER__ENTRYPOINT__SUPERUSERS}" | tr "," " ")
   python -m syncmaster.backend.scripts.manage_superusers add ${superusers}

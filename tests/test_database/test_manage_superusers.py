@@ -50,12 +50,12 @@ async def test_add_superusers(caplog, session: AsyncSession, simple_users: list[
 
 @pytest.mark.parametrize("simple_users", [10], indirect=True)
 async def test_remove_superusers(caplog, session: AsyncSession, simple_users: list[MockUser]):
-    # users 0 and 1 will be superusers, 2-10 will not
+    # users 0-4 will be superusers, 5-10 will not
     to_create = [user.username for user in simple_users[:5]]
-    to_delete = [user.username for user in simple_users[2:]]
+    to_delete = [user.username for user in simple_users[5:]]
 
-    expected_superusers = [user.username for user in simple_users[:2]]
-    expected_not_superusers = [user.username for user in simple_users[2:]]
+    expected_superusers = [user.username for user in simple_users[:5]]
+    expected_not_superusers = [user.username for user in simple_users[5:]]
 
     await add_superusers(session, to_create)
 
