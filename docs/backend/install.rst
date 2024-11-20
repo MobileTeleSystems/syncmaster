@@ -28,6 +28,29 @@ Options can be set via ``.env`` file or ``environment`` section in ``docker-comp
 
 After container is started and ready, open http://localhost:8000/docs.
 
+Managing superusers
+^^^^^^^^^^^^^^^^^^^
+
+Users listed in ``SYNCMASTER__ENTRYPOINT__SUPERUSERS`` env variable will be automatically promoted to ``SUPERUSER`` role.
+
+Adding superusers:
+
+.. code-block:: console
+
+    $ python -m syncmaster.backend.scripts.manage_superusers add <username1> <username2>
+
+Removing superusers:
+
+.. code-block:: console
+
+    $ python -m syncmaster.backend.scripts.manage_superusers remove <username1> <username2>
+
+Viewing list of superusers:
+
+.. code-block:: console
+
+    $ python -m syncmaster.backend.scripts.manage_superusers list
+
 Without docker
 --------------
 

@@ -63,7 +63,7 @@ def http_exception_handler(request: Request, exc: HTTPException) -> Response:
     return exception_json_response(
         status=exc.status_code,
         content=content,
-        headers=exc.headers,
+        headers=exc.headers,  # type: ignore[arg-type]
     )
 
 

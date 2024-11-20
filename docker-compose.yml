@@ -36,9 +36,11 @@ services:
       context: .
     ports:
       - 8000:8000
-    # PROMETHEUS_MULTIPROC_DIR is required for multiple workers, see:
-    # https://prometheus.github.io/client_python/multiprocess/
     environment:
+      # list here usernames which should be assigned SUPERUSER role on application start
+      SYNCMASTER__ENTRYPOINT__SUPERUSERS: admin
+      # PROMETHEUS_MULTIPROC_DIR is required for multiple workers, see:
+      # https://prometheus.github.io/client_python/multiprocess/
       PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus-metrics
     # tmpfs dir is cleaned up each container restart
     tmpfs:

@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 import time
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Callable
 from pathlib import Path
 
 import pytest
@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 pytest_plugins = [
     "tests.test_unit.test_transfers.transfer_fixtures",
     "tests.test_unit.test_auth.auth_fixtures",
+    "tests.test_unit.test_users.user_fixtures",
     "tests.test_unit.test_runs.run_fixtures",
     "tests.test_unit.test_connections.connection_fixtures",
     "tests.test_unit.test_scheduler.scheduler_fixtures",
@@ -46,8 +47,8 @@ def access_token_settings(settings: Settings) -> JWTSettings:
 
 
 @pytest.fixture
-def access_token_factory(access_token_settings: JWTSettings):
-    def _generate_access_token(user_id):
+def access_token_factory(access_token_settings: JWTSettings) -> Callable[[int], str]:
+    def _generate_access_token(user_id: int) -> str:
         return sign_jwt(
             {"user_id": user_id, "exp": time.time() + 1000},
             access_token_settings.secret_key.get_secret_value(),
