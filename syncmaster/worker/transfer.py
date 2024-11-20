@@ -18,12 +18,11 @@ from syncmaster.exceptions.run import RunNotFoundError
 from syncmaster.worker.base import WorkerTask
 from syncmaster.worker.config import celery
 from syncmaster.worker.controller import TransferController
-from syncmaster.worker.settings import WorkerSettings as WorkerSettings
+from syncmaster.worker.settings import get_worker_settings
 
 logger = get_task_logger(__name__)
 
-# TODO: remove global import of WorkerSettings
-CORRELATION_CELERY_HEADER_ID = WorkerSettings().CORRELATION_CELERY_HEADER_ID
+CORRELATION_CELERY_HEADER_ID = get_worker_settings().CORRELATION_CELERY_HEADER_ID
 
 
 @celery.task(name="run_transfer_task", bind=True, track_started=True)

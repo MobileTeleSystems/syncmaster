@@ -32,3 +32,7 @@ class WorkerSettings(SyncmasterSettings):
         description="Function to create Spark session for worker",
         alias="SYNCMASTER__WORKER__CREATE_SPARK_SESSION_FUNCTION",
     )
+
+
+def get_worker_settings(settings: WorkerSettings | None = None) -> WorkerSettings:
+    return WorkerSettings() if settings is None else settings

@@ -13,16 +13,16 @@ class SchedulerSettings(SyncmasterSettings):
 
     .. code-block:: bash
 
-        SYNCMASTER__SCHEDULER__TRANSFER_FETCHING_TIMEOUT=200
+        SYNCMASTER__SCHEDULER__TRANSFER_FETCHING_TIMEOUT_SECONDS=200
     """
 
     TRANSFER_FETCHING_TIMEOUT_SECONDS: int = Field(
         180,
         description="Timeout for fetching transfers in seconds",
-        alias="SCHEDULER__TRANSFER_FETCHING_TIMEOUT_SECONDS",
+        alias="SYNCMASTER__SCHEDULER__TRANSFER_FETCHING_TIMEOUT_SECONDS",
     )
     MISFIRE_GRACE_TIME_SECONDS: int = Field(
         300,
         description="Grace time for misfired jobs in seconds",
-        alias="SCHEDULER__MISFIRE_GRACE_TIME_SECONDS",
+        alias="SYNCMASTER__SCHEDULER__MISFIRE_GRACE_TIME_SECONDS",
     )
