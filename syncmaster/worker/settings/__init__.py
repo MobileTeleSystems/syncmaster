@@ -1,8 +1,5 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-import importlib
-import os
-
 from pydantic import Field
 from pydantic.types import ImportString
 from pydantic_settings import BaseSettings
@@ -23,13 +20,9 @@ class WorkerSettings(BaseSettings):
 
     .. code-block:: bash
 
-        SYNCMASTER__WORKER__LOG_URL_TEMPLATE="https://grafana.example.com?correlation_id={{ correlation_id }}&run_id={{ run.id }}"
+        SYNCMASTER__WORKER__CORRELATION_CELERY_HEADER_ID=CORRELATION_ID_CELERY
     """
 
-    LOG_URL_TEMPLATE: str = Field(
-        "",
-        description="URL template for logging",
-    )
     CORRELATION_CELERY_HEADER_ID: str = Field(
         "CORRELATION_CELERY_HEADER_ID",
         description="Header ID for correlation in Celery",
@@ -54,16 +47,3 @@ class WorkerAppSettings(BaseSettings):
     class Config:
         env_prefix = "SYNCMASTER__"
         env_nested_delimiter = "__"
-
-
-def get_worker_settings() -> WorkerAppSettings:
-    # TODO: add to worker documentation
-    worker_settings_path = os.environ.get("WORKER_SETTINGS", None)
-
-    if worker_settings_path:
-        module_name, class_name = worker_settings_path.rsplit(".", 1)
-        module = importlib.import_module(module_name)
-        settings_class = getattr(module, class_name)
-    else:
-        settings_class = WorkerAppSettings
-    return settings_class()

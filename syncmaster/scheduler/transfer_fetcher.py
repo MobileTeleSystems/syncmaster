@@ -3,7 +3,7 @@
 from sqlalchemy import select
 
 from syncmaster.db.models import Transfer
-from syncmaster.scheduler.settings import SchedulerSettings as Settings
+from syncmaster.scheduler.settings import SchedulerAppSettings as Settings
 from syncmaster.scheduler.utils import get_async_session
 
 

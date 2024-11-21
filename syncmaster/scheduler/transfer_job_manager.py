@@ -12,7 +12,7 @@ from syncmaster.exceptions.run import CannotConnectToTaskQueueError
 from syncmaster.scheduler.settings import SchedulerAppSettings as Settings
 from syncmaster.scheduler.utils import get_async_session
 from syncmaster.schemas.v1.connections.connection import ReadAuthDataSchema
-from syncmaster.worker.config import celery
+from syncmaster.worker import celery
 
 
 class TransferJobManager:

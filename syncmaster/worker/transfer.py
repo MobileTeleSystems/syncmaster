@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 import onetl
 from asgi_correlation_id import correlation_id
+from celery import Celery
 from celery.signals import after_setup_logger, before_task_publish, task_prerun
 from celery.utils.log import get_task_logger
 from sqlalchemy import select
@@ -15,18 +16,18 @@ from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.db.models import AuthData, Run, Status, Transfer
 from syncmaster.db.repositories.utils import decrypt_auth_data
 from syncmaster.exceptions.run import RunNotFoundError
-from syncmaster.worker.base import WorkerTask
-from syncmaster.worker.config import celery
+from syncmaster.worker import celery
 from syncmaster.worker.controller import TransferController
-from syncmaster.worker.settings import get_worker_settings
+from syncmaster.worker.settings import WorkerAppSettings
 
 logger = get_task_logger(__name__)
 
-CORRELATION_CELERY_HEADER_ID = get_worker_settings().worker.CORRELATION_CELERY_HEADER_ID
+WORKER_SETTINGS = WorkerAppSettings()
+CORRELATION_CELERY_HEADER_ID = WORKER_SETTINGS.worker.CORRELATION_CELERY_HEADER_ID
 
 
 @celery.task(name="run_transfer_task", bind=True, track_started=True)
-def run_transfer_task(self: WorkerTask, run_id: int) -> None:
+def run_transfer_task(self: Celery, run_id: int) -> None:
     onetl.log.setup_logging(level=logging.INFO)
     with Session(self.engine) as session:
         run_transfer(
@@ -70,7 +71,7 @@ def run_transfer(session: Session, run_id: int, settings: Settings):
             source_auth_data=source_auth_data,
             target_auth_data=target_auth_data,
         )
-        controller.perform_transfer()
+        controller.perform_transfer(WORKER_SETTINGS)
     except Exception:
         run.status = Status.FAILED
         logger.exception("Run %r was failed", run.id)

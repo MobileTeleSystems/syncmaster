@@ -113,7 +113,7 @@ dev-server: db-start ##@Application Run development server (without docker)
 	${POETRY} run python -m syncmaster.backend $(ARGS)
 
 dev-worker: db-start broker-start ##@Application Run development broker (without docker)
-	${POETRY} run python -m celery -A syncmaster.worker.config.celery worker --max-tasks-per-child=1 $(ARGS)
+	${POETRY} run python -m celery -A syncmaster.worker.celery worker --max-tasks-per-child=1 $(ARGS)
 
 
 

@@ -80,7 +80,7 @@ async def test_send_job_to_celery_with_success(
     group_transfer: MockTransfer,
 ):
     # Arrange
-    mock_send_task = mocker.patch("syncmaster.worker.config.celery.send_task")
+    mock_send_task = mocker.patch("syncmaster.worker.celery.send_task")
     mock_to_thread = mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
     # Act
@@ -107,7 +107,7 @@ async def test_send_job_to_celery_with_failure(
     group_transfer: MockTransfer,
 ):
     # Arrange
-    mocker.patch("syncmaster.worker.config.celery.send_task")
+    mocker.patch("syncmaster.worker.celery.send_task")
     mocker.patch("asyncio.to_thread", new_callable=AsyncMock, side_effect=KombuError)
 
     # Act & Assert

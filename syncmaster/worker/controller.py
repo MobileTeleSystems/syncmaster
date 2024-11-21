@@ -84,7 +84,7 @@ class TransferController:
         )
 
     def perform_transfer(self, settings: WorkerAppSettings) -> None:
-        spark = settings.CREATE_SPARK_SESSION_FUNCTION(
+        spark = settings.worker.CREATE_SPARK_SESSION_FUNCTION(
             run=self.run,
             source=self.source_handler.connection_dto,
             target=self.target_handler.connection_dto,
