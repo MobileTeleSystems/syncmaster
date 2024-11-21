@@ -3,8 +3,7 @@
 from pydantic import BaseModel, Field, SecretStr
 
 
-class KeycloakAuthProviderSettings(BaseModel):
-    """Settings related to Keycloak interaction."""
+class KeycloakSettings(BaseModel):
 
     server_url: str = Field(..., description="Keycloak server URL")
     client_id: str = Field(..., description="Keycloak client ID")
@@ -13,3 +12,11 @@ class KeycloakAuthProviderSettings(BaseModel):
     redirect_uri: str = Field(..., description="Redirect URI")
     verify_ssl: bool = Field(True, description="Verify SSL certificates")
     scope: str = Field("openid", description="Keycloak scope")
+
+
+class KeycloakAuthProviderSettings(BaseModel):
+    """Settings related to Keycloak interaction."""
+
+    keycloak: KeycloakSettings = Field(
+        description="Keycloak settings",
+    )

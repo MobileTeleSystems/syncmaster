@@ -117,7 +117,7 @@ async def start_run(
             type=RunType.MANUAL,
         )
 
-        log_url = Template(get_worker_settings().LOG_URL_TEMPLATE).render(
+        log_url = Template(get_worker_settings().worker.LOG_URL_TEMPLATE).render(
             run=run,
             correlation_id=correlation_id.get(),
         )

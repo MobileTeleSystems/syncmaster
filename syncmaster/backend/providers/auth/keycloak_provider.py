@@ -27,11 +27,11 @@ class KeycloakAuthProvider(AuthProvider):
         self.settings = settings
         self._uow = unit_of_work
         self.keycloak_openid = KeycloakOpenID(
-            server_url=self.settings.server_url,
-            client_id=self.settings.client_id,
-            realm_name=self.settings.realm_name,
-            client_secret_key=self.settings.client_secret.get_secret_value(),
-            verify=self.settings.verify_ssl,
+            server_url=self.settings.keycloak.server_url,
+            client_id=self.settings.keycloak.client_id,
+            realm_name=self.settings.keycloak.realm_name,
+            client_secret_key=self.settings.keycloak.client_secret.get_secret_value(),
+            verify=self.settings.keycloak.verify_ssl,
         )
 
     @classmethod
@@ -62,7 +62,7 @@ class KeycloakAuthProvider(AuthProvider):
         client_secret: str | None = None,
     ) -> dict[str, Any]:
         try:
-            redirect_uri = redirect_uri or self.settings.redirect_uri
+            redirect_uri = redirect_uri or self.settings.keycloak.redirect_uri
             token = self.keycloak_openid.token(
                 grant_type="authorization_code",
                 code=code,
@@ -140,8 +140,8 @@ class KeycloakAuthProvider(AuthProvider):
     def redirect_to_auth(self, path: str) -> None:
         state = generate_state(path)
         auth_url = self.keycloak_openid.auth_url(
-            redirect_uri=self.settings.redirect_uri,
-            scope=self.settings.scope,
+            redirect_uri=self.settings.keycloak.redirect_uri,
+            scope=self.settings.keycloak.scope,
             state=state,
         )
         raise RedirectException(redirect_url=auth_url)

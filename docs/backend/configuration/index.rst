@@ -18,5 +18,5 @@ Configuration
     static_files
     openapi
 
-.. autopydantic_settings:: syncmaster.settings.Settings
-.. autopydantic_settings:: syncmaster.settings.server.ServerSettings
+.. autopydantic_settings:: syncmaster.backend.settings.ServerAppSettings
+.. autopydantic_settings:: syncmaster.backend.settings.server.ServerSettings

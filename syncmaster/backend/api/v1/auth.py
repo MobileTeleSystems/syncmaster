@@ -53,7 +53,7 @@ async def auth_callback(
         raise HTTPException(status_code=400, detail="Invalid state parameter")
     token = await auth_provider.get_token_authorization_code_grant(
         code=code,
-        redirect_uri=auth_provider.settings.redirect_uri,
+        redirect_uri=auth_provider.settings.keycloak.redirect_uri,
     )
     request.session["access_token"] = token["access_token"]
     request.session["refresh_token"] = token["refresh_token"]

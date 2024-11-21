@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from syncmaster.backend.services import UnitOfWork
-from syncmaster.backend.settings import BackendSettings as Settings
+from syncmaster.backend.settings import ServerAppSettings as Settings
 
 
 def create_engine(connection_uri: str, **engine_kwargs: Any) -> AsyncEngine:

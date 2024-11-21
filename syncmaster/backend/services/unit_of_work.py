@@ -6,7 +6,7 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.backend.dependencies import Stub
-from syncmaster.backend.settings import BackendSettings as Settings
+from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.db.models import AuthData
 from syncmaster.db.repositories import (
     ConnectionRepository,

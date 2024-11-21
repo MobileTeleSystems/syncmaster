@@ -11,7 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from syncmaster.backend.middlewares.logging import setup_logging
-from syncmaster.backend.settings import BackendSettings as Settings
+from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.db.models import AuthData, Run, Status, Transfer
 from syncmaster.db.repositories.utils import decrypt_auth_data
 from syncmaster.exceptions.run import RunNotFoundError
@@ -22,7 +22,7 @@ from syncmaster.worker.settings import get_worker_settings
 
 logger = get_task_logger(__name__)
 
-CORRELATION_CELERY_HEADER_ID = get_worker_settings().CORRELATION_CELERY_HEADER_ID
+CORRELATION_CELERY_HEADER_ID = get_worker_settings().worker.CORRELATION_CELERY_HEADER_ID
 
 
 @celery.task(name="run_transfer_task", bind=True, track_started=True)

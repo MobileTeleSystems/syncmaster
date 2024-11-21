@@ -8,7 +8,7 @@ from sqlalchemy import ScalarResult, insert, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.backend.settings import BackendSettings as Settings
+from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.db.models import AuthData
 from syncmaster.db.repositories.base import Repository
 from syncmaster.db.repositories.utils import decrypt_auth_data, encrypt_auth_data

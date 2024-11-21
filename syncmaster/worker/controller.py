@@ -25,7 +25,7 @@ from syncmaster.worker.handlers.db.oracle import OracleHandler
 from syncmaster.worker.handlers.db.postgres import PostgresHandler
 from syncmaster.worker.handlers.file.hdfs import HDFSHandler
 from syncmaster.worker.handlers.file.s3 import S3Handler
-from syncmaster.worker.settings import WorkerSettings
+from syncmaster.worker.settings import WorkerAppSettings
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ class TransferController:
             connection_auth_data=target_auth_data,
         )
 
-    def perform_transfer(self, settings: WorkerSettings) -> None:
+    def perform_transfer(self, settings: WorkerAppSettings) -> None:
         spark = settings.CREATE_SPARK_SESSION_FUNCTION(
             run=self.run,
             source=self.source_handler.connection_dto,
