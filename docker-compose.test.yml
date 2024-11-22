@@ -95,7 +95,7 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    profiles: [worker, scheduler, s3, oracle, hdfs, hive, all]
+    profiles: [worker, scheduler, s3, oracle, hdfs, hive, all, clickhouse]
 
   test-postgres:
     image: postgres
@@ -109,7 +109,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    profiles: [s3, oracle, hdfs, hive, all]
+    profiles: [s3, oracle, clickhouse, hdfs, hive, all]
 
   test-s3:
     image: bitnami/minio:latest
@@ -139,6 +139,14 @@ services:
       APP_USER: syncmaster
       APP_USER_PASSWORD: changeme
     profiles: [oracle, all]
+
+  test-clickhouse:
+    image: clickhouse/clickhouse-server
+    restart: unless-stopped
+    ports:
+      - 8123:8123
+      - 9001:9000
+    profiles: [clickhouse, all]
 
   metastore-hive:
     image: postgres

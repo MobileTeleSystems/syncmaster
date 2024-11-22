@@ -21,6 +21,17 @@ class PostgresConnectionDTO(ConnectionDTO):
 
 
 @dataclass
+class ClickhouseConnectionDTO(ConnectionDTO):
+    host: str
+    port: int
+    user: str
+    password: str
+    database_name: str
+    additional_params: dict
+    type: ClassVar[str] = "clickhouse"
+
+
+@dataclass
 class OracleConnectionDTO(ConnectionDTO):
     host: str
     port: int

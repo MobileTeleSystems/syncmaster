@@ -8,7 +8,7 @@ from pathlib import Path, PurePosixPath
 import pyspark
 import pytest
 import pytest_asyncio
-from onetl.connection import Hive, Oracle, Postgres, SparkS3
+from onetl.connection import Clickhouse, Hive, Oracle, Postgres, SparkS3
 from onetl.db import DBWriter
 from onetl.file.format import CSV, JSON, JSONLine
 from pyspark.sql import DataFrame, SparkSession
@@ -27,6 +27,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.db.models import Group
 from syncmaster.dto.connections import (
+    ClickhouseConnectionDTO,
     HDFSConnectionDTO,
     HiveConnectionDTO,
     OracleConnectionDTO,
@@ -71,6 +72,9 @@ def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
 
     if "oracle" in markers:
         maven_packages.extend(Oracle.get_packages())
+
+    if "clickhouse" in markers:
+        maven_packages.extend(Clickhouse.get_packages())
 
     if "s3" in markers:
         maven_packages.extend(SparkS3.get_packages(spark_version=pyspark.__version__))
@@ -160,6 +164,36 @@ def oracle_for_worker(test_settings: TestSettings) -> OracleConnectionDTO:
         password=test_settings.TEST_ORACLE_PASSWORD,
         service_name=test_settings.TEST_ORACLE_SERVICE_NAME,
         sid=test_settings.TEST_ORACLE_SID,
+        additional_params={},
+    )
+
+
+@pytest.fixture(
+    scope="session",
+    params=[pytest.param("clickhouse", marks=[pytest.mark.clickhouse])],
+)
+def clickhouse_for_conftest(test_settings: TestSettings) -> ClickhouseConnectionDTO:
+    return ClickhouseConnectionDTO(
+        host=test_settings.TEST_CLICKHOUSE_HOST_FOR_CONFTEST,
+        port=test_settings.TEST_CLICKHOUSE_PORT_FOR_CONFTEST,
+        user=test_settings.TEST_CLICKHOUSE_USER,
+        password=test_settings.TEST_CLICKHOUSE_PASSWORD,
+        database_name=test_settings.TEST_CLICKHOUSE_DB,
+        additional_params={},
+    )
+
+
+@pytest.fixture(
+    scope="session",
+    params=[pytest.param("clickhouse", marks=[pytest.mark.clickhouse])],
+)
+def clickhouse_for_worker(test_settings: TestSettings) -> ClickhouseConnectionDTO:
+    return ClickhouseConnectionDTO(
+        host=test_settings.TEST_CLICKHOUSE_HOST_FOR_WORKER,
+        port=test_settings.TEST_CLICKHOUSE_PORT_FOR_WORKER,
+        user=test_settings.TEST_CLICKHOUSE_USER,
+        password=test_settings.TEST_CLICKHOUSE_PASSWORD,
+        database_name=test_settings.TEST_CLICKHOUSE_DB,
         additional_params={},
     )
 
@@ -509,6 +543,50 @@ def prepare_oracle(
         pass
 
 
+@pytest.fixture
+def prepare_clickhouse(
+    clickhouse_for_conftest: ClickhouseConnectionDTO,
+    spark: SparkSession,
+):
+    clickhouse = clickhouse_for_conftest
+    onetl_conn = Clickhouse(
+        host=clickhouse.host,
+        port=clickhouse.port,
+        user=clickhouse.user,
+        password=clickhouse.password,
+        spark=spark,
+    ).check()
+    try:
+        onetl_conn.execute(f"DROP TABLE {clickhouse.user}.source_table")
+    except Exception:
+        pass
+    try:
+        onetl_conn.execute(f"DROP TABLE {clickhouse.user}.target_table")
+    except Exception:
+        pass
+
+    def fill_with_data(df: DataFrame):
+        logger.info("START PREPARE ORACLE")
+        db_writer = DBWriter(
+            connection=onetl_conn,
+            target=f"{clickhouse.user}.source_table",
+            options=Clickhouse.WriteOptions(createTableOptions="ENGINE = Memory"),
+        )
+        db_writer.run(df)
+        logger.info("END PREPARE ORACLE")
+
+    yield onetl_conn, fill_with_data
+
+    try:
+        onetl_conn.execute(f"DROP TABLE {clickhouse.user}.source_table")
+    except Exception:
+        pass
+    try:
+        onetl_conn.execute(f"DROP TABLE {clickhouse.user}.target_table")
+    except Exception:
+        pass
+
+
 @pytest.fixture(params=[("csv", {}), ("jsonline", {}), ("json", {})])
 def source_file_format(request: FixtureRequest):
     name, params = request.param
@@ -708,6 +786,43 @@ async def oracle_connection(
             type="oracle",
             user=oracle.user,
             password=oracle.password,
+        ),
+    )
+
+    yield syncmaster_conn
+    await session.delete(syncmaster_conn)
+    await session.commit()
+
+
+@pytest_asyncio.fixture
+async def clickhouse_connection(
+    clickhouse_for_worker: ClickhouseConnectionDTO,
+    settings: Settings,
+    session: AsyncSession,
+    group: Group,
+):
+    clickhouse = clickhouse_for_worker
+    syncmaster_conn = await create_connection(
+        session=session,
+        name=secrets.token_hex(5),
+        data=dict(
+            type=clickhouse.type,
+            host=clickhouse.host,
+            port=clickhouse.port,
+            database_name=clickhouse.database_name,
+            additional_params={},
+        ),
+        group_id=group.id,
+    )
+
+    await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=syncmaster_conn.id,
+        auth_data=dict(
+            type="clickhouse",
+            user=clickhouse.user,
+            password=clickhouse.password,
         ),
     )
 

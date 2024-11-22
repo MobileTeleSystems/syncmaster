@@ -5,6 +5,7 @@ from typing import Any
 
 from syncmaster.db.models import Connection, Run
 from syncmaster.dto.connections import (
+    ClickhouseConnectionDTO,
     HDFSConnectionDTO,
     HiveConnectionDTO,
     OracleConnectionDTO,
@@ -12,6 +13,7 @@ from syncmaster.dto.connections import (
     S3ConnectionDTO,
 )
 from syncmaster.dto.transfers import (
+    ClickhouseTransferDTO,
     HDFSTransferDTO,
     HiveTransferDTO,
     OracleTransferDTO,
@@ -20,6 +22,7 @@ from syncmaster.dto.transfers import (
 )
 from syncmaster.exceptions.connection import ConnectionTypeNotRecognizedError
 from syncmaster.worker.handlers.base import Handler
+from syncmaster.worker.handlers.db.clickhouse import ClickhouseHandler
 from syncmaster.worker.handlers.db.hive import HiveHandler
 from syncmaster.worker.handlers.db.oracle import OracleHandler
 from syncmaster.worker.handlers.db.postgres import PostgresHandler
@@ -40,6 +43,11 @@ connection_handler_proxy = {
         OracleHandler,
         OracleConnectionDTO,
         OracleTransferDTO,
+    ),
+    "clickhouse": (
+        ClickhouseHandler,
+        ClickhouseConnectionDTO,
+        ClickhouseTransferDTO,
     ),
     "postgres": (
         PostgresHandler,
