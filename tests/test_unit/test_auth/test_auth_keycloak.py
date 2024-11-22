@@ -4,7 +4,7 @@ import pytest
 import responses
 from httpx import AsyncClient
 
-from syncmaster.backend.settings import BackendSettings as Settings
+from syncmaster.backend.settings import ServerAppSettings as Settings
 from tests.mocks import MockUser
 
 KEYCLOAK_PROVIDER = "syncmaster.backend.providers.auth.keycloak_provider.KeycloakAuthProvider"

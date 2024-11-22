@@ -5,14 +5,14 @@ import json
 from cryptography.fernet import Fernet
 from pydantic import SecretStr
 
-from syncmaster.backend.settings import BackendSettings as Settings
+from syncmaster.backend.settings import ServerAppSettings as Settings
 
 
 def decrypt_auth_data(
     value: str,
     settings: Settings,
 ) -> dict:
-    decryptor = Fernet(settings.crypto_key)
+    decryptor = Fernet(settings.encryption.crypto_key)
     decrypted = decryptor.decrypt(value)
     return json.loads(decrypted)
 
@@ -26,7 +26,7 @@ def encrypt_auth_data(
     value: dict,
     settings: Settings,
 ) -> str:
-    encryptor = Fernet(settings.crypto_key)
+    encryptor = Fernet(settings.encryption.crypto_key)
     serialized = json.dumps(
         value,
         ensure_ascii=False,

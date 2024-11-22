@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 import pytest_asyncio
 from alembic.config import Config as AlembicConfig
+from celery import Celery
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -17,10 +18,13 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from syncmaster.backend import application_factory
-from syncmaster.backend.settings import BackendSettings as Settings
+from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.backend.settings.auth.jwt import JWTSettings
 from syncmaster.backend.utils.jwt import sign_jwt
 from syncmaster.db.models import Base
+from syncmaster.scheduler.settings import SchedulerAppSettings
+from syncmaster.worker import create_celery_app
+from syncmaster.worker.settings import WorkerAppSettings
 from tests.mocks import UserTestRoles
 from tests.settings import TestSettings
 from tests.utils import prepare_new_database, run_async_migrations
@@ -69,6 +73,16 @@ def event_loop():
 @pytest.fixture(scope="session", params=[{}])
 def settings(request: pytest.FixtureRequest) -> Settings:
     return Settings.parse_obj(request.param)
+
+
+@pytest.fixture(scope="session", params=[{}])
+def scheduler_settings(request: pytest.FixtureRequest) -> SchedulerAppSettings:
+    return SchedulerAppSettings.parse_obj(request.param)
+
+
+@pytest.fixture(scope="session", params=[{}])
+def worker_settings(request: pytest.FixtureRequest) -> WorkerAppSettings:
+    return WorkerAppSettings.parse_obj(request.param)
 
 
 @pytest.fixture(scope="session")
@@ -122,6 +136,12 @@ async def client(settings: Settings) -> AsyncGenerator:
     async with AsyncClient(app=app, base_url="http://testserver") as client:
         yield client
         logger.info("END CLIENT FIXTURE")
+
+
+@pytest.fixture(scope="session", params=[{}])
+def celery(worker_settings: WorkerAppSettings) -> Celery:
+    celery_app = create_celery_app(worker_settings)
+    return celery_app
 
 
 @pytest_asyncio.fixture

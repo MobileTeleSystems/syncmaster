@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.future import select
 
 from syncmaster.backend.middlewares import setup_logging
-from syncmaster.backend.settings import BackendSettings as Settings
+from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.db.models.user import User
 
 

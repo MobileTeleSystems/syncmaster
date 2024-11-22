@@ -1,6 +1,6 @@
 import pytest
 
-from syncmaster.backend.settings import BackendSettings as Settings
+from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.scheduler.transfer_fetcher import TransferFetcher
 
 

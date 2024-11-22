@@ -2,14 +2,14 @@ import asyncio
 
 import pytest
 from apscheduler.triggers.cron import CronTrigger
+from celery import Celery
 from pytest_mock import MockerFixture, MockType
 
 from syncmaster.scheduler.transfer_job_manager import TransferJobManager
-from syncmaster.worker.config import celery
 
 
 @pytest.fixture
-def mock_send_task_to_tick(mocker: MockerFixture) -> MockType:
+def mock_send_task_to_tick(mocker: MockerFixture, celery: Celery) -> MockType:
     original_to_thread = asyncio.to_thread
     return mocker.patch(
         "asyncio.to_thread",

@@ -24,7 +24,7 @@ from pyspark.sql.types import (
 from pytest import FixtureRequest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.backend.settings import BackendSettings as Settings
+from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.db.models import Group
 from syncmaster.dto.connections import (
     HDFSConnectionDTO,

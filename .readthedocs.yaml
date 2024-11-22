@@ -17,7 +17,7 @@ build:
       - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH python -m poetry install --no-root --all-extras --with docs --without dev,test
       - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH python -m poetry show -v
       - python -m pip list -v
-      - SYNCMASTER__DATABASE__URL=postgresql+psycopg://fake:fake@127.0.0.1:5432/fake SYNCMASTER__SERVER__SESSION__SECRET_KEY=session_secret_key SYNCMASTER__BROKER__URL=amqp://fake:faket@fake:5672/ SYNCMASTER__CRYPTO_KEY=crypto_key SYNCMASTER__AUTH__ACCESS_TOKEN__SECRET_KEY=fakepython python -m syncmaster.backend.scripts.export_openapi_schema docs/_static/openapi.json
+      - SYNCMASTER__DATABASE__URL=postgresql+psycopg://fake:fake@127.0.0.1:5432/fake SYNCMASTER__SERVER__SESSION__SECRET_KEY=session_secret_key SYNCMASTER__BROKER__URL=amqp://fake:faket@fake:5672/ SYNCMASTER__ENCRYPTION__CRYPTO_KEY=crypto_key SYNCMASTER__AUTH__ACCESS_TOKEN__SECRET_KEY=fakepython python -m syncmaster.backend.scripts.export_openapi_schema docs/_static/openapi.json
 
 sphinx:
   configuration: docs/conf.py

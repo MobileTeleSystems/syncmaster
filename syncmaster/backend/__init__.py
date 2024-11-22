@@ -15,7 +15,7 @@ from syncmaster.backend.handler import (
 from syncmaster.backend.middlewares import apply_middlewares
 from syncmaster.backend.providers.auth import AuthProvider
 from syncmaster.backend.services.unit_of_work import UnitOfWork
-from syncmaster.backend.settings import BackendSettings as Settings
+from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.db.factory import create_session_factory, get_uow
 from syncmaster.exceptions import SyncmasterError
 

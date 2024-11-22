@@ -38,7 +38,6 @@ async def test_maintainer_plus_can_delete_connection(
     assert deleted_connection.is_deleted
 
 
-# TODO: rename tests with simple_user to new group role name
 async def test_groupless_user_cannot_delete_connection(
     client: AsyncClient,
     group_connection: MockConnection,

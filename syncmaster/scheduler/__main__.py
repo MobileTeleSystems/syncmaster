@@ -3,7 +3,7 @@
 import asyncio
 import logging
 
-from syncmaster.backend.settings import BackendSettings as Settings
+from syncmaster.scheduler.settings import SchedulerSettings as Settings
 from syncmaster.scheduler.transfer_fetcher import TransferFetcher
 from syncmaster.scheduler.transfer_job_manager import TransferJobManager
 
@@ -30,7 +30,7 @@ async def main():
             transfer_fetcher.last_updated_at = max(t.updated_at for t in transfers)
             logger.info("Scheduler state has been updated. Last updated at: %s", transfer_fetcher.last_updated_at)
 
-        await asyncio.sleep(settings.SCHEDULER_TRANSFER_FETCHING_TIMEOUT)
+        await asyncio.sleep(settings.TRANSFER_FETCHING_TIMEOUT_SECONDS)
 
 
 if __name__ == "__main__":

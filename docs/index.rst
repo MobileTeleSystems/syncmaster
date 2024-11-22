@@ -20,6 +20,22 @@
     backend/openapi
     backend/configuration/index
 
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Worker
+    :hidden:
+
+    worker/configuration/index
+
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Scheduler
+    :hidden:
+
+    scheduler/configuration/index
+
 .. toctree::
     :maxdepth: 2
     :caption: Development

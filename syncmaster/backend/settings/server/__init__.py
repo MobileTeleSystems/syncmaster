@@ -34,6 +34,10 @@ class ServerSettings(BaseModel):
             """,
         ),
     )
+    log_url_template: str = Field(
+        "",
+        description="URL template for logging",
+    )
     request_id: RequestIDSettings = Field(
         default_factory=RequestIDSettings,
     )

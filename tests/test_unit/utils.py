@@ -11,7 +11,7 @@ from onetl.impl import LocalPath, RemotePath
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from syncmaster.backend.settings import BackendSettings as Settings
+from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.db.models import (
     AuthData,
     Connection,
