@@ -57,6 +57,11 @@ class ClickhouseTransferDTO(DBTransferDTO):
 
 
 @dataclass
+class MSSQLTransferDTO(DBTransferDTO):
+    type: ClassVar[str] = "mssql"
+
+
+@dataclass
 class HiveTransferDTO(DBTransferDTO):
     type: ClassVar[str] = "hive"
 

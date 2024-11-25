@@ -8,7 +8,7 @@ from pathlib import Path, PurePosixPath
 import pyspark
 import pytest
 import pytest_asyncio
-from onetl.connection import Clickhouse, Hive, Oracle, Postgres, SparkS3
+from onetl.connection import MSSQL, Clickhouse, Hive, Oracle, Postgres, SparkS3
 from onetl.db import DBWriter
 from onetl.file.format import CSV, JSON, JSONLine
 from pyspark.sql import DataFrame, SparkSession
@@ -30,6 +30,7 @@ from syncmaster.dto.connections import (
     ClickhouseConnectionDTO,
     HDFSConnectionDTO,
     HiveConnectionDTO,
+    MSSQLConnectionDTO,
     OracleConnectionDTO,
     PostgresConnectionDTO,
     S3ConnectionDTO,
@@ -75,6 +76,9 @@ def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
 
     if "clickhouse" in markers:
         maven_packages.extend(Clickhouse.get_packages())
+
+    if "mssql" in markers:
+        maven_packages.extend(MSSQL.get_packages())
 
     if "s3" in markers:
         maven_packages.extend(SparkS3.get_packages(spark_version=pyspark.__version__))
@@ -194,6 +198,36 @@ def clickhouse_for_worker(test_settings: TestSettings) -> ClickhouseConnectionDT
         user=test_settings.TEST_CLICKHOUSE_USER,
         password=test_settings.TEST_CLICKHOUSE_PASSWORD,
         database_name=test_settings.TEST_CLICKHOUSE_DB,
+        additional_params={},
+    )
+
+
+@pytest.fixture(
+    scope="session",
+    params=[pytest.param("mssql", marks=[pytest.mark.mssql])],
+)
+def mssql_for_conftest(test_settings: TestSettings) -> MSSQLConnectionDTO:
+    return MSSQLConnectionDTO(
+        host=test_settings.TEST_MSSQL_HOST_FOR_CONFTEST,
+        port=test_settings.TEST_MSSQL_PORT_FOR_CONFTEST,
+        user=test_settings.TEST_MSSQL_USER,
+        password=test_settings.TEST_MSSQL_PASSWORD,
+        database_name=test_settings.TEST_MSSQL_DB,
+        additional_params={},
+    )
+
+
+@pytest.fixture(
+    scope="session",
+    params=[pytest.param("mssql", marks=[pytest.mark.mssql])],
+)
+def mssql_for_worker(test_settings: TestSettings) -> MSSQLConnectionDTO:
+    return MSSQLConnectionDTO(
+        host=test_settings.TEST_MSSQL_HOST_FOR_CONFTEST,
+        port=test_settings.TEST_MSSQL_PORT_FOR_CONFTEST,
+        user=test_settings.TEST_MSSQL_USER,
+        password=test_settings.TEST_MSSQL_PASSWORD,
+        database_name=test_settings.TEST_MSSQL_DB,
         additional_params={},
     )
 
@@ -587,6 +621,51 @@ def prepare_clickhouse(
         pass
 
 
+@pytest.fixture
+def prepare_mssql(
+    mssql_for_conftest: MSSQLConnectionDTO,
+    spark: SparkSession,
+):
+    mssql = mssql_for_conftest
+    onetl_conn = MSSQL(
+        host=mssql.host,
+        port=mssql.port,
+        user=mssql.user,
+        password=mssql.password,
+        database=mssql.database_name,
+        extra={"trustServerCertificate": "true"},
+        spark=spark,
+    ).check()
+    try:
+        onetl_conn.execute(f"DROP TABLE {mssql.user}.source_table")
+    except Exception:
+        pass
+    try:
+        onetl_conn.execute(f"DROP TABLE {mssql.user}.target_table")
+    except Exception:
+        pass
+
+    def fill_with_data(df: DataFrame):
+        logger.info("START PREPARE ORACLE")
+        db_writer = DBWriter(
+            connection=onetl_conn,
+            target=f"{mssql.user}.source_table",
+        )
+        db_writer.run(df)
+        logger.info("END PREPARE ORACLE")
+
+    yield onetl_conn, fill_with_data
+
+    try:
+        onetl_conn.execute(f"DROP TABLE {mssql.user}.source_table")
+    except Exception:
+        pass
+    try:
+        onetl_conn.execute(f"DROP TABLE {mssql.user}.target_table")
+    except Exception:
+        pass
+
+
 @pytest.fixture(params=[("csv", {}), ("jsonline", {}), ("json", {})])
 def source_file_format(request: FixtureRequest):
     name, params = request.param
@@ -823,6 +902,43 @@ async def clickhouse_connection(
             type="clickhouse",
             user=clickhouse.user,
             password=clickhouse.password,
+        ),
+    )
+
+    yield syncmaster_conn
+    await session.delete(syncmaster_conn)
+    await session.commit()
+
+
+@pytest_asyncio.fixture
+async def mssql_connection(
+    mssql_for_worker: MSSQLConnectionDTO,
+    settings: Settings,
+    session: AsyncSession,
+    group: Group,
+):
+    mssql = mssql_for_worker
+    syncmaster_conn = await create_connection(
+        session=session,
+        name=secrets.token_hex(5),
+        data=dict(
+            type=mssql.type,
+            host=mssql.host,
+            port=mssql.port,
+            database_name=mssql.database_name,
+            additional_params={},
+        ),
+        group_id=group.id,
+    )
+
+    await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=syncmaster_conn.id,
+        auth_data=dict(
+            type="mssql",
+            user=mssql.user,
+            password=mssql.password,
         ),
     )
 

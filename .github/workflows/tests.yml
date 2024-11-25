@@ -24,6 +24,10 @@ jobs:
     name: Clickhouse tests
     uses: ./.github/workflows/clickhouse-tests.yml
 
+  mssql_tests:
+    name: MSSQL tests
+    uses: ./.github/workflows/mssql-tests.yml
+
   hdfs_tests:
     name: HDFS tests
     uses: ./.github/workflows/hdfs-tests.yml
@@ -48,7 +52,7 @@ jobs:
     name: Tests done
     runs-on: ubuntu-latest
 
-    needs: [oracle_tests, clickhouse_tests, hive_tests, hdfs_tests, s3_tests, unit_tests]
+    needs: [oracle_tests, clickhouse_tests, mssql_tests, hive_tests, hdfs_tests, s3_tests, unit_tests]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
