@@ -43,6 +43,7 @@ from syncmaster.schemas.v1.transfers.file_format import (
     XML,
     Excel,
     JSONLine,
+    Parquet,
 )
 from syncmaster.schemas.v1.transfers.run import (
     CreateRunSchema,
