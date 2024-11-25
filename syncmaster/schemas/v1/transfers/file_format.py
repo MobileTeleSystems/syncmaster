@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from syncmaster.schemas.v1.file_formats import CSV_FORMAT, JSON_FORMAT, JSONLINE_FORMAT
+from syncmaster.schemas.v1.file_formats import (
+    CSV_FORMAT,
+    EXCEL_FORMAT,
+    JSON_FORMAT,
+    JSONLINE_FORMAT,
+)
 
 
 class CSV(BaseModel):
@@ -27,3 +32,9 @@ class JSON(BaseModel):
     type: JSON_FORMAT
     encoding: str = "utf-8"
     line_sep: str = "\n"
+
+
+class Excel(BaseModel):
+    type: EXCEL_FORMAT
+    include_header: bool
+    start_cell: str | None = None

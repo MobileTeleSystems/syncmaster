@@ -28,6 +28,24 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
             "directory_path": "/some/pure/path",
             "file_format": {
                 "type": "csv",
+                "delimiter": ",",
+                "encoding": "utf-8",
+                "quote": '"',
+                "escape": "\\",
+                "header": False,
+                "line_sep": "\n",
+            },
+            "options": {
+                "some": "option",
+            },
+        },
+        {
+            "type": "s3",
+            "directory_path": "/some/excel/path",
+            "file_format": {
+                "type": "excel",
+                "include_header": True,
+                "start_cell": "A1",
             },
             "options": {
                 "some": "option",
@@ -94,11 +112,26 @@ async def test_developer_plus_can_create_s3_transfer(
         "queue_id": transfer.queue_id,
     }
 
+    expected_file_formats = {
+        "csv": {
+            "delimiter": ",",
+            "encoding": "utf-8",
+            "quote": '"',
+            "escape": "\\",
+            "header": False,
+            "line_sep": "\n",
+        },
+        "excel": {
+            "include_header": True,
+            "start_cell": "A1",
+        },
+    }
+
     for params in (transfer.source_params, transfer.target_params):
-        assert params["type"] == "s3"
-        assert params["directory_path"] == "/some/pure/path"
-        assert params["file_format"]["type"] == "csv"
+        assert params["type"] == target_source_params["type"]
+        assert params["directory_path"] == target_source_params["directory_path"]
         assert params["options"] == {"some": "option"}
+        assert params["file_format"] == expected_file_formats[params["type"]]
 
 
 @pytest.mark.parametrize(
@@ -119,6 +152,15 @@ async def test_developer_plus_can_create_s3_transfer(
             "directory_path": "/some/pure/path",
             "file_format": {
                 "type": "csv",
+            },
+        },
+        {
+            "type": "hdfs",
+            "directory_path": "/some/excel/path",
+            "file_format": {
+                "type": "excel",
+                "include_header": True,
+                "start_cell": "A1",
             },
         },
     ],
@@ -183,10 +225,27 @@ async def test_developer_plus_can_create_hdfs_transfer(
         "queue_id": transfer.queue_id,
     }
 
+    expected_file_formats = {
+        "csv": {
+            "type": "csv",
+            "delimiter": ",",
+            "encoding": "utf-8",
+            "quote": '"',
+            "escape": "\\",
+            "header": False,
+            "line_sep": "\n",
+        },
+        "excel": {
+            "type": "excel",
+            "include_header": True,
+            "start_cell": "A1",
+        },
+    }
+
     for params in (transfer.source_params, transfer.target_params):
-        assert params["type"] == "hdfs"
-        assert params["directory_path"] == "/some/pure/path"
-        assert params["file_format"]["type"] == "csv"
+        assert params["type"] == target_source_params["type"]
+        assert params["directory_path"] == target_source_params["directory_path"]
+        assert params["file_format"] == expected_file_formats[params["file_format"]["type"]]
         assert params["options"] == {}
 
 
@@ -209,6 +268,14 @@ async def test_developer_plus_can_create_hdfs_transfer(
             "directory_path": "some/path",
             "file_format": {
                 "type": "csv",
+            },
+        },
+        {
+            "type": "s3",
+            "directory_path": "some/path",
+            "file_format": {
+                "type": "excel",
+                "include_header": True,
             },
         },
     ],

@@ -23,6 +23,16 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
             },
             "options": {},
         },
+        {
+            "type": "s3",
+            "directory_path": "/some/excel/path",
+            "file_format": {
+                "type": "excel",
+                "include_header": True,
+                "start_cell": "A1",
+            },
+            "options": {},
+        },
     ],
 )
 @pytest.mark.parametrize(
