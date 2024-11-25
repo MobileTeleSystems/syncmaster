@@ -9,6 +9,7 @@ from syncmaster.schemas.v1.file_formats import (
     EXCEL_FORMAT,
     JSON_FORMAT,
     JSONLINE_FORMAT,
+    ORC_FORMAT,
     XML_FORMAT,
 )
 
@@ -45,3 +46,7 @@ class XML(BaseModel):
     type: XML_FORMAT
     root_tag: str
     row_tag: str
+
+
+class ORC(BaseModel):
+    type: ORC_FORMAT
