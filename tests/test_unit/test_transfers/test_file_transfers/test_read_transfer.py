@@ -51,6 +51,14 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
             },
             "options": {},
         },
+        {
+            "type": "s3",
+            "directory_path": "/some/parquet/path",
+            "file_format": {
+                "type": "parquet",
+            },
+            "options": {},
+        },
     ],
 )
 @pytest.mark.parametrize(

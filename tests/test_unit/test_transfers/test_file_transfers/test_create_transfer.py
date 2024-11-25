@@ -73,6 +73,16 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
                 "some": "option",
             },
         },
+        {
+            "type": "s3",
+            "directory_path": "/some/parquet/path",
+            "file_format": {
+                "type": "parquet",
+            },
+            "options": {
+                "some": "option",
+            },
+        },
     ],
 )
 async def test_developer_plus_can_create_s3_transfer(
@@ -157,6 +167,9 @@ async def test_developer_plus_can_create_s3_transfer(
         "orc": {
             "type": "orc",
         },
+        "parquet": {
+            "type": "parquet",
+        },
     }
 
     for params in (transfer.source_params, transfer.target_params):
@@ -209,6 +222,13 @@ async def test_developer_plus_can_create_s3_transfer(
             "directory_path": "/some/orc/path",
             "file_format": {
                 "type": "orc",
+            },
+        },
+        {
+            "type": "hdfs",
+            "directory_path": "/some/parquet/path",
+            "file_format": {
+                "type": "parquet",
             },
         },
     ],
@@ -296,6 +316,9 @@ async def test_developer_plus_can_create_hdfs_transfer(
         "orc": {
             "type": "orc",
         },
+        "parquet": {
+            "type": "parquet",
+        },
     }
 
     for params in (transfer.source_params, transfer.target_params):
@@ -348,6 +371,13 @@ async def test_developer_plus_can_create_hdfs_transfer(
             "directory_path": "some/path",
             "file_format": {
                 "type": "orc",
+            },
+        },
+        {
+            "type": "s3",
+            "directory_path": "some/path",
+            "file_format": {
+                "type": "parquet",
             },
         },
     ],
