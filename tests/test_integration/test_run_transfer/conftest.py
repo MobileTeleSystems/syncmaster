@@ -515,7 +515,7 @@ def source_file_format(request: FixtureRequest):
     if name == "csv":
         return "csv", CSV(
             lineSep="\n",
-            include_header=True,
+            header=True,
             **params,
         )
 
@@ -542,7 +542,7 @@ def target_file_format(request: FixtureRequest):
     if name == "csv":
         return "csv", CSV(
             lineSep="\n",
-            include_header=True,
+            header=True,
             timestampFormat="yyyy-MM-dd'T'HH:mm:ss.SSSSSS+00:00",
             **params,
         )
