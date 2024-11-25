@@ -51,6 +51,18 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
                 "some": "option",
             },
         },
+        {
+            "type": "s3",
+            "directory_path": "/some/xml/path",
+            "file_format": {
+                "type": "xml",
+                "root_tag": "data",
+                "row_tag": "record",
+            },
+            "options": {
+                "some": "option",
+            },
+        },
     ],
 )
 async def test_developer_plus_can_create_s3_transfer(
@@ -127,6 +139,11 @@ async def test_developer_plus_can_create_s3_transfer(
             "include_header": True,
             "start_cell": "A1",
         },
+        "xml": {
+            "type": "xml",
+            "root_tag": "data",
+            "row_tag": "record",
+        },
     }
 
     for params in (transfer.source_params, transfer.target_params):
@@ -163,6 +180,15 @@ async def test_developer_plus_can_create_s3_transfer(
                 "type": "excel",
                 "include_header": True,
                 "start_cell": "A1",
+            },
+        },
+        {
+            "type": "hdfs",
+            "directory_path": "/some/xml/path",
+            "file_format": {
+                "type": "xml",
+                "root_tag": "data",
+                "row_tag": "record",
             },
         },
     ],
@@ -242,6 +268,11 @@ async def test_developer_plus_can_create_hdfs_transfer(
             "include_header": True,
             "start_cell": "A1",
         },
+        "xml": {
+            "type": "xml",
+            "root_tag": "data",
+            "row_tag": "record",
+        },
     }
 
     for params in (transfer.source_params, transfer.target_params):
@@ -278,6 +309,15 @@ async def test_developer_plus_can_create_hdfs_transfer(
             "file_format": {
                 "type": "excel",
                 "include_header": True,
+            },
+        },
+        {
+            "type": "s3",
+            "directory_path": "some/path",
+            "file_format": {
+                "type": "xml",
+                "root_tag": "data",
+                "row_tag": "record",
             },
         },
     ],
