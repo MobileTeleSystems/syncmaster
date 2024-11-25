@@ -33,6 +33,16 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
             },
             "options": {},
         },
+        {
+            "type": "s3",
+            "directory_path": "/some/xml/path",
+            "file_format": {
+                "type": "xml",
+                "root_tag": "data",
+                "row_tag": "record",
+            },
+            "options": {},
+        },
     ],
 )
 @pytest.mark.parametrize(

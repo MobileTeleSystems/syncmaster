@@ -9,6 +9,7 @@ from syncmaster.schemas.v1.file_formats import (
     EXCEL_FORMAT,
     JSON_FORMAT,
     JSONLINE_FORMAT,
+    XML_FORMAT,
 )
 
 
@@ -38,3 +39,9 @@ class Excel(BaseModel):
     type: EXCEL_FORMAT
     include_header: bool = False
     start_cell: str | None = None
+
+
+class XML(BaseModel):
+    type: XML_FORMAT
+    root_tag: str
+    row_tag: str

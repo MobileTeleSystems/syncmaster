@@ -7,20 +7,24 @@ from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
-from syncmaster.schemas.v1.transfers.file_format import CSV, JSON, Excel, JSONLine
+from syncmaster.schemas.v1.transfers.file_format import CSV, JSON, XML, Excel, JSONLine
 
 
 # At the moment the ReadTransferSourceParams and ReadTransferTargetParams
 # classes are identical but may change in the future
 class ReadFileTransferSource(BaseModel):
     directory_path: str
-    file_format: CSV | JSONLine | JSON | Excel = Field(..., discriminator="type")
+    file_format: CSV | JSONLine | JSON | Excel | XML = Field(..., discriminator="type")
     options: dict[str, Any]
 
 
 class ReadFileTransferTarget(BaseModel):
     directory_path: str
-    file_format: CSV | JSONLine | Excel = Field(..., discriminator="type")  # JSON format is not supported for writing
+    # JSON format is not supported for writing
+    file_format: CSV | JSONLine | Excel | XML = Field(
+        ...,
+        discriminator="type",
+    )
     options: dict[str, Any]
 
 
@@ -28,7 +32,7 @@ class ReadFileTransferTarget(BaseModel):
 # classes are identical but may change in the future
 class CreateFileTransferSource(BaseModel):
     directory_path: str
-    file_format: CSV | JSONLine | JSON | Excel = Field(..., discriminator="type")
+    file_format: CSV | JSONLine | JSON | Excel | XML = Field(..., discriminator="type")
     options: dict[str, Any] = Field(default_factory=dict)
 
     class Config:
@@ -44,7 +48,11 @@ class CreateFileTransferSource(BaseModel):
 
 class CreateFileTransferTarget(BaseModel):
     directory_path: str
-    file_format: CSV | JSONLine | Excel = Field(..., discriminator="type")  # JSON FORMAT IS NOT SUPPORTED AS A TARGET !
+    # JSON format is not supported as a target
+    file_format: CSV | JSONLine | Excel | XML = Field(
+        ...,
+        discriminator="type",
+    )
     options: dict[str, Any] = Field(default_factory=dict)
 
     class Config:
