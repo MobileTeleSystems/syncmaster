@@ -14,6 +14,7 @@ from syncmaster.schemas.v1.transfers.file_format import (
     XML,
     Excel,
     JSONLine,
+    Parquet,
 )
 
 
@@ -21,14 +22,14 @@ from syncmaster.schemas.v1.transfers.file_format import (
 # classes are identical but may change in the future
 class ReadFileTransferSource(BaseModel):
     directory_path: str
-    file_format: CSV | JSONLine | JSON | Excel | XML | ORC = Field(..., discriminator="type")
+    file_format: CSV | JSONLine | JSON | Excel | XML | ORC | Parquet = Field(..., discriminator="type")
     options: dict[str, Any]
 
 
 class ReadFileTransferTarget(BaseModel):
     directory_path: str
     # JSON format is not supported for writing
-    file_format: CSV | JSONLine | Excel | XML | ORC = Field(
+    file_format: CSV | JSONLine | Excel | XML | ORC | Parquet = Field(
         ...,
         discriminator="type",
     )
@@ -39,7 +40,7 @@ class ReadFileTransferTarget(BaseModel):
 # classes are identical but may change in the future
 class CreateFileTransferSource(BaseModel):
     directory_path: str
-    file_format: CSV | JSONLine | JSON | Excel | XML | ORC = Field(..., discriminator="type")
+    file_format: CSV | JSONLine | JSON | Excel | XML | ORC | Parquet = Field(..., discriminator="type")
     options: dict[str, Any] = Field(default_factory=dict)
 
     class Config:
@@ -56,7 +57,7 @@ class CreateFileTransferSource(BaseModel):
 class CreateFileTransferTarget(BaseModel):
     directory_path: str
     # JSON format is not supported as a target
-    file_format: CSV | JSONLine | Excel | XML | ORC = Field(
+    file_format: CSV | JSONLine | Excel | XML | ORC | Parquet = Field(
         ...,
         discriminator="type",
     )

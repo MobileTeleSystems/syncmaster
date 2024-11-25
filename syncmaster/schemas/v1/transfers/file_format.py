@@ -10,6 +10,7 @@ from syncmaster.schemas.v1.file_formats import (
     JSON_FORMAT,
     JSONLINE_FORMAT,
     ORC_FORMAT,
+    PARQUET_FORMAT,
     XML_FORMAT,
 )
 
@@ -50,3 +51,7 @@ class XML(BaseModel):
 
 class ORC(BaseModel):
     type: ORC_FORMAT
+
+
+class Parquet(BaseModel):
+    type: PARQUET_FORMAT
