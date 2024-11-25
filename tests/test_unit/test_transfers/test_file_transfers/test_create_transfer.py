@@ -114,6 +114,7 @@ async def test_developer_plus_can_create_s3_transfer(
 
     expected_file_formats = {
         "csv": {
+            "type": "csv",
             "delimiter": ",",
             "encoding": "utf-8",
             "quote": '"',
@@ -122,6 +123,7 @@ async def test_developer_plus_can_create_s3_transfer(
             "line_sep": "\n",
         },
         "excel": {
+            "type": "excel",
             "include_header": True,
             "start_cell": "A1",
         },
@@ -131,7 +133,7 @@ async def test_developer_plus_can_create_s3_transfer(
         assert params["type"] == target_source_params["type"]
         assert params["directory_path"] == target_source_params["directory_path"]
         assert params["options"] == {"some": "option"}
-        assert params["file_format"] == expected_file_formats[params["type"]]
+        assert params["file_format"] == expected_file_formats[params["file_format"]["type"]]
 
 
 @pytest.mark.parametrize(
