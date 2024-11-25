@@ -63,6 +63,16 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
                 "some": "option",
             },
         },
+        {
+            "type": "s3",
+            "directory_path": "/some/orc/path",
+            "file_format": {
+                "type": "orc",
+            },
+            "options": {
+                "some": "option",
+            },
+        },
     ],
 )
 async def test_developer_plus_can_create_s3_transfer(
@@ -144,6 +154,9 @@ async def test_developer_plus_can_create_s3_transfer(
             "root_tag": "data",
             "row_tag": "record",
         },
+        "orc": {
+            "type": "orc",
+        },
     }
 
     for params in (transfer.source_params, transfer.target_params):
@@ -189,6 +202,13 @@ async def test_developer_plus_can_create_s3_transfer(
                 "type": "xml",
                 "root_tag": "data",
                 "row_tag": "record",
+            },
+        },
+        {
+            "type": "hdfs",
+            "directory_path": "/some/orc/path",
+            "file_format": {
+                "type": "orc",
             },
         },
     ],
@@ -273,6 +293,9 @@ async def test_developer_plus_can_create_hdfs_transfer(
             "root_tag": "data",
             "row_tag": "record",
         },
+        "orc": {
+            "type": "orc",
+        },
     }
 
     for params in (transfer.source_params, transfer.target_params):
@@ -318,6 +341,13 @@ async def test_developer_plus_can_create_hdfs_transfer(
                 "type": "xml",
                 "root_tag": "data",
                 "row_tag": "record",
+            },
+        },
+        {
+            "type": "s3",
+            "directory_path": "some/path",
+            "file_format": {
+                "type": "orc",
             },
         },
     ],

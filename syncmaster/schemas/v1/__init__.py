@@ -36,7 +36,14 @@ from syncmaster.schemas.v1.transfers.db import (
     PostgresReadTransferSourceAndTarget,
     ReadDBTransfer,
 )
-from syncmaster.schemas.v1.transfers.file_format import CSV, JSON, XML, Excel, JSONLine
+from syncmaster.schemas.v1.transfers.file_format import (
+    CSV,
+    JSON,
+    ORC,
+    XML,
+    Excel,
+    JSONLine,
+)
 from syncmaster.schemas.v1.transfers.run import (
     CreateRunSchema,
     ReadRunSchema,

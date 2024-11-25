@@ -43,6 +43,14 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
             },
             "options": {},
         },
+        {
+            "type": "s3",
+            "directory_path": "/some/orc/path",
+            "file_format": {
+                "type": "orc",
+            },
+            "options": {},
+        },
     ],
 )
 @pytest.mark.parametrize(
