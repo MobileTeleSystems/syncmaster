@@ -20,10 +20,11 @@ class ReadFileTransferSource(BaseModel):
 
 class ReadFileTransferTarget(BaseModel):
     directory_path: str
+    # JSON format is not supported for writing
     file_format: CSV | JSONLine | Excel | XML = Field(
         ...,
         discriminator="type",
-    )  # JSON format is not supported for writing
+    )
     options: dict[str, Any]
 
 
@@ -47,10 +48,11 @@ class CreateFileTransferSource(BaseModel):
 
 class CreateFileTransferTarget(BaseModel):
     directory_path: str
+    # JSON format is not supported as a target
     file_format: CSV | JSONLine | Excel | XML = Field(
         ...,
         discriminator="type",
-    )  # JSON FORMAT IS NOT SUPPORTED AS A TARGET !
+    )
     options: dict[str, Any] = Field(default_factory=dict)
 
     class Config:
