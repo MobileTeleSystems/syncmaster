@@ -18,7 +18,7 @@ class CSV(BaseModel):
     encoding: str = "utf-8"
     quote: str = '"'
     escape: str = "\\"
-    header: bool = False
+    include_header: bool = False
     line_sep: str = "\n"
 
 
@@ -36,5 +36,5 @@ class JSON(BaseModel):
 
 class Excel(BaseModel):
     type: EXCEL_FORMAT
-    include_header: bool
+    include_header: bool = False
     start_cell: str | None = None

@@ -32,7 +32,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
                 "encoding": "utf-8",
                 "quote": '"',
                 "escape": "\\",
-                "header": False,
+                "include_header": False,
                 "line_sep": "\n",
             },
             "options": {
@@ -119,7 +119,7 @@ async def test_developer_plus_can_create_s3_transfer(
             "encoding": "utf-8",
             "quote": '"',
             "escape": "\\",
-            "header": False,
+            "include_header": False,
             "line_sep": "\n",
         },
         "excel": {
@@ -234,7 +234,7 @@ async def test_developer_plus_can_create_hdfs_transfer(
             "encoding": "utf-8",
             "quote": '"',
             "escape": "\\",
-            "header": False,
+            "include_header": False,
             "line_sep": "\n",
         },
         "excel": {
