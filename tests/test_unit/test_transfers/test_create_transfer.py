@@ -633,10 +633,14 @@ async def test_developer_plus_can_not_create_transfer_with_target_format_json(
             "message": "Invalid request",
             "details": [
                 {
-                    "context": {"discriminator": "'type'", "tag": "json", "expected_tags": "'csv', 'jsonline'"},
+                    "context": {
+                        "discriminator": "'type'",
+                        "tag": "json",
+                        "expected_tags": "'csv', 'jsonline', 'excel'",
+                    },
                     "input": {"type": "json", "lineSep": "\n", "encoding": "utf-8"},
                     "location": ["body", "target_params", "s3", "file_format"],
-                    "message": "Input tag 'json' found using 'type' does not match any of the expected tags: 'csv', 'jsonline'",
+                    "message": "Input tag 'json' found using 'type' does not match any of the expected tags: 'csv', 'jsonline', 'excel'",
                     "code": "union_tag_invalid",
                 },
             ],
