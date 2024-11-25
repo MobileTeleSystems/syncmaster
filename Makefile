@@ -65,7 +65,7 @@ broker-start: ##Broker Start broker
 
 
 
-test: test-db test-broker ##@Test Run tests
+test: test-db test-broker ##@Test           Run tests
 	${POETRY} run pytest $(PYTEST_ARGS)
 
 test-db: test-db-start db-upgrade ##@TestDB Prepare database (in docker)
@@ -78,33 +78,37 @@ test-broker: test-broker-start ##@TestBroker Prepare broker (in docker)
 test-broker-start: ##@TestBroker Start broker
 	docker compose -f docker-compose.test.yml up -d --wait rabbitmq $(DOCKER_COMPOSE_ARGS)
 
-test-unit: test-db ##@Test Run unit tests
+test-unit: test-db ##@Test           Run unit tests
 	${POETRY} run pytest ./tests/test_unit ./tests/test_database $(PYTEST_ARGS)
 
-test-integration-hdfs: test-db ##@Test Run integration tests for HDFS
+test-integration-hdfs: test-db ##@Test          Run integration tests for HDFS
 	docker compose -f docker-compose.test.yml --profile hdfs up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration -m hdfs $(PYTEST_ARGS)
 
-test-integration-hive: test-db ##@Test Run integration tests for Hive
+test-integration-hive: test-db ##@Test          Run integration tests for Hive
 	docker compose -f docker-compose.test.yml --profile hive up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration -m hive $(PYTEST_ARGS)
 
-test-integration-oracle: test-db ##@Test Run integration tests for Oracle
+test-integration-clickhouse: test-db ##@Test    Run integration tests for Clickhouse
+	docker compose -f docker-compose.test.yml --profile clickhouse up -d --wait $(DOCKER_COMPOSE_ARGS)
+	${POETRY} run pytest ./tests/test_integration -m clickhouse $(PYTEST_ARGS)
+
+test-integration-oracle: test-db ##@Test        Run integration tests for Oracle
 	docker compose -f docker-compose.test.yml --profile oracle up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration -m oracle $(PYTEST_ARGS)
 
-test-integration-s3: test-db ##@Test Run integration tests for S3
+test-integration-s3: test-db ##@Test           Run integration tests for S3
 	docker compose -f docker-compose.test.yml --profile s3 up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration -m s3 $(PYTEST_ARGS)
 
-test-integration: test-db ##@Test Run all integration tests
+test-integration: test-db ##@Test           Run all integration tests
 	docker compose -f docker-compose.test.yml --profile all up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration $(PYTEST_ARGS)
 
-test-check-fixtures: ##@Test Check declared fixtures
+test-check-fixtures: ##@Test           Check declared fixtures
 	${POETRY} run pytest --dead-fixtures $(PYTEST_ARGS)
 
-test-cleanup: ##@Test Cleanup tests dependencies
+test-cleanup: ##@Test           Cleanup tests dependencies
 	docker compose -f docker-compose.test.yml --profile all down $(ARGS)
 
 

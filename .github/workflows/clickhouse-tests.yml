@@ -1,4 +1,4 @@
-name: Hive Tests
+name: Clickhouse Tests
 on:
   workflow_call:
 
@@ -7,7 +7,7 @@ env:
 
 jobs:
   tests:
-    name: Run Hive tests
+    name: Run Clickhouse tests
     runs-on: ubuntu-latest
 
     steps:
@@ -24,9 +24,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./cached_jars
-          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-hive
+          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-clickhouse
           restore-keys: |
-            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-hive
+            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-clickhouse
             ${{ runner.os }}-python-
 
       - name: Build Worker Image
@@ -42,13 +42,13 @@ jobs:
       - name: Docker compose up
         run: |
           docker compose -f docker-compose.test.yml --profile all down -v --remove-orphans
-          docker compose -f docker-compose.test.yml --profile hive up -d --wait --wait-timeout 200
+          docker compose -f docker-compose.test.yml --profile clickhouse up -d --wait --wait-timeout 200
         env:
           WORKER_IMAGE_TAG: ${{ github.sha }}
 
-      - name: Run Hive Tests
+      - name: Run Clickhouse Tests
         run: |
-          docker compose -f ./docker-compose.test.yml --profile hive exec -T worker coverage run -m pytest -vvv -s -m "worker and hive"
+          docker compose -f ./docker-compose.test.yml --profile clickhouse exec -T worker coverage run -m pytest -vvv -s -m "worker and clickhouse"
 
       - name: Dump worker logs on failure
         if: failure()
@@ -67,13 +67,13 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: worker-logs-hive
+          name: worker-logs-clickhouse
           path: logs/*
 
       - name: Upload coverage results
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-hive
+          name: coverage-clickhouse
           path: reports/*
           # https://github.com/actions/upload-artifact/issues/602
           include-hidden-files: true

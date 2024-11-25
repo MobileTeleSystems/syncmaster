@@ -36,12 +36,15 @@ def get_worker_spark_session(
 
 
 def get_packages(db_type: str) -> list[str]:
-    from onetl.connection import Oracle, Postgres, SparkS3
+    from onetl.connection import Clickhouse, Oracle, Postgres, SparkS3
 
     if db_type == "postgres":
         return Postgres.get_packages()
     if db_type == "oracle":
         return Oracle.get_packages()
+    if db_type == "clickhouse":
+        # TODO: add https://github.com/MobileTeleSystems/spark-dialect-extension/ to spark jars
+        return Clickhouse.get_packages()
     if db_type == "s3":
         import pyspark
 

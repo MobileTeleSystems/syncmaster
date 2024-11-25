@@ -52,6 +52,11 @@ class OracleTransferDTO(DBTransferDTO):
 
 
 @dataclass
+class ClickhouseTransferDTO(DBTransferDTO):
+    type: ClassVar[str] = "clickhouse"
+
+
+@dataclass
 class HiveTransferDTO(DBTransferDTO):
     type: ClassVar[str] = "hive"
 

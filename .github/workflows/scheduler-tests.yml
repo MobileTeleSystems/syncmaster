@@ -46,7 +46,6 @@ jobs:
         env:
           WORKER_IMAGE_TAG: ${{ github.sha }}
 
-      # This is important, as coverage is exported after receiving SIGTERM
       - name: Run Scheduler Tests
         run: |
           docker compose -f ./docker-compose.test.yml --profile worker exec -T worker coverage run -m pytest -vvv -s -m "worker and scheduler_integration"
@@ -58,6 +57,7 @@ jobs:
           images: mtsrus/syncmaster-worker
           dest: ./logs
 
+      # This is important, as coverage is exported after receiving SIGTERM
       - name: Shutdown
         if: always()
         run: |
