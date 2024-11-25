@@ -5,3 +5,4 @@ from typing import Literal
 CSV_FORMAT = Literal["csv"]
 JSONLINE_FORMAT = Literal["jsonline"]
 JSON_FORMAT = Literal["json"]
+EXCEL_FORMAT = Literal["excel"]

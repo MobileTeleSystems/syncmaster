@@ -57,7 +57,7 @@ async def group_transfers(
                 "delimiter": ",",
                 "encoding": "utf-8",
                 "escape": "\\",
-                "header": False,
+                "include_header": False,
                 "line_sep": "\n",
                 "quote": '"',
                 "type": "csv",

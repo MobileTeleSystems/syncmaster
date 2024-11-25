@@ -16,10 +16,20 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
                 "delimiter": ",",
                 "encoding": "utf-8",
                 "escape": "\\",
-                "header": False,
+                "include_header": False,
                 "line_sep": "\n",
                 "quote": '"',
                 "type": "csv",
+            },
+            "options": {},
+        },
+        {
+            "type": "s3",
+            "directory_path": "/some/excel/path",
+            "file_format": {
+                "type": "excel",
+                "include_header": True,
+                "start_cell": "A1",
             },
             "options": {},
         },
@@ -54,7 +64,7 @@ async def test_developer_plus_can_update_s3_transfer(
             "source_params": {
                 "type": "s3",
                 "directory_path": "/some/new/test/directory",
-                "file_format": {"type": "jsonline"},
+                "file_format": create_transfer_data["file_format"],
                 "options": {"some": "option"},
             },
         },
@@ -65,14 +75,11 @@ async def test_developer_plus_can_update_s3_transfer(
     source_params.update(
         {
             "directory_path": "/some/new/test/directory",
-            "file_format": {
-                "encoding": "utf-8",
-                "line_sep": "\n",
-                "type": "jsonline",
-            },
+            "file_format": create_transfer_data["file_format"],
             "options": {"some": "option"},
         },
     )
+
     # Assert
     assert result.status_code == 200
     assert result.json() == {
