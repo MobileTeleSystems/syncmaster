@@ -22,7 +22,8 @@ class ServerSettings(BaseModel):
     .. code-block:: bash
 
         SYNCMASTER__SERVER__DEBUG=True
-        SYNCMASTER__SERVER__LOGGING__PRESET=colored
+        SYNCMASTER__SERVER__REQUEST_ID__ENABLED=True
+        SYNCMASTER__SERVER__MONITORING__ENABLED=True
     """
 
     debug: bool = Field(
