@@ -3,7 +3,7 @@
 import asyncio
 import logging
 
-from syncmaster.scheduler.settings import SchedulerSettings as Settings
+from syncmaster.scheduler.settings import SchedulerAppSettings as Settings
 from syncmaster.scheduler.transfer_fetcher import TransferFetcher
 from syncmaster.scheduler.transfer_job_manager import TransferJobManager
 
