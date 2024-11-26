@@ -30,7 +30,7 @@ async def main():
             transfer_fetcher.last_updated_at = max(t.updated_at for t in transfers)
             logger.info("Scheduler state has been updated. Last updated at: %s", transfer_fetcher.last_updated_at)
 
-        await asyncio.sleep(settings.TRANSFER_FETCHING_TIMEOUT_SECONDS)
+        await asyncio.sleep(settings.scheduler.TRANSFER_FETCHING_TIMEOUT_SECONDS)
 
 
 if __name__ == "__main__":
