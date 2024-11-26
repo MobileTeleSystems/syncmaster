@@ -34,6 +34,35 @@ class WorkerSettings(BaseSettings):
 
 
 class WorkerAppSettings(BaseSettings):
+    """
+    Worker application settings.
+
+    This class is used to configure various settings for the worker application.
+    The settings can be defined in two ways:
+
+    1. By explicitly passing a settings object as an argument.
+    2. By setting environment variables matching specific keys.
+
+    All environment variable names are written in uppercase and should be prefixed with ``SYNCMASTER__``.
+    Nested items are delimited with ``__``.
+
+    Examples
+    --------
+
+    .. code-block:: bash
+
+        # Example of setting a CORRELATION_CELERY_HEADER_ID via environment variable
+        SYNCMASTER__WORKER__CORRELATION_CELERY_HEADER_ID=CORRELATION_ID_CELERY
+
+        # Example of setting a database URL via environment variable
+        SYNCMASTER__DATABASE__URL=postgresql+asyncpg://user:password@localhost:5432/dbname
+
+        # Example of setting a broker URL via environment variable
+        SYNCMASTER__BROKER__URL=amqp://user:password@localhost:5672/
+
+    Refer to `Pydantic documentation <https://docs.pydantic.dev/latest/concepts/pydantic_settings/>`_
+    for more details on configuration options and environment variable usage.
+    """
 
     database: DatabaseSettings = Field(description="Database settings")
     broker: RabbitMQSettings = Field(description="Broker settings")

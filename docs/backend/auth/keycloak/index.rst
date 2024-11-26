@@ -1,17 +1,18 @@
-.. _backend-auth-ldap:
+.. _keycloak-auth-provider:
 
 KeyCloak Auth provider
-==================
+======================
 
 Description
 -----------
+Keycloak auth provider uses `python-keycloak <https://pypi.org/project/python-keycloak/>`_ library to interact with Keycloak server. During the authentication process,
+KeycloakAuthProvider redirects user to Keycloak authentication page.
 
-TODO:
+After successful authentication, Keycloak redirects user back to Syncmaster with authorization code.
+Then KeycloakAuthProvider exchanges authorization code for an access token and uses it to get user information from Keycloak server.
+If user is not found in Syncmaster database, KeycloakAuthProvider creates it. Finally, KeycloakAuthProvider returns user with access token.
 
-Strategies
-----------
-
-TODO:
+You can follow interaction schema below.
 
 Interaction schema
 ------------------
@@ -76,6 +77,13 @@ Interaction schema
 Basic configuration
 -------------------
 
-.. autopydantic_model:: syncmaster.settings.auth.keycloak.KeycloakProviderSettings
-.. autopydantic_model:: syncmaster.settings.auth.jwt.JWTSettings
+.. autopydantic_model:: syncmaster.backend.settings.auth.keycloak.KeycloakAuthProviderSettings
+.. autopydantic_model:: syncmaster.backend.settings.auth.keycloak.KeycloakSettings
+.. autopydantic_model:: syncmaster.backend.settings.auth.jwt.JWTSettings
 
+.. toctree::
+    :maxdepth: 1
+    :caption: Keycloak
+    :hidden:
+
+    local_installation
