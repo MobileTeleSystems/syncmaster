@@ -6,6 +6,7 @@ from httpx import AsyncClient
 from onetl.connection import MSSQL
 from onetl.db import DBReader
 from pyspark.sql import DataFrame
+from pyspark.sql.functions import col, date_trunc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Connection, Group, Queue, Status, Transfer
@@ -37,7 +38,7 @@ async def postgres_to_mssql(
         },
         target_params={
             "type": "mssql",
-            "table_name": f"{mssql_for_conftest.user}.target_table",
+            "table_name": "dbo.target_table",
         },
         queue_id=queue.id,
     )
@@ -63,7 +64,7 @@ async def mssql_to_postgres(
         target_connection_id=postgres_connection.id,
         source_params={
             "type": "mssql",
-            "table_name": f"{mssql_for_conftest.user}.source_table",
+            "table_name": "dbo.source_table",
         },
         target_params={
             "type": "postgres",
@@ -113,9 +114,13 @@ async def test_run_transfer_postgres_to_mssql(
     assert "password" not in target_auth_data
     reader = DBReader(
         connection=mssql,
-        table=f"{mssql.user}.target_table",
+        table="dbo.target_table",
     )
     df = reader.run()
+
+    # as spark rounds datetime up to milliseconds while writing to mssql: https://onetl.readthedocs.io/en/latest/connection/db_connection/mssql/types.html#id5
+    df = df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
+    init_df = init_df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
 
     for field in init_df.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
@@ -161,11 +166,19 @@ async def test_run_transfer_postgres_to_mssql_mixed_naming(
 
     reader = DBReader(
         connection=mssql,
-        table=f"{mssql.user}.target_table",
+        table=f"dbo.target_table",
     )
     df = reader.run()
+
     assert df.columns != init_df_with_mixed_column_naming.columns
-    assert df.columns == [column.lower() for column in init_df_with_mixed_column_naming.columns]
+    assert df.columns == [column.upper() for column in init_df_with_mixed_column_naming.columns]
+
+    # as spark rounds datetime up to milliseconds while writing to mssql: https://onetl.readthedocs.io/en/latest/connection/db_connection/mssql/types.html#id5
+    df = df.withColumn("Registered At", date_trunc("second", col("Registered At")))
+    init_df_with_mixed_column_naming = init_df_with_mixed_column_naming.withColumn(
+        "Registered At",
+        date_trunc("second", col("Registered At")),
+    )
 
     for field in init_df_with_mixed_column_naming.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
@@ -214,6 +227,10 @@ async def test_run_transfer_mssql_to_postgres(
         table="public.target_table",
     )
     df = reader.run()
+
+    # as spark rounds datetime up to milliseconds while writing to mssql: https://onetl.readthedocs.io/en/latest/connection/db_connection/mssql/types.html#id5
+    df = df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
+    init_df = init_df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
 
     for field in init_df.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
@@ -265,6 +282,13 @@ async def test_run_transfer_mssql_to_postgres_mixed_naming(
 
     assert df.columns != init_df_with_mixed_column_naming.columns
     assert df.columns == [column.lower() for column in init_df_with_mixed_column_naming.columns]
+
+    # as spark rounds datetime up to milliseconds while writing to mssql: https://onetl.readthedocs.io/en/latest/connection/db_connection/mssql/types.html#id5
+    df = df.withColumn("Registered At", date_trunc("second", col("Registered At")))
+    init_df_with_mixed_column_naming = init_df_with_mixed_column_naming.withColumn(
+        "Registered At",
+        date_trunc("second", col("Registered At")),
+    )
 
     for field in init_df_with_mixed_column_naming.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))

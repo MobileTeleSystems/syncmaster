@@ -95,7 +95,7 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    profiles: [worker, scheduler, s3, oracle, hdfs, hive, all, clickhouse, mssql]
+    profiles: [worker, scheduler, s3, oracle, hdfs, hive, clickhouse, mssql, all]
 
   test-postgres:
     image: postgres

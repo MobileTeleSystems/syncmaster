@@ -34,5 +34,5 @@ class MSSQLHandler(DBHandler):
 
     def normalize_column_names(self, df: DataFrame) -> DataFrame:
         for column_name in df.columns:
-            df = df.withColumnRenamed(column_name, column_name.upper())
+            df = df.withColumnRenamed(column_name, column_name.lower())
         return df
