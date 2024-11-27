@@ -171,7 +171,7 @@ async def test_run_transfer_postgres_to_mssql_mixed_naming(
     df = reader.run()
 
     assert df.columns != init_df_with_mixed_column_naming.columns
-    assert df.columns == [column.upper() for column in init_df_with_mixed_column_naming.columns]
+    assert df.columns == [column.lower() for column in init_df_with_mixed_column_naming.columns]
 
     # as spark rounds datetime up to milliseconds while writing to mssql: https://onetl.readthedocs.io/en/latest/connection/db_connection/mssql/types.html#id5
     df = df.withColumn("Registered At", date_trunc("second", col("Registered At")))
