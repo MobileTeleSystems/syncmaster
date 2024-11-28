@@ -17,7 +17,12 @@ RUN apt-get update && apt-get install -y \
         libffi-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir --timeout 3 --retries 3 poetry && poetry config virtualenvs.create false
+RUN apt-get update && apt-get install -y curl \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -sSL https://install.python-poetry.org | python3 - \
+    && ln -s /root/.local/bin/poetry /usr/local/bin/poetry \
+    && poetry config virtualenvs.create false
 
 WORKDIR /app
 ENV PYTHONPATH=/app
