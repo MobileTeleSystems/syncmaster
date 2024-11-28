@@ -8,6 +8,7 @@ from syncmaster.dto.connections import (
     ClickhouseConnectionDTO,
     HDFSConnectionDTO,
     HiveConnectionDTO,
+    MSSQLConnectionDTO,
     OracleConnectionDTO,
     PostgresConnectionDTO,
     S3ConnectionDTO,
@@ -16,6 +17,7 @@ from syncmaster.dto.transfers import (
     ClickhouseTransferDTO,
     HDFSTransferDTO,
     HiveTransferDTO,
+    MSSQLTransferDTO,
     OracleTransferDTO,
     PostgresTransferDTO,
     S3TransferDTO,
@@ -24,6 +26,7 @@ from syncmaster.exceptions.connection import ConnectionTypeNotRecognizedError
 from syncmaster.worker.handlers.base import Handler
 from syncmaster.worker.handlers.db.clickhouse import ClickhouseHandler
 from syncmaster.worker.handlers.db.hive import HiveHandler
+from syncmaster.worker.handlers.db.mssql import MSSQLHandler
 from syncmaster.worker.handlers.db.oracle import OracleHandler
 from syncmaster.worker.handlers.db.postgres import PostgresHandler
 from syncmaster.worker.handlers.file.hdfs import HDFSHandler
@@ -48,6 +51,11 @@ connection_handler_proxy = {
         ClickhouseHandler,
         ClickhouseConnectionDTO,
         ClickhouseTransferDTO,
+    ),
+    "mssql": (
+        MSSQLHandler,
+        MSSQLConnectionDTO,
+        MSSQLTransferDTO,
     ),
     "postgres": (
         PostgresHandler,
