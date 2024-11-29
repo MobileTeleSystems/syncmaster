@@ -53,22 +53,23 @@ services:
     profiles: [backend, all]
 
   scheduler:
-    image: mtsrus/syncmaster-backend:${BACKEND_IMAGE_TAG:-test}
+    image: mtsrus/syncmaster-scheduler:${SCHEDULER_IMAGE_TAG:-test}
     restart: unless-stopped
     build:
-      dockerfile: docker/Dockerfile.backend
+      dockerfile: docker/Dockerfile.scheduler
       context: .
       target: test
     env_file: .env.docker
     volumes:
       - ./syncmaster:/app/syncmaster
+      - ./tests:/app/tests
+      - ./reports:/app/reports
       - ./pyproject.toml:/app/pyproject.toml
     depends_on:
       db:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    entrypoint: [python, -m, syncmaster.scheduler]
     profiles: [scheduler, all]
 
   worker:

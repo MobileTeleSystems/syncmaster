@@ -65,6 +65,19 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  scheduler:
+    image: mtsrus/syncmaster-scheduler:${TAG:-develop}
+    restart: unless-stopped
+    build:
+      dockerfile: docker/Dockerfile.scheduler
+      context: .
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
 volumes:
   postgres_data:
   rabbitmq_data:

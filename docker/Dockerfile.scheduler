@@ -1,0 +1,28 @@
+FROM python:3.12-slim AS base
+
+RUN apt-get update && apt-get install -y curl \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -sSL https://install.python-poetry.org | python3 - \
+    && ln -s /root/.local/bin/poetry /usr/local/bin/poetry \
+    && poetry config virtualenvs.create false
+
+WORKDIR /app
+ENV PYTHONPATH=/app
+
+COPY ./pyproject.toml ./poetry.lock* /app/
+
+RUN pip install --upgrade pip setuptools wheel packaging
+RUN poetry install --no-root --extras "scheduler" --without test,docs,dev
+
+COPY ./docker/entrypoint_scheduler.sh /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+FROM base AS prod
+
+COPY ./syncmaster/ /app/syncmaster/
+
+FROM base as test
+
+RUN poetry install --no-root --all-extras --with test --without docs,dev
+RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
