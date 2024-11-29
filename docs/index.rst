@@ -17,8 +17,8 @@
     backend/install
     backend/architecture
     backend/auth/index
-    backend/openapi
     backend/configuration/index
+    backend/openapi
 
 
 .. toctree::
@@ -26,6 +26,8 @@
     :caption: Worker
     :hidden:
 
+    worker/start_worker
+    worker/log_url
     worker/configuration/index
 
 
@@ -34,6 +36,7 @@
     :caption: Scheduler
     :hidden:
 
+    scheduler/start_scheduler
     scheduler/configuration/index
 
 .. toctree::

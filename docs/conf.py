@@ -147,6 +147,12 @@ pygments_style = "sphinx"
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
+# set the environment variable before imports
+# TODO: remove after global init of WorkerAppSettings in worker/__init__.py
+os.environ["SYNCMASTER__ENCRYPTION__CRYPTO_KEY"] = "crypto_key"
+os.environ["SYNCMASTER__DATABASE__URL"] = "postgresql+asyncpg://syncmaster:changeme@db:5432/syncmaster"
+os.environ["SYNCMASTER__BROKER__URL"] = "amqp://guest:guest@localhost:5672/"
+
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.

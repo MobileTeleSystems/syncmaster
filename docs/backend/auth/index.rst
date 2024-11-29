@@ -12,7 +12,7 @@ Syncmaster supports different auth provider implementations. You can change impl
     :caption: Auth providers
 
     dummy
-    keycloak
+    keycloak/index
 
 .. toctree::
     :maxdepth: 2

@@ -12,7 +12,7 @@ class CredentialsEncryptionSettings(BaseModel):
     .. code-block:: bash
 
         # Set the encryption key
-        SYNCMASTER_CRYPTO_KEY=secret_key
+        SYNCMASTER__ENCRYPTION__CRYPTO_KEY=secret_key
     """
 
     crypto_key: str = Field(description="Key for encrypt/decrypt credentials data")

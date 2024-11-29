@@ -79,15 +79,11 @@ Available *extras* are:
 Run database
 ~~~~~~~~~~~~
 
-Start Postgres instance somewhere, and set up environment variables:
+Start Postgres instance somewhere, and set up environment variable:
 
 .. code-block:: bash
 
-    POSTGRES_HOST=localhost
-    POSTGRES_PORT=5432
-    POSTGRES_DB=postgres
-    POSTGRES_USER=user
-    POSTGRES_PASSWORD=password
+    SYNCMASTER__DATABASE__URL=postgresql+asyncpg://syncmaster:changeme@db:5432/syncmaster
 
 You can use virtually any database supported by `SQLAlchemy <https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls>`_,
 but the only one we really tested is Postgres.
@@ -111,33 +107,11 @@ options and commands are just the same.
 Run RabbitMQ
 ~~~~~~~~~~~~
 
-Start RabbitMQ instance somewhere, and set up environment variables:
+Start RabbitMQ instance somewhere, and set up environment variable:
 
 .. code-block:: bash
 
-    RABBITMQ_HOST=somehost
-    RABBITMQ_PORT=5672
-    RABBITMQ_USER=user
-    RABBITMQ_PASSWORD=password
-
-Run worker
-~~~~~~~~~~
-
-.. note::
-
-    Before starting the worker you need to create a queue.
-    The queue is created by sending a post request to ``/queues`` endpoint (See Swagger doc for details).
-
-to start the worker you need to run the command
-
-.. code-block:: console
-
-    $ celery -A syncmaster.worker.config.celery worker --loglevel=info --max-tasks-per-child=1 -Q queue_name
-
-.. note::
-
-    The specified celery options are given as an example, you can specify other options you need.
-
+    SYNCMASTER__BROKER__URL=amqp://guest:guest@rabbitmq:5672/
 
 Run backend
 ~~~~~~~~~~~

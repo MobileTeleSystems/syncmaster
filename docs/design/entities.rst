@@ -121,7 +121,7 @@ Example:
         "started_at": "2024-01-19T16:30:07+03:00",
         "ended_at": null,
         "status": "STARTED",
-        "log_url": "https://kinaba.url/...",
+        "log_url": "https://kibana.url/...",
         "transfer_dump": {
             "transfer object JSON"
         },
