@@ -9,6 +9,7 @@ from syncmaster.dto.connections import (
     HDFSConnectionDTO,
     HiveConnectionDTO,
     MSSQLConnectionDTO,
+    MySQLConnectionDTO,
     OracleConnectionDTO,
     PostgresConnectionDTO,
     S3ConnectionDTO,
@@ -18,6 +19,7 @@ from syncmaster.dto.transfers import (
     HDFSTransferDTO,
     HiveTransferDTO,
     MSSQLTransferDTO,
+    MySQLTransferDTO,
     OracleTransferDTO,
     PostgresTransferDTO,
     S3TransferDTO,
@@ -27,6 +29,7 @@ from syncmaster.worker.handlers.base import Handler
 from syncmaster.worker.handlers.db.clickhouse import ClickhouseHandler
 from syncmaster.worker.handlers.db.hive import HiveHandler
 from syncmaster.worker.handlers.db.mssql import MSSQLHandler
+from syncmaster.worker.handlers.db.mysql import MySQLHandler
 from syncmaster.worker.handlers.db.oracle import OracleHandler
 from syncmaster.worker.handlers.db.postgres import PostgresHandler
 from syncmaster.worker.handlers.file.hdfs import HDFSHandler
@@ -56,6 +59,11 @@ connection_handler_proxy = {
         MSSQLHandler,
         MSSQLConnectionDTO,
         MSSQLTransferDTO,
+    ),
+    "mysql": (
+        MySQLHandler,
+        MySQLConnectionDTO,
+        MySQLTransferDTO,
     ),
     "postgres": (
         PostgresHandler,

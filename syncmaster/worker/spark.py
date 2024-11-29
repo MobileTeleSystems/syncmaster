@@ -36,7 +36,7 @@ def get_worker_spark_session(
 
 
 def get_packages(db_type: str) -> list[str]:
-    from onetl.connection import MSSQL, Clickhouse, Oracle, Postgres, SparkS3
+    from onetl.connection import MSSQL, Clickhouse, MySQL, Oracle, Postgres, SparkS3
 
     if db_type == "postgres":
         return Postgres.get_packages()
@@ -47,6 +47,8 @@ def get_packages(db_type: str) -> list[str]:
         return Clickhouse.get_packages()
     if db_type == "mssql":
         return MSSQL.get_packages()
+    if db_type == "mysql":
+        return MySQL.get_packages()
     if db_type == "s3":
         import pyspark
 

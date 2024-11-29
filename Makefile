@@ -93,6 +93,10 @@ test-integration-clickhouse: test-db ##@Test    Run integration tests for Clickh
 	docker compose -f docker-compose.test.yml --profile clickhouse up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration -m clickhouse $(PYTEST_ARGS)
 
+test-integration-mysql: test-db ##@Test         Run integration tests for MySQL
+	docker compose -f docker-compose.test.yml --profile mysql up -d --wait $(DOCKER_COMPOSE_ARGS)
+	${POETRY} run pytest ./tests/test_integration -m mysql $(PYTEST_ARGS)
+
 test-integration-mssql: test-db ##@Test         Run integration tests for MSSQL
 	docker compose -f docker-compose.test.yml --profile mssql up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration -m mssql $(PYTEST_ARGS)
