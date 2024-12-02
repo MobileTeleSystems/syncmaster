@@ -8,6 +8,7 @@ from onetl.connection import SparkHDFS
 from onetl.db import DBReader
 from onetl.file import FileDFReader
 from pyspark.sql import DataFrame
+from pyspark.sql.functions import col, date_format, date_trunc, to_timestamp
 from pytest import FixtureRequest
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -37,6 +38,7 @@ async def hdfs_to_postgres(
     file_format_flavor: str,
 ):
     format_name, file_format = source_file_format
+    format_name_in_path = "xlsx" if format_name == "excel" else format_name
     _, source_path, _ = prepare_hdfs
 
     result = await create_transfer(
@@ -47,7 +49,7 @@ async def hdfs_to_postgres(
         target_connection_id=postgres_connection.id,
         source_params={
             "type": "hdfs",
-            "directory_path": os.fspath(source_path / "file_df_connection" / format_name / file_format_flavor),
+            "directory_path": os.fspath(source_path / "file_df_connection" / format_name_in_path / file_format_flavor),
             "file_format": {
                 "type": format_name,
                 **file_format.dict(),
@@ -121,6 +123,11 @@ async def postgres_to_hdfs(
             "without_compression",
             id="jsonline",
         ),
+        pytest.param(
+            ("excel", {}),
+            "with_header",
+            id="excel",
+        ),
     ],
     indirect=["source_file_format", "file_format_flavor"],
 )
@@ -135,6 +142,7 @@ async def test_run_transfer_hdfs_to_postgres(
 ):
     # Arrange
     postgres, _ = prepare_postgres
+    file_format, _ = source_file_format
 
     # Act
     result = await client.post(
@@ -164,6 +172,12 @@ async def test_run_transfer_hdfs_to_postgres(
         table="public.target_table",
     )
     df = reader.run()
+
+    # as Excel does not support datetime values with precision greater than milliseconds
+    if file_format == "excel":
+        df = df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
+        init_df = init_df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
+
     for field in init_df.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
 
@@ -182,6 +196,11 @@ async def test_run_transfer_hdfs_to_postgres(
             ("jsonline", {}),
             "without_compression",
             id="jsonline",
+        ),
+        pytest.param(
+            ("excel", {}),
+            "with_header",
+            id="excel",
         ),
     ],
     indirect=["target_file_format", "file_format_flavor"],
@@ -234,6 +253,13 @@ async def test_run_transfer_postgres_to_hdfs(
         options={},
     )
     df = reader.run()
+
+    # as Excel does not support datetime values with precision greater than milliseconds
+    if format_name == "excel":
+        init_df = init_df.withColumn(
+            "REGISTERED_AT",
+            to_timestamp(date_format(col("REGISTERED_AT"), "yyyy-MM-dd HH:mm:ss.SSS")),
+        )
 
     for field in init_df.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))

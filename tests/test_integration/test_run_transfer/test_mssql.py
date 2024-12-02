@@ -118,7 +118,7 @@ async def test_run_transfer_postgres_to_mssql(
     )
     df = reader.run()
 
-    # as spark rounds datetime up to milliseconds while writing to mssql: https://onetl.readthedocs.io/en/latest/connection/db_connection/mssql/types.html#id5
+    # as spark rounds datetime to nearest 3.33 milliseconds when writing to mssql: https://onetl.readthedocs.io/en/latest/connection/db_connection/mssql/types.html#id5
     df = df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
     init_df = init_df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
 
@@ -173,7 +173,7 @@ async def test_run_transfer_postgres_to_mssql_mixed_naming(
     assert df.columns != init_df_with_mixed_column_naming.columns
     assert df.columns == [column.lower() for column in init_df_with_mixed_column_naming.columns]
 
-    # as spark rounds datetime up to milliseconds while writing to mssql: https://onetl.readthedocs.io/en/latest/connection/db_connection/mssql/types.html#id5
+    # as spark rounds datetime to nearest 3.33 milliseconds when writing to mssql: https://onetl.readthedocs.io/en/latest/connection/db_connection/mssql/types.html#id5
     df = df.withColumn("Registered At", date_trunc("second", col("Registered At")))
     init_df_with_mixed_column_naming = init_df_with_mixed_column_naming.withColumn(
         "Registered At",
@@ -228,7 +228,7 @@ async def test_run_transfer_mssql_to_postgres(
     )
     df = reader.run()
 
-    # as spark rounds datetime up to milliseconds while writing to mssql: https://onetl.readthedocs.io/en/latest/connection/db_connection/mssql/types.html#id5
+    # as spark rounds datetime to nearest 3.33 milliseconds when writing to mssql: https://onetl.readthedocs.io/en/latest/connection/db_connection/mssql/types.html#id5
     df = df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
     init_df = init_df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
 
@@ -283,7 +283,7 @@ async def test_run_transfer_mssql_to_postgres_mixed_naming(
     assert df.columns != init_df_with_mixed_column_naming.columns
     assert df.columns == [column.lower() for column in init_df_with_mixed_column_naming.columns]
 
-    # as spark rounds datetime up to milliseconds while writing to mssql: https://onetl.readthedocs.io/en/latest/connection/db_connection/mssql/types.html#id5
+    # as spark rounds datetime to nearest 3.33 milliseconds when writing to mssql: https://onetl.readthedocs.io/en/latest/connection/db_connection/mssql/types.html#id5
     df = df.withColumn("Registered At", date_trunc("second", col("Registered At")))
     init_df_with_mixed_column_naming = init_df_with_mixed_column_naming.withColumn(
         "Registered At",
