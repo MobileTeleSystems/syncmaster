@@ -4,7 +4,7 @@ import json
 from dataclasses import dataclass
 from typing import ClassVar
 
-from onetl.file.format import CSV, JSON, ORC, Excel, JSONLine, Parquet
+from onetl.file.format import CSV, JSON, ORC, XML, Excel, JSONLine, Parquet
 
 
 @dataclass
@@ -20,7 +20,7 @@ class DBTransferDTO(TransferDTO):
 @dataclass
 class FileTransferDTO(TransferDTO):
     directory_path: str
-    file_format: CSV | JSONLine | JSON | Excel | ORC | Parquet
+    file_format: CSV | JSONLine | JSON | Excel | XML | ORC | Parquet
     options: dict
     df_schema: dict | None = None
 
@@ -31,6 +31,7 @@ class FileTransferDTO(TransferDTO):
         "excel": Excel,
         "orc": ORC,
         "parquet": Parquet,
+        "xml": XML,
     }
 
     def __post_init__(self):

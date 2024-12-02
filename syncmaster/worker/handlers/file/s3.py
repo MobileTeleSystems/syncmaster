@@ -35,7 +35,7 @@ class S3Handler(FileHandler):
         from pyspark.sql.types import StructType
 
         options = {}
-        if self.transfer_dto.file_format.__class__.__name__ == "Excel":
+        if self.transfer_dto.file_format.__class__.__name__ in ("Excel", "XML"):
             options = {"inferSchema": True}
 
         reader = FileDFReader(

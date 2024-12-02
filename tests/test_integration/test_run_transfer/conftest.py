@@ -11,7 +11,7 @@ import pytest_asyncio
 from onetl.connection import MSSQL, Clickhouse, Hive, MySQL, Oracle, Postgres, SparkS3
 from onetl.connection.file_connection.s3 import S3
 from onetl.db import DBWriter
-from onetl.file.format import CSV, JSON, ORC, Excel, JSONLine, Parquet
+from onetl.file.format import CSV, JSON, ORC, XML, Excel, JSONLine, Parquet
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import (
     DateType,
@@ -114,8 +114,11 @@ def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
         )
 
     if "hdfs" in markers or "s3" in markers:
-        # see supported versions from https://mvnrepository.com/artifact/com.crealytics/spark-excel
-        maven_packages.extend(Excel.get_packages(spark_version="3.5.1"))
+        # excel version is hardcoded due to https://github.com/nightscape/spark-excel/issues/902
+        file_formats_spark_packages: list[str] = XML.get_packages(
+            spark_version=pyspark.__version__,
+        ) + Excel.get_packages(spark_version="3.5.1")
+        maven_packages.extend(file_formats_spark_packages)
 
     if maven_packages:
         spark = spark.config("spark.jars.packages", ",".join(maven_packages))
@@ -845,6 +848,12 @@ def source_file_format(request: FixtureRequest):
             **params,
         )
 
+    if name == "xml":
+        return "xml", XML(
+            row_tag="item",
+            **params,
+        )
+
     raise ValueError(f"Unsupported file format: {name}")
 
 
@@ -880,6 +889,12 @@ def target_file_format(request: FixtureRequest):
 
     if name == "parquet":
         return "parquet", Parquet(
+            **params,
+        )
+
+    if name == "xml":
+        return "xml", XML(
+            row_tag="item",
             **params,
         )
 

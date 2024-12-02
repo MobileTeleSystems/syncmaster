@@ -139,6 +139,11 @@ async def postgres_to_s3(
             "without_compression",
             id="parquet",
         ),
+        pytest.param(
+            ("xml", {}),
+            "without_compression",
+            id="xml",
+        ),
     ],
     indirect=["source_file_format", "file_format_flavor"],
 )
@@ -223,6 +228,11 @@ async def test_run_transfer_s3_to_postgres(
             ("parquet", {"compression": "gzip"}),
             "with_compression",
             id="parquet",
+        ),
+        pytest.param(
+            ("xml", {}),
+            "without_compression",
+            id="xml",
         ),
     ],
     indirect=["target_file_format", "file_format_flavor"],
