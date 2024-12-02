@@ -43,3 +43,7 @@ loggers:
     level: DEBUG
     handlers: [celery]
     propagate: false
+  scheduler:
+    handlers: [main]
+    level: INFO
+    propagate: false

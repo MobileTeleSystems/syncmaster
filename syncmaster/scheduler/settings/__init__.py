@@ -6,6 +6,7 @@ from pydantic_settings import BaseSettings
 from syncmaster.settings import (
     CredentialsEncryptionSettings,
     DatabaseSettings,
+    LoggingSettings,
     RabbitMQSettings,
 )
 
@@ -64,6 +65,7 @@ class SchedulerAppSettings(BaseSettings):
 
     database: DatabaseSettings = Field(description="Database settings")
     broker: RabbitMQSettings = Field(description="Broker settings")
+    logging: LoggingSettings = Field(default_factory=LoggingSettings, description="Logging settings")
     scheduler: SchedulerSettings = Field(default_factory=SchedulerSettings, description="Scheduler-specific settings")
     encryption: CredentialsEncryptionSettings = Field(
         default_factory=CredentialsEncryptionSettings,
