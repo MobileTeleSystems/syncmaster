@@ -96,7 +96,7 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    profiles: [worker, scheduler, s3, oracle, hdfs, hive, clickhouse, mssql, all]
+    profiles: [worker, scheduler, s3, oracle, hdfs, hive, clickhouse, mysql, mssql, all]
 
   test-postgres:
     image: postgres
@@ -110,7 +110,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    profiles: [s3, oracle, clickhouse, mssql, hdfs, hive, all]
+    profiles: [s3, oracle, clickhouse, mysql, mssql, hdfs, hive, all]
 
   test-s3:
     image: bitnami/minio:latest
@@ -166,6 +166,20 @@ services:
     entrypoint: [/usr/config/entrypoint.sh]
     platform: linux/amd64
     profiles: [mssql, all]
+
+  test-mysql:
+    image: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ohbuz9Eochaj9saibooK3thooGa5aesh
+      MYSQL_DATABASE: syncmaster
+      MYSQL_USER: syncmaster
+      MYSQL_PASSWORD: ohbuz9Eochaj9saibooK3thooGa5aesh
+    ports:
+      - 3306:3306
+    platform: linux/amd64
+    profiles: [mysql, all]
+
 
   metastore-hive:
     image: postgres

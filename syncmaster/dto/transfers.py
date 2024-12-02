@@ -62,6 +62,11 @@ class MSSQLTransferDTO(DBTransferDTO):
 
 
 @dataclass
+class MySQLTransferDTO(DBTransferDTO):
+    type: ClassVar[str] = "mysql"
+
+
+@dataclass
 class HiveTransferDTO(DBTransferDTO):
     type: ClassVar[str] = "hive"
 

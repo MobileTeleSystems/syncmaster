@@ -8,7 +8,7 @@ from pathlib import Path, PurePosixPath
 import pyspark
 import pytest
 import pytest_asyncio
-from onetl.connection import MSSQL, Clickhouse, Hive, Oracle, Postgres, SparkS3
+from onetl.connection import MSSQL, Clickhouse, Hive, MySQL, Oracle, Postgres, SparkS3
 from onetl.db import DBWriter
 from onetl.file.format import CSV, JSON, JSONLine
 from pyspark.sql import DataFrame, SparkSession
@@ -31,6 +31,7 @@ from syncmaster.dto.connections import (
     HDFSConnectionDTO,
     HiveConnectionDTO,
     MSSQLConnectionDTO,
+    MySQLConnectionDTO,
     OracleConnectionDTO,
     PostgresConnectionDTO,
     S3ConnectionDTO,
@@ -66,6 +67,7 @@ def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
         SparkSession.builder.appName("celery_worker")
         .enableHiveSupport()
         .config("spark.sql.pyspark.jvmStacktrace.enabled", "true")
+        .config("spark.driver.host", "localhost")
     )
 
     if "postgres" in markers:
@@ -79,6 +81,9 @@ def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
 
     if "mssql" in markers:
         maven_packages.extend(MSSQL.get_packages())
+
+    if "mysql" in markers:
+        maven_packages.extend(MySQL.get_packages())
 
     if "s3" in markers:
         maven_packages.extend(SparkS3.get_packages(spark_version=pyspark.__version__))
@@ -228,6 +233,36 @@ def mssql_for_worker(test_settings: TestSettings) -> MSSQLConnectionDTO:
         user=test_settings.TEST_MSSQL_USER,
         password=test_settings.TEST_MSSQL_PASSWORD,
         database_name=test_settings.TEST_MSSQL_DB,
+        additional_params={},
+    )
+
+
+@pytest.fixture(
+    scope="session",
+    params=[pytest.param("mysql", marks=[pytest.mark.mysql])],
+)
+def mysql_for_conftest(test_settings: TestSettings) -> MySQLConnectionDTO:
+    return MySQLConnectionDTO(
+        host=test_settings.TEST_MYSQL_HOST_FOR_CONFTEST,
+        port=test_settings.TEST_MYSQL_PORT_FOR_CONFTEST,
+        user=test_settings.TEST_MYSQL_USER,
+        password=test_settings.TEST_MYSQL_PASSWORD,
+        database_name=test_settings.TEST_MYSQL_DB,
+        additional_params={},
+    )
+
+
+@pytest.fixture(
+    scope="session",
+    params=[pytest.param("mysql", marks=[pytest.mark.mysql])],
+)
+def mysql_for_worker(test_settings: TestSettings) -> MySQLConnectionDTO:
+    return MySQLConnectionDTO(
+        host=test_settings.TEST_MYSQL_HOST_FOR_WORKER,
+        port=test_settings.TEST_MYSQL_PORT_FOR_WORKER,
+        user=test_settings.TEST_MYSQL_USER,
+        password=test_settings.TEST_MYSQL_PASSWORD,
+        database_name=test_settings.TEST_MYSQL_DB,
         additional_params={},
     )
 
@@ -666,6 +701,50 @@ def prepare_mssql(
         pass
 
 
+@pytest.fixture
+def prepare_mysql(
+    mysql_for_conftest: MySQLConnectionDTO,
+    spark: SparkSession,
+):
+    mysql = mysql_for_conftest
+    onetl_conn = MySQL(
+        host=mysql.host,
+        port=mysql.port,
+        user=mysql.user,
+        password=mysql.password,
+        database=mysql.database_name,
+        spark=spark,
+    ).check()
+    try:
+        onetl_conn.execute(f"DROP TABLE IF EXISTS {mysql.database_name}.source_table")
+    except Exception:
+        pass
+    try:
+        onetl_conn.execute(f"DROP TABLE IF EXISTS {mysql.database_name}.target_table")
+    except Exception:
+        pass
+
+    def fill_with_data(df: DataFrame):
+        logger.info("START PREPARE MYSQL")
+        db_writer = DBWriter(
+            connection=onetl_conn,
+            target=f"{mysql.database_name}.source_table",
+        )
+        db_writer.run(df)
+        logger.info("END PREPARE MYSQL")
+
+    yield onetl_conn, fill_with_data
+
+    try:
+        onetl_conn.execute(f"DROP TABLE IF EXISTS {mysql.database_name}.source_table")
+    except Exception:
+        pass
+    try:
+        onetl_conn.execute(f"DROP TABLE IF EXISTS {mysql.database_name}.target_table")
+    except Exception:
+        pass
+
+
 @pytest.fixture(params=[("csv", {}), ("jsonline", {}), ("json", {})])
 def source_file_format(request: FixtureRequest):
     name, params = request.param
@@ -939,6 +1018,43 @@ async def mssql_connection(
             type="mssql",
             user=mssql.user,
             password=mssql.password,
+        ),
+    )
+
+    yield syncmaster_conn
+    await session.delete(syncmaster_conn)
+    await session.commit()
+
+
+@pytest_asyncio.fixture
+async def mysql_connection(
+    mysql_for_worker: MySQLConnectionDTO,
+    settings: Settings,
+    session: AsyncSession,
+    group: Group,
+):
+    mysql = mysql_for_worker
+    syncmaster_conn = await create_connection(
+        session=session,
+        name=secrets.token_hex(5),
+        data=dict(
+            type=mysql.type,
+            host=mysql.host,
+            port=mysql.port,
+            database_name=mysql.database_name,
+            additional_params={},
+        ),
+        group_id=group.id,
+    )
+
+    await create_credentials(
+        session=session,
+        settings=settings,
+        connection_id=syncmaster_conn.id,
+        auth_data=dict(
+            type="mysql",
+            user=mysql.user,
+            password=mysql.password,
         ),
     )
 

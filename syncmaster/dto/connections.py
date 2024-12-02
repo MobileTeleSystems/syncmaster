@@ -43,6 +43,17 @@ class MSSQLConnectionDTO(ConnectionDTO):
 
 
 @dataclass
+class MySQLConnectionDTO(ConnectionDTO):
+    host: str
+    port: int
+    user: str
+    password: str
+    database_name: str
+    additional_params: dict
+    type: ClassVar[str] = "mysql"
+
+
+@dataclass
 class OracleConnectionDTO(ConnectionDTO):
     host: str
     port: int
