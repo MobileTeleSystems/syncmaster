@@ -121,6 +121,9 @@ scheduler = [
     "asyncpg",
     "python-multipart",
     "python-jose",
+    "pyyaml",
+    "coloredlogs",
+    "python-json-logger",
     "celery",
 ]
 
