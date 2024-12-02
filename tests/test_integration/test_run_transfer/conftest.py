@@ -3,14 +3,15 @@ import logging
 import os
 import secrets
 from collections import namedtuple
-from pathlib import Path, PurePosixPath
+from pathlib import Path, PosixPath, PurePosixPath
 
 import pyspark
 import pytest
 import pytest_asyncio
 from onetl.connection import MSSQL, Clickhouse, Hive, MySQL, Oracle, Postgres, SparkS3
+from onetl.connection.file_connection.s3 import S3
 from onetl.db import DBWriter
-from onetl.file.format import CSV, JSON, JSONLine
+from onetl.file.format import CSV, JSON, Excel, JSONLine
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import (
     DateType,
@@ -111,6 +112,10 @@ def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
                 "org.apache.spark.internal.io.cloud.PathOutputCommitProtocol",
             )
         )
+
+    if "hdfs" in markers or "s3" in markers:
+        # see supported versions from https://mvnrepository.com/artifact/com.crealytics/spark-excel
+        maven_packages.extend(Excel.get_packages(spark_version="3.5.1"))
 
     if maven_packages:
         spark = spark.config("spark.jars.packages", ",".join(maven_packages))
@@ -462,12 +467,22 @@ def s3_file_df_connection(s3_file_connection, spark, s3_server):
 
 
 @pytest.fixture(scope="session")
-def prepare_s3(resource_path, s3_file_connection, s3_file_df_connection_with_path: tuple[SparkS3, PurePosixPath]):
-    logger.info("START PREPARE HDFS")
-    connection, upload_to = s3_file_df_connection_with_path
-    files = upload_files(resource_path, upload_to, s3_file_connection)
-    logger.info("END PREPARE HDFS")
-    return connection, upload_to, files
+def prepare_s3(
+    resource_path: PosixPath,
+    s3_file_connection: S3,
+    s3_file_df_connection_with_path: tuple[SparkS3, PurePosixPath],
+):
+    logger.info("START PREPARE S3")
+    connection, remote_path = s3_file_df_connection_with_path
+
+    s3_file_connection.remove_dir(remote_path, recursive=True)
+    files = upload_files(resource_path, remote_path, s3_file_connection)
+
+    yield connection, remote_path, files
+
+    logger.info("START POST-CLEANUP S3")
+    s3_file_connection.remove_dir(remote_path, recursive=True)
+    logger.info("END POST-CLEANUP S3")
 
 
 @pytest.fixture(scope="session")
@@ -635,14 +650,14 @@ def prepare_clickhouse(
         pass
 
     def fill_with_data(df: DataFrame):
-        logger.info("START PREPARE ORACLE")
+        logger.info("START PREPARE CLICKHOUSE")
         db_writer = DBWriter(
             connection=onetl_conn,
             target=f"{clickhouse.user}.source_table",
             options=Clickhouse.WriteOptions(createTableOptions="ENGINE = Memory"),
         )
         db_writer.run(df)
-        logger.info("END PREPARE ORACLE")
+        logger.info("END PREPARE CLICKHOUSE")
 
     yield onetl_conn, fill_with_data
 
@@ -745,7 +760,51 @@ def prepare_mysql(
         pass
 
 
-@pytest.fixture(params=[("csv", {}), ("jsonline", {}), ("json", {})])
+@pytest.fixture
+def prepare_mysql(
+    mysql_for_conftest: MySQLConnectionDTO,
+    spark: SparkSession,
+):
+    mysql = mysql_for_conftest
+    onetl_conn = MySQL(
+        host=mysql.host,
+        port=mysql.port,
+        user=mysql.user,
+        password=mysql.password,
+        database=mysql.database_name,
+        spark=spark,
+    ).check()
+    try:
+        onetl_conn.execute(f"DROP TABLE IF EXISTS {mysql.database_name}.source_table")
+    except Exception:
+        pass
+    try:
+        onetl_conn.execute(f"DROP TABLE IF EXISTS {mysql.database_name}.target_table")
+    except Exception:
+        pass
+
+    def fill_with_data(df: DataFrame):
+        logger.info("START PREPARE MYSQL")
+        db_writer = DBWriter(
+            connection=onetl_conn,
+            target=f"{mysql.database_name}.source_table",
+        )
+        db_writer.run(df)
+        logger.info("END PREPARE MYSQL")
+
+    yield onetl_conn, fill_with_data
+
+    try:
+        onetl_conn.execute(f"DROP TABLE IF EXISTS {mysql.database_name}.source_table")
+    except Exception:
+        pass
+    try:
+        onetl_conn.execute(f"DROP TABLE IF EXISTS {mysql.database_name}.target_table")
+    except Exception:
+        pass
+
+
+@pytest.fixture(params=[("csv", {}), ("jsonline", {}), ("json", {}), ("excel", {})])
 def source_file_format(request: FixtureRequest):
     name, params = request.param
     if name == "csv":
@@ -769,10 +828,17 @@ def source_file_format(request: FixtureRequest):
             **params,
         )
 
+    if name == "excel":
+        return "excel", Excel(
+            header=True,
+            inferSchema=True,
+            **params,
+        )
+
     raise ValueError(f"Unsupported file format: {name}")
 
 
-@pytest.fixture(params=[("csv", {}), ("jsonline", {})])
+@pytest.fixture(params=[("csv", {}), ("jsonline", {}), ("excel", {})])
 def target_file_format(request: FixtureRequest):
     name, params = request.param
     if name == "csv":
@@ -788,6 +854,12 @@ def target_file_format(request: FixtureRequest):
             encoding="utf-8",
             lineSep="\n",
             timestampFormat="yyyy-MM-dd'T'HH:mm:ss.SSSSSS+00:00",
+            **params,
+        )
+
+    if name == "excel":
+        return "excel", Excel(
+            header=False,
             **params,
         )
 

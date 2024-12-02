@@ -4,7 +4,7 @@ import json
 from dataclasses import dataclass
 from typing import ClassVar
 
-from onetl.file.format import CSV, JSON, JSONLine
+from onetl.file.format import CSV, JSON, Excel, JSONLine
 
 
 @dataclass
@@ -20,9 +20,16 @@ class DBTransferDTO(TransferDTO):
 @dataclass
 class FileTransferDTO(TransferDTO):
     directory_path: str
-    file_format: CSV | JSONLine | JSON
+    file_format: CSV | JSONLine | JSON | Excel
     options: dict
     df_schema: dict | None = None
+
+    _format_parsers = {
+        "csv": CSV,
+        "jsonline": JSONLine,
+        "json": JSON,
+        "excel": Excel,
+    }
 
     def __post_init__(self):
         if isinstance(self.file_format, dict):
@@ -32,13 +39,10 @@ class FileTransferDTO(TransferDTO):
 
     def _get_format(self, file_format: dict):
         file_type = file_format.pop("type", None)
-        if file_type == "csv":
-            return CSV.parse_obj(file_format)
-        if file_type == "jsonline":
-            return JSONLine.parse_obj(file_format)
-        if file_type == "json":
-            return JSON.parse_obj(file_format)
-        raise ValueError("Unknown file type")
+        parser_class = self._format_parsers.get(file_type)
+        if parser_class is not None:
+            return parser_class.parse_obj(file_format)
+        raise ValueError(f"Unknown file type: {file_type}")
 
 
 @dataclass

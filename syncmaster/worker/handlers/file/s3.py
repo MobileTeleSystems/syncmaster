@@ -6,12 +6,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from onetl.connection import SparkS3
+from onetl.file import FileDFReader
 
 from syncmaster.dto.connections import S3ConnectionDTO
 from syncmaster.worker.handlers.file.base import FileHandler
 
 if TYPE_CHECKING:
-    from pyspark.sql import SparkSession
+    from pyspark.sql import DataFrame, SparkSession
 
 
 class S3Handler(FileHandler):
@@ -29,3 +30,20 @@ class S3Handler(FileHandler):
             extra=self.connection_dto.additional_params,
             spark=spark,
         ).check()
+
+    def read(self) -> DataFrame:
+        from pyspark.sql.types import StructType
+
+        options = {}
+        if self.transfer_dto.file_format.__class__.__name__ == "Excel":
+            options = {"inferSchema": True}
+
+        reader = FileDFReader(
+            connection=self.connection,
+            format=self.transfer_dto.file_format,
+            source_path=self.transfer_dto.directory_path,
+            df_schema=StructType.fromJson(self.transfer_dto.df_schema) if self.transfer_dto.df_schema else None,
+            options={**options, **self.transfer_dto.options},
+        )
+
+        return reader.run()
