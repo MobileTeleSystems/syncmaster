@@ -22,8 +22,6 @@ class ORCCompression(str, Enum):
     NONE = "none"
     SNAPPY = "snappy"
     ZLIB = "zlib"
-    LZO = "lzo"
-    ZSTD = "zstd"
     LZ4 = "lz4"
 
 
@@ -32,10 +30,7 @@ class ParquetCompression(str, Enum):
     NONE = "none"
     SNAPPY = "snappy"
     GZIP = "gzip"
-    LZO = "lzo"
-    ZSTD = "zstd"
     LZ4 = "lz4"
-    BROTLI = "brotli"
 
 
 class JSONCompression(str, Enum):

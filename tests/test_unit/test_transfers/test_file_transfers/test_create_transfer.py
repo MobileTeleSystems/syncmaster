@@ -80,7 +80,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
             "directory_path": "/some/parquet/path",
             "file_format": {
                 "type": "parquet",
-                "compression": "zstd",
+                "compression": "gzip",
             },
             "options": {
                 "some": "option",
@@ -175,7 +175,7 @@ async def test_developer_plus_can_create_s3_transfer(
         },
         "parquet": {
             "type": "parquet",
-            "compression": "zstd",
+            "compression": "gzip",
         },
     }
 
@@ -238,7 +238,7 @@ async def test_developer_plus_can_create_s3_transfer(
             "directory_path": "/some/parquet/path",
             "file_format": {
                 "type": "parquet",
-                "compression": "brotli",
+                "compression": "snappy",
             },
         },
     ],
@@ -331,7 +331,7 @@ async def test_developer_plus_can_create_hdfs_transfer(
         },
         "parquet": {
             "type": "parquet",
-            "compression": "brotli",
+            "compression": "snappy",
         },
     }
 
