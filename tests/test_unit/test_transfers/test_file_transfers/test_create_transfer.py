@@ -34,6 +34,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
                 "escape": "\\",
                 "include_header": False,
                 "line_sep": "\n",
+                "compression": "gzip",
             },
             "options": {
                 "some": "option",
@@ -58,6 +59,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
                 "type": "xml",
                 "root_tag": "data",
                 "row_tag": "record",
+                "compression": "lz4",
             },
             "options": {
                 "some": "option",
@@ -78,6 +80,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
             "directory_path": "/some/parquet/path",
             "file_format": {
                 "type": "parquet",
+                "compression": "zstd",
             },
             "options": {
                 "some": "option",
@@ -153,6 +156,7 @@ async def test_developer_plus_can_create_s3_transfer(
             "escape": "\\",
             "include_header": False,
             "line_sep": "\n",
+            "compression": "gzip",
         },
         "excel": {
             "type": "excel",
@@ -163,12 +167,15 @@ async def test_developer_plus_can_create_s3_transfer(
             "type": "xml",
             "root_tag": "data",
             "row_tag": "record",
+            "compression": "lz4",
         },
         "orc": {
             "type": "orc",
+            "compression": "none",
         },
         "parquet": {
             "type": "parquet",
+            "compression": "zstd",
         },
     }
 
@@ -197,6 +204,7 @@ async def test_developer_plus_can_create_s3_transfer(
             "directory_path": "/some/pure/path",
             "file_format": {
                 "type": "csv",
+                "compression": "gzip",
             },
         },
         {
@@ -215,6 +223,7 @@ async def test_developer_plus_can_create_s3_transfer(
                 "type": "xml",
                 "root_tag": "data",
                 "row_tag": "record",
+                "compression": "bzip2",
             },
         },
         {
@@ -229,6 +238,7 @@ async def test_developer_plus_can_create_s3_transfer(
             "directory_path": "/some/parquet/path",
             "file_format": {
                 "type": "parquet",
+                "compression": "brotli",
             },
         },
     ],
@@ -302,6 +312,7 @@ async def test_developer_plus_can_create_hdfs_transfer(
             "escape": "\\",
             "include_header": False,
             "line_sep": "\n",
+            "compression": "gzip",
         },
         "excel": {
             "type": "excel",
@@ -312,12 +323,15 @@ async def test_developer_plus_can_create_hdfs_transfer(
             "type": "xml",
             "root_tag": "data",
             "row_tag": "record",
+            "compression": "bzip2",
         },
         "orc": {
             "type": "orc",
+            "compression": "none",
         },
         "parquet": {
             "type": "parquet",
+            "compression": "brotli",
         },
     }
 
