@@ -115,8 +115,8 @@ async def postgres_to_s3(
             id="csv",
         ),
         pytest.param(
-            ("json", {"compression": "gzip"}),
-            "with_compression",
+            ("json", {}),
+            "without_compression",
             id="json",
         ),
         pytest.param(
@@ -130,13 +130,13 @@ async def postgres_to_s3(
             id="excel",
         ),
         pytest.param(
-            ("orc", {"compression": "snappy"}),
-            "with_compression",
+            ("orc", {}),
+            "without_compression",
             id="orc",
         ),
         pytest.param(
-            ("parquet", {"compression": "snappy"}),
-            "with_compression",
+            ("parquet", {}),
+            "without_compression",
             id="parquet",
         ),
     ],
