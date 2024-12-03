@@ -2600,13 +2600,13 @@ requests-toolbelt = ">=0.6.0"
 
 [[package]]
 name = "python-multipart"
-version = "0.0.18"
+version = "0.0.19"
 description = "A streaming multipart parser for Python"
 optional = true
 python-versions = ">=3.8"
 files = [
-    {file = "python_multipart-0.0.18-py3-none-any.whl", hash = "sha256:efe91480f485f6a361427a541db4796f9e1591afc0fb8e7a4ba06bfbc6708996"},
-    {file = "python_multipart-0.0.18.tar.gz", hash = "sha256:7a68db60c8bfb82e460637fa4750727b45af1d5e2ed215593f917f64694d34fe"},
+    {file = "python_multipart-0.0.19-py3-none-any.whl", hash = "sha256:f8d5b0b9c618575bf9df01c684ded1d94a338839bdd8223838afacfb4bb2082d"},
+    {file = "python_multipart-0.0.19.tar.gz", hash = "sha256:905502ef39050557b7a6af411f454bc19526529ca46ae6831508438890ce12cc"},
 ]
 
 [[package]]
@@ -3529,4 +3529,4 @@ worker = ["asgi-correlation-id", "celery", "coloredlogs", "jinja2", "onetl", "ps
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "8cd683accef2ca55c67bbbe8b0e9a8d62e2cb68e0e496558e0c313da29ec348a"
+content-hash = "8d0b3429bc8759a1e54ab4300022fd083e12f19d8f5cae9a4a8bd8b9c3981349"
