@@ -61,6 +61,7 @@ async def group_transfers(
                 "line_sep": "\n",
                 "quote": '"',
                 "type": "csv",
+                "compression": "none",
             }
             common_params = {
                 "file_format": file_format,

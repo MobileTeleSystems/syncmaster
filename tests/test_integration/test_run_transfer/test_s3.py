@@ -185,7 +185,7 @@ async def test_run_transfer_s3_to_postgres(
     )
     df = reader.run()
 
-    # as these file formats do not support datetime values with precision greater than milliseconds
+    # as Excel does not support datetime values with precision greater than milliseconds
     if file_format in ("excel", "parquet", "orc"):
         df = df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
         init_df = init_df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
@@ -276,8 +276,8 @@ async def test_run_transfer_postgres_to_s3(
     )
     df = reader.run()
 
-    # as these file formats do not support datetime values with precision greater than milliseconds
-    if format_name in ("excel", "parquet", "orc"):
+    # as Excel does not support datetime values with precision greater than milliseconds
+    if format_name in ("excel", "parquet"):
         init_df = init_df.withColumn(
             "REGISTERED_AT",
             to_timestamp(date_format(col("REGISTERED_AT"), "yyyy-MM-dd HH:mm:ss.SSS")),
