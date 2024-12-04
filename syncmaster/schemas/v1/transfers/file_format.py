@@ -18,7 +18,6 @@ from syncmaster.schemas.v1.file_formats import (
 
 
 class ORCCompression(str, Enum):
-    UNCOMPRESSED = "uncompressed"
     NONE = "none"
     SNAPPY = "snappy"
     ZLIB = "zlib"
@@ -26,7 +25,6 @@ class ORCCompression(str, Enum):
 
 
 class ParquetCompression(str, Enum):
-    UNCOMPRESSED = "uncompressed"
     NONE = "none"
     SNAPPY = "snappy"
     GZIP = "gzip"
@@ -51,13 +49,6 @@ class CSVCompression(str, Enum):
     DEFLATE = "deflate"
 
 
-class XMLCompression(str, Enum):
-    BZIP2 = "bzip2"
-    GZIP = "gzip"
-    LZ4 = "lz4"
-    SNAPPY = "snappy"
-
-
 class CSV(BaseModel):
     type: CSV_FORMAT
     delimiter: str = ","
@@ -66,21 +57,21 @@ class CSV(BaseModel):
     escape: str = "\\"
     include_header: bool = False
     line_sep: str = "\n"
-    compression: CSVCompression = CSVCompression.NONE
+    compression: CSVCompression = CSVCompression.GZIP
 
 
 class JSONLine(BaseModel):
     type: JSONLINE_FORMAT
     encoding: str = "utf-8"
     line_sep: str = "\n"
-    compression: JSONCompression = CSVCompression.NONE
+    compression: JSONCompression = JSONCompression.GZIP
 
 
 class JSON(BaseModel):
     type: JSON_FORMAT
     encoding: str = "utf-8"
     line_sep: str = "\n"
-    compression: JSONCompression = CSVCompression.NONE
+    compression: JSONCompression = JSONCompression.GZIP
 
 
 class Excel(BaseModel):
@@ -93,14 +84,13 @@ class XML(BaseModel):
     type: XML_FORMAT
     root_tag: str
     row_tag: str
-    compression: XMLCompression | None = None
 
 
 class ORC(BaseModel):
     type: ORC_FORMAT
-    compression: ORCCompression = CSVCompression.NONE
+    compression: ORCCompression = ORCCompression.ZLIB
 
 
 class Parquet(BaseModel):
     type: PARQUET_FORMAT
-    compression: ParquetCompression = CSVCompression.NONE
+    compression: ParquetCompression = ParquetCompression.SNAPPY

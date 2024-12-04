@@ -59,7 +59,6 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
                 "type": "xml",
                 "root_tag": "data",
                 "row_tag": "record",
-                "compression": "lz4",
             },
             "options": {
                 "some": "option",
@@ -167,11 +166,10 @@ async def test_developer_plus_can_create_s3_transfer(
             "type": "xml",
             "root_tag": "data",
             "row_tag": "record",
-            "compression": "lz4",
         },
         "orc": {
             "type": "orc",
-            "compression": "none",
+            "compression": "zlib",
         },
         "parquet": {
             "type": "parquet",
@@ -223,7 +221,6 @@ async def test_developer_plus_can_create_s3_transfer(
                 "type": "xml",
                 "root_tag": "data",
                 "row_tag": "record",
-                "compression": "bzip2",
             },
         },
         {
@@ -323,11 +320,10 @@ async def test_developer_plus_can_create_hdfs_transfer(
             "type": "xml",
             "root_tag": "data",
             "row_tag": "record",
-            "compression": "bzip2",
         },
         "orc": {
             "type": "orc",
-            "compression": "none",
+            "compression": "zlib",
         },
         "parquet": {
             "type": "parquet",

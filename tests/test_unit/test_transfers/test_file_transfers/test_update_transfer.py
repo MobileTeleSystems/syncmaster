@@ -41,7 +41,6 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
                 "type": "xml",
                 "root_tag": "data",
                 "row_tag": "record",
-                "compression": "bzip2",
             },
             "options": {},
         },
