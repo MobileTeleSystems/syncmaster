@@ -34,6 +34,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
                 "escape": "\\",
                 "include_header": False,
                 "line_sep": "\n",
+                "compression": "gzip",
             },
             "options": {
                 "some": "option",
@@ -78,6 +79,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
             "directory_path": "/some/parquet/path",
             "file_format": {
                 "type": "parquet",
+                "compression": "gzip",
             },
             "options": {
                 "some": "option",
@@ -153,6 +155,7 @@ async def test_developer_plus_can_create_s3_transfer(
             "escape": "\\",
             "include_header": False,
             "line_sep": "\n",
+            "compression": "gzip",
         },
         "excel": {
             "type": "excel",
@@ -166,9 +169,11 @@ async def test_developer_plus_can_create_s3_transfer(
         },
         "orc": {
             "type": "orc",
+            "compression": "zlib",
         },
         "parquet": {
             "type": "parquet",
+            "compression": "gzip",
         },
     }
 
@@ -197,6 +202,7 @@ async def test_developer_plus_can_create_s3_transfer(
             "directory_path": "/some/pure/path",
             "file_format": {
                 "type": "csv",
+                "compression": "gzip",
             },
         },
         {
@@ -229,6 +235,7 @@ async def test_developer_plus_can_create_s3_transfer(
             "directory_path": "/some/parquet/path",
             "file_format": {
                 "type": "parquet",
+                "compression": "snappy",
             },
         },
     ],
@@ -302,6 +309,7 @@ async def test_developer_plus_can_create_hdfs_transfer(
             "escape": "\\",
             "include_header": False,
             "line_sep": "\n",
+            "compression": "gzip",
         },
         "excel": {
             "type": "excel",
@@ -315,9 +323,11 @@ async def test_developer_plus_can_create_hdfs_transfer(
         },
         "orc": {
             "type": "orc",
+            "compression": "zlib",
         },
         "parquet": {
             "type": "parquet",
+            "compression": "snappy",
         },
     }
 

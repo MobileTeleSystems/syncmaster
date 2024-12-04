@@ -1,0 +1,1 @@
+Add compression options to file formats CSV, JSON, JSONLine, Excel, ORC, Parquet

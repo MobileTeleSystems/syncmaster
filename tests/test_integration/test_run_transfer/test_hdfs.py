@@ -13,6 +13,7 @@ from pytest import FixtureRequest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Connection, Group, Queue, Status
+from syncmaster.db.models.transfer import Transfer
 from tests.mocks import MockUser
 from tests.test_unit.utils import create_transfer
 from tests.utils import get_run_on_end
@@ -128,6 +129,16 @@ async def postgres_to_hdfs(
             "with_header",
             id="excel",
         ),
+        pytest.param(
+            ("orc", {}),
+            "without_compression",
+            id="orc",
+        ),
+        pytest.param(
+            ("parquet", {}),
+            "without_compression",
+            id="parquet",
+        ),
     ],
     indirect=["source_file_format", "file_format_flavor"],
 )
@@ -136,7 +147,7 @@ async def test_run_transfer_hdfs_to_postgres(
     group_owner: MockUser,
     init_df: DataFrame,
     client: AsyncClient,
-    hdfs_to_postgres: Connection,
+    hdfs_to_postgres: Transfer,
     source_file_format,
     file_format_flavor,
 ):
@@ -188,8 +199,8 @@ async def test_run_transfer_hdfs_to_postgres(
     "target_file_format, file_format_flavor",
     [
         pytest.param(
-            ("csv", {}),
-            "with_header",
+            ("csv", {"compression": "lz4"}),
+            "with_compression",
             id="csv",
         ),
         pytest.param(
@@ -202,6 +213,16 @@ async def test_run_transfer_hdfs_to_postgres(
             "with_header",
             id="excel",
         ),
+        pytest.param(
+            ("orc", {"compression": "snappy"}),
+            "with_compression",
+            id="orc",
+        ),
+        pytest.param(
+            ("parquet", {"compression": "lz4"}),
+            "with_compression",
+            id="parquet",
+        ),
     ],
     indirect=["target_file_format", "file_format_flavor"],
 )
@@ -211,7 +232,7 @@ async def test_run_transfer_postgres_to_hdfs(
     client: AsyncClient,
     prepare_postgres,
     hdfs_file_df_connection: SparkHDFS,
-    postgres_to_hdfs: Connection,
+    postgres_to_hdfs: Transfer,
     hdfs_connection: SparkHDFS,
     target_file_format,
     file_format_flavor: str,

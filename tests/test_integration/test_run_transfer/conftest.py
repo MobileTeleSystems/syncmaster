@@ -11,7 +11,7 @@ import pytest_asyncio
 from onetl.connection import MSSQL, Clickhouse, Hive, MySQL, Oracle, Postgres, SparkS3
 from onetl.connection.file_connection.s3 import S3
 from onetl.db import DBWriter
-from onetl.file.format import CSV, JSON, Excel, JSONLine
+from onetl.file.format import CSV, JSON, ORC, Excel, JSONLine, Parquet
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import (
     DateType,
@@ -804,7 +804,7 @@ def prepare_mysql(
         pass
 
 
-@pytest.fixture(params=[("csv", {}), ("jsonline", {}), ("json", {}), ("excel", {})])
+@pytest.fixture()
 def source_file_format(request: FixtureRequest):
     name, params = request.param
     if name == "csv":
@@ -835,10 +835,20 @@ def source_file_format(request: FixtureRequest):
             **params,
         )
 
+    if name == "orc":
+        return "orc", ORC(
+            **params,
+        )
+
+    if name == "parquet":
+        return "parquet", Parquet(
+            **params,
+        )
+
     raise ValueError(f"Unsupported file format: {name}")
 
 
-@pytest.fixture(params=[("csv", {}), ("jsonline", {}), ("excel", {})])
+@pytest.fixture()
 def target_file_format(request: FixtureRequest):
     name, params = request.param
     if name == "csv":
@@ -860,6 +870,16 @@ def target_file_format(request: FixtureRequest):
     if name == "excel":
         return "excel", Excel(
             header=False,
+            **params,
+        )
+
+    if name == "orc":
+        return "orc", ORC(
+            **params,
+        )
+
+    if name == "parquet":
+        return "parquet", Parquet(
             **params,
         )
 

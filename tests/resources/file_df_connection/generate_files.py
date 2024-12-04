@@ -64,7 +64,7 @@ def get_pyarrow_schema() -> ArrowSchema:
             pa.field("REGION", pa.string()),
             pa.field("NUMBER", pa.int32()),
             pa.field("BIRTH_DATE", pa.date32()),
-            pa.field("REGISTERED_AT", pa.timestamp("ms")),
+            pa.field("REGISTERED_AT", pa.timestamp("us")),
             pa.field("ACCOUNT_BALANCE", pa.float64()),
         ],
     )

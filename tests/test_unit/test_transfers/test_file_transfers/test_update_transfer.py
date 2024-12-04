@@ -20,6 +20,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
                 "line_sep": "\n",
                 "quote": '"',
                 "type": "csv",
+                "compression": "gzip",
             },
             "options": {},
         },
@@ -48,6 +49,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
             "directory_path": "/some/orc/path",
             "file_format": {
                 "type": "orc",
+                "compression": "snappy",
             },
             "options": {},
         },
@@ -56,6 +58,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
             "directory_path": "/some/parquet/path",
             "file_format": {
                 "type": "parquet",
+                "compression": "snappy",
             },
             "options": {},
         },
