@@ -36,8 +36,14 @@ def get_worker_spark_session(
 
 
 def get_packages(db_type: str) -> list[str]:
+    import pyspark
     from onetl.connection import MSSQL, Clickhouse, MySQL, Oracle, Postgres, SparkS3
-    from onetl.file.format import Excel
+    from onetl.file.format import XML, Excel
+
+    # excel version is hardcoded due to https://github.com/nightscape/spark-excel/issues/902
+    file_formats_spark_packages: list[str] = XML.get_packages(spark_version=pyspark.__version__) + Excel.get_packages(
+        spark_version="3.5.1",
+    )
 
     if db_type == "postgres":
         return Postgres.get_packages()
@@ -54,11 +60,10 @@ def get_packages(db_type: str) -> list[str]:
         import pyspark
 
         spark_version = pyspark.__version__
-        # see supported versions from https://mvnrepository.com/artifact/com.crealytics/spark-excel
-        return SparkS3.get_packages(spark_version=spark_version) + Excel.get_packages(spark_version="3.5.1")
+        return SparkS3.get_packages(spark_version=spark_version) + file_formats_spark_packages
+
     if db_type == "hdfs":
-        # see supported versions from https://mvnrepository.com/artifact/com.crealytics/spark-excel
-        return Excel.get_packages(spark_version="3.5.1")
+        return file_formats_spark_packages
 
     # If the database type does not require downloading .jar packages
     return []

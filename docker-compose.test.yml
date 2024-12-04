@@ -196,7 +196,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    profiles: [hive, hdfs, all]
+    profiles: [hive, hdfs, s3, all]
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -234,7 +234,8 @@ services:
       HIVE_METASTORE_DB_DRIVER: org.postgresql.Driver
       HIVE_METASTORE_DB_USER: test_hive
       HIVE_METASTORE_DB_PASSWORD: test_hive
-    profiles: [hive, hdfs, all]
+    # writing spark dataframe to s3 xml file fails without running hive metastore server
+    profiles: [hive, hdfs, s3, all]
 
 volumes:
   postgres_test_data:
