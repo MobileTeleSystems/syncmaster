@@ -229,8 +229,8 @@ async def test_run_transfer_hdfs_to_postgres(
             id="parquet",
         ),
         pytest.param(
-            ("xml", {}),
-            "without_compression",
+            ("xml", {"compression": "snappy"}),
+            "with_compression",
             id="xml",
         ),
     ],

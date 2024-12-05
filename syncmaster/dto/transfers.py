@@ -36,15 +36,20 @@ class FileTransferDTO(TransferDTO):
 
     def __post_init__(self):
         if isinstance(self.file_format, dict):
-            self.file_format = self._get_format(self.file_format.copy())
+            self.file_format = self._get_file_format(self.file_format.copy())
         if isinstance(self.df_schema, str):
             self.df_schema = json.loads(self.df_schema)
 
-    def _get_format(self, file_format: dict):
+    def _get_file_format(self, file_format: dict) -> CSV | JSONLine | JSON | Excel | XML | ORC | Parquet:
         file_type = file_format.pop("type", None)
+        # XML at spark-xml has no "none" option https://github.com/databricks/spark-xml?tab=readme-ov-file#features
+        if file_type == "xml" and file_format.get("compression") == "none":
+            file_format.pop("compression")
+
         parser_class = self._format_parsers.get(file_type)
         if parser_class is not None:
             return parser_class.parse_obj(file_format)
+
         raise ValueError(f"Unknown file type: {file_type}")
 
 
