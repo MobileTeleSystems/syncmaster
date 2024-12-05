@@ -78,6 +78,7 @@ def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
         maven_packages.extend(Oracle.get_packages())
 
     if "clickhouse" in markers:
+        maven_packages.append("io.github.mtsongithub.doetl:spark-dialect-extension_2.12:0.0.2")
         maven_packages.extend(Clickhouse.get_packages())
 
     if "mssql" in markers:
@@ -635,6 +636,11 @@ def prepare_clickhouse(
     clickhouse_for_conftest: ClickhouseConnectionDTO,
     spark: SparkSession,
 ):
+    ClickhouseDialectRegistry = (
+        spark._jvm.io.github.mtsongithub.doetl.sparkdialectextensions.clickhouse.ClickhouseDialectRegistry
+    )
+    ClickhouseDialectRegistry.register()
+
     clickhouse = clickhouse_for_conftest
     onetl_conn = Clickhouse(
         host=clickhouse.host,

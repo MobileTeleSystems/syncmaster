@@ -6,7 +6,6 @@ from httpx import AsyncClient
 from onetl.connection import Clickhouse
 from onetl.db import DBReader
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, date_trunc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Connection, Group, Queue, Status, Transfer
@@ -117,8 +116,6 @@ async def test_run_transfer_postgres_to_clickhouse(
         table=f"{clickhouse.user}.target_table",
     )
     df = reader.run()
-    # as spark truncates milliseconds while writing to clickhouse: https://onetl.readthedocs.io/en/latest/connection/db_connection/clickhouse/types.html#id10
-    init_df = init_df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
     for field in init_df.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
 
@@ -169,11 +166,6 @@ async def test_run_transfer_postgres_to_clickhouse_mixed_naming(
     assert df.columns != init_df_with_mixed_column_naming.columns
     assert df.columns == [column.lower() for column in init_df_with_mixed_column_naming.columns]
 
-    # as spark truncates milliseconds while writing to clickhouse: https://onetl.readthedocs.io/en/latest/connection/db_connection/clickhouse/types.html#id10
-    init_df_with_mixed_column_naming = init_df_with_mixed_column_naming.withColumn(
-        "Registered At",
-        date_trunc("second", col("Registered At")),
-    )
     for field in init_df_with_mixed_column_naming.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
 
@@ -222,8 +214,6 @@ async def test_run_transfer_clickhouse_to_postgres(
     )
     df = reader.run()
 
-    # as spark truncates milliseconds while writing to clickhouse: https://onetl.readthedocs.io/en/latest/connection/db_connection/clickhouse/types.html#id10
-    init_df = init_df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
     for field in init_df.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
 
@@ -275,11 +265,6 @@ async def test_run_transfer_clickhouse_to_postgres_mixed_naming(
     assert df.columns != init_df_with_mixed_column_naming.columns
     assert df.columns == [column.lower() for column in init_df_with_mixed_column_naming.columns]
 
-    # as spark truncates milliseconds while writing to clickhouse: https://onetl.readthedocs.io/en/latest/connection/db_connection/clickhouse/types.html#id10
-    init_df_with_mixed_column_naming = init_df_with_mixed_column_naming.withColumn(
-        "Registered At",
-        date_trunc("second", col("Registered At")),
-    )
     for field in init_df_with_mixed_column_naming.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
 

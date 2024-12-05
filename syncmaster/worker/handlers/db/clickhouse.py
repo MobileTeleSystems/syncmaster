@@ -23,6 +23,10 @@ class ClickhouseHandler(DBHandler):
     transfer_dto: ClickhouseTransferDTO
 
     def connect(self, spark: SparkSession):
+        ClickhouseDialectRegistry = (
+            spark._jvm.io.github.mtsongithub.doetl.sparkdialectextensions.clickhouse.ClickhouseDialectRegistry
+        )
+        ClickhouseDialectRegistry.register()
         self.connection = Clickhouse(
             host=self.connection_dto.host,
             port=self.connection_dto.port,
