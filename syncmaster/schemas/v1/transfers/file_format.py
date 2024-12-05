@@ -49,6 +49,14 @@ class CSVCompression(str, Enum):
     DEFLATE = "deflate"
 
 
+class XMLCompression(str, Enum):
+    NONE = "none"
+    BZIP2 = "bzip2"
+    GZIP = "gzip"
+    LZ4 = "lz4"
+    SNAPPY = "snappy"
+
+
 class CSV(BaseModel):
     type: CSV_FORMAT
     delimiter: str = ","
@@ -84,6 +92,7 @@ class XML(BaseModel):
     type: XML_FORMAT
     root_tag: str
     row_tag: str
+    compression: XMLCompression = XMLCompression.GZIP
 
 
 class ORC(BaseModel):

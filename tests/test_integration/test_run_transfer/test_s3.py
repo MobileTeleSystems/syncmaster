@@ -230,7 +230,7 @@ async def test_run_transfer_s3_to_postgres(
             id="parquet",
         ),
         pytest.param(
-            ("xml", {}),
+            ("xml", {"compression": "none"}),
             "without_compression",
             id="xml",
         ),
