@@ -50,8 +50,10 @@ def get_packages(db_type: str) -> list[str]:
     if db_type == "oracle":
         return Oracle.get_packages()
     if db_type == "clickhouse":
-        # TODO: add https://github.com/MobileTeleSystems/spark-dialect-extension/ to spark jars
-        return Clickhouse.get_packages()
+        return [
+            "io.github.mtsongithub.doetl:spark-dialect-extension_2.12:0.0.2",
+            *Clickhouse.get_packages(),
+        ]
     if db_type == "mssql":
         return MSSQL.get_packages()
     if db_type == "mysql":
