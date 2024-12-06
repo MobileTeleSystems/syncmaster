@@ -28,6 +28,24 @@ services:
       timeout: 5s
       retries: 3
 
+  # Using worker image here to skip building backend image build in CI.
+  # Worker test image already has all neccessary dependencies
+  migrations:
+    image: mtsrus/syncmaster-worker:${WORKER_IMAGE_TAG:-test}
+    restart: none
+    build:
+      dockerfile: docker/Dockerfile.worker
+      context: .
+      target: test
+    volumes:
+      - ./syncmaster:/app/syncmaster
+      - ./tests:/app/tests
+    entrypoint: [python, -m, syncmaster.db.migrations, upgrade, head]
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+
   backend:
     image: mtsrus/syncmaster-backend:${BACKEND_IMAGE_TAG:-test}
     restart: unless-stopped
@@ -41,15 +59,22 @@ services:
     volumes:
       - ./syncmaster:/app/syncmaster
       - ./docs/_static:/app/docs/_static
-      - ./cached_jars:/root/.ivy2
       - ./reports:/app/reports
       - ./tests:/app/tests
       - ./pyproject.toml:/app/pyproject.toml
     depends_on:
       db:
         condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
+    healthcheck:
+      test: [CMD-SHELL, curl -f http://localhost:8000/monitoring/ping]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
     profiles: [backend, all]
 
   scheduler:
@@ -68,6 +93,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
     profiles: [scheduler, all]
@@ -94,6 +121,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
     profiles: [worker, scheduler, s3, oracle, hdfs, hive, clickhouse, mysql, mssql, all]

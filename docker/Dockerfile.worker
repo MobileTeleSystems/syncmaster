@@ -43,7 +43,7 @@ FROM base as prod
 COPY ./syncmaster/ /app/syncmaster/
 
 
-FROM base as test
+FROM base AS test
 
 ENV SYNCMASTER__WORKER__CREATE_SPARK_SESSION_FUNCTION=tests.spark.get_worker_spark_session
 

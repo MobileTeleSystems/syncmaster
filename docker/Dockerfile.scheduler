@@ -22,7 +22,8 @@ FROM base AS prod
 
 COPY ./syncmaster/ /app/syncmaster/
 
-FROM base as test
+
+FROM base AS test
 
 RUN poetry install --no-root --all-extras --with test --without docs,dev
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh

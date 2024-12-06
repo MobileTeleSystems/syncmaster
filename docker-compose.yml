@@ -28,12 +28,26 @@ services:
       timeout: 5s
       retries: 3
 
+  migrations:
+    image: mtsrus/syncmaster-backend:${TAG:-develop}
+    restart: none
+    build:
+      dockerfile: docker/Dockerfile.backend
+      context: .
+      target: prod
+    entrypoint: [python, -m, syncmaster.db.migrations, upgrade, head]
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+
   backend:
     image: mtsrus/syncmaster-backend:${TAG:-develop}
     restart: unless-stopped
     build:
       dockerfile: docker/Dockerfile.backend
       context: .
+      target: prod
     ports:
       - 8000:8000
     environment:
@@ -49,6 +63,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
 
@@ -58,10 +74,13 @@ services:
     build:
       dockerfile: docker/Dockerfile.worker
       context: .
+      target: prod
     env_file: .env.docker
     depends_on:
       db:
         condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
 
@@ -71,10 +90,13 @@ services:
     build:
       dockerfile: docker/Dockerfile.scheduler
       context: .
+      target: prod
     env_file: .env.docker
     depends_on:
       db:
         condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
 
