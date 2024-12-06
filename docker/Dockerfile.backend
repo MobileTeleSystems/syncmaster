@@ -39,7 +39,7 @@ ENV SYNCMASTER__SERVER__OPENAPI__SWAGGER__JS_URL=/static/swagger/swagger-ui-bund
     SYNCMASTER__SERVER__STATIC_FILES__DIRECTORY=/app/syncmaster/backend/static
 
 
-FROM base as test
+FROM base AS test
 
 RUN poetry install --no-root --extras "backend" --with test --without docs,dev
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh

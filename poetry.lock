@@ -178,24 +178,6 @@ starlette = ">=0.18"
 celery = ["celery"]
 
 [[package]]
-name = "asttokens"
-version = "2.4.1"
-description = "Annotate AST trees with source code positions"
-optional = true
-python-versions = "*"
-files = [
-    {file = "asttokens-2.4.1-py2.py3-none-any.whl", hash = "sha256:051ed49c3dcae8913ea7cd08e46a606dba30b79993209636c4875bc1d637bc24"},
-    {file = "asttokens-2.4.1.tar.gz", hash = "sha256:b03869718ba9a6eb027e134bfdf69f38a236d681c83c160d510768af11254ba0"},
-]
-
-[package.dependencies]
-six = ">=1.12.0"
-
-[package.extras]
-astroid = ["astroid (>=1,<2)", "astroid (>=2,<4)"]
-test = ["astroid (>=1,<2)", "astroid (>=2,<4)", "pytest"]
-
-[[package]]
 name = "async-property"
 version = "0.2.2"
 description = "Python decorator for async properties."
@@ -895,22 +877,6 @@ files = [
 packaging = "*"
 
 [[package]]
-name = "devtools"
-version = "0.12.2"
-description = "Python's missing debug print command, and more."
-optional = true
-python-versions = ">=3.7"
-files = [
-    {file = "devtools-0.12.2-py3-none-any.whl", hash = "sha256:c366e3de1df4cdd635f1ad8cbcd3af01a384d7abda71900e68d43b04eb6aaca7"},
-    {file = "devtools-0.12.2.tar.gz", hash = "sha256:efceab184cb35e3a11fa8e602cc4fadacaa2e859e920fc6f87bf130b69885507"},
-]
-
-[package.dependencies]
-asttokens = ">=2.0.0,<3.0.0"
-executing = ">=1.1.1"
-pygments = ">=2.15.0"
-
-[[package]]
 name = "distlib"
 version = "0.3.9"
 description = "Distribution utilities"
@@ -989,20 +955,6 @@ files = [
     {file = "evacuator-1.0.4-py3-none-any.whl", hash = "sha256:0c3a5fafa2c41fba1272e18bead116954cd3ac7bf97c3050fa77f516def88c1b"},
     {file = "evacuator-1.0.4.tar.gz", hash = "sha256:4fac38ee4241e826fced8115ab7cdc8ca2fd18e2e200083405c4a802e836e926"},
 ]
-
-[[package]]
-name = "executing"
-version = "2.1.0"
-description = "Get the currently executing AST node of a frame, and other information"
-optional = true
-python-versions = ">=3.8"
-files = [
-    {file = "executing-2.1.0-py2.py3-none-any.whl", hash = "sha256:8d63781349375b5ebccc3142f4b30350c0cd9c79f921cde38be2be4637e98eaf"},
-    {file = "executing-2.1.0.tar.gz", hash = "sha256:8ea27ddd260da8150fa5a708269c4a10e76161e2496ec3e587da9e3c0fe4b9ab"},
-]
-
-[package.extras]
-tests = ["asttokens (>=2.1.0)", "coverage", "coverage-enable-subprocess", "ipython", "littleutils", "pytest", "rich"]
 
 [[package]]
 name = "faker"
@@ -3522,11 +3474,11 @@ test = ["coverage[toml]", "zope.event", "zope.testing"]
 testing = ["coverage[toml]", "zope.event", "zope.testing"]
 
 [extras]
-backend = ["alembic", "asgi-correlation-id", "asyncpg", "celery", "coloredlogs", "devtools", "fastapi", "itsdangerous", "jinja2", "psycopg", "pydantic-settings", "python-jose", "python-json-logger", "python-keycloak", "python-multipart", "pyyaml", "sqlalchemy", "sqlalchemy-utils", "starlette-exporter", "uuid6", "uvicorn"]
+backend = ["alembic", "asgi-correlation-id", "asyncpg", "celery", "coloredlogs", "fastapi", "itsdangerous", "jinja2", "psycopg", "pydantic-settings", "python-jose", "python-json-logger", "python-keycloak", "python-multipart", "pyyaml", "sqlalchemy", "sqlalchemy-utils", "starlette-exporter", "uuid6", "uvicorn"]
 scheduler = ["apscheduler", "asyncpg", "celery", "coloredlogs", "pydantic-settings", "python-jose", "python-json-logger", "python-multipart", "pyyaml", "sqlalchemy", "sqlalchemy-utils"]
-worker = ["asgi-correlation-id", "celery", "coloredlogs", "jinja2", "onetl", "psycopg", "pydantic-settings", "python-json-logger", "python-keycloak", "sqlalchemy", "sqlalchemy-utils", "uuid6"]
+worker = ["asgi-correlation-id", "celery", "coloredlogs", "jinja2", "onetl", "psycopg", "pydantic-settings", "python-json-logger", "sqlalchemy", "sqlalchemy-utils", "uuid6"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "8d0b3429bc8759a1e54ab4300022fd083e12f19d8f5cae9a4a8bd8b9c3981349"
+content-hash = "22c7277db014088ba6dd9c5ba719ef065b58360c213d437122fb9becc9c7d4cf"

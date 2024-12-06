@@ -130,10 +130,13 @@ dev-worker: db-start broker-start ##@Application Run development broker (without
 
 
 prod-build-server: ##@Application Build docker image for server
-	docker build --progress=plain -t mtsrus/syncmaster-backend:develop -f ./docker/Dockerfile.backend $(ARGS) .
+	docker build --progress=plain -t mtsrus/syncmaster-backend:develop -f ./docker/Dockerfile.backend --target=prod $(ARGS) .
+
+prod-build-scheduler: ##@Application Build docker image for scheduler
+	docker build --progress=plain -t mtsrus/syncmaster-scheduler:develop -f ./docker/Dockerfile.scheduler --target=prod $(ARGS) .
 
 prod-build-worker: ##@Application Build docker image for worker
-	docker build --progress=plain -t mtsrus/syncmaster-worker:develop -f ./docker/Dockerfile.worker $(ARGS) .
+	docker build --progress=plain -t mtsrus/syncmaster-worker:develop -f ./docker/Dockerfile.worker --target=prod $(ARGS) .
 
 prod-build: prod-build-server prod-build-worker ##@Application Build docker images
 
