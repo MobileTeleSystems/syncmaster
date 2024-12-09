@@ -17,7 +17,7 @@ from syncmaster.exceptions.run import RunNotFoundError
 
 from syncmaster.settings.log import setup_logging
 
-from syncmaster.worker.celery import celery
+from syncmaster.worker.celery import app as celery
 from syncmaster.worker.controller import TransferController
 from syncmaster.worker.settings import WorkerAppSettings
 

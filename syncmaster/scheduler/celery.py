@@ -3,4 +3,4 @@
 from syncmaster.scheduler.settings import SchedulerAppSettings
 from syncmaster.worker import celery_factory
 
-celery = celery_factory(SchedulerAppSettings())
+app = celery_factory(SchedulerAppSettings())

@@ -3,4 +3,4 @@
 from syncmaster.worker import celery_factory
 from syncmaster.worker.settings import WorkerAppSettings
 
-celery = celery_factory(WorkerAppSettings())
+app = celery_factory(WorkerAppSettings())
