@@ -6,4 +6,3 @@ set -e
 
 # exec is required to forward all signals to the main process
 exec python -m celery -A syncmaster.worker.celery worker --max-tasks-per-child=1 "$@"
-

@@ -23,7 +23,7 @@ from syncmaster.backend.settings.auth.jwt import JWTSettings
 from syncmaster.backend.utils.jwt import sign_jwt
 from syncmaster.db.models import Base
 from syncmaster.scheduler.settings import SchedulerAppSettings
-from syncmaster.worker import create_celery_app
+from syncmaster.worker import celery_factory
 from syncmaster.worker.settings import WorkerAppSettings
 from tests.mocks import UserTestRoles
 from tests.settings import TestSettings
@@ -140,7 +140,7 @@ async def client(settings: Settings) -> AsyncGenerator:
 
 @pytest.fixture(scope="session", params=[{}])
 def celery(worker_settings: WorkerAppSettings) -> Celery:
-    celery_app = create_celery_app(worker_settings)
+    celery_app = celery_factory(worker_settings)
     return celery_app
 
 
