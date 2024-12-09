@@ -1,16 +1,22 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
+from __future__ import annotations
+
 import json
+from typing import TYPE_CHECKING
 
 from cryptography.fernet import Fernet
 from pydantic import SecretStr
 
-from syncmaster.backend.settings import ServerAppSettings as Settings
+if TYPE_CHECKING:
+    from syncmaster.backend.settings import ServerAppSettings
+    from syncmaster.scheduler.settings import SchedulerAppSettings
+    from syncmaster.worker.settings import WorkerAppSettings
 
 
 def decrypt_auth_data(
     value: str,
-    settings: Settings,
+    settings: WorkerAppSettings | SchedulerAppSettings | ServerAppSettings,
 ) -> dict:
     decryptor = Fernet(settings.encryption.crypto_key)
     decrypted = decryptor.decrypt(value)
@@ -24,7 +30,7 @@ def _json_default(value):
 
 def encrypt_auth_data(
     value: dict,
-    settings: Settings,
+    settings: WorkerAppSettings | SchedulerAppSettings | ServerAppSettings,
 ) -> str:
     encryptor = Fernet(settings.encryption.crypto_key)
     serialized = json.dumps(
