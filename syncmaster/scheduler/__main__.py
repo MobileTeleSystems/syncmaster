@@ -3,10 +3,10 @@
 import asyncio
 import logging
 
-from syncmaster.scheduler.logging import setup_logging
 from syncmaster.scheduler.settings import SchedulerAppSettings as Settings
 from syncmaster.scheduler.transfer_fetcher import TransferFetcher
 from syncmaster.scheduler.transfer_job_manager import TransferJobManager
+from syncmaster.settings.log import setup_logging
 
 logger = logging.getLogger(__name__)
 

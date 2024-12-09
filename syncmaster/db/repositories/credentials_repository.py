@@ -2,24 +2,28 @@
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
-from typing import NoReturn
+from typing import TYPE_CHECKING, NoReturn
 
 from sqlalchemy import ScalarResult, insert, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.db.models import AuthData
 from syncmaster.db.repositories.base import Repository
 from syncmaster.db.repositories.utils import decrypt_auth_data, encrypt_auth_data
 from syncmaster.exceptions import SyncmasterError
 from syncmaster.exceptions.credentials import AuthDataNotFoundError
 
+if TYPE_CHECKING:
+    from syncmaster.backend.settings import ServerAppSettings
+    from syncmaster.scheduler.settings import SchedulerAppSettings
+    from syncmaster.worker.settings import WorkerAppSettings
+
 
 class CredentialsRepository(Repository[AuthData]):
     def __init__(
         self,
-        settings: Settings,
+        settings: WorkerAppSettings | SchedulerAppSettings | ServerAppSettings,
         session: AsyncSession,
         model: type[AuthData],
     ):

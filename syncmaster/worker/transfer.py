@@ -11,11 +11,10 @@ from celery.utils.log import get_task_logger
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from syncmaster.backend.middlewares.logging import setup_logging
-from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.db.models import AuthData, Run, Status, Transfer
 from syncmaster.db.repositories.utils import decrypt_auth_data
 from syncmaster.exceptions.run import RunNotFoundError
+from syncmaster.settings.log import setup_logging
 from syncmaster.worker import celery
 from syncmaster.worker.controller import TransferController
 from syncmaster.worker.settings import WorkerAppSettings
@@ -37,7 +36,7 @@ def run_transfer_task(self: Celery, run_id: int) -> None:
         )
 
 
-def run_transfer(session: Session, run_id: int, settings: Settings):
+def run_transfer(session: Session, run_id: int, settings: WorkerAppSettings):
     logger.info("Start transfer")
     run = session.get(
         Run,
@@ -86,7 +85,7 @@ def run_transfer(session: Session, run_id: int, settings: Settings):
 
 @after_setup_logger.connect
 def setup_loggers(*args, **kwargs):
-    setup_logging(Settings().logging.get_log_config_path())
+    setup_logging(WorkerAppSettings().logging.get_log_config_path())
 
 
 @before_task_publish.connect()

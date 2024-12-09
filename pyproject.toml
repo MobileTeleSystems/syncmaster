@@ -100,6 +100,8 @@ worker = [
     "pydantic-settings",
     "sqlalchemy",
     "sqlalchemy-utils",
+    "python-multipart",
+    "python-jose",
     "celery",
     "onetl",
     "asgi-correlation-id",
@@ -108,6 +110,7 @@ worker = [
     "uuid6",
     "coloredlogs",
     "python-json-logger",
+    "pyyaml",
 ]
 
 scheduler = [
