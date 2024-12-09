@@ -1,6 +1,5 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from celery import Celery
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
@@ -19,7 +18,6 @@ from syncmaster.backend.services.unit_of_work import UnitOfWork
 from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.db.factory import create_session_factory, get_uow
 from syncmaster.exceptions import SyncmasterError
-from syncmaster.worker import celery_factory
 
 
 def application_factory(settings: Settings) -> FastAPI:
