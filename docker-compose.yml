@@ -30,7 +30,7 @@ services:
 
   migrations:
     image: mtsrus/syncmaster-backend:${TAG:-develop}
-    restart: none
+    restart: no
     build:
       dockerfile: docker/Dockerfile.backend
       context: .

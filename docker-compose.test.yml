@@ -32,7 +32,7 @@ services:
   # Worker test image already has all neccessary dependencies
   migrations:
     image: mtsrus/syncmaster-worker:${WORKER_IMAGE_TAG:-test}
-    restart: none
+    restart: no
     build:
       dockerfile: docker/Dockerfile.worker
       context: .
