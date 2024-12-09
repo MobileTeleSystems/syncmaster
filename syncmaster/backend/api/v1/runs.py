@@ -5,11 +5,11 @@ from datetime import datetime
 from typing import Annotated
 
 from asgi_correlation_id import correlation_id
-from celery import Celery
 from fastapi import APIRouter, Depends, Query
 from jinja2 import Template
 from kombu.exceptions import KombuError
 
+from syncmaster.backend.celery import app as celery
 from syncmaster.backend.dependencies import Stub
 from syncmaster.backend.services import UnitOfWork, get_user
 from syncmaster.backend.settings import ServerAppSettings as Settings
@@ -84,7 +84,6 @@ async def read_run(
 async def start_run(
     create_run_data: CreateRunSchema,
     settings: Annotated[Settings, Depends(Stub(Settings))],
-    celery: Annotated[Celery, Depends(Stub(Celery))],
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
     current_user: User = Depends(get_user(is_active=True)),
 ) -> ReadRunSchema:

@@ -32,7 +32,6 @@ def application_factory(settings: Settings) -> FastAPI:
         redoc_url=None,
     )
     application.state.settings = settings
-    application.state.celery = celery_factory(settings)
     application.include_router(api_router)
     application.exception_handler(RequestValidationError)(validation_exception_handler)
     application.exception_handler(ValidationError)(validation_exception_handler)
@@ -47,7 +46,6 @@ def application_factory(settings: Settings) -> FastAPI:
         {
             Settings: lambda: settings,
             UnitOfWork: get_uow(session_factory, settings=settings),
-            Celery: lambda: application.state.celery,
         },
     )
 

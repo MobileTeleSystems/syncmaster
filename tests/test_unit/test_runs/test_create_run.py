@@ -20,7 +20,7 @@ async def test_developer_plus_can_create_run_of_transfer_his_group(
 ) -> None:
     # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
-    mock_send_task = mocker.patch("syncmaster.worker.celery.app.send_task")
+    mock_send_task = mocker.patch("syncmaster.backend.celery.app.send_task")
     mock_to_thread = mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
     run = (
@@ -73,7 +73,7 @@ async def test_groupless_user_cannot_create_run(
     mocker,
 ) -> None:
     # Arrange
-    mocker.patch("syncmaster.worker.celery.app.send_task")
+    mocker.patch("syncmaster.backend.celery.app.send_task")
     mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
     # Act
@@ -103,7 +103,7 @@ async def test_group_member_cannot_create_run_of_other_group_transfer(
     role_guest_plus: UserTestRoles,
 ):
     # Arrange
-    mocker.patch("syncmaster.worker.celery.app.send_task")
+    mocker.patch("syncmaster.backend.celery.app.send_task")
     mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
     user = group.get_member_of_role(role_guest_plus)
 
@@ -139,7 +139,7 @@ async def test_superuser_can_create_run(
     mocker,
 ) -> None:
     # Arrange
-    mock_send_task = mocker.patch("syncmaster.worker.celery.app.send_task")
+    mock_send_task = mocker.patch("syncmaster.backend.celery.app.send_task")
     mock_to_thread = mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
     # Act
@@ -183,7 +183,7 @@ async def test_unauthorized_user_cannot_create_run(
     mocker,
 ) -> None:
     # Arrange
-    mocker.patch("syncmaster.worker.celery.app.send_task")
+    mocker.patch("syncmaster.backend.celery.app.send_task")
     mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
     # Act
@@ -212,7 +212,7 @@ async def test_group_member_cannot_create_run_of_unknown_transfer_error(
 ) -> None:
     # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_guest_plus)
-    mocker.patch("syncmaster.worker.celery.app.send_task")
+    mocker.patch("syncmaster.backend.celery.app.send_task")
     mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
     # Act
@@ -240,7 +240,7 @@ async def test_superuser_cannot_create_run_of_unknown_transfer_error(
     mocker,
 ) -> None:
     # Arrange
-    mocker.patch("syncmaster.worker.celery.app.send_task")
+    mocker.patch("syncmaster.backend.celery.app.send_task")
     mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
     # Act
