@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from syncmaster.db.models.run import Run, Status
 from syncmaster.exceptions.run import RunNotFoundError
-from syncmaster.worker import celery
+from syncmaster.scheduler.celery import app as celery
 from syncmaster.worker.base import WorkerTask
 
 

@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
+from celery import Celery
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
@@ -20,6 +21,15 @@ from syncmaster.db.factory import create_session_factory, get_uow
 from syncmaster.exceptions import SyncmasterError
 
 
+def celery_factory(settings: Settings) -> Celery:
+    app = Celery(
+        __name__,
+        broker=settings.broker.url,
+        backend="db+" + settings.database.sync_url,
+    )
+    return app
+
+
 def application_factory(settings: Settings) -> FastAPI:
     application = FastAPI(
         title="Syncmaster",
@@ -30,6 +40,7 @@ def application_factory(settings: Settings) -> FastAPI:
         redoc_url=None,
     )
     application.state.settings = settings
+    application.state.celery = celery_factory(settings)
     application.include_router(api_router)
     application.exception_handler(RequestValidationError)(validation_exception_handler)
     application.exception_handler(ValidationError)(validation_exception_handler)
@@ -44,6 +55,7 @@ def application_factory(settings: Settings) -> FastAPI:
         {
             Settings: lambda: settings,
             UnitOfWork: get_uow(session_factory, settings=settings),
+            Celery: lambda: application.state.celery,
         },
     )
 

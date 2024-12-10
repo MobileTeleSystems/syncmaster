@@ -1,7 +1,9 @@
 from unittest.mock import AsyncMock
 
 import pytest
+from celery import Celery
 from httpx import AsyncClient
+from pytest_mock import MockerFixture
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,15 +14,15 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
 
 async def test_developer_plus_can_create_run_of_transfer_his_group(
-    client: AsyncClient,
+    client_with_mocked_celery: AsyncClient,
+    mocked_celery: Celery,
     group_transfer: MockTransfer,
     session: AsyncSession,
-    mocker,
+    mocker: MockerFixture,
     role_developer_plus: UserTestRoles,
 ) -> None:
-    # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
-    mock_send_task = mocker.patch("syncmaster.worker.celery.send_task")
+    mock_send_task = mocked_celery.send_task
     mock_to_thread = mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
     run = (
@@ -31,14 +33,12 @@ async def test_developer_plus_can_create_run_of_transfer_his_group(
 
     assert not run
 
-    # Act
-    result = await client.post(
+    result = await client_with_mocked_celery.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
         json={"transfer_id": group_transfer.id},
     )
 
-    # Assert
     run = (
         await session.scalars(
             select(Run).filter_by(transfer_id=group_transfer.id, status=Status.CREATED).order_by(desc(Run.created_at)),
@@ -66,24 +66,20 @@ async def test_developer_plus_can_create_run_of_transfer_his_group(
 
 
 async def test_groupless_user_cannot_create_run(
-    client: AsyncClient,
+    client_with_mocked_celery: AsyncClient,
     simple_user: MockUser,
     group_transfer: MockTransfer,
     session: AsyncSession,
-    mocker,
+    mocker: MockerFixture,
 ) -> None:
-    # Arrange
-    mocker.patch("syncmaster.worker.celery.send_task")
     mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
-    # Act
-    result = await client.post(
+    result = await client_with_mocked_celery.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={"transfer_id": group_transfer.id},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -95,26 +91,22 @@ async def test_groupless_user_cannot_create_run(
 
 
 async def test_group_member_cannot_create_run_of_other_group_transfer(
-    client: AsyncClient,
+    client_with_mocked_celery: AsyncClient,
     group_transfer: MockTransfer,
     group: MockGroup,
     session: AsyncSession,
-    mocker,
+    mocker: MockerFixture,
     role_guest_plus: UserTestRoles,
 ):
-    # Arrange
-    mocker.patch("syncmaster.worker.celery.send_task")
     mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
     user = group.get_member_of_role(role_guest_plus)
 
-    # Act
-    result = await client.post(
+    result = await client_with_mocked_celery.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
         json={"transfer_id": group_transfer.id},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -132,18 +124,17 @@ async def test_group_member_cannot_create_run_of_other_group_transfer(
 
 
 async def test_superuser_can_create_run(
-    client: AsyncClient,
+    client_with_mocked_celery: AsyncClient,
+    mocked_celery: Celery,
     superuser: MockUser,
     group_transfer: MockTransfer,
     session: AsyncSession,
-    mocker,
+    mocker: MockerFixture,
 ) -> None:
-    # Arrange
-    mock_send_task = mocker.patch("syncmaster.worker.celery.send_task")
+    mock_send_task = mocked_celery.send_task
     mock_to_thread = mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
-    # Act
-    result = await client.post(
+    result = await client_with_mocked_celery.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={"transfer_id": group_transfer.id},
@@ -154,7 +145,6 @@ async def test_superuser_can_create_run(
         )
     ).first()
 
-    # Assert
     response = result.json()
     assert response == {
         "id": run.id,
@@ -178,21 +168,17 @@ async def test_superuser_can_create_run(
 
 
 async def test_unauthorized_user_cannot_create_run(
-    client: AsyncClient,
+    client_with_mocked_celery: AsyncClient,
     group_transfer: MockTransfer,
-    mocker,
+    mocker: MockerFixture,
 ) -> None:
-    # Arrange
-    mocker.patch("syncmaster.worker.celery.send_task")
     mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
-    # Act
-    result = await client.post(
+    result = await client_with_mocked_celery.post(
         "v1/runs",
         json={"transfer_id": group_transfer.id},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -204,25 +190,21 @@ async def test_unauthorized_user_cannot_create_run(
 
 
 async def test_group_member_cannot_create_run_of_unknown_transfer_error(
-    client: AsyncClient,
+    client_with_mocked_celery: AsyncClient,
     group_transfer: MockTransfer,
     session: AsyncSession,
-    mocker,
+    mocker: MockerFixture,
     role_guest_plus: UserTestRoles,
 ) -> None:
-    # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_guest_plus)
-    mocker.patch("syncmaster.worker.celery.send_task")
     mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
-    # Act
-    result = await client.post(
+    result = await client_with_mocked_celery.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
         json={"transfer_id": -1},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -233,24 +215,20 @@ async def test_group_member_cannot_create_run_of_unknown_transfer_error(
 
 
 async def test_superuser_cannot_create_run_of_unknown_transfer_error(
-    client: AsyncClient,
+    client_with_mocked_celery: AsyncClient,
     superuser: MockUser,
     group_transfer: MockTransfer,
     session: AsyncSession,
-    mocker,
+    mocker: MockerFixture,
 ) -> None:
-    # Arrange
-    mocker.patch("syncmaster.worker.celery.send_task")
     mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
-    # Act
-    result = await client.post(
+    result = await client_with_mocked_celery.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={"transfer_id": -1},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",

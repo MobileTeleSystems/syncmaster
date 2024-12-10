@@ -4,11 +4,13 @@ import os
 import time
 from collections.abc import AsyncGenerator, Callable
 from pathlib import Path
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 import pytest_asyncio
 from alembic.config import Config as AlembicConfig
 from celery import Celery
+from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -23,7 +25,7 @@ from syncmaster.backend.settings.auth.jwt import JWTSettings
 from syncmaster.backend.utils.jwt import sign_jwt
 from syncmaster.db.models import Base
 from syncmaster.scheduler.settings import SchedulerAppSettings
-from syncmaster.worker import create_celery_app
+from syncmaster.worker import celery_factory
 from syncmaster.worker.settings import WorkerAppSettings
 from tests.mocks import UserTestRoles
 from tests.settings import TestSettings
@@ -129,6 +131,26 @@ async def session(sessionmaker: async_sessionmaker[AsyncSession]):
         await session.close()
 
 
+@pytest.fixture(scope="session")
+def mocked_celery() -> Celery:
+    celery_app = Mock(Celery)
+    celery_app.send_task = AsyncMock()
+    return celery_app
+
+
+@pytest_asyncio.fixture(scope="session")
+async def app(settings: Settings, mocked_celery: Celery) -> FastAPI:
+    app = application_factory(settings=settings)
+    app.dependency_overrides[Celery] = lambda: mocked_celery
+    return app
+
+
+@pytest_asyncio.fixture(scope="session")
+async def client_with_mocked_celery(app: FastAPI) -> AsyncGenerator:
+    async with AsyncClient(app=app, base_url="http://testserver") as client:
+        yield client
+
+
 @pytest_asyncio.fixture(scope="session")
 async def client(settings: Settings) -> AsyncGenerator:
     logger.info("START CLIENT FIXTURE")
@@ -140,7 +162,7 @@ async def client(settings: Settings) -> AsyncGenerator:
 
 @pytest.fixture(scope="session", params=[{}])
 def celery(worker_settings: WorkerAppSettings) -> Celery:
-    celery_app = create_celery_app(worker_settings)
+    celery_app = celery_factory(worker_settings)
     return celery_app
 
 

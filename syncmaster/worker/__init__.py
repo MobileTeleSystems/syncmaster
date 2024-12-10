@@ -6,7 +6,7 @@ from syncmaster.worker.base import WorkerTask
 from syncmaster.worker.settings import WorkerAppSettings
 
 
-def create_celery_app(settings) -> Celery:
+def celery_factory(settings: WorkerAppSettings) -> Celery:
     app = Celery(
         __name__,
         broker=settings.broker.url,
@@ -17,8 +17,3 @@ def create_celery_app(settings) -> Celery:
         ],
     )
     return app
-
-
-# TODO: initialize celery app in __name__ == "__main__"
-#       then initialize celery app in backend via dependency injection and initialize in scheduler
-celery = create_celery_app(WorkerAppSettings())

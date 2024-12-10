@@ -9,10 +9,10 @@ from kombu.exceptions import KombuError
 from syncmaster.backend.services.unit_of_work import UnitOfWork
 from syncmaster.db.models import RunType, Status, Transfer
 from syncmaster.exceptions.run import CannotConnectToTaskQueueError
+from syncmaster.scheduler.celery import app as celery
 from syncmaster.scheduler.settings import SchedulerAppSettings as Settings
 from syncmaster.scheduler.utils import get_async_session
 from syncmaster.schemas.v1.connections.connection import ReadAuthDataSchema
-from syncmaster.worker import celery
 
 
 class TransferJobManager:
@@ -50,8 +50,11 @@ class TransferJobManager:
     @staticmethod
     async def send_job_to_celery(transfer_id: int) -> None:
         """
-        Do not pass additional arguments like settings,
+        1. Do not pass additional arguments like settings,
         otherwise they will be serialized in jobs table.
+        2. Instance methods are bound to specific objects and cannot be reliably serialized
+        due to the weak reference problem. Use a static method instead, as it is not
+        object-specific and can be serialized.
         """
         settings = Settings()
 
