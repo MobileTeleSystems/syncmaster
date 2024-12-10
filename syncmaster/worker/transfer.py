@@ -14,9 +14,7 @@ from sqlalchemy.orm import Session, selectinload
 from syncmaster.db.models import AuthData, Run, Status, Transfer
 from syncmaster.db.repositories.utils import decrypt_auth_data
 from syncmaster.exceptions.run import RunNotFoundError
-
 from syncmaster.settings.log import setup_logging
-
 from syncmaster.worker.celery import app as celery
 from syncmaster.worker.controller import TransferController
 from syncmaster.worker.settings import WorkerAppSettings
