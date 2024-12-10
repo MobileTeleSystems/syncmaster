@@ -3,9 +3,10 @@
 from celery import Celery
 
 from syncmaster.worker.base import WorkerTask
+from syncmaster.worker.settings import WorkerAppSettings
 
 
-def celery_factory(settings) -> Celery:
+def celery_factory(settings: WorkerAppSettings) -> Celery:
     app = Celery(
         __name__,
         broker=settings.broker.url,

@@ -50,8 +50,11 @@ class TransferJobManager:
     @staticmethod
     async def send_job_to_celery(transfer_id: int) -> None:
         """
-        Do not pass additional arguments like settings,
+        1. Do not pass additional arguments like settings,
         otherwise they will be serialized in jobs table.
+        2. Instance methods are bound to specific objects and cannot be reliably serialized
+        due to the weak reference problem. Use a static method instead, as it is not
+        object-specific and can be serialized.
         """
         settings = Settings()
 
