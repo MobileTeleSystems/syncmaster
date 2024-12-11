@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
         libffi-dev \
         libkrb5-dev \
         krb5-user \
+        curl \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -sSL https://install.python-poetry.org | python3 - \
