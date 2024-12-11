@@ -45,8 +45,6 @@ async def test_modifying_existing_jobs(transfer_job_manager: TransferJobManager,
 @pytest.mark.parametrize(
     "transfer_attr, expected_state, is_existing_job",
     [
-        ("is_deleted", True, True),
-        ("is_deleted", True, False),
         ("is_scheduled", False, True),
         ("is_scheduled", False, False),
     ],

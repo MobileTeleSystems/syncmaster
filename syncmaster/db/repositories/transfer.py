@@ -41,7 +41,6 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         is_scheduled: bool | None = None,
     ) -> Pagination:
         stmt = select(Transfer).where(
-            Transfer.is_deleted.is_(False),
             Transfer.group_id == group_id,
         )
 
@@ -97,7 +96,6 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
             select(Transfer)
             .where(
                 Transfer.id == transfer_id,
-                Transfer.is_deleted.is_(False),
             )
             .options(selectinload(Transfer.queue))
         )
@@ -172,7 +170,6 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
                     strategy_params[key] = transfer.strategy_params[key]
             return await self._update(
                 Transfer.id == transfer.id,
-                Transfer.is_deleted.is_(False),
                 name=name or transfer.name,
                 description=description or transfer.description,
                 strategy_params=strategy_params,

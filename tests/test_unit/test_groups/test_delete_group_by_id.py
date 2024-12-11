@@ -1,5 +1,6 @@
 import pytest
 from httpx import AsyncClient
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Group
@@ -15,8 +16,8 @@ async def test_only_superuser_can_delete_group(
     session: AsyncSession,
 ):
     # Arrange
-    group = await session.get(Group, empty_group.group.id)
-    assert not group.is_deleted
+    await session.get(Group, empty_group.group.id)
+    g_id = empty_group.group.id
 
     # Act
     result = await client.delete(
@@ -33,8 +34,11 @@ async def test_only_superuser_can_delete_group(
         "message": "Group was deleted",
     }
 
-    await session.refresh(group)
-    assert group.is_deleted
+    # Assert group was deleted
+    stmt = select(Group).where(Group.id == g_id)
+    res = await session.execute(stmt)
+    group_in_db = res.scalars().first()
+    assert group_in_db is None
 
 
 async def test_not_superuser_cannot_delete_group(

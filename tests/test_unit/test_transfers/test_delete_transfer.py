@@ -1,5 +1,6 @@
 import pytest
 from httpx import AsyncClient
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Transfer
@@ -16,9 +17,8 @@ async def test_maintainer_plus_can_delete_group_transfer(
 ):
     # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_maintainer_plus)
-    transfer = await session.get(Transfer, group_transfer.id)
-
-    assert not transfer.is_deleted
+    t_id = group_transfer.id
+    await session.get(Transfer, group_transfer.id)
 
     # Act
     result = await client.delete(
@@ -33,8 +33,12 @@ async def test_maintainer_plus_can_delete_group_transfer(
         "status_code": 200,
         "message": "Transfer was deleted",
     }
-    await session.refresh(transfer)
-    assert transfer.is_deleted
+
+    # Assert transfer was deleted
+    stmt = select(Transfer).where(Transfer.id == t_id)
+    res = await session.execute(stmt)
+    transfer_in_db = res.scalars().first()
+    assert transfer_in_db is None
 
 
 async def test_superuser_can_delete_transfer(
@@ -43,6 +47,8 @@ async def test_superuser_can_delete_transfer(
     superuser: MockUser,
     session: AsyncSession,
 ):
+    t_id = group_transfer.id
+
     # Act
     result = await client.delete(
         f"v1/transfers/{group_transfer.id}",
@@ -56,8 +62,12 @@ async def test_superuser_can_delete_transfer(
         "status_code": 200,
         "message": "Transfer was deleted",
     }
-    await session.refresh(group_transfer.transfer)
-    assert group_transfer.is_deleted
+
+    # Assert transfer was deleted
+    stmt = select(Transfer).where(Transfer.id == t_id)
+    res = await session.execute(stmt)
+    transfer_in_db = res.scalars().first()
+    assert transfer_in_db is None
 
 
 async def test_groupless_user_cannot_delete_transfer(
@@ -106,8 +116,6 @@ async def test_developer_or_below_cannot_delete_transfer(
         },
     }
     assert result.status_code == 403
-    await session.refresh(group_transfer.transfer)
-    assert not group_transfer.is_deleted
 
 
 async def test_group_member_cannot_delete_other_group_transfer(

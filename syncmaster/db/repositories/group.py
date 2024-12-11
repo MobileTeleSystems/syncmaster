@@ -32,7 +32,7 @@ class GroupRepository(Repository[Group]):
         page_size: int,
         search_query: str | None = None,
     ) -> Pagination:
-        stmt = select(Group).where(Group.is_deleted.is_(False))
+        stmt = select(Group)
         if search_query:
             stmt = self._construct_vector_search(stmt, search_query)
 
@@ -73,7 +73,6 @@ class GroupRepository(Repository[Group]):
                 select(Group)
                 .where(
                     Group.owner_id == current_user_id,
-                    Group.is_deleted.is_(False),
                 )
                 .order_by(Group.name)
             )
@@ -104,7 +103,6 @@ class GroupRepository(Repository[Group]):
             .join(Group, UserGroup.group_id == Group.id)
             .where(
                 UserGroup.user_id == current_user_id,
-                Group.is_deleted.is_(False),
             )
             .order_by(Group.name)
         )
@@ -154,7 +152,7 @@ class GroupRepository(Repository[Group]):
         self,
         group_id: int,
     ) -> Group:
-        stmt = select(Group).where(Group.id == group_id, Group.is_deleted.is_(False))
+        stmt = select(Group).where(Group.id == group_id)
         try:
             result: ScalarResult[Group] = await self._session.scalars(stmt)
             return result.one()
@@ -186,7 +184,7 @@ class GroupRepository(Repository[Group]):
         description: str,
         owner_id: int,
     ) -> Group:
-        args = [Group.id == group_id, Group.is_deleted.is_(False)]
+        args = [Group.id == group_id]
         try:
             return await self._update(
                 *args,
@@ -278,7 +276,7 @@ class GroupRepository(Repository[Group]):
     async def delete(self, group_id: int) -> None:
         try:
             await self._delete(group_id)
-        except EntityNotFoundError as e:
+        except (EntityNotFoundError, NoResultFound) as e:
             raise GroupNotFoundError from e
 
     async def add_user(

@@ -38,7 +38,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
     ) -> Queue:
         stmt = (
             select(Queue)
-            .where(Queue.id == queue_id, Queue.is_deleted.is_(False))
+            .where(Queue.id == queue_id)
             .options(selectinload(Queue.transfers))
             .options(selectinload(Queue.group))
         )
@@ -56,7 +56,6 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         search_query: str | None = None,
     ):
         stmt = select(Queue).where(
-            Queue.is_deleted.is_(False),
             Queue.group_id == group_id,
         )
         if search_query:
@@ -77,7 +76,6 @@ class QueueRepository(RepositoryWithOwner[Queue]):
             queue = await self.read_by_id(queue_id=queue_id)
             return await self._update(
                 Queue.id == queue_id,
-                Queue.is_deleted.is_(False),
                 description=queue_data.description or queue.description,
             )
         except IntegrityError as e:

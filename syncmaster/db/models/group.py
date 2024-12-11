@@ -10,7 +10,7 @@ from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy_utils import ChoiceType
 
-from syncmaster.db.mixins import DeletableMixin, TimestampMixin
+from syncmaster.db.mixins import TimestampMixin
 from syncmaster.db.models.base import Base
 from syncmaster.db.models.user import User
 
@@ -69,7 +69,7 @@ class GroupMemberRole(enum.StrEnum):
         return [r.value for r, level in cls.role_hierarchy().items() if level >= required_level]
 
 
-class Group(Base, TimestampMixin, DeletableMixin):
+class Group(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     name: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(String(512), nullable=False, default="")

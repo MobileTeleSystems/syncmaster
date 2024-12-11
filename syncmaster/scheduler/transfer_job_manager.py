@@ -26,7 +26,7 @@ class TransferJobManager:
             job_id = str(transfer.id)
             existing_job = self.scheduler.get_job(job_id)
 
-            if not transfer.is_scheduled or transfer.is_deleted:
+            if not transfer.is_scheduled:
                 if existing_job:
                     self.scheduler.remove_job(job_id)
                 continue
