@@ -951,6 +951,7 @@ async def queue(
         session=session,
         name=request.param,
         group_id=group.id,
+        slug=request.param,
     )
     yield result
     await session.delete(result)

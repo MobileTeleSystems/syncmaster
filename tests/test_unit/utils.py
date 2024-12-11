@@ -95,13 +95,14 @@ async def create_queue(
     session: AsyncSession,
     name: str,
     group_id: int,
+    slug: str | None = None,
     description: str | None = None,
 ) -> Queue:
     queue = Queue(
         name=name,
         description=description,
         group_id=group_id,
-        slug=f"{group_id}-{name}",
+        slug=slug if slug is not None else f"{group_id}-{name}",
     )
     session.add(queue)
     await session.commit()
