@@ -78,7 +78,7 @@ class TransferJobManager:
                     celery.send_task,
                     "run_transfer_task",
                     kwargs={"run_id": run.id},
-                    queue=transfer.queue.name,
+                    queue=transfer.queue.slug,
                 )
             except KombuError as e:
                 async with unit_of_work:

@@ -61,7 +61,7 @@ async def test_developer_plus_can_create_run_of_transfer_his_group(
         mock_send_task,
         "run_transfer_task",
         kwargs={"run_id": run.id},
-        queue=group_transfer.queue.name,
+        queue=group_transfer.queue.slug,
     )
 
 
@@ -163,7 +163,7 @@ async def test_superuser_can_create_run(
         mock_send_task,
         "run_transfer_task",
         kwargs={"run_id": run.id},
-        queue=group_transfer.queue.name,
+        queue=group_transfer.queue.slug,
     )
 
 

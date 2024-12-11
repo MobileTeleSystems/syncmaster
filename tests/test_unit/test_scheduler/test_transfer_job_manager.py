@@ -96,7 +96,7 @@ async def test_send_job_to_celery_with_success(
         mock_send_task,
         "run_transfer_task",
         kwargs={"run_id": run.id},
-        queue=group_transfer.queue.name,
+        queue=group_transfer.queue.slug,
     )
 
 
