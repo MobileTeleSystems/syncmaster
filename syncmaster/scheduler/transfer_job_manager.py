@@ -5,10 +5,12 @@ import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from kombu.exceptions import KombuError
+from sqlalchemy import any_, select
 
 from syncmaster.backend.services.unit_of_work import UnitOfWork
 from syncmaster.db.models import RunType, Status, Transfer
 from syncmaster.exceptions.run import CannotConnectToTaskQueueError
+from syncmaster.exceptions.transfer import TransferNotFoundError
 from syncmaster.scheduler.celery import app as celery
 from syncmaster.scheduler.settings import SchedulerAppSettings as Settings
 from syncmaster.scheduler.utils import get_async_session
@@ -47,6 +49,22 @@ class TransferJobManager:
                     args=(transfer.id,),
                 )
 
+    async def remove_orphan_jobs(self) -> None:
+        all_jobs = self.scheduler.get_jobs()
+        settings = self.settings
+        job_transfer_ids = [int(job.id) for job in all_jobs]
+
+        async with get_async_session(settings) as session:
+            result = await session.execute(
+                select(Transfer).where(Transfer.id == any_(job_transfer_ids)),  # type: ignore[arg-type]
+            )
+            existing_transfers = result.scalars().all()
+            existing_transfer_ids = {t.id for t in existing_transfers}
+
+        missing_job_ids = set(job_transfer_ids) - existing_transfer_ids
+        for job_id in missing_job_ids:
+            self.scheduler.remove_job(str(job_id))
+
     @staticmethod
     async def send_job_to_celery(transfer_id: int) -> None:
         """
@@ -61,7 +79,11 @@ class TransferJobManager:
         async with get_async_session(settings) as session:
             unit_of_work = UnitOfWork(session=session, settings=settings)
 
-            transfer = await unit_of_work.transfer.read_by_id(transfer_id)
+            try:
+                transfer = await unit_of_work.transfer.read_by_id(transfer_id)
+            except TransferNotFoundError:
+                return
+
             credentials_source = await unit_of_work.credentials.read(transfer.source_connection_id)
             credentials_target = await unit_of_work.credentials.read(transfer.target_connection_id)
 

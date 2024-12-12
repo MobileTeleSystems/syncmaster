@@ -1,6 +1,5 @@
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Queue
@@ -18,6 +17,7 @@ async def test_maintainer_plus_can_delete_queue(
 ):
     # Arrange
     user = mock_group.get_member_of_role(role_maintainer_plus)
+    q_id = group_queue.id
 
     # Act
     result = await client.delete(
@@ -31,6 +31,11 @@ async def test_maintainer_plus_can_delete_queue(
         "status_code": 200,
     }
     assert result.status_code == 200
+
+    # Assert queue was deleted
+    session.expunge_all()
+    queue_in_db = await session.get(Queue, q_id)
+    assert queue_in_db is None
 
 
 async def test_superuser_can_delete_queue(
@@ -56,9 +61,8 @@ async def test_superuser_can_delete_queue(
     assert result.status_code == 200
 
     # Assert queue was deleted
-    stmt = select(Queue).where(Queue.id == q_id)
-    res = await session.execute(stmt)
-    queue_in_db = res.scalars().first()
+    session.expunge_all()
+    queue_in_db = await session.get(Queue, q_id)
     assert queue_in_db is None
 
 

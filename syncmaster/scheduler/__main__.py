@@ -20,6 +20,8 @@ async def main():
 
     while True:
         logger.info("Looking at the transfer table...")
+
+        await transfer_job_manager.remove_orphan_jobs()
         transfers = await transfer_fetcher.fetch_updated_jobs()
 
         if transfers:
@@ -29,6 +31,7 @@ async def main():
                 ", ".join(str(t.id) for t in transfers),
             )
             transfer_job_manager.update_jobs(transfers)
+
             transfer_fetcher.last_updated_at = max(t.updated_at for t in transfers)
             logger.info("Scheduler state has been updated. Last updated at: %s", transfer_fetcher.last_updated_at)
 
