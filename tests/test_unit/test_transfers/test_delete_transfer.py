@@ -18,8 +18,6 @@ async def test_maintainer_plus_can_delete_group_transfer(
     user = group_transfer.owner_group.get_member_of_role(role_maintainer_plus)
     transfer = await session.get(Transfer, group_transfer.id)
 
-    assert not transfer.is_deleted
-
     # Act
     result = await client.delete(
         f"v1/transfers/{group_transfer.id}",
@@ -33,8 +31,11 @@ async def test_maintainer_plus_can_delete_group_transfer(
         "status_code": 200,
         "message": "Transfer was deleted",
     }
-    await session.refresh(transfer)
-    assert transfer.is_deleted
+
+    # Assert transfer was deleted
+    session.expunge(transfer)
+    transfer_in_db = await session.get(Transfer, transfer.id)
+    assert transfer_in_db is None
 
 
 async def test_superuser_can_delete_transfer(
@@ -43,6 +44,8 @@ async def test_superuser_can_delete_transfer(
     superuser: MockUser,
     session: AsyncSession,
 ):
+    transfer = await session.get(Transfer, group_transfer.id)
+
     # Act
     result = await client.delete(
         f"v1/transfers/{group_transfer.id}",
@@ -56,8 +59,11 @@ async def test_superuser_can_delete_transfer(
         "status_code": 200,
         "message": "Transfer was deleted",
     }
-    await session.refresh(group_transfer.transfer)
-    assert group_transfer.is_deleted
+
+    # Assert transfer was deleted
+    session.expunge(transfer)
+    transfer_in_db = await session.get(Transfer, transfer.id)
+    assert transfer_in_db is None
 
 
 async def test_groupless_user_cannot_delete_transfer(
@@ -89,6 +95,7 @@ async def test_developer_or_below_cannot_delete_transfer(
     role_developer_or_below: UserTestRoles,
 ):
     # Act
+    transfer = await session.get(Transfer, group_transfer.id)
     user = group_transfer.owner_group.get_member_of_role(role_developer_or_below)
 
     # Assert
@@ -106,8 +113,11 @@ async def test_developer_or_below_cannot_delete_transfer(
         },
     }
     assert result.status_code == 403
-    await session.refresh(group_transfer.transfer)
-    assert not group_transfer.is_deleted
+
+    # Assert transfer was not deleted
+    session.expunge(transfer)
+    transfer_in_db = await session.get(Transfer, transfer.id)
+    assert transfer_in_db is not None
 
 
 async def test_group_member_cannot_delete_other_group_transfer(

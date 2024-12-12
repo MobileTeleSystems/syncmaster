@@ -8,7 +8,7 @@ from sqlalchemy import Computed, String
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from syncmaster.db.mixins import DeletableMixin, ResourceMixin, TimestampMixin
+from syncmaster.db.mixins import ResourceMixin, TimestampMixin
 from syncmaster.db.models.base import Base
 
 if TYPE_CHECKING:
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from syncmaster.db.models.transfer import Transfer
 
 
-class Queue(Base, ResourceMixin, TimestampMixin, DeletableMixin):
+class Queue(Base, ResourceMixin, TimestampMixin):
     name: Mapped[str] = mapped_column(String(128), nullable=False)
     slug: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
 

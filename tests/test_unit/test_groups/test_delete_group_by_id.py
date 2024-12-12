@@ -15,8 +15,7 @@ async def test_only_superuser_can_delete_group(
     session: AsyncSession,
 ):
     # Arrange
-    group = await session.get(Group, empty_group.group.id)
-    assert not group.is_deleted
+    g_id = empty_group.group.id
 
     # Act
     result = await client.delete(
@@ -33,8 +32,10 @@ async def test_only_superuser_can_delete_group(
         "message": "Group was deleted",
     }
 
-    await session.refresh(group)
-    assert group.is_deleted
+    # Assert group was deleted
+    session.expunge_all()
+    group_in_db = await session.get(Group, g_id)
+    assert group_in_db is None
 
 
 async def test_not_superuser_cannot_delete_group(

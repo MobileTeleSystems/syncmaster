@@ -47,7 +47,6 @@ def upgrade():
         sa.Column("is_scheduled", sa.Boolean(), nullable=False),
         sa.Column("schedule", sa.String(length=32), nullable=False),
         sa.Column("queue_id", sa.BigInteger(), nullable=False),
-        sa.Column("is_deleted", sa.Boolean(), nullable=False),
         sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.ForeignKeyConstraint(

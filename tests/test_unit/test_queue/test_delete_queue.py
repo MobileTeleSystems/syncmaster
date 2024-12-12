@@ -17,6 +17,7 @@ async def test_maintainer_plus_can_delete_queue(
 ):
     # Arrange
     user = mock_group.get_member_of_role(role_maintainer_plus)
+    q_id = group_queue.id
 
     # Act
     result = await client.delete(
@@ -31,10 +32,10 @@ async def test_maintainer_plus_can_delete_queue(
     }
     assert result.status_code == 200
 
-    queue = await session.get(Queue, group_queue.id)
-    await session.refresh(queue)
-
-    assert queue.is_deleted
+    # Assert queue was deleted
+    session.expunge_all()
+    queue_in_db = await session.get(Queue, q_id)
+    assert queue_in_db is None
 
 
 async def test_superuser_can_delete_queue(
@@ -44,6 +45,8 @@ async def test_superuser_can_delete_queue(
     mock_group: MockGroup,
     superuser: MockUser,
 ):
+    q_id = group_queue.id
+
     # Act
     result = await client.delete(
         f"v1/queues/{group_queue.id}",
@@ -57,10 +60,10 @@ async def test_superuser_can_delete_queue(
     }
     assert result.status_code == 200
 
-    queue = await session.get(Queue, group_queue.id)
-    await session.refresh(queue)
-
-    assert queue.is_deleted
+    # Assert queue was deleted
+    session.expunge_all()
+    queue_in_db = await session.get(Queue, q_id)
+    assert queue_in_db is None
 
 
 async def test_groupless_user_cannot_delete_queue(

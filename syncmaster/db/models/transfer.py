@@ -17,7 +17,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
 
-from syncmaster.db.mixins import DeletableMixin, ResourceMixin, TimestampMixin
+from syncmaster.db.mixins import ResourceMixin, TimestampMixin
 from syncmaster.db.models.base import Base
 from syncmaster.db.models.group import Group
 
@@ -29,7 +29,6 @@ if TYPE_CHECKING:
 class Transfer(
     Base,
     ResourceMixin,
-    DeletableMixin,
     TimestampMixin,
 ):
     source_connection_id: Mapped[int] = mapped_column(
