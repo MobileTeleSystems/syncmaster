@@ -24,7 +24,7 @@ class WorkerSettings(BaseSettings):
     """
 
     CORRELATION_CELERY_HEADER_ID: str = Field(
-        "CORRELATION_CELERY_HEADER_ID",
+        "CORRELATION_ID",
         description="Header ID for correlation in Celery",
     )
     CREATE_SPARK_SESSION_FUNCTION: ImportString = Field(

@@ -1,12 +1,11 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-import logging
 from datetime import datetime, timezone
 
-import onetl
 from asgi_correlation_id import correlation_id
+from asgi_correlation_id.extensions.celery import load_correlation_ids
 from celery import Celery
-from celery.signals import after_setup_logger, before_task_publish, task_prerun
+from celery.signals import after_setup_task_logger, before_task_publish, task_prerun
 from celery.utils.log import get_task_logger
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -20,6 +19,7 @@ from syncmaster.worker.controller import TransferController
 from syncmaster.worker.settings import WorkerAppSettings
 
 logger = get_task_logger(__name__)
+load_correlation_ids()
 
 WORKER_SETTINGS = WorkerAppSettings()
 CORRELATION_CELERY_HEADER_ID = WORKER_SETTINGS.worker.CORRELATION_CELERY_HEADER_ID
@@ -27,7 +27,6 @@ CORRELATION_CELERY_HEADER_ID = WORKER_SETTINGS.worker.CORRELATION_CELERY_HEADER_
 
 @celery.task(name="run_transfer_task", bind=True, track_started=True)
 def run_transfer_task(self: Celery, run_id: int) -> None:
-    onetl.log.setup_logging(level=logging.INFO)
     with Session(self.engine) as session:
         run_transfer(
             session=session,
@@ -83,7 +82,7 @@ def run_transfer(session: Session, run_id: int, settings: WorkerAppSettings):
     session.commit()
 
 
-@after_setup_logger.connect
+@after_setup_task_logger.connect
 def setup_loggers(*args, **kwargs):
     setup_logging(WorkerAppSettings().logging.get_log_config_path())
 
