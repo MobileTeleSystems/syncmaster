@@ -14,11 +14,11 @@ async def test_maintainer_plus_can_delete_connection(
     role_maintainer_plus: UserTestRoles,
     session: AsyncSession,
 ):
-    # Arraange
+    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_maintainer_plus)
     connection_id = group_connection.connection.id
     connection = await session.get(Connection, connection_id)
-    assert not connection.is_deleted
+    assert connection is not None
 
     # Act
     result = await client.delete(
@@ -33,9 +33,10 @@ async def test_maintainer_plus_can_delete_connection(
         "message": "Connection was deleted",
     }
     assert result.status_code == 200
-    deleted_connection = await session.get(Connection, connection_id)
-    await session.refresh(deleted_connection)
-    assert deleted_connection.is_deleted
+
+    session.expunge(connection)
+    connection = await session.get(Connection, connection_id)
+    assert connection is None
 
 
 async def test_groupless_user_cannot_delete_connection(
@@ -59,8 +60,10 @@ async def test_groupless_user_cannot_delete_connection(
             "details": None,
         },
     }
-    await session.refresh(group_connection.connection)
-    assert not group_connection.connection.is_deleted
+
+    session.expunge(group_connection)
+    connection = await session.get(Connection, group_connection.id)
+    assert connection is not None
 
 
 async def test_maintainer_plus_cannot_delete_connection_with_linked_transfer(
@@ -87,8 +90,10 @@ async def test_maintainer_plus_cannot_delete_connection_with_linked_transfer(
         },
     }
     assert result.status_code == 409
-    await session.refresh(group_transfer.source_connection)
-    assert not group_transfer.source_connection.is_deleted
+
+    session.expunge(group_transfer.source_connection)
+    connection = await session.get(Connection, group_transfer.source_connection.id)
+    assert connection is not None
 
 
 async def test_other_group_member_cannot_delete_group_connection(

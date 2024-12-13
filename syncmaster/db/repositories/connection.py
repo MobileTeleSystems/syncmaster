@@ -32,7 +32,6 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         connection_type: list[str] | None = None,
     ) -> Pagination:
         stmt = select(Connection).where(
-            Connection.is_deleted.is_(False),
             Connection.group_id == group_id,
         )
         if search_query:
@@ -53,7 +52,7 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         self,
         connection_id: int,
     ) -> Connection:
-        stmt = select(Connection).where(Connection.id == connection_id, Connection.is_deleted.is_(False))
+        stmt = select(Connection).where(Connection.id == connection_id)
         result: ScalarResult[Connection] = await self._session.scalars(stmt)
         try:
             return result.one()
@@ -99,7 +98,6 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
 
             return await self._update(
                 Connection.id == connection_id,
-                Connection.is_deleted.is_(False),
                 name=name or connection.name,
                 description=description or connection.description,
                 data=data,

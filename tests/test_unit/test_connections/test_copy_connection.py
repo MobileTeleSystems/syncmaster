@@ -44,7 +44,7 @@ async def test_maintainer_plus_can_copy_connection_with_delete_source(
         "user": "user",
         "password": "password",
     }
-    assert not current.is_deleted
+    assert current is not None
 
     query_copy_not_exist = select(Connection).filter(
         Connection.group_id == empty_group.id,
@@ -73,14 +73,13 @@ async def test_maintainer_plus_can_copy_connection_with_delete_source(
     }
     assert result.status_code == 200
 
-    await session.refresh(group_connection.connection)
     query_prev_row = select(Connection).where(Connection.id == curr_id)
     result_prev_row = await session.scalars(query_prev_row)
-    origin = result_prev_row.one()
+    origin = result_prev_row.first()
 
     q_creds_origin = select(AuthData).where(AuthData.connection_id == curr_id)
     creds_origin = await session.scalars(q_creds_origin)
-    creds_origin = creds_origin.one()
+    creds_origin = creds_origin.first()
 
     query_new_row = select(Connection).filter(
         Connection.group_id == empty_group.id,
@@ -94,14 +93,25 @@ async def test_maintainer_plus_can_copy_connection_with_delete_source(
     creds_new = creds_new.one_or_none()
 
     # Assert
-    assert origin.id == curr_id
-    assert decrypt_auth_data(creds_origin.value, settings) == {
-        "type": "postgres",
-        "user": "user",
-        "password": "password",
-    }
-    assert origin.is_deleted == is_delete_source
-    assert not new.is_deleted
+
+    if not is_delete_source:
+        assert origin.id == curr_id
+        assert decrypt_auth_data(creds_origin.value, settings) == {
+            "type": "postgres",
+            "user": "user",
+            "password": "password",
+        }
+
+    session.expunge(current)
+    origin = await session.get(Connection, current.id)
+    if is_delete_source:
+        # Assert that origin connection was deleted
+        assert origin is None
+    else:
+        # Assert that origin connection was not deleted
+        assert origin is not None
+
+    assert new is not None
     assert not creds_new
 
 
@@ -132,7 +142,7 @@ async def test_superuser_can_copy_connection(
         "user": "user",
         "password": "password",
     }
-    assert not current.is_deleted
+    assert current is not None
 
     query_copy_not_exist = select(Connection).filter(
         Connection.group_id == empty_group.id,
@@ -161,9 +171,6 @@ async def test_superuser_can_copy_connection(
     }
     assert result.status_code == 200
 
-    query_prev_row = select(Connection).where(Connection.id == curr_id)
-    result_prev_row = await session.scalars(query_prev_row)
-    origin = result_prev_row.one()
     query_new_row = select(Connection).filter(
         Connection.group_id == empty_group.id,
         Connection.name == group_connection.name,
@@ -171,27 +178,29 @@ async def test_superuser_can_copy_connection(
     result_new_row = await session.scalars(query_new_row)
     new = result_new_row.one()  # copied
 
-    # Assert
-    await session.refresh(group_connection.connection)
-
-    q_creds_origin = select(AuthData).where(AuthData.connection_id == origin.id)
+    q_creds_origin = select(AuthData).where(AuthData.connection_id == current.id)
     creds_origin = await session.scalars(q_creds_origin)
-    creds_origin = creds_origin.one()
+    creds_origin = creds_origin.first()
 
     q_creds_new = select(AuthData).where(AuthData.connection_id == new.id)
     creds_new = await session.scalars(q_creds_new)
     creds_new = creds_new.one_or_none()
 
-    assert origin.id == curr_id
-    assert origin.group_id == curr_group_id
-    assert decrypt_auth_data(creds_origin.value, settings) == {
-        "type": "postgres",
-        "user": "user",
-        "password": "password",
-    }
-    assert origin.is_deleted == is_delete_source
-    assert not new.is_deleted
-    assert not creds_new
+    # Assert
+    session.expunge(current)
+    origin = await session.get(Connection, current.id)
+    if is_delete_source:
+        # Assert that origin connection was deleted
+        assert origin is None
+    else:
+        assert origin.id == curr_id
+        assert origin.group_id == curr_group_id
+        assert decrypt_auth_data(creds_origin.value, settings) == {
+            "type": "postgres",
+            "user": "user",
+            "password": "password",
+        }
+        assert not creds_new
 
 
 async def test_unauthorized_user_cannot_copy_connection(
@@ -291,7 +300,7 @@ async def test_not_in_both_groups_user_can_not_copy_connection(
         "user": "user",
         "password": "password",
     }
-    assert not current.is_deleted
+    assert current is not None
 
     query_copy_not_exist = select(Connection).filter(
         Connection.group_id == empty_group.id,
@@ -349,7 +358,7 @@ async def test_groupless_user_can_not_copy_connection(
         "user": "user",
         "password": "password",
     }
-    assert not current.is_deleted
+    assert current is not None
 
     query_copy_not_exist = select(Connection).filter(
         Connection.group_id == empty_group.id,
