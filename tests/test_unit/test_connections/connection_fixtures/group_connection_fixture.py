@@ -1,4 +1,5 @@
 import secrets
+from collections.abc import AsyncGenerator
 
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,10 +26,11 @@ from tests.test_unit.utils import (
 async def group_connection(
     session: AsyncSession,
     settings: Settings,
+    connection_type: str | None,
     create_connection_data: dict | None,
     create_connection_auth_data: dict | None,
     access_token_factory,
-) -> MockConnection:
+) -> AsyncGenerator[MockConnection, None]:
     group_owner = await create_user(
         session=session,
         username=f"{secrets.token_hex(5)}_group_connection_owner",
@@ -58,6 +60,7 @@ async def group_connection(
     connection = await create_connection(
         session=session,
         name=f"{secrets.token_hex(5)}_group_for_group_connection",
+        type=connection_type or "postgres",
         group_id=group.id,
         data=create_connection_data,
     )

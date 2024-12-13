@@ -52,15 +52,15 @@ Example:
         "group_id": "1",
         "name": "Beautiful name",
         "description": "What a great connection !",
+        "type": "postgres",
         "connection_data": {
-            "type": "postgres",
             "host": "127.0.0.1",
             "port": 5432,
             "database_name": "postgres",
             "additional_params": {},
         },
         "auth_data": {
-            "type": "postgres",
+            "type": "basic",
             "user": "user_name",
             "password": "password",
         }

@@ -7,23 +7,23 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend, pytest.mark.mssql]
 
 
 @pytest.mark.parametrize(
-    "create_connection_data,create_connection_auth_data",
+    "connection_type,create_connection_data,create_connection_auth_data",
     [
         (
+            "mssql",
             {
-                "type": "mssql",
                 "host": "127.0.0.1",
                 "port": 1433,
                 "database_name": "name",
             },
             {
-                "type": "mssql",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
         ),
     ],
-    indirect=True,
+    indirect=["create_connection_data", "create_connection_auth_data"],
 )
 async def test_developer_plus_can_update_mssql_connection(
     client: AsyncClient,
@@ -39,13 +39,13 @@ async def test_developer_plus_can_update_mssql_connection(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
+            "type": "mssql",
             "connection_data": {
-                "type": "mssql",
                 "host": "127.0.1.1",
                 "database_name": "new_name",
             },
             "auth_data": {
-                "type": "mssql",
+                "type": "basic",
                 "user": "new_user",
             },
         },
@@ -58,8 +58,8 @@ async def test_developer_plus_can_update_mssql_connection(
         "name": group_connection.name,
         "description": group_connection.description,
         "group_id": group_connection.group_id,
+        "type": "mssql",
         "connection_data": {
-            "type": group_connection.data["type"],
             "host": "127.0.1.1",
             "port": group_connection.data["port"],
             "database_name": "new_name",

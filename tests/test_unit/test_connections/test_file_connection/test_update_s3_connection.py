@@ -7,11 +7,11 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend, pytest.mark.s3]
 
 
 @pytest.mark.parametrize(
-    "create_connection_data,create_connection_auth_data",
+    "connection_type,create_connection_data,create_connection_auth_data",
     [
         (
+            "s3",
             {
-                "type": "s3",
                 "bucket": "some_bucket",
                 "host": "some_host",
                 "port": 80,
@@ -26,14 +26,12 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend, pytest.mark.s3]
             },
         ),
     ],
-    indirect=True,
+    indirect=["create_connection_data", "create_connection_auth_data"],
 )
 async def test_developer_plus_can_update_s3_connection(
     client: AsyncClient,
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
-    create_connection_data: dict,  # don't remove
-    create_connection_auth_data: dict,  # don't remove
 ):
     # Arrange
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
@@ -44,7 +42,7 @@ async def test_developer_plus_can_update_s3_connection(
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"connection_data": {"type": "s3", parameter_to_update: value_to_update}},
+        json={"type": "s3", "connection_data": {parameter_to_update: value_to_update}},
     )
 
     # Assert
@@ -53,9 +51,9 @@ async def test_developer_plus_can_update_s3_connection(
         "name": group_connection.connection.name,
         "description": group_connection.description,
         "group_id": group_connection.group_id,
+        "type": group_connection.type,
         "connection_data": {
             parameter_to_update: value_to_update,
-            "type": group_connection.data["type"],
             "host": group_connection.data["host"],
             "bucket": group_connection.data["bucket"],
             "port": group_connection.data["port"],

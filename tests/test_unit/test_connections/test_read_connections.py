@@ -47,8 +47,8 @@ async def test_guest_plus_can_read_connections(
                 "description": group_connection.description,
                 "group_id": group_connection.group_id,
                 "name": group_connection.name,
+                "type": group_connection.type,
                 "connection_data": {
-                    "type": group_connection.data["type"],
                     "host": group_connection.data["host"],
                     "port": group_connection.data["port"],
                     "database_name": group_connection.data["database_name"],
@@ -148,8 +148,8 @@ async def test_superuser_can_read_connections(
                 "description": group_connection.description,
                 "group_id": group_connection.group_id,
                 "name": group_connection.name,
+                "type": group_connection.type,
                 "connection_data": {
-                    "type": group_connection.data["type"],
                     "host": group_connection.data["host"],
                     "port": group_connection.data["port"],
                     "database_name": group_connection.data["database_name"],
@@ -270,8 +270,8 @@ async def test_search_connections_with_query(
                 "description": group_connection.description,
                 "group_id": group_connection.group_id,
                 "name": group_connection.name,
+                "type": group_connection.type,
                 "connection_data": {
-                    "type": group_connection.data["type"],
                     "host": group_connection.data["host"],
                     "port": group_connection.data["port"],
                     "database_name": group_connection.data["database_name"],
@@ -343,7 +343,7 @@ async def test_filter_connections(
 
     # check that the types match
     if "type" in params and params["type"]:
-        returned_types = [conn["connection_data"]["type"] for conn in result.json()["items"]]
+        returned_types = [conn["type"] for conn in result.json()["items"]]
         assert all(type in params["type"] for type in returned_types)
 
 

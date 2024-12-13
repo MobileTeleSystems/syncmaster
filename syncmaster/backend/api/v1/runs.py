@@ -19,7 +19,7 @@ from syncmaster.errors.registration import get_error_responses
 from syncmaster.exceptions.base import ActionNotAllowedError
 from syncmaster.exceptions.run import CannotConnectToTaskQueueError
 from syncmaster.exceptions.transfer import TransferNotFoundError
-from syncmaster.schemas.v1.connections.connection import ReadAuthDataSchema
+from syncmaster.schemas.v1.connections.connection_base import ReadAuthDataSchema
 from syncmaster.schemas.v1.transfers.run import (
     CreateRunSchema,
     ReadRunSchema,

@@ -8,18 +8,21 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend, pytest.mark.hdfs]
 
 
 @pytest.mark.parametrize(
-    "create_connection_data,create_connection_auth_data",
+    "connection_type,create_connection_data,create_connection_auth_data",
     [
         (
-            {"type": "hdfs", "cluster": "cluster"},
+            "hdfs",
             {
-                "type": "hdfs",
+                "cluster": "cluster",
+            },
+            {
+                "type": "basic",
                 "user": "user",
                 "password": "password",
             },
         ),
     ],
-    indirect=True,
+    indirect=["create_connection_data", "create_connection_auth_data"],
 )
 async def test_guest_plus_can_read_hdfs_connection(
     client: AsyncClient,
@@ -44,7 +47,8 @@ async def test_guest_plus_can_read_hdfs_connection(
         "description": group_connection.description,
         "group_id": group_connection.group_id,
         "name": group_connection.name,
-        "connection_data": {"type": group_connection.data["type"], "cluster": group_connection.data["cluster"]},
+        "type": group_connection.type,
+        "connection_data": {"cluster": group_connection.data["cluster"]},
         "auth_data": {
             "type": group_connection.credentials.value["type"],
             "user": group_connection.credentials.value["user"],

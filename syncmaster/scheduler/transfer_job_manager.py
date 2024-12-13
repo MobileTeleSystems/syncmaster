@@ -14,7 +14,7 @@ from syncmaster.exceptions.transfer import TransferNotFoundError
 from syncmaster.scheduler.celery import app as celery
 from syncmaster.scheduler.settings import SchedulerAppSettings as Settings
 from syncmaster.scheduler.utils import get_async_session
-from syncmaster.schemas.v1.connections.connection import ReadAuthDataSchema
+from syncmaster.schemas.v1.connections.connection_base import ReadAuthDataSchema
 
 
 class TransferJobManager:

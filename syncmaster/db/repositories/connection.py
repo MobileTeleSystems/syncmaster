@@ -40,7 +40,7 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
             stmt = self._construct_vector_search(stmt, combined_query)
 
         if connection_type is not None:
-            stmt = stmt.where(Connection.data.op("->>")("type").in_(connection_type))
+            stmt = stmt.where(Connection.type.in_(connection_type))
 
         return await self._paginate_scalar_result(
             query=stmt.order_by(Connection.name),
@@ -62,6 +62,7 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
     async def create(
         self,
         group_id: int,
+        type: str,
         name: str,
         description: str,
         data: dict[str, Any],
@@ -70,6 +71,7 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
             insert(Connection)
             .values(
                 group_id=group_id,
+                type=type,
                 name=name,
                 description=description,
                 data=data,
@@ -88,6 +90,7 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         self,
         connection_id: int,
         name: str | None,
+        type: str | None,
         description: str | None,
         data: dict[str, Any],
     ) -> Connection:
@@ -98,6 +101,7 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
 
             return await self._update(
                 Connection.id == connection_id,
+                type=type or connection.type,
                 name=name or connection.name,
                 description=description or connection.description,
                 data=data,

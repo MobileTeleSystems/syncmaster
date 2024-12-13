@@ -3,8 +3,7 @@ from collections.abc import AsyncGenerator
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.db.models import Connection
-from syncmaster.schemas.v1.connection_types import ConnectionType
+from syncmaster.db.models import Connection, ConnectionType
 from tests.mocks import MockConnection
 
 
@@ -24,7 +23,6 @@ async def group_connections(
 
         new_data = {
             **connection.data,
-            "type": conn_type.value,
         }
 
         if conn_type in [ConnectionType.HDFS, ConnectionType.HIVE]:
@@ -54,6 +52,7 @@ async def group_connections(
         new_connection = Connection(
             group_id=connection.group_id,
             name=f"{connection.name}_{conn_type.value}",
+            type=conn_type.value,
             description=connection.description,
             data=new_data,
         )

@@ -332,9 +332,9 @@ async def test_filter_transfers_with_multiple_transfers(
     for transfer in group_transfers:
         connection_type_value = None
         if filter_param == "source_connection_type":
-            connection_type_value = transfer.source_connection.connection.data.get("type")
+            connection_type_value = transfer.source_connection.connection.type
         elif filter_param == "target_connection_type":
-            connection_type_value = transfer.target_connection.connection.data.get("type")
+            connection_type_value = transfer.target_connection.connection.type
         if connection_type_value == connection_type:
             expected_transfers.append(transfer)
 

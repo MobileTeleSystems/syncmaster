@@ -29,14 +29,14 @@ async def test_developer_plus_create_postgres_connection(
             "group_id": group.id,
             "name": "New connection",
             "description": "",
+            "type": "postgres",
             "connection_data": {
-                "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -66,8 +66,8 @@ async def test_developer_plus_create_postgres_connection(
         "name": connection.name,
         "description": connection.description,
         "group_id": connection.group_id,
+        "type": connection.type,
         "connection_data": {
-            "type": connection.data["type"],
             "host": connection.data["host"],
             "port": connection.data["port"],
             "database_name": connection.data["database_name"],

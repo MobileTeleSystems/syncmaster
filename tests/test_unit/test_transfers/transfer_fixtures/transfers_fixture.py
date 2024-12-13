@@ -4,8 +4,8 @@ import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.backend.settings import ServerAppSettings as Settings
+from syncmaster.db.models import ConnectionType
 from syncmaster.db.repositories.utils import decrypt_auth_data
-from syncmaster.schemas.v1.connection_types import ConnectionType
 from tests.mocks import MockConnection, MockCredentials, MockTransfer
 from tests.test_unit.utils import create_connection, create_credentials, create_transfer
 
@@ -28,8 +28,8 @@ async def group_transfers(
         source_connection = await create_connection(
             session=session,
             name=f"group_transfer_source_connection_{connection_type.value}",
+            type=connection_type.value,
             group_id=group.id,
-            data={"type": connection_type.value},
         )
         source_connection_creds = await create_credentials(
             session=session,
@@ -40,8 +40,8 @@ async def group_transfers(
         target_connection = await create_connection(
             session=session,
             name=f"group_transfer_target_connection_{connection_type.value}",
+            type=connection_type.value,
             group_id=group.id,
-            data={"type": connection_type.value},
         )
         target_connection_creds = await create_credentials(
             session=session,

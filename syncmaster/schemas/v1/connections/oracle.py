@@ -1,19 +1,37 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 
-from pydantic import BaseModel, Field, SecretStr, model_validator
+from pydantic import BaseModel, Field, model_validator
 
+from syncmaster.schemas.v1.auth import (
+    CreateBasicAuthSchema,
+    ReadBasicAuthSchema,
+    UpdateBasicAuthSchema,
+)
 from syncmaster.schemas.v1.connection_types import ORACLE_TYPE
+from syncmaster.schemas.v1.connections.connection_base import (
+    CreateConnectionBaseSchema,
+    ReadConnectionBaseSchema,
+    UpdateConnectionBaseSchema,
+)
 
 
-class OracleBaseSchema(BaseModel):
-    type: ORACLE_TYPE
+class CreateOracleConnectionDataSchema(BaseModel):
+    host: str
+    port: int
+    service_name: str | None = None
+    sid: str | None = None
+    additional_params: dict = Field(default_factory=dict)
 
-    class Config:
-        from_attributes = True
+    @model_validator(mode="before")
+    def check_owner_id(cls, values):
+        sid, service_name = values.get("sid"), values.get("service_name")
+        if sid and service_name:
+            raise ValueError("You must specify either sid or service_name but not both")
+        return values
 
 
-class ReadOracleConnectionSchema(OracleBaseSchema):
+class ReadOracleConnectionDataSchema(BaseModel):
     host: str
     port: int
     service_name: str | None = None
@@ -21,11 +39,7 @@ class ReadOracleConnectionSchema(OracleBaseSchema):
     additional_params: dict = Field(default_factory=dict)
 
 
-class ReadOracleAuthSchema(OracleBaseSchema):
-    user: str
-
-
-class UpdateOracleConnectionSchema(OracleBaseSchema):
+class UpdateOracleConnectionDataSchema(BaseModel):
     host: str | None = None
     port: int | None = None
     sid: str | None = None
@@ -40,26 +54,27 @@ class UpdateOracleConnectionSchema(OracleBaseSchema):
         return values
 
 
-class UpdateOracleAuthSchema(OracleBaseSchema):
-    user: str | None = None  # noqa: F722
-    password: SecretStr | None = None
+class CreateOracleConnectionSchema(CreateConnectionBaseSchema):
+    type: ORACLE_TYPE = Field(..., description="Connection type")
+    data: CreateOracleConnectionDataSchema = Field(
+        ...,
+        alias="connection_data",
+        description=(
+            "Data required to connect to the database. These are the parameters that are specified in the URL request."
+        ),
+    )
+    auth_data: CreateBasicAuthSchema = Field(
+        description="Credentials for authorization",
+    )
 
 
-class CreateOracleConnectionSchema(OracleBaseSchema):
-    host: str
-    port: int
-    service_name: str | None = None
-    sid: str | None = None
-    additional_params: dict = Field(default_factory=dict)
-
-    @model_validator(mode="before")
-    def check_owner_id(cls, values):
-        sid, service_name = values.get("sid"), values.get("service_name")
-        if sid and service_name:
-            raise ValueError("You must specify either sid or service_name but not both")
-        return values
+class ReadOracleConnectionSchema(ReadConnectionBaseSchema):
+    type: ORACLE_TYPE
+    data: ReadOracleConnectionDataSchema = Field(alias="connection_data")
+    auth_data: ReadBasicAuthSchema | None = None
 
 
-class CreateOracleAuthSchema(OracleBaseSchema):
-    user: str
-    password: SecretStr
+class UpdateOracleConnectionSchema(UpdateConnectionBaseSchema):
+    type: ORACLE_TYPE
+    data: UpdateOracleConnectionDataSchema | None = Field(alias="connection_data", default=None)
+    auth_data: UpdateBasicAuthSchema | None = None

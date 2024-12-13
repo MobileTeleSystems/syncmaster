@@ -8,11 +8,11 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend, pytest.mark.s3]
 
 
 @pytest.mark.parametrize(
-    "create_connection_data,create_connection_auth_data",
+    "connection_type,create_connection_data,create_connection_auth_data",
     [
         (
+            "s3",
             {
-                "type": "s3",
                 "bucket": "some_bucket",
                 "host": "some_host",
                 "port": 80,
@@ -27,7 +27,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend, pytest.mark.s3]
             },
         ),
     ],
-    indirect=True,
+    indirect=["create_connection_data", "create_connection_auth_data"],
 )
 async def test_guest_plus_can_read_s3_connection(
     client: AsyncClient,
@@ -52,8 +52,8 @@ async def test_guest_plus_can_read_s3_connection(
         "description": group_connection.description,
         "group_id": group_connection.group_id,
         "name": group_connection.name,
+        "type": group_connection.type,
         "connection_data": {
-            "type": group_connection.data["type"],
             "host": group_connection.data["host"],
             "bucket": group_connection.data["bucket"],
             "port": group_connection.data["port"],

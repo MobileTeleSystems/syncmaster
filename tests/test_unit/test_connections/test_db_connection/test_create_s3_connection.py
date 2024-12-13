@@ -29,8 +29,8 @@ async def test_developer_plus_can_create_s3_connection(
             "group_id": group.id,
             "name": "New connection",
             "description": "",
+            "type": "s3",
             "connection_data": {
-                "type": "s3",
                 "bucket": "some_bucket",
                 "host": "some_host",
                 "port": 80,
@@ -69,8 +69,8 @@ async def test_developer_plus_can_create_s3_connection(
         "group_id": connection.group_id,
         "name": connection.name,
         "description": connection.description,
+        "type": connection.type,
         "connection_data": {
-            "type": connection.data["type"],
             "host": connection.data["host"],
             "bucket": connection.data["bucket"],
             "port": connection.data["port"],
@@ -106,8 +106,8 @@ async def test_developer_plus_can_create_s3_connection_auto_generate_port(
             "group_id": group.id,
             "name": "New connection",
             "description": "",
+            "type": "s3",
             "connection_data": {
-                "type": "s3",
                 "bucket": "some_bucket",
                 "host": "some_host",
                 "region": "some_region",
@@ -145,8 +145,8 @@ async def test_developer_plus_can_create_s3_connection_auto_generate_port(
         "group_id": connection.group_id,
         "name": connection.name,
         "description": connection.description,
+        "type": connection.type,
         "connection_data": {
-            "type": connection.data["type"],
             "host": connection.data["host"],
             "bucket": connection.data["bucket"],
             "port": port,

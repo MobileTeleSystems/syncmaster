@@ -28,8 +28,8 @@ async def test_guest_plus_can_read_connection(
         "description": group_connection.description,
         "group_id": group_connection.group_id,
         "name": group_connection.name,
+        "type": group_connection.type,
         "connection_data": {
-            "type": group_connection.data["type"],
             "database_name": group_connection.data["database_name"],
             "host": group_connection.data["host"],
             "port": group_connection.data["port"],
@@ -109,8 +109,8 @@ async def test_superuser_can_read_connection(
         "description": group_connection.description,
         "group_id": group_connection.group_id,
         "name": group_connection.name,
+        "type": group_connection.type,
         "connection_data": {
-            "type": group_connection.data["type"],
             "database_name": group_connection.data["database_name"],
             "host": group_connection.data["host"],
             "port": group_connection.data["port"],

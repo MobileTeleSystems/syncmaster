@@ -2,28 +2,22 @@
 # SPDX-License-Identifier: Apache-2.0
 from typing import Literal
 
-from pydantic import BaseModel, SecretStr, model_validator
+from pydantic import BaseModel, Field, model_validator
 
+from syncmaster.schemas.v1.auth import (
+    CreateS3AuthSchema,
+    ReadS3AuthSchema,
+    UpdateS3AuthSchema,
+)
 from syncmaster.schemas.v1.connection_types import S3_TYPE
+from syncmaster.schemas.v1.connections.connection_base import (
+    CreateConnectionBaseSchema,
+    ReadConnectionBaseSchema,
+    UpdateConnectionBaseSchema,
+)
 
 
-class S3BaseSchema(BaseModel):
-    type: S3_TYPE
-
-    class Config:
-        from_attributes = True
-
-
-class S3ReadConnectionSchema(S3BaseSchema):
-    host: str
-    bucket: str
-    port: int | None = None
-    region: str | None = None
-    protocol: Literal["http", "https"] = "https"
-    bucket_style: Literal["domain", "path"] = "domain"
-
-
-class S3CreateConnectionSchema(S3BaseSchema):
+class CreateS3ConnectionDataSchema(BaseModel):
     host: str
     bucket: str
     port: int | None = None
@@ -43,7 +37,16 @@ class S3CreateConnectionSchema(S3BaseSchema):
         return values
 
 
-class S3UpdateConnectionSchema(S3BaseSchema):
+class ReadS3ConnectionDataSchema(BaseModel):
+    host: str
+    bucket: str
+    port: int | None = None
+    region: str | None = None
+    protocol: Literal["http", "https"] = "https"
+    bucket_style: Literal["domain", "path"] = "domain"
+
+
+class UpdateS3ConnectionDataSchema(BaseModel):
     host: str | None = None
     bucket: str | None = None
     port: int | None = None
@@ -52,15 +55,29 @@ class S3UpdateConnectionSchema(S3BaseSchema):
     bucket_style: Literal["domain", "path"] | None = None
 
 
-class S3CreateAuthSchema(S3BaseSchema):
-    access_key: str
-    secret_key: SecretStr
+class CreateS3ConnectionSchema(CreateConnectionBaseSchema):
+    type: S3_TYPE = Field(..., description="Connection type")
+    data: CreateS3ConnectionDataSchema = Field(
+        ...,
+        alias="connection_data",
+        description=(
+            "Data required to connect to the database. These are the parameters that are specified in the URL request."
+        ),
+    )
+    auth_data: CreateS3AuthSchema = Field(
+        ...,
+        discriminator="type",
+        description="Credentials for authorization",
+    )
 
 
-class S3ReadAuthSchema(S3BaseSchema):
-    access_key: str
+class ReadS3ConnectionSchema(ReadConnectionBaseSchema):
+    type: S3_TYPE
+    data: ReadS3ConnectionDataSchema = Field(alias="connection_data")
+    auth_data: ReadS3AuthSchema | None = Field(discriminator="type", default=None)
 
 
-class S3UpdateAuthSchema(S3BaseSchema):
-    access_key: str | None = None
-    secret_key: SecretStr | None = None
+class UpdateS3ConnectionSchema(UpdateConnectionBaseSchema):
+    type: S3_TYPE
+    data: UpdateS3ConnectionDataSchema | None = Field(alias="connection_data", default=None)
+    auth_data: UpdateS3AuthSchema | None = Field(discriminator="type", default=None)

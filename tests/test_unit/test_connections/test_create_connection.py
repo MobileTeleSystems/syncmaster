@@ -31,14 +31,14 @@ async def test_developer_plus_can_create_connection(
             "group_id": group.id,
             "name": "New connection",
             "description": "",
+            "type": "postgres",
             "connection_data": {
-                "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -78,8 +78,8 @@ async def test_developer_plus_can_create_connection(
         "name": connection.name,
         "description": connection.description,
         "group_id": connection.group_id,
+        "type": connection.type,
         "connection_data": {
-            "type": connection.data["type"],
             "host": connection.data["host"],
             "port": connection.data["port"],
             "database_name": connection.data["database_name"],
@@ -103,14 +103,14 @@ async def test_unauthorized_user_cannot_create_connection(
             "group_id": group_connection.id,
             "name": "New connection",
             "description": "",
+            "type": "postgres",
             "connection_data": {
-                "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -142,14 +142,14 @@ async def test_check_fields_validation_on_create_connection(
             "group_id": group_connection.id,
             "name": "",
             "description": "",
+            "type": "postgres",
             "connection_data": {
-                "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -166,7 +166,7 @@ async def test_check_fields_validation_on_create_connection(
                 {
                     "context": {"min_length": 1},
                     "input": "",
-                    "location": ["body", "name"],
+                    "location": ["body", "postgres", "name"],
                     "message": "String should have at least 1 character",
                     "code": "string_too_short",
                 },
@@ -182,14 +182,14 @@ async def test_check_fields_validation_on_create_connection(
             "group_id": group_connection.id,
             "name": None,
             "description": "",
+            "type": "postgres",
             "connection_data": {
-                "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -206,7 +206,7 @@ async def test_check_fields_validation_on_create_connection(
                 {
                     "context": {},
                     "input": None,
-                    "location": ["body", "name"],
+                    "location": ["body", "postgres", "name"],
                     "message": "Input should be a valid string",
                     "code": "string_type",
                 },
@@ -221,14 +221,14 @@ async def test_check_fields_validation_on_create_connection(
             "group_id": group_connection.id,
             "name": "None",
             "description": None,
+            "type": "postgres",
             "connection_data": {
-                "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -243,7 +243,7 @@ async def test_check_fields_validation_on_create_connection(
                 {
                     "context": {},
                     "input": None,
-                    "location": ["body", "description"],
+                    "location": ["body", "postgres", "description"],
                     "message": "Input should be a valid string",
                     "code": "string_type",
                 },
@@ -258,46 +258,26 @@ async def test_check_fields_validation_on_create_connection(
             "group_id": group_connection.id,
             "name": "None",
             "description": "None",
+            "type": "POSTGRESQL",
             "connection_data": {
-                "type": "POSTGRESQL",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "user": "user",
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
         },
     )
+
     assert result.status_code == 422
-    assert result.json() == {
-        "error": {
-            "code": "invalid_request",
-            "message": "Invalid request",
-            "details": [
-                {
-                    "context": {
-                        "discriminator": "'type'",
-                        "tag": "POSTGRESQL",
-                        "expected_tags": "'hive', 'oracle', 'postgres', 'clickhouse', 'mssql', 'mysql', 'hdfs', 's3'",
-                    },
-                    "input": {
-                        "type": "POSTGRESQL",
-                        "host": "127.0.0.1",
-                        "port": 5432,
-                        "user": "user",
-                        "database_name": "postgres",
-                    },
-                    "location": ["body", "connection_data"],
-                    "message": "Input tag 'POSTGRESQL' found using 'type' does not match any of the expected tags: 'hive', 'oracle', 'postgres', 'clickhouse', 'mssql', 'mysql', 'hdfs', 's3'",
-                    "code": "union_tag_invalid",
-                },
-            ],
-        },
-    }
+    assert (
+        result.json()["error"]["details"][0]["message"]
+        == "Input tag 'POSTGRESQL' found using 'type' does not match any of the expected tags: 'oracle', 'postgres', 'mysql', 'mssql', 'clickhouse', 'hive', 'hdfs', 's3'"
+    )
 
 
 async def test_other_group_member_cannot_create_group_connection(
@@ -317,14 +297,14 @@ async def test_other_group_member_cannot_create_group_connection(
             "group_id": empty_group.id,
             "name": "New connection",
             "description": "",
+            "type": "postgres",
             "connection_data": {
-                "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -356,14 +336,14 @@ async def test_superuser_can_create_connection(
             "group_id": group.id,
             "name": "New connection from superuser",
             "description": "",
+            "type": "postgres",
             "connection_data": {
-                "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -392,8 +372,8 @@ async def test_superuser_can_create_connection(
         "group_id": connection.group_id,
         "name": connection.name,
         "description": connection.description,
+        "type": connection.type,
         "connection_data": {
-            "type": connection.data["type"],
             "host": connection.data["host"],
             "port": connection.data["port"],
             "database_name": connection.data["database_name"],
@@ -419,6 +399,7 @@ async def test_groupless_user_cannot_create_connection(
             "group_id": group.id,
             "name": "New connection",
             "description": "",
+            "type": "postgres",
             "connection_data": {
                 "type": "postgres",
                 "host": "127.0.0.1",
@@ -426,7 +407,7 @@ async def test_groupless_user_cannot_create_connection(
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -461,14 +442,14 @@ async def test_group_member_cannot_create_connection_with_unknown_group_error(
             "group_id": -1,
             "name": "New connection",
             "description": "",
+            "type": "postgres",
             "connection_data": {
-                "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -500,6 +481,7 @@ async def test_superuser_cannot_create_connection_with_unknown_group_error(
             "group_id": -1,
             "name": "New connection from superuser",
             "description": "",
+            "type": "postgres",
             "connection_data": {
                 "type": "postgres",
                 "host": "127.0.0.1",
@@ -507,7 +489,7 @@ async def test_superuser_cannot_create_connection_with_unknown_group_error(
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -539,6 +521,7 @@ async def test_guest_cannot_create_connection_error(
             "group_id": group.id,
             "name": "New connection",
             "description": "",
+            "type": "postgres",
             "connection_data": {
                 "type": "postgres",
                 "host": "127.0.0.1",
@@ -546,7 +529,7 @@ async def test_guest_cannot_create_connection_error(
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },

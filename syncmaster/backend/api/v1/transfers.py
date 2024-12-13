@@ -4,7 +4,7 @@
 from fastapi import APIRouter, Depends, Query, status
 
 from syncmaster.backend.services import UnitOfWork, get_user
-from syncmaster.db.models import User
+from syncmaster.db.models import ConnectionType, User
 from syncmaster.db.utils import Permission
 from syncmaster.errors.registration import get_error_responses
 from syncmaster.exceptions.base import ActionNotAllowedError
@@ -16,7 +16,6 @@ from syncmaster.exceptions.transfer import (
     DifferentTypeConnectionsAndParamsError,
     TransferNotFoundError,
 )
-from syncmaster.schemas.v1.connection_types import ConnectionType
 from syncmaster.schemas.v1.status import (
     StatusCopyTransferResponseSchema,
     StatusResponseSchema,
@@ -103,16 +102,16 @@ async def create_transfer(
     ):
         raise DifferentTransferAndConnectionsGroupsError
 
-    if target_connection.data["type"] != transfer_data.target_params.type:
+    if target_connection.type != transfer_data.target_params.type:
         raise DifferentTypeConnectionsAndParamsError(
-            connection_type=target_connection.data["type"],
+            connection_type=target_connection.type,
             conn="target",
             params_type=transfer_data.target_params.type,
         )
 
-    if source_connection.data["type"] != transfer_data.source_params.type:
+    if source_connection.type != transfer_data.source_params.type:
         raise DifferentTypeConnectionsAndParamsError(
-            connection_type=source_connection.data["type"],
+            connection_type=source_connection.type,
             conn="source",
             params_type=transfer_data.source_params.type,
         )
@@ -302,16 +301,16 @@ async def update_transfer(
     if queue.group_id != transfer.group_id:
         raise DifferentTransferAndQueueGroupError
 
-    if transfer_data.target_params and target_connection.data["type"] != transfer_data.target_params.type:
+    if transfer_data.target_params and target_connection.type != transfer_data.target_params.type:
         raise DifferentTypeConnectionsAndParamsError(
-            connection_type=target_connection.data["type"],
+            connection_type=target_connection.type,
             conn="target",
             params_type=transfer_data.target_params.type,
         )
 
-    if transfer_data.source_params and source_connection.data["type"] != transfer_data.source_params.type:
+    if transfer_data.source_params and source_connection.type != transfer_data.source_params.type:
         raise DifferentTypeConnectionsAndParamsError(
-            connection_type=source_connection.data["type"],
+            connection_type=source_connection.type,
             conn="source",
             params_type=transfer_data.source_params.type,
         )

@@ -70,7 +70,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
                 Transfer.source_connection_id == SourceConnection.id,
             )
             stmt = stmt.where(
-                SourceConnection.data.op("->>")("type").in_(source_connection_type),
+                SourceConnection.type.in_(source_connection_type),
             )
 
         if target_connection_type is not None:
@@ -79,7 +79,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
                 Transfer.target_connection_id == TargetConnection.id,
             )
             stmt = stmt.where(
-                TargetConnection.data.op("->>")("type").in_(target_connection_type),
+                TargetConnection.type.in_(target_connection_type),
             )
 
         return await self._paginate_scalar_result(
