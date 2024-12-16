@@ -8,12 +8,12 @@ from sqlalchemy import JSON, Computed, Index, UniqueConstraint
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
 
-from syncmaster.db.mixins import DeletableMixin, ResourceMixin, TimestampMixin
+from syncmaster.db.mixins import ResourceMixin, TimestampMixin
 from syncmaster.db.models.base import Base
 from syncmaster.db.models.group import Group
 
 
-class Connection(Base, ResourceMixin, DeletableMixin, TimestampMixin):
+class Connection(Base, ResourceMixin, TimestampMixin):
     data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
 
     group: Mapped[Group] = relationship("Group")
