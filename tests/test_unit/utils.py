@@ -126,7 +126,7 @@ async def create_credentials(
 ) -> AuthData:
     if auth_data is None:
         auth_data = {
-            "type": "postgres",
+            "type": "basic",
             "user": "user",
             "password": "password",
         }
@@ -145,13 +145,13 @@ async def create_credentials(
 async def create_connection(
     session: AsyncSession,
     name: str,
+    type: str = "postgres",
     group_id: int | None = None,
     description: str = "",
     data: dict[str, Any] | None = None,
 ) -> Connection:
     if data is None:
         data = {
-            "type": "postgres",
             "host": "127.0.0.1",
             "port": 5432,
             "database_name": "db",
@@ -162,6 +162,7 @@ async def create_connection(
         group_id=group_id,
         name=name,
         description=description,
+        type=type,
         data=data,
     )
     session.add(c)

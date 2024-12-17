@@ -30,6 +30,7 @@ def upgrade():
         "connection",
         sa.Column("id", sa.BigInteger(), nullable=False),
         sa.Column("group_id", sa.BigInteger(), nullable=False),
+        sa.Column("type", sa.String(length=23), nullable=False),
         sa.Column("name", sa.String(length=128), nullable=False),
         sa.Column("description", sa.String(length=512), nullable=False),
         sa.Column("data", sa.JSON(), nullable=False),

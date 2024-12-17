@@ -29,14 +29,14 @@ async def test_developer_plus_can_create_clickhouse_connection(
             "group_id": group.id,
             "name": "New connection",
             "description": "",
+            "type": "clickhouse",
             "connection_data": {
-                "type": "clickhouse",
                 "host": "127.0.0.1",
                 "port": 8123,
                 "database_name": "database",
             },
             "auth_data": {
-                "type": "clickhouse",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -66,8 +66,8 @@ async def test_developer_plus_can_create_clickhouse_connection(
         "name": connection.name,
         "description": connection.description,
         "group_id": connection.group_id,
+        "type": connection.type,
         "connection_data": {
-            "type": connection.data["type"],
             "host": connection.data["host"],
             "port": connection.data["port"],
             "database_name": connection.data["database_name"],

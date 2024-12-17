@@ -29,14 +29,14 @@ async def test_developer_plus_can_create_mssql_connection(
             "group_id": group.id,
             "name": "New connection",
             "description": "",
+            "type": "mssql",
             "connection_data": {
-                "type": "mssql",
                 "host": "127.0.0.1",
                 "port": 1433,
                 "database_name": "database",
             },
             "auth_data": {
-                "type": "mssql",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -66,8 +66,8 @@ async def test_developer_plus_can_create_mssql_connection(
         "name": connection.name,
         "description": connection.description,
         "group_id": connection.group_id,
+        "type": connection.type,
         "connection_data": {
-            "type": connection.data["type"],
             "host": connection.data["host"],
             "port": connection.data["port"],
             "database_name": connection.data["database_name"],

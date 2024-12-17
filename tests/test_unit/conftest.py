@@ -242,7 +242,8 @@ async def create_connection_data(request) -> dict | None:
 @pytest_asyncio.fixture
 async def two_group_connections(
     session: AsyncSession,
-    create_connection_data,
+    connection_type: str | None,
+    create_connection_data: dict | None,
     settings: Settings,
     mock_group: MockGroup,
     group_queue: Queue,  # do not delete
@@ -250,6 +251,7 @@ async def two_group_connections(
     connection1 = await create_connection(
         session=session,
         name=f"{secrets.token_hex(5)}_group_for_group_connection",
+        type=connection_type or "postgres",
         group_id=mock_group.id,
         data=create_connection_data,
     )
@@ -257,6 +259,7 @@ async def two_group_connections(
     connection2 = await create_connection(
         session=session,
         name=f"{secrets.token_hex(5)}_group_for_group_connection",
+        type=connection_type or "postgres",
         group_id=mock_group.id,
         data=create_connection_data,
     )
@@ -295,6 +298,13 @@ async def two_group_connections(
 
 @pytest_asyncio.fixture
 async def create_connection_auth_data(request) -> dict | None:
+    if hasattr(request, "param"):
+        return request.param
+    return None
+
+
+@pytest_asyncio.fixture
+async def connection_type(request) -> str | None:
     if hasattr(request, "param"):
         return request.param
     return None

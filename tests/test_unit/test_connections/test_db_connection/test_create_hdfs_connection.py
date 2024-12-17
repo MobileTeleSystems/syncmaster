@@ -29,12 +29,12 @@ async def test_developer_plus_can_create_hdfs_connection(
             "group_id": group.id,
             "name": "New connection",
             "description": "",
+            "type": "hdfs",
             "connection_data": {
-                "type": "hdfs",
                 "cluster": "cluster",
             },
             "auth_data": {
-                "type": "hdfs",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -64,8 +64,8 @@ async def test_developer_plus_can_create_hdfs_connection(
         "group_id": connection.group_id,
         "name": connection.name,
         "description": connection.description,
+        "type": connection.type,
         "connection_data": {
-            "type": connection.data["type"],
             "cluster": connection.data["cluster"],
         },
         "auth_data": {

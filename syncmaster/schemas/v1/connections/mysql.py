@@ -1,47 +1,62 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import BaseModel, Field
 
+from syncmaster.schemas.v1.auth import (
+    CreateBasicAuthSchema,
+    ReadBasicAuthSchema,
+    UpdateBasicAuthSchema,
+)
 from syncmaster.schemas.v1.connection_types import MYSQL_TYPE
+from syncmaster.schemas.v1.connections.connection_base import (
+    CreateConnectionBaseSchema,
+    ReadConnectionBaseSchema,
+    UpdateConnectionBaseSchema,
+)
 
 
-class MySQLBaseSchema(BaseModel):
-    type: MYSQL_TYPE
-
-    class Config:
-        from_attributes = True
-
-
-class ReadMySQLConnectionSchema(MySQLBaseSchema):
+class CreateMySQLConnectionDataSchema(BaseModel):
     host: str
     port: int
     database_name: str
     additional_params: dict = Field(default_factory=dict)
 
 
-class ReadMySQLAuthSchema(MySQLBaseSchema):
-    user: str
+class ReadMySQLConnectionDataSchema(BaseModel):
+    host: str
+    port: int
+    database_name: str
+    additional_params: dict = Field(default_factory=dict)
 
 
-class UpdateMySQLConnectionSchema(MySQLBaseSchema):
+class UpdateMySQLConnectionDataSchema(BaseModel):
     host: str | None = None
     port: int | None = None
     database_name: str | None = None
     additional_params: dict | None = Field(default_factory=dict)
 
 
-class UpdateMySQLAuthSchema(MySQLBaseSchema):
-    user: str | None = None  # noqa: F722
-    password: SecretStr | None = None
+class CreateMySQLConnectionSchema(CreateConnectionBaseSchema):
+    type: MYSQL_TYPE = Field(..., description="Connection type")
+    data: CreateMySQLConnectionDataSchema = Field(
+        ...,
+        alias="connection_data",
+        description=(
+            "Data required to connect to the database. These are the parameters that are specified in the URL request."
+        ),
+    )
+    auth_data: CreateBasicAuthSchema = Field(
+        description="Credentials for authorization",
+    )
 
 
-class CreateMySQLConnectionSchema(MySQLBaseSchema):
-    host: str
-    port: int
-    database_name: str
-    additional_params: dict = Field(default_factory=dict)
+class ReadMySQLConnectionSchema(ReadConnectionBaseSchema):
+    type: MYSQL_TYPE
+    data: ReadMySQLConnectionDataSchema = Field(alias="connection_data")
+    auth_data: ReadBasicAuthSchema | None = None
 
 
-class CreateMySQLAuthSchema(MySQLBaseSchema):
-    user: str
-    password: SecretStr
+class UpdateMySQLConnectionSchema(UpdateConnectionBaseSchema):
+    type: MYSQL_TYPE
+    data: UpdateMySQLConnectionDataSchema | None = Field(alias="connection_data", default=None)
+    auth_data: UpdateBasicAuthSchema | None = None

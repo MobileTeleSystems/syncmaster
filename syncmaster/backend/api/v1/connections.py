@@ -4,9 +4,10 @@ from collections.abc import Sequence
 from typing import get_args
 
 from fastapi import APIRouter, Depends, Query, status
+from pydantic import TypeAdapter
 
 from syncmaster.backend.services import UnitOfWork, get_user
-from syncmaster.db.models import Connection, Transfer, User
+from syncmaster.db.models import Connection, ConnectionType, Transfer, User
 from syncmaster.db.utils import Permission
 from syncmaster.errors.registration import get_error_responses
 from syncmaster.exceptions import ActionNotAllowedError
@@ -26,7 +27,6 @@ from syncmaster.schemas.v1.connection_types import (
     ORACLE_TYPE,
     POSTGRES_TYPE,
     S3_TYPE,
-    ConnectionType,
 )
 from syncmaster.schemas.v1.connections.connection import (
     ConnectionCopySchema,
@@ -80,13 +80,16 @@ async def read_connections(
     if pagination.items:
         credentials = await unit_of_work.credentials.read_bulk([item.id for item in pagination.items])
         items = [
-            ReadConnectionSchema(
-                id=item.id,
-                group_id=item.group_id,
-                name=item.name,
-                description=item.description,
-                auth_data=credentials.get(item.id, None),
-                data=item.data,
+            TypeAdapter(ReadConnectionSchema).validate_python(
+                {
+                    "id": item.id,
+                    "group_id": item.group_id,
+                    "name": item.name,
+                    "description": item.description,
+                    "type": item.type,
+                    "data": item.data,
+                    "auth_data": credentials.get(item.id, None),
+                },
             )
             for item in pagination.items
         ]
@@ -126,6 +129,7 @@ async def create_connection(
     async with unit_of_work:
         connection = await unit_of_work.connection.create(
             name=connection_data.name,
+            type=connection_data.type,
             description=connection_data.description,
             group_id=connection_data.group_id,
             data=connection_data.data.dict(),
@@ -137,13 +141,16 @@ async def create_connection(
         )
 
     credentials = await unit_of_work.credentials.read(connection.id)
-    return ReadConnectionSchema(
-        id=connection.id,
-        group_id=connection.group_id,
-        name=connection.name,
-        description=connection.description,
-        data=connection.data,
-        auth_data=credentials,
+    return TypeAdapter(ReadConnectionSchema).validate_python(
+        {
+            "id": connection.id,
+            "group_id": connection.group_id,
+            "name": connection.name,
+            "description": connection.description,
+            "type": connection.type,
+            "data": connection.data,
+            "auth_data": credentials,
+        },
     )
 
 
@@ -172,13 +179,16 @@ async def read_connection(
     except AuthDataNotFoundError:
         credentials = None
 
-    return ReadConnectionSchema(
-        id=connection.id,
-        group_id=connection.group_id,
-        name=connection.name,
-        description=connection.description,
-        data=connection.data,
-        auth_data=credentials,
+    return TypeAdapter(ReadConnectionSchema).validate_python(
+        {
+            "id": connection.id,
+            "group_id": connection.group_id,
+            "name": connection.name,
+            "description": connection.description,
+            "type": connection.type,
+            "data": connection.data,
+            "auth_data": credentials,
+        },
     )
 
 
@@ -202,15 +212,15 @@ async def update_connection(
 
     async with unit_of_work:
         data = changes.data.dict(exclude={"auth_data"}) if changes.data else {}
-        if data.get("type", None) is not None:
-            source_connection: Connection = await unit_of_work.connection.read_by_id(connection_id=connection_id)
-            if data["type"] != source_connection.data["type"]:
-                linked_transfers: Sequence[Transfer] = await unit_of_work.transfer.list_by_connection_id(connection_id)
-                if linked_transfers:
-                    raise ConnectionTypeUpdateError
+        source_connection: Connection = await unit_of_work.connection.read_by_id(connection_id=connection_id)
+        if changes.type != source_connection.type:
+            linked_transfers: Sequence[Transfer] = await unit_of_work.transfer.list_by_connection_id(connection_id)
+            if linked_transfers:
+                raise ConnectionTypeUpdateError
         connection = await unit_of_work.connection.update(
             connection_id=connection_id,
             name=changes.name,
+            type=changes.type,
             description=changes.description,
             data=data,
         )
@@ -222,13 +232,16 @@ async def update_connection(
             )
 
     credentials = await unit_of_work.credentials.read(connection_id)
-    return ReadConnectionSchema(
-        id=connection.id,
-        group_id=connection.group_id,
-        name=connection.name,
-        description=connection.description,
-        data=connection.data,
-        auth_data=credentials,
+    return TypeAdapter(ReadConnectionSchema).validate_python(
+        {
+            "id": connection.id,
+            "group_id": connection.group_id,
+            "name": connection.name,
+            "description": connection.description,
+            "type": connection.type,
+            "data": connection.data,
+            "auth_data": credentials,
+        },
     )
 
 

@@ -29,12 +29,12 @@ async def test_developer_plus_can_create_hive_connection(
             "group_id": group.id,
             "name": "New connection",
             "description": "",
+            "type": "hive",
             "connection_data": {
-                "type": "hive",
                 "cluster": "cluster",
             },
             "auth_data": {
-                "type": "hive",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -64,8 +64,8 @@ async def test_developer_plus_can_create_hive_connection(
         "group_id": connection.group_id,
         "name": connection.name,
         "description": connection.description,
+        "type": connection.type,
         "connection_data": {
-            "type": connection.data["type"],
             "cluster": connection.data["cluster"],
         },
         "auth_data": {

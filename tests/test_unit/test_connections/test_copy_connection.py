@@ -33,7 +33,7 @@ async def test_maintainer_plus_can_copy_connection_without_deleting_source(
     curr_id = current.id
 
     assert decrypt_auth_data(current_cred.value, settings) == {
-        "type": "postgres",
+        "type": "basic",
         "user": "user",
         "password": "password",
     }
@@ -71,7 +71,7 @@ async def test_maintainer_plus_can_copy_connection_without_deleting_source(
     q_creds_origin = select(AuthData).where(AuthData.connection_id == curr_id)
     creds_origin = (await session.scalars(q_creds_origin)).first()
     assert decrypt_auth_data(creds_origin.value, settings) == {
-        "type": "postgres",
+        "type": "basic",
         "user": "user",
         "password": "password",
     }
@@ -109,7 +109,7 @@ async def test_maintainer_plus_can_copy_connection_and_delete_source(
     curr_id = current.id
 
     assert decrypt_auth_data(current_cred.value, settings) == {
-        "type": "postgres",
+        "type": "basic",
         "user": "user",
         "password": "password",
     }
@@ -167,7 +167,7 @@ async def test_superuser_can_copy_connection_without_deleting_source(
     current_cred = (await session.scalars(query_current_creds)).one()
 
     assert decrypt_auth_data(current_cred.value, settings) == {
-        "type": "postgres",
+        "type": "basic",
         "user": "user",
         "password": "password",
     }
@@ -205,7 +205,7 @@ async def test_superuser_can_copy_connection_without_deleting_source(
     q_creds_origin = select(AuthData).where(AuthData.connection_id == current.id)
     creds_origin = (await session.scalars(q_creds_origin)).first()
     assert decrypt_auth_data(creds_origin.value, settings) == {
-        "type": "postgres",
+        "type": "basic",
         "user": "user",
         "password": "password",
     }
@@ -240,7 +240,7 @@ async def test_superuser_can_copy_connection_and_delete_source(
     current_cred = (await session.scalars(query_current_creds)).one()
 
     assert decrypt_auth_data(current_cred.value, settings) == {
-        "type": "postgres",
+        "type": "basic",
         "user": "user",
         "password": "password",
     }
@@ -373,7 +373,7 @@ async def test_not_in_both_groups_user_can_not_copy_connection(
     current_cred = result_current_creds.one()
 
     assert decrypt_auth_data(current_cred.value, settings) == {
-        "type": "postgres",
+        "type": "basic",
         "user": "user",
         "password": "password",
     }
@@ -427,7 +427,7 @@ async def test_groupless_user_can_not_copy_connection(
     current_cred = result_current_creds.one()
 
     assert decrypt_auth_data(current_cred.value, settings) == {
-        "type": "postgres",
+        "type": "basic",
         "user": "user",
         "password": "password",
     }

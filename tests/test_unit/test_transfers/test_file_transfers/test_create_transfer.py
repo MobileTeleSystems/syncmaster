@@ -10,15 +10,17 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
 
 
 @pytest.mark.parametrize(
-    "create_connection_data",
+    "connection_type,create_connection_data",
     [
-        {
-            "type": "s3",
-            "host": "localhost",
-            "port": 443,
-        },
+        (
+            "s3",
+            {
+                "host": "localhost",
+                "port": 443,
+            },
+        ),
     ],
-    indirect=True,
+    indirect=["create_connection_data"],
 )
 @pytest.mark.parametrize(
     "target_source_params",
@@ -187,14 +189,16 @@ async def test_developer_plus_can_create_s3_transfer(
 
 
 @pytest.mark.parametrize(
-    "create_connection_data",
+    "connection_type,create_connection_data",
     [
-        {
-            "type": "hdfs",
-            "cluster": "cluster",
-        },
+        (
+            "hdfs",
+            {
+                "cluster": "cluster",
+            },
+        ),
     ],
-    indirect=True,
+    indirect=["create_connection_data"],
 )
 @pytest.mark.parametrize(
     "target_source_params",

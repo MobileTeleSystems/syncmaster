@@ -969,8 +969,8 @@ async def postgres_connection(
     syncmaster_conn = await create_connection(
         session=session,
         name=secrets.token_hex(5),
+        type=postgres.type,
         data=dict(
-            type=postgres.type,
             host=postgres.host,
             port=postgres.port,
             database_name=postgres.database_name,
@@ -984,7 +984,7 @@ async def postgres_connection(
         settings=settings,
         connection_id=syncmaster_conn.id,
         auth_data=dict(
-            type="postgres",
+            type="basic",
             user=postgres.user,
             password=postgres.password,
         ),
@@ -1005,8 +1005,8 @@ async def hive_connection(
     result = await create_connection(
         session=session,
         name=secrets.token_hex(5),
+        type=hive.type,
         data=dict(
-            type=hive.type,
             cluster=hive.cluster,
         ),
         group_id=group.id,
@@ -1017,7 +1017,7 @@ async def hive_connection(
         settings=settings,
         connection_id=result.id,
         auth_data=dict(
-            type="hive",
+            type="basic",
             user=hive.user,
             password=hive.password,
         ),
@@ -1039,8 +1039,8 @@ async def oracle_connection(
     syncmaster_conn = await create_connection(
         session=session,
         name=secrets.token_hex(5),
+        type=oracle.type,
         data=dict(
-            type=oracle.type,
             host=oracle.host,
             port=oracle.port,
             sid=oracle.sid,
@@ -1055,7 +1055,7 @@ async def oracle_connection(
         settings=settings,
         connection_id=syncmaster_conn.id,
         auth_data=dict(
-            type="oracle",
+            type="basic",
             user=oracle.user,
             password=oracle.password,
         ),
@@ -1077,8 +1077,8 @@ async def clickhouse_connection(
     syncmaster_conn = await create_connection(
         session=session,
         name=secrets.token_hex(5),
+        type=clickhouse.type,
         data=dict(
-            type=clickhouse.type,
             host=clickhouse.host,
             port=clickhouse.port,
             database_name=clickhouse.database_name,
@@ -1092,7 +1092,7 @@ async def clickhouse_connection(
         settings=settings,
         connection_id=syncmaster_conn.id,
         auth_data=dict(
-            type="clickhouse",
+            type="basic",
             user=clickhouse.user,
             password=clickhouse.password,
         ),
@@ -1114,8 +1114,8 @@ async def mssql_connection(
     syncmaster_conn = await create_connection(
         session=session,
         name=secrets.token_hex(5),
+        type=mssql.type,
         data=dict(
-            type=mssql.type,
             host=mssql.host,
             port=mssql.port,
             database_name=mssql.database_name,
@@ -1129,7 +1129,7 @@ async def mssql_connection(
         settings=settings,
         connection_id=syncmaster_conn.id,
         auth_data=dict(
-            type="mssql",
+            type="basic",
             user=mssql.user,
             password=mssql.password,
         ),
@@ -1151,8 +1151,8 @@ async def mysql_connection(
     syncmaster_conn = await create_connection(
         session=session,
         name=secrets.token_hex(5),
+        type=mysql.type,
         data=dict(
-            type=mysql.type,
             host=mysql.host,
             port=mysql.port,
             database_name=mysql.database_name,
@@ -1166,7 +1166,7 @@ async def mysql_connection(
         settings=settings,
         connection_id=syncmaster_conn.id,
         auth_data=dict(
-            type="mysql",
+            type="basic",
             user=mysql.user,
             password=mysql.password,
         ),
@@ -1187,8 +1187,8 @@ async def hdfs_connection(
     result = await create_connection(
         session=session,
         name=secrets.token_hex(5),
+        type=hdfs.type,
         data=dict(
-            type=hdfs.type,
             cluster=hdfs.cluster,
         ),
         group_id=group.id,
@@ -1199,7 +1199,7 @@ async def hdfs_connection(
         settings=settings,
         connection_id=result.id,
         auth_data=dict(
-            type="hdfs",
+            type="basic",
             user=hdfs.user,
             password=hdfs.password,
         ),
@@ -1221,8 +1221,8 @@ async def s3_connection(
     syncmaster_conn = await create_connection(
         session=session,
         name=secrets.token_hex(5),
+        type=s3.type,
         data=dict(
-            type=s3.type,
             host=s3.host,
             port=s3.port,
             bucket=s3.bucket,

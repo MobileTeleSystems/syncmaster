@@ -18,7 +18,7 @@ async def test_developer_plus_can_update_connection(
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"name": "New connection name"},
+        json={"name": "New connection name", "type": group_connection.type},
     )
 
     # Assert
@@ -27,8 +27,8 @@ async def test_developer_plus_can_update_connection(
         "name": "New connection name",
         "description": group_connection.description,
         "group_id": group_connection.group_id,
+        "type": group_connection.type,
         "connection_data": {
-            "type": group_connection.data["type"],
             "host": group_connection.data["host"],
             "port": group_connection.data["port"],
             "additional_params": group_connection.data["additional_params"],
@@ -43,23 +43,23 @@ async def test_developer_plus_can_update_connection(
 
 
 @pytest.mark.parametrize(
-    "create_connection_data,create_connection_auth_data",
+    "connection_type,create_connection_data,create_connection_auth_data",
     [
         (
+            "oracle",
             {
-                "type": "oracle",
                 "host": "127.0.0.1",
                 "port": 1521,
                 "sid": "sid_name",
             },
             {
-                "type": "oracle",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
         ),
     ],
-    indirect=True,
+    indirect=["create_connection_data", "create_connection_auth_data"],
 )
 async def test_developer_plus_can_update_oracle_connection(
     client: AsyncClient,
@@ -75,13 +75,13 @@ async def test_developer_plus_can_update_oracle_connection(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
+            "type": "oracle",
             "connection_data": {
-                "type": "oracle",
                 "host": "127.0.1.1",
                 "sid": "new_sid_name",
             },
             "auth_data": {
-                "type": "oracle",
+                "type": "basic",
                 "user": "new_user",
             },
         },
@@ -94,8 +94,8 @@ async def test_developer_plus_can_update_oracle_connection(
         "name": group_connection.name,
         "description": group_connection.description,
         "group_id": group_connection.group_id,
+        "type": group_connection.type,
         "connection_data": {
-            "type": group_connection.data["type"],
             "host": "127.0.1.1",
             "port": group_connection.data["port"],
             "sid": "new_sid_name",
@@ -118,7 +118,7 @@ async def test_groupless_user_cannot_update_connection(
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
-        json={"name": "New connection name"},
+        json={"name": "New connection name", "type": group_connection.type},
     )
 
     # Assert
@@ -144,7 +144,7 @@ async def test_check_name_field_validation_on_update_connection(
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"name": ""},
+        json={"name": "", "type": group_connection.type},
     )
 
     # Assert
@@ -156,7 +156,7 @@ async def test_check_name_field_validation_on_update_connection(
                 {
                     "context": {"min_length": 1},
                     "input": "",
-                    "location": ["body", "name"],
+                    "location": ["body", "postgres", "name"],
                     "message": "String should have at least 1 character",
                     "code": "string_too_short",
                 },
@@ -178,7 +178,7 @@ async def test_group_member_cannot_update_other_group_connection(
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"name": "New connection name"},
+        json={"name": "New connection name", "type": group_connection.type},
     )
 
     # Assert
@@ -201,7 +201,7 @@ async def test_superuser_can_update_connection(
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
-        json={"name": "New connection name"},
+        json={"type": "postgres", "name": "New connection name"},
     )
 
     # Assert
@@ -210,8 +210,8 @@ async def test_superuser_can_update_connection(
         "name": "New connection name",
         "description": group_connection.description,
         "group_id": group_connection.group_id,
+        "type": group_connection.type,
         "connection_data": {
-            "type": group_connection.data["type"],
             "host": group_connection.data["host"],
             "port": group_connection.data["port"],
             "additional_params": group_connection.data["additional_params"],
@@ -249,8 +249,8 @@ async def test_update_connection_data_fields(
             "details": [
                 {
                     "context": {"discriminator": "'type'"},
-                    "input": {"host": "localhost"},
-                    "location": ["body", "connection_data"],
+                    "input": {"connection_data": {"host": "localhost"}},
+                    "location": ["body"],
                     "message": "Unable to extract tag using discriminator 'type'",
                     "code": "union_tag_not_found",
                 },
@@ -262,7 +262,7 @@ async def test_update_connection_data_fields(
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"connection_data": {"type": "postgres", "host": "localhost"}},
+        json={"type": "postgres", "connection_data": {"host": "localhost"}},
     )
 
     # Assert
@@ -271,8 +271,8 @@ async def test_update_connection_data_fields(
         "name": group_connection.name,
         "description": group_connection.description,
         "group_id": group_connection.group_id,
+        "type": group_connection.type,
         "connection_data": {
-            "type": group_connection.data["type"],
             "host": "localhost",
             "port": group_connection.data["port"],
             "additional_params": group_connection.data["additional_params"],
@@ -297,7 +297,7 @@ async def test_update_connection_auth_data_all_felds(
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"auth_data": {"type": "postgres", "user": "new_user", "password": "new_password"}},
+        json={"type": "postgres", "auth_data": {"type": "basic", "user": "new_user", "password": "new_password"}},
     )
 
     # Assert
@@ -306,8 +306,8 @@ async def test_update_connection_auth_data_all_felds(
         "name": group_connection.name,
         "description": group_connection.description,
         "group_id": group_connection.group_id,
+        "type": group_connection.type,
         "connection_data": {
-            "type": group_connection.data["type"],
             "host": "127.0.0.1",
             "port": group_connection.data["port"],
             "additional_params": group_connection.data["additional_params"],
@@ -332,7 +332,7 @@ async def test_update_connection_auth_data_partial(
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"auth_data": {"type": "postgres", "user": "new_user"}},
+        json={"type": "postgres", "auth_data": {"type": "basic", "user": "new_user"}},
     )
 
     # Assert
@@ -341,8 +341,8 @@ async def test_update_connection_auth_data_partial(
         "name": group_connection.name,
         "description": group_connection.description,
         "group_id": group_connection.group_id,
+        "type": group_connection.type,
         "connection_data": {
-            "type": group_connection.data["type"],
             "host": "127.0.0.1",
             "port": group_connection.data["port"],
             "additional_params": group_connection.data["additional_params"],
@@ -389,7 +389,7 @@ async def test_developer_plus_cannot_update_unknown_connection_error(
     result = await client.patch(
         "v1/connections/-1",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"name": "New connection name"},
+        json={"type": "postgres", "name": "New connection name"},
     )
 
     # Assert
@@ -410,7 +410,7 @@ async def test_superuser_cannot_update_unknown_connection_error(
     result = await client.patch(
         "v1/connections/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
-        json={"name": "New connection name"},
+        json={"type": "postgres", "name": "New connection name"},
     )
 
     # Assert
@@ -424,23 +424,23 @@ async def test_superuser_cannot_update_unknown_connection_error(
 
 
 @pytest.mark.parametrize(
-    "create_connection_data,create_connection_auth_data",
+    "connection_type,create_connection_data,create_connection_auth_data",
     [
         (
+            "oracle",
             {
-                "type": "oracle",
                 "host": "127.0.0.1",
                 "port": 1521,
                 "sid": "sid_name",
             },
             {
-                "type": "oracle",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
         ),
     ],
-    indirect=True,
+    indirect=["create_connection_data", "create_connection_auth_data"],
 )
 async def test_developer_plus_update_oracle_connection_both_sid_and_service_name_error(
     client: AsyncClient,
@@ -459,15 +459,15 @@ async def test_developer_plus_update_oracle_connection_both_sid_and_service_name
             "group_id": group_id,
             "name": "New connection",
             "description": "",
+            "type": "oracle",
             "connection_data": {
-                "type": "oracle",
                 "host": "127.0.0.1",
                 "port": 1521,
                 "sid": "sid_name",
                 "service_name": "service_name",
             },
             "auth_data": {
-                "type": "oracle",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -488,58 +488,9 @@ async def test_developer_plus_update_oracle_connection_both_sid_and_service_name
                         "port": 1521,
                         "service_name": "service_name",
                         "sid": "sid_name",
-                        "type": "oracle",
                     },
-                    "location": ["body", "connection_data", "oracle"],
+                    "location": ["body", "oracle", "connection_data"],
                     "message": "Value error, You must specify either sid or service_name but not both",
-                    "code": "value_error",
-                },
-            ],
-        },
-    }
-
-
-async def test_developer_plus_update_connection_with_diff_type_error(
-    client: AsyncClient,
-    group_connection: MockConnection,
-    role_developer_plus: UserTestRoles,
-):
-    # Arrange
-    user = group_connection.owner_group.get_member_of_role(role_developer_plus)
-
-    # Act
-    result = await client.patch(
-        f"v1/connections/{group_connection.id}",
-        headers={"Authorization": f"Bearer {user.token}"},
-        json={
-            "name": "New connection name",
-            "connection_data": {
-                "type": "postgres",
-                "host": "new_host",
-            },
-            "auth_data": {
-                "type": "oracle",
-                "user": "new_user",
-            },
-        },
-    )
-
-    # Assert
-    assert result.status_code == 422
-    assert result.json() == {
-        "error": {
-            "code": "invalid_request",
-            "message": "Invalid request",
-            "details": [
-                {
-                    "context": {},
-                    "input": {
-                        "auth_data": {"type": "oracle", "user": "new_user"},
-                        "connection_data": {"host": "new_host", "type": "postgres"},
-                        "name": "New connection name",
-                    },
-                    "location": ["body"],
-                    "message": "Value error, Connection data and auth data must have same types",
                     "code": "value_error",
                 },
             ],
@@ -561,8 +512,8 @@ async def test_maintainer_plus_cannot_update_connection_type_with_linked_transfe
         headers={"Authorization": f"Bearer {user.token}"},
         json={
             "name": "New connection name",
+            "type": "oracle",
             "connection_data": {
-                "type": "oracle",
                 "host": "new_host",
             },
         },
@@ -590,7 +541,7 @@ async def test_guest_cannot_update_connection_error(
     result = await client.patch(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"name": "New connection name"},
+        json={"type": "postgres", "name": "New connection name"},
     )
 
     # Assert

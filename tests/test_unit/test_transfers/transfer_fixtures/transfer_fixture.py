@@ -29,6 +29,7 @@ from tests.test_unit.utils import (
 async def group_transfer(
     session: AsyncSession,
     settings: Settings,
+    connection_type: str | None,
     create_connection_data: dict | None,
     create_transfer_data: dict | None,
     access_token_factory,
@@ -80,6 +81,7 @@ async def group_transfer(
     source_connection = await create_connection(
         session=session,
         name="group_transfer_source_connection",
+        type=connection_type or "postgres",
         group_id=group.id,
         data=create_connection_data,
     )

@@ -128,8 +128,8 @@ class TransferController:
         transfer_params: dict[str, Any],
     ) -> Handler:
         connection_data.update(connection_auth_data)
-        handler_type = connection_data.pop("type")
-        transfer_params.pop("type", None)
+        connection_data.pop("type")
+        handler_type = transfer_params.pop("type", None)
 
         if connection_handler_proxy.get(handler_type, None) is None:
             raise ConnectionTypeNotRecognizedError

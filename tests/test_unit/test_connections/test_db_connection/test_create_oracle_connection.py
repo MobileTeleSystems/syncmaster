@@ -29,14 +29,14 @@ async def test_developer_plus_can_create_oracle_connection_with_service_name(
             "group_id": group.id,
             "name": "New connection",
             "description": "",
+            "type": "oracle",
             "connection_data": {
-                "type": "oracle",
                 "host": "127.0.0.1",
                 "port": 1521,
                 "service_name": "service_name",
             },
             "auth_data": {
-                "type": "oracle",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -66,8 +66,8 @@ async def test_developer_plus_can_create_oracle_connection_with_service_name(
         "name": connection.name,
         "description": connection.description,
         "group_id": connection.group_id,
+        "type": connection.type,
         "connection_data": {
-            "type": connection.data["type"],
             "host": connection.data["host"],
             "port": connection.data["port"],
             "additional_params": connection.data["additional_params"],
@@ -99,14 +99,14 @@ async def test_developer_plus_can_create_oracle_connection_with_sid(
             "group_id": group.id,
             "name": "New connection",
             "description": "",
+            "type": "oracle",
             "connection_data": {
-                "type": "oracle",
                 "host": "127.0.0.1",
                 "port": 1521,
                 "sid": "sid_name",
             },
             "auth_data": {
-                "type": "oracle",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -136,8 +136,8 @@ async def test_developer_plus_can_create_oracle_connection_with_sid(
         "name": connection.name,
         "description": connection.description,
         "group_id": connection.group_id,
+        "type": connection.type,
         "connection_data": {
-            "type": connection.data["type"],
             "host": connection.data["host"],
             "port": connection.data["port"],
             "sid": connection.data["sid"],
@@ -168,15 +168,15 @@ async def test_developer_plus_create_oracle_connection_with_sid_and_service_name
             "group_id": group.id,
             "name": "New connection",
             "description": "",
+            "type": "oracle",
             "connection_data": {
-                "type": "oracle",
                 "host": "127.0.0.1",
                 "port": 1521,
                 "sid": "sid_name",
                 "service_name": "service_name",
             },
             "auth_data": {
-                "type": "oracle",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -197,73 +197,9 @@ async def test_developer_plus_create_oracle_connection_with_sid_and_service_name
                         "port": 1521,
                         "service_name": "service_name",
                         "sid": "sid_name",
-                        "type": "oracle",
                     },
-                    "location": ["body", "connection_data", "oracle"],
+                    "location": ["body", "oracle", "connection_data"],
                     "message": "Value error, You must specify either sid or service_name but not both",
-                    "code": "value_error",
-                },
-            ],
-        },
-    }
-
-
-async def test_developer_plus_cannot_create_connection_with_type_mismatch(
-    client: AsyncClient,
-    group: MockGroup,
-    session: AsyncSession,
-    settings: Settings,
-    role_developer_plus: UserTestRoles,
-    event_loop,
-    request,
-):
-    # Arrange
-    user = group.get_member_of_role(role_developer_plus)
-
-    # Act
-    result = await client.post(
-        "v1/connections",
-        headers={"Authorization": f"Bearer {user.token}"},
-        json={
-            "group_id": group.id,
-            "name": "New connection",
-            "description": "",
-            "connection_data": {
-                "type": "postgres",
-                "host": "127.0.0.1",
-                "port": 5432,
-                "database_name": "postgres",
-            },
-            "auth_data": {
-                "type": "oracle",
-                "user": "user",
-                "password": "secret",
-            },
-        },
-    )
-
-    # Assert
-    assert result.json() == {
-        "error": {
-            "code": "invalid_request",
-            "message": "Invalid request",
-            "details": [
-                {
-                    "context": {},
-                    "input": {
-                        "group_id": group.id,
-                        "name": "New connection",
-                        "description": "",
-                        "connection_data": {
-                            "type": "postgres",
-                            "host": "127.0.0.1",
-                            "port": 5432,
-                            "database_name": "postgres",
-                        },
-                        "auth_data": {"type": "oracle", "user": "user", "password": "secret"},
-                    },
-                    "location": ["body"],
-                    "message": "Value error, Connection data and auth data must have same types",
                     "code": "value_error",
                 },
             ],
