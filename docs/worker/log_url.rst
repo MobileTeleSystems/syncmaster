@@ -9,5 +9,5 @@ The configuration parameter is:
 
   SYNCMASTER__SERVER__LOG_URL_TEMPLATE=https://grafana.example.com?correlation_id={{ correlation_id }}&run_id={{ run.id }}
 
-You can search for each run by either its correlation id ``CORRELATION_CELERY_HEADER_ID`` in http headers or the ``Run.Id``.
+You can search for each run by either its correlation id ``x-request-id`` in http headers or the ``Run.Id``.
 

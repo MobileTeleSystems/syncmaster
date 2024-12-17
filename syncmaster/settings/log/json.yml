@@ -9,9 +9,6 @@ filters:
     (): asgi_correlation_id.CorrelationIdFilter
     uuid_length: 32
     default_value: '-'
-  celery_tracing:
-    (): asgi_correlation_id.CeleryTracingIdsFilter
-    uuid_length: 32
 
 formatters:
   json:
@@ -29,7 +26,7 @@ handlers:
   celery:
     class: logging.StreamHandler
     formatter: json
-    filters: [correlation_id, celery_tracing]
+    filters: [correlation_id]
     stream: ext://sys.stdout
 
 loggers:

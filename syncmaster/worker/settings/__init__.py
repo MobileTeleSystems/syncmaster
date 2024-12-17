@@ -20,13 +20,9 @@ class WorkerSettings(BaseSettings):
 
     .. code-block:: bash
 
-        SYNCMASTER__WORKER__CORRELATION_CELERY_HEADER_ID=CORRELATION_ID_CELERY
+        SYNCMASTER__WORKER__CREATE_SPARK_SESSION_FUNCTION=custom_syncmaster.spark.get_worker_spark_session
     """
 
-    CORRELATION_CELERY_HEADER_ID: str = Field(
-        "CORRELATION_ID",
-        description="Header ID for correlation in Celery",
-    )
     CREATE_SPARK_SESSION_FUNCTION: ImportString = Field(
         "syncmaster.worker.spark.get_worker_spark_session",
         description="Function to create Spark session for worker",
@@ -50,9 +46,6 @@ class WorkerAppSettings(BaseSettings):
     --------
 
     .. code-block:: bash
-
-        # Example of setting a CORRELATION_CELERY_HEADER_ID via environment variable
-        SYNCMASTER__WORKER__CORRELATION_CELERY_HEADER_ID=CORRELATION_ID_CELERY
 
         # Example of setting a database URL via environment variable
         SYNCMASTER__DATABASE__URL=postgresql+asyncpg://user:password@localhost:5432/dbname
