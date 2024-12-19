@@ -5,12 +5,12 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.db.models import AuthData, Connection
 from syncmaster.db.repositories.utils import decrypt_auth_data
+from syncmaster.server.settings import ServerAppSettings as Settings
 from tests.mocks import MockConnection, MockGroup, MockUser, UserTestRoles
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 async def test_maintainer_plus_can_copy_connection_without_deleting_source(

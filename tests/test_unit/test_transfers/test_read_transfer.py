@@ -3,7 +3,7 @@ from httpx import AsyncClient
 
 from tests.mocks import MockGroup, MockTransfer, MockUser, UserTestRoles
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 async def test_guest_plus_can_read_transfer(

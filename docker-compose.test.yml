@@ -28,7 +28,7 @@ services:
       timeout: 5s
       retries: 3
 
-  # Using worker image here to skip building backend image build in CI.
+  # Using worker image here to skip building server image build in CI.
   # Worker test image already has all neccessary dependencies
   migrations:
     image: mtsrus/syncmaster-worker:${WORKER_IMAGE_TAG:-test}
@@ -46,11 +46,11 @@ services:
       db:
         condition: service_healthy
 
-  backend:
-    image: mtsrus/syncmaster-backend:${BACKEND_IMAGE_TAG:-test}
+  server:
+    image: mtsrus/syncmaster-server:${SERVER_IMAGE_TAG:-test}
     restart: unless-stopped
     build:
-      dockerfile: docker/Dockerfile.backend
+      dockerfile: docker/Dockerfile.server
       context: .
       target: test
     env_file: .env.docker
@@ -75,7 +75,7 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
-    profiles: [backend, all]
+    profiles: [server, all]
 
   scheduler:
     image: mtsrus/syncmaster-scheduler:${SCHEDULER_IMAGE_TAG:-test}

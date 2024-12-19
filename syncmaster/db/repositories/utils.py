@@ -9,8 +9,8 @@ from cryptography.fernet import Fernet
 from pydantic import SecretStr
 
 if TYPE_CHECKING:
-    from syncmaster.backend.settings import ServerAppSettings
     from syncmaster.scheduler.settings import SchedulerAppSettings
+    from syncmaster.server.settings import ServerAppSettings
     from syncmaster.worker.settings import WorkerAppSettings
 
 

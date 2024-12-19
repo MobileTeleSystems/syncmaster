@@ -7,7 +7,7 @@ With docker
 Installation process
 ~~~~~~~~~~~~~~~~~~~~
 
-Docker will download worker image of syncmaster scheduler (same as backend image) & broker, and run them.
+Docker will download worker image of syncmaster scheduler & broker, and run them.
 Options can be set via ``.env`` file or ``environment`` section in ``docker-compose.yml``
 
 .. dropdown:: ``docker-compose.yml``

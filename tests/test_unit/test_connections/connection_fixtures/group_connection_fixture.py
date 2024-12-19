@@ -4,8 +4,8 @@ from collections.abc import AsyncGenerator
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.db.repositories.utils import decrypt_auth_data
+from syncmaster.server.settings import ServerAppSettings as Settings
 from tests.mocks import (
     MockConnection,
     MockCredentials,

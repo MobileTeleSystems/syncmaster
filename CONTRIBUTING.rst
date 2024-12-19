@@ -54,7 +54,7 @@ It allows to keep development environment the same for all developers due to usi
 
 There are *extra* dependencies (included into package as optional):
 
-* ``backend`` - for running backend
+* ``server`` - for running server
 * ``worker`` - for running Celery workers
 
 And *groups* (not included into package, used locally and in CI):
@@ -330,7 +330,7 @@ Examples for adding changelog entries to your Pull Requests
 .. code-block:: rst
     :caption: docs/changelog/next_release/2345.bugfix.rst
 
-    Fixed behavior of ``backend`` -- by :github:user:`someuser`
+    Fixed behavior of ``server`` -- by :github:user:`someuser`
 
 .. code-block:: rst
     :caption: docs/changelog/next_release/3456.feature.rst

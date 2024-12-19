@@ -30,7 +30,7 @@ class DatabaseSettings(BaseModel):
             """
             Database connection URL.
 
-            See `SQLAlchemy documentation <https://docs.sqlalchemy.org/en/20/core/engines.html#backend-specific-urls>`_
+            See `SQLAlchemy documentation <https://docs.sqlalchemy.org/en/20/core/engines.html#server-specific-urls>`_
 
             .. warning:
 

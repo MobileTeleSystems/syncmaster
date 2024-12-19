@@ -29,10 +29,10 @@ services:
       retries: 3
 
   migrations:
-    image: mtsrus/syncmaster-backend:${TAG:-develop}
+    image: mtsrus/syncmaster-server:${TAG:-develop}
     restart: no
     build:
-      dockerfile: docker/Dockerfile.backend
+      dockerfile: docker/Dockerfile.server
       context: .
       target: prod
     entrypoint: [python, -m, syncmaster.db.migrations, upgrade, head]
@@ -41,11 +41,11 @@ services:
       db:
         condition: service_healthy
 
-  backend:
-    image: mtsrus/syncmaster-backend:${TAG:-develop}
+  server:
+    image: mtsrus/syncmaster-server:${TAG:-develop}
     restart: unless-stopped
     build:
-      dockerfile: docker/Dockerfile.backend
+      dockerfile: docker/Dockerfile.server
       context: .
       target: prod
     ports:

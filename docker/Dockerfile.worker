@@ -37,7 +37,7 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["--loglevel=info"]
 
 
-FROM base as prod
+FROM base AS prod
 
 COPY ./syncmaster/ /app/syncmaster/
 
@@ -46,6 +46,6 @@ FROM base AS test
 
 ENV SYNCMASTER__WORKER__CREATE_SPARK_SESSION_FUNCTION=tests.spark.get_worker_spark_session
 
-# CI runs tests in the worker container, so we need backend dependencies too
+# CI runs tests in the worker container, so we need server dependencies too
 RUN poetry install --no-root --all-extras --with test --without docs,dev
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh

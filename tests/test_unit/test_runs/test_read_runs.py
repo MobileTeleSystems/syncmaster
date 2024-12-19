@@ -7,7 +7,7 @@ from httpx import AsyncClient
 from syncmaster.db.models import RunType, Status
 from tests.mocks import MockGroup, MockRun, MockTransfer, MockUser, UserTestRoles
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 FUTURE_DATE = "2099-01-01T00:00:00"
 PAST_DATE = "2000-01-01T00:00:00"

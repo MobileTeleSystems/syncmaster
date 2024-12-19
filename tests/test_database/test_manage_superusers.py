@@ -6,15 +6,15 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.backend.scripts.manage_superusers import (
+from syncmaster.db.models.user import User
+from syncmaster.server.scripts.manage_superusers import (
     add_superusers,
     list_superusers,
     remove_superusers,
 )
-from syncmaster.db.models.user import User
 from tests.mocks import MockUser
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 @pytest.mark.parametrize("simple_users", [10], indirect=True)

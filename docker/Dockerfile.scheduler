@@ -13,7 +13,7 @@ ENV PYTHONPATH=/app
 COPY ./pyproject.toml ./poetry.lock* /app/
 
 RUN pip install --upgrade pip setuptools wheel packaging
-RUN poetry install --no-root --extras "scheduler" --extras "backend" --without test,docs,dev
+RUN poetry install --no-root --extras "scheduler" --extras "server" --without test,docs,dev
 
 COPY ./docker/entrypoint_scheduler.sh /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]

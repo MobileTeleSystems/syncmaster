@@ -3,7 +3,7 @@ from httpx import AsyncClient
 
 from tests.mocks import MockConnection, MockGroup, MockUser, UserTestRoles
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 async def test_member_of_group_can_read_group_members(

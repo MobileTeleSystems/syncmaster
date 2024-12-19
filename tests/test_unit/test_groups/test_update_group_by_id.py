@@ -3,7 +3,7 @@ from httpx import AsyncClient
 
 from tests.mocks import MockGroup, MockUser, UserTestRoles
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 async def test_owner_of_group_can_update_group(client: AsyncClient, empty_group: MockGroup):

@@ -1,4 +1,4 @@
-name: Backend docker image
+name: Server docker image
 
 on:
   push:
@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   release:
-    name: Build & push backend image to Dockerhub
+    name: Build & push server image to Dockerhub
     runs-on: ubuntu-latest
     if: github.repository == 'MobileTeleSystems/syncmaster'  # prevent running on forks
 
@@ -38,22 +38,22 @@ jobs:
         id: set_tag
         run: |
           if [[ "${{ github.ref_type }}" == "branch" && "${{ github.ref_name }}" == "develop" ]]; then
-            echo "TAG=mtsrus/syncmaster-backend:develop" >> $GITHUB_ENV
+            echo "TAG=mtsrus/syncmaster-server:develop" >> $GITHUB_ENV
           elif [[ "${{ github.ref_type }}" == "tag" ]]; then
-            echo "TAG=mtsrus/syncmaster-backend:latest,mtsrus/syncmaster-backend:${{ github.ref_name }}" >> $GITHUB_ENV
+            echo "TAG=mtsrus/syncmaster-server:latest,mtsrus/syncmaster-server:${{ github.ref_name }}" >> $GITHUB_ENV
           fi
 
-      - name: Build Backend image
+      - name: Build Server image
         uses: docker/build-push-action@v6
         with:
           tags: ${{ env.TAG }}
           context: .
           target: prod
-          file: docker/Dockerfile.backend
+          file: docker/Dockerfile.server
           pull: true
           push: true
           cache-to: type=inline
-          cache-from: mtsrus/syncmaster-backend:develop
+          cache-from: mtsrus/syncmaster-server:develop
           platforms: |
             linux/amd64
             linux/arm64/v8
@@ -76,6 +76,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           # this requires token with read+write+delete permissions. read+write is not enough!
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: mtsrus/syncmaster-backend
+          repository: mtsrus/syncmaster-server
           short-description: ${{ github.event.repository.description }}
           enable-url-completion: true

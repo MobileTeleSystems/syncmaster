@@ -55,7 +55,7 @@ class LoggingSettings(BaseModel):
     .. code-block:: bash
 
         $ export SYNCMASTER__LOGGING__SETUP=False
-        $ python -m syncmaster.backend --log-level debug
+        $ python -m syncmaster.server --log-level debug
     """
 
     setup: bool = Field(
@@ -68,7 +68,7 @@ class LoggingSettings(BaseModel):
             """
             Name of logging preset to use.
 
-            There are few logging presets bundled to ``syncmaster[backend]`` package:
+            There are few logging presets bundled to ``syncmaster[server]`` package:
 
             .. dropdown:: ``plain`` preset
 

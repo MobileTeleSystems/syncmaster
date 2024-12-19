@@ -11,14 +11,14 @@
 
 .. toctree::
     :maxdepth: 2
-    :caption: Backend
+    :caption: Server
     :hidden:
 
-    backend/install
-    backend/architecture
-    backend/auth/index
-    backend/configuration/index
-    backend/openapi
+    server/install
+    server/architecture
+    server/auth/index
+    server/configuration/index
+    server/openapi
 
 
 .. toctree::

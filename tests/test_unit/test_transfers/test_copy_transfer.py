@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from syncmaster.db.models import Connection, Queue
 from tests.mocks import MockGroup, MockTransfer, MockUser, UserTestRoles
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 async def test_maintainer_plus_can_copy_transfer_with_remove_source(

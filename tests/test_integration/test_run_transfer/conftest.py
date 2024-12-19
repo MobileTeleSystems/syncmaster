@@ -25,7 +25,6 @@ from pyspark.sql.types import (
 from pytest import FixtureRequest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.db.models import Group
 from syncmaster.dto.connections import (
     ClickhouseConnectionDTO,
@@ -37,6 +36,7 @@ from syncmaster.dto.connections import (
     PostgresConnectionDTO,
     S3ConnectionDTO,
 )
+from syncmaster.server.settings import ServerAppSettings as Settings
 from tests.mocks import MockUser, UserTestRoles
 from tests.resources.file_df_connection.test_data import data
 from tests.settings import TestSettings

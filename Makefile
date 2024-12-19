@@ -122,7 +122,7 @@ test-cleanup: ##@Test           Cleanup tests dependencies
 
 
 dev-server: db-start ##@Application Run development server (without docker)
-	${POETRY} run python -m syncmaster.backend $(ARGS)
+	${POETRY} run python -m syncmaster.server $(ARGS)
 
 dev-worker: db-start broker-start ##@Application Run development broker (without docker)
 	${POETRY} run python -m celery -A syncmaster.worker.celery worker --max-tasks-per-child=1 $(ARGS)
@@ -130,7 +130,7 @@ dev-worker: db-start broker-start ##@Application Run development broker (without
 
 
 prod-build-server: ##@Application Build docker image for server
-	docker build --progress=plain -t mtsrus/syncmaster-backend:develop -f ./docker/Dockerfile.backend --target=prod $(ARGS) .
+	docker build --progress=plain -t mtsrus/syncmaster-server:develop -f ./docker/Dockerfile.server --target=prod $(ARGS) .
 
 prod-build-scheduler: ##@Application Build docker image for scheduler
 	docker build --progress=plain -t mtsrus/syncmaster-scheduler:develop -f ./docker/Dockerfile.scheduler --target=prod $(ARGS) .
@@ -164,4 +164,4 @@ docs-cleanup: ##@Docs Cleanup docs
 docs-fresh: docs-cleanup docs-build ##@Docs Cleanup & build docs
 
 openapi: ##@Docs Generate OpenAPI schema
-	python -m syncmaster.backend.scripts.export_openapi_schema docs/_static/openapi.json
+	python -m syncmaster.server.scripts.export_openapi_schema docs/_static/openapi.json
