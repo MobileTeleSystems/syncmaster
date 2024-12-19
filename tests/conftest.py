@@ -19,12 +19,12 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from syncmaster.backend import application_factory
-from syncmaster.backend.settings import ServerAppSettings as Settings
-from syncmaster.backend.settings.auth.jwt import JWTSettings
-from syncmaster.backend.utils.jwt import sign_jwt
 from syncmaster.db.models import Base
 from syncmaster.scheduler.settings import SchedulerAppSettings
+from syncmaster.server import application_factory
+from syncmaster.server.settings import ServerAppSettings as Settings
+from syncmaster.server.settings.auth.jwt import JWTSettings
+from syncmaster.server.utils.jwt import sign_jwt
 from syncmaster.worker import celery_factory
 from syncmaster.worker.settings import WorkerAppSettings
 from tests.mocks import UserTestRoles

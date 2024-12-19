@@ -7,7 +7,6 @@ from apscheduler.triggers.cron import CronTrigger
 from kombu.exceptions import KombuError
 from sqlalchemy import any_, select
 
-from syncmaster.backend.services.unit_of_work import UnitOfWork
 from syncmaster.db.models import RunType, Status, Transfer
 from syncmaster.exceptions.run import CannotConnectToTaskQueueError
 from syncmaster.exceptions.transfer import TransferNotFoundError
@@ -15,6 +14,7 @@ from syncmaster.scheduler.celery import app as celery
 from syncmaster.scheduler.settings import SchedulerAppSettings as Settings
 from syncmaster.scheduler.utils import get_async_session
 from syncmaster.schemas.v1.connections.connection_base import ReadAuthDataSchema
+from syncmaster.server.services.unit_of_work import UnitOfWork
 
 
 class TransferJobManager:

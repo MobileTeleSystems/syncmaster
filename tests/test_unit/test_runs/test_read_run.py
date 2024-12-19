@@ -4,7 +4,7 @@ from httpx import AsyncClient
 from syncmaster.db.models import RunType
 from tests.mocks import MockGroup, MockRun, MockUser, UserTestRoles
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 async def test_developer_plus_can_read_run(

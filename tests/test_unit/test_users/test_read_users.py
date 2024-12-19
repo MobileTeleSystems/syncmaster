@@ -6,7 +6,7 @@ from httpx import AsyncClient
 
 from tests.mocks import MockUser
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 async def test_get_users_unauthorized(client: AsyncClient):

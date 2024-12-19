@@ -3,10 +3,10 @@ from typing import get_args
 import pytest
 from httpx import AsyncClient
 
-from syncmaster.backend.api.v1.connections import CONNECTION_TYPES
+from syncmaster.server.api.v1.connections import CONNECTION_TYPES
 from tests.mocks import MockUser
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 async def test_unauthorized_user_cannot_read_connection_types(client: AsyncClient):

@@ -39,16 +39,16 @@ repos:
       - id: chmod
         args: ['644']
         exclude_types: [shell]
-        exclude: ^(.*__main__\.py|syncmaster/backend/scripts/export_openapi_schema\.py)$
+        exclude: ^(.*__main__\.py|syncmaster/server/scripts/export_openapi_schema\.py)$
       - id: chmod
         args: ['755']
         types: [shell]
       - id: chmod
         args: ['755']
-        files: ^(.*__main__\.py|syncmaster/backend/scripts/export_openapi_schema\.py)$
+        files: ^(.*__main__\.py|syncmaster/server/scripts/export_openapi_schema\.py)$
       - id: insert-license
         files: .*\.py$
-        exclude: ^(syncmaster/backend/dependencies/stub.py|docs/.*\.py|tests/.*\.py)$
+        exclude: ^(syncmaster/server/dependencies/stub.py|docs/.*\.py|tests/.*\.py)$
         args:
           - --license-filepath
           - .spdx-license-header.txt
@@ -109,7 +109,7 @@ repos:
 
       - id: mypy
         name: mypy
-        entry: mypy ./syncmaster/backend --config-file ./pyproject.toml
+        entry: mypy ./syncmaster/server --config-file ./pyproject.toml
         language: python
         require_serial: true
         pass_filenames: false

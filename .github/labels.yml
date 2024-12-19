@@ -14,8 +14,8 @@
     description: Add this label to skip changelog file check
     color: 04990f
 
-  - name: component:backend
-    description: Backend-related changes
+  - name: component:server
+    description: Server-related changes
     color: '5319e7'
 
   - name: component:worker

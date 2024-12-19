@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from syncmaster.db.models import Group
 from tests.mocks import MockGroup, MockUser, UserTestRoles
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 async def test_only_superuser_can_delete_group(

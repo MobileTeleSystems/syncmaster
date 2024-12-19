@@ -5,10 +5,10 @@ from pytest_mock import MockType
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.backend.settings import ServerAppSettings as Settings
 from syncmaster.db.models import Run, Status
 from syncmaster.scheduler.transfer_fetcher import TransferFetcher
 from syncmaster.scheduler.transfer_job_manager import TransferJobManager
+from syncmaster.server.settings import ServerAppSettings as Settings
 from tests.mocks import MockTransfer
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.worker, pytest.mark.scheduler_integration]

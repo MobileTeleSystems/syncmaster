@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from syncmaster.db.models import RunType, Status
 from tests.mocks import MockGroup, MockRun, MockUser, UserTestRoles
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 async def test_developer_plus_can_stop_run_of_transfer_his_group(

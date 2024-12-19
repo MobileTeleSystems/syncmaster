@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from syncmaster.db.models import Group
 from tests.mocks import MockUser
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 async def test_simple_user_can_create_group(

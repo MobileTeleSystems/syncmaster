@@ -4,11 +4,11 @@ import pytest
 import responses
 from httpx import AsyncClient
 
-from syncmaster.backend.settings import ServerAppSettings as Settings
+from syncmaster.server.settings import ServerAppSettings as Settings
 from tests.mocks import MockUser
 
-KEYCLOAK_PROVIDER = "syncmaster.backend.providers.auth.keycloak_provider.KeycloakAuthProvider"
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
+KEYCLOAK_PROVIDER = "syncmaster.server.providers.auth.keycloak_provider.KeycloakAuthProvider"
+pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 @responses.activate

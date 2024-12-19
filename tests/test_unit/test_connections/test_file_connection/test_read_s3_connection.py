@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.mocks import MockConnection, UserTestRoles
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend, pytest.mark.s3]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.s3]
 
 
 @pytest.mark.parametrize(

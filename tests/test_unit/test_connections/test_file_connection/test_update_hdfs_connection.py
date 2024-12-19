@@ -3,7 +3,7 @@ from httpx import AsyncClient
 
 from tests.mocks import MockConnection, UserTestRoles
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend, pytest.mark.hdfs]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.hdfs]
 
 
 @pytest.mark.parametrize(

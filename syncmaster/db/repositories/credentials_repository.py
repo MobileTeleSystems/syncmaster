@@ -15,8 +15,8 @@ from syncmaster.exceptions import SyncmasterError
 from syncmaster.exceptions.credentials import AuthDataNotFoundError
 
 if TYPE_CHECKING:
-    from syncmaster.backend.settings import ServerAppSettings
     from syncmaster.scheduler.settings import SchedulerAppSettings
+    from syncmaster.server.settings import ServerAppSettings
     from syncmaster.worker.settings import WorkerAppSettings
 
 

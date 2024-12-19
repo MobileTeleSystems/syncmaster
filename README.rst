@@ -14,8 +14,8 @@ Data.SyncMaster
     :target: https://github.com/MobileTeleSystems/syncmaster/blob/develop/LICENSE.txt
 .. |PyPI Python Version| image:: https://img.shields.io/pypi/pyversions/data-syncmaster.svg
     :target: https://badge.fury.io/py/data-syncmaster
-.. |Docker image| image:: https://img.shields.io/docker/v/mtsrus/syncmaster-backend?sort=semver&label=docker
-    :target: https://hub.docker.com/r/mtsrus/syncmaster-backend
+.. |Docker image| image:: https://img.shields.io/docker/v/mtsrus/syncmaster-server?sort=semver&label=docker
+    :target: https://hub.docker.com/r/mtsrus/syncmaster-server
 .. |Documentation| image:: https://readthedocs.org/projects/syncmaster/badge/?version=stable
     :target: https://syncmaster.readthedocs.io
 .. |Build Status| image:: https://github.com/MobileTeleSystems/syncmaster/workflows/Run%20All%20Tests/badge.svg
