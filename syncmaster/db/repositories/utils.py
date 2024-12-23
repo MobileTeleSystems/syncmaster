@@ -18,7 +18,7 @@ def decrypt_auth_data(
     value: str,
     settings: WorkerAppSettings | SchedulerAppSettings | ServerAppSettings,
 ) -> dict:
-    decryptor = Fernet(settings.encryption.crypto_key)
+    decryptor = Fernet(settings.encryption.secret_key)
     decrypted = decryptor.decrypt(value)
     return json.loads(decrypted)
 
@@ -32,7 +32,7 @@ def encrypt_auth_data(
     value: dict,
     settings: WorkerAppSettings | SchedulerAppSettings | ServerAppSettings,
 ) -> str:
-    encryptor = Fernet(settings.encryption.crypto_key)
+    encryptor = Fernet(settings.encryption.secret_key)
     serialized = json.dumps(
         value,
         ensure_ascii=False,

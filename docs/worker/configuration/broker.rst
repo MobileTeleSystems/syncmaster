@@ -1,4 +1,4 @@
-.. _backend-configuration-broker:
+.. _worker-configuration-broker:
 
 Broker settings
 =================

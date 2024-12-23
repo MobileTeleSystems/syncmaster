@@ -21,9 +21,8 @@ class ServerAppSettings(BaseSettings):
     * By explicitly passing ``settings`` object as an argument to :obj:`application_factory <syncmaster.server.main.application_factory>`
     * By setting up environment variables matching a specific key.
 
-        All environment variable names are written in uppercase and should be prefixed with ``SYNCMASTER__``.
-        Nested items are delimited with ``__``.
-
+    All environment variable names are written in uppercase and should be prefixed with ``SYNCMASTER__``.
+    Nested items are delimited with ``__``.
 
     More details can be found in
     `Pydantic documentation <https://docs.pydantic.dev/latest/concepts/pydantic_settings/>`_.
@@ -40,19 +39,19 @@ class ServerAppSettings(BaseSettings):
         SYNCMASTER__SERVER__DEBUG=True
     """
 
-    database: DatabaseSettings = Field(description=":ref:`Database settings <backend-configuration-database>`")
-    broker: RabbitMQSettings = Field(description=":ref:`Broker settings <backend-configuration-broker>`")
+    database: DatabaseSettings = Field(description=":ref:`Database settings <server-configuration-database>`")
+    broker: RabbitMQSettings = Field(description=":ref:`Broker settings <server-configuration-broker>`")
     logging: LoggingSettings = Field(
         default_factory=LoggingSettings,
-        description=":ref:`Logging settings <backend-configuration-logging>`",
+        description=":ref:`Logging settings <server-configuration-logging>`",
     )
     server: ServerSettings = Field(
         default_factory=ServerSettings,
-        description="Server settings <backend-configuration",
+        description=":ref:`Server settings <server-configuration>`",
     )
     auth: AuthSettings = Field(
         default_factory=AuthSettings,
-        description="Auth settings",
+        description=":ref:`Auth provider settings <server-auth-providers>`",
     )
     encryption: CredentialsEncryptionSettings = Field(
         default_factory=CredentialsEncryptionSettings,  # type: ignore[arg-type]

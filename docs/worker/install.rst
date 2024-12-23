@@ -1,5 +1,7 @@
-Starting the Celery Worker
-==========================
+.. _worker-install:
+
+Install & run worker
+====================
 
 .. note::
 
@@ -18,12 +20,12 @@ Options can be set via ``.env`` file or ``environment`` section in ``docker-comp
 .. dropdown:: ``docker-compose.yml``
 
     .. literalinclude:: ../../docker-compose.yml
-        :emphasize-lines: 75-88
+        :emphasize-lines: 77-91
 
 .. dropdown:: ``.env.docker``
 
     .. literalinclude:: ../../.env.docker
-        :emphasize-lines: 11-22
+        :emphasize-lines: 4-16
 
 To start the worker container you need to run the command:
 

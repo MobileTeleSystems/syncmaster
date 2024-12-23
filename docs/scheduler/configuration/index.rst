@@ -10,6 +10,7 @@ Configuration
 
     database
     broker
+    credentials
     logging
 
 .. autopydantic_settings:: syncmaster.scheduler.settings.SchedulerAppSettings

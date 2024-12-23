@@ -1,5 +1,7 @@
-Starting the Scheduler
-======================
+.. _server-install:
+
+Install & run scheduler
+=======================
 
 With docker
 -----------
@@ -13,12 +15,12 @@ Options can be set via ``.env`` file or ``environment`` section in ``docker-comp
 .. dropdown:: ``docker-compose.yml``
 
     .. literalinclude:: ../../docker-compose.yml
-        :emphasize-lines: 90-103
+        :emphasize-lines: 93-107
 
 .. dropdown:: ``.env.docker``
 
     .. literalinclude:: ../../.env.docker
-        :emphasize-lines: 11-25
+        :emphasize-lines: 4-16,38-39
 
 To start the worker container you need to run the command:
 
