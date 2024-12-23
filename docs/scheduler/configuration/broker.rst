@@ -1,4 +1,4 @@
-.. _backend-configuration-broker:
+.. _scheduler-configuration-broker:
 
 Broker settings
 =================

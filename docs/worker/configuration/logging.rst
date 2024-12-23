@@ -1,4 +1,4 @@
-.. _backend-configuration-logging:
+.. _worker-configuration-logging:
 
 Logging settings
 ================

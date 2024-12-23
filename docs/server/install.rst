@@ -21,10 +21,18 @@ Options can be set via ``.env`` file or ``environment`` section in ``docker-comp
 .. dropdown:: ``docker-compose.yml``
 
     .. literalinclude:: ../../docker-compose.yml
+        :emphasize-lines: 44-75
 
 .. dropdown:: ``.env.docker``
 
     .. literalinclude:: ../../.env.docker
+        :emphasize-lines: 4-36
+
+To start the worker container you need to run the command:
+
+.. code-block:: bash
+
+    docker compose up server -d --wait --wait-timeout 200
 
 After container is started and ready, open http://localhost:8000/docs.
 

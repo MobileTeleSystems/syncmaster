@@ -1,4 +1,4 @@
-.. _backend-configuration-logging:
+.. _scheduler-configuration-logging:
 
 Logging settings
 ================

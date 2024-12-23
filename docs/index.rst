@@ -26,7 +26,7 @@
     :caption: Worker
     :hidden:
 
-    worker/start_worker
+    worker/install
     worker/log_url
     worker/configuration/index
 
@@ -36,7 +36,7 @@
     :caption: Scheduler
     :hidden:
 
-    scheduler/start_scheduler
+    scheduler/install
     scheduler/configuration/index
 
 .. toctree::

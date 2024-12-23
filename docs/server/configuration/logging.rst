@@ -1,4 +1,4 @@
-.. _backend-configuration-logging:
+.. _server-configuration-logging:
 
 Logging settings
 ================

@@ -1,4 +1,4 @@
-.. _backend-configuration:
+.. _server-configuration:
 
 Configuration
 =============
@@ -10,6 +10,7 @@ Configuration
 
     database
     broker
+    credentials
     logging
     session
     cors
@@ -17,6 +18,7 @@ Configuration
     monitoring
     static_files
     openapi
+    debug
 
 .. autopydantic_settings:: syncmaster.server.settings.ServerAppSettings
 .. autopydantic_settings:: syncmaster.server.settings.server.ServerSettings

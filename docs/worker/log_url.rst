@@ -1,3 +1,5 @@
+.. _worker-log-url:
+
 Setting the `Run.log_url` value
 ===============================
 

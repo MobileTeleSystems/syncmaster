@@ -30,14 +30,14 @@ class ServerSettings(BaseModel):
         default=False,
         description=textwrap.dedent(
             """
-            Enable debug output in responses.
+            :ref:`Enable debug output in responses <server-configuration-debug>`.
             Do not use this on production!
             """,
         ),
     )
     log_url_template: str = Field(
         "",
-        description="URL template for logging",
+        description=":ref:`URL template to access worker logs <worker-log-url>`",
     )
     request_id: RequestIDSettings = Field(
         default_factory=RequestIDSettings,

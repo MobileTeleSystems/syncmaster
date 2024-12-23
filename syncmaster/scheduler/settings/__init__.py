@@ -45,6 +45,9 @@ class SchedulerAppSettings(BaseSettings):
     All environment variable names are written in uppercase and should be prefixed with ``SYNCMASTER__``.
     Nested items are delimited with ``__``.
 
+    More details can be found in
+    `Pydantic documentation <https://docs.pydantic.dev/latest/concepts/pydantic_settings/>`_.
+
     Examples
     --------
 

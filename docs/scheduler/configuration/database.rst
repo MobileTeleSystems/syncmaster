@@ -1,4 +1,4 @@
-.. _backend-configuration-database:
+.. _scheduler-configuration-database:
 
 Database settings
 =================
