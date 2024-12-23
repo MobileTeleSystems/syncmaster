@@ -1,11 +1,13 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import logging
-from typing import Annotated, Any
+from typing import Annotated, Any, NoReturn
 
 from fastapi import Depends, FastAPI, Request
-from keycloak import KeycloakOpenID
+from jwcrypto.common import JWException
+from keycloak import KeycloakOpenID, KeycloakOperationError
 
+from syncmaster.db.models import User
 from syncmaster.exceptions import EntityNotFoundError
 from syncmaster.exceptions.auth import AuthorizationError
 from syncmaster.exceptions.redirect import RedirectException
@@ -63,67 +65,64 @@ class KeycloakAuthProvider(AuthProvider):
     ) -> dict[str, Any]:
         try:
             redirect_uri = redirect_uri or self.settings.keycloak.redirect_uri
-            token = self.keycloak_openid.token(
+            token = await self.keycloak_openid.a_token(
                 grant_type="authorization_code",
                 code=code,
                 redirect_uri=redirect_uri,
             )
             return token
-        except Exception as e:
+        except KeycloakOperationError as e:
             raise AuthorizationError("Failed to get token") from e
 
-    async def get_current_user(self, access_token: str, *args, **kwargs) -> Any:
+    async def get_current_user(self, access_token: str | None, **kwargs) -> User:
         request: Request = kwargs["request"]
-        refresh_token = request.session.get("refresh_token")
-
         if not access_token:
             log.debug("No access token found in session.")
-            self.redirect_to_auth(request.url.path)
+            await self.redirect_to_auth(request.url.path)
 
         try:
             # if user is disabled or blocked in Keycloak after the token is issued, he will
             # remain authorized until the token expires (not more than 15 minutes in MTS SSO)
-            token_info = self.keycloak_openid.decode_token(token=access_token)
-        except Exception as e:
+            token_info = await self.keycloak_openid.a_decode_token(token=access_token)
+        except (KeycloakOperationError, JWException) as e:
             log.info("Access token is invalid or expired: %s", e)
-            token_info = None
+            token_info = {}
 
+        refresh_token = request.session.get("refresh_token")
         if not token_info and refresh_token:
             log.debug("Access token invalid. Attempting to refresh.")
 
             try:
-                new_tokens = await self.refresh_access_token(refresh_token)
+                new_tokens = await self.keycloak_openid.a_refresh_token(refresh_token)
 
                 new_access_token = new_tokens.get("access_token")
                 new_refresh_token = new_tokens.get("refresh_token")
                 request.session["access_token"] = new_access_token
                 request.session["refresh_token"] = new_refresh_token
 
-                token_info = self.keycloak_openid.decode_token(
-                    token=new_access_token,
-                )
+                token_info = await self.keycloak_openid.a_decode_token(token=new_access_token)
                 log.debug("Access token refreshed and decoded successfully.")
-            except Exception as e:
+            except (KeycloakOperationError, JWException) as e:
                 log.debug("Failed to refresh access token: %s", e)
-                self.redirect_to_auth(request.url.path)
+                await self.redirect_to_auth(request.url.path)
 
         # these names are hardcoded in keycloak:
         # https://github.com/keycloak/keycloak/blob/3ca3a4ad349b4d457f6829eaf2ae05f1e01408be/core/src/main/java/org/keycloak/representations/IDToken.java
         user_id = token_info.get("sub")
+        if not user_id:
+            raise AuthorizationError("Invalid token payload")
+
         login = token_info.get("preferred_username")
         email = token_info.get("email")
         first_name = token_info.get("given_name")
         middle_name = token_info.get("middle_name")
         last_name = token_info.get("family_name")
 
-        if not user_id:
-            raise AuthorizationError("Invalid token payload")
-
-        async with self._uow:
-            try:
-                user = await self._uow.user.read_by_username(login)
-            except EntityNotFoundError:
-                user = await self._uow.user.create(
+        try:
+            return await self._uow.user.read_by_username(login)
+        except EntityNotFoundError:
+            async with self._uow:
+                return await self._uow.user.create(
                     username=login,
                     email=email,
                     first_name=first_name,
@@ -131,15 +130,10 @@ class KeycloakAuthProvider(AuthProvider):
                     last_name=last_name,
                     is_active=True,
                 )
-        return user
 
-    async def refresh_access_token(self, refresh_token: str) -> dict[str, Any]:
-        new_tokens = self.keycloak_openid.refresh_token(refresh_token)
-        return new_tokens
-
-    def redirect_to_auth(self, path: str) -> None:
+    async def redirect_to_auth(self, path: str) -> NoReturn:
         state = generate_state(path)
-        auth_url = self.keycloak_openid.auth_url(
+        auth_url = await self.keycloak_openid.a_auth_url(
             redirect_uri=self.settings.keycloak.redirect_uri,
             scope=self.settings.keycloak.scope,
             state=state,

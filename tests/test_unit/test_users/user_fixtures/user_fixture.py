@@ -1,3 +1,4 @@
+import secrets
 from collections.abc import AsyncGenerator, Callable
 
 import pytest_asyncio
@@ -22,7 +23,7 @@ async def superuser(session: AsyncSession, access_token_factory) -> AsyncGenerat
 
 @pytest_asyncio.fixture
 async def simple_user(session: AsyncSession, access_token_factory) -> AsyncGenerator[MockUser, None]:
-    async with create_user_cm(session, username="simple_user", is_active=True) as user:
+    async with create_user_cm(session, username=f"simple_user_{secrets.token_hex(5)}", is_active=True) as user:
         token = access_token_factory(user.id)
         yield MockUser(
             user=user,
@@ -39,8 +40,8 @@ async def simple_users(
 ) -> AsyncGenerator[list[MockUser], None]:
     size = request.param
     users = []
-    for i in range(size):
-        username = f"simple_user_{i}"
+    for _ in range(size):
+        username = f"simple_user_{secrets.token_hex(5)}"
         user = await create_user(
             session=session,
             username=username,
@@ -71,7 +72,7 @@ async def simple_users(
 
 @pytest_asyncio.fixture
 async def inactive_user(session: AsyncSession, access_token_factory) -> AsyncGenerator[MockUser, None]:
-    async with create_user_cm(session, username="inactive_user") as user:
+    async with create_user_cm(session, username=f"inactive_user_{secrets.token_hex(5)}") as user:
         access_token_factory(user.id)
         yield MockUser(
             user=user,
@@ -84,7 +85,7 @@ async def inactive_user(session: AsyncSession, access_token_factory) -> AsyncGen
 async def deleted_user(session: AsyncSession, access_token_factory) -> AsyncGenerator[MockUser, None]:
     async with create_user_cm(
         session,
-        username="deleted_user",
+        username=f"deleted_user_{secrets.token_hex(5)}",
         is_deleted=True,
     ) as user:
         token = access_token_factory(user.id)
@@ -103,7 +104,7 @@ async def user_with_many_roles(
 ) -> AsyncGenerator[MockUser, None]:
     user = await create_user(
         session=session,
-        username="multi_role_user",
+        username=f"multi_role_user_{secrets.token_hex(5)}",
         is_active=True,
     )
 
@@ -119,7 +120,7 @@ async def user_with_many_roles(
     for role in roles:
         group = await create_group(
             session=session,
-            name=f"group_for_{role}",
+            name=f"group_for_{role}_{secrets.token_hex(5)}",
             owner_id=user.id if role == UserTestRoles.Owner else simple_user.user.id,
         )
 

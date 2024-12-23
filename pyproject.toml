@@ -139,7 +139,7 @@ onetl = {extras = ["spark", "s3", "hdfs"], version = "^0.12.0"}
 faker = ">=28.4.1,<34.0.0"
 coverage = "^7.6.1"
 gevent = "^24.2.1"
-responses = "*"
+respx = "*"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.11.2"
@@ -194,6 +194,10 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "keycloak.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "jwcrypto.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
