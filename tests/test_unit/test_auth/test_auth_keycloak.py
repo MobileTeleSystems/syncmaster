@@ -1,7 +1,6 @@
 import logging
 
 import pytest
-import responses
 from httpx import AsyncClient
 
 from syncmaster.server.settings import ServerAppSettings as Settings
@@ -11,7 +10,6 @@ KEYCLOAK_PROVIDER = "syncmaster.server.providers.auth.keycloak_provider.Keycloak
 pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
-@responses.activate
 @pytest.mark.parametrize(
     "settings",
     [
@@ -23,17 +21,20 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
     ],
     indirect=True,
 )
-async def test_get_keycloak_user_unauthorized(client: AsyncClient, mock_keycloak_well_known):
-    response = await client.get("/v1/users/some_user_id")
+async def test_get_keycloak_user_unauthorized(
+    client: AsyncClient,
+    mock_keycloak_well_known,
+    mock_keycloak_realm,
+):
+    response = await client.get("/v1/users/me")
 
     # redirect unauthorized user to Keycloak
-    assert response.status_code == 307
+    assert response.status_code == 307, response.json()
     assert "protocol/openid-connect/auth?" in str(
         response.next_request.url,
     )
 
 
-@responses.activate
 @pytest.mark.parametrize(
     "settings",
     [
@@ -63,7 +64,7 @@ async def test_get_keycloak_user_authorized(
     )
 
     assert response.cookies.get("session") == session_cookie
-    assert response.status_code == 200
+    assert response.status_code == 200, response.json()
     assert response.json() == {
         "id": simple_user.id,
         "is_superuser": simple_user.is_superuser,
@@ -71,7 +72,6 @@ async def test_get_keycloak_user_authorized(
     }
 
 
-@responses.activate
 @pytest.mark.parametrize(
     "settings",
     [
@@ -108,7 +108,7 @@ async def test_get_keycloak_user_expired_access_token(
     assert "Access token refreshed and decoded successfully" in caplog.text
 
     assert response.cookies.get("session") != session_cookie  # cookie is updated
-    assert response.status_code == 200
+    assert response.status_code == 200, response.json()
     assert response.json() == {
         "id": simple_user.id,
         "is_superuser": simple_user.is_superuser,
@@ -116,7 +116,6 @@ async def test_get_keycloak_user_expired_access_token(
     }
 
 
-@responses.activate
 @pytest.mark.parametrize(
     "settings",
     [
@@ -155,7 +154,6 @@ async def test_get_keycloak_deleted_user(
     }
 
 
-@responses.activate
 @pytest.mark.parametrize(
     "settings",
     [

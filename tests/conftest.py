@@ -131,27 +131,27 @@ async def session(sessionmaker: async_sessionmaker[AsyncSession]):
         await session.close()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def mocked_celery() -> Celery:
     celery_app = Mock(Celery)
     celery_app.send_task = AsyncMock()
     return celery_app
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture
 async def app(settings: Settings, mocked_celery: Celery) -> FastAPI:
     app = application_factory(settings=settings)
     app.dependency_overrides[Celery] = lambda: mocked_celery
     return app
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture
 async def client_with_mocked_celery(app: FastAPI) -> AsyncGenerator:
     async with AsyncClient(app=app, base_url="http://testserver") as client:
         yield client
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture
 async def client(settings: Settings) -> AsyncGenerator:
     logger.info("START CLIENT FIXTURE")
     app = application_factory(settings=settings)
@@ -160,7 +160,7 @@ async def client(settings: Settings) -> AsyncGenerator:
         logger.info("END CLIENT FIXTURE")
 
 
-@pytest.fixture(scope="session", params=[{}])
+@pytest.fixture
 def celery(worker_settings: WorkerAppSettings) -> Celery:
     celery_app = celery_factory(worker_settings)
     return celery_app
