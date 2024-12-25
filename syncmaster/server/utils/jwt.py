@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 
-from jose import ExpiredSignatureError, JWTError, jwt
+import jwt
 
 from syncmaster.exceptions.auth import AuthorizationError
 
@@ -22,8 +22,8 @@ def decode_jwt(token: str, secret_key: str, security_algorithm: str) -> dict:
             algorithms=[security_algorithm],
         )
         if "exp" not in result:
-            raise ExpiredSignatureError("Missing expiration time in token")
+            raise jwt.ExpiredSignatureError("Missing expiration time in token")
 
         return result
-    except JWTError as e:
+    except jwt.PyJWTError as e:
         raise AuthorizationError("Invalid token") from e

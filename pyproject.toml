@@ -55,7 +55,7 @@ fastapi = { version = "^0.115", optional = true}
 asgi-correlation-id = {version = "^4.3.4", optional = true}
 uvicorn = { version = ">=0.30.6,<0.35.0", optional = true }
 alembic = { version = "^1.13.2", optional = true }
-python-jose = { version = "^3.3.0", extras = ["cryptography"], optional = true }
+pyjwt = { version = "^2.10.1", optional = true }
 jinja2 = { version = "^3.1.4", optional = true }
 python-multipart = { version = ">=0.0.9,<0.0.21", optional = true }
 celery = { version = "^5.4.0", optional = true }
@@ -82,7 +82,7 @@ server = [
     "uvicorn",
     "alembic",
     "python-multipart",
-    "python-jose",
+    "pyjwt",
     "asgi-correlation-id",
     "jinja2",
     "psycopg",
@@ -100,8 +100,6 @@ worker = [
     "pydantic-settings",
     "sqlalchemy",
     "sqlalchemy-utils",
-    "python-multipart",
-    "python-jose",
     "celery",
     "onetl",
     "asgi-correlation-id",
@@ -119,8 +117,6 @@ scheduler = [
     "sqlalchemy",
     "sqlalchemy-utils",
     "asyncpg",
-    "python-multipart",
-    "python-jose",
     "pyyaml",
     "coloredlogs",
     "python-json-logger",
@@ -148,7 +144,6 @@ black = "^24.8.0"
 flake8 = "^7.0.0"
 flake8-pyproject = "^1.2.3"
 sqlalchemy = {extras = ["mypy"], version = "^2.0.35"}
-types-python-jose = "^3.3.4.20240106"
 
 [tool.poetry.group.docs.dependencies]
 autodoc-pydantic = {version = "^2.2.0", python = ">=3.8"}
