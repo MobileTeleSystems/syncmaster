@@ -20,6 +20,10 @@ class MySQLHandler(DBHandler):
     connection: MySQL
     connection_dto: MySQLConnectionDTO
     transfer_dto: MySQLTransferDTO
+    _operators = {
+        "regexp": "RLIKE",
+        **DBHandler._operators,
+    }
 
     def connect(self, spark: SparkSession):
         self.connection = MySQL(
@@ -31,7 +35,27 @@ class MySQLHandler(DBHandler):
             spark=spark,
         ).check()
 
-    def normalize_column_names(self, df: DataFrame) -> DataFrame:
+    def _normalize_column_names(self, df: DataFrame) -> DataFrame:
         for column_name in df.columns:
             df = df.withColumnRenamed(column_name, column_name.lower())
         return df
+
+    def _make_filter_expression(self, filters: list[dict]) -> str | None:
+        expressions = []
+        for filter in filters:
+            op = self._operators[filter["type"]]
+            field = f"`{filter["field"]}`"
+            value = filter.get("value")
+
+            if value is None:
+                expressions.append(f"{field} {op}")
+                continue
+
+            if op == "ILIKE":
+                expressions.append(f"LOWER({field}) LIKE LOWER('{value}')")
+            elif op == "NOT ILIKE":
+                expressions.append(f"NOT LOWER({field}) LIKE LOWER('{value}')")
+            else:
+                expressions.append(f"{field} {op} '{value}'")
+
+        return " AND ".join(expressions) or None

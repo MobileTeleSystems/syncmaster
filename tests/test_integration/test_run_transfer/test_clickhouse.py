@@ -6,6 +6,7 @@ from httpx import AsyncClient
 from onetl.connection import Clickhouse
 from onetl.db import DBReader
 from pyspark.sql import DataFrame
+from pytest_lazy_fixtures import lf
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Connection, Group, Queue, Status, Transfer
@@ -24,6 +25,7 @@ async def postgres_to_clickhouse(
     clickhouse_for_conftest: Clickhouse,
     clickhouse_connection: Connection,
     postgres_connection: Connection,
+    transformations: list[dict],
 ):
     result = await create_transfer(
         session=session,
@@ -39,6 +41,7 @@ async def postgres_to_clickhouse(
             "type": "clickhouse",
             "table_name": f"{clickhouse_for_conftest.user}.target_table",
         },
+        transformations=transformations,
         queue_id=queue.id,
     )
     yield result
@@ -54,6 +57,7 @@ async def clickhouse_to_postgres(
     clickhouse_for_conftest: Clickhouse,
     clickhouse_connection: Connection,
     postgres_connection: Connection,
+    transformations: list[dict],
 ):
     result = await create_transfer(
         session=session,
@@ -69,6 +73,7 @@ async def clickhouse_to_postgres(
             "type": "postgres",
             "table_name": "public.target_table",
         },
+        transformations=transformations,
         queue_id=queue.id,
     )
     yield result
@@ -76,6 +81,15 @@ async def clickhouse_to_postgres(
     await session.commit()
 
 
+@pytest.mark.parametrize(
+    "transformations, expected_filter",
+    [
+        (
+            lf("dataframe_rows_filter_transformations"),
+            lf("expected_dataframe_rows_filter"),
+        ),
+    ],
+)
 async def test_run_transfer_postgres_to_clickhouse(
     client: AsyncClient,
     group_owner: MockUser,
@@ -83,11 +97,14 @@ async def test_run_transfer_postgres_to_clickhouse(
     prepare_clickhouse,
     init_df: DataFrame,
     postgres_to_clickhouse: Transfer,
+    transformations,
+    expected_filter,
 ):
     # Arrange
     _, fill_with_data = prepare_postgres
     fill_with_data(init_df)
     clickhouse, _ = prepare_clickhouse
+    init_df = init_df.where(expected_filter(init_df))
 
     # Act
     result = await client.post(
@@ -122,6 +139,7 @@ async def test_run_transfer_postgres_to_clickhouse(
     assert df.sort("ID").collect() == init_df.sort("ID").collect()
 
 
+@pytest.mark.parametrize("transformations", [[]])
 async def test_run_transfer_postgres_to_clickhouse_mixed_naming(
     client: AsyncClient,
     group_owner: MockUser,
@@ -129,6 +147,7 @@ async def test_run_transfer_postgres_to_clickhouse_mixed_naming(
     prepare_clickhouse,
     init_df_with_mixed_column_naming: DataFrame,
     postgres_to_clickhouse: Transfer,
+    transformations,
 ):
     # Arrange
     _, fill_with_data = prepare_postgres
@@ -169,21 +188,33 @@ async def test_run_transfer_postgres_to_clickhouse_mixed_naming(
     for field in init_df_with_mixed_column_naming.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
 
-    assert df.collect() == init_df_with_mixed_column_naming.collect()
+    assert df.sort("ID").collect() == init_df_with_mixed_column_naming.sort("ID").collect()
 
 
+@pytest.mark.parametrize(
+    "transformations, expected_filter",
+    [
+        (
+            lf("dataframe_rows_filter_transformations"),
+            lf("expected_dataframe_rows_filter"),
+        ),
+    ],
+)
 async def test_run_transfer_clickhouse_to_postgres(
     client: AsyncClient,
     group_owner: MockUser,
     prepare_clickhouse,
     prepare_postgres,
     init_df: DataFrame,
+    transformations,
+    expected_filter,
     clickhouse_to_postgres: Transfer,
 ):
     # Arrange
     _, fill_with_data = prepare_clickhouse
     fill_with_data(init_df)
     postgres, _ = prepare_postgres
+    init_df = init_df.where(expected_filter(init_df))
 
     # Act
     result = await client.post(
@@ -220,6 +251,7 @@ async def test_run_transfer_clickhouse_to_postgres(
     assert df.sort("ID").collect() == init_df.sort("ID").collect()
 
 
+@pytest.mark.parametrize("transformations", [[]])
 async def test_run_transfer_clickhouse_to_postgres_mixed_naming(
     client: AsyncClient,
     group_owner: MockUser,
@@ -227,6 +259,7 @@ async def test_run_transfer_clickhouse_to_postgres_mixed_naming(
     prepare_postgres,
     init_df_with_mixed_column_naming: DataFrame,
     clickhouse_to_postgres: Transfer,
+    transformations,
 ):
     # Arrange
     _, fill_with_data = prepare_clickhouse
@@ -268,4 +301,4 @@ async def test_run_transfer_clickhouse_to_postgres_mixed_naming(
     for field in init_df_with_mixed_column_naming.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
 
-    assert df.collect() == init_df_with_mixed_column_naming.collect()
+    assert df.sort("ID").collect() == init_df_with_mixed_column_naming.sort("ID").collect()

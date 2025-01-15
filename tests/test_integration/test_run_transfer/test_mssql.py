@@ -25,6 +25,7 @@ async def postgres_to_mssql(
     mssql_for_conftest: MSSQL,
     mssql_connection: Connection,
     postgres_connection: Connection,
+    transformations: list[dict],
 ):
     result = await create_transfer(
         session=session,
@@ -40,6 +41,7 @@ async def postgres_to_mssql(
             "type": "mssql",
             "table_name": "dbo.target_table",
         },
+        transformations=transformations,
         queue_id=queue.id,
     )
     yield result
@@ -55,6 +57,7 @@ async def mssql_to_postgres(
     mssql_for_conftest: MSSQL,
     mssql_connection: Connection,
     postgres_connection: Connection,
+    transformations: list[dict],
 ):
     result = await create_transfer(
         session=session,
@@ -70,6 +73,7 @@ async def mssql_to_postgres(
             "type": "postgres",
             "table_name": "public.target_table",
         },
+        transformations=transformations,
         queue_id=queue.id,
     )
     yield result
@@ -77,6 +81,7 @@ async def mssql_to_postgres(
     await session.commit()
 
 
+@pytest.mark.parametrize("transformations", [[]])
 async def test_run_transfer_postgres_to_mssql(
     client: AsyncClient,
     group_owner: MockUser,
@@ -84,6 +89,7 @@ async def test_run_transfer_postgres_to_mssql(
     prepare_mssql,
     init_df: DataFrame,
     postgres_to_mssql: Transfer,
+    transformations,
 ):
     # Arrange
     _, fill_with_data = prepare_postgres
@@ -128,6 +134,7 @@ async def test_run_transfer_postgres_to_mssql(
     assert df.sort("ID").collect() == init_df.sort("ID").collect()
 
 
+@pytest.mark.parametrize("transformations", [[]])
 async def test_run_transfer_postgres_to_mssql_mixed_naming(
     client: AsyncClient,
     group_owner: MockUser,
@@ -135,6 +142,7 @@ async def test_run_transfer_postgres_to_mssql_mixed_naming(
     prepare_mssql,
     init_df_with_mixed_column_naming: DataFrame,
     postgres_to_mssql: Transfer,
+    transformations,
 ):
     # Arrange
     _, fill_with_data = prepare_postgres
@@ -183,9 +191,55 @@ async def test_run_transfer_postgres_to_mssql_mixed_naming(
     for field in init_df_with_mixed_column_naming.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
 
-    assert df.collect() == init_df_with_mixed_column_naming.collect()
+    assert df.sort("ID").collect() == init_df_with_mixed_column_naming.sort("ID").collect()
 
 
+@pytest.mark.parametrize(
+    "transformations, expected_filter",
+    [
+        (
+            [
+                {
+                    "type": "dataframe_rows_filter",
+                    "filters": [
+                        {
+                            "type": "is_not_null",
+                            "field": "BIRTH_DATE",
+                        },
+                        {
+                            "type": "less_or_equal",
+                            "field": "NUMBER",
+                            "value": "25",
+                        },
+                        {
+                            "type": "not_like",
+                            "field": "REGION",
+                            "value": "%port",
+                        },
+                        {
+                            "type": "not_ilike",
+                            "field": "REGION",
+                            "value": "new%",
+                        },
+                        {
+                            "type": "regexp",
+                            "field": "PHONE_NUMBER",
+                            "value": "^[0-9!@#$.,;_]%",
+                            # available expressions are limited
+                        },
+                    ],
+                },
+            ],
+            lambda df: (
+                df["BIRTH_DATE"].isNotNull()
+                & (df["NUMBER"] <= "25")
+                & (~df["REGION"].like("%port"))
+                & (~df["REGION"].ilike("new%"))
+                & (df["PHONE_NUMBER"].rlike("[0-9!@#$.,;_]%"))
+            ),
+        ),
+    ],
+)
 async def test_run_transfer_mssql_to_postgres(
     client: AsyncClient,
     group_owner: MockUser,
@@ -193,11 +247,14 @@ async def test_run_transfer_mssql_to_postgres(
     prepare_postgres,
     init_df: DataFrame,
     mssql_to_postgres: Transfer,
+    transformations,
+    expected_filter,
 ):
     # Arrange
     _, fill_with_data = prepare_mssql
     fill_with_data(init_df)
     postgres, _ = prepare_postgres
+    init_df = init_df.where(expected_filter(init_df))
 
     # Act
     result = await client.post(
@@ -238,6 +295,7 @@ async def test_run_transfer_mssql_to_postgres(
     assert df.sort("ID").collect() == init_df.sort("ID").collect()
 
 
+@pytest.mark.parametrize("transformations", [[]])
 async def test_run_transfer_mssql_to_postgres_mixed_naming(
     client: AsyncClient,
     group_owner: MockUser,
@@ -245,6 +303,7 @@ async def test_run_transfer_mssql_to_postgres_mixed_naming(
     prepare_postgres,
     init_df_with_mixed_column_naming: DataFrame,
     mssql_to_postgres: Transfer,
+    transformations,
 ):
     # Arrange
     _, fill_with_data = prepare_mssql
@@ -293,4 +352,4 @@ async def test_run_transfer_mssql_to_postgres_mixed_naming(
     for field in init_df_with_mixed_column_naming.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
 
-    assert df.collect() == init_df_with_mixed_column_naming.collect()
+    assert df.sort("ID").collect() == init_df_with_mixed_column_naming.sort("ID").collect()

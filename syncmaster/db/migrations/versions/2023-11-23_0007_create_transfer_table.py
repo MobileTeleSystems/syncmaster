@@ -44,6 +44,7 @@ def upgrade():
         sa.Column("strategy_params", sa.JSON(), nullable=False),
         sa.Column("source_params", sa.JSON(), nullable=False),
         sa.Column("target_params", sa.JSON(), nullable=False),
+        sa.Column("transformations", sa.JSON(), nullable=False),
         sa.Column("is_scheduled", sa.Boolean(), nullable=False),
         sa.Column("schedule", sa.String(length=32), nullable=False),
         sa.Column("queue_id", sa.BigInteger(), nullable=False),

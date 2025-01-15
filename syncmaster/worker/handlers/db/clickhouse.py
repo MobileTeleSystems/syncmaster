@@ -21,6 +21,10 @@ class ClickhouseHandler(DBHandler):
     connection: Clickhouse
     connection_dto: ClickhouseConnectionDTO
     transfer_dto: ClickhouseTransferDTO
+    _operators = {
+        "regexp": "REGEXP",
+        **DBHandler._operators,
+    }
 
     def connect(self, spark: SparkSession):
         ClickhouseDialectRegistry = (
@@ -37,7 +41,7 @@ class ClickhouseHandler(DBHandler):
         ).check()
 
     def write(self, df: DataFrame) -> None:
-        normalized_df = self.normalize_column_names(df)
+        normalized_df = self._normalize_column_names(df)
         sort_column = next(
             (col for col in normalized_df.columns if col.lower().endswith("id")),
             normalized_df.columns[0],  # if there is no column with "id", take the first column
@@ -55,7 +59,18 @@ class ClickhouseHandler(DBHandler):
         )
         return writer.run(df=normalized_df)
 
-    def normalize_column_names(self, df: DataFrame) -> DataFrame:
+    def _normalize_column_names(self, df: DataFrame) -> DataFrame:
         for column_name in df.columns:
             df = df.withColumnRenamed(column_name, column_name.lower())
         return df
+
+    def _make_filter_expression(self, filters: list[dict]) -> str | None:
+        expressions = []
+        for filter in filters:
+            field = f'"{filter["field"]}"'
+            op = self._operators[filter["type"]]
+            value = filter.get("value")
+
+            expressions.append(f"{field} {op} '{value}'" if value is not None else f"{field} {op}")
+
+        return " AND ".join(expressions) or None

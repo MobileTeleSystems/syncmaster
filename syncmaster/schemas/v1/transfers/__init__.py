@@ -2,7 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
-from pydantic import BaseModel, Field, model_validator
+from typing import Annotated
+
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from syncmaster.schemas.v1.connections.connection import ReadConnectionSchema
 from syncmaster.schemas.v1.page import PageSchema
@@ -27,6 +29,9 @@ from syncmaster.schemas.v1.transfers.file.s3 import (
     S3ReadTransferTarget,
 )
 from syncmaster.schemas.v1.transfers.strategy import FullStrategy, IncrementalStrategy
+from syncmaster.schemas.v1.transfers.transformations.dataframe_rows_filter import (
+    DataframeRowsFilter,
+)
 from syncmaster.schemas.v1.types import NameConstr
 
 ReadTransferSchemaSource = (
@@ -97,6 +102,8 @@ UpdateTransferSchemaTarget = (
     | None
 )
 
+TransformationSchema = DataframeRowsFilter
+
 
 class CopyTransferSchema(BaseModel):
     new_group_id: int
@@ -129,6 +136,9 @@ class ReadTransferSchema(BaseModel):
         ...,
         discriminator="type",
     )
+    transformations: list[Annotated[TransformationSchema, Field(..., discriminator="type")]] = Field(
+        default_factory=list,
+    )
 
     class Config:
         from_attributes = True
@@ -158,9 +168,12 @@ class CreateTransferSchema(BaseModel):
         discriminator="type",
         description="Incremental or archive download options",
     )
+    transformations: list[
+        Annotated[TransformationSchema, Field(None, discriminator="type", description="List of transformations")]
+    ] = Field(default_factory=list)
 
     @model_validator(mode="before")
-    def check_owner_id(cls, values):
+    def validate_scheduling(cls, values):
         is_scheduled, schedule = values.get("is_scheduled"), values.get("schedule")
         if is_scheduled and schedule is None:
             # TODO make checking cron string
@@ -179,6 +192,7 @@ class UpdateTransferSchema(BaseModel):
     source_params: UpdateTransferSchemaSource = Field(discriminator="type", default=None)
     target_params: UpdateTransferSchemaTarget = Field(discriminator="type", default=None)
     strategy_params: FullStrategy | IncrementalStrategy | None = Field(discriminator="type", default=None)
+    transformations: list[Annotated[TransformationSchema, Field(discriminator="type", default=None)]] = None
 
 
 class ReadFullTransferSchema(ReadTransferSchema):

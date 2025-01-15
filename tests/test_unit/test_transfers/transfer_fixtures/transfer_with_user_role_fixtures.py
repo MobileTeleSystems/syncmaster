@@ -1,4 +1,5 @@
 import secrets
+from collections.abc import AsyncGenerator
 
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -38,7 +39,7 @@ async def group_transfer_with_same_name_maintainer_plus(
     group_transfer: MockTransfer,
     role_maintainer_plus: UserTestRoles,
     role_maintainer_or_below_without_guest: UserTestRoles,
-) -> str:
+) -> AsyncGenerator[str, None]:
     user = group_transfer.owner_group.get_member_of_role(role_maintainer_plus)
 
     await add_user_to_group(
@@ -113,7 +114,7 @@ async def group_transfer_and_group_connection_developer_plus(
     role_developer_plus: UserTestRoles,
     role_maintainer_or_below_without_guest: UserTestRoles,
     settings: Settings,
-) -> tuple[str, Connection]:
+) -> AsyncGenerator[tuple[str, Connection], None]:
     user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
 
     await add_user_to_group(

@@ -45,5 +45,10 @@ class S3Handler(FileHandler):
             df_schema=StructType.fromJson(self.transfer_dto.df_schema) if self.transfer_dto.df_schema else None,
             options={**options, **self.transfer_dto.options},
         )
+        df = reader.run()
 
-        return reader.run()
+        filter_expression = self._get_filter_expression()
+        if filter_expression:
+            df = df.where(filter_expression)
+
+        return df

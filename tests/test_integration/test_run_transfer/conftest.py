@@ -237,8 +237,8 @@ def mssql_for_conftest(test_settings: TestSettings) -> MSSQLConnectionDTO:
 )
 def mssql_for_worker(test_settings: TestSettings) -> MSSQLConnectionDTO:
     return MSSQLConnectionDTO(
-        host=test_settings.TEST_MSSQL_HOST_FOR_CONFTEST,
-        port=test_settings.TEST_MSSQL_PORT_FOR_CONFTEST,
+        host=test_settings.TEST_MSSQL_HOST_FOR_WORKER,
+        port=test_settings.TEST_MSSQL_PORT_FOR_WORKER,
         user=test_settings.TEST_MSSQL_USER,
         password=test_settings.TEST_MSSQL_PASSWORD,
         database_name=test_settings.TEST_MSSQL_DB,
@@ -1257,6 +1257,7 @@ def init_df_with_mixed_column_naming(spark: SparkSession) -> DataFrame:
             StructField("Id", IntegerType()),
             StructField("Phone Number", StringType()),
             StructField("region", StringType()),
+            StructField("NUMBER", IntegerType()),
             StructField("birth_DATE", DateType()),
             StructField("Registered At", TimestampType()),
             StructField("account_balance", DoubleType()),
@@ -1269,10 +1270,93 @@ def init_df_with_mixed_column_naming(spark: SparkSession) -> DataFrame:
                 1,
                 "+79123456789",
                 "Mordor",
+                1,
                 datetime.date(year=2023, month=3, day=11),
                 datetime.datetime.now(),
                 1234.2343,
             ),
+            (
+                2,
+                "+79234567890",
+                "Gondor",
+                2,
+                datetime.date(2022, 6, 19),
+                datetime.datetime.now(),
+                2345.5678,
+            ),
+            (
+                3,
+                "+79345678901",
+                "Rohan",
+                3,
+                datetime.date(2021, 11, 5),
+                datetime.datetime.now(),
+                3456.7890,
+            ),
+            (
+                4,
+                "+79456789012",
+                "Shire",
+                4,
+                datetime.date(2020, 1, 30),
+                datetime.datetime.now(),
+                4567.8901,
+            ),
+            (
+                5,
+                "+79567890123",
+                "Isengard",
+                5,
+                datetime.date(2023, 8, 15),
+                datetime.datetime.now(),
+                5678.9012,
+            ),
         ],
         schema=df_schema,
+    )
+
+
+@pytest.fixture
+def dataframe_rows_filter_transformations():
+    return [
+        {
+            "type": "dataframe_rows_filter",
+            "filters": [
+                {
+                    "type": "is_not_null",
+                    "field": "BIRTH_DATE",
+                },
+                {
+                    "type": "less_or_equal",
+                    "field": "NUMBER",
+                    "value": "25",
+                },
+                {
+                    "type": "not_like",
+                    "field": "REGION",
+                    "value": "%port",
+                },
+                {
+                    "type": "not_ilike",
+                    "field": "REGION",
+                    "value": "new%",
+                },
+                {
+                    "type": "regexp",
+                    "field": "PHONE_NUMBER",
+                    "value": "^[^+].*",
+                },
+            ],
+        },
+    ]
+
+
+@pytest.fixture
+def expected_dataframe_rows_filter():
+    return lambda df: (
+        df["BIRTH_DATE"].isNotNull()
+        & (df["NUMBER"] <= "25")
+        & (~df["REGION"].like("%port"))
+        & (~df["REGION"].ilike("new%"))
+        & (df["PHONE_NUMBER"].rlike("^[^+].*"))
     )

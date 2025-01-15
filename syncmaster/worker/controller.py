@@ -99,11 +99,13 @@ class TransferController:
         self.source_handler = self.get_handler(
             connection_data=source_connection.data,
             transfer_params=run.transfer.source_params,
+            transformations=run.transfer.transformations,
             connection_auth_data=source_auth_data,
         )
         self.target_handler = self.get_handler(
             connection_data=target_connection.data,
             transfer_params=run.transfer.target_params,
+            transformations=run.transfer.transformations,
             connection_auth_data=target_auth_data,
         )
 
@@ -126,6 +128,7 @@ class TransferController:
         connection_data: dict[str, Any],
         connection_auth_data: dict,
         transfer_params: dict[str, Any],
+        transformations: list[dict],
     ) -> Handler:
         connection_data.update(connection_auth_data)
         connection_data.pop("type")
@@ -138,5 +141,5 @@ class TransferController:
 
         return handler(
             connection_dto=connection_dto(**connection_data),
-            transfer_dto=transfer_dto(**transfer_params),
+            transfer_dto=transfer_dto(**transfer_params, transformations=transformations),
         )

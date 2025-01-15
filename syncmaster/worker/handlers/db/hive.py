@@ -20,6 +20,10 @@ class HiveHandler(DBHandler):
     connection: Hive
     connection_dto: HiveConnectionDTO
     transfer_dto: HiveTransferDTO
+    _operators = {
+        "regexp": "RLIKE",
+        **DBHandler._operators,
+    }
 
     def connect(self, spark: SparkSession):
         self.connection = Hive(
@@ -31,7 +35,27 @@ class HiveHandler(DBHandler):
         self.connection.spark.catalog.refreshTable(self.transfer_dto.table_name)
         return super().read()
 
-    def normalize_column_names(self, df: DataFrame) -> DataFrame:
+    def _normalize_column_names(self, df: DataFrame) -> DataFrame:
         for column_name in df.columns:
             df = df.withColumnRenamed(column_name, column_name.lower())
         return df
+
+    def _make_filter_expression(self, filters: list[dict]) -> str | None:
+        expressions = []
+        for filter in filters:
+            op = self._operators[filter["type"]]
+            field = f"`{filter["field"]}`"
+            value = filter.get("value")
+
+            if value is None:
+                expressions.append(f"{field} {op}")
+                continue
+
+            if op == "ILIKE":
+                expressions.append(f"LOWER({field}) LIKE LOWER('{value}')")
+            elif op == "NOT ILIKE":
+                expressions.append(f"NOT LOWER({field}) LIKE LOWER('{value}')")
+            else:
+                expressions.append(f"{field} {op} '{value}'")
+
+        return " AND ".join(expressions) or None

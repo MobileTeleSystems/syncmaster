@@ -10,6 +10,7 @@ from onetl.file import FileDFReader
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, date_format, date_trunc, to_timestamp
 from pytest import FixtureRequest
+from pytest_lazy_fixtures import lf
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Connection, Group, Queue, Status
@@ -37,6 +38,7 @@ async def s3_to_postgres(
     prepare_s3,
     source_file_format,
     file_format_flavor: str,
+    transformations: list[dict],
 ):
     format_name, file_format = source_file_format
     format_name_in_path = "xlsx" if format_name == "excel" else format_name
@@ -62,6 +64,7 @@ async def s3_to_postgres(
             "type": "postgres",
             "table_name": "public.target_table",
         },
+        transformations=transformations,
         queue_id=queue.id,
     )
     yield result
@@ -78,6 +81,7 @@ async def postgres_to_s3(
     postgres_connection: Connection,
     target_file_format,
     file_format_flavor: str,
+    transformations: list[dict],
 ):
     format_name, file_format = target_file_format
     result = await create_transfer(
@@ -99,6 +103,7 @@ async def postgres_to_s3(
             },
             "options": {},
         },
+        transformations=transformations,
         queue_id=queue.id,
     )
     yield result
@@ -107,41 +112,54 @@ async def postgres_to_s3(
 
 
 @pytest.mark.parametrize(
-    "source_file_format, file_format_flavor",
+    "source_file_format, file_format_flavor, transformations, expected_filter",
     [
         pytest.param(
             ("csv", {}),
             "with_header",
-            id="csv",
+            lf("dataframe_rows_filter_transformations"),
+            lf("expected_dataframe_rows_filter"),
         ),
         pytest.param(
             ("json", {}),
             "without_compression",
+            [],
+            None,
             id="json",
         ),
         pytest.param(
             ("jsonline", {}),
             "without_compression",
+            [],
+            None,
             id="jsonline",
         ),
         pytest.param(
             ("excel", {}),
             "with_header",
+            [],
+            None,
             id="excel",
         ),
         pytest.param(
             ("orc", {}),
             "without_compression",
+            [],
+            None,
             id="orc",
         ),
         pytest.param(
             ("parquet", {}),
             "without_compression",
+            [],
+            None,
             id="parquet",
         ),
         pytest.param(
             ("xml", {}),
             "without_compression",
+            [],
+            None,
             id="xml",
         ),
     ],
@@ -155,10 +173,14 @@ async def test_run_transfer_s3_to_postgres(
     s3_to_postgres: Transfer,
     source_file_format,
     file_format_flavor,
+    transformations,
+    expected_filter,
 ):
     # Arrange
     postgres, _ = prepare_postgres
     file_format, _ = source_file_format
+    if expected_filter:
+        init_df = init_df.where(expected_filter(init_df))
 
     # Act
     result = await client.post(
@@ -202,36 +224,42 @@ async def test_run_transfer_s3_to_postgres(
 
 
 @pytest.mark.parametrize(
-    "target_file_format, file_format_flavor",
+    "target_file_format, file_format_flavor, transformations",
     [
         pytest.param(
             ("csv", {"compression": "lz4"}),
             "with_compression",
+            [],
             id="csv",
         ),
         pytest.param(
             ("jsonline", {}),
             "without_compression",
+            [],
             id="jsonline",
         ),
         pytest.param(
             ("excel", {}),
             "with_header",
+            [],
             id="excel",
         ),
         pytest.param(
             ("orc", {"compression": "none"}),
             "with_compression",
+            [],
             id="orc",
         ),
         pytest.param(
             ("parquet", {"compression": "gzip"}),
             "with_compression",
+            [],
             id="parquet",
         ),
         pytest.param(
             ("xml", {"compression": "none"}),
             "without_compression",
+            [],
             id="xml",
         ),
     ],
@@ -247,6 +275,7 @@ async def test_run_transfer_postgres_to_s3(
     postgres_to_s3: Transfer,
     target_file_format,
     file_format_flavor: str,
+    transformations,
 ):
     format_name, format = target_file_format
 
