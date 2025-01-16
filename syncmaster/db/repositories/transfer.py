@@ -115,6 +115,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         source_params: dict[str, Any],
         target_params: dict[str, Any],
         strategy_params: dict[str, Any],
+        transformations: list[dict[str, Any]],
         queue_id: int,
         is_scheduled: bool,
         schedule: str | None,
@@ -130,6 +131,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
                 source_params=source_params,
                 target_params=target_params,
                 strategy_params=strategy_params,
+                transformations=transformations,
                 queue_id=queue_id,
                 is_scheduled=is_scheduled,
                 schedule=schedule or "",
@@ -154,20 +156,21 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         source_params: dict[str, Any],
         target_params: dict[str, Any],
         strategy_params: dict[str, Any],
+        transformations: list[dict[str, Any]],
         is_scheduled: bool | None,
         schedule: str | None,
         new_queue_id: int | None,
     ) -> Transfer:
         try:
-            for key in transfer.source_params:
-                if key not in source_params or source_params[key] is None:
-                    source_params[key] = transfer.source_params[key]
-            for key in transfer.target_params:
-                if key not in target_params or target_params[key] is None:
-                    target_params[key] = transfer.target_params[key]
-            for key in transfer.strategy_params:
-                if key not in strategy_params or strategy_params[key] is None:
-                    strategy_params[key] = transfer.strategy_params[key]
+            for old, new in [
+                (transfer.source_params, source_params),
+                (transfer.target_params, target_params),
+                (transfer.strategy_params, strategy_params),
+            ]:
+                for key in old:
+                    if key not in new or new[key] is None:
+                        new[key] = old[key]
+
             return await self._update(
                 Transfer.id == transfer.id,
                 name=name or transfer.name,
@@ -179,6 +182,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
                 target_connection_id=target_connection_id or transfer.target_connection_id,
                 source_params=source_params,
                 target_params=target_params,
+                transformations=transformations or transfer.transformations,
                 queue_id=new_queue_id or transfer.queue_id,
             )
         except IntegrityError as e:

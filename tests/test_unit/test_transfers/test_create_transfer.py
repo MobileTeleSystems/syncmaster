@@ -36,6 +36,23 @@ async def test_developer_plus_can_create_transfer(
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
+            "transformations": [
+                {
+                    "type": "dataframe_rows_filter",
+                    "filters": [
+                        {
+                            "type": "equal",
+                            "field": "col1",
+                            "value": "something",
+                        },
+                        {
+                            "type": "greater_than",
+                            "field": "col2",
+                            "value": "20",
+                        },
+                    ],
+                },
+            ],
             "queue_id": group_queue.id,
         },
     )
@@ -64,6 +81,7 @@ async def test_developer_plus_can_create_transfer(
         "source_params": transfer.source_params,
         "target_params": transfer.target_params,
         "strategy_params": transfer.strategy_params,
+        "transformations": transfer.transformations,
         "queue_id": transfer.queue_id,
     }
 
@@ -211,6 +229,23 @@ async def test_superuser_can_create_transfer(
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
             "strategy_params": {"type": "full"},
+            "transformations": [
+                {
+                    "type": "dataframe_rows_filter",
+                    "filters": [
+                        {
+                            "type": "equal",
+                            "field": "col1",
+                            "value": "something",
+                        },
+                        {
+                            "type": "greater_than",
+                            "field": "col2",
+                            "value": "20",
+                        },
+                    ],
+                },
+            ],
             "queue_id": group_queue.id,
         },
     )
@@ -236,6 +271,7 @@ async def test_superuser_can_create_transfer(
         "source_params": transfer.source_params,
         "target_params": transfer.target_params,
         "strategy_params": transfer.strategy_params,
+        "transformations": transfer.transformations,
         "queue_id": transfer.queue_id,
     }
 
@@ -387,6 +423,95 @@ async def test_superuser_can_create_transfer(
                 },
             },
         ),
+        (
+            {
+                "transformations": [
+                    {
+                        "type": "some unknown transformation type",
+                        "filters": [
+                            {
+                                "type": "equal",
+                                "field": "col1",
+                                "value": "something",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "location": ["body", "transformations", 0],
+                            "message": (
+                                "Input tag 'some unknown transformation type' found using 'type' "
+                                "does not match any of the expected tags: 'dataframe_rows_filter'"
+                            ),
+                            "code": "union_tag_invalid",
+                            "context": {
+                                "discriminator": "'type'",
+                                "expected_tags": "'dataframe_rows_filter'",
+                                "tag": "some unknown transformation type",
+                            },
+                            "input": {
+                                "type": "some unknown transformation type",
+                                "filters": [
+                                    {
+                                        "type": "equal",
+                                        "field": "col1",
+                                        "value": "something",
+                                    },
+                                ],
+                            },
+                        },
+                    ],
+                },
+            },
+        ),
+        (
+            {
+                "transformations": [
+                    {
+                        "type": "dataframe_rows_filter",
+                        "filters": [
+                            {
+                                "type": "equals_today",
+                                "field": "col1",
+                                "value": "something",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "location": ["body", "transformations", 0, "dataframe_rows_filter", "filters", 0],
+                            "message": (
+                                "Input tag 'equals_today' found using 'type' does not match any of the expected tags: 'is_null', 'is_not_null', 'equal', 'not_equal', "
+                                "'greater_than', 'greater_or_equal', 'less_than', 'less_or_equal', 'like', 'ilike', 'not_like', 'not_ilike', 'regexp'"
+                            ),
+                            "code": "union_tag_invalid",
+                            "context": {
+                                "discriminator": "'type'",
+                                "tag": "equals_today",
+                                "expected_tags": "'is_null', 'is_not_null', 'equal', 'not_equal', 'greater_than', 'greater_or_equal', 'less_than', 'less_or_equal', 'like', 'ilike', 'not_like', 'not_ilike', 'regexp'",
+                            },
+                            "input": {
+                                "type": "equals_today",
+                                "field": "col1",
+                                "value": "something",
+                            },
+                        },
+                    ],
+                },
+            },
+        ),
     ),
 )
 async def test_check_fields_validation_on_create_transfer(
@@ -414,6 +539,7 @@ async def test_check_fields_validation_on_create_transfer(
         "source_params": {"type": "postgres", "table_name": "source_table"},
         "target_params": {"type": "postgres", "table_name": "target_table"},
         "strategy_params": {"type": "full"},
+        "transformations": [],
         "queue_id": group_queue.id,
     }
     transfer_data.update(new_data)
@@ -584,7 +710,7 @@ async def test_developer_plus_cannot_create_transfer_with_other_group_queue(
     }
 
 
-async def test_developer_plus_can_not_create_transfer_with_target_format_json(
+async def test_developer_plus_cannot_create_transfer_with_target_format_json(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
     session: AsyncSession,

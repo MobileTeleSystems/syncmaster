@@ -36,6 +36,7 @@ async def test_developer_plus_can_update_transfer(
         "source_params": group_transfer.source_params,
         "target_params": group_transfer.target_params,
         "strategy_params": group_transfer.strategy_params,
+        "transformations": group_transfer.transformations,
         "queue_id": group_transfer.transfer.queue_id,
     }
 
@@ -89,6 +90,7 @@ async def test_superuser_can_update_transfer(
         "source_params": group_transfer.source_params,
         "target_params": group_transfer.target_params,
         "strategy_params": group_transfer.strategy_params,
+        "transformations": group_transfer.transformations,
         "queue_id": group_transfer.transfer.queue_id,
     }
 
@@ -206,6 +208,7 @@ async def test_check_connection_types_and_its_params_transfer(
         },
         "target_params": group_transfer.target_params,
         "strategy_params": group_transfer.strategy_params,
+        "transformations": group_transfer.transformations,
         "queue_id": group_transfer.transfer.queue_id,
     }
     assert result.status_code == 200

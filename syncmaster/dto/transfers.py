@@ -15,6 +15,7 @@ class TransferDTO:
 @dataclass
 class DBTransferDTO(TransferDTO):
     table_name: str
+    transformations: list[dict] | None = None
 
 
 @dataclass
@@ -23,6 +24,7 @@ class FileTransferDTO(TransferDTO):
     file_format: CSV | JSONLine | JSON | Excel | XML | ORC | Parquet
     options: dict
     df_schema: dict | None = None
+    transformations: list[dict] | None = None
 
     _format_parsers = {
         "csv": CSV,

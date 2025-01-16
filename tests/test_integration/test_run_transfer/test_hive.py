@@ -5,6 +5,7 @@ import pytest_asyncio
 from httpx import AsyncClient
 from onetl.db import DBReader
 from pyspark.sql import DataFrame
+from pytest_lazy_fixtures import lf
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Connection, Group, Queue, Status, Transfer
@@ -22,6 +23,7 @@ async def postgres_to_hive(
     queue: Queue,
     hive_connection: Connection,
     postgres_connection: Connection,
+    transformations: list[dict],
 ):
     result = await create_transfer(
         session=session,
@@ -37,6 +39,7 @@ async def postgres_to_hive(
             "type": "hive",
             "table_name": "default.target_table",
         },
+        transformations=transformations,
         queue_id=queue.id,
     )
     yield result
@@ -51,6 +54,7 @@ async def hive_to_postgres(
     queue: Queue,
     hive_connection: Connection,
     postgres_connection: Connection,
+    transformations: list[dict],
 ):
     result = await create_transfer(
         session=session,
@@ -66,6 +70,7 @@ async def hive_to_postgres(
             "type": "postgres",
             "table_name": "public.target_table",
         },
+        transformations=transformations,
         queue_id=queue.id,
     )
     yield result
@@ -73,6 +78,7 @@ async def hive_to_postgres(
     await session.commit()
 
 
+@pytest.mark.parametrize("transformations", [[]])
 async def test_run_transfer_postgres_to_hive(
     client: AsyncClient,
     group_owner: MockUser,
@@ -80,6 +86,7 @@ async def test_run_transfer_postgres_to_hive(
     prepare_hive,
     init_df: DataFrame,
     postgres_to_hive: Transfer,
+    transformations,
 ):
     # Arrange
     _, fill_with_data = prepare_postgres
@@ -120,6 +127,7 @@ async def test_run_transfer_postgres_to_hive(
     assert df.sort("ID").collect() == init_df.sort("ID").collect()
 
 
+@pytest.mark.parametrize("transformations", [[]])
 async def test_run_transfer_postgres_to_hive_mixed_naming(
     client: AsyncClient,
     group_owner: MockUser,
@@ -127,6 +135,7 @@ async def test_run_transfer_postgres_to_hive_mixed_naming(
     prepare_hive,
     init_df_with_mixed_column_naming: DataFrame,
     postgres_to_hive: Transfer,
+    transformations,
 ):
     # Arrange
     _, fill_with_data = prepare_postgres
@@ -167,9 +176,18 @@ async def test_run_transfer_postgres_to_hive_mixed_naming(
     for field in init_df_with_mixed_column_naming.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
 
-    assert df.collect() == init_df_with_mixed_column_naming.collect()
+    assert df.sort("ID").collect() == init_df_with_mixed_column_naming.sort("ID").collect()
 
 
+@pytest.mark.parametrize(
+    "transformations, expected_filter",
+    [
+        (
+            lf("dataframe_rows_filter_transformations"),
+            lf("expected_dataframe_rows_filter"),
+        ),
+    ],
+)
 async def test_run_transfer_hive_to_postgres(
     client: AsyncClient,
     group_owner: MockUser,
@@ -177,11 +195,14 @@ async def test_run_transfer_hive_to_postgres(
     prepare_postgres,
     init_df: DataFrame,
     hive_to_postgres: Transfer,
+    transformations,
+    expected_filter,
 ):
     # Arrange
     _, fill_with_data = prepare_hive
     fill_with_data(init_df)
     postgres, _ = prepare_postgres
+    init_df = init_df.where(expected_filter(init_df))
 
     # Act
     result = await client.post(
@@ -216,6 +237,7 @@ async def test_run_transfer_hive_to_postgres(
     assert df.sort("ID").collect() == init_df.sort("ID").collect()
 
 
+@pytest.mark.parametrize("transformations", [[]])
 async def test_run_transfer_hive_to_postgres_mixes_naming(
     client: AsyncClient,
     group_owner: MockUser,
@@ -223,6 +245,7 @@ async def test_run_transfer_hive_to_postgres_mixes_naming(
     prepare_postgres,
     init_df_with_mixed_column_naming: DataFrame,
     hive_to_postgres: Transfer,
+    transformations,
 ):
     # Arrange
     _, fill_with_data = prepare_hive
@@ -264,4 +287,4 @@ async def test_run_transfer_hive_to_postgres_mixes_naming(
     for field in init_df_with_mixed_column_naming.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
 
-    assert df.collect() == init_df_with_mixed_column_naming.collect()
+    assert df.sort("ID").collect() == init_df_with_mixed_column_naming.sort("ID").collect()

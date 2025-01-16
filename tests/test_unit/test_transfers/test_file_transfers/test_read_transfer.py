@@ -10,58 +10,85 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
     "create_transfer_data",
     [
         {
-            "type": "s3",
-            "directory_path": "/some/pure/path",
-            "file_format": {
-                "delimiter": ",",
-                "encoding": "utf-8",
-                "escape": "\\",
-                "include_header": False,
-                "line_sep": "\n",
-                "quote": '"',
-                "type": "csv",
-                "compression": "gzip",
+            "source_and_target_params": {
+                "type": "s3",
+                "directory_path": "/some/pure/path",
+                "file_format": {
+                    "delimiter": ",",
+                    "encoding": "utf-8",
+                    "escape": "\\",
+                    "include_header": False,
+                    "line_sep": "\n",
+                    "quote": '"',
+                    "type": "csv",
+                    "compression": "gzip",
+                },
+                "options": {},
             },
-            "options": {},
+            "transformations": [
+                {
+                    "type": "dataframe_rows_filter",
+                    "filters": [
+                        {
+                            "type": "not_equal",
+                            "field": "col1",
+                            "value": "something",
+                        },
+                        {
+                            "type": "less_than",
+                            "field": "col2",
+                            "value": "20",
+                        },
+                    ],
+                },
+            ],
         },
         {
-            "type": "s3",
-            "directory_path": "/some/excel/path",
-            "file_format": {
-                "type": "excel",
-                "include_header": True,
-                "start_cell": "A1",
+            "source_and_target_params": {
+                "type": "s3",
+                "directory_path": "/some/excel/path",
+                "file_format": {
+                    "type": "excel",
+                    "include_header": True,
+                    "start_cell": "A1",
+                },
+                "options": {},
             },
-            "options": {},
         },
         {
-            "type": "s3",
-            "directory_path": "/some/xml/path",
-            "file_format": {
-                "type": "xml",
-                "root_tag": "data",
-                "row_tag": "record",
-                "compression": "bzip2",
+            "source_and_target_params": {
+                "type": "s3",
+                "directory_path": "/some/xml/path",
+                "file_format": {
+                    "type": "xml",
+                    "root_tag": "data",
+                    "row_tag": "record",
+                    "compression": "bzip2",
+                },
+                "options": {},
             },
-            "options": {},
         },
         {
-            "type": "s3",
-            "directory_path": "/some/orc/path",
-            "file_format": {
-                "type": "orc",
-                "compression": "zlib",
+            "source_and_target_params": {
+                "type": "s3",
+                "directory_path": "/some/orc/path",
+                "file_format": {
+                    "type": "orc",
+                    "compression": "zlib",
+                },
+                "options": {},
             },
-            "options": {},
         },
         {
-            "type": "s3",
-            "directory_path": "/some/parquet/path",
-            "file_format": {
-                "type": "parquet",
-                "compression": "lz4",
+            "source_and_target_params": {
+                "type": "s3",
+                "directory_path": "/some/parquet/path",
+                "file_format": {
+                    "type": "parquet",
+                    "compression": "lz4",
+                },
+                "options": {},
             },
-            "options": {},
         },
     ],
 )
@@ -104,6 +131,7 @@ async def test_guest_plus_can_read_s3_transfer(
         "source_params": group_transfer.source_params,
         "target_params": group_transfer.target_params,
         "strategy_params": group_transfer.strategy_params,
+        "transformations": group_transfer.transformations,
         "queue_id": group_transfer.transfer.queue_id,
     }
     assert result.status_code == 200

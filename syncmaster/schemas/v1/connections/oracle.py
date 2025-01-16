@@ -24,7 +24,7 @@ class CreateOracleConnectionDataSchema(BaseModel):
     additional_params: dict = Field(default_factory=dict)
 
     @model_validator(mode="before")
-    def check_owner_id(cls, values):
+    def validate_connection_identifiers(cls, values):
         sid, service_name = values.get("sid"), values.get("service_name")
         if sid and service_name:
             raise ValueError("You must specify either sid or service_name but not both")
@@ -47,7 +47,7 @@ class UpdateOracleConnectionDataSchema(BaseModel):
     additional_params: dict | None = Field(default_factory=dict)
 
     @model_validator(mode="before")
-    def check_owner_id(cls, values):
+    def validate_connection_identifiers(cls, values):
         sid, service_name = values.get("sid"), values.get("service_name")
         if sid and service_name:
             raise ValueError("You must specify either sid or service_name but not both")
