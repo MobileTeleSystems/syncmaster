@@ -7,6 +7,7 @@ from onetl.connection import MSSQL
 from onetl.db import DBReader
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, date_trunc
+from pytest_lazy_fixtures import lf
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Connection, Group, Queue, Status, Transfer
@@ -195,48 +196,17 @@ async def test_run_transfer_postgres_to_mssql_mixed_naming(
 
 
 @pytest.mark.parametrize(
-    "transformations, expected_filter",
+    "source_type, transformations, expected_filter",
     [
         (
-            [
-                {
-                    "type": "dataframe_rows_filter",
-                    "filters": [
-                        {
-                            "type": "is_not_null",
-                            "field": "BIRTH_DATE",
-                        },
-                        {
-                            "type": "less_or_equal",
-                            "field": "NUMBER",
-                            "value": "25",
-                        },
-                        {
-                            "type": "not_like",
-                            "field": "REGION",
-                            "value": "%port",
-                        },
-                        {
-                            "type": "not_ilike",
-                            "field": "REGION",
-                            "value": "new%",
-                        },
-                        {
-                            "type": "regexp",
-                            "field": "PHONE_NUMBER",
-                            "value": "^[0-9!@#$.,;_]%",
-                            # available expressions are limited
-                        },
-                    ],
-                },
-            ],
-            lambda df: (
-                df["BIRTH_DATE"].isNotNull()
-                & (df["NUMBER"] <= "25")
-                & (~df["REGION"].like("%port"))
-                & (~df["REGION"].ilike("new%"))
-                & (df["PHONE_NUMBER"].rlike("[0-9!@#$.,;_]%"))
-            ),
+            "mssql",
+            lf("dataframe_rows_filter_transformations"),
+            lf("expected_dataframe_rows_filter"),
+        ),
+        (
+            "mssql",
+            lf("dataframe_columns_filter_transformations"),
+            lf("expected_dataframe_columns_filter"),
         ),
     ],
 )
@@ -247,6 +217,7 @@ async def test_run_transfer_mssql_to_postgres(
     prepare_postgres,
     init_df: DataFrame,
     mssql_to_postgres: Transfer,
+    source_type,
     transformations,
     expected_filter,
 ):
@@ -254,7 +225,7 @@ async def test_run_transfer_mssql_to_postgres(
     _, fill_with_data = prepare_mssql
     fill_with_data(init_df)
     postgres, _ = prepare_postgres
-    init_df = init_df.where(expected_filter(init_df))
+    init_df = expected_filter(init_df, source_type)
 
     # Act
     result = await client.post(

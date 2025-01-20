@@ -40,11 +40,11 @@ class MySQLHandler(DBHandler):
             df = df.withColumnRenamed(column_name, column_name.lower())
         return df
 
-    def _make_filter_expression(self, filters: list[dict]) -> str | None:
+    def _make_rows_filter_expression(self, filters: list[dict]) -> str | None:
         expressions = []
         for filter in filters:
             op = self._operators[filter["type"]]
-            field = f"`{filter["field"]}`"
+            field = self._quote_field(filter["field"])
             value = filter.get("value")
 
             if value is None:
@@ -59,3 +59,7 @@ class MySQLHandler(DBHandler):
                 expressions.append(f"{field} {op} '{value}'")
 
         return " AND ".join(expressions) or None
+
+    @staticmethod
+    def _quote_field(field: str) -> str:
+        return f"`{field}`"

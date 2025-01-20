@@ -112,24 +112,28 @@ async def postgres_to_s3(
 
 
 @pytest.mark.parametrize(
-    "source_file_format, file_format_flavor, transformations, expected_filter",
+    "source_file_format, file_format_flavor, source_type, transformations, expected_filter",
     [
         pytest.param(
             ("csv", {}),
             "with_header",
+            "s3",
             lf("dataframe_rows_filter_transformations"),
             lf("expected_dataframe_rows_filter"),
+            id="csv",
         ),
         pytest.param(
             ("json", {}),
             "without_compression",
-            [],
-            None,
+            "s3",
+            lf("dataframe_columns_filter_transformations"),
+            lf("expected_dataframe_columns_filter"),
             id="json",
         ),
         pytest.param(
             ("jsonline", {}),
             "without_compression",
+            None,
             [],
             None,
             id="jsonline",
@@ -137,6 +141,7 @@ async def postgres_to_s3(
         pytest.param(
             ("excel", {}),
             "with_header",
+            None,
             [],
             None,
             id="excel",
@@ -144,6 +149,7 @@ async def postgres_to_s3(
         pytest.param(
             ("orc", {}),
             "without_compression",
+            None,
             [],
             None,
             id="orc",
@@ -151,6 +157,7 @@ async def postgres_to_s3(
         pytest.param(
             ("parquet", {}),
             "without_compression",
+            None,
             [],
             None,
             id="parquet",
@@ -158,6 +165,7 @@ async def postgres_to_s3(
         pytest.param(
             ("xml", {}),
             "without_compression",
+            None,
             [],
             None,
             id="xml",
@@ -173,6 +181,7 @@ async def test_run_transfer_s3_to_postgres(
     s3_to_postgres: Transfer,
     source_file_format,
     file_format_flavor,
+    source_type,
     transformations,
     expected_filter,
 ):
@@ -180,7 +189,7 @@ async def test_run_transfer_s3_to_postgres(
     postgres, _ = prepare_postgres
     file_format, _ = source_file_format
     if expected_filter:
-        init_df = init_df.where(expected_filter(init_df))
+        init_df = expected_filter(init_df, source_type)
 
     # Act
     result = await client.post(

@@ -47,8 +47,12 @@ class S3Handler(FileHandler):
         )
         df = reader.run()
 
-        filter_expression = self._get_filter_expression()
-        if filter_expression:
-            df = df.where(filter_expression)
+        rows_filter_expression = self._get_rows_filter_expression()
+        if rows_filter_expression:
+            df = df.where(rows_filter_expression)
+
+        columns_filter_expressions = self._get_columns_filter_expressions()
+        if columns_filter_expressions:
+            df = df.selectExpr(*columns_filter_expressions)
 
         return df

@@ -52,6 +52,25 @@ async def test_developer_plus_can_create_transfer(
                         },
                     ],
                 },
+                {
+                    "type": "dataframe_columns_filter",
+                    "filters": [
+                        {
+                            "type": "include",
+                            "field": "col1",
+                        },
+                        {
+                            "type": "rename",
+                            "field": "col2",
+                            "to": "new_col2",
+                        },
+                        {
+                            "type": "cast",
+                            "field": "col3",
+                            "as_type": "VARCHAR",
+                        },
+                    ],
+                },
             ],
             "queue_id": group_queue.id,
         },
@@ -447,12 +466,12 @@ async def test_superuser_can_create_transfer(
                             "location": ["body", "transformations", 0],
                             "message": (
                                 "Input tag 'some unknown transformation type' found using 'type' "
-                                "does not match any of the expected tags: 'dataframe_rows_filter'"
+                                "does not match any of the expected tags: 'dataframe_rows_filter', 'dataframe_columns_filter'"
                             ),
                             "code": "union_tag_invalid",
                             "context": {
                                 "discriminator": "'type'",
-                                "expected_tags": "'dataframe_rows_filter'",
+                                "expected_tags": "'dataframe_rows_filter', 'dataframe_columns_filter'",
                                 "tag": "some unknown transformation type",
                             },
                             "input": {
@@ -506,6 +525,47 @@ async def test_superuser_can_create_transfer(
                                 "type": "equals_today",
                                 "field": "col1",
                                 "value": "something",
+                            },
+                        },
+                    ],
+                },
+            },
+        ),
+        (
+            {
+                "transformations": [
+                    {
+                        "type": "dataframe_columns_filter",
+                        "filters": [
+                            {
+                                "type": "convert",
+                                "field": "col1",
+                                "value": "VARCHAR",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "location": ["body", "transformations", 0, "dataframe_columns_filter", "filters", 0],
+                            "message": (
+                                "Input tag 'convert' found using 'type' does not match any of the expected tags: 'include', 'rename', 'cast'"
+                            ),
+                            "code": "union_tag_invalid",
+                            "context": {
+                                "discriminator": "'type'",
+                                "tag": "convert",
+                                "expected_tags": "'include', 'rename', 'cast'",
+                            },
+                            "input": {
+                                "type": "convert",
+                                "field": "col1",
+                                "value": "VARCHAR",
                             },
                         },
                     ],
