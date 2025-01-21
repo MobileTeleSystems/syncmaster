@@ -48,9 +48,13 @@ class FileHandler(Handler):
         )
         df = reader.run()
 
-        filter_expression = self._get_filter_expression()
-        if filter_expression:
-            df = df.where(filter_expression)
+        rows_filter_expression = self._get_rows_filter_expression()
+        if rows_filter_expression:
+            df = df.where(rows_filter_expression)
+
+        columns_filter_expressions = self._get_columns_filter_expressions()
+        if columns_filter_expressions:
+            df = df.selectExpr(*columns_filter_expressions)
 
         return df
 
@@ -64,16 +68,7 @@ class FileHandler(Handler):
 
         return writer.run(df=df)
 
-    def _get_filter_expression(self) -> str | None:
-        filters = []
-        for transformation in self.transfer_dto.transformations:
-            if transformation["type"] == "dataframe_rows_filter":
-                filters.extend(transformation["filters"])
-        if filters:
-            return self._make_filter_expression(filters)
-        return None
-
-    def _make_filter_expression(self, filters: list[dict]) -> str:
+    def _make_rows_filter_expression(self, filters: list[dict]) -> str:
         expressions = []
         for filter in filters:
             field = filter["field"]
@@ -83,3 +78,43 @@ class FileHandler(Handler):
             expressions.append(f"{field} {op} '{value}'" if value is not None else f"{field} {op}")
 
         return " AND ".join(expressions)
+
+    def _make_columns_filter_expressions(self, filters: list[dict]) -> list[str] | None:
+        # TODO: another approach is to use df.select(col("col1"), col("col2").alias("new_col2"), ...)
+        expressions = []
+        for filter in filters:
+            filter_type = filter["type"]
+            field = filter["field"]
+
+            if filter_type == "include":
+                expressions.append(field)
+            elif filter_type == "rename":
+                new_name = filter["to"]
+                expressions.append(f"{field} AS {new_name}")
+            elif filter_type == "cast":
+                cast_type = filter["as_type"]
+                expressions.append(f"CAST({field} AS {cast_type}) AS {field}")
+
+        return expressions or None
+
+    def _get_rows_filter_expression(self) -> str | None:
+        expressions = []
+        for transformation in self.transfer_dto.transformations:
+            if transformation["type"] == "dataframe_rows_filter":
+                expressions.extend(transformation["filters"])
+
+        if expressions:
+            return self._make_rows_filter_expression(expressions)
+
+        return None
+
+    def _get_columns_filter_expressions(self) -> list[str] | None:
+        expressions = []
+        for transformation in self.transfer_dto.transformations:
+            if transformation["type"] == "dataframe_columns_filter":
+                expressions.extend(transformation["filters"])
+
+        if expressions:
+            return self._make_columns_filter_expressions(expressions)
+
+        return None

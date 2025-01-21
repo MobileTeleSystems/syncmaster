@@ -64,10 +64,10 @@ class ClickhouseHandler(DBHandler):
             df = df.withColumnRenamed(column_name, column_name.lower())
         return df
 
-    def _make_filter_expression(self, filters: list[dict]) -> str | None:
+    def _make_rows_filter_expression(self, filters: list[dict]) -> str | None:
         expressions = []
         for filter in filters:
-            field = f'"{filter["field"]}"'
+            field = self._quote_field(filter["field"])
             op = self._operators[filter["type"]]
             value = filter.get("value")
 

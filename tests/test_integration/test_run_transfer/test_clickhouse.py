@@ -82,11 +82,17 @@ async def clickhouse_to_postgres(
 
 
 @pytest.mark.parametrize(
-    "transformations, expected_filter",
+    "source_type, transformations, expected_filter",
     [
         (
+            "clickhouse",
             lf("dataframe_rows_filter_transformations"),
             lf("expected_dataframe_rows_filter"),
+        ),
+        (
+            "clickhouse",
+            lf("dataframe_columns_filter_transformations"),
+            lf("expected_dataframe_columns_filter"),
         ),
     ],
 )
@@ -97,6 +103,7 @@ async def test_run_transfer_postgres_to_clickhouse(
     prepare_clickhouse,
     init_df: DataFrame,
     postgres_to_clickhouse: Transfer,
+    source_type,
     transformations,
     expected_filter,
 ):
@@ -104,7 +111,7 @@ async def test_run_transfer_postgres_to_clickhouse(
     _, fill_with_data = prepare_postgres
     fill_with_data(init_df)
     clickhouse, _ = prepare_clickhouse
-    init_df = init_df.where(expected_filter(init_df))
+    init_df = expected_filter(init_df, source_type)
 
     # Act
     result = await client.post(
@@ -192,11 +199,17 @@ async def test_run_transfer_postgres_to_clickhouse_mixed_naming(
 
 
 @pytest.mark.parametrize(
-    "transformations, expected_filter",
+    "source_type, transformations, expected_filter",
     [
         (
+            "clickhouse",
             lf("dataframe_rows_filter_transformations"),
             lf("expected_dataframe_rows_filter"),
+        ),
+        (
+            "clickhouse",
+            lf("dataframe_columns_filter_transformations"),
+            lf("expected_dataframe_columns_filter"),
         ),
     ],
 )
@@ -206,6 +219,7 @@ async def test_run_transfer_clickhouse_to_postgres(
     prepare_clickhouse,
     prepare_postgres,
     init_df: DataFrame,
+    source_type,
     transformations,
     expected_filter,
     clickhouse_to_postgres: Transfer,
@@ -214,7 +228,7 @@ async def test_run_transfer_clickhouse_to_postgres(
     _, fill_with_data = prepare_clickhouse
     fill_with_data(init_df)
     postgres, _ = prepare_postgres
-    init_df = init_df.where(expected_filter(init_df))
+    init_df = expected_filter(init_df, source_type)
 
     # Act
     result = await client.post(

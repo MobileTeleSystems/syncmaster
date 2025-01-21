@@ -29,6 +29,9 @@ from syncmaster.schemas.v1.transfers.file.s3 import (
     S3ReadTransferTarget,
 )
 from syncmaster.schemas.v1.transfers.strategy import FullStrategy, IncrementalStrategy
+from syncmaster.schemas.v1.transfers.transformations.dataframe_columns_filter import (
+    DataframeColumnsFilter,
+)
 from syncmaster.schemas.v1.transfers.transformations.dataframe_rows_filter import (
     DataframeRowsFilter,
 )
@@ -102,7 +105,7 @@ UpdateTransferSchemaTarget = (
     | None
 )
 
-TransformationSchema = DataframeRowsFilter
+TransformationSchema = DataframeRowsFilter | DataframeColumnsFilter
 
 
 class CopyTransferSchema(BaseModel):

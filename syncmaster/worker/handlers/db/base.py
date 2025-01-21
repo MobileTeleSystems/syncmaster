@@ -38,7 +38,8 @@ class DBHandler(Handler):
         reader = DBReader(
             connection=self.connection,
             table=self.transfer_dto.table_name,
-            where=self._get_filter_expression(),
+            where=self._get_rows_filter_expression(),
+            columns=self._get_columns_filter_expressions(),
         )
         return reader.run()
 
@@ -53,13 +54,47 @@ class DBHandler(Handler):
     def _normalize_column_names(self, df: DataFrame) -> DataFrame: ...
 
     @abstractmethod
-    def _make_filter_expression(self, filters: list[dict]) -> str | None: ...
+    def _make_rows_filter_expression(self, filters: list[dict]) -> str | None: ...
 
-    def _get_filter_expression(self) -> str | None:
-        filters = []
+    def _make_columns_filter_expressions(self, filters: list[dict]) -> list[str] | None:
+        expressions = []
+        for filter in filters:
+            filter_type = filter["type"]
+            field = self._quote_field(filter["field"])
+
+            if filter_type == "include":
+                expressions.append(field)
+            elif filter_type == "rename":
+                new_name = self._quote_field(filter["to"])
+                expressions.append(f"{field} AS {new_name}")
+            elif filter_type == "cast":
+                cast_type = filter["as_type"]
+                expressions.append(f"CAST({field} AS {cast_type}) AS {field}")
+
+        return expressions or None
+
+    def _get_rows_filter_expression(self) -> str | None:
+        expressions = []
         for transformation in self.transfer_dto.transformations:
             if transformation["type"] == "dataframe_rows_filter":
-                filters.extend(transformation["filters"])
-        if filters:
-            return self._make_filter_expression(filters)
+                expressions.extend(transformation["filters"])
+
+        if expressions:
+            return self._make_rows_filter_expression(expressions)
+
         return None
+
+    def _get_columns_filter_expressions(self) -> list[str] | None:
+        expressions = []
+        for transformation in self.transfer_dto.transformations:
+            if transformation["type"] == "dataframe_columns_filter":
+                expressions.extend(transformation["filters"])
+
+        if expressions:
+            return self._make_columns_filter_expressions(expressions)
+
+        return None
+
+    @staticmethod
+    def _quote_field(field: str) -> str:
+        return f'"{field}"'

@@ -88,6 +88,15 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
                         },
                     ],
                 },
+                {
+                    "type": "dataframe_columns_filter",
+                    "filters": [
+                        {
+                            "type": "include",
+                            "field": "col1",
+                        },
+                    ],
+                },
             ],
         },
     ],

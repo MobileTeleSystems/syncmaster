@@ -180,11 +180,17 @@ async def test_run_transfer_postgres_to_hive_mixed_naming(
 
 
 @pytest.mark.parametrize(
-    "transformations, expected_filter",
+    "source_type, transformations, expected_filter",
     [
         (
+            "hive",
             lf("dataframe_rows_filter_transformations"),
             lf("expected_dataframe_rows_filter"),
+        ),
+        (
+            "hive",
+            lf("dataframe_columns_filter_transformations"),
+            lf("expected_dataframe_columns_filter"),
         ),
     ],
 )
@@ -195,6 +201,7 @@ async def test_run_transfer_hive_to_postgres(
     prepare_postgres,
     init_df: DataFrame,
     hive_to_postgres: Transfer,
+    source_type,
     transformations,
     expected_filter,
 ):
@@ -202,7 +209,7 @@ async def test_run_transfer_hive_to_postgres(
     _, fill_with_data = prepare_hive
     fill_with_data(init_df)
     postgres, _ = prepare_postgres
-    init_df = init_df.where(expected_filter(init_df))
+    init_df = expected_filter(init_df, source_type)
 
     # Act
     result = await client.post(

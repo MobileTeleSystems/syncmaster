@@ -7,74 +7,74 @@ from pydantic import BaseModel, Field
 from syncmaster.schemas.v1.transformation_types import DATAFRAME_ROWS_FILTER
 
 
-class BaseRowFilter(BaseModel):
+class BaseRowsFilter(BaseModel):
     field: str
 
 
-class IsNullFilter(BaseRowFilter):
+class IsNullFilter(BaseRowsFilter):
     type: Literal["is_null"]
 
 
-class IsNotNullFilter(BaseRowFilter):
+class IsNotNullFilter(BaseRowsFilter):
     type: Literal["is_not_null"]
 
 
-class EqualFilter(BaseRowFilter):
+class EqualFilter(BaseRowsFilter):
     type: Literal["equal"]
     value: str
 
 
-class NotEqualFilter(BaseRowFilter):
+class NotEqualFilter(BaseRowsFilter):
     type: Literal["not_equal"]
     value: str
 
 
-class GreaterThanFilter(BaseRowFilter):
+class GreaterThanFilter(BaseRowsFilter):
     type: Literal["greater_than"]
     value: str
 
 
-class GreaterOrEqualFilter(BaseRowFilter):
+class GreaterOrEqualFilter(BaseRowsFilter):
     type: Literal["greater_or_equal"]
     value: str
 
 
-class LessThanFilter(BaseRowFilter):
+class LessThanFilter(BaseRowsFilter):
     type: Literal["less_than"]
     value: str
 
 
-class LessOrEqualFilter(BaseRowFilter):
+class LessOrEqualFilter(BaseRowsFilter):
     type: Literal["less_or_equal"]
     value: str
 
 
-class LikeFilter(BaseRowFilter):
+class LikeFilter(BaseRowsFilter):
     type: Literal["like"]
     value: str
 
 
-class ILikeFilter(BaseRowFilter):
+class ILikeFilter(BaseRowsFilter):
     type: Literal["ilike"]
     value: str
 
 
-class NotLikeFilter(BaseRowFilter):
+class NotLikeFilter(BaseRowsFilter):
     type: Literal["not_like"]
     value: str
 
 
-class NotILikeFilter(BaseRowFilter):
+class NotILikeFilter(BaseRowsFilter):
     type: Literal["not_ilike"]
     value: str
 
 
-class RegexpFilter(BaseRowFilter):
+class RegexpFilter(BaseRowsFilter):
     type: Literal["regexp"]
     value: str
 
 
-RowFilter = (
+RowsFilter = (
     IsNullFilter
     | IsNotNullFilter
     | EqualFilter
@@ -93,4 +93,4 @@ RowFilter = (
 
 class DataframeRowsFilter(BaseModel):
     type: DATAFRAME_ROWS_FILTER
-    filters: list[Annotated[RowFilter, Field(..., discriminator="type")]] = Field(default_factory=list)
+    filters: list[Annotated[RowsFilter, Field(..., discriminator="type")]] = Field(default_factory=list)
