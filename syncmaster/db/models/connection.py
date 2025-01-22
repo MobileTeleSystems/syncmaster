@@ -24,6 +24,11 @@ class ConnectionType(StrEnum):
     MYSQL = "mysql"
     S3 = "s3"
     HDFS = "hdfs"
+    SFTP = "sftp"
+    FTP = "ftp"
+    FTPS = "ftps"
+    WEBDAV = "webdav"
+    SAMBA = "samba"
 
 
 class Connection(Base, ResourceMixin, TimestampMixin):

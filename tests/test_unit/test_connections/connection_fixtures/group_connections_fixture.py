@@ -37,6 +37,20 @@ async def group_connections(
                     "bucket": "bucket",
                 },
             )
+        elif conn_type == ConnectionType.SAMBA:
+            new_data.update(
+                {
+                    "share": "folder",
+                    "protocol": "SMB",
+                    "domain": "domain",
+                },
+            )
+        elif conn_type == ConnectionType.WEBDAV:
+            new_data.update(
+                {
+                    "protocol": "http",
+                },
+            )
         elif conn_type in [
             ConnectionType.POSTGRES,
             ConnectionType.CLICKHOUSE,

@@ -10,6 +10,16 @@ from syncmaster.schemas.v1.connections.clickhouse import (
     ReadClickhouseConnectionSchema,
     UpdateClickhouseConnectionSchema,
 )
+from syncmaster.schemas.v1.connections.ftp import (
+    CreateFTPConnectionSchema,
+    ReadFTPConnectionSchema,
+    UpdateFTPConnectionSchema,
+)
+from syncmaster.schemas.v1.connections.ftps import (
+    CreateFTPSConnectionSchema,
+    ReadFTPSConnectionSchema,
+    UpdateFTPSConnectionSchema,
+)
 from syncmaster.schemas.v1.connections.hdfs import (
     CreateHDFSConnectionSchema,
     ReadHDFSConnectionSchema,
@@ -45,6 +55,21 @@ from syncmaster.schemas.v1.connections.s3 import (
     ReadS3ConnectionSchema,
     UpdateS3ConnectionSchema,
 )
+from syncmaster.schemas.v1.connections.samba import (
+    CreateSambaConnectionSchema,
+    ReadSambaConnectionSchema,
+    UpdateSambaConnectionSchema,
+)
+from syncmaster.schemas.v1.connections.sftp import (
+    CreateSFTPConnectionSchema,
+    ReadSFTPConnectionSchema,
+    UpdateSFTPConnectionSchema,
+)
+from syncmaster.schemas.v1.connections.webdav import (
+    CreateWebDAVConnectionSchema,
+    ReadWebDAVConnectionSchema,
+    UpdateWebDAVConnectionSchema,
+)
 from syncmaster.schemas.v1.page import PageSchema
 from syncmaster.schemas.v1.types import NameConstr
 
@@ -56,7 +81,12 @@ CreateConnectionSchema = Annotated[
     | CreateClickhouseConnectionSchema
     | CreateHiveConnectionSchema
     | CreateHDFSConnectionSchema
-    | CreateS3ConnectionSchema,
+    | CreateS3ConnectionSchema
+    | CreateSFTPConnectionSchema
+    | CreateFTPConnectionSchema
+    | CreateFTPSConnectionSchema
+    | CreateWebDAVConnectionSchema
+    | CreateSambaConnectionSchema,
     Field(discriminator="type"),
 ]
 ReadConnectionSchema = Annotated[
@@ -67,7 +97,12 @@ ReadConnectionSchema = Annotated[
     | ReadClickhouseConnectionSchema
     | ReadHiveConnectionSchema
     | ReadHDFSConnectionSchema
-    | ReadS3ConnectionSchema,
+    | ReadS3ConnectionSchema
+    | ReadSFTPConnectionSchema
+    | ReadFTPConnectionSchema
+    | ReadFTPSConnectionSchema
+    | ReadWebDAVConnectionSchema
+    | ReadSambaConnectionSchema,
     Field(discriminator="type"),
 ]
 UpdateConnectionSchema = Annotated[
@@ -78,7 +113,12 @@ UpdateConnectionSchema = Annotated[
     | UpdateClickhouseConnectionSchema
     | UpdateHiveConnectionSchema
     | UpdateHDFSConnectionSchema
-    | UpdateS3ConnectionSchema,
+    | UpdateS3ConnectionSchema
+    | UpdateSFTPConnectionSchema
+    | UpdateFTPConnectionSchema
+    | UpdateFTPSConnectionSchema
+    | UpdateWebDAVConnectionSchema
+    | UpdateSambaConnectionSchema,
     Field(discriminator="type"),
 ]
 
