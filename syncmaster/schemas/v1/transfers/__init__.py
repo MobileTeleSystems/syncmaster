@@ -16,6 +16,18 @@ from syncmaster.schemas.v1.transfers.db import (
     OracleReadTransferSourceAndTarget,
     PostgresReadTransferSourceAndTarget,
 )
+from syncmaster.schemas.v1.transfers.file.ftp import (
+    FTPCreateTransferSource,
+    FTPCreateTransferTarget,
+    FTPReadTransferSource,
+    FTPReadTransferTarget,
+)
+from syncmaster.schemas.v1.transfers.file.ftps import (
+    FTPSCreateTransferSource,
+    FTPSCreateTransferTarget,
+    FTPSReadTransferSource,
+    FTPSReadTransferTarget,
+)
 from syncmaster.schemas.v1.transfers.file.hdfs import (
     HDFSCreateTransferSource,
     HDFSCreateTransferTarget,
@@ -27,6 +39,24 @@ from syncmaster.schemas.v1.transfers.file.s3 import (
     S3CreateTransferTarget,
     S3ReadTransferSource,
     S3ReadTransferTarget,
+)
+from syncmaster.schemas.v1.transfers.file.samba import (
+    SambaCreateTransferSource,
+    SambaCreateTransferTarget,
+    SambaReadTransferSource,
+    SambaReadTransferTarget,
+)
+from syncmaster.schemas.v1.transfers.file.sftp import (
+    SFTPCreateTransferSource,
+    SFTPCreateTransferTarget,
+    SFTPReadTransferSource,
+    SFTPReadTransferTarget,
+)
+from syncmaster.schemas.v1.transfers.file.webdav import (
+    WebDAVCreateTransferSource,
+    WebDAVCreateTransferTarget,
+    WebDAVReadTransferSource,
+    WebDAVReadTransferTarget,
 )
 from syncmaster.schemas.v1.transfers.strategy import FullStrategy, IncrementalStrategy
 from syncmaster.schemas.v1.transfers.transformations.dataframe_columns_filter import (
@@ -46,6 +76,11 @@ ReadTransferSchemaSource = (
     | MSSQLReadTransferSourceAndTarget
     | MySQLReadTransferSourceAndTarget
     | S3ReadTransferSource
+    | SFTPReadTransferSource
+    | FTPReadTransferSource
+    | FTPSReadTransferSource
+    | WebDAVReadTransferSource
+    | SambaReadTransferSource
 )
 
 ReadTransferSchemaTarget = (
@@ -57,6 +92,11 @@ ReadTransferSchemaTarget = (
     | MSSQLReadTransferSourceAndTarget
     | MySQLReadTransferSourceAndTarget
     | S3ReadTransferTarget
+    | SFTPReadTransferTarget
+    | FTPReadTransferTarget
+    | FTPSReadTransferTarget
+    | WebDAVReadTransferTarget
+    | SambaReadTransferTarget
 )
 
 CreateTransferSchemaSource = (
@@ -68,6 +108,11 @@ CreateTransferSchemaSource = (
     | MSSQLReadTransferSourceAndTarget
     | MySQLReadTransferSourceAndTarget
     | S3CreateTransferSource
+    | SFTPCreateTransferSource
+    | FTPCreateTransferSource
+    | FTPSCreateTransferSource
+    | WebDAVCreateTransferSource
+    | SambaCreateTransferSource
 )
 
 CreateTransferSchemaTarget = (
@@ -79,6 +124,11 @@ CreateTransferSchemaTarget = (
     | MSSQLReadTransferSourceAndTarget
     | MySQLReadTransferSourceAndTarget
     | S3CreateTransferTarget
+    | SFTPCreateTransferTarget
+    | FTPCreateTransferTarget
+    | FTPSCreateTransferTarget
+    | WebDAVCreateTransferTarget
+    | SambaCreateTransferTarget
 )
 
 UpdateTransferSchemaSource = (
@@ -89,7 +139,12 @@ UpdateTransferSchemaSource = (
     | ClickhouseReadTransferSourceAndTarget
     | MSSQLReadTransferSourceAndTarget
     | MySQLReadTransferSourceAndTarget
-    | S3CreateTransferSource
+    | S3ReadTransferSource
+    | SFTPReadTransferSource
+    | FTPReadTransferSource
+    | FTPSReadTransferSource
+    | WebDAVReadTransferSource
+    | SambaReadTransferSource
     | None
 )
 
@@ -101,7 +156,12 @@ UpdateTransferSchemaTarget = (
     | ClickhouseReadTransferSourceAndTarget
     | MSSQLReadTransferSourceAndTarget
     | MySQLReadTransferSourceAndTarget
-    | S3CreateTransferTarget
+    | S3ReadTransferTarget
+    | SFTPReadTransferTarget
+    | FTPReadTransferTarget
+    | FTPSReadTransferTarget
+    | WebDAVReadTransferTarget
+    | SambaReadTransferTarget
     | None
 )
 

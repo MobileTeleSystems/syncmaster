@@ -34,7 +34,7 @@ class CreateHDFSConnectionSchema(CreateConnectionBaseSchema):
         ...,
         alias="connection_data",
         description=(
-            "Data required to connect to the database. These are the parameters that are specified in the URL request."
+            "Data required to connect to the HDFS cluster. These are the parameters that are specified in the URL request."
         ),
     )
     auth_data: CreateBasicAuthSchema = Field(

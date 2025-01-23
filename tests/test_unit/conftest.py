@@ -22,8 +22,6 @@ from tests.test_unit.utils import (
     create_user,
 )
 
-ALLOWED_SOURCES = "'hive', 'oracle', 'postgres', 'hdfs', 's3'"
-
 
 async def create_group_member(
     username: str,
