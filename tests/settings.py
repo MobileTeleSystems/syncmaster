@@ -64,6 +64,13 @@ class TestSettings(BaseSettings):
     TEST_S3_PROTOCOL: str = "http"
     TEST_S3_ADDITIONAL_PARAMS: dict = {}
 
+    TEST_SFTP_HOST_FOR_CONFTEST: str
+    TEST_SFTP_PORT_FOR_CONFTEST: int
+    TEST_SFTP_HOST_FOR_WORKER: str
+    TEST_SFTP_PORT_FOR_WORKER: int
+    TEST_SFTP_USER: str
+    TEST_SFTP_PASSWORD: str
+
     @model_validator(mode="before")
     def check_sid_and_service_name(cls, values):
         sid = values.get("TEST_ORACLE_SID")

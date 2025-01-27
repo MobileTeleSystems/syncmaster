@@ -58,7 +58,7 @@ class FileHandler(Handler):
 
         return df
 
-    def write(self, df: DataFrame):
+    def write(self, df: DataFrame) -> None:
         writer = FileDFWriter(
             connection=self.connection,
             format=self.transfer_dto.file_format,

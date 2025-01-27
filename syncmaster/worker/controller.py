@@ -13,6 +13,7 @@ from syncmaster.dto.connections import (
     OracleConnectionDTO,
     PostgresConnectionDTO,
     S3ConnectionDTO,
+    SFTPConnectionDTO,
 )
 from syncmaster.dto.transfers import (
     ClickhouseTransferDTO,
@@ -23,6 +24,7 @@ from syncmaster.dto.transfers import (
     OracleTransferDTO,
     PostgresTransferDTO,
     S3TransferDTO,
+    SFTPTransferDTO,
 )
 from syncmaster.exceptions.connection import ConnectionTypeNotRecognizedError
 from syncmaster.worker.handlers.base import Handler
@@ -34,6 +36,7 @@ from syncmaster.worker.handlers.db.oracle import OracleHandler
 from syncmaster.worker.handlers.db.postgres import PostgresHandler
 from syncmaster.worker.handlers.file.hdfs import HDFSHandler
 from syncmaster.worker.handlers.file.s3 import S3Handler
+from syncmaster.worker.handlers.file.sftp import SFTPHandler
 from syncmaster.worker.settings import WorkerAppSettings
 
 logger = logging.getLogger(__name__)
@@ -79,6 +82,11 @@ connection_handler_proxy = {
         HDFSHandler,
         HDFSConnectionDTO,
         HDFSTransferDTO,
+    ),
+    "sftp": (
+        SFTPHandler,
+        SFTPConnectionDTO,
+        SFTPTransferDTO,
     ),
 }
 

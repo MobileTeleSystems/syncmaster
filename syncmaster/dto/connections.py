@@ -92,3 +92,12 @@ class S3ConnectionDTO(ConnectionDTO):
     region: str | None = None
     protocol: str = "https"
     type: ClassVar[str] = "s3"
+
+
+@dataclass
+class SFTPConnectionDTO(ConnectionDTO):
+    host: str
+    port: int
+    user: str
+    password: str
+    type: ClassVar[str] = "sftp"
