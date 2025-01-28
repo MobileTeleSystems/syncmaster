@@ -84,7 +84,7 @@ def sftp_file_connection(sftp_for_conftest):
         port=sftp_for_conftest.port,
         user=sftp_for_conftest.user,
         password=sftp_for_conftest.password,
-        compress=False,
+        compress=False,  # to avoid errors from combining file and SCP-level compression
     )
 
 

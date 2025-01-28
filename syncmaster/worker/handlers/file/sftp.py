@@ -24,7 +24,7 @@ class SFTPHandler(FileHandler):
             port=self.connection_dto.port,
             user=self.connection_dto.user,
             password=self.connection_dto.password,
-            compress=False,
+            compress=False,  # to avoid errors from combining file and SCP-level compression
         ).check()
         self.local_connection = SparkLocalFS(
             spark=spark,
@@ -36,16 +36,14 @@ class SFTPHandler(FileHandler):
         downloader = FileDownloader(
             connection=self.connection,
             source_path=self.transfer_dto.directory_path,
-            temp_path="/tmp/syncmaster",
-            local_path="/tmp/syncmaster/sftp",
-            options={"if_exists": "replace_entire_directory"},
+            local_path=self.temp_dir.name,
         )
         downloader.run()
 
         reader = FileDFReader(
             connection=self.local_connection,
             format=self.transfer_dto.file_format,
-            source_path="/tmp/syncmaster/sftp",
+            source_path=self.temp_dir.name,
             df_schema=StructType.fromJson(self.transfer_dto.df_schema) if self.transfer_dto.df_schema else None,
             options=self.transfer_dto.options,
         )
@@ -65,16 +63,14 @@ class SFTPHandler(FileHandler):
         writer = FileDFWriter(
             connection=self.local_connection,
             format=self.transfer_dto.file_format,
-            target_path="/tmp/syncmaster/sftp",
+            target_path=self.temp_dir.name,
             options=self.transfer_dto.options,
         )
         writer.run(df=df)
 
         uploader = FileUploader(
             connection=self.connection,
-            local_path="/tmp/syncmaster/sftp",
-            temp_path="/config/target",  # SFTP host
+            local_path=self.temp_dir.name,
             target_path=self.transfer_dto.directory_path,
-            options={"if_exists": "replace_entire_directory"},
         )
         uploader.run()

@@ -277,7 +277,7 @@ services:
       USER_NAME: syncmaster
       PASSWORD_ACCESS: true
       SUDO_ACCESS: true
-      USER_PASSWORD: AesujeifohgoaCu0Boosiet5aimeitho
+      USER_PASSWORD: test_only
     profiles: [sftp, all]
 
 volumes:

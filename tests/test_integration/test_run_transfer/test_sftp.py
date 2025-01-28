@@ -1,5 +1,6 @@
 import os
 import secrets
+from pathlib import Path
 
 import pytest
 import pytest_asyncio
@@ -246,6 +247,7 @@ async def test_run_transfer_postgres_to_sftp(
     postgres_to_sftp: Transfer,
     target_file_format,
     file_format_flavor: str,
+    tmp_path: Path,
 ):
     format_name, format = target_file_format
 
@@ -279,18 +281,15 @@ async def test_run_transfer_postgres_to_sftp(
     downloader = FileDownloader(
         connection=sftp_file_connection,
         source_path=f"/config/target/{format_name}/{file_format_flavor}",
-        temp_path="/tmp/syncmaster",
-        local_path="/tmp/syncmaster/sftp",
-        options={"if_exists": "replace_entire_directory"},
+        local_path=tmp_path,
     )
     downloader.run()
 
     reader = FileDFReader(
         connection=sftp_file_df_connection,
         format=format,
-        source_path="/tmp/syncmaster/sftp",
+        source_path=tmp_path,
         df_schema=init_df.schema,
-        options={},
     )
     df = reader.run()
 
