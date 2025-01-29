@@ -40,6 +40,7 @@ List of currently supported connections:
 * MySQL
 * HDFS
 * S3
+* SFTP
 
 Current Data.SyncMaster implementation provides following components:
 

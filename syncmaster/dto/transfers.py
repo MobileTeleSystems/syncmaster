@@ -93,3 +93,8 @@ class S3TransferDTO(FileTransferDTO):
 @dataclass
 class HDFSTransferDTO(FileTransferDTO):
     type: ClassVar[str] = "hdfs"
+
+
+@dataclass
+class SFTPTransferDTO(FileTransferDTO):
+    type: ClassVar[str] = "sftp"

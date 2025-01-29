@@ -35,7 +35,7 @@ def get_worker_spark_session(
     return spark_builder.getOrCreate()
 
 
-def get_packages(db_type: str) -> list[str]:
+def get_packages(connection_type: str) -> list[str]:
     import pyspark
     from onetl.connection import MSSQL, Clickhouse, MySQL, Oracle, Postgres, SparkS3
     from onetl.file.format import XML, Excel
@@ -45,26 +45,26 @@ def get_packages(db_type: str) -> list[str]:
         spark_version="3.5.1",
     )
 
-    if db_type == "postgres":
+    if connection_type == "postgres":
         return Postgres.get_packages()
-    if db_type == "oracle":
+    if connection_type == "oracle":
         return Oracle.get_packages()
-    if db_type == "clickhouse":
+    if connection_type == "clickhouse":
         return [
             "io.github.mtsongithub.doetl:spark-dialect-extension_2.12:0.0.2",
             *Clickhouse.get_packages(),
         ]
-    if db_type == "mssql":
+    if connection_type == "mssql":
         return MSSQL.get_packages()
-    if db_type == "mysql":
+    if connection_type == "mysql":
         return MySQL.get_packages()
-    if db_type == "s3":
+    if connection_type == "s3":
         import pyspark
 
         spark_version = pyspark.__version__
         return SparkS3.get_packages(spark_version=spark_version) + file_formats_spark_packages
 
-    if db_type == "hdfs":
+    if connection_type in ("hdfs", "sftp"):
         return file_formats_spark_packages
 
     # If the database type does not require downloading .jar packages
@@ -90,7 +90,7 @@ def get_spark_session_conf(
     excluded_packages: list[str] = []
 
     for db_type in source, target:
-        maven_packages.extend(get_packages(db_type=db_type.type))  # type: ignore
+        maven_packages.extend(get_packages(connection_type=db_type.type))  # type: ignore
         excluded_packages.extend(get_excluded_packages(db_type=db_type.type))  # type: ignore
 
     config = {

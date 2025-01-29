@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import logging
+from tempfile import TemporaryDirectory
 from typing import Any
 
 from syncmaster.db.models import Connection, Run
@@ -13,6 +14,7 @@ from syncmaster.dto.connections import (
     OracleConnectionDTO,
     PostgresConnectionDTO,
     S3ConnectionDTO,
+    SFTPConnectionDTO,
 )
 from syncmaster.dto.transfers import (
     ClickhouseTransferDTO,
@@ -23,6 +25,7 @@ from syncmaster.dto.transfers import (
     OracleTransferDTO,
     PostgresTransferDTO,
     S3TransferDTO,
+    SFTPTransferDTO,
 )
 from syncmaster.exceptions.connection import ConnectionTypeNotRecognizedError
 from syncmaster.worker.handlers.base import Handler
@@ -34,6 +37,7 @@ from syncmaster.worker.handlers.db.oracle import OracleHandler
 from syncmaster.worker.handlers.db.postgres import PostgresHandler
 from syncmaster.worker.handlers.file.hdfs import HDFSHandler
 from syncmaster.worker.handlers.file.s3 import S3Handler
+from syncmaster.worker.handlers.file.sftp import SFTPHandler
 from syncmaster.worker.settings import WorkerAppSettings
 
 logger = logging.getLogger(__name__)
@@ -80,6 +84,11 @@ connection_handler_proxy = {
         HDFSConnectionDTO,
         HDFSTransferDTO,
     ),
+    "sftp": (
+        SFTPHandler,
+        SFTPConnectionDTO,
+        SFTPTransferDTO,
+    ),
 }
 
 
@@ -95,33 +104,40 @@ class TransferController:
         target_connection: Connection,
         target_auth_data: dict,
     ):
+        self.temp_dir = TemporaryDirectory(prefix="syncmaster_")
+
         self.run = run
         self.source_handler = self.get_handler(
             connection_data=source_connection.data,
             transfer_params=run.transfer.source_params,
             transformations=run.transfer.transformations,
             connection_auth_data=source_auth_data,
+            temp_dir=TemporaryDirectory(dir=self.temp_dir.name, prefix="downloaded_"),
         )
         self.target_handler = self.get_handler(
             connection_data=target_connection.data,
             transfer_params=run.transfer.target_params,
             transformations=run.transfer.transformations,
             connection_auth_data=target_auth_data,
+            temp_dir=TemporaryDirectory(dir=self.temp_dir.name, prefix="written_"),
         )
 
     def perform_transfer(self, settings: WorkerAppSettings) -> None:
-        spark = settings.worker.CREATE_SPARK_SESSION_FUNCTION(
-            run=self.run,
-            source=self.source_handler.connection_dto,
-            target=self.target_handler.connection_dto,
-        )
+        try:
+            spark = settings.worker.CREATE_SPARK_SESSION_FUNCTION(
+                run=self.run,
+                source=self.source_handler.connection_dto,
+                target=self.target_handler.connection_dto,
+            )
 
-        with spark:
-            self.source_handler.connect(spark)
-            self.target_handler.connect(spark)
+            with spark:
+                self.source_handler.connect(spark)
+                self.target_handler.connect(spark)
 
-            df = self.source_handler.read()
-            self.target_handler.write(df)
+                df = self.source_handler.read()
+                self.target_handler.write(df)
+        finally:
+            self.temp_dir.cleanup()
 
     def get_handler(
         self,
@@ -129,6 +145,7 @@ class TransferController:
         connection_auth_data: dict,
         transfer_params: dict[str, Any],
         transformations: list[dict],
+        temp_dir: TemporaryDirectory,
     ) -> Handler:
         connection_data.update(connection_auth_data)
         connection_data.pop("type")
@@ -142,4 +159,5 @@ class TransferController:
         return handler(
             connection_dto=connection_dto(**connection_data),
             transfer_dto=transfer_dto(**transfer_params, transformations=transformations),
+            temp_dir=temp_dir,
         )

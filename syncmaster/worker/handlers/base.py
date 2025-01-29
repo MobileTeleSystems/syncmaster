@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING
 
 from syncmaster.dto.connections import ConnectionDTO
@@ -19,9 +20,11 @@ class Handler(ABC):
         self,
         connection_dto: ConnectionDTO,
         transfer_dto: TransferDTO,
+        temp_dir: TemporaryDirectory,
     ):
         self.connection_dto = connection_dto
         self.transfer_dto = transfer_dto
+        self.temp_dir = temp_dir
 
     @abstractmethod
     def connect(self, spark: SparkSession) -> None: ...

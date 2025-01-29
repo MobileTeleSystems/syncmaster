@@ -125,7 +125,7 @@ services:
         condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
-    profiles: [worker, scheduler, s3, oracle, hdfs, hive, clickhouse, mysql, mssql, all]
+    profiles: [worker, scheduler, s3, oracle, hdfs, hive, clickhouse, mysql, mssql, sftp, all]
 
   test-postgres:
     image: postgres
@@ -139,7 +139,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    profiles: [s3, oracle, clickhouse, mysql, mssql, hdfs, hive, all]
+    profiles: [s3, oracle, clickhouse, mysql, mssql, hdfs, hive, sftp, all]
 
   test-s3:
     image: bitnami/minio:latest
@@ -225,7 +225,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    profiles: [hive, hdfs, s3, all]
+    profiles: [hive, hdfs, s3, sftp, all]
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -263,8 +263,22 @@ services:
       HIVE_METASTORE_DB_DRIVER: org.postgresql.Driver
       HIVE_METASTORE_DB_USER: test_hive
       HIVE_METASTORE_DB_PASSWORD: test_hive
-    # writing spark dataframe to s3 xml file fails without running hive metastore server
-    profiles: [hive, hdfs, s3, all]
+    # writing spark dataframe to s3, sftp xml file fails without running hive metastore server
+    profiles: [hive, hdfs, s3, sftp, all]
+
+  test-sftp:
+    image: ${SFTP_IMAGE:-linuxserver/openssh-server}
+    restart: unless-stopped
+    ports:
+      - 2222:2222
+    environment:
+      PUID: 1000
+      PGID: 1000
+      USER_NAME: syncmaster
+      PASSWORD_ACCESS: true
+      SUDO_ACCESS: true
+      USER_PASSWORD: test_only
+    profiles: [sftp, all]
 
 volumes:
   postgres_test_data:
