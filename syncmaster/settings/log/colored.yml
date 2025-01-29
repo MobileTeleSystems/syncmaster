@@ -47,3 +47,7 @@ loggers:
     handlers: [main]
     level: INFO
     propagate: false
+  py4j:
+    handlers: [main]
+    level: WARNING
+    propagate: false
