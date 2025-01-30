@@ -71,6 +71,20 @@ class TestSettings(BaseSettings):
     TEST_SFTP_USER: str
     TEST_SFTP_PASSWORD: str
 
+    TEST_FTP_HOST_FOR_CONFTEST: str
+    TEST_FTP_PORT_FOR_CONFTEST: int
+    TEST_FTP_HOST_FOR_WORKER: str
+    TEST_FTP_PORT_FOR_WORKER: int
+    TEST_FTP_USER: str
+    TEST_FTP_PASSWORD: str
+
+    TEST_FTPS_HOST_FOR_CONFTEST: str
+    TEST_FTPS_PORT_FOR_CONFTEST: int
+    TEST_FTPS_HOST_FOR_WORKER: str
+    TEST_FTPS_PORT_FOR_WORKER: int
+    TEST_FTPS_USER: str
+    TEST_FTPS_PASSWORD: str
+
     @model_validator(mode="before")
     def check_sid_and_service_name(cls, values):
         sid = values.get("TEST_ORACLE_SID")

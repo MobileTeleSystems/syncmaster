@@ -125,7 +125,7 @@ services:
         condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
-    profiles: [worker, scheduler, s3, oracle, hdfs, hive, clickhouse, mysql, mssql, sftp, all]
+    profiles: [worker, scheduler, s3, oracle, hdfs, hive, clickhouse, mysql, mssql, sftp, ftp, ftps, all]
 
   test-postgres:
     image: postgres
@@ -139,7 +139,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    profiles: [s3, oracle, clickhouse, mysql, mssql, hdfs, hive, sftp, all]
+    profiles: [s3, oracle, clickhouse, mysql, mssql, hdfs, hive, sftp, ftp, ftps, all]
 
   test-s3:
     image: bitnami/minio:latest
@@ -225,7 +225,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    profiles: [hive, hdfs, s3, sftp, all]
+    profiles: [hive, hdfs, s3, sftp, ftp, ftps, all]
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -263,8 +263,8 @@ services:
       HIVE_METASTORE_DB_DRIVER: org.postgresql.Driver
       HIVE_METASTORE_DB_USER: test_hive
       HIVE_METASTORE_DB_PASSWORD: test_hive
-    # writing spark dataframe to s3, sftp xml file fails without running hive metastore server
-    profiles: [hive, hdfs, s3, sftp, all]
+    # writing spark dataframe to s3, sftp, ftp, ftps xml file fails without running hive metastore server
+    profiles: [hive, hdfs, s3, sftp, ftp, ftps, all]
 
   test-sftp:
     image: ${SFTP_IMAGE:-linuxserver/openssh-server}
@@ -279,6 +279,42 @@ services:
       SUDO_ACCESS: true
       USER_PASSWORD: test_only
     profiles: [sftp, all]
+
+  test-ftp:
+    image: ${FTP_IMAGE:-chonjay21/ftps:latest}
+    restart: unless-stopped
+    environment:
+      - USE_SSL=false
+      - PASSV_MIN_PORT=30000
+      - PASSV_MAX_PORT=30010
+      - APP_USER_NAME=syncmaster
+      - APP_USER_PASSWD=test_only
+      - APP_UID=1000
+      - APP_GID=1000
+    ports:
+      - 2121:21
+      - 30000-30010:30000-30010
+    volumes:
+      - ./docker/ftp/on_post_init.sh:/sources/ftp/eventscripts/on_post_init.sh
+    profiles: [ftp, all]
+
+  test-ftps:
+    image: ${FTPS_IMAGE:-chonjay21/ftps:latest}
+    restart: unless-stopped
+    environment:
+      - USE_SSL=true
+      - PASSV_MIN_PORT=30020
+      - PASSV_MAX_PORT=30030
+      - APP_USER_NAME=syncmaster
+      - APP_USER_PASSWD=test_only
+      - APP_UID=1000
+      - APP_GID=1000
+    ports:
+      - 2122:21
+      - 30020-30030:30020-30030
+    volumes:
+      - ./docker/ftp/on_post_init.sh:/sources/ftps/eventscripts/on_post_init.sh
+    profiles: [ftps, all]
 
 volumes:
   postgres_test_data:

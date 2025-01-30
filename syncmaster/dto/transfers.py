@@ -42,6 +42,8 @@ class FileTransferDTO(TransferDTO):
         if isinstance(self.df_schema, str):
             self.df_schema = json.loads(self.df_schema)
 
+        self.options.setdefault("if_exists", "replace_entire_directory")  # TODO: use "append" for incremental strategy
+
     def _get_file_format(self, file_format: dict) -> CSV | JSONLine | JSON | Excel | XML | ORC | Parquet:
         file_type = file_format.pop("type", None)
         # XML at spark-xml has no "none" option https://github.com/databricks/spark-xml?tab=readme-ov-file#features
@@ -98,3 +100,13 @@ class HDFSTransferDTO(FileTransferDTO):
 @dataclass
 class SFTPTransferDTO(FileTransferDTO):
     type: ClassVar[str] = "sftp"
+
+
+@dataclass
+class FTPTransferDTO(FileTransferDTO):
+    type: ClassVar[str] = "ftp"
+
+
+@dataclass
+class FTPSTransferDTO(FileTransferDTO):
+    type: ClassVar[str] = "ftps"

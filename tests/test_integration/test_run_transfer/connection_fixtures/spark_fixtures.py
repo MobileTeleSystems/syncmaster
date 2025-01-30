@@ -29,6 +29,7 @@ def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
         .enableHiveSupport()
         .config("spark.sql.pyspark.jvmStacktrace.enabled", "true")
         .config("spark.driver.host", "localhost")
+        .config("spark.hadoop.mapreduce.fileoutputcommitter.marksuccessfuljobs", "false")
     )
 
     if "postgres" in markers:
@@ -74,7 +75,7 @@ def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
             )
         )
 
-    if set(markers).intersection({"hdfs", "s3", "sftp"}):
+    if set(markers).intersection({"hdfs", "s3", "sftp", "ftp", "ftps"}):
         # excel version is hardcoded due to https://github.com/nightscape/spark-excel/issues/902
         file_formats_spark_packages: list[str] = XML.get_packages(
             spark_version=pyspark.__version__,

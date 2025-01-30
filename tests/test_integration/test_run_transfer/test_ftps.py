@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
-from onetl.connection import SFTP, SparkLocalFS
+from onetl.connection import FTPS, SparkLocalFS
 from onetl.db import DBReader
 from onetl.file import FileDFReader, FileDownloader
 from pyspark.sql import DataFrame
@@ -28,29 +28,29 @@ def file_format_flavor(request: FixtureRequest):
 
 
 @pytest_asyncio.fixture
-async def sftp_to_postgres(
+async def ftps_to_postgres(
     session: AsyncSession,
     group: Group,
     queue: Queue,
     init_df: DataFrame,
-    sftp_connection: Connection,
+    ftps_connection: Connection,
     postgres_connection: Connection,
-    prepare_sftp,
+    prepare_ftps,
     source_file_format,
     file_format_flavor: str,
 ):
     format_name, file_format = source_file_format
     format_name_in_path = "xlsx" if format_name == "excel" else format_name
-    _, source_path, _ = prepare_sftp
+    _, source_path, _ = prepare_ftps
 
     result = await create_transfer(
         session=session,
         group_id=group.id,
-        name=f"sftp2postgres_{secrets.token_hex(5)}",
-        source_connection_id=sftp_connection.id,
+        name=f"ftps2postgres_{secrets.token_hex(5)}",
+        source_connection_id=ftps_connection.id,
         target_connection_id=postgres_connection.id,
         source_params={
-            "type": "sftp",
+            "type": "ftps",
             "directory_path": os.fspath(source_path / "file_df_connection" / format_name_in_path / file_format_flavor),
             "file_format": {
                 "type": format_name,
@@ -71,11 +71,11 @@ async def sftp_to_postgres(
 
 
 @pytest_asyncio.fixture(params=[""])
-async def postgres_to_sftp(
+async def postgres_to_ftps(
     session: AsyncSession,
     group: Group,
     queue: Queue,
-    sftp_connection: Connection,
+    ftps_connection: Connection,
     postgres_connection: Connection,
     target_file_format,
     file_format_flavor: str,
@@ -84,16 +84,16 @@ async def postgres_to_sftp(
     result = await create_transfer(
         session=session,
         group_id=group.id,
-        name=f"postgres2sftp_{secrets.token_hex(5)}",
+        name=f"postgres2ftps_{secrets.token_hex(5)}",
         source_connection_id=postgres_connection.id,
-        target_connection_id=sftp_connection.id,
+        target_connection_id=ftps_connection.id,
         source_params={
             "type": "postgres",
             "table_name": "public.source_table",
         },
         target_params={
-            "type": "sftp",
-            "directory_path": f"/config/target/{format_name}/{file_format_flavor}",
+            "type": "ftps",
+            "directory_path": f"/target/{format_name}/{file_format_flavor}",
             "file_format": {
                 "type": format_name,
                 **file_format.dict(),
@@ -148,12 +148,12 @@ async def postgres_to_sftp(
     ],
     indirect=["source_file_format", "file_format_flavor"],
 )
-async def test_run_transfer_sftp_to_postgres(
+async def test_run_transfer_ftps_to_postgres(
     prepare_postgres,
     group_owner: MockUser,
     init_df: DataFrame,
     client: AsyncClient,
-    sftp_to_postgres: Transfer,
+    ftps_to_postgres: Transfer,
     source_file_format,
     file_format_flavor,
 ):
@@ -165,7 +165,7 @@ async def test_run_transfer_sftp_to_postgres(
     result = await client.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {group_owner.token}"},
-        json={"transfer_id": sftp_to_postgres.id},
+        json={"transfer_id": ftps_to_postgres.id},
     )
     # Assert
     assert result.status_code == 200
@@ -237,14 +237,14 @@ async def test_run_transfer_sftp_to_postgres(
     ],
     indirect=["target_file_format", "file_format_flavor"],
 )
-async def test_run_transfer_postgres_to_sftp(
+async def test_run_transfer_postgres_to_ftps(
     group_owner: MockUser,
     init_df: DataFrame,
     client: AsyncClient,
     prepare_postgres,
-    sftp_file_connection: SFTP,
-    sftp_file_df_connection: SparkLocalFS,
-    postgres_to_sftp: Transfer,
+    ftps_file_connection: FTPS,
+    ftps_file_df_connection: SparkLocalFS,
+    postgres_to_ftps: Transfer,
     target_file_format,
     file_format_flavor: str,
     tmp_path: Path,
@@ -259,7 +259,7 @@ async def test_run_transfer_postgres_to_sftp(
     result = await client.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {group_owner.token}"},
-        json={"transfer_id": postgres_to_sftp.id},
+        json={"transfer_id": postgres_to_ftps.id},
     )
     # Assert
     assert result.status_code == 200
@@ -279,14 +279,14 @@ async def test_run_transfer_postgres_to_sftp(
     assert "password" not in target_auth_data
 
     downloader = FileDownloader(
-        connection=sftp_file_connection,
-        source_path=f"/config/target/{format_name}/{file_format_flavor}",
+        connection=ftps_file_connection,
+        source_path=f"/target/{format_name}/{file_format_flavor}",
         local_path=tmp_path,
     )
     downloader.run()
 
     reader = FileDFReader(
-        connection=sftp_file_df_connection,
+        connection=ftps_file_df_connection,
         format=format,
         source_path=tmp_path,
         df_schema=init_df.schema,

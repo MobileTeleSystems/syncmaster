@@ -3,28 +3,28 @@
 
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING
 
-from onetl.connection import SFTP, SparkLocalFS
+from onetl.connection import FTPS, SparkLocalFS
 from onetl.file import FileDFReader, FileDFWriter, FileDownloader, FileUploader
 
-from syncmaster.dto.connections import SFTPConnectionDTO
+from syncmaster.dto.connections import FTPSConnectionDTO
 from syncmaster.worker.handlers.file.base import FileHandler
 
 if TYPE_CHECKING:
     from pyspark.sql import DataFrame, SparkSession
 
 
-class SFTPHandler(FileHandler):
-    connection_dto: SFTPConnectionDTO
+class FTPSHandler(FileHandler):
+    connection_dto: FTPSConnectionDTO
 
     def connect(self, spark: SparkSession) -> None:
-        self.connection = SFTP(
+        self.connection = FTPS(
             host=self.connection_dto.host,
             port=self.connection_dto.port,
             user=self.connection_dto.user,
             password=self.connection_dto.password,
-            compress=False,  # to avoid errors from combining file and SCP-level compression
         ).check()
         self.local_connection = SparkLocalFS(
             spark=spark,
@@ -66,6 +66,10 @@ class SFTPHandler(FileHandler):
             options={"if_exists": "replace_entire_directory"},
         )
         writer.run(df=df)
+
+        crc_files = [f for f in os.listdir(self.temp_dir.name) if f.endswith(".crc")]
+        for file in crc_files:
+            os.remove(os.path.join(self.temp_dir.name, file))
 
         uploader = FileUploader(
             connection=self.connection,

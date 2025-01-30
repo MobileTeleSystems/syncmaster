@@ -24,6 +24,26 @@ from tests.test_integration.test_run_transfer.connection_fixtures.file_storage_f
     source_file_format,
     target_file_format,
 )
+from tests.test_integration.test_run_transfer.connection_fixtures.ftp_fixtures import (
+    ftp_connection,
+    ftp_file_connection,
+    ftp_file_connection_with_path,
+    ftp_file_df_connection,
+    ftp_file_df_connection_with_path,
+    ftp_for_conftest,
+    ftp_for_worker,
+    prepare_ftp,
+)
+from tests.test_integration.test_run_transfer.connection_fixtures.ftps_fixtures import (
+    ftps_connection,
+    ftps_file_connection,
+    ftps_file_connection_with_path,
+    ftps_file_df_connection,
+    ftps_file_df_connection_with_path,
+    ftps_for_conftest,
+    ftps_for_worker,
+    prepare_ftps,
+)
 from tests.test_integration.test_run_transfer.connection_fixtures.hdfs_fixtures import (
     hdfs,
     hdfs_connection,
