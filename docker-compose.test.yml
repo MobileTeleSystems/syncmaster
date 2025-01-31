@@ -125,7 +125,7 @@ services:
         condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
-    profiles: [worker, scheduler, s3, oracle, hdfs, hive, clickhouse, mysql, mssql, sftp, ftp, ftps, all]
+    profiles: [worker, scheduler, s3, oracle, hdfs, hive, clickhouse, mysql, mssql, sftp, ftp, ftps, samba, all]
 
   test-postgres:
     image: postgres
@@ -139,7 +139,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    profiles: [s3, oracle, clickhouse, mysql, mssql, hdfs, hive, sftp, ftp, ftps, all]
+    profiles: [s3, oracle, clickhouse, mysql, mssql, hdfs, hive, sftp, ftp, ftps, samba, all]
 
   test-s3:
     image: bitnami/minio:latest
@@ -225,7 +225,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    profiles: [hive, hdfs, s3, sftp, ftp, ftps, all]
+    profiles: [hive, hdfs, s3, sftp, ftp, ftps, samba, all]
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -264,7 +264,7 @@ services:
       HIVE_METASTORE_DB_USER: test_hive
       HIVE_METASTORE_DB_PASSWORD: test_hive
     # writing spark dataframe to s3, sftp, ftp, ftps xml file fails without running hive metastore server
-    profiles: [hive, hdfs, s3, sftp, ftp, ftps, all]
+    profiles: [hive, hdfs, s3, sftp, ftp, ftps, samba, all]
 
   test-sftp:
     image: ${SFTP_IMAGE:-linuxserver/openssh-server}
@@ -315,6 +315,17 @@ services:
     volumes:
       - ./docker/ftp/on_post_init.sh:/sources/ftps/eventscripts/on_post_init.sh
     profiles: [ftps, all]
+
+  test-samba:
+    image: ${SAMBA_IMAGE:-elswork/samba}
+    restart: unless-stopped
+    ports:
+      - 139:139
+      - 1445:445
+    volumes:
+      - ./docker/samba/custom_entrypoint.sh:/custom_entrypoint.sh
+    entrypoint: [/custom_entrypoint.sh]
+    profiles: [samba, all]
 
 volumes:
   postgres_test_data:

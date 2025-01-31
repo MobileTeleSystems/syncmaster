@@ -43,6 +43,7 @@ List of currently supported connections:
 * FTP
 * FTPS
 * SFTP
+* Samba
 
 Current Data.SyncMaster implementation provides following components:
 

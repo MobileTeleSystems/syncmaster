@@ -3,9 +3,10 @@
 from pydantic import BaseModel, Field
 
 from syncmaster.schemas.v1.auth import ReadBasicAuthSchema, ReadS3AuthSchema
+from syncmaster.schemas.v1.auth.samba import ReadSambaAuthSchema
 from syncmaster.schemas.v1.types import NameConstr
 
-ReadConnectionAuthDataSchema = ReadBasicAuthSchema | ReadS3AuthSchema
+ReadConnectionAuthDataSchema = ReadBasicAuthSchema | ReadS3AuthSchema | ReadSambaAuthSchema
 
 
 class CreateConnectionBaseSchema(BaseModel):

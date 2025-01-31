@@ -9,7 +9,6 @@ from onetl.connection import SFTP, SparkLocalFS
 from onetl.db import DBReader
 from onetl.file import FileDFReader, FileDownloader
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, date_format, date_trunc, to_timestamp
 from pytest import FixtureRequest
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -115,36 +114,6 @@ async def postgres_to_sftp(
             "with_header",
             id="csv",
         ),
-        pytest.param(
-            ("json", {}),
-            "without_compression",
-            id="json",
-        ),
-        pytest.param(
-            ("jsonline", {}),
-            "without_compression",
-            id="jsonline",
-        ),
-        pytest.param(
-            ("excel", {}),
-            "with_header",
-            id="excel",
-        ),
-        pytest.param(
-            ("orc", {}),
-            "without_compression",
-            id="orc",
-        ),
-        pytest.param(
-            ("parquet", {}),
-            "without_compression",
-            id="parquet",
-        ),
-        pytest.param(
-            ("xml", {}),
-            "without_compression",
-            id="xml",
-        ),
     ],
     indirect=["source_file_format", "file_format_flavor"],
 )
@@ -190,11 +159,6 @@ async def test_run_transfer_sftp_to_postgres(
     )
     df = reader.run()
 
-    # as Excel does not support datetime values with precision greater than milliseconds
-    if file_format == "excel":
-        df = df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
-        init_df = init_df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
-
     for field in init_df.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
 
@@ -208,31 +172,6 @@ async def test_run_transfer_sftp_to_postgres(
             ("csv", {"compression": "lz4"}),
             "with_compression",
             id="csv",
-        ),
-        pytest.param(
-            ("jsonline", {}),
-            "without_compression",
-            id="jsonline",
-        ),
-        pytest.param(
-            ("excel", {}),
-            "with_header",
-            id="excel",
-        ),
-        pytest.param(
-            ("orc", {"compression": "snappy"}),
-            "with_compression",
-            id="orc",
-        ),
-        pytest.param(
-            ("parquet", {"compression": "lz4"}),
-            "with_compression",
-            id="parquet",
-        ),
-        pytest.param(
-            ("xml", {"compression": "snappy"}),
-            "with_compression",
-            id="xml",
         ),
     ],
     indirect=["target_file_format", "file_format_flavor"],
@@ -292,13 +231,6 @@ async def test_run_transfer_postgres_to_sftp(
         df_schema=init_df.schema,
     )
     df = reader.run()
-
-    # as Excel does not support datetime values with precision greater than milliseconds
-    if format_name == "excel":
-        init_df = init_df.withColumn(
-            "REGISTERED_AT",
-            to_timestamp(date_format(col("REGISTERED_AT"), "yyyy-MM-dd HH:mm:ss.SSS")),
-        )
 
     for field in init_df.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))

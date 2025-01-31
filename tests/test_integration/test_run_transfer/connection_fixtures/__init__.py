@@ -94,6 +94,16 @@ from tests.test_integration.test_run_transfer.connection_fixtures.s3_fixtures im
     s3_for_worker,
     s3_server,
 )
+from tests.test_integration.test_run_transfer.connection_fixtures.samba_fixtures import (
+    prepare_samba,
+    samba_connection,
+    samba_file_connection,
+    samba_file_connection_with_path,
+    samba_file_df_connection,
+    samba_file_df_connection_with_path,
+    samba_for_conftest,
+    samba_for_worker,
+)
 from tests.test_integration.test_run_transfer.connection_fixtures.sftp_fixtures import (
     prepare_sftp,
     sftp_connection,

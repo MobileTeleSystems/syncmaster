@@ -75,7 +75,7 @@ def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
             )
         )
 
-    if set(markers).intersection({"hdfs", "s3", "sftp", "ftp", "ftps"}):
+    if set(markers).intersection({"hdfs", "s3", "sftp", "ftp", "ftps", "samba"}):
         # excel version is hardcoded due to https://github.com/nightscape/spark-excel/issues/902
         file_formats_spark_packages: list[str] = XML.get_packages(
             spark_version=pyspark.__version__,
