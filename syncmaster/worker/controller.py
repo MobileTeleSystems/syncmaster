@@ -16,6 +16,7 @@ from syncmaster.dto.connections import (
     OracleConnectionDTO,
     PostgresConnectionDTO,
     S3ConnectionDTO,
+    SambaConnectionDTO,
     SFTPConnectionDTO,
 )
 from syncmaster.dto.transfers import (
@@ -29,6 +30,7 @@ from syncmaster.dto.transfers import (
     OracleTransferDTO,
     PostgresTransferDTO,
     S3TransferDTO,
+    SambaTransferDTO,
     SFTPTransferDTO,
 )
 from syncmaster.exceptions.connection import ConnectionTypeNotRecognizedError
@@ -43,6 +45,7 @@ from syncmaster.worker.handlers.file.ftp import FTPHandler
 from syncmaster.worker.handlers.file.ftps import FTPSHandler
 from syncmaster.worker.handlers.file.hdfs import HDFSHandler
 from syncmaster.worker.handlers.file.s3 import S3Handler
+from syncmaster.worker.handlers.file.samba import SambaHandler
 from syncmaster.worker.handlers.file.sftp import SFTPHandler
 from syncmaster.worker.settings import WorkerAppSettings
 
@@ -104,6 +107,11 @@ connection_handler_proxy = {
         FTPSHandler,
         FTPSConnectionDTO,
         FTPSTransferDTO,
+    ),
+    "samba": (
+        SambaHandler,
+        SambaConnectionDTO,
+        SambaTransferDTO,
     ),
 }
 

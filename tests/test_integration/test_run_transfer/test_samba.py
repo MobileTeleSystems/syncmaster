@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
-from onetl.connection import FTPS, SparkLocalFS
+from onetl.connection import Samba, SparkLocalFS
 from onetl.db import DBReader
 from onetl.file import FileDFReader, FileDownloader
 from pyspark.sql import DataFrame
@@ -27,29 +27,29 @@ def file_format_flavor(request: FixtureRequest):
 
 
 @pytest_asyncio.fixture
-async def ftps_to_postgres(
+async def samba_to_postgres(
     session: AsyncSession,
     group: Group,
     queue: Queue,
     init_df: DataFrame,
-    ftps_connection: Connection,
+    samba_connection: Connection,
     postgres_connection: Connection,
-    prepare_ftps,
+    prepare_samba,
     source_file_format,
     file_format_flavor: str,
 ):
     format_name, file_format = source_file_format
     format_name_in_path = "xlsx" if format_name == "excel" else format_name
-    _, source_path, _ = prepare_ftps
+    _, source_path, _ = prepare_samba
 
     result = await create_transfer(
         session=session,
         group_id=group.id,
-        name=f"ftps2postgres_{secrets.token_hex(5)}",
-        source_connection_id=ftps_connection.id,
+        name=f"samba2postgres_{secrets.token_hex(5)}",
+        source_connection_id=samba_connection.id,
         target_connection_id=postgres_connection.id,
         source_params={
-            "type": "ftps",
+            "type": "samba",
             "directory_path": os.fspath(source_path / "file_df_connection" / format_name_in_path / file_format_flavor),
             "file_format": {
                 "type": format_name,
@@ -70,11 +70,11 @@ async def ftps_to_postgres(
 
 
 @pytest_asyncio.fixture(params=[""])
-async def postgres_to_ftps(
+async def postgres_to_samba(
     session: AsyncSession,
     group: Group,
     queue: Queue,
-    ftps_connection: Connection,
+    samba_connection: Connection,
     postgres_connection: Connection,
     target_file_format,
     file_format_flavor: str,
@@ -83,15 +83,15 @@ async def postgres_to_ftps(
     result = await create_transfer(
         session=session,
         group_id=group.id,
-        name=f"postgres2ftps_{secrets.token_hex(5)}",
+        name=f"postgres2samba_{secrets.token_hex(5)}",
         source_connection_id=postgres_connection.id,
-        target_connection_id=ftps_connection.id,
+        target_connection_id=samba_connection.id,
         source_params={
             "type": "postgres",
             "table_name": "public.source_table",
         },
         target_params={
-            "type": "ftps",
+            "type": "samba",
             "directory_path": f"/target/{format_name}/{file_format_flavor}",
             "file_format": {
                 "type": format_name,
@@ -117,12 +117,12 @@ async def postgres_to_ftps(
     ],
     indirect=["source_file_format", "file_format_flavor"],
 )
-async def test_run_transfer_ftps_to_postgres(
+async def test_run_transfer_samba_to_postgres(
     prepare_postgres,
     group_owner: MockUser,
     init_df: DataFrame,
     client: AsyncClient,
-    ftps_to_postgres: Transfer,
+    samba_to_postgres: Transfer,
     source_file_format,
     file_format_flavor,
 ):
@@ -134,7 +134,7 @@ async def test_run_transfer_ftps_to_postgres(
     result = await client.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {group_owner.token}"},
-        json={"transfer_id": ftps_to_postgres.id},
+        json={"transfer_id": samba_to_postgres.id},
     )
     # Assert
     assert result.status_code == 200
@@ -176,14 +176,14 @@ async def test_run_transfer_ftps_to_postgres(
     ],
     indirect=["target_file_format", "file_format_flavor"],
 )
-async def test_run_transfer_postgres_to_ftps(
+async def test_run_transfer_postgres_to_samba(
     group_owner: MockUser,
     init_df: DataFrame,
     client: AsyncClient,
     prepare_postgres,
-    ftps_file_connection: FTPS,
-    ftps_file_df_connection: SparkLocalFS,
-    postgres_to_ftps: Transfer,
+    samba_file_connection: Samba,
+    samba_file_df_connection: SparkLocalFS,
+    postgres_to_samba: Transfer,
     target_file_format,
     file_format_flavor: str,
     tmp_path: Path,
@@ -198,7 +198,7 @@ async def test_run_transfer_postgres_to_ftps(
     result = await client.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {group_owner.token}"},
-        json={"transfer_id": postgres_to_ftps.id},
+        json={"transfer_id": postgres_to_samba.id},
     )
     # Assert
     assert result.status_code == 200
@@ -218,14 +218,14 @@ async def test_run_transfer_postgres_to_ftps(
     assert "password" not in target_auth_data
 
     downloader = FileDownloader(
-        connection=ftps_file_connection,
+        connection=samba_file_connection,
         source_path=f"/target/{format_name}/{file_format_flavor}",
         local_path=tmp_path,
     )
     downloader.run()
 
     reader = FileDFReader(
-        connection=ftps_file_df_connection,
+        connection=samba_file_df_connection,
         format=format,
         source_path=tmp_path,
         df_schema=init_df.schema,

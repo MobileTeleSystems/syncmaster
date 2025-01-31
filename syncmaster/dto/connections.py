@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from dataclasses import dataclass
-from typing import ClassVar
+from typing import ClassVar, Literal
 
 
 @dataclass
@@ -119,3 +119,16 @@ class FTPSConnectionDTO(ConnectionDTO):
     user: str
     password: str
     type: ClassVar[str] = "ftps"
+
+
+@dataclass
+class SambaConnectionDTO(ConnectionDTO):
+    host: str
+    share: str
+    protocol: Literal["SMB", "NetBIOS"]
+    user: str
+    password: str
+    auth_type: Literal["NTLMv1", "NTLMv2"] = "NTLMv2"
+    domain: str = ""
+    port: int | None = None
+    type: ClassVar[str] = "samba"

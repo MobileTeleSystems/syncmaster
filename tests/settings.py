@@ -85,6 +85,19 @@ class TestSettings(BaseSettings):
     TEST_FTPS_USER: str
     TEST_FTPS_PASSWORD: str
 
+    TEST_SAMBA_HOST_FOR_CONFTEST: str
+    TEST_SAMBA_PORT_FOR_CONFTEST: int | None = None
+    TEST_SAMBA_HOST_FOR_WORKER: str
+    TEST_SAMBA_PORT_FOR_WORKER: int | None = None
+    TEST_SAMBA_DOMAIN: str = ""
+    TEST_SAMBA_PROTOCOL: str
+    TEST_SAMBA_UID: int
+    TEST_SAMBA_GID: int
+    TEST_SAMBA_SHARE: str
+    TEST_SAMBA_USER: str
+    TEST_SAMBA_PASSWORD: str
+    TEST_SAMBA_AUTH_TYPE: str = "NTLMv2"
+
     @model_validator(mode="before")
     def check_sid_and_service_name(cls, values):
         sid = values.get("TEST_ORACLE_SID")
