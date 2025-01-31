@@ -101,3 +101,21 @@ class SFTPConnectionDTO(ConnectionDTO):
     user: str
     password: str
     type: ClassVar[str] = "sftp"
+
+
+@dataclass
+class FTPConnectionDTO(ConnectionDTO):
+    host: str
+    port: int
+    user: str
+    password: str
+    type: ClassVar[str] = "ftp"
+
+
+@dataclass
+class FTPSConnectionDTO(ConnectionDTO):
+    host: str
+    port: int
+    user: str
+    password: str
+    type: ClassVar[str] = "ftps"

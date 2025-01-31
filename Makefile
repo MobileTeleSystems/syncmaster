@@ -113,6 +113,14 @@ test-integration-sftp: test-db ##@Test           Run integration tests for SFTP
 	docker compose -f docker-compose.test.yml --profile sftp up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration -m sftp $(PYTEST_ARGS)
 
+test-integration-ftp: test-db ##@Test           Run integration tests for FTP
+	docker compose -f docker-compose.test.yml --profile ftp up -d --wait $(DOCKER_COMPOSE_ARGS)
+	${POETRY} run pytest ./tests/test_integration -m ftp $(PYTEST_ARGS)
+
+test-integration-ftps: test-db ##@Test           Run integration tests for FTPS
+	docker compose -f docker-compose.test.yml --profile ftps up -d --wait $(DOCKER_COMPOSE_ARGS)
+	${POETRY} run pytest ./tests/test_integration -m ftps $(PYTEST_ARGS)
+
 test-integration: test-db ##@Test           Run all integration tests
 	docker compose -f docker-compose.test.yml --profile all up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration $(PYTEST_ARGS)

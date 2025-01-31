@@ -7,6 +7,8 @@ from typing import Any
 from syncmaster.db.models import Connection, Run
 from syncmaster.dto.connections import (
     ClickhouseConnectionDTO,
+    FTPConnectionDTO,
+    FTPSConnectionDTO,
     HDFSConnectionDTO,
     HiveConnectionDTO,
     MSSQLConnectionDTO,
@@ -18,6 +20,8 @@ from syncmaster.dto.connections import (
 )
 from syncmaster.dto.transfers import (
     ClickhouseTransferDTO,
+    FTPSTransferDTO,
+    FTPTransferDTO,
     HDFSTransferDTO,
     HiveTransferDTO,
     MSSQLTransferDTO,
@@ -35,6 +39,8 @@ from syncmaster.worker.handlers.db.mssql import MSSQLHandler
 from syncmaster.worker.handlers.db.mysql import MySQLHandler
 from syncmaster.worker.handlers.db.oracle import OracleHandler
 from syncmaster.worker.handlers.db.postgres import PostgresHandler
+from syncmaster.worker.handlers.file.ftp import FTPHandler
+from syncmaster.worker.handlers.file.ftps import FTPSHandler
 from syncmaster.worker.handlers.file.hdfs import HDFSHandler
 from syncmaster.worker.handlers.file.s3 import S3Handler
 from syncmaster.worker.handlers.file.sftp import SFTPHandler
@@ -89,6 +95,16 @@ connection_handler_proxy = {
         SFTPConnectionDTO,
         SFTPTransferDTO,
     ),
+    "ftp": (
+        FTPHandler,
+        FTPConnectionDTO,
+        FTPTransferDTO,
+    ),
+    "ftps": (
+        FTPSHandler,
+        FTPSConnectionDTO,
+        FTPSTransferDTO,
+    ),
 }
 
 
@@ -104,7 +120,7 @@ class TransferController:
         target_connection: Connection,
         target_auth_data: dict,
     ):
-        self.temp_dir = TemporaryDirectory(prefix="syncmaster_")
+        self.temp_dir = TemporaryDirectory(prefix=f"syncmaster_{run.id}_")
 
         self.run = run
         self.source_handler = self.get_handler(

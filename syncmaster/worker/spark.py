@@ -64,7 +64,7 @@ def get_packages(connection_type: str) -> list[str]:
         spark_version = pyspark.__version__
         return SparkS3.get_packages(spark_version=spark_version) + file_formats_spark_packages
 
-    if connection_type in ("hdfs", "sftp"):
+    if connection_type in ("hdfs", "sftp", "ftp", "ftps"):
         return file_formats_spark_packages
 
     # If the database type does not require downloading .jar packages
@@ -96,6 +96,7 @@ def get_spark_session_conf(
     config = {
         "spark.jars.packages": ",".join(maven_packages),
         "spark.sql.pyspark.jvmStacktrace.enabled": "true",
+        "spark.hadoop.mapreduce.fileoutputcommitter.marksuccessfuljobs": "false",
     }
 
     if maven_packages:
