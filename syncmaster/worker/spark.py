@@ -64,7 +64,7 @@ def get_packages(connection_type: str) -> list[str]:
         spark_version = pyspark.__version__
         return SparkS3.get_packages(spark_version=spark_version) + file_formats_spark_packages
 
-    if connection_type in ("hdfs", "sftp", "ftp", "ftps", "samba"):
+    if connection_type in ("hdfs", "sftp", "ftp", "ftps", "samba", "webdav"):
         return file_formats_spark_packages
 
     # If the database type does not require downloading .jar packages

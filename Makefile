@@ -125,6 +125,10 @@ test-integration-samba: test-db ##@Test           Run integration tests for Samb
 	docker compose -f docker-compose.test.yml --profile samba up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration -m samba $(PYTEST_ARGS)
 
+test-integration-webdav: test-db ##@Test           Run integration tests for WebDAV
+	docker compose -f docker-compose.test.yml --profile webdav up -d --wait $(DOCKER_COMPOSE_ARGS)
+	${POETRY} run pytest ./tests/test_integration -m webdav $(PYTEST_ARGS)
+
 test-integration: test-db ##@Test           Run all integration tests
 	docker compose -f docker-compose.test.yml --profile all up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration $(PYTEST_ARGS)

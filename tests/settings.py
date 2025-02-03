@@ -98,6 +98,14 @@ class TestSettings(BaseSettings):
     TEST_SAMBA_PASSWORD: str
     TEST_SAMBA_AUTH_TYPE: str = "NTLMv2"
 
+    TEST_WEBDAV_HOST_FOR_CONFTEST: str
+    TEST_WEBDAV_PORT_FOR_CONFTEST: int
+    TEST_WEBDAV_HOST_FOR_WORKER: str
+    TEST_WEBDAV_PORT_FOR_WORKER: int
+    TEST_WEBDAV_PROTOCOL: str = "http"
+    TEST_WEBDAV_USER: str
+    TEST_WEBDAV_PASSWORD: str
+
     @model_validator(mode="before")
     def check_sid_and_service_name(cls, values):
         sid = values.get("TEST_ORACLE_SID")

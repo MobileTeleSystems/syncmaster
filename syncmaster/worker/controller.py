@@ -18,6 +18,7 @@ from syncmaster.dto.connections import (
     S3ConnectionDTO,
     SambaConnectionDTO,
     SFTPConnectionDTO,
+    WebDAVConnectionDTO,
 )
 from syncmaster.dto.transfers import (
     ClickhouseTransferDTO,
@@ -32,6 +33,7 @@ from syncmaster.dto.transfers import (
     S3TransferDTO,
     SambaTransferDTO,
     SFTPTransferDTO,
+    WebDAVTransferDTO,
 )
 from syncmaster.exceptions.connection import ConnectionTypeNotRecognizedError
 from syncmaster.worker.handlers.base import Handler
@@ -47,6 +49,7 @@ from syncmaster.worker.handlers.file.hdfs import HDFSHandler
 from syncmaster.worker.handlers.file.s3 import S3Handler
 from syncmaster.worker.handlers.file.samba import SambaHandler
 from syncmaster.worker.handlers.file.sftp import SFTPHandler
+from syncmaster.worker.handlers.file.webdav import WebDAVHandler
 from syncmaster.worker.settings import WorkerAppSettings
 
 logger = logging.getLogger(__name__)
@@ -112,6 +115,11 @@ connection_handler_proxy = {
         SambaHandler,
         SambaConnectionDTO,
         SambaTransferDTO,
+    ),
+    "webdav": (
+        WebDAVHandler,
+        WebDAVConnectionDTO,
+        WebDAVTransferDTO,
     ),
 }
 

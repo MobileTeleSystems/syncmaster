@@ -60,6 +60,10 @@ jobs:
     name: Samba tests
     uses: ./.github/workflows/samba-tests.yml
 
+  webdav_tests:
+    name: WebDAV tests
+    uses: ./.github/workflows/webdav-tests.yml
+
   scheduler_tests:
     name: Scheduler tests
     uses: ./.github/workflows/scheduler-tests.yml
@@ -72,7 +76,7 @@ jobs:
     name: Tests done
     runs-on: ubuntu-latest
 
-    needs: [unit_tests, scheduler_tests, oracle_tests, clickhouse_tests, mssql_tests, mysql_tests, hive_tests, hdfs_tests, s3_tests, sftp_tests, ftp_tests, ftps_tests, samba_tests]
+    needs: [unit_tests, scheduler_tests, oracle_tests, clickhouse_tests, mssql_tests, mysql_tests, hive_tests, hdfs_tests, s3_tests, sftp_tests, ftp_tests, ftps_tests, samba_tests, webdav_tests]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
