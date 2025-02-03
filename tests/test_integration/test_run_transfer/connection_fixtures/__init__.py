@@ -117,3 +117,13 @@ from tests.test_integration.test_run_transfer.connection_fixtures.sftp_fixtures 
 from tests.test_integration.test_run_transfer.connection_fixtures.spark_fixtures import (
     spark,
 )
+from tests.test_integration.test_run_transfer.connection_fixtures.webdav_fixtures import (
+    prepare_webdav,
+    webdav_connection,
+    webdav_file_connection,
+    webdav_file_connection_with_path,
+    webdav_file_df_connection,
+    webdav_file_df_connection_with_path,
+    webdav_for_conftest,
+    webdav_for_worker,
+)

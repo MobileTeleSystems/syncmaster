@@ -44,6 +44,7 @@ List of currently supported connections:
 * FTPS
 * SFTP
 * Samba
+* WebDAV
 
 Current Data.SyncMaster implementation provides following components:
 

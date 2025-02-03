@@ -132,3 +132,13 @@ class SambaConnectionDTO(ConnectionDTO):
     domain: str = ""
     port: int | None = None
     type: ClassVar[str] = "samba"
+
+
+@dataclass
+class WebDAVConnectionDTO(ConnectionDTO):
+    host: str
+    port: int
+    user: str
+    password: str
+    protocol: Literal["http", "https"] = "https"
+    type: ClassVar[str] = "webdav"

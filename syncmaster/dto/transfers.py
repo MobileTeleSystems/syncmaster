@@ -115,3 +115,8 @@ class FTPSTransferDTO(FileTransferDTO):
 @dataclass
 class SambaTransferDTO(FileTransferDTO):
     type: ClassVar[str] = "samba"
+
+
+@dataclass
+class WebDAVTransferDTO(FileTransferDTO):
+    type: ClassVar[str] = "webdav"
