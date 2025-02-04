@@ -10,7 +10,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 @pytest.mark.parametrize(
-    "connection_type,create_connection_data",
+    "connection_type, create_connection_data",
     [
         (
             "s3",
@@ -23,71 +23,92 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
     indirect=["create_connection_data"],
 )
 @pytest.mark.parametrize(
-    "target_source_params",
+    "target_source_params, target_params",
     [
-        {
-            "type": "s3",
-            "directory_path": "/some/pure/path",
-            "file_format": {
-                "type": "csv",
-                "delimiter": ",",
-                "encoding": "utf-8",
-                "quote": '"',
-                "escape": "\\",
-                "include_header": False,
-                "line_sep": "\n",
-                "compression": "gzip",
+        (
+            {
+                "type": "s3",
+                "directory_path": "/some/pure/path",
+                "file_format": {
+                    "type": "csv",
+                    "delimiter": ",",
+                    "encoding": "utf-8",
+                    "quote": '"',
+                    "escape": "\\",
+                    "include_header": False,
+                    "line_sep": "\n",
+                    "compression": "gzip",
+                },
+                "options": {
+                    "some": "option",
+                },
             },
-            "options": {
-                "some": "option",
+            {
+                "file_name_template": "{run_created_at}_{index}.{extension}",
             },
-        },
-        {
-            "type": "s3",
-            "directory_path": "/some/excel/path",
-            "file_format": {
-                "type": "excel",
-                "include_header": True,
-                "start_cell": "A1",
+        ),
+        (
+            {
+                "type": "s3",
+                "directory_path": "/some/excel/path",
+                "file_format": {
+                    "type": "excel",
+                    "include_header": True,
+                    "start_cell": "A1",
+                },
+                "options": {
+                    "some": "option",
+                },
             },
-            "options": {
-                "some": "option",
+            {
+                "file_name_template": "{index}.{extension}",
             },
-        },
-        {
-            "type": "s3",
-            "directory_path": "/some/xml/path",
-            "file_format": {
-                "type": "xml",
-                "root_tag": "data",
-                "row_tag": "record",
-                "compression": "lz4",
+        ),
+        (
+            {
+                "type": "s3",
+                "directory_path": "/some/xml/path",
+                "file_format": {
+                    "type": "xml",
+                    "root_tag": "data",
+                    "row_tag": "record",
+                    "compression": "lz4",
+                },
+                "options": {
+                    "some": "option",
+                },
             },
-            "options": {
-                "some": "option",
+            {
+                "file_name_template": "{run_created_at}-{index}.{extension}",
             },
-        },
-        {
-            "type": "s3",
-            "directory_path": "/some/orc/path",
-            "file_format": {
-                "type": "orc",
+        ),
+        (
+            {
+                "type": "s3",
+                "directory_path": "/some/orc/path",
+                "file_format": {
+                    "type": "orc",
+                },
+                "options": {
+                    "some": "option",
+                },
             },
-            "options": {
-                "some": "option",
+            {},
+        ),
+        (
+            {
+                "type": "s3",
+                "directory_path": "/some/parquet/path",
+                "file_format": {
+                    "type": "parquet",
+                    "compression": "gzip",
+                },
+                "options": {
+                    "some": "option",
+                },
             },
-        },
-        {
-            "type": "s3",
-            "directory_path": "/some/parquet/path",
-            "file_format": {
-                "type": "parquet",
-                "compression": "gzip",
-            },
-            "options": {
-                "some": "option",
-            },
-        },
+            {},
+        ),
     ],
 )
 async def test_developer_plus_can_create_s3_transfer(
@@ -98,6 +119,7 @@ async def test_developer_plus_can_create_s3_transfer(
     group_queue: Queue,
     mock_group: MockGroup,
     target_source_params: dict,
+    target_params: dict,
     create_connection_data: dict,
 ):
     # Arrange
@@ -117,7 +139,7 @@ async def test_developer_plus_can_create_s3_transfer(
             "source_connection_id": first_connection.id,
             "target_connection_id": second_connection.id,
             "source_params": target_source_params,
-            "target_params": target_source_params,
+            "target_params": {**target_source_params, **target_params},
             "strategy_params": {"type": "full"},
             "queue_id": group_queue.id,
         },
@@ -202,56 +224,78 @@ async def test_developer_plus_can_create_s3_transfer(
     indirect=["create_connection_data"],
 )
 @pytest.mark.parametrize(
-    "target_source_params",
+    "target_source_params, target_params",
     [
-        {
-            "type": "hdfs",
-            "directory_path": "/some/pure/path",
-            "file_format": {
-                "type": "csv",
-                "compression": "gzip",
+        (
+            {
+                "type": "hdfs",
+                "directory_path": "/some/pure/path",
+                "file_format": {
+                    "type": "csv",
+                    "compression": "gzip",
+                },
             },
-        },
-        {
-            "type": "hdfs",
-            "directory_path": "/some/excel/path",
-            "file_format": {
-                "type": "excel",
-                "include_header": True,
-                "start_cell": "A1",
+            {
+                "file_name_template": "{run_created_at}_{index}.{extension}",
             },
-        },
-        {
-            "type": "hdfs",
-            "directory_path": "/some/xml/path",
-            "file_format": {
-                "type": "xml",
-                "root_tag": "data",
-                "row_tag": "record",
-                "compression": "bzip2",
+        ),
+        (
+            {
+                "type": "hdfs",
+                "directory_path": "/some/excel/path",
+                "file_format": {
+                    "type": "excel",
+                    "include_header": True,
+                    "start_cell": "A1",
+                },
             },
-        },
-        {
-            "type": "hdfs",
-            "directory_path": "/some/orc/path",
-            "file_format": {
-                "type": "orc",
+            {
+                "file_name_template": "{index}.{extension}",
             },
-        },
-        {
-            "type": "hdfs",
-            "directory_path": "/some/parquet/path",
-            "file_format": {
-                "type": "parquet",
-                "compression": "snappy",
+        ),
+        (
+            {
+                "type": "hdfs",
+                "directory_path": "/some/xml/path",
+                "file_format": {
+                    "type": "xml",
+                    "root_tag": "data",
+                    "row_tag": "record",
+                    "compression": "bzip2",
+                },
             },
-        },
+            {
+                "file_name_template": "{run_created_at}-{index}.{extension}",
+            },
+        ),
+        (
+            {
+                "type": "hdfs",
+                "directory_path": "/some/orc/path",
+                "file_format": {
+                    "type": "orc",
+                },
+            },
+            {},
+        ),
+        (
+            {
+                "type": "hdfs",
+                "directory_path": "/some/parquet/path",
+                "file_format": {
+                    "type": "parquet",
+                    "compression": "snappy",
+                },
+            },
+            {},
+        ),
     ],
 )
 async def test_developer_plus_can_create_hdfs_transfer(
     create_connection_data: dict,
     two_group_connections: tuple[MockConnection, MockConnection],
     target_source_params: dict,
+    target_params: dict,
     role_developer_plus: UserTestRoles,
     group_queue: Queue,
     mock_group: MockGroup,
@@ -275,7 +319,7 @@ async def test_developer_plus_can_create_hdfs_transfer(
             "source_connection_id": first_connection.id,
             "target_connection_id": second_connection.id,
             "source_params": target_source_params,
-            "target_params": target_source_params,
+            "target_params": {**target_source_params, **target_params},
             "strategy_params": {"type": "full"},
             "queue_id": group_queue.id,
         },
@@ -455,5 +499,109 @@ async def test_cannot_create_file_transfer_with_relative_path(
                     "code": "value_error",
                 },
             ],
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    "create_connection_data",
+    [
+        {
+            "type": "s3",
+            "host": "localhost",
+            "port": 443,
+        },
+    ],
+    indirect=True,
+)
+@pytest.mark.parametrize(
+    "target_source_params, target_params, expected_errors",
+    [
+        pytest.param(
+            {
+                "type": "s3",
+                "directory_path": "/some/path",
+                "file_format": {
+                    "type": "excel",
+                    "include_header": True,
+                },
+            },
+            {
+                "file_name_template": "{run_created_at}",
+            },
+            [
+                {
+                    "context": {},
+                    "input": "{run_created_at}",
+                    "location": ["body", "target_params", "s3", "file_name_template"],
+                    "message": "Value error, Missing required placeholders: extension, index",
+                    "code": "value_error",
+                },
+            ],
+            id="missing_required_placeholders",
+        ),
+        pytest.param(
+            {
+                "type": "s3",
+                "directory_path": "/some/path",
+                "file_format": {
+                    "type": "xml",
+                    "root_tag": "data",
+                    "row_tag": "record",
+                },
+            },
+            {
+                "file_name_template": "{run_created_at}_{index}.{extension}{some_unknown_tag}",
+            },
+            [
+                {
+                    "context": {},
+                    "input": "{run_created_at}_{index}.{extension}{some_unknown_tag}",
+                    "location": ["body", "target_params", "s3", "file_name_template"],
+                    "message": "Value error, Invalid placeholder: 'some_unknown_tag'",
+                    "code": "value_error",
+                },
+            ],
+            id="unknown_tag",
+        ),
+    ],
+)
+async def test_file_name_template_validation(
+    client: AsyncClient,
+    two_group_connections: tuple[MockConnection, MockConnection],
+    group_queue: Queue,
+    mock_group: MockGroup,
+    target_source_params: dict,
+    target_params: dict,
+    expected_errors: list,
+    create_connection_data: dict,
+):
+    first_connection, second_connection = two_group_connections
+    user = mock_group.get_member_of_role(UserTestRoles.Developer)
+
+    result = await client.post(
+        "v1/transfers",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "group_id": mock_group.group.id,
+            "name": "new test transfer",
+            "description": "",
+            "is_scheduled": False,
+            "schedule": "",
+            "source_connection_id": first_connection.id,
+            "target_connection_id": second_connection.id,
+            "source_params": target_source_params,
+            "target_params": {**target_source_params, **target_params},
+            "strategy_params": {"type": "full"},
+            "queue_id": group_queue.id,
+        },
+    )
+
+    assert result.status_code == 422
+    assert result.json() == {
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": expected_errors,
         },
     }

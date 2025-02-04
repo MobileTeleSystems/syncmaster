@@ -25,6 +25,9 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
                 },
                 "options": {},
             },
+            "target_params": {
+                "file_name_template": "{run_created_at}_{index}.{extension}",
+            },
             "transformations": [
                 {
                     "type": "dataframe_rows_filter",
@@ -54,6 +57,9 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
                 },
                 "options": {},
             },
+            "target_params": {
+                "file_name_template": "{index}.{extension}",
+            },
         },
         {
             "source_and_target_params": {
@@ -67,6 +73,9 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
                 },
                 "options": {},
             },
+            "target_params": {
+                "file_name_template": "{run_created_at}-{index}.{extension}",
+            },
         },
         {
             "source_and_target_params": {
@@ -78,6 +87,9 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
                 },
                 "options": {},
             },
+            "target_params": {
+                "file_name_template": "{run_created_at}_{index}.{extension}",
+            },
         },
         {
             "source_and_target_params": {
@@ -88,6 +100,9 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
                     "compression": "lz4",
                 },
                 "options": {},
+            },
+            "target_params": {
+                "file_name_template": "{run_created_at}_{index}.{extension}",
             },
         },
     ],
