@@ -25,6 +25,9 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
                 },
                 "options": {},
             },
+            "target_params": {
+                "file_name_template": "{run_created_at}_{index}.{extension}",
+            },
         },
         {
             "source_and_target_params": {
@@ -36,6 +39,9 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
                     "start_cell": "A1",
                 },
                 "options": {},
+            },
+            "target_params": {
+                "file_name_template": "{index}.{extension}",
             },
         },
         {
@@ -49,6 +55,9 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
                     "compression": "bzip2",
                 },
                 "options": {},
+            },
+            "target_params": {
+                "file_name_template": "{run_created_at}-{index}.{extension}",
             },
         },
         {
@@ -146,6 +155,13 @@ async def test_developer_plus_can_update_s3_transfer(
                 "file_format": create_transfer_data["source_and_target_params"]["file_format"],
                 "options": {"some": "option"},
             },
+            "target_params": {
+                "type": "s3",
+                "directory_path": "/some/new/test/directory",
+                "file_format": create_transfer_data["source_and_target_params"]["file_format"],
+                "file_name_template": "{index}.{extension}",
+                "options": {"some": "option"},
+            },
             "transformations": transformations,
         },
     )
@@ -159,6 +175,10 @@ async def test_developer_plus_can_update_s3_transfer(
             "options": {"some": "option"},
         },
     )
+    target_params = {
+        **source_params,
+        "file_name_template": "{index}.{extension}",
+    }
 
     # Assert
     assert result.status_code == 200
@@ -172,7 +192,7 @@ async def test_developer_plus_can_update_s3_transfer(
         "source_connection_id": group_transfer.source_connection_id,
         "target_connection_id": group_transfer.target_connection_id,
         "source_params": source_params,
-        "target_params": group_transfer.target_params,
+        "target_params": target_params,
         "strategy_params": group_transfer.strategy_params,
         "transformations": transformations,
         "queue_id": group_transfer.transfer.queue_id,

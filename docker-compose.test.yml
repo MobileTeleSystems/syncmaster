@@ -173,6 +173,10 @@ services:
   test-clickhouse:
     image: clickhouse/clickhouse-server
     restart: unless-stopped
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: test_only
+      CLICKHOUSE_DB: default
     ports:
       - 8123:8123
       - 9001:9000

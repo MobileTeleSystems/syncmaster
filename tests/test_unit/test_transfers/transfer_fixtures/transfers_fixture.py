@@ -71,12 +71,14 @@ async def group_transfers(
             source_params["directory_path"] = "/path/to/source"
             target_params.update(common_params)
             target_params["directory_path"] = "/path/to/target"
+            target_params["file_name_template"] = "{run_created_at}_{index}.{extension}"
         elif connection_type == ConnectionType.HDFS:
             common_params = {"options": {}}
             source_params.update(common_params)
             source_params["directory_path"] = "/path/to/source"
             target_params.update(common_params)
             target_params["directory_path"] = "/path/to/target"
+            target_params["file_name_template"] = "{run_created_at}_{index}.{extension}"
         elif connection_type in [
             ConnectionType.HIVE,
             ConnectionType.POSTGRES,

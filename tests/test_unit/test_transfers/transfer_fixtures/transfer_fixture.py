@@ -93,6 +93,7 @@ async def group_transfer(
     target_connection = await create_connection(
         session=session,
         name="group_transfer_target_connection",
+        type=connection_type or "postgres",
         group_id=group.id,
         data=create_connection_data,
     )
@@ -102,6 +103,8 @@ async def group_transfer(
         connection_id=target_connection.id,
     )
 
+    source_and_target_params = create_transfer_data.get("source_and_target_params", {}) if create_transfer_data else {}
+    target_params = create_transfer_data.get("target_params", {}) if create_transfer_data else {}
     transfer = await create_transfer(
         session=session,
         name="group_transfer",
@@ -109,8 +112,8 @@ async def group_transfer(
         source_connection_id=source_connection.id,
         target_connection_id=target_connection.id,
         queue_id=queue.id,
-        source_params=create_transfer_data.get("source_and_target_params") if create_transfer_data else None,
-        target_params=create_transfer_data.get("source_and_target_params") if create_transfer_data else None,
+        source_params=source_and_target_params,
+        target_params={**source_and_target_params, **target_params},
         transformations=create_transfer_data.get("transformations") if create_transfer_data else None,
     )
 

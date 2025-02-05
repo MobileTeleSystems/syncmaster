@@ -33,6 +33,7 @@ class ReadFileTransferTarget(BaseModel):
         ...,
         discriminator="type",
     )
+    file_name_template: str
     options: dict[str, Any]
 
 
@@ -61,6 +62,10 @@ class CreateFileTransferTarget(BaseModel):
         ...,
         discriminator="type",
     )
+    file_name_template: str = Field(
+        default="{run_created_at}_{index}.{extension}",
+        description="Template for file naming with required placeholders 'index' and 'extension'",
+    )
     options: dict[str, Any] = Field(default_factory=dict)
 
     class Config:
@@ -71,4 +76,21 @@ class CreateFileTransferTarget(BaseModel):
     def _directory_path_is_valid_path(cls, value):
         if not PurePosixPath(value).is_absolute():
             raise ValueError("Directory path must be absolute")
+        return value
+
+    @field_validator("file_name_template")
+    @classmethod
+    def validate_file_name_template(cls, value):
+        required_keys = {"index", "extension"}
+        placeholders = {key for key in required_keys if f"{{{key}}}" in value}
+
+        missing_keys = sorted(required_keys - placeholders)
+        if missing_keys:
+            raise ValueError(f"Missing required placeholders: {', '.join(missing_keys)}")
+
+        try:
+            value.format(index="", extension="", run_created_at="", run_id="")
+        except KeyError as e:
+            raise ValueError(f"Invalid placeholder: {e}")
+
         return value
