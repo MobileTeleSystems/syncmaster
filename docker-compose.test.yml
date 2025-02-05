@@ -2,7 +2,11 @@ services:
   db:
     image: postgres
     restart: unless-stopped
-    env_file: .env.docker
+    environment:
+      TZ: UTC
+      POSTGRES_DB: syncmaster
+      POSTGRES_USER: syncmaster
+      POSTGRES_PASSWORD: changeme
     ports:
       - 5432:5432
     volumes:
@@ -132,7 +136,11 @@ services:
     restart: unless-stopped
     ports:
       - 5433:5432
-    env_file: .env.docker
+    environment:
+      TZ: UTC
+      POSTGRES_DB: syncmaster
+      POSTGRES_USER: syncmaster
+      POSTGRES_PASSWORD: 123UsedForTestOnly@!
     healthcheck:
       test: pg_isready
       start_period: 5s
@@ -145,7 +153,10 @@ services:
     image: bitnami/minio:latest
     container_name: test-s3
     restart: unless-stopped
-    env_file: .env.docker
+    environment:
+      TZ: UTC
+      MINIO_ROOT_USER: syncmaster
+      MINIO_ROOT_PASSWORD: 123UsedForTestOnly@!
     ports:
       - 9010:9000
       - 9011:9001
@@ -164,19 +175,19 @@ services:
       - 1522:1521
     environment:
       TZ: UTC
-      ORACLE_PASSWORD: changeme
-      ORACLE_DATABASE: syncmaster
+      ORACLE_PASSWORD: 123AdminUserForTests@!
       APP_USER: syncmaster
-      APP_USER_PASSWORD: changeme
+      APP_USER_PASSWORD: 123UsedForTestOnly@!
     profiles: [oracle, all]
 
   test-clickhouse:
     image: clickhouse/clickhouse-server
     restart: unless-stopped
     environment:
-      CLICKHOUSE_USER: default
-      CLICKHOUSE_PASSWORD: test_only
-      CLICKHOUSE_DB: default
+      TZ: UTC
+      CLICKHOUSE_USER: syncmaster
+      CLICKHOUSE_PASSWORD: 123UsedForTestOnly@!
+      CLICKHOUSE_DB: syncmaster
     ports:
       - 8123:8123
       - 9001:9000
@@ -186,12 +197,9 @@ services:
     image: mcr.microsoft.com/mssql/server
     restart: unless-stopped
     environment:
+      TZ: UTC
       ACCEPT_EULA: Y
-      MSSQL_PID: Developer
-      MSSQL_SA_PASSWORD: 7ellowEl7akey
-      MSSQL_DATABASE: syncmaster
-      MSSQL_USER: syncmaster
-      MSSQL_PASSWORD: 7ellowEl7akey
+      MSSQL_SA_PASSWORD: 123AdminUserForTests@!@!
     ports:
       - 1433:1433
     volumes:
@@ -204,10 +212,11 @@ services:
     image: mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ohbuz9Eochaj9saibooK3thooGa5aesh
+      TZ: UTC
+      MYSQL_ROOT_PASSWORD: 123RootUserForTestsOnly@!
       MYSQL_DATABASE: syncmaster
       MYSQL_USER: syncmaster
-      MYSQL_PASSWORD: ohbuz9Eochaj9saibooK3thooGa5aesh
+      MYSQL_PASSWORD: 123UsedForTestOnly@!
     ports:
       - 3306:3306
     platform: linux/amd64
@@ -217,6 +226,7 @@ services:
     image: postgres
     restart: unless-stopped
     environment:
+      TZ: UTC
       POSTGRES_DB: metastore
       POSTGRES_USER: test_hive
       POSTGRES_PASSWORD: test_hive
@@ -235,6 +245,7 @@ services:
     command: start-dev
     restart: unless-stopped
     environment:
+      TZ: UTC
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
     ports:
@@ -261,6 +272,7 @@ services:
       - 9083:9083  # Hive Metastore server
       - 9864:9864 # Datanode UI
     environment:
+      TZ: UTC
       WITH_HIVE_SERVER: 'false'  # We leave only the metastore server, we don’t need Hive itself, we don’t waste resources on it
       HIVE_METASTORE_DB_URL: jdbc:postgresql://metastore-hive:5432/metastore
       HIVE_METASTORE_DB_DRIVER: org.postgresql.Driver
@@ -275,25 +287,27 @@ services:
     ports:
       - 2222:2222
     environment:
+      TZ: UTC
       PUID: 1000
       PGID: 1000
       USER_NAME: syncmaster
-      PASSWORD_ACCESS: true
-      SUDO_ACCESS: true
-      USER_PASSWORD: test_only
+      PASSWORD_ACCESS: 'true'
+      SUDO_ACCESS: 'true'
+      USER_PASSWORD: 123UsedForTestOnly@!
     profiles: [sftp, all]
 
   test-ftp:
     image: ${FTP_IMAGE:-chonjay21/ftps:latest}
     restart: unless-stopped
     environment:
-      - USE_SSL=false
-      - PASSV_MIN_PORT=30000
-      - PASSV_MAX_PORT=30010
-      - APP_USER_NAME=syncmaster
-      - APP_USER_PASSWD=test_only
-      - APP_UID=1000
-      - APP_GID=1000
+      TZ: UTC
+      USE_SSL: 'false'
+      PASSV_MIN_PORT: 30000
+      PASSV_MAX_PORT: 30010
+      APP_USER_NAME: syncmaster
+      APP_USER_PASSWD: 123UsedForTestOnly@!
+      APP_UID: 1000
+      APP_GID: 1000
     ports:
       - 2121:21
       - 30000-30010:30000-30010
@@ -305,13 +319,14 @@ services:
     image: ${FTPS_IMAGE:-chonjay21/ftps:latest}
     restart: unless-stopped
     environment:
-      - USE_SSL=true
-      - PASSV_MIN_PORT=30020
-      - PASSV_MAX_PORT=30030
-      - APP_USER_NAME=syncmaster
-      - APP_USER_PASSWD=test_only
-      - APP_UID=1000
-      - APP_GID=1000
+      TZ: UTC
+      USE_SSL: 'true'
+      PASSV_MIN_PORT: 30020
+      PASSV_MAX_PORT: 30030
+      APP_USER_NAME: syncmaster
+      APP_USER_PASSWD: 123UsedForTestOnly@!
+      APP_UID: 1000
+      APP_GID: 1000
     ports:
       - 2122:21
       - 30020-30030:30020-30030
@@ -325,19 +340,22 @@ services:
     ports:
       - 139:139
       - 1445:445
+    environment:
+      TZ: UTC
     volumes:
       - ./docker/samba/custom_entrypoint.sh:/custom_entrypoint.sh
     entrypoint: [/custom_entrypoint.sh]
     profiles: [samba, all]
 
-  webdav:
+  test-webdav:
     image: ${WEBDAV_IMAGE:-chonjay21/webdav:latest}
     restart: unless-stopped
     environment:
-      - APP_USER_NAME=syncmaster
-      - APP_USER_PASSWD=test_only
-      - APP_UID=1000
-      - APP_GID=1000
+      TZ: UTC
+      APP_USER_NAME: syncmaster
+      APP_USER_PASSWD: 123UsedForTestOnly@!
+      APP_UID: 1000
+      APP_GID: 1000
     ports:
       - 8010:80
     volumes:

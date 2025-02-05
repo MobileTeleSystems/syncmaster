@@ -10,7 +10,7 @@ GO
 USE syncmaster;
 GO
 
-CREATE LOGIN syncmaster WITH PASSWORD = '7ellowEl7akey';
+CREATE LOGIN syncmaster WITH PASSWORD = '123UsedForTestOnly@!';
 GO
 
 CREATE USER syncmaster FOR LOGIN syncmaster;

@@ -2,7 +2,10 @@ services:
   db:
     image: postgres
     restart: unless-stopped
-    env_file: .env.docker
+    environment:
+      POSTGRES_DB: syncmaster
+      POSTGRES_USER: syncmaster
+      POSTGRES_PASSWORD: changeme
     ports:
       - 5432:5432
     volumes:
