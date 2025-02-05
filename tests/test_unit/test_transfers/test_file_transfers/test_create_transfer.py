@@ -9,6 +9,7 @@ from tests.mocks import MockConnection, MockGroup, UserTestRoles
 pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
+# TODO: refactor test fixtures to decrease amount of annotations
 @pytest.mark.parametrize(
     "connection_type, create_connection_data",
     [
