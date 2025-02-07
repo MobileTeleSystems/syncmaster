@@ -3972,4 +3972,4 @@ worker = ["asgi-correlation-id", "celery", "coloredlogs", "jinja2", "onetl", "ps
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "57a88ea331dd31750583967fbd4ac155d3a590978244595c9c9349b4f8742121"
+content-hash = "0de161b92b4373a42203c75d683ee1edd9b2243f91963cceb7270955cb6f2df2"

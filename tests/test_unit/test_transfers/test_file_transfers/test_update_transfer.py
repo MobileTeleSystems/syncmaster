@@ -11,7 +11,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
     [
         {
             "source_and_target_params": {
-                "type": "s3",
+                "type": "ftp",
                 "directory_path": "/some/pure/path",
                 "file_format": {
                     "delimiter": ",",
@@ -31,7 +31,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
         },
         {
             "source_and_target_params": {
-                "type": "s3",
+                "type": "ftp",
                 "directory_path": "/some/excel/path",
                 "file_format": {
                     "type": "excel",
@@ -46,7 +46,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
         },
         {
             "source_and_target_params": {
-                "type": "s3",
+                "type": "ftp",
                 "directory_path": "/some/xml/path",
                 "file_format": {
                     "type": "xml",
@@ -62,7 +62,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
         },
         {
             "source_and_target_params": {
-                "type": "s3",
+                "type": "ftp",
                 "directory_path": "/some/orc/path",
                 "file_format": {
                     "type": "orc",
@@ -73,7 +73,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
         },
         {
             "source_and_target_params": {
-                "type": "s3",
+                "type": "ftp",
                 "directory_path": "/some/parquet/path",
                 "file_format": {
                     "type": "parquet",
@@ -106,6 +106,19 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
                         },
                     ],
                 },
+                {
+                    "type": "file_metadata_filter",
+                    "filters": [
+                        {
+                            "type": "name_glob",
+                            "value": "*.csv",
+                        },
+                        {
+                            "type": "name_regexp",
+                            "value": "^1234$",
+                        },
+                    ],
+                },
             ],
         },
     ],
@@ -114,10 +127,10 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
     "connection_type,create_connection_data",
     [
         (
-            "s3",
+            "ftp",
             {
                 "host": "localhost",
-                "port": 443,
+                "port": 80,
             },
         ),
     ],
@@ -150,13 +163,13 @@ async def test_developer_plus_can_update_s3_transfer(
         headers={"Authorization": f"Bearer {user.token}"},
         json={
             "source_params": {
-                "type": "s3",
+                "type": "ftp",
                 "directory_path": "/some/new/test/directory",
                 "file_format": create_transfer_data["source_and_target_params"]["file_format"],
                 "options": {"some": "option"},
             },
             "target_params": {
-                "type": "s3",
+                "type": "ftp",
                 "directory_path": "/some/new/test/directory",
                 "file_format": create_transfer_data["source_and_target_params"]["file_format"],
                 "file_name_template": "{index}.{extension}",

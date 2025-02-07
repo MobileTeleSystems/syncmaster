@@ -9,6 +9,7 @@ from tests.mocks import MockConnection, MockGroup, MockTransfer, MockUser, UserT
 pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
+@pytest.mark.parametrize("connection_type", ["ftp"], indirect=True)
 async def test_developer_plus_can_create_transfer(
     client: AsyncClient,
     two_group_connections: tuple[MockConnection, MockConnection],
@@ -33,8 +34,20 @@ async def test_developer_plus_can_create_transfer(
             "schedule": "",
             "source_connection_id": first_connection.id,
             "target_connection_id": second_connection.id,
-            "source_params": {"type": "postgres", "table_name": "source_table"},
-            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "source_params": {
+                "type": "ftp",
+                "directory_path": "/source_path",
+                "file_format": {
+                    "type": "csv",
+                },
+            },
+            "target_params": {
+                "type": "ftp",
+                "directory_path": "/target_path",
+                "file_format": {
+                    "type": "csv",
+                },
+            },
             "strategy_params": {"type": "full"},
             "transformations": [
                 {
@@ -68,6 +81,23 @@ async def test_developer_plus_can_create_transfer(
                             "type": "cast",
                             "field": "col3",
                             "as_type": "VARCHAR",
+                        },
+                    ],
+                },
+                {
+                    "type": "file_metadata_filter",
+                    "filters": [
+                        {
+                            "type": "name_glob",
+                            "value": "*.csv",
+                        },
+                        {
+                            "type": "name_regexp",
+                            "value": "^1234$",
+                        },
+                        {
+                            "type": "file_size_min",
+                            "value": "1kb",
                         },
                     ],
                 },
@@ -466,12 +496,12 @@ async def test_superuser_can_create_transfer(
                             "location": ["body", "transformations", 0],
                             "message": (
                                 "Input tag 'some unknown transformation type' found using 'type' "
-                                "does not match any of the expected tags: 'dataframe_rows_filter', 'dataframe_columns_filter'"
+                                "does not match any of the expected tags: 'dataframe_rows_filter', 'dataframe_columns_filter', 'file_metadata_filter'"
                             ),
                             "code": "union_tag_invalid",
                             "context": {
                                 "discriminator": "'type'",
-                                "expected_tags": "'dataframe_rows_filter', 'dataframe_columns_filter'",
+                                "expected_tags": "'dataframe_rows_filter', 'dataframe_columns_filter', 'file_metadata_filter'",
                                 "tag": "some unknown transformation type",
                             },
                             "input": {
@@ -567,6 +597,123 @@ async def test_superuser_can_create_transfer(
                                 "field": "col1",
                                 "value": "VARCHAR",
                             },
+                        },
+                    ],
+                },
+            },
+        ),
+        (
+            {
+                "transformations": [
+                    {
+                        "type": "file_metadata_filter",
+                        "filters": [
+                            {
+                                "type": "glob",
+                                "value": "*.csv",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "location": ["body", "transformations", 0, "file_metadata_filter", "filters", 0],
+                            "message": (
+                                "Input tag 'glob' found using 'type' does not match any of the expected tags: 'name_glob', 'name_regexp', 'file_size_min', 'file_size_max'"
+                            ),
+                            "code": "union_tag_invalid",
+                            "context": {
+                                "discriminator": "'type'",
+                                "tag": "glob",
+                                "expected_tags": "'name_glob', 'name_regexp', 'file_size_min', 'file_size_max'",
+                            },
+                            "input": {
+                                "type": "glob",
+                                "value": "*.csv",
+                            },
+                        },
+                    ],
+                },
+            },
+        ),
+        (
+            {
+                "transformations": [
+                    {
+                        "type": "file_metadata_filter",
+                        "filters": [
+                            {
+                                "type": "name_glob",
+                                "value": ".csv",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "location": [
+                                "body",
+                                "transformations",
+                                0,
+                                "file_metadata_filter",
+                                "filters",
+                                0,
+                                "name_glob",
+                                "value",
+                            ],
+                            "message": "Value error, Invalid glob: '.csv'",
+                            "code": "value_error",
+                            "context": {},
+                            "input": ".csv",
+                        },
+                    ],
+                },
+            },
+        ),
+        (
+            {
+                "transformations": [
+                    {
+                        "type": "file_metadata_filter",
+                        "filters": [
+                            {
+                                "type": "name_regexp",
+                                "value": "[a-z",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "location": [
+                                "body",
+                                "transformations",
+                                0,
+                                "file_metadata_filter",
+                                "filters",
+                                0,
+                                "name_regexp",
+                                "value",
+                            ],
+                            "message": "Value error, Invalid regexp: '[a-z'",
+                            "code": "value_error",
+                            "context": {},
+                            "input": "[a-z",
                         },
                     ],
                 },
