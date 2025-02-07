@@ -105,3 +105,30 @@ def expected_dataframe_columns_filter():
         "CAST(NUMBER AS STRING) AS NUMBER",
         "REGISTERED_AT",
     )
+
+
+@pytest.fixture
+def file_metadata_filter_transformations():
+    return [
+        {
+            "type": "file_metadata_filter",
+            "filters": [
+                {
+                    "type": "name_glob",
+                    "value": "*.csv",
+                },
+                {
+                    "type": "name_regexp",
+                    "value": r"\bfile\b",
+                },
+                {
+                    "type": "file_size_min",
+                    "value": "1kb",
+                },
+                {
+                    "type": "file_size_max",
+                    "value": "3kb",
+                },
+            ],
+        },
+    ]

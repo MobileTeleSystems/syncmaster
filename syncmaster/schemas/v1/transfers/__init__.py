@@ -65,6 +65,9 @@ from syncmaster.schemas.v1.transfers.transformations.dataframe_columns_filter im
 from syncmaster.schemas.v1.transfers.transformations.dataframe_rows_filter import (
     DataframeRowsFilter,
 )
+from syncmaster.schemas.v1.transfers.transformations.file_metadata_filter import (
+    FileMetadataFilter,
+)
 from syncmaster.schemas.v1.types import NameConstr
 
 ReadTransferSchemaSource = (
@@ -165,7 +168,7 @@ UpdateTransferSchemaTarget = (
     | None
 )
 
-TransformationSchema = DataframeRowsFilter | DataframeColumnsFilter
+TransformationSchema = DataframeRowsFilter | DataframeColumnsFilter | FileMetadataFilter
 
 
 class CopyTransferSchema(BaseModel):

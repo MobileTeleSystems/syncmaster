@@ -94,8 +94,8 @@ class KeycloakAuthProvider(AuthProvider):
             try:
                 new_tokens = await self.refresh_access_token(refresh_token)
 
-                new_access_token = new_tokens.get("access_token")
-                new_refresh_token = new_tokens.get("refresh_token")
+                new_access_token = new_tokens["access_token"]
+                new_refresh_token = new_tokens["refresh_token"]
                 request.session["access_token"] = new_access_token
                 request.session["refresh_token"] = new_refresh_token
 
@@ -107,11 +107,15 @@ class KeycloakAuthProvider(AuthProvider):
                 log.debug("Failed to refresh access token: %s", e)
                 self.redirect_to_auth(request.url.path)
 
+        if not token_info:
+            raise AuthorizationError("Invalid token payload")
+
         # these names are hardcoded in keycloak:
         # https://github.com/keycloak/keycloak/blob/3ca3a4ad349b4d457f6829eaf2ae05f1e01408be/core/src/main/java/org/keycloak/representations/IDToken.java
+        # TODO: make sure which fields are guaranteed
         user_id = token_info.get("sub")
-        login = token_info.get("preferred_username")
-        email = token_info.get("email")
+        login = token_info["preferred_username"]
+        email = token_info["email"]
         first_name = token_info.get("given_name")
         middle_name = token_info.get("middle_name")
         last_name = token_info.get("family_name")

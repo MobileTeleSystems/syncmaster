@@ -10,6 +10,7 @@ from onetl.db import DBReader
 from onetl.file import FileDFReader, FileDownloader
 from pyspark.sql import DataFrame
 from pytest import FixtureRequest
+from pytest_lazy_fixtures import lf
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Connection, Group, Queue, Status
@@ -37,6 +38,7 @@ async def sftp_to_postgres(
     prepare_sftp,
     source_file_format,
     file_format_flavor: str,
+    transformations: list[dict],
 ):
     format_name, file_format = source_file_format
     format_name_in_path = "xlsx" if format_name == "excel" else format_name
@@ -50,7 +52,7 @@ async def sftp_to_postgres(
         target_connection_id=postgres_connection.id,
         source_params={
             "type": "sftp",
-            "directory_path": os.fspath(source_path / "file_df_connection" / format_name_in_path / file_format_flavor),
+            "directory_path": os.fspath(source_path / "file_connection" / format_name_in_path / file_format_flavor),
             "file_format": {
                 "type": format_name,
                 **file_format.dict(),
@@ -62,6 +64,7 @@ async def sftp_to_postgres(
             "type": "postgres",
             "table_name": "public.target_table",
         },
+        transformations=transformations,
         queue_id=queue.id,
     )
     yield result
@@ -107,11 +110,12 @@ async def postgres_to_sftp(
 
 
 @pytest.mark.parametrize(
-    "source_file_format, file_format_flavor",
+    "source_file_format, file_format_flavor, transformations",
     [
         pytest.param(
             ("csv", {}),
-            "with_header",
+            "for_file_filtering",
+            lf("file_metadata_filter_transformations"),
             id="csv",
         ),
     ],
@@ -125,6 +129,7 @@ async def test_run_transfer_sftp_to_postgres(
     sftp_to_postgres: Transfer,
     source_file_format,
     file_format_flavor,
+    transformations,
 ):
     # Arrange
     postgres, _ = prepare_postgres

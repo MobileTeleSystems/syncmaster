@@ -9,12 +9,6 @@ from tests.test_integration.test_run_transfer.connection_fixtures.connection_fix
     group_owner,
     queue,
 )
-from tests.test_integration.test_run_transfer.connection_fixtures.dataframe_filters_fixtures import (
-    dataframe_columns_filter_transformations,
-    dataframe_rows_filter_transformations,
-    expected_dataframe_columns_filter,
-    expected_dataframe_rows_filter,
-)
 from tests.test_integration.test_run_transfer.connection_fixtures.dataframe_fixtures import (
     init_df,
     init_df_with_mixed_column_naming,
@@ -23,6 +17,13 @@ from tests.test_integration.test_run_transfer.connection_fixtures.file_storage_f
     resource_path,
     source_file_format,
     target_file_format,
+)
+from tests.test_integration.test_run_transfer.connection_fixtures.filters_fixtures import (
+    dataframe_columns_filter_transformations,
+    dataframe_rows_filter_transformations,
+    expected_dataframe_columns_filter,
+    expected_dataframe_rows_filter,
+    file_metadata_filter_transformations,
 )
 from tests.test_integration.test_run_transfer.connection_fixtures.ftp_fixtures import (
     ftp_connection,

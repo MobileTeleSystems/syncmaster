@@ -68,7 +68,7 @@ class FileHandler(Handler):
 
         return writer.run(df=df)
 
-    def _make_rows_filter_expression(self, filters: list[dict]) -> str:
+    def _make_rows_filter_expression(self, filters: list[dict]) -> str | None:
         expressions = []
         for filter in filters:
             field = filter["field"]
@@ -77,7 +77,7 @@ class FileHandler(Handler):
 
             expressions.append(f"{field} {op} '{value}'" if value is not None else f"{field} {op}")
 
-        return " AND ".join(expressions)
+        return " AND ".join(expressions) or None
 
     def _make_columns_filter_expressions(self, filters: list[dict]) -> list[str] | None:
         # TODO: another approach is to use df.select(col("col1"), col("col2").alias("new_col2"), ...)
@@ -103,10 +103,7 @@ class FileHandler(Handler):
             if transformation["type"] == "dataframe_rows_filter":
                 expressions.extend(transformation["filters"])
 
-        if expressions:
-            return self._make_rows_filter_expression(expressions)
-
-        return None
+        return self._make_rows_filter_expression(expressions)
 
     def _get_columns_filter_expressions(self) -> list[str] | None:
         expressions = []
@@ -114,7 +111,4 @@ class FileHandler(Handler):
             if transformation["type"] == "dataframe_columns_filter":
                 expressions.extend(transformation["filters"])
 
-        if expressions:
-            return self._make_columns_filter_expressions(expressions)
-
-        return None
+        return self._make_columns_filter_expressions(expressions)
