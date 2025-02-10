@@ -79,10 +79,7 @@ class DBHandler(Handler):
             if transformation["type"] == "dataframe_rows_filter":
                 expressions.extend(transformation["filters"])
 
-        if expressions:
-            return self._make_rows_filter_expression(expressions)
-
-        return None
+        return self._make_rows_filter_expression(expressions)
 
     def _get_columns_filter_expressions(self) -> list[str] | None:
         expressions = []
@@ -90,10 +87,7 @@ class DBHandler(Handler):
             if transformation["type"] == "dataframe_columns_filter":
                 expressions.extend(transformation["filters"])
 
-        if expressions:
-            return self._make_columns_filter_expressions(expressions)
-
-        return None
+        return self._make_columns_filter_expressions(expressions)
 
     @staticmethod
     def _quote_field(field: str) -> str:

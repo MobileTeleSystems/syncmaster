@@ -7,6 +7,7 @@ import os
 from typing import TYPE_CHECKING
 
 from onetl.file import FileDFReader, FileDFWriter, FileDownloader, FileUploader
+from onetl.file.filter import FileSizeRange, Glob, Regexp
 
 from syncmaster.worker.handlers.file.base import FileHandler
 
@@ -23,6 +24,7 @@ class FileProtocolHandler(FileHandler):
             connection=self.connection,
             source_path=self.transfer_dto.directory_path,
             local_path=self.temp_dir.name,
+            filters=self._get_file_metadata_filters(),
         )
         downloader.run()
 
@@ -65,3 +67,28 @@ class FileProtocolHandler(FileHandler):
             options=self.transfer_dto.options,
         )
         uploader.run()
+
+    def _make_file_metadata_filters(self, filters: list[dict]) -> list[Glob | Regexp | FileSizeRange]:
+        processed_filters = []
+        for filter in filters:
+            filter_type = filter["type"]
+            value = filter["value"]
+
+            if filter_type == "name_glob":
+                processed_filters.append(Glob(value))
+            elif filter_type == "name_regexp":
+                processed_filters.append(Regexp(value))
+            elif filter_type == "file_size_min":
+                processed_filters.append(FileSizeRange(min=value))
+            elif filter_type == "file_size_max":
+                processed_filters.append(FileSizeRange(max=value))
+
+        return processed_filters
+
+    def _get_file_metadata_filters(self) -> list[Glob | Regexp | FileSizeRange]:
+        expressions = []
+        for transformation in self.transfer_dto.transformations:
+            if transformation["type"] == "file_metadata_filter":
+                expressions.extend(transformation["filters"])
+
+        return self._make_file_metadata_filters(expressions)
