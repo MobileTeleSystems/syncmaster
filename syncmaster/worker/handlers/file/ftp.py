@@ -18,12 +18,12 @@ class FTPHandler(FileProtocolHandler):
     connection_dto: FTPConnectionDTO
 
     def connect(self, spark: SparkSession) -> None:
-        self.connection = FTP(
+        self.file_connection = FTP(
             host=self.connection_dto.host,
             port=self.connection_dto.port,
             user=self.connection_dto.user,
             password=self.connection_dto.password,
         ).check()
-        self.local_connection = SparkLocalFS(
+        self.local_df_connection = SparkLocalFS(
             spark=spark,
         ).check()

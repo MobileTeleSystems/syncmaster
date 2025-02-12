@@ -8,6 +8,7 @@ from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING
 
 from syncmaster.dto.connections import ConnectionDTO
+from syncmaster.dto.runs import RunDTO
 from syncmaster.dto.transfers import TransferDTO
 
 if TYPE_CHECKING:
@@ -20,10 +21,12 @@ class Handler(ABC):
         self,
         connection_dto: ConnectionDTO,
         transfer_dto: TransferDTO,
+        run_dto: RunDTO,
         temp_dir: TemporaryDirectory,
     ):
         self.connection_dto = connection_dto
         self.transfer_dto = transfer_dto
+        self.run_dto = run_dto
         self.temp_dir = temp_dir
 
     @abstractmethod

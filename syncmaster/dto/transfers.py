@@ -23,6 +23,7 @@ class FileTransferDTO(TransferDTO):
     directory_path: str
     file_format: CSV | JSONLine | JSON | Excel | XML | ORC | Parquet
     options: dict
+    file_name_template: str | None = None
     df_schema: dict | None = None
     transformations: list[dict] | None = None
 

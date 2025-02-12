@@ -55,7 +55,7 @@ def hdfs_file_df_connection(spark, hdfs_server):
 def hdfs_file_connection(hdfs_server):
     from onetl.connection import HDFS
 
-    return HDFS(host=hdfs_server.host, webhdfs_port=hdfs_server.webhdfs_port)
+    return HDFS(cluster="test-hive", host=hdfs_server.host, webhdfs_port=hdfs_server.webhdfs_port)
 
 
 @pytest.fixture()

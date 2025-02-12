@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
+import re
 from pathlib import PurePosixPath
-from typing import Any
+from typing import Any, ClassVar
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -63,10 +64,12 @@ class CreateFileTransferTarget(BaseModel):
         discriminator="type",
     )
     file_name_template: str = Field(
-        default="{run_created_at}_{index}.{extension}",
+        default="{run_created_at}-{index}.{extension}",
         description="Template for file naming with required placeholders 'index' and 'extension'",
     )
     options: dict[str, Any] = Field(default_factory=dict)
+
+    FILE_NAME_PATTERN: ClassVar[re.Pattern] = re.compile(r"^[a-zA-Z0-9_.{}-]+$")
 
     class Config:
         arbitrary_types_allowed = True
@@ -80,7 +83,10 @@ class CreateFileTransferTarget(BaseModel):
 
     @field_validator("file_name_template")
     @classmethod
-    def validate_file_name_template(cls, value):
+    def validate_file_name_template(cls, value: str) -> str:
+        if not cls.FILE_NAME_PATTERN.match(value):
+            raise ValueError("Template contains invalid characters. Allowed: letters, numbers, '.', '_', '-', '{', '}'")
+
         required_keys = {"index", "extension"}
         placeholders = {key for key in required_keys if f"{{{key}}}" in value}
 

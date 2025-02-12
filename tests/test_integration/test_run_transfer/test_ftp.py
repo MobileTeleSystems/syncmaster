@@ -98,6 +98,7 @@ async def postgres_to_ftp(
                 "type": format_name,
                 **file_format.dict(),
             },
+            "file_name_template": "{run_created_at}-{index}.{extension}",
             "options": {},
         },
         queue_id=queue.id,
@@ -202,36 +203,42 @@ async def test_run_transfer_ftp_to_postgres(
 
 
 @pytest.mark.parametrize(
-    "target_file_format, file_format_flavor",
+    "target_file_format, file_format_flavor, expected_extension",
     [
         pytest.param(
             ("csv", {"compression": "lz4"}),
             "with_compression",
+            "csv.lz4",
             id="csv",
         ),
         pytest.param(
             ("jsonline", {}),
             "without_compression",
+            "jsonl",
             id="jsonline",
         ),
         pytest.param(
             ("excel", {}),
             "with_header",
+            "xlsx",
             id="excel",
         ),
         pytest.param(
             ("orc", {"compression": "snappy"}),
             "with_compression",
+            "snappy.orc",
             id="orc",
         ),
         pytest.param(
             ("parquet", {"compression": "lz4"}),
             "with_compression",
+            "lz4hadoop.parquet",
             id="parquet",
         ),
         pytest.param(
             ("xml", {"compression": "snappy"}),
             "with_compression",
+            "xml.snappy",
             id="xml",
         ),
     ],
@@ -248,6 +255,7 @@ async def test_run_transfer_postgres_to_ftp(
     target_file_format,
     file_format_flavor: str,
     tmp_path: Path,
+    expected_extension: str,
 ):
     format_name, format = target_file_format
 
@@ -284,6 +292,12 @@ async def test_run_transfer_postgres_to_ftp(
         local_path=tmp_path,
     )
     downloader.run()
+
+    files = os.listdir(tmp_path)
+    for file_name in files:
+        run_created_at, index_and_extension = file_name.split("-")
+        assert len(run_created_at.split("_")) == 6, f"Got wrong {run_created_at=}"
+        assert index_and_extension.split(".", 1)[1] == expected_extension
 
     reader = FileDFReader(
         connection=ftp_file_df_connection,

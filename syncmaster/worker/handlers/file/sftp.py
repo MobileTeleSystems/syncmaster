@@ -18,13 +18,13 @@ class SFTPHandler(FileProtocolHandler):
     connection_dto: SFTPConnectionDTO
 
     def connect(self, spark: SparkSession) -> None:
-        self.connection = SFTP(
+        self.file_connection = SFTP(
             host=self.connection_dto.host,
             port=self.connection_dto.port,
             user=self.connection_dto.user,
             password=self.connection_dto.password,
             compress=False,  # to avoid errors from combining file and SCP-level compression
         ).check()
-        self.local_connection = SparkLocalFS(
+        self.local_df_connection = SparkLocalFS(
             spark=spark,
         ).check()
