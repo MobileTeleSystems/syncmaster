@@ -565,6 +565,30 @@ async def test_cannot_create_file_transfer_with_relative_path(
             ],
             id="unknown_tag",
         ),
+        pytest.param(
+            {
+                "type": "s3",
+                "directory_path": "/some/path",
+                "file_format": {
+                    "type": "xml",
+                    "root_tag": "data",
+                    "row_tag": "record",
+                },
+            },
+            {
+                "file_name_template": "{run_created_at}:{index}.{extension}",
+            },
+            [
+                {
+                    "context": {},
+                    "input": "{run_created_at}:{index}.{extension}",
+                    "location": ["body", "target_params", "s3", "file_name_template"],
+                    "message": "Value error, Template contains invalid characters. Allowed: letters, numbers, '.', '_', '-', '{', '}'",
+                    "code": "value_error",
+                },
+            ],
+            id="prohibited_symbol",
+        ),
     ],
 )
 async def test_file_name_template_validation(

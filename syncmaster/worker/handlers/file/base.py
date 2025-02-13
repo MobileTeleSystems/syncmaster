@@ -3,10 +3,12 @@
 
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING
 
 from onetl.base.base_file_df_connection import BaseFileDFConnection
-from onetl.file import FileDFReader, FileDFWriter
+from onetl.file import FileDFReader, FileDFWriter, FileMover
+from onetl.file.filter import Glob
 
 from syncmaster.dto.connections import ConnectionDTO
 from syncmaster.dto.transfers import FileTransferDTO
@@ -15,9 +17,18 @@ from syncmaster.worker.handlers.base import Handler
 if TYPE_CHECKING:
     from pyspark.sql.dataframe import DataFrame
 
+COLUMN_FORMATS = ("parquet", "orc")
+
 
 class FileHandler(Handler):
-    connection: BaseFileDFConnection
+    """
+    TODO: FileHandler is actually handler for FileDFWriter with remote FS (direct write).
+    FileProtocolHandler is handler for FileDFWriter with local FS (write via upload).
+    Maybe we should keep here only common methods,
+    like file name generator and split other ones to classes where the method is really used.
+    """
+
+    df_connection: BaseFileDFConnection
     connection_dto: ConnectionDTO
     transfer_dto: FileTransferDTO
     _operators = {
@@ -35,12 +46,29 @@ class FileHandler(Handler):
         "not_ilike": "NOT ILIKE",
         "regexp": "RLIKE",
     }
+    _compression_to_file_suffix = {
+        "gzip": "gz",
+        "snappy": "snappy",
+        "zlib": "zlib",
+        "lz4": "lz4",
+        "bzip2": "bz2",
+        "deflate": "deflate",
+    }
+    _file_format_to_file_suffix = {
+        "json": "json",
+        "jsonline": "jsonl",
+        "csv": "csv",
+        "xml": "xml",
+        "excel": "xlsx",
+        "parquet": "parquet",
+        "orc": "orc",
+    }
 
     def read(self) -> DataFrame:
         from pyspark.sql.types import StructType
 
         reader = FileDFReader(
-            connection=self.connection,
+            connection=self.df_connection,
             format=self.transfer_dto.file_format,
             source_path=self.transfer_dto.directory_path,
             df_schema=StructType.fromJson(self.transfer_dto.df_schema) if self.transfer_dto.df_schema else None,
@@ -59,14 +87,65 @@ class FileHandler(Handler):
         return df
 
     def write(self, df: DataFrame) -> None:
-        writer = FileDFWriter(
-            connection=self.connection,
-            format=self.transfer_dto.file_format,
-            target_path=self.transfer_dto.directory_path,
-            options=self.transfer_dto.options,
+        tmp_path = os.path.join(self.transfer_dto.directory_path, ".tmp", str(self.run_dto.id))
+        try:
+            writer = FileDFWriter(
+                connection=self.df_connection,
+                format=self.transfer_dto.file_format,
+                target_path=tmp_path,
+                options=self.transfer_dto.options,
+            )
+            writer.run(df=df)
+
+            self._rename_files(tmp_path)
+
+            mover = FileMover(
+                connection=self.file_connection,
+                source_path=tmp_path,
+                target_path=self.transfer_dto.directory_path,
+                # ignore .crc and other metadata files
+                filters=[Glob(f"*.{self._get_file_extension()}")],
+            )
+            mover.run()
+        finally:
+            self.file_connection.remove_dir(tmp_path, recursive=True)
+
+    def _rename_files(self, tmp_path: str) -> None:
+        files = self.file_connection.list_dir(tmp_path)
+
+        for index, file_name in enumerate(files):
+            extension = self._get_file_extension()
+            new_name = self._get_file_name(str(index), extension)
+            old_path = os.path.join(tmp_path, file_name)
+            new_path = os.path.join(tmp_path, new_name)
+            self.file_connection.rename_file(old_path, new_path)
+
+    def _get_file_name(self, index: str, extension: str) -> str:
+        return self.transfer_dto.file_name_template.format(
+            index=index,
+            extension=extension,
+            run_id=self.run_dto.id,
+            run_created_at=self.run_dto.created_at.strftime("%Y_%m_%d_%H_%M_%S"),
         )
 
-        return writer.run(df=df)
+    def _get_file_extension(self) -> str:
+        file_format = self.transfer_dto.file_format.__class__.__name__.lower()
+        extension_suffix = self._file_format_to_file_suffix[file_format]
+
+        compression = getattr(self.transfer_dto.file_format, "compression", "none")
+        if compression == "none":
+            return extension_suffix
+
+        compression_suffix = self._compression_to_file_suffix[compression]
+
+        # https://github.com/apache/parquet-java/blob/fb6f0be0323f5f52715b54b8c6602763d8d0128d/parquet-common/src/main/java/org/apache/parquet/hadoop/metadata/CompressionCodecName.java#L26-L33
+        if extension_suffix == "parquet" and compression_suffix == "lz4":
+            return "lz4hadoop.parquet"
+
+        if extension_suffix in COLUMN_FORMATS:
+            return f"{compression_suffix}.{extension_suffix}"
+
+        return f"{extension_suffix}.{compression_suffix}"
 
     def _make_rows_filter_expression(self, filters: list[dict]) -> str | None:
         expressions = []

@@ -4,7 +4,7 @@ import secrets
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
-from onetl.connection import SparkS3
+from onetl.connection import S3, SparkS3
 from onetl.db import DBReader
 from onetl.file import FileDFReader
 from pyspark.sql import DataFrame
@@ -101,6 +101,7 @@ async def postgres_to_s3(
                 "type": format_name,
                 **file_format.dict(),
             },
+            "file_name_template": "{run_created_at}-{index}.{extension}",
             "options": {},
         },
         transformations=transformations,
@@ -233,42 +234,48 @@ async def test_run_transfer_s3_to_postgres(
 
 
 @pytest.mark.parametrize(
-    "target_file_format, file_format_flavor, transformations",
+    "target_file_format, file_format_flavor, transformations, expected_extension",
     [
         pytest.param(
             ("csv", {"compression": "lz4"}),
             "with_compression",
             [],
+            "csv.lz4",
             id="csv",
         ),
         pytest.param(
             ("jsonline", {}),
             "without_compression",
             [],
+            "jsonl",
             id="jsonline",
         ),
         pytest.param(
             ("excel", {}),
             "with_header",
             [],
+            "xlsx",
             id="excel",
         ),
         pytest.param(
             ("orc", {"compression": "none"}),
-            "with_compression",
+            "without_compression",
             [],
+            "orc",
             id="orc",
         ),
         pytest.param(
             ("parquet", {"compression": "gzip"}),
             "with_compression",
             [],
+            "gz.parquet",
             id="parquet",
         ),
         pytest.param(
             ("xml", {"compression": "none"}),
             "without_compression",
             [],
+            "xml",
             id="xml",
         ),
     ],
@@ -279,14 +286,17 @@ async def test_run_transfer_postgres_to_s3(
     init_df: DataFrame,
     client: AsyncClient,
     s3_file_df_connection: SparkS3,
+    s3_file_connection: S3,
     prepare_postgres,
     prepare_s3,
     postgres_to_s3: Transfer,
     target_file_format,
     file_format_flavor: str,
     transformations,
+    expected_extension: str,
 ):
     format_name, format = target_file_format
+    source_path = f"/target/{format_name}/{file_format_flavor}"
 
     # Arrange
     _, fill_with_data = prepare_postgres
@@ -315,10 +325,16 @@ async def test_run_transfer_postgres_to_s3(
     assert target_auth_data["access_key"]
     assert "secret_key" not in target_auth_data
 
+    files = [os.fspath(file) for file in s3_file_connection.list_dir(source_path)]
+    for file_name in files:
+        run_created_at, index_and_extension = file_name.split("-")
+        assert len(run_created_at.split("_")) == 6, f"Got wrong {run_created_at=}"
+        assert index_and_extension.split(".", 1)[1] == expected_extension
+
     reader = FileDFReader(
         connection=s3_file_df_connection,
         format=format,
-        source_path=f"/target/{format_name}/{file_format_flavor}",
+        source_path=source_path,
         df_schema=init_df.schema,
         options={},
     )

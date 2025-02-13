@@ -25,7 +25,7 @@ class ReadHDFSConnectionDataSchema(BaseModel):
 
 
 class UpdateHDFSConnectionDataSchema(BaseModel):
-    cluster: str
+    cluster: str | None = None
 
 
 class CreateHDFSConnectionSchema(CreateConnectionBaseSchema):

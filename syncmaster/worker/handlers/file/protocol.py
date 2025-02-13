@@ -21,7 +21,7 @@ class FileProtocolHandler(FileHandler):
         from pyspark.sql.types import StructType
 
         downloader = FileDownloader(
-            connection=self.connection,
+            connection=self.file_connection,
             source_path=self.transfer_dto.directory_path,
             local_path=self.temp_dir.name,
             filters=self._get_file_metadata_filters(),
@@ -29,7 +29,7 @@ class FileProtocolHandler(FileHandler):
         downloader.run()
 
         reader = FileDFReader(
-            connection=self.local_connection,
+            connection=self.local_df_connection,
             format=self.transfer_dto.file_format,
             source_path=self.temp_dir.name,
             df_schema=StructType.fromJson(self.transfer_dto.df_schema) if self.transfer_dto.df_schema else None,
@@ -48,7 +48,7 @@ class FileProtocolHandler(FileHandler):
 
     def write(self, df: DataFrame) -> None:
         writer = FileDFWriter(
-            connection=self.local_connection,
+            connection=self.local_df_connection,
             format=self.transfer_dto.file_format,
             target_path=self.temp_dir.name,
             options={"if_exists": "replace_entire_directory"},
@@ -60,13 +60,25 @@ class FileProtocolHandler(FileHandler):
         for file in crc_files:
             os.remove(os.path.join(self.temp_dir.name, file))
 
+        self._rename_files()
+
         uploader = FileUploader(
-            connection=self.connection,
+            connection=self.file_connection,
             local_path=self.temp_dir.name,
             target_path=self.transfer_dto.directory_path,
             options=self.transfer_dto.options,
         )
         uploader.run()
+
+    def _rename_files(self):
+        files = os.listdir(self.temp_dir.name)
+
+        for index, file_name in enumerate(files):
+            extension = self._get_file_extension()
+            new_name = self._get_file_name(str(index), extension)
+            old_path = os.path.join(self.temp_dir.name, file_name)
+            new_path = os.path.join(self.temp_dir.name, new_name)
+            os.rename(old_path, new_path)
 
     def _make_file_metadata_filters(self, filters: list[dict]) -> list[Glob | Regexp | FileSizeRange]:
         processed_filters = []

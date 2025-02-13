@@ -20,6 +20,7 @@ from syncmaster.dto.connections import (
     SFTPConnectionDTO,
     WebDAVConnectionDTO,
 )
+from syncmaster.dto.runs import RunDTO
 from syncmaster.dto.transfers import (
     ClickhouseTransferDTO,
     FTPSTransferDTO,
@@ -60,66 +61,79 @@ connection_handler_proxy = {
         HiveHandler,
         HiveConnectionDTO,
         HiveTransferDTO,
+        RunDTO,
     ),
     "oracle": (
         OracleHandler,
         OracleConnectionDTO,
         OracleTransferDTO,
+        RunDTO,
     ),
     "clickhouse": (
         ClickhouseHandler,
         ClickhouseConnectionDTO,
         ClickhouseTransferDTO,
+        RunDTO,
     ),
     "mssql": (
         MSSQLHandler,
         MSSQLConnectionDTO,
         MSSQLTransferDTO,
+        RunDTO,
     ),
     "mysql": (
         MySQLHandler,
         MySQLConnectionDTO,
         MySQLTransferDTO,
+        RunDTO,
     ),
     "postgres": (
         PostgresHandler,
         PostgresConnectionDTO,
         PostgresTransferDTO,
+        RunDTO,
     ),
     "s3": (
         S3Handler,
         S3ConnectionDTO,
         S3TransferDTO,
+        RunDTO,
     ),
     "hdfs": (
         HDFSHandler,
         HDFSConnectionDTO,
         HDFSTransferDTO,
+        RunDTO,
     ),
     "sftp": (
         SFTPHandler,
         SFTPConnectionDTO,
         SFTPTransferDTO,
+        RunDTO,
     ),
     "ftp": (
         FTPHandler,
         FTPConnectionDTO,
         FTPTransferDTO,
+        RunDTO,
     ),
     "ftps": (
         FTPSHandler,
         FTPSConnectionDTO,
         FTPSTransferDTO,
+        RunDTO,
     ),
     "samba": (
         SambaHandler,
         SambaConnectionDTO,
         SambaTransferDTO,
+        RunDTO,
     ),
     "webdav": (
         WebDAVHandler,
         WebDAVConnectionDTO,
         WebDAVTransferDTO,
+        RunDTO,
     ),
 }
 
@@ -141,6 +155,7 @@ class TransferController:
         self.run = run
         self.source_handler = self.get_handler(
             connection_data=source_connection.data,
+            run_data={"id": run.id, "created_at": run.created_at},
             transfer_params=run.transfer.source_params,
             transformations=run.transfer.transformations,
             connection_auth_data=source_auth_data,
@@ -148,6 +163,7 @@ class TransferController:
         )
         self.target_handler = self.get_handler(
             connection_data=target_connection.data,
+            run_data={"id": run.id, "created_at": run.created_at},
             transfer_params=run.transfer.target_params,
             transformations=run.transfer.transformations,
             connection_auth_data=target_auth_data,
@@ -175,6 +191,7 @@ class TransferController:
         self,
         connection_data: dict[str, Any],
         connection_auth_data: dict,
+        run_data: dict[str, Any],
         transfer_params: dict[str, Any],
         transformations: list[dict],
         temp_dir: TemporaryDirectory,
@@ -186,10 +203,11 @@ class TransferController:
         if connection_handler_proxy.get(handler_type, None) is None:
             raise ConnectionTypeNotRecognizedError
 
-        handler, connection_dto, transfer_dto = connection_handler_proxy[handler_type]
+        handler, connection_dto, transfer_dto, run_dto = connection_handler_proxy[handler_type]
 
         return handler(
             connection_dto=connection_dto(**connection_data),
             transfer_dto=transfer_dto(**transfer_params, transformations=transformations),
+            run_dto=run_dto(**run_data),
             temp_dir=temp_dir,
         )

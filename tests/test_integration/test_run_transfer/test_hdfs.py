@@ -4,7 +4,7 @@ import secrets
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
-from onetl.connection import SparkHDFS
+from onetl.connection import HDFS, SparkHDFS
 from onetl.db import DBReader
 from onetl.file import FileDFReader
 from pyspark.sql import DataFrame
@@ -97,6 +97,7 @@ async def postgres_to_hdfs(
                 "type": format_name,
                 **file_format.dict(),
             },
+            "file_name_template": "{run_created_at}-{index}.{extension}",
             "options": {},
         },
         queue_id=queue.id,
@@ -201,36 +202,42 @@ async def test_run_transfer_hdfs_to_postgres(
 
 
 @pytest.mark.parametrize(
-    "target_file_format, file_format_flavor",
+    "target_file_format, file_format_flavor, expected_extension",
     [
         pytest.param(
             ("csv", {"compression": "lz4"}),
             "with_compression",
+            "csv.lz4",
             id="csv",
         ),
         pytest.param(
             ("jsonline", {}),
             "without_compression",
+            "jsonl",
             id="jsonline",
         ),
         pytest.param(
             ("excel", {}),
             "with_header",
+            "xlsx",
             id="excel",
         ),
         pytest.param(
             ("orc", {"compression": "snappy"}),
             "with_compression",
+            "snappy.orc",
             id="orc",
         ),
         pytest.param(
             ("parquet", {"compression": "lz4"}),
             "with_compression",
+            "lz4hadoop.parquet",
             id="parquet",
         ),
         pytest.param(
             ("xml", {"compression": "snappy"}),
             "with_compression",
+            "xml.snappy",
             id="xml",
         ),
     ],
@@ -242,12 +249,15 @@ async def test_run_transfer_postgres_to_hdfs(
     client: AsyncClient,
     prepare_postgres,
     hdfs_file_df_connection: SparkHDFS,
+    hdfs_file_connection: HDFS,
     postgres_to_hdfs: Transfer,
     hdfs_connection: SparkHDFS,
     target_file_format,
     file_format_flavor: str,
+    expected_extension: str,
 ):
     format_name, format = target_file_format
+    source_path = f"/target/{format_name}/{file_format_flavor}"
 
     # Arrange
     _, fill_with_data = prepare_postgres
@@ -276,10 +286,16 @@ async def test_run_transfer_postgres_to_hdfs(
     assert target_auth_data["user"]
     assert "password" not in target_auth_data
 
+    files = [os.fspath(file) for file in hdfs_file_connection.list_dir(source_path) if file.is_file()]
+    for file_name in files:
+        run_created_at, index_and_extension = file_name.split("-")
+        assert len(run_created_at.split("_")) == 6, f"Got wrong {run_created_at=}"
+        assert index_and_extension.split(".", 1)[1] == expected_extension
+
     reader = FileDFReader(
         connection=hdfs_file_df_connection,
         format=format,
-        source_path=f"/target/{format_name}/{file_format_flavor}",
+        source_path=source_path,
         df_schema=init_df.schema,
         options={},
     )
