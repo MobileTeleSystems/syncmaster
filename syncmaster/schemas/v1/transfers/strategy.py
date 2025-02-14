@@ -13,3 +13,4 @@ class FullStrategy(BaseModel):
 
 class IncrementalStrategy(BaseModel):
     type: INCREMENTAL_TYPE
+    increment_by: str

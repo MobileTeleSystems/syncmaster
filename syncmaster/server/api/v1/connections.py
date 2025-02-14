@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from collections.abc import Sequence
-from typing import get_args
 
 from fastapi import APIRouter, Depends, Query, status
 from pydantic import TypeAdapter
@@ -17,16 +16,7 @@ from syncmaster.exceptions.connection import (
 )
 from syncmaster.exceptions.credentials import AuthDataNotFoundError
 from syncmaster.exceptions.group import GroupNotFoundError
-from syncmaster.schemas.v1.connection_types import (
-    CLICKHOUSE_TYPE,
-    HDFS_TYPE,
-    HIVE_TYPE,
-    MSSQL_TYPE,
-    MYSQL_TYPE,
-    ORACLE_TYPE,
-    POSTGRES_TYPE,
-    S3_TYPE,
-)
+from syncmaster.schemas.v1.connection_types import CONNECTION_TYPES
 from syncmaster.schemas.v1.connections.connection import (
     ConnectionCopySchema,
     ConnectionPageSchema,
@@ -40,8 +30,6 @@ from syncmaster.server.services.get_user import get_user
 from syncmaster.server.services.unit_of_work import UnitOfWork
 
 router = APIRouter(tags=["Connections"], responses=get_error_responses())
-
-CONNECTION_TYPES = ORACLE_TYPE, POSTGRES_TYPE, CLICKHOUSE_TYPE, HIVE_TYPE, MSSQL_TYPE, MYSQL_TYPE, S3_TYPE, HDFS_TYPE
 
 
 @router.get("/connections")
@@ -157,7 +145,7 @@ async def create_connection(
 
 @router.get("/connections/known_types", dependencies=[Depends(get_user(is_active=True))])
 async def read_connection_types() -> list[str]:
-    return [get_args(type_)[0] for type_ in CONNECTION_TYPES]
+    return CONNECTION_TYPES
 
 
 @router.get("/connections/{connection_id}")

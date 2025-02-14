@@ -145,53 +145,43 @@ async def test_developer_plus_can_update_s3_transfer(
 ):
     # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
-    transformations = [
-        {
-            "type": "dataframe_rows_filter",
-            "filters": [
-                {
-                    "type": "is_not_null",
-                    "field": "col2",
-                },
-            ],
+    updated_fields = {
+        "source_params": {
+            "type": "ftp",
+            "directory_path": "/some/new/test/directory",
+            "file_format": create_transfer_data["source_and_target_params"]["file_format"],
+            "options": {"some": "option"},
         },
-    ]
+        "target_params": {
+            "type": "ftp",
+            "directory_path": "/some/new/test/directory",
+            "file_format": create_transfer_data["source_and_target_params"]["file_format"],
+            "file_name_template": "{index}.{extension}",
+            "options": {"some": "option"},
+        },
+        "strategy_params": {
+            "type": "incremental",
+            "increment_by": "modified_since",
+        },
+        "transformations": [
+            {
+                "type": "dataframe_rows_filter",
+                "filters": [
+                    {
+                        "type": "is_not_null",
+                        "field": "col2",
+                    },
+                ],
+            },
+        ],
+    }
 
     # Act
     result = await client.patch(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={
-            "source_params": {
-                "type": "ftp",
-                "directory_path": "/some/new/test/directory",
-                "file_format": create_transfer_data["source_and_target_params"]["file_format"],
-                "options": {"some": "option"},
-            },
-            "target_params": {
-                "type": "ftp",
-                "directory_path": "/some/new/test/directory",
-                "file_format": create_transfer_data["source_and_target_params"]["file_format"],
-                "file_name_template": "{index}.{extension}",
-                "options": {"some": "option"},
-            },
-            "transformations": transformations,
-        },
+        json=updated_fields,
     )
-
-    # Pre-Assert
-    source_params = group_transfer.source_params.copy()
-    source_params.update(
-        {
-            "directory_path": "/some/new/test/directory",
-            "file_format": create_transfer_data["source_and_target_params"]["file_format"],
-            "options": {"some": "option"},
-        },
-    )
-    target_params = {
-        **source_params,
-        "file_name_template": "{index}.{extension}",
-    }
 
     # Assert
     assert result.status_code == 200
@@ -204,9 +194,9 @@ async def test_developer_plus_can_update_s3_transfer(
         "is_scheduled": group_transfer.is_scheduled,
         "source_connection_id": group_transfer.source_connection_id,
         "target_connection_id": group_transfer.target_connection_id,
-        "source_params": source_params,
-        "target_params": target_params,
-        "strategy_params": group_transfer.strategy_params,
-        "transformations": transformations,
+        "source_params": updated_fields["source_params"],
+        "target_params": updated_fields["target_params"],
+        "strategy_params": updated_fields["strategy_params"],
+        "transformations": updated_fields["transformations"],
         "queue_id": group_transfer.transfer.queue_id,
     }
