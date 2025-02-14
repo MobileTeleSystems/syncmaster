@@ -14,12 +14,20 @@ async def test_developer_plus_can_update_transfer(
 ):
     # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
+    updated_fields = {
+        "name": "New transfer name",
+        "is_scheduled": False,
+        "strategy_params": {
+            "type": "incremental",
+            "increment_by": "updated_at",
+        },
+    }
 
     # Act
     result = await client.patch(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"name": "New transfer name", "is_scheduled": False},
+        json=updated_fields,
     )
 
     # Assert
@@ -27,15 +35,15 @@ async def test_developer_plus_can_update_transfer(
     assert result.json() == {
         "id": group_transfer.id,
         "group_id": group_transfer.group_id,
-        "name": "New transfer name",
+        "name": updated_fields["name"],
         "description": group_transfer.description,
         "schedule": group_transfer.schedule,
-        "is_scheduled": False,
+        "is_scheduled": updated_fields["is_scheduled"],
         "source_connection_id": group_transfer.source_connection_id,
         "target_connection_id": group_transfer.target_connection_id,
         "source_params": group_transfer.source_params,
         "target_params": group_transfer.target_params,
-        "strategy_params": group_transfer.strategy_params,
+        "strategy_params": updated_fields["strategy_params"],
         "transformations": group_transfer.transformations,
         "queue_id": group_transfer.transfer.queue_id,
     }

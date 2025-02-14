@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, model_validator
 
+from syncmaster.schemas.v1.connection_types import FILE_CONNECTION_TYPES
 from syncmaster.schemas.v1.connections.connection import ReadConnectionSchema
 from syncmaster.schemas.v1.page import PageSchema
 from syncmaster.schemas.v1.transfers.db import (
@@ -244,6 +245,19 @@ class CreateTransferSchema(BaseModel):
         if is_scheduled and schedule is None:
             # TODO make checking cron string
             raise ValueError("If transfer must be scheduled than set schedule param")
+        return values
+
+    @model_validator(mode="after")
+    def validate_increment_by(cls, values):
+        if not isinstance(values.strategy_params, IncrementalStrategy):
+            return values
+
+        source_type = values.source_params.type
+        increment_by = values.strategy_params.increment_by
+
+        if source_type in FILE_CONNECTION_TYPES and increment_by != "modified_since":
+            raise ValueError("Field 'increment_by' must be equal to 'modified_since' for file source types")
+
         return values
 
 

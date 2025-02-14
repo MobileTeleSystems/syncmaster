@@ -1,9 +1,7 @@
-from typing import get_args
-
 import pytest
 from httpx import AsyncClient
 
-from syncmaster.server.api.v1.connections import CONNECTION_TYPES
+from syncmaster.schemas.v1.connection_types import CONNECTION_TYPES
 from tests.mocks import MockUser
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.server]
@@ -31,4 +29,4 @@ async def test_groupless_user_can_read_connection_types(client: AsyncClient, sim
     )
     # Assert
     assert result.status_code == 200
-    assert set(result.json()) == {get_args(type)[0] for type in CONNECTION_TYPES}
+    assert set(result.json()) == set(CONNECTION_TYPES)

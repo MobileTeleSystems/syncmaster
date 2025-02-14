@@ -15,3 +15,21 @@ FTP_TYPE = Literal["ftp"]
 FTPS_TYPE = Literal["ftps"]
 WEBDAV_TYPE = Literal["webdav"]
 SAMBA_TYPE = Literal["samba"]
+
+CONNECTION_TYPES = [
+    "oracle",
+    "postgres",
+    "clickhouse",
+    "hive",
+    "mssql",
+    "mysql",
+    "s3",
+    "hdfs",
+    "sftp",
+    "ftp",
+    "ftps",
+    "webdav",
+    "samba",
+]
+FILE_CONNECTION_TYPES = ["s3", "hdfs", "sftp", "ftp", "ftps", "webdav", "samba"]
+DB_CONNECTION_TYPES = ["oracle", "postgres", "clickhouse", "hive", "mssql", "mysql"]

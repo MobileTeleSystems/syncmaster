@@ -48,7 +48,7 @@ async def test_developer_plus_can_create_transfer(
                     "type": "csv",
                 },
             },
-            "strategy_params": {"type": "full"},
+            "strategy_params": {"type": "incremental", "increment_by": "modified_since"},
             "transformations": [
                 {
                     "type": "dataframe_rows_filter",
@@ -325,6 +325,7 @@ async def test_superuser_can_create_transfer(
     }
 
 
+# TODO: refactor annotations & fixtures
 @pytest.mark.parametrize(
     argnames=["new_data", "error_json"],
     argvalues=(
@@ -394,19 +395,6 @@ async def test_superuser_can_create_transfer(
                             "message": "Value error, If transfer must be scheduled than set schedule param",
                             "code": "value_error",
                             "context": {},
-                            "input": {
-                                "description": "",
-                                "group_id": 1,
-                                "is_scheduled": True,
-                                "name": "new test transfer",
-                                "queue_id": 1,
-                                "schedule": None,
-                                "source_connection_id": 1,
-                                "source_params": {"table_name": "source_table", "type": "postgres"},
-                                "strategy_params": {"type": "full"},
-                                "target_connection_id": 2,
-                                "target_params": {"table_name": "target_table", "type": "postgres"},
-                            },
                         },
                     ],
                 },
@@ -434,6 +422,37 @@ async def test_superuser_can_create_transfer(
                                 "tag": "new some strategy type",
                             },
                             "input": {"type": "new some strategy type"},
+                        },
+                    ],
+                },
+            },
+        ),
+        (
+            {
+                "source_params": {
+                    "type": "ftp",
+                    "directory_path": "/source_path",
+                    "file_format": {
+                        "type": "csv",
+                    },
+                },
+                "strategy_params": {
+                    "type": "incremental",
+                    "increment_by": "unknown",
+                },
+            },
+            {
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "location": ["body"],
+                            "message": (
+                                "Value error, Field 'increment_by' must be equal to 'modified_since' for file source types"
+                            ),
+                            "code": "value_error",
+                            "context": {},
                         },
                     ],
                 },
@@ -759,7 +778,9 @@ async def test_check_fields_validation_on_create_transfer(
     # Assert
     assert result.status_code == 422
 
-    if new_data == {"schedule": None}:
+    if (new_data == {"schedule": None}) or (
+        "strategy_params" in new_data and new_data["strategy_params"].get("increment_by") == "unknown"
+    ):
         error_json["error"]["details"][0]["input"] = transfer_data
 
     assert result.json() == error_json

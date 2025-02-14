@@ -104,6 +104,10 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
             "target_params": {
                 "file_name_template": "{run_created_at}_{index}.{extension}",
             },
+            "strategy_params": {
+                "type": "incremental",
+                "increment_by": "modified_since",
+            },
         },
     ],
 )
