@@ -135,7 +135,7 @@ pytest-mock = "^3.14.0"
 pytest-lazy-fixtures = "^1.1.1"
 # TODO: switch to 0.13.0 before next SyncMaster release
 onetl = { git = "https://github.com/MobileTeleSystems/onetl.git", branch = "develop", extras = ["spark", "s3", "hdfs", "files"] }
-faker = ">=33.3,<36.0"
+faker = ">=33.3,<37.0"
 coverage = "^7.6.1"
 gevent = "^24.2.1"
 responses = "^0.25.3"
