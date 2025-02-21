@@ -114,9 +114,9 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./reports/coverage.xml
+          files: ./reports/coverage.xml
           fail_ci_if_error: true
-          plugin: noop
+          plugins: noop
 
       - name: All done
         run: echo 1
