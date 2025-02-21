@@ -14,7 +14,11 @@ ENV PYTHONPATH=/app
 COPY ./pyproject.toml ./poetry.lock* /app/
 
 RUN pip install --upgrade pip setuptools wheel packaging
-RUN poetry install --no-root --extras "server" --without test,docs,dev
+RUN --mount=type=cache,target=/root/.cache/pypoetry \
+    poetry install \
+        --no-root \
+        --extras "server" \
+        --without test,docs,dev
 
 COPY ./docker/entrypoint_server.sh /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
@@ -41,5 +45,11 @@ ENV SYNCMASTER__SERVER__OPENAPI__SWAGGER__JS_URL=/static/swagger/swagger-ui-bund
 
 FROM base AS test
 
-RUN poetry install --no-root --extras "server" --with test --without docs,dev
+RUN --mount=type=cache,target=/root/.cache/pypoetry \
+    poetry install \
+        --no-root \
+        --extras "server" \
+        --with test \
+        --without docs,dev
+
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
