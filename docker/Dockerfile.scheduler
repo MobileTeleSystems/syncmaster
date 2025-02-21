@@ -13,7 +13,13 @@ ENV PYTHONPATH=/app
 COPY ./pyproject.toml ./poetry.lock* /app/
 
 RUN pip install --upgrade pip setuptools wheel packaging
-RUN poetry install --no-root --extras "scheduler" --extras "server" --without test,docs,dev
+RUN --mount=type=cache,target=/root/.cache/pypoetry \
+    poetry install \
+        --no-root \
+        # TODO: make scheduler independent from server
+        --extras "server" \
+        --extras "scheduler" \
+        --without test,docs,dev
 
 COPY ./docker/entrypoint_scheduler.sh /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
@@ -25,5 +31,11 @@ COPY ./syncmaster/ /app/syncmaster/
 
 FROM base AS test
 
-RUN poetry install --no-root --all-extras --with test --without docs,dev
+RUN --mount=type=cache,target=/root/.cache/pypoetry \
+    poetry install \
+        --no-root \
+        --extras "scheduler" \
+        --with test \
+        --without docs,dev
+
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh

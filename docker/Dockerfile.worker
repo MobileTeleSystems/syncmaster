@@ -30,7 +30,11 @@ ENV PYTHONPATH=/app
 COPY ./pyproject.toml ./poetry.lock* /app/
 
 RUN pip install --upgrade pip setuptools wheel packaging
-RUN poetry install --no-root --extras "worker" --without test,docs,dev
+RUN --mount=type=cache,target=/root/.cache/pypoetry \
+    poetry install \
+        --no-root \
+        --extras "worker" \
+        --without test,docs,dev
 
 COPY ./docker/entrypoint_worker.sh /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
@@ -46,6 +50,13 @@ FROM base AS test
 
 ENV SYNCMASTER__WORKER__CREATE_SPARK_SESSION_FUNCTION=tests.spark.get_worker_spark_session
 
-# CI runs tests in the worker container, so we need server dependencies too
-RUN poetry install --no-root --all-extras --with test --without docs,dev
+# CI runs tests in the worker container, so we need server & scheduler dependencies too
+
+RUN --mount=type=cache,target=/root/.cache/pypoetry \
+    poetry install \
+        --no-root \
+        --all-extras \
+        --with test \
+        --without docs,dev
+
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
