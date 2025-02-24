@@ -63,7 +63,7 @@ celery = { version = "^5.4.0", optional = true }
 onetl = { git = "https://github.com/MobileTeleSystems/onetl.git", branch = "develop", extras = ["spark"] }
 pyyaml = {version = "*", optional = true}
 # due to not supporting MacOS 14.x https://www.psycopg.org/psycopg3/docs/news.html#psycopg-3-1-20
-psycopg = { version = ">=3.1.0,<3.2.5", extras = ["binary"], optional = true }
+psycopg = { version = ">=3.1.0,<3.2.6", extras = ["binary"], optional = true }
 uuid6 = "^2024.7.10"
 coloredlogs = {version = "*", optional = true}
 python-json-logger = {version = "*", optional = true}
