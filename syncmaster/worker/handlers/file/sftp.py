@@ -8,13 +8,13 @@ from typing import TYPE_CHECKING
 from onetl.connection import SFTP, SparkLocalFS
 
 from syncmaster.dto.connections import SFTPConnectionDTO
-from syncmaster.worker.handlers.file.protocol import FileProtocolHandler
+from syncmaster.worker.handlers.file.local_df import LocalDFFileHandler
 
 if TYPE_CHECKING:
     from pyspark.sql import SparkSession
 
 
-class SFTPHandler(FileProtocolHandler):
+class SFTPHandler(LocalDFFileHandler):
     connection_dto: SFTPConnectionDTO
 
     def connect(self, spark: SparkSession) -> None:

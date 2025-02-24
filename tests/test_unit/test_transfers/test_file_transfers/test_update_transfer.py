@@ -41,7 +41,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
                 "options": {},
             },
             "target_params": {
-                "file_name_template": "{index}.{extension}",
+                "file_name_template": "{run_id}-{index}.{extension}",
             },
         },
         {
@@ -156,12 +156,12 @@ async def test_developer_plus_can_update_s3_transfer(
             "type": "ftp",
             "directory_path": "/some/new/test/directory",
             "file_format": create_transfer_data["source_and_target_params"]["file_format"],
-            "file_name_template": "{index}.{extension}",
+            "file_name_template": "{run_id}--{index}.{extension}",
             "options": {"some": "option"},
         },
         "strategy_params": {
             "type": "incremental",
-            "increment_by": "modified_since",
+            "increment_by": "file_modified_since",
         },
         "transformations": [
             {

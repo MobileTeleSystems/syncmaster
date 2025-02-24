@@ -8,13 +8,13 @@ from typing import TYPE_CHECKING
 from onetl.connection import FTP, SparkLocalFS
 
 from syncmaster.dto.connections import FTPConnectionDTO
-from syncmaster.worker.handlers.file.protocol import FileProtocolHandler
+from syncmaster.worker.handlers.file.local_df import LocalDFFileHandler
 
 if TYPE_CHECKING:
     from pyspark.sql import SparkSession
 
 
-class FTPHandler(FileProtocolHandler):
+class FTPHandler(LocalDFFileHandler):
     connection_dto: FTPConnectionDTO
 
     def connect(self, spark: SparkSession) -> None:

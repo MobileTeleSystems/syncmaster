@@ -62,7 +62,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
                 },
             },
             {
-                "file_name_template": "{index}.{extension}",
+                "file_name_template": "{run_id}-{index}.{extension}",
             },
         ),
         (
@@ -251,7 +251,7 @@ async def test_developer_plus_can_create_s3_transfer(
                 },
             },
             {
-                "file_name_template": "{index}.{extension}",
+                "file_name_template": "{run_id}-{index}.{extension}",
             },
         ),
         (
@@ -588,6 +588,29 @@ async def test_cannot_create_file_transfer_with_relative_path(
                 },
             ],
             id="prohibited_symbol",
+        ),
+        pytest.param(
+            {
+                "type": "s3",
+                "directory_path": "/some/path",
+                "file_format": {
+                    "type": "excel",
+                    "include_header": True,
+                },
+            },
+            {
+                "file_name_template": "{index}.{extension}",
+            },
+            [
+                {
+                    "context": {},
+                    "input": "{index}.{extension}",
+                    "location": ["body", "target_params", "s3", "file_name_template"],
+                    "message": "Value error, At least one of placeholders must be present: {run_id} or {run_created_at}",
+                    "code": "value_error",
+                },
+            ],
+            id="missing_placeholders",
         ),
     ],
 )

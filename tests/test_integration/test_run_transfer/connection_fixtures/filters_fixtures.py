@@ -119,7 +119,7 @@ def file_metadata_filter_transformations():
                 },
                 {
                     "type": "name_regexp",
-                    "value": r"\bfile\b",
+                    "value": r"\bdoc",
                 },
                 {
                     "type": "file_size_min",

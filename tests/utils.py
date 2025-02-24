@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 from alembic.autogenerate import compare_metadata
@@ -9,6 +10,10 @@ from alembic.runtime.environment import EnvironmentContext
 from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from httpx import AsyncClient
+from onetl.connection import FileConnection
+from onetl.file import FileDownloader, FileUploader
+from pyspark.sql import DataFrame
+from pyspark.sql.functions import col, date_trunc
 from sqlalchemy import Connection as AlchConnection
 from sqlalchemy import MetaData, pool, text
 from sqlalchemy.ext.asyncio import (
@@ -19,6 +24,7 @@ from sqlalchemy.ext.asyncio import (
 
 from syncmaster.db.models import Status
 from syncmaster.server.settings import ServerAppSettings as Settings
+from tests.mocks import MockUser
 
 logger = logging.getLogger(__name__)
 
@@ -118,3 +124,72 @@ async def get_run_on_end(
             raise TimeoutError()
 
         await asyncio.sleep(1)
+
+
+def verify_transfer_auth_data(run_data: dict[str, Any]) -> None:
+    source_auth_data = run_data["transfer_dump"]["source_connection"]["auth_data"]
+    target_auth_data = run_data["transfer_dump"]["target_connection"]["auth_data"]
+
+    assert source_auth_data["user"]
+    assert "password" not in source_auth_data
+    assert target_auth_data["user"]
+    assert "password" not in target_auth_data
+
+
+async def run_transfer_and_verify(client: AsyncClient, user: MockUser, transfer_id: int) -> dict[str, Any]:
+    result = await client.post(
+        "v1/runs",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={"transfer_id": transfer_id},
+    )
+    assert result.status_code == 200
+
+    run_data = await get_run_on_end(
+        client=client,
+        run_id=result.json()["id"],
+        token=user.token,
+    )
+    assert run_data["status"] == Status.FINISHED.value
+    verify_transfer_auth_data(run_data)
+
+    return run_data
+
+
+def prepare_dataframes_for_comparison(
+    df: DataFrame,
+    init_df: DataFrame,
+    file_format: str,
+) -> tuple[DataFrame, DataFrame]:
+    # as Excel does not support datetime values with precision greater than milliseconds
+    if file_format == "excel":
+        df = df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
+        init_df = init_df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
+
+    for field in init_df.schema:
+        df = df.withColumn(field.name, df[field.name].cast(field.dataType))
+
+    return df, init_df
+
+
+def add_increment_to_files_and_upload(file_connection: FileConnection, remote_path: str, tmp_path: Path) -> None:
+    downloader = FileDownloader(
+        connection=file_connection,
+        source_path=remote_path,
+        local_path=tmp_path,
+    )
+    downloader.run()
+
+    for file in tmp_path.iterdir():
+        if file.is_file():
+            # do not use file.suffix field, as extensions may include compression
+            stem, suffix = file.name.split(".", 1)
+            new_name = f"{stem}_increment.{suffix}"
+            new_path = file.with_name(new_name)
+            file.rename(new_path)
+
+    uploader = FileUploader(
+        connection=file_connection,
+        local_path=tmp_path,
+        target_path=remote_path,
+    )
+    uploader.run()

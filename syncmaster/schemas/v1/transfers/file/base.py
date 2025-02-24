@@ -94,6 +94,9 @@ class CreateFileTransferTarget(BaseModel):
         if missing_keys:
             raise ValueError(f"Missing required placeholders: {', '.join(missing_keys)}")
 
+        if "{run_id}" not in value and "{run_created_at}" not in value:
+            raise ValueError("At least one of placeholders must be present: {run_id} or {run_created_at}")
+
         try:
             value.format(index="", extension="", run_created_at="", run_id="")
         except KeyError as e:

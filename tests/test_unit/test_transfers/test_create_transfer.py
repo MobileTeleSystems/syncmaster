@@ -48,7 +48,7 @@ async def test_developer_plus_can_create_transfer(
                     "type": "csv",
                 },
             },
-            "strategy_params": {"type": "incremental", "increment_by": "modified_since"},
+            "strategy_params": {"type": "incremental", "increment_by": "file_modified_since"},
             "transformations": [
                 {
                     "type": "dataframe_rows_filter",
@@ -449,8 +449,37 @@ async def test_superuser_can_create_transfer(
                         {
                             "location": ["body"],
                             "message": (
-                                "Value error, Field 'increment_by' must be equal to 'modified_since' for file source types"
+                                "Value error, Field 'increment_by' must be equal to 'file_modified_since' or 'file_name' for file source types"
                             ),
+                            "code": "value_error",
+                            "context": {},
+                        },
+                    ],
+                },
+            },
+        ),
+        (
+            {
+                "source_params": {
+                    "type": "s3",
+                    "directory_path": "/source_path",
+                    "file_format": {
+                        "type": "csv",
+                    },
+                },
+                "strategy_params": {
+                    "type": "incremental",
+                    "increment_by": "file_modified_since",
+                },
+            },
+            {
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "location": ["body"],
+                            "message": ("Value error, S3 and HDFS sources do not support incremental strategy for now"),
                             "code": "value_error",
                             "context": {},
                         },
@@ -778,8 +807,15 @@ async def test_check_fields_validation_on_create_transfer(
     # Assert
     assert result.status_code == 422
 
-    if (new_data == {"schedule": None}) or (
-        "strategy_params" in new_data and new_data["strategy_params"].get("increment_by") == "unknown"
+    if (
+        (new_data == {"schedule": None})
+        or ("strategy_params" in new_data and new_data["strategy_params"].get("increment_by") == "unknown")
+        or (
+            "strategy_params" in new_data
+            and new_data["strategy_params"].get("type") == "incremental"
+            and "source_params" in new_data
+            and new_data["source_params"].get("type") == "s3"
+        )
     ):
         error_json["error"]["details"][0]["input"] = transfer_data
 

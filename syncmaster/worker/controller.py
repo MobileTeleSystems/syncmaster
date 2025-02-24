@@ -4,6 +4,10 @@ import logging
 from tempfile import TemporaryDirectory
 from typing import Any
 
+from horizon.client.auth import LoginPassword
+from horizon_hwm_store import HorizonHWMStore
+from onetl.strategy import IncrementalStrategy
+
 from syncmaster.db.models import Connection, Run
 from syncmaster.dto.connections import (
     ClickhouseConnectionDTO,
@@ -36,6 +40,7 @@ from syncmaster.dto.transfers import (
     SFTPTransferDTO,
     WebDAVTransferDTO,
 )
+from syncmaster.dto.transfers_strategy import Strategy
 from syncmaster.exceptions.connection import ConnectionTypeNotRecognizedError
 from syncmaster.worker.handlers.base import Handler
 from syncmaster.worker.handlers.db.clickhouse import ClickhouseHandler
@@ -139,11 +144,13 @@ connection_handler_proxy = {
 
 
 class TransferController:
+    settings: WorkerAppSettings
     source_handler: Handler
     target_handler: Handler
 
     def __init__(
         self,
+        settings: WorkerAppSettings,
         run: Run,
         source_connection: Connection,
         source_auth_data: dict,
@@ -152,11 +159,14 @@ class TransferController:
     ):
         self.temp_dir = TemporaryDirectory(prefix=f"syncmaster_{run.id}_")
 
+        self.settings = settings
         self.run = run
         self.source_handler = self.get_handler(
             connection_data=source_connection.data,
             run_data={"id": run.id, "created_at": run.created_at},
+            transfer_id=run.transfer.id,
             transfer_params=run.transfer.source_params,
+            strategy_params=run.transfer.strategy_params,
             transformations=run.transfer.transformations,
             connection_auth_data=source_auth_data,
             temp_dir=TemporaryDirectory(dir=self.temp_dir.name, prefix="downloaded_"),
@@ -164,15 +174,17 @@ class TransferController:
         self.target_handler = self.get_handler(
             connection_data=target_connection.data,
             run_data={"id": run.id, "created_at": run.created_at},
+            transfer_id=run.transfer.id,
             transfer_params=run.transfer.target_params,
+            strategy_params=run.transfer.strategy_params,
             transformations=run.transfer.transformations,
             connection_auth_data=target_auth_data,
             temp_dir=TemporaryDirectory(dir=self.temp_dir.name, prefix="written_"),
         )
 
-    def perform_transfer(self, settings: WorkerAppSettings) -> None:
+    def perform_transfer(self) -> None:
         try:
-            spark = settings.worker.CREATE_SPARK_SESSION_FUNCTION(
+            spark = self.settings.worker.CREATE_SPARK_SESSION_FUNCTION(
                 run=self.run,
                 source=self.source_handler.connection_dto,
                 target=self.target_handler.connection_dto,
@@ -181,6 +193,9 @@ class TransferController:
             with spark:
                 self.source_handler.connect(spark)
                 self.target_handler.connect(spark)
+
+                if self.source_handler.transfer_dto.strategy.type == "incremental":
+                    return self._perform_incremental_transfer()
 
                 df = self.source_handler.read()
                 self.target_handler.write(df)
@@ -192,7 +207,9 @@ class TransferController:
         connection_data: dict[str, Any],
         connection_auth_data: dict,
         run_data: dict[str, Any],
+        transfer_id: int,
         transfer_params: dict[str, Any],
+        strategy_params: dict[str, Any],
         transformations: list[dict],
         temp_dir: TemporaryDirectory,
     ) -> Handler:
@@ -207,7 +224,35 @@ class TransferController:
 
         return handler(
             connection_dto=connection_dto(**connection_data),
-            transfer_dto=transfer_dto(**transfer_params, transformations=transformations),
+            transfer_dto=transfer_dto(
+                id=transfer_id,
+                strategy=Strategy.from_dict(strategy_params),
+                transformations=transformations,
+                **transfer_params,
+            ),
             run_dto=run_dto(**run_data),
             temp_dir=temp_dir,
         )
+
+    def _perform_incremental_transfer(self) -> None:
+        with HorizonHWMStore(
+            api_url=self.settings.hwm_store.url,
+            auth=LoginPassword(login=self.settings.hwm_store.user, password=self.settings.hwm_store.password),
+            namespace=self.settings.hwm_store.namespace,
+        ).force_create_namespace() as hwm_store:
+
+            with IncrementalStrategy():
+                hwm_name = "_".join(
+                    [
+                        str(self.source_handler.transfer_dto.id),
+                        self.source_handler.connection_dto.type,
+                        self.source_handler.transfer_dto.directory_path,
+                    ],
+                )
+                hwm = hwm_store.get_hwm(hwm_name)
+
+                self.source_handler.hwm = hwm
+                self.target_handler.hwm = hwm
+
+                df = self.source_handler.read()
+                self.target_handler.write(df)

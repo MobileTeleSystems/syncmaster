@@ -6,6 +6,8 @@ from typing import ClassVar
 
 from onetl.file.format import CSV, JSON, ORC, XML, Excel, JSONLine, Parquet
 
+from syncmaster.dto.transfers_strategy import FullStrategy, IncrementalStrategy
+
 
 @dataclass
 class TransferDTO:
@@ -14,14 +16,24 @@ class TransferDTO:
 
 @dataclass
 class DBTransferDTO(TransferDTO):
+    id: int
     table_name: str
+    strategy: FullStrategy | IncrementalStrategy
     transformations: list[dict] | None = None
+    options: dict | None = None
+
+    def __post_init__(self):
+        if self.options is None:
+            self.options = {}
+        self.options.setdefault("if_exists", "replace_entire_table")
 
 
 @dataclass
 class FileTransferDTO(TransferDTO):
+    id: int
     directory_path: str
     file_format: CSV | JSONLine | JSON | Excel | XML | ORC | Parquet
+    strategy: FullStrategy | IncrementalStrategy
     options: dict
     file_name_template: str | None = None
     df_schema: dict | None = None
@@ -43,7 +55,7 @@ class FileTransferDTO(TransferDTO):
         if isinstance(self.df_schema, str):
             self.df_schema = json.loads(self.df_schema)
 
-        self.options.setdefault("if_exists", "replace_entire_directory")  # TODO: use "append" for incremental strategy
+        self.options.setdefault("if_exists", "replace_overlapping_partitions")
 
     def _get_file_format(self, file_format: dict) -> CSV | JSONLine | JSON | Excel | XML | ORC | Parquet:
         file_type = file_format.pop("type", None)
@@ -86,6 +98,10 @@ class MySQLTransferDTO(DBTransferDTO):
 @dataclass
 class HiveTransferDTO(DBTransferDTO):
     type: ClassVar[str] = "hive"
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.options.setdefault("if_exists", "replace_overlapping_partitions")
 
 
 @dataclass

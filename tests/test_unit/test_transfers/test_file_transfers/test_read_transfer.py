@@ -58,7 +58,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
                 "options": {},
             },
             "target_params": {
-                "file_name_template": "{index}.{extension}",
+                "file_name_template": "{run_id}-{index}.{extension}",
             },
         },
         {
@@ -106,7 +106,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
             },
             "strategy_params": {
                 "type": "incremental",
-                "increment_by": "modified_since",
+                "increment_by": "file_modified_since",
             },
         },
     ],

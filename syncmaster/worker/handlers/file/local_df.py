@@ -6,6 +6,7 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
+from etl_entities.hwm import FileListHWM, FileModifiedTimeHWM
 from onetl.file import FileDFReader, FileDFWriter, FileDownloader, FileUploader
 from onetl.file.filter import FileSizeRange, Glob, Regexp
 
@@ -15,17 +16,27 @@ if TYPE_CHECKING:
     from pyspark.sql import DataFrame
 
 
-class FileProtocolHandler(FileHandler):
+class LocalDFFileHandler(FileHandler):
 
     def read(self) -> DataFrame:
         from pyspark.sql.types import StructType
+
+        downloader_params = {}
+        if self.transfer_dto.strategy.type == "incremental":
+            hwm_name = f"{self.transfer_dto.id}_{self.connection_dto.type}_{self.transfer_dto.directory_path}"
+            if self.transfer_dto.strategy.increment_by == "file_modified_since":
+                downloader_params["hwm"] = FileModifiedTimeHWM(name=hwm_name)
+            elif self.transfer_dto.strategy.increment_by == "file_name":
+                downloader_params["hwm"] = FileListHWM(name=hwm_name)
 
         downloader = FileDownloader(
             connection=self.file_connection,
             source_path=self.transfer_dto.directory_path,
             local_path=self.temp_dir.name,
             filters=self._get_file_metadata_filters(),
+            **downloader_params,
         )
+
         downloader.run()
 
         reader = FileDFReader(
@@ -47,11 +58,12 @@ class FileProtocolHandler(FileHandler):
         return df
 
     def write(self, df: DataFrame) -> None:
+
         writer = FileDFWriter(
             connection=self.local_df_connection,
             format=self.transfer_dto.file_format,
             target_path=self.temp_dir.name,
-            options={"if_exists": "replace_entire_directory"},
+            options=self.transfer_dto.options,
         )
         writer.run(df=df)
 
@@ -66,7 +78,6 @@ class FileProtocolHandler(FileHandler):
             connection=self.file_connection,
             local_path=self.temp_dir.name,
             target_path=self.transfer_dto.directory_path,
-            options=self.transfer_dto.options,
         )
         uploader.run()
 
