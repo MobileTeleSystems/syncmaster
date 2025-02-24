@@ -22,7 +22,7 @@ def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
         markers.update(marker.name for marker in func.iter_markers())
 
     maven_packages: list[str] = []
-    excluded_packages: list[str] = []
+    excluded_packages: list[str] = SparkS3.get_exclude_packages()
 
     spark = (
         SparkSession.builder.appName("celery_worker")
@@ -50,14 +50,6 @@ def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
 
     if "s3" in markers:
         maven_packages.extend(SparkS3.get_packages(spark_version=pyspark.__version__))
-        excluded_packages.extend(
-            [
-                "com.google.cloud.bigdataoss:gcs-connector",
-                "org.apache.hadoop:hadoop-aliyun",
-                "org.apache.hadoop:hadoop-azure-datalake",
-                "org.apache.hadoop:hadoop-azure",
-            ],
-        )
         spark = (
             spark.config("spark.hadoop.fs.s3a.committer.magic.enabled", "true")
             .config("spark.hadoop.fs.s3a.committer.name", "magic")
@@ -77,9 +69,10 @@ def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
 
     if set(markers).intersection({"hdfs", "s3", "sftp", "ftp", "ftps", "samba", "webdav"}):
         # excel version is hardcoded due to https://github.com/nightscape/spark-excel/issues/902
-        file_formats_spark_packages: list[str] = XML.get_packages(
-            spark_version=pyspark.__version__,
-        ) + Excel.get_packages(spark_version="3.5.1")
+        file_formats_spark_packages: list[str] = [
+            *XML.get_packages(spark_version=pyspark.__version__),
+            *Excel.get_packages(spark_version="3.5.1"),
+        ]
         maven_packages.extend(file_formats_spark_packages)
 
     if maven_packages:
