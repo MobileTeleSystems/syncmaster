@@ -22,7 +22,7 @@ def get_worker_spark_session(
     """Construct Spark Session using run parameters and application settings"""
     from pyspark.sql import SparkSession
 
-    name = run.transfer.group.name + "_" + run.transfer.name
+    name = run.transfer.group.name + "_" + run.transfer.name  # noqa: WPS336
     spark_builder = SparkSession.builder.appName(f"syncmaster_{name}")
 
     for k, v in get_spark_session_conf(source, target).items():
@@ -35,15 +35,16 @@ def get_worker_spark_session(
     return spark_builder.getOrCreate()
 
 
-def get_packages(connection_type: str) -> list[str]:
+def get_packages(connection_type: str) -> list[str]:  # noqa: WPS212
     import pyspark
     from onetl.connection import MSSQL, Clickhouse, MySQL, Oracle, Postgres, SparkS3
     from onetl.file.format import XML, Excel
 
     # excel version is hardcoded due to https://github.com/nightscape/spark-excel/issues/902
-    file_formats_spark_packages: list[str] = XML.get_packages(spark_version=pyspark.__version__) + Excel.get_packages(
-        spark_version="3.5.1",
-    )
+    file_formats_spark_packages: list[str] = [
+        *XML.get_packages(spark_version=pyspark.__version__),
+        *Excel.get_packages(spark_version="3.5.1"),
+    ]
 
     if connection_type == "postgres":
         return Postgres.get_packages()
@@ -71,15 +72,10 @@ def get_packages(connection_type: str) -> list[str]:
     return []
 
 
-def get_excluded_packages(db_type: str):
-    if db_type == "s3":
-        return [
-            "com.google.cloud.bigdataoss:gcs-connector",
-            "org.apache.hadoop:hadoop-aliyun",
-            "org.apache.hadoop:hadoop-azure-datalake",
-            "org.apache.hadoop:hadoop-azure",
-        ]
-    return []
+def get_excluded_packages(db_type: str) -> list[str]:
+    from onetl.connection import SparkS3
+
+    return SparkS3.get_exclude_packages()
 
 
 def get_spark_session_conf(
