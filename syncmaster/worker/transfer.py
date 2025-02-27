@@ -61,13 +61,14 @@ def run_transfer(session: Session, run_id: int, settings: WorkerAppSettings):
 
     try:
         controller = TransferController(
+            settings=WORKER_SETTINGS,
             run=run,
             source_connection=run.transfer.source_connection,
             target_connection=run.transfer.target_connection,
             source_auth_data=source_auth_data,
             target_auth_data=target_auth_data,
         )
-        controller.perform_transfer(WORKER_SETTINGS)
+        controller.perform_transfer()
     except Exception:
         run.status = Status.FAILED
         logger.exception("Run %r was failed", run.id)

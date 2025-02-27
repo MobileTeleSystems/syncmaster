@@ -9,13 +9,13 @@ from onetl.connection import S3, SparkS3
 from onetl.file import FileDFReader
 
 from syncmaster.dto.connections import S3ConnectionDTO
-from syncmaster.worker.handlers.file.base import FileHandler
+from syncmaster.worker.handlers.file.remote_df import RemoteDFFileHandler
 
 if TYPE_CHECKING:
     from pyspark.sql import DataFrame, SparkSession
 
 
-class S3Handler(FileHandler):
+class S3Handler(RemoteDFFileHandler):
     connection_dto: S3ConnectionDTO
 
     def connect(self, spark: SparkSession):

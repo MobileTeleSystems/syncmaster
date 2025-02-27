@@ -255,8 +255,18 @@ class CreateTransferSchema(BaseModel):
         source_type = values.source_params.type
         increment_by = values.strategy_params.increment_by
 
-        if source_type in FILE_CONNECTION_TYPES and increment_by != "modified_since":
-            raise ValueError("Field 'increment_by' must be equal to 'modified_since' for file source types")
+        if source_type in FILE_CONNECTION_TYPES and increment_by not in ("file_modified_since", "file_name"):
+            raise ValueError(
+                "Field 'increment_by' must be equal to 'file_modified_since' or 'file_name' for file source types",
+            )
+
+        return values
+
+    @model_validator(mode="after")
+    def validate_strategy(cls, values):
+
+        if values.source_params.type in ("s3", "hdfs") and isinstance(values.strategy_params, IncrementalStrategy):
+            raise ValueError("S3 and HDFS sources do not support incremental strategy for now")
 
         return values
 

@@ -12,6 +12,11 @@ def resource_path():
     return path
 
 
+@pytest.fixture(params=[""])
+def file_format_flavor(request: FixtureRequest):
+    return request.param
+
+
 @pytest.fixture()
 def source_file_format(request: FixtureRequest):
     name, params = request.param

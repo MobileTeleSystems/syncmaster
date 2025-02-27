@@ -14,6 +14,7 @@ from tests.test_integration.test_run_transfer.connection_fixtures.dataframe_fixt
     init_df_with_mixed_column_naming,
 )
 from tests.test_integration.test_run_transfer.connection_fixtures.file_storage_fixtures import (
+    file_format_flavor,
     resource_path,
     source_file_format,
     target_file_format,
@@ -117,6 +118,11 @@ from tests.test_integration.test_run_transfer.connection_fixtures.sftp_fixtures 
 )
 from tests.test_integration.test_run_transfer.connection_fixtures.spark_fixtures import (
     spark,
+)
+from tests.test_integration.test_run_transfer.connection_fixtures.strategy_fixtures import (
+    full_strategy,
+    incremental_strategy_by_file_modified_since,
+    incremental_strategy_by_file_name,
 )
 from tests.test_integration.test_run_transfer.connection_fixtures.webdav_fixtures import (
     prepare_webdav,

@@ -8,13 +8,13 @@ from typing import TYPE_CHECKING
 from onetl.connection import HDFS, SparkHDFS
 
 from syncmaster.dto.connections import HDFSConnectionDTO
-from syncmaster.worker.handlers.file.base import FileHandler
+from syncmaster.worker.handlers.file.remote_df import RemoteDFFileHandler
 
 if TYPE_CHECKING:
     from pyspark.sql import SparkSession
 
 
-class HDFSHandler(FileHandler):
+class HDFSHandler(RemoteDFFileHandler):
     connection_dto: HDFSConnectionDTO
 
     def connect(self, spark: SparkSession):

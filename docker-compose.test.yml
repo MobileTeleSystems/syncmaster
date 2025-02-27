@@ -129,7 +129,51 @@ services:
         condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
-    profiles: [worker, scheduler, s3, oracle, hdfs, hive, clickhouse, mysql, mssql, sftp, ftp, ftps, samba, webdav, all]
+    profiles: [worker, scheduler, s3, hdfs, hive, oracle, clickhouse, mysql, mssql, sftp, ftp, ftps, samba, webdav, all]
+
+  horizon:
+    image: mtsrus/horizon-backend:develop
+    restart: unless-stopped
+    env_file: .env.docker
+    environment:
+      # list here usernames which should be assigned SUPERADMIN role on application start
+      HORIZON__ENTRYPOINT__ADMIN_USERS: admin
+      HORIZON__DATABASE__URL: postgresql+asyncpg://horizon:changeme@horizon-db:5432/horizon
+      HORIZON__AUTH__ACCESS_TOKEN__SECRET_KEY: generate_another_random_string
+      HORIZON__AUTH__PROVIDER: horizon.backend.providers.auth.dummy.DummyAuthProvider
+      HORIZON__SERVER__LOGGING__PRESET: colored
+      # PROMETHEUS_MULTIPROC_DIR is required for multiple workers, see:
+      # https://prometheus.github.io/client_python/multiprocess/
+      PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus-metrics
+    # tmpfs dir is cleaned up each container restart
+    tmpfs:
+      - /tmp/prometheus-metrics
+    ports:
+      - 8020:8000
+    depends_on:
+      horizon-db:
+        condition: service_healthy
+    profiles: [horizon, s3, hdfs, hive, oracle, clickhouse, mysql, mssql, sftp, ftp, ftps, samba, webdav, all]
+
+  horizon-db:
+    image: postgres
+    restart: unless-stopped
+    environment:
+      TZ: UTC
+      POSTGRES_DB: horizon
+      POSTGRES_USER: horizon
+      POSTGRES_PASSWORD: changeme
+    ports:
+      - 5434:5432
+    volumes:
+      - horizon_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready
+      start_period: 5s
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    profiles: [horizon, s3, hdfs, hive, oracle, clickhouse, mysql, mssql, sftp, ftp, ftps, samba, webdav, all]
 
   test-postgres:
     image: postgres
@@ -147,7 +191,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    profiles: [s3, oracle, clickhouse, mysql, mssql, hdfs, hive, sftp, ftp, ftps, samba, webdav, all]
+    profiles: [s3, hdfs, hive, oracle, clickhouse, mysql, mssql, sftp, ftp, ftps, samba, webdav, all]
 
   test-s3:
     image: bitnami/minio:latest
@@ -366,4 +410,5 @@ services:
 volumes:
   postgres_test_data:
   rabbitmq_test_data:
+  horizon_test_data:
   keycloak_data:

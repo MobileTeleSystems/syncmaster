@@ -10,6 +10,7 @@ from syncmaster.settings import (
     LoggingSettings,
     RabbitMQSettings,
 )
+from syncmaster.worker.settings.hwm_store import HWMStoreSettings
 
 
 class WorkerSettings(BaseSettings):
@@ -68,6 +69,7 @@ class WorkerAppSettings(BaseSettings):
         default_factory=CredentialsEncryptionSettings,
         description="Settings for encrypting credential data",
     )
+    hwm_store: HWMStoreSettings = Field(default_factory=HWMStoreSettings, description="HWM Store settings")
 
     class Config:
         env_prefix = "SYNCMASTER__"

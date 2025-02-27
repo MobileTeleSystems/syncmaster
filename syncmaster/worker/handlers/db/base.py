@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 class DBHandler(Handler):
     connection: BaseDBConnection
     transfer_dto: DBTransferDTO
+
     _operators = {
         "is_null": "IS NULL",
         "is_not_null": "IS NOT NULL",
@@ -44,9 +45,13 @@ class DBHandler(Handler):
         return reader.run()
 
     def write(self, df: DataFrame) -> None:
+        if self.transfer_dto.strategy.type == "incremental" and self.hwm and self.hwm.value:
+            self.transfer_dto.options["if_exists"] = "append"
+
         writer = DBWriter(
             connection=self.connection,
             table=self.transfer_dto.table_name,
+            options=self.transfer_dto.options,
         )
         return writer.run(df=self._normalize_column_names(df))
 

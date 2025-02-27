@@ -9,21 +9,21 @@ from onetl.connection import Samba, SparkLocalFS
 from onetl.db import DBReader
 from onetl.file import FileDFReader, FileDownloader
 from pyspark.sql import DataFrame
-from pytest import FixtureRequest
+from pytest_lazy_fixtures import lf
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Connection, Group, Queue, Status
 from syncmaster.db.models.transfer import Transfer
 from tests.mocks import MockUser
 from tests.test_unit.utils import create_transfer
-from tests.utils import get_run_on_end
+from tests.utils import (
+    add_increment_to_files_and_upload,
+    get_run_on_end,
+    prepare_dataframes_for_comparison,
+    run_transfer_and_verify,
+)
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.worker]
-
-
-@pytest.fixture(params=[""])
-def file_format_flavor(request: FixtureRequest):
-    return request.param
 
 
 @pytest_asyncio.fixture
@@ -37,6 +37,7 @@ async def samba_to_postgres(
     prepare_samba,
     source_file_format,
     file_format_flavor: str,
+    strategy: dict,
 ):
     format_name, file_format = source_file_format
     format_name_in_path = "xlsx" if format_name == "excel" else format_name
@@ -62,6 +63,7 @@ async def samba_to_postgres(
             "type": "postgres",
             "table_name": "public.target_table",
         },
+        strategy_params=strategy,
         queue_id=queue.id,
     )
     yield result
@@ -108,51 +110,31 @@ async def postgres_to_samba(
 
 
 @pytest.mark.parametrize(
-    "source_file_format, file_format_flavor",
+    "source_file_format, file_format_flavor, strategy",
     [
         pytest.param(
             ("csv", {}),
             "with_header",
+            lf("full_strategy"),
             id="csv",
         ),
     ],
     indirect=["source_file_format", "file_format_flavor"],
 )
-async def test_run_transfer_samba_to_postgres(
+async def test_run_transfer_samba_to_postgres_with_full_strategy(
     prepare_postgres,
     group_owner: MockUser,
     init_df: DataFrame,
     client: AsyncClient,
     samba_to_postgres: Transfer,
-    source_file_format,
-    file_format_flavor,
+    source_file_format: tuple[str, dict],
+    file_format_flavor: str,
+    strategy: dict,
 ):
-    # Arrange
     postgres, _ = prepare_postgres
     file_format, _ = source_file_format
 
-    # Act
-    result = await client.post(
-        "v1/runs",
-        headers={"Authorization": f"Bearer {group_owner.token}"},
-        json={"transfer_id": samba_to_postgres.id},
-    )
-    # Assert
-    assert result.status_code == 200
-
-    run_data = await get_run_on_end(
-        client=client,
-        run_id=result.json()["id"],
-        token=group_owner.token,
-    )
-    source_auth_data = run_data["transfer_dump"]["source_connection"]["auth_data"]
-    target_auth_data = run_data["transfer_dump"]["target_connection"]["auth_data"]
-
-    assert run_data["status"] == Status.FINISHED.value
-    assert source_auth_data["user"]
-    assert "password" not in source_auth_data
-    assert target_auth_data["user"]
-    assert "password" not in target_auth_data
+    await run_transfer_and_verify(client, group_owner, samba_to_postgres.id)
 
     reader = DBReader(
         connection=postgres,
@@ -160,10 +142,66 @@ async def test_run_transfer_samba_to_postgres(
     )
     df = reader.run()
 
-    for field in init_df.schema:
-        df = df.withColumn(field.name, df[field.name].cast(field.dataType))
-
+    df, init_df = prepare_dataframes_for_comparison(df, init_df, file_format)
     assert df.sort("id").collect() == init_df.sort("id").collect()
+
+
+@pytest.mark.parametrize(
+    "source_file_format, file_format_flavor, strategy",
+    [
+        pytest.param(
+            ("csv", {}),
+            "with_header",
+            lf("incremental_strategy_by_file_name"),
+            id="csv",
+        ),
+    ],
+    indirect=["source_file_format", "file_format_flavor"],
+)
+async def test_run_transfer_samba_to_postgres_with_incremental_strategy(
+    prepare_postgres,
+    group_owner: MockUser,
+    init_df: DataFrame,
+    client: AsyncClient,
+    samba_to_postgres: Transfer,
+    samba_file_connection: Samba,
+    source_file_format: tuple[str, dict],
+    file_format_flavor: str,
+    strategy: dict,
+    tmp_path: Path,
+):
+    postgres, _ = prepare_postgres
+    file_format, _ = source_file_format
+
+    await run_transfer_and_verify(client, group_owner, samba_to_postgres.id)
+
+    reader = DBReader(
+        connection=postgres,
+        table="public.target_table",
+    )
+    df = reader.run()
+
+    df, init_df = prepare_dataframes_for_comparison(df, init_df, file_format)
+    assert df.sort("id").collect() == init_df.sort("id").collect()
+    df_count = df.count()
+
+    add_increment_to_files_and_upload(
+        file_connection=samba_file_connection,
+        remote_path=f"/data/file_df_connection/{file_format}/{file_format_flavor}",
+        tmp_path=tmp_path,
+    )
+
+    await run_transfer_and_verify(client, group_owner, samba_to_postgres.id)
+
+    reader = DBReader(
+        connection=postgres,
+        table="public.target_table",
+    )
+    df_with_increment = reader.run()
+
+    df_with_increment, init_df = prepare_dataframes_for_comparison(df_with_increment, init_df, file_format)
+    assert df_with_increment.count() > df_count
+    assert df_with_increment.sort("id").collect() == init_df.union(init_df).sort("id").collect()
 
 
 @pytest.mark.parametrize(

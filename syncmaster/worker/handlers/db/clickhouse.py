@@ -48,14 +48,15 @@ class ClickhouseHandler(DBHandler):
         )
         quoted_sort_column = f'"{sort_column}"'
 
+        self.transfer_dto.options["createTableOptions"] = f"ENGINE = MergeTree() ORDER BY {quoted_sort_column}"
+
+        if self.transfer_dto.strategy.type == "incremental" and self.hwm and self.hwm.value:
+            self.transfer_dto.options["if_exists"] = "append"
+
         writer = DBWriter(
             connection=self.connection,
             table=self.transfer_dto.table_name,
-            options=(
-                Clickhouse.WriteOptions(createTableOptions=f"ENGINE = MergeTree() ORDER BY {quoted_sort_column}")
-                if self.transfer_dto.type == "clickhouse"
-                else None
-            ),
+            options=self.transfer_dto.options,
         )
         return writer.run(df=normalized_df)
 
