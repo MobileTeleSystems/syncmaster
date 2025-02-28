@@ -13,7 +13,13 @@ from httpx import AsyncClient
 from onetl.connection import FileConnection
 from onetl.file import FileDownloader, FileUploader
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, date_trunc
+from pyspark.sql.functions import (
+    col,
+    date_format,
+    date_trunc,
+    from_unixtime,
+    to_timestamp,
+)
 from sqlalchemy import Connection as AlchConnection
 from sqlalchemy import MetaData, pool, text
 from sqlalchemy.ext.asyncio import (
@@ -126,17 +132,32 @@ async def get_run_on_end(
         await asyncio.sleep(1)
 
 
-def verify_transfer_auth_data(run_data: dict[str, Any]) -> None:
+def verify_transfer_auth_data(run_data: dict[str, Any], auth: tuple[str, str]) -> None:
     source_auth_data = run_data["transfer_dump"]["source_connection"]["auth_data"]
     target_auth_data = run_data["transfer_dump"]["target_connection"]["auth_data"]
+    source_auth, target_auth = auth
 
-    assert source_auth_data["user"]
-    assert "password" not in source_auth_data
-    assert target_auth_data["user"]
-    assert "password" not in target_auth_data
+    if source_auth == "s3":
+        assert source_auth_data["access_key"]
+        assert "secret_key" not in source_auth_data
+    else:
+        assert source_auth_data["user"]
+        assert "password" not in source_auth_data
+
+    if target_auth == "s3":
+        assert target_auth_data["access_key"]
+        assert "secret_key" not in target_auth_data
+    else:
+        assert target_auth_data["user"]
+        assert "password" not in target_auth_data
 
 
-async def run_transfer_and_verify(client: AsyncClient, user: MockUser, transfer_id: int) -> dict[str, Any]:
+async def run_transfer_and_verify(
+    client: AsyncClient,
+    user: MockUser,
+    transfer_id: int,
+    auth: tuple[str, str] = ("basic", "basic"),
+) -> dict[str, Any]:
     result = await client.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -150,7 +171,7 @@ async def run_transfer_and_verify(client: AsyncClient, user: MockUser, transfer_
         token=user.token,
     )
     assert run_data["status"] == Status.FINISHED.value
-    verify_transfer_auth_data(run_data)
+    verify_transfer_auth_data(run_data, auth)
 
     return run_data
 
@@ -158,12 +179,31 @@ async def run_transfer_and_verify(client: AsyncClient, user: MockUser, transfer_
 def prepare_dataframes_for_comparison(
     df: DataFrame,
     init_df: DataFrame,
-    file_format: str,
+    db_type: str | None = None,
+    file_format: str | None = None,
+    transfer_direction: str | None = None,
 ) -> tuple[DataFrame, DataFrame]:
-    # as Excel does not support datetime values with precision greater than milliseconds
-    if file_format == "excel":
-        df = df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
-        init_df = init_df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
+    # Excel does not support datetime values with precision greater than milliseconds
+    # Spark rounds datetime to nearest 3.33 milliseconds when writing to MSSQL: https://onetl.readthedocs.io/en/latest/connection/db_connection/mssql/types.html#id5
+    if file_format == "excel" or db_type == "mssql":
+        if transfer_direction == "file_to_db" or not file_format:
+            df = df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
+            init_df = init_df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
+        elif transfer_direction == "db_to_file":
+            init_df = init_df.withColumn(
+                "REGISTERED_AT",
+                to_timestamp(date_format(col("REGISTERED_AT"), "yyyy-MM-dd HH:mm:ss.SSS")),
+            )
+    # Spark rounds milliseconds to seconds while writing to MySQL: https://onetl.readthedocs.io/en/latest/connection/db_connection/mysql/types.html#id5
+    elif db_type == "mysql":
+        df = df.withColumn(
+            "REGISTERED_AT",
+            from_unixtime((col("REGISTERED_AT").cast("double") + 0.5).cast("long")).cast("timestamp"),
+        )
+        init_df = init_df.withColumn(
+            "REGISTERED_AT",
+            from_unixtime((col("REGISTERED_AT").cast("double") + 0.5).cast("long")).cast("timestamp"),
+        )
 
     for field in init_df.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
@@ -193,3 +233,16 @@ def add_increment_to_files_and_upload(file_connection: FileConnection, remote_pa
         target_path=remote_path,
     )
     uploader.run()
+
+
+def verify_file_name_template(files: list, expected_extension: str) -> None:
+    for file_name in files:
+        run_created_at, index_and_extension = file_name.split("-")
+        assert len(run_created_at.split("_")) == 6, f"Got wrong {run_created_at=}"
+        assert index_and_extension.split(".", 1)[1] == expected_extension
+
+
+def split_df(df: DataFrame, ratio: float, keep_sorted_by: str) -> tuple[DataFrame, DataFrame]:
+    first_df = df.limit(int(df.count() * ratio))
+    second_df = df.subtract(first_df).sort(keep_sorted_by)
+    return first_df, second_df

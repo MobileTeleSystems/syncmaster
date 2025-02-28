@@ -36,11 +36,21 @@ class DBHandler(Handler):
     }
 
     def read(self) -> DataFrame:
+        reader_params = {}
+        if self.transfer_dto.strategy.type == "incremental":
+            self.transfer_dto.strategy.increment_by = self._quote_field(self.transfer_dto.strategy.increment_by)
+            hwm_name = f"{self.transfer_dto.id}_{self.connection_dto.type}_{self.transfer_dto.table_name}"
+            reader_params["hwm"] = DBReader.AutoDetectHWM(
+                name=hwm_name,
+                expression=self.transfer_dto.strategy.increment_by,
+            )
+
         reader = DBReader(
             connection=self.connection,
             table=self.transfer_dto.table_name,
             where=self._get_rows_filter_expression(),
             columns=self._get_columns_filter_expressions(),
+            **reader_params,
         )
         return reader.run()
 

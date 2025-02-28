@@ -50,13 +50,13 @@ def expected_dataframe_rows_filter():
 
 @pytest.fixture
 def dataframe_columns_filter_transformations(source_type: str):
-    string_types_per_source_type = {
-        "postgres": "VARCHAR(10)",
-        "oracle": "VARCHAR2(10)",
-        "clickhouse": "VARCHAR(10)",
+    string_type_per_source_type = {
+        "postgres": "VARCHAR(30)",
+        "oracle": "VARCHAR2(30)",
+        "clickhouse": "VARCHAR(30)",
         "mysql": "CHAR",
-        "mssql": "VARCHAR(10)",
-        "hive": "VARCHAR(10)",
+        "mssql": "VARCHAR(30)",
+        "hive": "VARCHAR(30)",
         "s3": "STRING",
         "hdfs": "STRING",
     }
@@ -84,7 +84,7 @@ def dataframe_columns_filter_transformations(source_type: str):
                 {
                     "type": "cast",
                     "field": "NUMBER",
-                    "as_type": string_types_per_source_type[source_type],
+                    "as_type": string_type_per_source_type[source_type],
                 },
                 {
                     "type": "include",

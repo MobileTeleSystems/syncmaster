@@ -123,6 +123,7 @@ from tests.test_integration.test_run_transfer.connection_fixtures.strategy_fixtu
     full_strategy,
     incremental_strategy_by_file_modified_since,
     incremental_strategy_by_file_name,
+    incremental_strategy_by_number_column,
 )
 from tests.test_integration.test_run_transfer.connection_fixtures.webdav_fixtures import (
     prepare_webdav,
