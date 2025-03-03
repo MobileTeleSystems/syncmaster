@@ -200,12 +200,7 @@ async def test_run_transfer_postgres_to_oracle_with_incremental_strategy(
     fill_with_data(second_transfer_df)
     await run_transfer_and_verify(client, group_owner, postgres_to_oracle.id)
 
-    reader = DBReader(
-        connection=oracle,
-        table=f"{oracle.user}.target_table",
-    )
     df_with_increment = reader.run()
-
     df_with_increment, init_df = prepare_dataframes_for_comparison(df_with_increment, init_df)
     assert df_with_increment.sort("ID").collect() == init_df.sort("ID").collect()
 
@@ -332,11 +327,6 @@ async def test_run_transfer_oracle_to_postgres_with_incremental_strategy(
     fill_with_data(second_transfer_df)
     await run_transfer_and_verify(client, group_owner, oracle_to_postgres.id)
 
-    reader = DBReader(
-        connection=postgres,
-        table="public.target_table",
-    )
     df_with_increment = reader.run()
-
     df_with_increment, init_df = prepare_dataframes_for_comparison(df_with_increment, init_df)
     assert df_with_increment.sort("ID").collect() == init_df.sort("ID").collect()

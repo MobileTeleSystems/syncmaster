@@ -197,12 +197,7 @@ async def test_run_transfer_postgres_to_hive_with_incremental_strategy(
     fill_with_data(second_transfer_df)
     await run_transfer_and_verify(client, group_owner, postgres_to_hive.id)
 
-    reader = DBReader(
-        connection=hive,
-        table="default.target_table",
-    )
     df_with_increment = reader.run()
-
     df_with_increment, init_df = prepare_dataframes_for_comparison(df_with_increment, init_df)
     assert df_with_increment.sort("ID").collect() == init_df.sort("ID").collect()
 
@@ -329,11 +324,6 @@ async def test_run_transfer_hive_to_postgres_with_incremental_strategy(
     fill_with_data(second_transfer_df)
     await run_transfer_and_verify(client, group_owner, hive_to_postgres.id)
 
-    reader = DBReader(
-        connection=postgres,
-        table="public.target_table",
-    )
     df_with_increment = reader.run()
-
     df_with_increment, init_df = prepare_dataframes_for_comparison(df_with_increment, init_df)
     assert df_with_increment.sort("ID").collect() == init_df.sort("ID").collect()

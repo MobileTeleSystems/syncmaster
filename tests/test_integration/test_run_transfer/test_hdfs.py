@@ -329,15 +329,7 @@ async def test_run_transfer_postgres_to_hdfs_with_incremental_strategy(
     files = [os.fspath(file) for file in hdfs_file_connection.list_dir(target_path) if file.is_file()]
     verify_file_name_template(files, expected_extension)
 
-    reader = FileDFReader(
-        connection=hdfs_file_df_connection,
-        format=format,
-        source_path=target_path,
-        df_schema=init_df.schema,
-        options={},
-    )
     df_with_increment = reader.run()
-
     df_with_increment, init_df = prepare_dataframes_for_comparison(
         df_with_increment,
         init_df,

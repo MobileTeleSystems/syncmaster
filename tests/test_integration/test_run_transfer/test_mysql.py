@@ -212,12 +212,7 @@ async def test_run_transfer_postgres_to_mysql_with_incremental_strategy(
     fill_with_data(second_transfer_df)
     await run_transfer_and_verify(client, group_owner, postgres_to_mysql.id)
 
-    reader = DBReader(
-        connection=mysql,
-        table=f"{mysql.database}.target_table",
-    )
     df_with_increment = reader.run()
-
     df_with_increment, init_df = prepare_dataframes_for_comparison(df_with_increment, init_df, db_type="mysql")
     assert df_with_increment.sort("ID").collect() == init_df.sort("ID").collect()
 
@@ -355,11 +350,6 @@ async def test_run_transfer_mysql_to_postgres_with_incremental_strategy(
     fill_with_data(second_transfer_df)
     await run_transfer_and_verify(client, group_owner, mysql_to_postgres.id)
 
-    reader = DBReader(
-        connection=postgres,
-        table="public.target_table",
-    )
     df_with_increment = reader.run()
-
     df_with_increment, init_df = prepare_dataframes_for_comparison(df_with_increment, init_df, db_type="mysql")
     assert df_with_increment.sort("ID").collect() == init_df.sort("ID").collect()

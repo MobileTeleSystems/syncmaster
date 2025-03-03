@@ -241,12 +241,7 @@ async def test_run_transfer_ftp_to_postgres_with_incremental_strategy(
 
     await run_transfer_and_verify(client, group_owner, ftp_to_postgres.id)
 
-    reader = DBReader(
-        connection=postgres,
-        table="public.target_table",
-    )
     df_with_increment = reader.run()
-
     df_with_increment, init_df = prepare_dataframes_for_comparison(
         df_with_increment,
         init_df,
@@ -415,23 +410,10 @@ async def test_run_transfer_postgres_to_ftp_with_incremental_strategy(
     fill_with_data(second_transfer_df)
     await run_transfer_and_verify(client, group_owner, postgres_to_ftp.id)
 
-    downloader = FileDownloader(
-        connection=ftp_file_connection,
-        source_path=f"/target/{format_name}/{file_format_flavor}",
-        local_path=tmp_path,
-    )
     downloader.run()
-
     verify_file_name_template(os.listdir(tmp_path), expected_extension)
 
-    reader = FileDFReader(
-        connection=ftp_file_df_connection,
-        format=format,
-        source_path=tmp_path,
-        df_schema=init_df.schema,
-    )
     df_with_increment = reader.run()
-
     df_with_increment, second_transfer_df = prepare_dataframes_for_comparison(
         df_with_increment,
         second_transfer_df,
