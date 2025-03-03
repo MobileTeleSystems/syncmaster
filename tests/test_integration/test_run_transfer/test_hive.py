@@ -4,7 +4,7 @@ import pytest
 import pytest_asyncio
 from httpx import AsyncClient
 from onetl.db import DBReader
-from pyspark.sql import DataFrame
+from pyspark.sql import DataFrame, SparkSession
 from pytest_lazy_fixtures import lf
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -169,6 +169,7 @@ async def test_run_transfer_postgres_to_hive_mixed_naming_with_full_strategy(
     ],
 )
 async def test_run_transfer_postgres_to_hive_with_incremental_strategy(
+    spark: SparkSession,
     client: AsyncClient,
     group_owner: MockUser,
     prepare_postgres,
@@ -197,6 +198,7 @@ async def test_run_transfer_postgres_to_hive_with_incremental_strategy(
     fill_with_data(second_transfer_df)
     await run_transfer_and_verify(client, group_owner, postgres_to_hive.id)
 
+    spark.catalog.refreshTable("default.target_table")
     df_with_increment = reader.run()
     df_with_increment, init_df = prepare_dataframes_for_comparison(df_with_increment, init_df)
     assert df_with_increment.sort("ID").collect() == init_df.sort("ID").collect()
