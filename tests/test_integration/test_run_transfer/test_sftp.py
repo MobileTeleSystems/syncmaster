@@ -12,15 +12,16 @@ from pyspark.sql import DataFrame
 from pytest_lazy_fixtures import lf
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.db.models import Connection, Group, Queue, Status
+from syncmaster.db.models import Connection, Group, Queue
 from syncmaster.db.models.transfer import Transfer
 from tests.mocks import MockUser
 from tests.test_unit.utils import create_transfer
 from tests.utils import (
     add_increment_to_files_and_upload,
-    get_run_on_end,
-    prepare_dataframes_for_comparison,
+    cast_dataframe_types,
     run_transfer_and_verify,
+    split_df,
+    verify_file_name_template,
 )
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.worker]
@@ -82,6 +83,7 @@ async def postgres_to_sftp(
     postgres_connection: Connection,
     target_file_format,
     file_format_flavor: str,
+    strategy: dict,
 ):
     format_name, file_format = target_file_format
     result = await create_transfer(
@@ -104,6 +106,7 @@ async def postgres_to_sftp(
             "file_name_template": "{run_created_at}-{index}.{extension}",
             "options": {},
         },
+        strategy_params=strategy,
         queue_id=queue.id,
     )
     yield result
@@ -146,7 +149,7 @@ async def test_run_transfer_sftp_to_postgres_with_full_strategy(
     )
     df = reader.run()
 
-    df, init_df = prepare_dataframes_for_comparison(df, init_df, file_format)
+    df, init_df = cast_dataframe_types(df, init_df)
     assert df.sort("id").collect() == init_df.sort("id").collect()
 
 
@@ -187,9 +190,8 @@ async def test_run_transfer_sftp_to_postgres_with_incremental_strategy(
     )
     df = reader.run()
 
-    df, init_df = prepare_dataframes_for_comparison(df, init_df, file_format)
+    df, init_df = cast_dataframe_types(df, init_df)
     assert df.sort("id").collect() == init_df.sort("id").collect()
-    df_count = df.count()
 
     add_increment_to_files_and_upload(
         file_connection=sftp_file_connection,
@@ -199,34 +201,30 @@ async def test_run_transfer_sftp_to_postgres_with_incremental_strategy(
 
     await run_transfer_and_verify(client, group_owner, sftp_to_postgres.id)
 
-    reader = DBReader(
-        connection=postgres,
-        table="public.target_table",
-    )
     df_with_increment = reader.run()
-
-    df_with_increment, init_df = prepare_dataframes_for_comparison(df_with_increment, init_df, file_format)
-    assert df_with_increment.count() > df_count
+    df_with_increment, init_df = cast_dataframe_types(df_with_increment, init_df)
     assert df_with_increment.sort("id").collect() == init_df.union(init_df).sort("id").collect()
 
 
 @pytest.mark.parametrize(
-    "target_file_format, file_format_flavor, expected_extension",
+    "target_file_format, file_format_flavor, expected_extension, strategy",
     [
         pytest.param(
             ("csv", {"compression": "lz4"}),
             "with_compression",
             "csv.lz4",
+            lf("full_strategy"),
             id="csv",
         ),
     ],
     indirect=["target_file_format", "file_format_flavor"],
 )
-async def test_run_transfer_postgres_to_sftp(
+async def test_run_transfer_postgres_to_sftp_with_full_strategy(
     group_owner: MockUser,
     init_df: DataFrame,
     client: AsyncClient,
     prepare_postgres,
+    sftp_file_connection_with_path,
     sftp_file_connection: SFTP,
     sftp_file_df_connection: SparkLocalFS,
     postgres_to_sftp: Transfer,
@@ -234,35 +232,13 @@ async def test_run_transfer_postgres_to_sftp(
     file_format_flavor: str,
     tmp_path: Path,
     expected_extension: str,
+    strategy: dict,
 ):
     format_name, format = target_file_format
-
-    # Arrange
     _, fill_with_data = prepare_postgres
     fill_with_data(init_df)
 
-    # Act
-    result = await client.post(
-        "v1/runs",
-        headers={"Authorization": f"Bearer {group_owner.token}"},
-        json={"transfer_id": postgres_to_sftp.id},
-    )
-    # Assert
-    assert result.status_code == 200
-
-    run_data = await get_run_on_end(
-        client=client,
-        run_id=result.json()["id"],
-        token=group_owner.token,
-    )
-    source_auth_data = run_data["transfer_dump"]["source_connection"]["auth_data"]
-    target_auth_data = run_data["transfer_dump"]["target_connection"]["auth_data"]
-
-    assert run_data["status"] == Status.FINISHED.value
-    assert source_auth_data["user"]
-    assert "password" not in source_auth_data
-    assert target_auth_data["user"]
-    assert "password" not in target_auth_data
+    await run_transfer_and_verify(client, group_owner, postgres_to_sftp.id)
 
     downloader = FileDownloader(
         connection=sftp_file_connection,
@@ -271,11 +247,7 @@ async def test_run_transfer_postgres_to_sftp(
     )
     downloader.run()
 
-    files = os.listdir(tmp_path)
-    for file_name in files:
-        run_created_at, index_and_extension = file_name.split("-")
-        assert len(run_created_at.split("_")) == 6, f"Got wrong {run_created_at=}"
-        assert index_and_extension.split(".", 1)[1] == expected_extension
+    verify_file_name_template(os.listdir(tmp_path), expected_extension)
 
     reader = FileDFReader(
         connection=sftp_file_df_connection,
@@ -285,7 +257,72 @@ async def test_run_transfer_postgres_to_sftp(
     )
     df = reader.run()
 
-    for field in init_df.schema:
-        df = df.withColumn(field.name, df[field.name].cast(field.dataType))
-
+    df, init_df = cast_dataframe_types(df, init_df)
     assert df.sort("id").collect() == init_df.sort("id").collect()
+
+
+@pytest.mark.parametrize(
+    "target_file_format, file_format_flavor, expected_extension, strategy",
+    [
+        pytest.param(
+            ("csv", {"compression": "lz4"}),
+            "with_compression",
+            "csv.lz4",
+            lf("incremental_strategy_by_number_column"),
+            id="csv",
+        ),
+    ],
+    indirect=["target_file_format", "file_format_flavor"],
+)
+async def test_run_transfer_postgres_to_sftp_with_incremental_strategy(
+    group_owner: MockUser,
+    init_df: DataFrame,
+    client: AsyncClient,
+    prepare_postgres,
+    sftp_file_connection_with_path,
+    sftp_file_connection: SFTP,
+    sftp_file_df_connection: SparkLocalFS,
+    postgres_to_sftp: Transfer,
+    target_file_format,
+    file_format_flavor: str,
+    tmp_path: Path,
+    expected_extension: str,
+    strategy: dict,
+):
+    format_name, format = target_file_format
+    _, fill_with_data = prepare_postgres
+
+    first_transfer_df, second_transfer_df = split_df(df=init_df, ratio=0.6, keep_sorted_by="number")
+    fill_with_data(first_transfer_df)
+
+    await run_transfer_and_verify(client, group_owner, postgres_to_sftp.id)
+
+    downloader = FileDownloader(
+        connection=sftp_file_connection,
+        source_path=f"/config/target/{format_name}/{file_format_flavor}",
+        local_path=tmp_path,
+    )
+    downloader.run()
+
+    verify_file_name_template(os.listdir(tmp_path), expected_extension)
+
+    reader = FileDFReader(
+        connection=sftp_file_df_connection,
+        format=format,
+        source_path=tmp_path,
+        df_schema=init_df.schema,
+    )
+    df = reader.run()
+
+    df, first_transfer_df = cast_dataframe_types(df, first_transfer_df)
+    assert df.sort("id").collect() == first_transfer_df.sort("id").collect()
+
+    fill_with_data(second_transfer_df)
+    await run_transfer_and_verify(client, group_owner, postgres_to_sftp.id)
+
+    downloader.run()
+    verify_file_name_template(os.listdir(tmp_path), expected_extension)
+
+    df_with_increment = reader.run()
+    df_with_increment, second_transfer_df = cast_dataframe_types(df_with_increment, init_df)
+    assert df_with_increment.sort("id").collect() == init_df.sort("id").collect()

@@ -42,6 +42,7 @@ from syncmaster.dto.transfers import (
 )
 from syncmaster.dto.transfers_strategy import Strategy
 from syncmaster.exceptions.connection import ConnectionTypeNotRecognizedError
+from syncmaster.schemas.v1.connection_types import FILE_CONNECTION_TYPES
 from syncmaster.worker.handlers.base import Handler
 from syncmaster.worker.handlers.db.clickhouse import ClickhouseHandler
 from syncmaster.worker.handlers.db.hive import HiveHandler
@@ -242,11 +243,15 @@ class TransferController:
         ).force_create_namespace() as hwm_store:
 
             with IncrementalStrategy():
+                if self.source_handler.connection_dto.type in FILE_CONNECTION_TYPES:
+                    hwm_name_suffix = self.source_handler.transfer_dto.directory_path
+                else:
+                    hwm_name_suffix = self.source_handler.transfer_dto.table_name
                 hwm_name = "_".join(
                     [
                         str(self.source_handler.transfer_dto.id),
                         self.source_handler.connection_dto.type,
-                        self.source_handler.transfer_dto.directory_path,
+                        hwm_name_suffix,
                     ],
                 )
                 hwm = hwm_store.get_hwm(hwm_name)

@@ -22,3 +22,11 @@ def incremental_strategy_by_file_name():
         "type": "incremental",
         "increment_by": "file_name",
     }
+
+
+@pytest.fixture
+def incremental_strategy_by_number_column():
+    return {
+        "type": "incremental",
+        "increment_by": "NUMBER",
+    }

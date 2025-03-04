@@ -82,7 +82,7 @@ def s3_file_connection(s3_server):
     return s3_connection
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def s3_file_connection_with_path(request, s3_file_connection):
     connection = s3_file_connection
     source = PurePosixPath("/data")
@@ -99,7 +99,7 @@ def s3_file_connection_with_path(request, s3_file_connection):
     return connection, source
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def s3_file_df_connection_with_path(s3_file_connection_with_path, s3_file_df_connection):
     _, root = s3_file_connection_with_path
     return s3_file_df_connection, root
@@ -123,7 +123,7 @@ def s3_file_df_connection(s3_file_connection, spark, s3_server):
     )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def prepare_s3(
     resource_path: PosixPath,
     s3_file_connection: S3,
