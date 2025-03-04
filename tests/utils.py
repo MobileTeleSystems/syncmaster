@@ -132,10 +132,9 @@ async def get_run_on_end(
         await asyncio.sleep(1)
 
 
-def verify_transfer_auth_data(run_data: dict[str, Any], auth: tuple[str, str]) -> None:
+def verify_transfer_auth_data(run_data: dict[str, Any], source_auth: str, target_auth: str) -> None:
     source_auth_data = run_data["transfer_dump"]["source_connection"]["auth_data"]
     target_auth_data = run_data["transfer_dump"]["target_connection"]["auth_data"]
-    source_auth, target_auth = auth
 
     if source_auth == "s3":
         assert source_auth_data["access_key"]
@@ -156,7 +155,8 @@ async def run_transfer_and_verify(
     client: AsyncClient,
     user: MockUser,
     transfer_id: int,
-    auth: tuple[str, str] = ("basic", "basic"),
+    source_auth: str = "basic",
+    target_auth: str = "basic",
 ) -> dict[str, Any]:
     result = await client.post(
         "v1/runs",
@@ -171,43 +171,47 @@ async def run_transfer_and_verify(
         token=user.token,
     )
     assert run_data["status"] == Status.FINISHED.value
-    verify_transfer_auth_data(run_data, auth)
+    verify_transfer_auth_data(run_data, source_auth, target_auth)
 
     return run_data
 
 
-def prepare_dataframes_for_comparison(
-    df: DataFrame,
-    init_df: DataFrame,
-    db_type: str | None = None,
-    file_format: str | None = None,
-    transfer_direction: str | None = None,
-) -> tuple[DataFrame, DataFrame]:
-    # Excel does not support datetime values with precision greater than milliseconds
-    # Spark rounds datetime to nearest 3.33 milliseconds when writing to MSSQL: https://onetl.readthedocs.io/en/latest/connection/db_connection/mssql/types.html#id5
-    if file_format == "excel" or db_type == "mssql":
-        if transfer_direction == "file_to_db" or not file_format:
-            df = df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
-            init_df = init_df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
-        elif transfer_direction == "db_to_file":
-            init_df = init_df.withColumn(
-                "REGISTERED_AT",
-                to_timestamp(date_format(col("REGISTERED_AT"), "yyyy-MM-dd HH:mm:ss.SSS")),
-            )
-    # Spark rounds milliseconds to seconds while writing to MySQL: https://onetl.readthedocs.io/en/latest/connection/db_connection/mysql/types.html#id5
-    elif db_type == "mysql":
-        df = df.withColumn(
-            "REGISTERED_AT",
-            from_unixtime((col("REGISTERED_AT").cast("double") + 0.5).cast("long")).cast("timestamp"),
-        )
-        init_df = init_df.withColumn(
-            "REGISTERED_AT",
-            from_unixtime((col("REGISTERED_AT").cast("double") + 0.5).cast("long")).cast("timestamp"),
-        )
+def cast_dataframe_types(df: DataFrame, init_df: DataFrame) -> tuple[DataFrame, DataFrame]:
 
     for field in init_df.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
 
+    return df, init_df
+
+
+def truncate_datetime_to_seconds(
+    df: DataFrame,
+    init_df: DataFrame,
+    transfer_direction: str | None = None,
+) -> tuple[DataFrame, DataFrame]:
+    # Excel does not support datetime values with precision greater than milliseconds
+    # Spark rounds datetime to nearest 3.33 milliseconds when writing to MSSQL: https://onetl.readthedocs.io/en/latest/connection/db_connection/mssql/types.html#id5
+    if transfer_direction == "file_to_db" or transfer_direction is None:
+        df = df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
+        init_df = init_df.withColumn("REGISTERED_AT", date_trunc("second", col("REGISTERED_AT")))
+    elif transfer_direction == "db_to_file":
+        init_df = init_df.withColumn(
+            "REGISTERED_AT",
+            to_timestamp(date_format(col("REGISTERED_AT"), "yyyy-MM-dd HH:mm:ss.SSS")),
+        )
+    return df, init_df
+
+
+def round_datetime_to_seconds(df: DataFrame, init_df: DataFrame) -> tuple[DataFrame, DataFrame]:
+    # Spark rounds milliseconds to seconds while writing to MySQL: https://onetl.readthedocs.io/en/latest/connection/db_connection/mysql/types.html#id5
+    df = df.withColumn(
+        "REGISTERED_AT",
+        from_unixtime((col("REGISTERED_AT").cast("double") + 0.5).cast("long")).cast("timestamp"),
+    )
+    init_df = init_df.withColumn(
+        "REGISTERED_AT",
+        from_unixtime((col("REGISTERED_AT").cast("double") + 0.5).cast("long")).cast("timestamp"),
+    )
     return df, init_df
 
 

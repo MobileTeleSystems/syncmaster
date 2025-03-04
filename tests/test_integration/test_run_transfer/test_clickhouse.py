@@ -13,7 +13,7 @@ from syncmaster.db.models import Connection, Group, Queue, Transfer
 from tests.mocks import MockUser
 from tests.test_unit.utils import create_transfer
 from tests.utils import (
-    prepare_dataframes_for_comparison,
+    cast_dataframe_types,
     run_transfer_and_verify,
     split_df,
 )
@@ -131,7 +131,7 @@ async def test_run_transfer_postgres_to_clickhouse_with_full_strategy(
     )
     df = reader.run()
 
-    df, init_df = prepare_dataframes_for_comparison(df, init_df)
+    df, init_df = cast_dataframe_types(df, init_df)
     assert df.sort("ID").collect() == init_df.sort("ID").collect()
 
 
@@ -169,7 +169,7 @@ async def test_run_transfer_postgres_to_clickhouse_mixed_naming_with_full_strate
     assert df.columns != init_df_with_mixed_column_naming.columns
     assert df.columns == [column.lower() for column in init_df_with_mixed_column_naming.columns]
 
-    df, init_df_with_mixed_column_naming = prepare_dataframes_for_comparison(df, init_df_with_mixed_column_naming)
+    df, init_df_with_mixed_column_naming = cast_dataframe_types(df, init_df_with_mixed_column_naming)
     assert df.sort("ID").collect() == init_df_with_mixed_column_naming.sort("ID").collect()
 
 
@@ -205,14 +205,14 @@ async def test_run_transfer_postgres_to_clickhouse_with_incremental_strategy(
     )
     df = reader.run()
 
-    df, first_transfer_df = prepare_dataframes_for_comparison(df, first_transfer_df)
+    df, first_transfer_df = cast_dataframe_types(df, first_transfer_df)
     assert df.sort("ID").collect() == first_transfer_df.sort("ID").collect()
 
     fill_with_data(second_transfer_df)
     await run_transfer_and_verify(client, group_owner, postgres_to_clickhouse.id)
 
     df_with_increment = reader.run()
-    df_with_increment, init_df = prepare_dataframes_for_comparison(df_with_increment, init_df)
+    df_with_increment, init_df = cast_dataframe_types(df_with_increment, init_df)
     assert df_with_increment.sort("ID").collect() == init_df.sort("ID").collect()
 
 
@@ -258,7 +258,7 @@ async def test_run_transfer_clickhouse_to_postgres_with_full_strategy(
     )
     df = reader.run()
 
-    df, init_df = prepare_dataframes_for_comparison(df, init_df)
+    df, init_df = cast_dataframe_types(df, init_df)
     assert df.sort("ID").collect() == init_df.sort("ID").collect()
 
 
@@ -296,7 +296,7 @@ async def test_run_transfer_clickhouse_to_postgres_mixed_naming_with_full_strate
     assert df.columns != init_df_with_mixed_column_naming.columns
     assert df.columns == [column.lower() for column in init_df_with_mixed_column_naming.columns]
 
-    df, init_df_with_mixed_column_naming = prepare_dataframes_for_comparison(df, init_df_with_mixed_column_naming)
+    df, init_df_with_mixed_column_naming = cast_dataframe_types(df, init_df_with_mixed_column_naming)
     assert df.sort("ID").collect() == init_df_with_mixed_column_naming.sort("ID").collect()
 
 
@@ -332,12 +332,12 @@ async def test_run_transfer_clickhouse_to_postgres_with_incremental_strategy(
     )
     df = reader.run()
 
-    df, first_transfer_df = prepare_dataframes_for_comparison(df, first_transfer_df)
+    df, first_transfer_df = cast_dataframe_types(df, first_transfer_df)
     assert df.sort("ID").collect() == first_transfer_df.sort("ID").collect()
 
     fill_with_data(second_transfer_df)
     await run_transfer_and_verify(client, group_owner, clickhouse_to_postgres.id)
 
     df_with_increment = reader.run()
-    df_with_increment, init_df = prepare_dataframes_for_comparison(df_with_increment, init_df)
+    df_with_increment, init_df = cast_dataframe_types(df_with_increment, init_df)
     assert df_with_increment.sort("ID").collect() == init_df.sort("ID").collect()

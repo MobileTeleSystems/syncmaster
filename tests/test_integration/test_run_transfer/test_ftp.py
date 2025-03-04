@@ -18,9 +18,10 @@ from tests.mocks import MockUser
 from tests.test_unit.utils import create_transfer
 from tests.utils import (
     add_increment_to_files_and_upload,
-    prepare_dataframes_for_comparison,
+    cast_dataframe_types,
     run_transfer_and_verify,
     split_df,
+    truncate_datetime_to_seconds,
     verify_file_name_template,
 )
 
@@ -181,12 +182,10 @@ async def test_run_transfer_ftp_to_postgres_with_full_strategy(
     )
     df = reader.run()
 
-    df, init_df = prepare_dataframes_for_comparison(
-        df,
-        init_df,
-        file_format=file_format,
-        transfer_direction="file_to_db",
-    )
+    if file_format == "excel":
+        df, init_df = truncate_datetime_to_seconds(df, init_df, transfer_direction="file_to_db")
+
+    df, init_df = cast_dataframe_types(df, init_df)
     assert df.sort("id").collect() == init_df.sort("id").collect()
 
 
@@ -225,12 +224,7 @@ async def test_run_transfer_ftp_to_postgres_with_incremental_strategy(
     )
     df = reader.run()
 
-    df, init_df = prepare_dataframes_for_comparison(
-        df,
-        init_df,
-        file_format=file_format,
-        transfer_direction="file_to_db",
-    )
+    df, init_df = cast_dataframe_types(df, init_df)
     assert df.sort("id").collect() == init_df.sort("id").collect()
 
     add_increment_to_files_and_upload(
@@ -242,12 +236,7 @@ async def test_run_transfer_ftp_to_postgres_with_incremental_strategy(
     await run_transfer_and_verify(client, group_owner, ftp_to_postgres.id)
 
     df_with_increment = reader.run()
-    df_with_increment, init_df = prepare_dataframes_for_comparison(
-        df_with_increment,
-        init_df,
-        file_format=file_format,
-        transfer_direction="file_to_db",
-    )
+    df_with_increment, init_df = cast_dataframe_types(df_with_increment, init_df)
     assert df_with_increment.sort("id").collect() == init_df.union(init_df).sort("id").collect()
 
 
@@ -337,12 +326,10 @@ async def test_run_transfer_postgres_to_ftp_with_full_strategy(
     )
     df = reader.run()
 
-    df, init_df = prepare_dataframes_for_comparison(
-        df,
-        init_df,
-        file_format=format_name,
-        transfer_direction="db_to_file",
-    )
+    if format_name == "excel":
+        df, init_df = truncate_datetime_to_seconds(df, init_df, transfer_direction="db_to_file")
+
+    df, init_df = cast_dataframe_types(df, init_df)
     assert df.sort("id").collect() == init_df.sort("id").collect()
 
 
@@ -399,12 +386,7 @@ async def test_run_transfer_postgres_to_ftp_with_incremental_strategy(
     )
     df = reader.run()
 
-    df, first_transfer_df = prepare_dataframes_for_comparison(
-        df,
-        first_transfer_df,
-        file_format=format_name,
-        transfer_direction="db_to_file",
-    )
+    df, first_transfer_df = cast_dataframe_types(df, first_transfer_df)
     assert df.sort("id").collect() == first_transfer_df.sort("id").collect()
 
     fill_with_data(second_transfer_df)
@@ -414,10 +396,5 @@ async def test_run_transfer_postgres_to_ftp_with_incremental_strategy(
     verify_file_name_template(os.listdir(tmp_path), expected_extension)
 
     df_with_increment = reader.run()
-    df_with_increment, second_transfer_df = prepare_dataframes_for_comparison(
-        df_with_increment,
-        second_transfer_df,
-        file_format=format_name,
-        transfer_direction="db_to_file",
-    )
+    df_with_increment, second_transfer_df = cast_dataframe_types(df_with_increment, second_transfer_df)
     assert df_with_increment.sort("id").collect() == init_df.sort("id").collect()

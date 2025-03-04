@@ -16,9 +16,10 @@ from syncmaster.db.models.transfer import Transfer
 from tests.mocks import MockUser
 from tests.test_unit.utils import create_transfer
 from tests.utils import (
-    prepare_dataframes_for_comparison,
+    cast_dataframe_types,
     run_transfer_and_verify,
     split_df,
+    truncate_datetime_to_seconds,
     verify_file_name_template,
 )
 
@@ -191,7 +192,7 @@ async def test_run_transfer_s3_to_postgres_with_full_strategy(
     if expected_filter:
         init_df = expected_filter(init_df, source_type)
 
-    await run_transfer_and_verify(client, group_owner, s3_to_postgres.id, auth=("s3", "basic"))
+    await run_transfer_and_verify(client, group_owner, s3_to_postgres.id, source_auth="s3")
 
     reader = DBReader(
         connection=postgres,
@@ -199,12 +200,10 @@ async def test_run_transfer_s3_to_postgres_with_full_strategy(
     )
     df = reader.run()
 
-    df, init_df = prepare_dataframes_for_comparison(
-        df,
-        init_df,
-        file_format=file_format,
-        transfer_direction="file_to_db",
-    )
+    if file_format == "excel":
+        df, init_df = truncate_datetime_to_seconds(df, init_df, transfer_direction="file_to_db")
+
+    df, init_df = cast_dataframe_types(df, init_df)
     assert df.sort("id").collect() == init_df.sort("id").collect()
 
 
@@ -282,7 +281,7 @@ async def test_run_transfer_postgres_to_s3_with_full_strategy(
     _, fill_with_data = prepare_postgres
     fill_with_data(init_df)
 
-    await run_transfer_and_verify(client, group_owner, postgres_to_s3.id, auth=("basic", "s3"))
+    await run_transfer_and_verify(client, group_owner, postgres_to_s3.id, target_auth="s3")
 
     files = [os.fspath(file) for file in s3_file_connection.list_dir(target_path)]
     verify_file_name_template(files, expected_extension)
@@ -296,12 +295,10 @@ async def test_run_transfer_postgres_to_s3_with_full_strategy(
     )
     df = reader.run()
 
-    df, init_df = prepare_dataframes_for_comparison(
-        df,
-        init_df,
-        file_format=format_name,
-        transfer_direction="db_to_file",
-    )
+    if format_name == "excel":
+        df, init_df = truncate_datetime_to_seconds(df, init_df, transfer_direction="db_to_file")
+
+    df, init_df = cast_dataframe_types(df, init_df)
     assert df.sort("id").collect() == init_df.sort("id").collect()
 
 
@@ -340,7 +337,7 @@ async def test_run_transfer_postgres_to_s3_with_incremental_strategy(
 
     first_transfer_df, second_transfer_df = split_df(df=init_df, ratio=0.6, keep_sorted_by="number")
     fill_with_data(first_transfer_df)
-    await run_transfer_and_verify(client, group_owner, postgres_to_s3.id, auth=("basic", "s3"))
+    await run_transfer_and_verify(client, group_owner, postgres_to_s3.id, target_auth="s3")
 
     files = [os.fspath(file) for file in s3_file_connection.list_dir(target_path)]
     verify_file_name_template(files, expected_extension)
@@ -354,25 +351,15 @@ async def test_run_transfer_postgres_to_s3_with_incremental_strategy(
     )
     df = reader.run()
 
-    df, first_transfer_df = prepare_dataframes_for_comparison(
-        df,
-        first_transfer_df,
-        file_format=format_name,
-        transfer_direction="db_to_file",
-    )
+    df, first_transfer_df = cast_dataframe_types(df, first_transfer_df)
     assert df.sort("id").collect() == first_transfer_df.sort("id").collect()
 
     fill_with_data(second_transfer_df)
-    await run_transfer_and_verify(client, group_owner, postgres_to_s3.id, auth=("basic", "s3"))
+    await run_transfer_and_verify(client, group_owner, postgres_to_s3.id, target_auth="s3")
 
     files = [os.fspath(file) for file in s3_file_connection.list_dir(target_path)]
     verify_file_name_template(files, expected_extension)
 
     df_with_increment = reader.run()
-    df_with_increment, init_df = prepare_dataframes_for_comparison(
-        df_with_increment,
-        init_df,
-        file_format=format_name,
-        transfer_direction="db_to_file",
-    )
+    df_with_increment, init_df = cast_dataframe_types(df_with_increment, init_df)
     assert df_with_increment.sort("id").collect() == init_df.sort("id").collect()
