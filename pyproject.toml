@@ -59,7 +59,7 @@ pyjwt = { version = "^2.10.1", optional = true }
 jinja2 = { version = "^3.1.4", optional = true }
 python-multipart = { version = ">=0.0.9,<0.0.21", optional = true }
 celery = { version = "^5.4.0", optional = true }
-onetl = { version = "^0.13.0", extras = ["spark"] }
+onetl = { version = "^0.13.0", extras = ["all"] }
 pyyaml = { version = "*", optional = true }
 # due to not supporting MacOS 14.x https://www.psycopg.org/psycopg3/docs/news.html#psycopg-3-1-20
 psycopg = { version = ">=3.1.0,<3.2.6", extras = ["binary"], optional = true }
@@ -134,7 +134,6 @@ pytest-randomly = "^3.15.0"
 pytest-deadfixtures = "^2.2.1"
 pytest-mock = "^3.14.0"
 pytest-lazy-fixtures = "^1.1.1"
-onetl = { version = "^0.13.0", extras = ["spark", "s3", "hdfs", "files"] }
 faker = ">=33.3,<37.0"
 coverage = "^7.6.1"
 gevent = "^24.2.1"
