@@ -129,7 +129,7 @@ zookeeper = ["kazoo"]
 name = "argon2-cffi"
 version = "23.1.0"
 description = "Argon2 for Python"
-optional = false
+optional = true
 python-versions = ">=3.7"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -151,7 +151,7 @@ typing = ["mypy"]
 name = "argon2-cffi-bindings"
 version = "21.2.0"
 description = "Low-level CFFI bindings for Argon2"
-optional = false
+optional = true
 python-versions = ">=3.6"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -343,7 +343,7 @@ dev = ["backports.zoneinfo ; python_version < \"3.9\"", "freezegun (>=1.0,<2.0)"
 name = "bcrypt"
 version = "4.3.0"
 description = "Modern password hashing for your software and your servers"
-optional = false
+optional = true
 python-versions = ">=3.8"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -432,7 +432,7 @@ lxml = ["lxml"]
 name = "bidict"
 version = "0.23.1"
 description = "The bidirectional mapping library for Python."
-optional = false
+optional = true
 python-versions = ">=3.8"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -948,7 +948,7 @@ toml = ["tomli ; python_full_version <= \"3.11.0a6\""]
 name = "cryptography"
 version = "44.0.2"
 description = "cryptography is a package which provides cryptographic recipes and primitives to Python developers."
-optional = false
+optional = true
 python-versions = "!=3.9.0,!=3.9.1,>=3.7"
 groups = ["main"]
 markers = "extra == \"worker\" or extra == \"server\""
@@ -1034,7 +1034,7 @@ postgres = ["asyncpg (>=0.28.0) ; python_version >= \"3.8\"", "asyncpg (>=0.28.0
 name = "decorator"
 version = "5.2.1"
 description = "Decorators for Humans"
-optional = false
+optional = true
 python-versions = ">=3.8"
 groups = ["main"]
 markers = "extra == \"worker\" and sys_platform != \"win32\""
@@ -1075,7 +1075,7 @@ files = [
 name = "docopt"
 version = "0.6.2"
 description = "Pythonic argument parser, that will make you smile"
-optional = false
+optional = true
 python-versions = "*"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -1099,7 +1099,7 @@ files = [
 name = "etl-entities"
 version = "2.5.0"
 description = "ETL Entities lib for onETL"
-optional = false
+optional = true
 python-versions = ">=3.7"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -1120,7 +1120,7 @@ typing-extensions = ">=4.5.0"
 name = "evacuator"
 version = "1.0.4"
 description = "Catch an exception and exit with an exit code"
-optional = false
+optional = true
 python-versions = ">=3.7"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -1221,7 +1221,7 @@ dev = ["pyTest", "pyTest-cov"]
 name = "frozendict"
 version = "2.4.6"
 description = "A simple immutable dictionary"
-optional = false
+optional = true
 python-versions = ">=3.6"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -1271,7 +1271,7 @@ files = [
 name = "ftputil"
 version = "5.1.0"
 description = "High-level FTP client library (virtual file system and more)"
-optional = false
+optional = true
 python-versions = ">=3.6"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -1450,7 +1450,7 @@ test = ["objgraph", "psutil"]
 name = "gssapi"
 version = "1.9.0"
 description = "Python GSSAPI Wrapper"
-optional = false
+optional = true
 python-versions = ">=3.8"
 groups = ["main"]
 markers = "extra == \"worker\" and sys_platform != \"win32\""
@@ -1501,7 +1501,7 @@ files = [
 name = "hdfs"
 version = "2.7.3"
 description = "HdfsCLI: API and command line interface for HDFS."
-optional = false
+optional = true
 python-versions = "*"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -1604,7 +1604,7 @@ pyreadline3 = {version = "*", markers = "sys_platform == \"win32\" and python_ve
 name = "humanize"
 version = "4.12.1"
 description = "Python humanize utilities"
-optional = false
+optional = true
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -1662,7 +1662,7 @@ files = [
 name = "importlib-metadata"
 version = "8.6.1"
 description = "Read metadata from Python packages"
-optional = false
+optional = true
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -1783,7 +1783,7 @@ zookeeper = ["kazoo (>=2.8.0)"]
 name = "krb5"
 version = "0.7.0"
 description = "Kerberos API bindings for Python"
-optional = false
+optional = true
 python-versions = ">=3.8"
 groups = ["main"]
 markers = "extra == \"worker\" and sys_platform != \"win32\""
@@ -1807,7 +1807,7 @@ files = [
 name = "lxml"
 version = "5.3.1"
 description = "Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API."
-optional = false
+optional = true
 python-versions = ">=3.6"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -2068,7 +2068,7 @@ files = [
 name = "minio"
 version = "7.2.15"
 description = "MinIO Python SDK for Amazon S3 Compatible Cloud Storage"
-optional = false
+optional = true
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -2251,7 +2251,7 @@ test = ["matplotlib", "pytest", "pytest-cov"]
 name = "onetl"
 version = "0.13.0"
 description = "One ETL tool to rule them all"
-optional = false
+optional = true
 python-versions = ">=3.7"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -2297,7 +2297,7 @@ webdav = ["webdavclient3"]
 name = "ordered-set"
 version = "4.1.0"
 description = "An OrderedSet is a custom MutableSet that remembers its order, so that every"
-optional = false
+optional = true
 python-versions = ">=3.7"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -2342,7 +2342,7 @@ types-pytz = ">=2022.1.1"
 name = "paramiko"
 version = "3.5.1"
 description = "SSH2 protocol library"
-optional = false
+optional = true
 python-versions = ">=3.6"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -2462,7 +2462,7 @@ wcwidth = "*"
 name = "psutil"
 version = "7.0.0"
 description = "Cross-platform lib for process and system monitoring in Python.  NOTE: the syntax of this script MUST be kept compatible with Python 2.7."
-optional = false
+optional = true
 python-versions = ">=3.6"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -2589,7 +2589,7 @@ files = [
 name = "py4j"
 version = "0.10.9.7"
 description = "Enables Python programs to dynamically access arbitrary Java objects"
-optional = false
+optional = true
 python-versions = "*"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -2602,7 +2602,7 @@ files = [
 name = "pyasn1"
 version = "0.6.1"
 description = "Pure-Python implementation of ASN.1 types and DER/BER/CER codecs (X.208)"
-optional = false
+optional = true
 python-versions = ">=3.8"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -2640,7 +2640,7 @@ markers = {main = "(extra == \"worker\" or extra == \"server\") and platform_pyt
 name = "pycryptodome"
 version = "3.21.0"
 description = "Cryptographic library for Python"
-optional = false
+optional = true
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -2885,7 +2885,7 @@ tests = ["coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)"]
 name = "pynacl"
 version = "1.5.0"
 description = "Python binding to the Networking and Cryptography (NaCl) library"
-optional = false
+optional = true
 python-versions = ">=3.6"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -2929,7 +2929,7 @@ dev = ["build", "flake8", "mypy", "pytest", "twine"]
 name = "pysmb"
 version = "1.2.10"
 description = "pysmb is an experimental SMB/CIFS library written in Python to support file sharing between Windows and Linux machines"
-optional = false
+optional = true
 python-versions = "*"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -2945,7 +2945,7 @@ tqdm = "*"
 name = "pyspark"
 version = "3.5.5"
 description = "Apache Spark Python API"
-optional = false
+optional = true
 python-versions = ">=3.8"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -2967,7 +2967,7 @@ sql = ["numpy (>=1.15,<2)", "pandas (>=1.0.5)", "pyarrow (>=4.0.0)"]
 name = "pyspnego"
 version = "0.11.2"
 description = "Windows Negotiate Authentication Client and Server"
-optional = false
+optional = true
 python-versions = ">=3.8"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -3093,7 +3093,7 @@ pytest = "*"
 name = "python-dateutil"
 version = "2.9.0.post0"
 description = "Extensions to the standard Python datetime module"
-optional = false
+optional = true
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 groups = ["main"]
 markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
@@ -3263,7 +3263,7 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 name = "requests-kerberos"
 version = "0.15.0"
 description = "A Kerberos authentication handler for python-requests"
-optional = false
+optional = true
 python-versions = ">=3.6"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -3338,7 +3338,7 @@ type = ["importlib_metadata (>=7.0.2) ; python_version < \"3.10\"", "jaraco.deve
 name = "six"
 version = "1.17.0"
 description = "Python 2 and 3 compatibility utilities"
-optional = false
+optional = true
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 groups = ["main"]
 markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
@@ -3805,7 +3805,7 @@ url = ["furl (>=0.4.1)"]
 name = "sspilib"
 version = "0.2.0"
 description = "SSPI API bindings for Python"
-optional = false
+optional = true
 python-versions = ">=3.8"
 groups = ["main"]
 markers = "extra == \"worker\" and sys_platform == \"win32\""
@@ -3922,7 +3922,7 @@ dev = ["furo (>=2024.05.06)", "nox", "packaging", "sphinx (>=5)", "twisted"]
 name = "tqdm"
 version = "4.67.1"
 description = "Fast, Extensible Progress Meter"
-optional = false
+optional = true
 python-versions = ">=3.7"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -4021,7 +4021,7 @@ zstd = ["zstandard (>=0.18.0)"]
 name = "uuid6"
 version = "2024.7.10"
 description = "New time-based UUID formats which are suited for use as a database key"
-optional = false
+optional = true
 python-versions = ">=3.8"
 groups = ["main"]
 markers = "extra == \"server\" or extra == \"worker\""
@@ -4101,7 +4101,7 @@ files = [
 name = "webdavclient3"
 version = "3.14.6"
 description = "WebDAV client, based on original package https://github.com/designerror/webdav-client-python but uses requests instead of PyCURL"
-optional = false
+optional = true
 python-versions = "*"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -4118,7 +4118,7 @@ requests = "*"
 name = "zipp"
 version = "3.21.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
-optional = false
+optional = true
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "extra == \"worker\""
@@ -4217,4 +4217,4 @@ worker = ["asgi-correlation-id", "celery", "coloredlogs", "horizon-hwm-store", "
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "924a5ea9586881bedebf420f2f58eb215e226edf9d8e57c4ab656641d3b05599"
+content-hash = "b0f5641e8231d6e89927a72f44e0f05ea65c6942f9d28fd50fd41c91babaeb59"
