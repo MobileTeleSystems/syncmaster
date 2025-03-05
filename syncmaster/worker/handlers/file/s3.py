@@ -5,7 +5,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from onetl.connection import S3, SparkS3
 from onetl.file import FileDFReader
 
 from syncmaster.dto.connections import S3ConnectionDTO
@@ -19,6 +18,8 @@ class S3Handler(RemoteDFFileHandler):
     connection_dto: S3ConnectionDTO
 
     def connect(self, spark: SparkSession):
+        from onetl.connection import S3, SparkS3
+
         self.df_connection = SparkS3(
             host=self.connection_dto.host,
             port=self.connection_dto.port,
@@ -30,6 +31,7 @@ class S3Handler(RemoteDFFileHandler):
             extra=self.connection_dto.additional_params,
             spark=spark,
         ).check()
+
         self.file_connection = S3(
             host=self.connection_dto.host,
             port=self.connection_dto.port,

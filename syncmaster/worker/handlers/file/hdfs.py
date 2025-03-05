@@ -5,8 +5,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from onetl.connection import HDFS, SparkHDFS
-
 from syncmaster.dto.connections import HDFSConnectionDTO
 from syncmaster.worker.handlers.file.remote_df import RemoteDFFileHandler
 
@@ -18,10 +16,13 @@ class HDFSHandler(RemoteDFFileHandler):
     connection_dto: HDFSConnectionDTO
 
     def connect(self, spark: SparkSession):
+        from onetl.connection import HDFS, SparkHDFS
+
         self.df_connection = SparkHDFS(
             cluster=self.connection_dto.cluster,
             spark=spark,
         ).check()
+
         self.file_connection = HDFS(
             cluster=self.connection_dto.cluster,
         ).check()
