@@ -36,8 +36,25 @@ jobs:
           python-version: ${{ env.DEFAULT_PYTHON }}
 
       - name: Install system dependencies
-        # this step is needed for successful installation of "bonsai" library in python dependencies
-        run: sudo apt-get update && sudo apt-get install -y libldap2-dev libsasl2-dev
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y
+            libsasl2-dev \
+            libsasl2-modules-gssapi-mit \
+            libsasl2-modules-ldap \
+            libsasl2-modules \
+            openjdk-17-jdk \
+            libssl-dev \
+            libldap2-dev \
+            autoconf \
+            gcc \
+            g++ \
+            make \
+            libnghttp2-dev \
+            libffi-dev \
+            libkrb5-dev \
+            krb5-user \
+            curl
 
       - name: Install poetry
         uses: snok/install-poetry@v1
