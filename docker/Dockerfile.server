@@ -4,9 +4,10 @@ FROM $BASE_IMAGE AS base
 RUN apt-get update && apt-get install -y curl \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl -sSL https://install.python-poetry.org | python3 - \
-    && ln -s /root/.local/bin/poetry /usr/local/bin/poetry \
-    && poetry config virtualenvs.create false
+RUN pip install --upgrade pip setuptools wheel packaging && \
+    curl -sSL https://install.python-poetry.org | python3 - && \
+    ln -s /root/.local/bin/poetry /usr/local/bin/poetry && \
+    poetry config virtualenvs.create false
 
 WORKDIR /app
 ENV PYTHONPATH=/app

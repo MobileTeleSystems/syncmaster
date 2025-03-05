@@ -1,35 +1,26 @@
 ARG BASE_IMAGE=python:3.12-slim
 FROM $BASE_IMAGE AS base
 
-RUN apt-get update && apt-get install -y \
-        libsasl2-dev \
-        libsasl2-modules-gssapi-mit \
-        libsasl2-modules-ldap \
-        libsasl2-modules \
-        openjdk-17-jdk \
-        libssl-dev \
-        libldap2-dev \
-        autoconf \
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        openjdk-17-jdk-headless \
         gcc \
-        g++ \
         make \
-        libnghttp2-dev \
         libffi-dev \
         libkrb5-dev \
-        krb5-user \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl -sSL https://install.python-poetry.org | python3 - \
-    && ln -s /root/.local/bin/poetry /usr/local/bin/poetry \
-    && poetry config virtualenvs.create false
+RUN pip install --upgrade pip setuptools wheel packaging && \
+    curl -sSL https://install.python-poetry.org | python3 - && \
+    ln -s /root/.local/bin/poetry /usr/local/bin/poetry && \
+    poetry config virtualenvs.create false
 
 WORKDIR /app
 ENV PYTHONPATH=/app
 
 COPY ./pyproject.toml ./poetry.lock* /app/
 
-RUN pip install --upgrade pip setuptools wheel packaging
 RUN --mount=type=cache,target=/root/.cache/pypoetry \
     poetry install \
         --no-root \
