@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=python:3.12-slim
+ARG BASE_IMAGE=python:3.13-slim
 FROM $BASE_IMAGE AS base
 
 RUN apt-get update && apt-get install -y curl \
@@ -14,7 +14,6 @@ ENV PYTHONPATH=/app
 
 COPY ./pyproject.toml ./poetry.lock* /app/
 
-RUN pip install --upgrade pip setuptools wheel packaging
 RUN --mount=type=cache,target=/root/.cache/pypoetry \
     poetry install \
         --no-root \
