@@ -25,7 +25,7 @@ def get_worker_spark_session(
     name = run.transfer.group.name + "_" + run.transfer.name  # noqa: WPS336
     spark_builder = SparkSession.builder.appName(f"syncmaster_{name}")
 
-    for k, v in get_spark_session_conf(source, target).items():
+    for k, v in get_spark_session_conf(source, target, run.transfer.resources).items():
         spark_builder = spark_builder.config(k, v)
 
     if source.type == "hive" or target.type == "hive":  # type: ignore
@@ -81,6 +81,7 @@ def get_excluded_packages(db_type: str) -> list[str]:
 def get_spark_session_conf(
     source: ConnectionDTO,
     target: ConnectionDTO,
+    resources: dict,
 ) -> dict:
     maven_packages: list[str] = []
     excluded_packages: list[str] = []
@@ -93,6 +94,9 @@ def get_spark_session_conf(
         "spark.jars.packages": ",".join(maven_packages),
         "spark.sql.pyspark.jvmStacktrace.enabled": "true",
         "spark.hadoop.mapreduce.fileoutputcommitter.marksuccessfuljobs": "false",
+        "spark.executor.cores": resources["cpu_cores_per_task"],
+        "spark.executor.memory": resources["ram_bytes_per_task"],
+        "spark.executor.instances": resources["max_parallel_tasks"],
     }
 
     if maven_packages:

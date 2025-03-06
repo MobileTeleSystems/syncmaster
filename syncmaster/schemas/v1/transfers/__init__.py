@@ -59,6 +59,7 @@ from syncmaster.schemas.v1.transfers.file.webdav import (
     WebDAVReadTransferSource,
     WebDAVReadTransferTarget,
 )
+from syncmaster.schemas.v1.transfers.resources import Resources
 from syncmaster.schemas.v1.transfers.strategy import FullStrategy, IncrementalStrategy
 from syncmaster.schemas.v1.transfers.transformations.dataframe_columns_filter import (
     DataframeColumnsFilter,
@@ -206,6 +207,9 @@ class ReadTransferSchema(BaseModel):
     transformations: list[Annotated[TransformationSchema, Field(..., discriminator="type")]] = Field(
         default_factory=list,
     )
+    resources: Resources = Field(
+        ...,
+    )
 
     class Config:
         from_attributes = True
@@ -238,6 +242,10 @@ class CreateTransferSchema(BaseModel):
     transformations: list[
         Annotated[TransformationSchema, Field(None, discriminator="type", description="List of transformations")]
     ] = Field(default_factory=list)
+    resources: Resources = Field(
+        default_factory=Resources,
+        description="Transfer resources",
+    )
 
     @model_validator(mode="before")
     def validate_scheduling(cls, values):
@@ -283,6 +291,7 @@ class UpdateTransferSchema(BaseModel):
     target_params: UpdateTransferSchemaTarget = Field(discriminator="type", default=None)
     strategy_params: FullStrategy | IncrementalStrategy | None = Field(discriminator="type", default=None)
     transformations: list[Annotated[TransformationSchema, Field(discriminator="type", default=None)]] = None
+    resources: Resources | None = Field(default=None)
 
 
 class ReadFullTransferSchema(ReadTransferSchema):

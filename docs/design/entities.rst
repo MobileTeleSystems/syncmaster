@@ -49,7 +49,7 @@ Example:
 .. code-block:: json
 
     {
-        "group_id": "1",
+        "group_id": 1,
         "name": "Beautiful name",
         "description": "What a great connection !",
         "type": "postgres",
@@ -93,17 +93,18 @@ Example:
 .. code-block:: json
 
     {
-        "group_id": "1",
-        "queue_id": "1",
+        "group_id": 1,
+        "queue_id": 1,
         "name": "My beautiful transfer.",
         "description": "What a great transfer !",
-        "is_scheduled": false,
-        "schedule": "",
-        "source_connection_id": "1",
-        "target_connection_id": "2",
-        "source_params": "{'type': 'postgres', 'table_name': 'source_table'}",
-        "target_params": "{'type': 'postgres', 'table_name': 'target_table'}",
-        "strategy_params": "{'type': 'full'}",
+        "is_scheduled": true,
+        "schedule": "0 0 * * *",
+        "source_connection_id": 1,
+        "target_connection_id": 2,
+        "source_params": {"type": "postgres", "table_name": "source_table"},
+        "target_params": {"type": "mysql", "table_name": "target_table"},
+        "strategy_params": {"type": "full"},
+        "resources": {"max_parallel_tasks": 2, "cpu_cores_per_task": 2, "ram_bytes_per_task": "1 GiB"}
     }
 
 Run

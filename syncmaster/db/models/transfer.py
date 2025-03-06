@@ -47,6 +47,7 @@ class Transfer(
     source_params: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
     target_params: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
     transformations: Mapped[list[dict[str, Any]]] = mapped_column(JSON, nullable=False, default=list)
+    resources: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
     is_scheduled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     schedule: Mapped[str] = mapped_column(String(32), nullable=False, default="")
     queue_id: Mapped[int] = mapped_column(

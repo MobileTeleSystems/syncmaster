@@ -114,7 +114,8 @@ async def group_transfer(
         queue_id=queue.id,
         source_params=source_and_target_params,
         target_params={**source_and_target_params, **target_params},
-        transformations=create_transfer_data.get("transformations") if create_transfer_data else None,
+        transformations=create_transfer_data.get("transformations", []) if create_transfer_data else [],
+        resources=create_transfer_data.get("resources", {}) if create_transfer_data else {},
     )
 
     yield MockTransfer(
