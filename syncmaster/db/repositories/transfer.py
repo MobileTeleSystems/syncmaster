@@ -116,6 +116,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         target_params: dict[str, Any],
         strategy_params: dict[str, Any],
         transformations: list[dict[str, Any]],
+        resources: dict[str, Any],
         queue_id: int,
         is_scheduled: bool,
         schedule: str | None,
@@ -132,6 +133,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
                 target_params=target_params,
                 strategy_params=strategy_params,
                 transformations=transformations,
+                resources=resources,
                 queue_id=queue_id,
                 is_scheduled=is_scheduled,
                 schedule=schedule or "",
@@ -157,6 +159,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         target_params: dict[str, Any],
         strategy_params: dict[str, Any],
         transformations: list[dict[str, Any]],
+        resources: dict[str, Any],
         is_scheduled: bool | None,
         schedule: str | None,
         new_queue_id: int | None,
@@ -183,6 +186,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
                 source_params=source_params,
                 target_params=target_params,
                 transformations=transformations or transfer.transformations,
+                resources=resources or transfer.resources,
                 queue_id=new_queue_id or transfer.queue_id,
             )
         except IntegrityError as e:

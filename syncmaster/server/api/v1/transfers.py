@@ -131,6 +131,7 @@ async def create_transfer(
             target_params=transfer_data.target_params.dict(),
             strategy_params=transfer_data.strategy_params.dict(),
             transformations=[tr.dict() for tr in transfer_data.transformations],
+            resources=transfer_data.resources.dict(),
             queue_id=transfer_data.queue_id,
             is_scheduled=transfer_data.is_scheduled,
             schedule=transfer_data.schedule,
@@ -330,6 +331,7 @@ async def update_transfer(
             transformations=(
                 [tr.dict() for tr in transfer_data.transformations] if transfer_data.transformations else []
             ),
+            resources=transfer_data.resources.dict() if transfer_data.resources else {},
             is_scheduled=transfer_data.is_scheduled,
             schedule=transfer_data.schedule,
             new_queue_id=transfer_data.new_queue_id,

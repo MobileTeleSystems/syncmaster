@@ -108,6 +108,7 @@ async def group_transfer_integration_mock(
         source_params=create_transfer_data.get("source_and_target_params") if create_transfer_data else None,
         target_params=create_transfer_data.get("source_and_target_params") if create_transfer_data else None,
         transformations=create_transfer_data.get("transformations") if create_transfer_data else None,
+        resources=create_transfer_data.get("resources") if create_transfer_data else None,
     )
 
     yield MockTransfer(

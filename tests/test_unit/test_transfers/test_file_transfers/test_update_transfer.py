@@ -174,6 +174,11 @@ async def test_developer_plus_can_update_s3_transfer(
                 ],
             },
         ],
+        "resources": {
+            "max_parallel_tasks": 6,
+            "cpu_cores_per_task": 4,
+            "ram_bytes_per_task": 2 * 1024**3,
+        },
     }
 
     # Act
@@ -198,5 +203,6 @@ async def test_developer_plus_can_update_s3_transfer(
         "target_params": updated_fields["target_params"],
         "strategy_params": updated_fields["strategy_params"],
         "transformations": updated_fields["transformations"],
+        "resources": updated_fields["resources"],
         "queue_id": group_transfer.transfer.queue_id,
     }

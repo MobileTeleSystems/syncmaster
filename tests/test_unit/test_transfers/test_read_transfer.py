@@ -34,6 +34,7 @@ async def test_guest_plus_can_read_transfer(
         "target_params": group_transfer.target_params,
         "strategy_params": group_transfer.strategy_params,
         "transformations": group_transfer.transformations,
+        "resources": group_transfer.resources,
         "queue_id": group_transfer.transfer.queue_id,
     }
     assert result.status_code == 200
@@ -112,6 +113,7 @@ async def test_superuser_can_read_transfer(
         "target_params": group_transfer.target_params,
         "strategy_params": group_transfer.strategy_params,
         "transformations": group_transfer.transformations,
+        "resources": group_transfer.resources,
         "queue_id": group_transfer.transfer.queue_id,
     }
     assert result.status_code == 200

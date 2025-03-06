@@ -102,6 +102,11 @@ async def test_developer_plus_can_create_transfer(
                     ],
                 },
             ],
+            "resources": {
+                "max_parallel_tasks": 1,
+                "cpu_cores_per_task": 2,
+                "ram_bytes_per_task": 1024**3,
+            },
             "queue_id": group_queue.id,
         },
     )
@@ -131,6 +136,7 @@ async def test_developer_plus_can_create_transfer(
         "target_params": transfer.target_params,
         "strategy_params": transfer.strategy_params,
         "transformations": transfer.transformations,
+        "resources": transfer.resources,
         "queue_id": transfer.queue_id,
     }
 
@@ -295,6 +301,11 @@ async def test_superuser_can_create_transfer(
                     ],
                 },
             ],
+            "resources": {
+                "max_parallel_tasks": 3,
+                "cpu_cores_per_task": 2,
+                "ram_bytes_per_task": 1024**3,
+            },
             "queue_id": group_queue.id,
         },
     )
@@ -321,6 +332,7 @@ async def test_superuser_can_create_transfer(
         "target_params": transfer.target_params,
         "strategy_params": transfer.strategy_params,
         "transformations": transfer.transformations,
+        "resources": transfer.resources,
         "queue_id": transfer.queue_id,
     }
 
@@ -762,6 +774,36 @@ async def test_superuser_can_create_transfer(
                             "code": "value_error",
                             "context": {},
                             "input": "[a-z",
+                        },
+                    ],
+                },
+            },
+        ),
+        (
+            {
+                "resources": {
+                    "max_parallel_tasks": 1,
+                    "cpu_cores_per_task": 2,
+                    "ram_bytes_per_task": 1024,
+                },
+            },
+            {
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "location": [
+                                "body",
+                                "resources",
+                                "ram_bytes_per_task",
+                            ],
+                            "message": f"Input should be greater than or equal to {512 * 1024**2}",
+                            "code": "greater_than_equal",
+                            "context": {
+                                "ge": 512 * 1024**2,
+                            },
+                            "input": 1024,
                         },
                     ],
                 },

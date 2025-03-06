@@ -170,6 +170,7 @@ async def test_developer_plus_can_create_s3_transfer(
         "target_params": transfer.target_params,
         "strategy_params": transfer.strategy_params,
         "transformations": transfer.transformations,
+        "resources": transfer.resources,
         "queue_id": transfer.queue_id,
     }
 
@@ -351,6 +352,7 @@ async def test_developer_plus_can_create_hdfs_transfer(
         "target_params": transfer.target_params,
         "strategy_params": transfer.strategy_params,
         "transformations": transfer.transformations,
+        "resources": transfer.resources,
         "queue_id": transfer.queue_id,
     }
 
