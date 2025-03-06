@@ -2249,15 +2249,15 @@ test = ["matplotlib", "pytest", "pytest-cov"]
 
 [[package]]
 name = "onetl"
-version = "0.13.0"
+version = "0.13.1"
 description = "One ETL tool to rule them all"
 optional = true
 python-versions = ">=3.7"
 groups = ["main"]
 markers = "extra == \"worker\""
 files = [
-    {file = "onetl-0.13.0-py3-none-any.whl", hash = "sha256:d633622d65b54f0008b979b3a6546040247a0f346d9011ca4d61c70752ef045e"},
-    {file = "onetl-0.13.0.tar.gz", hash = "sha256:19cad1454956f7c1d297064f53210e9169e6d165ac3f82995a152e9336513556"},
+    {file = "onetl-0.13.1-py3-none-any.whl", hash = "sha256:a7f31d1c8607571c83e83080c32cacadd8de12af1f80bf50c99cc167cee0de49"},
+    {file = "onetl-0.13.1.tar.gz", hash = "sha256:d146ab1cf2ea978e96782fbd1c0502437d517c3f0007adfc14f748485086bc9d"},
 ]
 
 [package.dependencies]
@@ -4217,4 +4217,4 @@ worker = ["asgi-correlation-id", "celery", "coloredlogs", "horizon-hwm-store", "
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "b0f5641e8231d6e89927a72f44e0f05ea65c6942f9d28fd50fd41c91babaeb59"
+content-hash = "d9c57afdb4c4ea47a9156dbea31c78a4b31c4ec14245aa277f42acc305278804"
