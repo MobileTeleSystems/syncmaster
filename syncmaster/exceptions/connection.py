@@ -19,6 +19,10 @@ class ConnectionTypeUpdateError(SyncmasterError):
     pass
 
 
+class ConnectionAuthDataUpdateError(SyncmasterError):
+    pass
+
+
 class UserDoNotHaveRightsInTheTargetGroupError(SyncmasterError):
     pass
 

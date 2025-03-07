@@ -71,10 +71,7 @@ class CredentialsRepository(Repository[AuthData]):
         connection_id: int,
         data: dict,
     ) -> AuthData:
-        creds = await self.read(connection_id)
         try:
-            for key in creds:
-                data[key] = data.get(key, None) or creds[key]
             return await self._update(
                 AuthData.connection_id == connection_id,
                 value=encrypt_auth_data(value=data, settings=self._settings),

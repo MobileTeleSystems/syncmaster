@@ -28,7 +28,6 @@ from syncmaster.schemas.v1.transfers import (
     ReadFullTransferSchema,
     ReadTransferSchema,
     TransferPageSchema,
-    UpdateTransferSchema,
 )
 from syncmaster.schemas.v1.transfers.db import (
     HiveReadTransferSourceAndTarget,

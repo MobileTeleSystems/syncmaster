@@ -74,12 +74,12 @@ from syncmaster.schemas.v1.types import NameConstr
 
 ReadTransferSchemaSource = (
     PostgresReadTransferSourceAndTarget
-    | HDFSReadTransferSource
     | HiveReadTransferSourceAndTarget
     | OracleReadTransferSourceAndTarget
     | ClickhouseReadTransferSourceAndTarget
     | MSSQLReadTransferSourceAndTarget
     | MySQLReadTransferSourceAndTarget
+    | HDFSReadTransferSource
     | S3ReadTransferSource
     | SFTPReadTransferSource
     | FTPReadTransferSource
@@ -90,12 +90,12 @@ ReadTransferSchemaSource = (
 
 ReadTransferSchemaTarget = (
     PostgresReadTransferSourceAndTarget
-    | HDFSReadTransferTarget
     | HiveReadTransferSourceAndTarget
     | OracleReadTransferSourceAndTarget
     | ClickhouseReadTransferSourceAndTarget
     | MSSQLReadTransferSourceAndTarget
     | MySQLReadTransferSourceAndTarget
+    | HDFSReadTransferTarget
     | S3ReadTransferTarget
     | SFTPReadTransferTarget
     | FTPReadTransferTarget
@@ -106,12 +106,12 @@ ReadTransferSchemaTarget = (
 
 CreateTransferSchemaSource = (
     PostgresReadTransferSourceAndTarget
-    | HDFSCreateTransferSource
     | HiveReadTransferSourceAndTarget
     | OracleReadTransferSourceAndTarget
     | ClickhouseReadTransferSourceAndTarget
     | MSSQLReadTransferSourceAndTarget
     | MySQLReadTransferSourceAndTarget
+    | HDFSCreateTransferSource
     | S3CreateTransferSource
     | SFTPCreateTransferSource
     | FTPCreateTransferSource
@@ -122,52 +122,18 @@ CreateTransferSchemaSource = (
 
 CreateTransferSchemaTarget = (
     PostgresReadTransferSourceAndTarget
-    | HDFSCreateTransferTarget
     | HiveReadTransferSourceAndTarget
     | OracleReadTransferSourceAndTarget
     | ClickhouseReadTransferSourceAndTarget
     | MSSQLReadTransferSourceAndTarget
     | MySQLReadTransferSourceAndTarget
+    | HDFSCreateTransferTarget
     | S3CreateTransferTarget
     | SFTPCreateTransferTarget
     | FTPCreateTransferTarget
     | FTPSCreateTransferTarget
     | WebDAVCreateTransferTarget
     | SambaCreateTransferTarget
-)
-
-UpdateTransferSchemaSource = (
-    PostgresReadTransferSourceAndTarget
-    | HDFSReadTransferSource
-    | HiveReadTransferSourceAndTarget
-    | OracleReadTransferSourceAndTarget
-    | ClickhouseReadTransferSourceAndTarget
-    | MSSQLReadTransferSourceAndTarget
-    | MySQLReadTransferSourceAndTarget
-    | S3ReadTransferSource
-    | SFTPReadTransferSource
-    | FTPReadTransferSource
-    | FTPSReadTransferSource
-    | WebDAVReadTransferSource
-    | SambaReadTransferSource
-    | None
-)
-
-UpdateTransferSchemaTarget = (
-    PostgresReadTransferSourceAndTarget
-    | HDFSReadTransferSource
-    | HiveReadTransferSourceAndTarget
-    | OracleReadTransferSourceAndTarget
-    | ClickhouseReadTransferSourceAndTarget
-    | MSSQLReadTransferSourceAndTarget
-    | MySQLReadTransferSourceAndTarget
-    | S3ReadTransferTarget
-    | SFTPReadTransferTarget
-    | FTPReadTransferTarget
-    | FTPSReadTransferTarget
-    | WebDAVReadTransferTarget
-    | SambaReadTransferTarget
-    | None
 )
 
 TransformationSchema = DataframeRowsFilter | DataframeColumnsFilter | FileMetadataFilter
@@ -277,21 +243,6 @@ class CreateTransferSchema(BaseModel):
             raise ValueError("S3 and HDFS sources do not support incremental strategy for now")
 
         return values
-
-
-class UpdateTransferSchema(BaseModel):
-    source_connection_id: int | None = None
-    target_connection_id: int | None = None
-    name: NameConstr | None = None  # noqa: F722
-    description: str | None = None
-    is_scheduled: bool | None = None
-    schedule: str | None = None
-    new_queue_id: int | None = None
-    source_params: UpdateTransferSchemaSource = Field(discriminator="type", default=None)
-    target_params: UpdateTransferSchemaTarget = Field(discriminator="type", default=None)
-    strategy_params: FullStrategy | IncrementalStrategy | None = Field(discriminator="type", default=None)
-    transformations: list[Annotated[TransformationSchema, Field(discriminator="type", default=None)]] = None
-    resources: Resources | None = Field(default=None)
 
 
 class ReadFullTransferSchema(ReadTransferSchema):

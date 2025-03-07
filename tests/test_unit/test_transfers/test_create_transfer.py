@@ -515,12 +515,12 @@ async def test_superuser_can_create_transfer(
                             "location": ["body", "source_params"],
                             "message": (
                                 "Input tag 'new some connection type' found using 'type' "
-                                "does not match any of the expected tags: 'postgres', 'hdfs', 'hive', 'oracle', 'clickhouse', 'mssql', 'mysql', 's3', 'sftp', 'ftp', 'ftps', 'webdav', 'samba'"
+                                "does not match any of the expected tags: 'postgres', 'hive', 'oracle', 'clickhouse', 'mssql', 'mysql', 'hdfs', 's3', 'sftp', 'ftp', 'ftps', 'webdav', 'samba'"
                             ),
                             "code": "union_tag_invalid",
                             "context": {
                                 "discriminator": "'type'",
-                                "expected_tags": "'postgres', 'hdfs', 'hive', 'oracle', 'clickhouse', 'mssql', 'mysql', 's3', 'sftp', 'ftp', 'ftps', 'webdav', 'samba'",
+                                "expected_tags": "'postgres', 'hive', 'oracle', 'clickhouse', 'mssql', 'mysql', 'hdfs', 's3', 'sftp', 'ftp', 'ftps', 'webdav', 'samba'",
                                 "tag": "new some connection type",
                             },
                             "input": {

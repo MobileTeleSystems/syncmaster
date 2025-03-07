@@ -10,6 +10,7 @@ from syncmaster.db.utils import Permission
 from syncmaster.errors.registration import get_error_responses
 from syncmaster.exceptions import ActionNotAllowedError
 from syncmaster.exceptions.connection import (
+    ConnectionAuthDataUpdateError,
     ConnectionDeleteError,
     ConnectionNotFoundError,
     ConnectionTypeUpdateError,
@@ -181,10 +182,10 @@ async def read_connection(
     )
 
 
-@router.patch("/connections/{connection_id}")
+@router.put("/connections/{connection_id}")
 async def update_connection(
     connection_id: int,
-    changes: UpdateConnectionSchema,
+    connection_data: UpdateConnectionSchema,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadConnectionSchema:
@@ -200,25 +201,33 @@ async def update_connection(
         raise ActionNotAllowedError
 
     async with unit_of_work:
-        data = changes.data.dict(exclude={"auth_data"}) if changes.data else {}
-        source_connection: Connection = await unit_of_work.connection.read_by_id(connection_id=connection_id)
-        if changes.type != source_connection.type:
+        existing_connection: Connection = await unit_of_work.connection.read_by_id(connection_id=connection_id)
+        if connection_data.type != existing_connection.type:
             linked_transfers: Sequence[Transfer] = await unit_of_work.transfer.list_by_connection_id(connection_id)
             if linked_transfers:
                 raise ConnectionTypeUpdateError
+
+        existing_credentials = await unit_of_work.credentials.read(connection_id=connection_id)
+        auth_data = connection_data.auth_data.dict()
+        secret_field = connection_data.auth_data.secret_field
+
+        if auth_data[secret_field] is None:
+            if existing_credentials["type"] != auth_data["type"]:
+                raise ConnectionAuthDataUpdateError
+
+            auth_data[secret_field] = existing_credentials[secret_field]
+
         connection = await unit_of_work.connection.update(
             connection_id=connection_id,
-            name=changes.name,
-            type=changes.type,
-            description=changes.description,
-            data=data,
+            name=connection_data.name,
+            type=connection_data.type,
+            description=connection_data.description,
+            data=connection_data.data.dict(),
         )
-
-        if changes.auth_data:
-            await unit_of_work.credentials.update(
-                connection_id=connection_id,
-                data=changes.auth_data.dict(),
-            )
+        await unit_of_work.credentials.update(
+            connection_id=connection_id,
+            data=auth_data,
+        )
 
     credentials = await unit_of_work.credentials.read(connection_id)
     return TypeAdapter(ReadConnectionSchema).validate_python(

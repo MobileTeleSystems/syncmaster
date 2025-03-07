@@ -5,13 +5,12 @@ from pydantic import BaseModel, Field
 from syncmaster.schemas.v1.auth import (
     CreateBasicAuthSchema,
     ReadBasicAuthSchema,
-    UpdateBasicAuthSchema,
 )
+from syncmaster.schemas.v1.auth.basic import UpdateBasicAuthSchema
 from syncmaster.schemas.v1.connection_types import MYSQL_TYPE
 from syncmaster.schemas.v1.connections.connection_base import (
     CreateConnectionBaseSchema,
     ReadConnectionBaseSchema,
-    UpdateConnectionBaseSchema,
 )
 
 
@@ -27,13 +26,6 @@ class ReadMySQLConnectionDataSchema(BaseModel):
     port: int
     database_name: str
     additional_params: dict = Field(default_factory=dict)
-
-
-class UpdateMySQLConnectionDataSchema(BaseModel):
-    host: str | None = None
-    port: int | None = None
-    database_name: str | None = None
-    additional_params: dict | None = Field(default_factory=dict)
 
 
 class CreateMySQLConnectionSchema(CreateConnectionBaseSchema):
@@ -56,7 +48,7 @@ class ReadMySQLConnectionSchema(ReadConnectionBaseSchema):
     auth_data: ReadBasicAuthSchema | None = None
 
 
-class UpdateMySQLConnectionSchema(UpdateConnectionBaseSchema):
-    type: MYSQL_TYPE
-    data: UpdateMySQLConnectionDataSchema | None = Field(alias="connection_data", default=None)
-    auth_data: UpdateBasicAuthSchema | None = None
+class UpdateMySQLConnectionSchema(CreateMySQLConnectionSchema):
+    auth_data: UpdateBasicAuthSchema = Field(
+        description="Credentials for authorization",
+    )

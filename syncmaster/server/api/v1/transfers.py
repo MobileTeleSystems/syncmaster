@@ -24,7 +24,6 @@ from syncmaster.schemas.v1.transfers import (
     CreateTransferSchema,
     ReadTransferSchema,
     TransferPageSchema,
-    UpdateTransferSchema,
 )
 from syncmaster.server.services.get_user import get_user
 from syncmaster.server.services.unit_of_work import UnitOfWork
@@ -245,10 +244,10 @@ async def copy_transfer(
     )
 
 
-@router.patch("/transfers/{transfer_id}")
+@router.put("/transfers/{transfer_id}")
 async def update_transfer(
     transfer_id: int,
-    transfer_data: UpdateTransferSchema,
+    transfer_data: CreateTransferSchema,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadTransferSchema:
@@ -264,20 +263,9 @@ async def update_transfer(
     if resource_role < Permission.WRITE:
         raise ActionNotAllowedError
 
-    transfer = await unit_of_work.transfer.read_by_id(
-        transfer_id=transfer_id,
-    )
-
-    target_connection = await unit_of_work.connection.read_by_id(
-        connection_id=transfer_data.target_connection_id or transfer.target_connection_id,
-    )
-    source_connection = await unit_of_work.connection.read_by_id(
-        connection_id=transfer_data.source_connection_id or transfer.source_connection_id,
-    )
-
-    queue = await unit_of_work.queue.read_by_id(
-        transfer_data.new_queue_id or transfer.queue_id,
-    )
+    target_connection = await unit_of_work.connection.read_by_id(transfer_data.target_connection_id)
+    source_connection = await unit_of_work.connection.read_by_id(transfer_data.source_connection_id)
+    queue = await unit_of_work.queue.read_by_id(transfer_data.queue_id)
 
     # Check: user can read new connections
     target_connection_resource_role = await unit_of_work.connection.get_resource_permission(
@@ -293,48 +281,45 @@ async def update_transfer(
     if source_connection_resource_role == Permission.NONE or target_connection_resource_role == Permission.NONE:
         raise ConnectionNotFoundError
 
-    # Check: connections and transfer group
     if (
         target_connection.group_id != source_connection.group_id
-        or target_connection.group_id != transfer.group_id
-        or source_connection.group_id != transfer.group_id
+        or target_connection.group_id != transfer_data.group_id
+        or source_connection.group_id != transfer_data.group_id
     ):
         raise DifferentTransferAndConnectionsGroupsError
 
-    if queue.group_id != transfer.group_id:
-        raise DifferentTransferAndQueueGroupError
-
-    if transfer_data.target_params and target_connection.type != transfer_data.target_params.type:
+    if target_connection.type != transfer_data.target_params.type:
         raise DifferentTypeConnectionsAndParamsError(
             connection_type=target_connection.type,
             conn="target",
             params_type=transfer_data.target_params.type,
         )
 
-    if transfer_data.source_params and source_connection.type != transfer_data.source_params.type:
+    if source_connection.type != transfer_data.source_params.type:
         raise DifferentTypeConnectionsAndParamsError(
             connection_type=source_connection.type,
             conn="source",
             params_type=transfer_data.source_params.type,
         )
 
+    if transfer_data.group_id != queue.group_id:
+        raise DifferentTransferAndQueueGroupError
+
     async with unit_of_work:
         transfer = await unit_of_work.transfer.update(
-            transfer=transfer,
+            transfer_id=transfer_id,
             name=transfer_data.name,
             description=transfer_data.description,
             target_connection_id=transfer_data.target_connection_id,
             source_connection_id=transfer_data.source_connection_id,
-            source_params=transfer_data.source_params.dict() if transfer_data.source_params else {},
-            target_params=transfer_data.target_params.dict() if transfer_data.target_params else {},
-            strategy_params=transfer_data.strategy_params.dict() if transfer_data.strategy_params else {},
-            transformations=(
-                [tr.dict() for tr in transfer_data.transformations] if transfer_data.transformations else []
-            ),
-            resources=transfer_data.resources.dict() if transfer_data.resources else {},
+            source_params=transfer_data.source_params.dict(),
+            target_params=transfer_data.target_params.dict(),
+            strategy_params=transfer_data.strategy_params.dict(),
+            transformations=[tr.dict() for tr in transfer_data.transformations],
+            resources=transfer_data.resources.dict(),
             is_scheduled=transfer_data.is_scheduled,
             schedule=transfer_data.schedule,
-            new_queue_id=transfer_data.new_queue_id,
+            queue_id=transfer_data.queue_id,
         )
     return ReadTransferSchema.from_orm(transfer)
 

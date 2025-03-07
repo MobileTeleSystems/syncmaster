@@ -6,13 +6,12 @@ from pydantic import BaseModel, Field
 from syncmaster.schemas.v1.auth import (
     CreateBasicAuthSchema,
     ReadBasicAuthSchema,
-    UpdateBasicAuthSchema,
 )
+from syncmaster.schemas.v1.auth.basic import UpdateBasicAuthSchema
 from syncmaster.schemas.v1.connection_types import HDFS_TYPE
 from syncmaster.schemas.v1.connections.connection_base import (
     CreateConnectionBaseSchema,
     ReadConnectionBaseSchema,
-    UpdateConnectionBaseSchema,
 )
 
 
@@ -22,10 +21,6 @@ class CreateHDFSConnectionDataSchema(BaseModel):
 
 class ReadHDFSConnectionDataSchema(BaseModel):
     cluster: str
-
-
-class UpdateHDFSConnectionDataSchema(BaseModel):
-    cluster: str | None = None
 
 
 class CreateHDFSConnectionSchema(CreateConnectionBaseSchema):
@@ -48,7 +43,7 @@ class ReadHDFSConnectionSchema(ReadConnectionBaseSchema):
     auth_data: ReadBasicAuthSchema | None = None
 
 
-class UpdateHDFSConnectionSchema(UpdateConnectionBaseSchema):
-    type: HDFS_TYPE
-    data: UpdateHDFSConnectionDataSchema | None = Field(alias="connection_data", default=None)
-    auth_data: UpdateBasicAuthSchema | None = None
+class UpdateHDFSConnectionSchema(CreateHDFSConnectionSchema):
+    auth_data: UpdateBasicAuthSchema = Field(
+        description="Credentials for authorization",
+    )

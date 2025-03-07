@@ -1,0 +1,1 @@
+Use PUT instead of PATCH for `Connection` and `Transfer` models

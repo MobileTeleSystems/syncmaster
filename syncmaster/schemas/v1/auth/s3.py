@@ -18,6 +18,9 @@ class ReadS3AuthSchema(S3AuthSchema):
     access_key: str
 
 
-class UpdateS3AuthSchema(S3AuthSchema):
-    access_key: str | None = None
+class UpdateS3AuthSchema(CreateS3AuthSchema):
     secret_key: SecretStr | None = None
+
+    @property
+    def secret_field(self) -> str:
+        return "secret_key"

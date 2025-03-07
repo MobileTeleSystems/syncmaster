@@ -150,44 +150,35 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
 
     async def update(
         self,
-        transfer: Transfer,
-        name: str | None,
-        description: str | None,
-        source_connection_id: int | None,
-        target_connection_id: int | None,
+        transfer_id: int,
+        name: str,
+        description: str,
+        source_connection_id: int,
+        target_connection_id: int,
         source_params: dict[str, Any],
         target_params: dict[str, Any],
         strategy_params: dict[str, Any],
         transformations: list[dict[str, Any]],
         resources: dict[str, Any],
-        is_scheduled: bool | None,
+        is_scheduled: bool,
         schedule: str | None,
-        new_queue_id: int | None,
+        queue_id: int,
     ) -> Transfer:
         try:
-            for old, new in [
-                (transfer.source_params, source_params),
-                (transfer.target_params, target_params),
-                (transfer.strategy_params, strategy_params),
-            ]:
-                for key in old:
-                    if key not in new or new[key] is None:
-                        new[key] = old[key]
-
             return await self._update(
-                Transfer.id == transfer.id,
-                name=name or transfer.name,
-                description=description or transfer.description,
+                Transfer.id == transfer_id,
+                name=name,
+                description=description,
                 strategy_params=strategy_params,
-                is_scheduled=is_scheduled if is_scheduled is not None else transfer.is_scheduled,
-                schedule=schedule or transfer.schedule,
-                source_connection_id=source_connection_id or transfer.source_connection_id,
-                target_connection_id=target_connection_id or transfer.target_connection_id,
+                is_scheduled=is_scheduled,
+                schedule=schedule or "",
+                source_connection_id=source_connection_id,
+                target_connection_id=target_connection_id,
                 source_params=source_params,
                 target_params=target_params,
-                transformations=transformations or transfer.transformations,
-                resources=resources or transfer.resources,
-                queue_id=new_queue_id or transfer.queue_id,
+                transformations=transformations,
+                resources=resources,
+                queue_id=queue_id,
             )
         except IntegrityError as e:
             self._raise_error(e)

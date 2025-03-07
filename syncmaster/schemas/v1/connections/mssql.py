@@ -5,13 +5,12 @@ from pydantic import BaseModel, Field
 from syncmaster.schemas.v1.auth import (
     CreateBasicAuthSchema,
     ReadBasicAuthSchema,
-    UpdateBasicAuthSchema,
 )
+from syncmaster.schemas.v1.auth.basic import UpdateBasicAuthSchema
 from syncmaster.schemas.v1.connection_types import MSSQL_TYPE
 from syncmaster.schemas.v1.connections.connection_base import (
     CreateConnectionBaseSchema,
     ReadConnectionBaseSchema,
-    UpdateConnectionBaseSchema,
 )
 
 
@@ -27,13 +26,6 @@ class ReadMSSQLConnectionDataSchema(BaseModel):
     port: int
     database_name: str
     additional_params: dict = Field(default_factory=dict)
-
-
-class UpdateMSSQLConnectionDataSchema(BaseModel):
-    host: str | None = None
-    port: int | None = None
-    database_name: str | None = None
-    additional_params: dict | None = Field(default_factory=dict)
 
 
 class CreateMSSQLConnectionSchema(CreateConnectionBaseSchema):
@@ -56,7 +48,7 @@ class ReadMSSQLConnectionSchema(ReadConnectionBaseSchema):
     auth_data: ReadBasicAuthSchema | None = None
 
 
-class UpdateMSSQLConnectionSchema(UpdateConnectionBaseSchema):
-    type: MSSQL_TYPE
-    data: UpdateMSSQLConnectionDataSchema | None = Field(alias="connection_data", default=None)
-    auth_data: UpdateBasicAuthSchema | None = None
+class UpdateMSSQLConnectionSchema(CreateMSSQLConnectionSchema):
+    auth_data: UpdateBasicAuthSchema = Field(
+        description="Credentials for authorization",
+    )

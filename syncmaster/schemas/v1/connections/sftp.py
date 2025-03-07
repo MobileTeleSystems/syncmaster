@@ -12,7 +12,6 @@ from syncmaster.schemas.v1.connection_types import SFTP_TYPE
 from syncmaster.schemas.v1.connections.connection_base import (
     CreateConnectionBaseSchema,
     ReadConnectionBaseSchema,
-    UpdateConnectionBaseSchema,
 )
 
 
@@ -24,11 +23,6 @@ class CreateSFTPConnectionDataSchema(BaseModel):
 class ReadSFTPConnectionDataSchema(BaseModel):
     host: str
     port: int
-
-
-class UpdateSFTPConnectionDataSchema(BaseModel):
-    host: str | None = None
-    port: int | None = None
 
 
 class CreateSFTPConnectionSchema(CreateConnectionBaseSchema):
@@ -51,7 +45,7 @@ class ReadSFTPConnectionSchema(ReadConnectionBaseSchema):
     auth_data: ReadBasicAuthSchema | None = None
 
 
-class UpdateSFTPConnectionSchema(UpdateConnectionBaseSchema):
-    type: SFTP_TYPE
-    data: UpdateSFTPConnectionDataSchema | None = Field(alias="connection_data", default=None)
-    auth_data: UpdateBasicAuthSchema | None = None
+class UpdateSFTPConnectionSchema(CreateSFTPConnectionSchema):
+    auth_data: UpdateBasicAuthSchema = Field(
+        description="Credentials for authorization",
+    )

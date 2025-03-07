@@ -13,6 +13,7 @@ from syncmaster.errors.registration import get_response_for_exception
 from syncmaster.exceptions import ActionNotAllowedError, SyncmasterError
 from syncmaster.exceptions.auth import AuthorizationError
 from syncmaster.exceptions.connection import (
+    ConnectionAuthDataUpdateError,
     ConnectionDeleteError,
     ConnectionNotFoundError,
     ConnectionOwnerError,
@@ -252,6 +253,14 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterError):
     if isinstance(exc, ConnectionTypeUpdateError):
         content.code = "conflict"
         content.message = "You cannot update the connection type of a connection already associated with a transfer."
+        return exception_json_response(
+            status=status.HTTP_409_CONFLICT,
+            content=content,
+        )
+
+    if isinstance(exc, ConnectionAuthDataUpdateError):
+        content.code = "conflict"
+        content.message = "You cannot update the connection auth type without providing a new secret value."
         return exception_json_response(
             status=status.HTTP_409_CONFLICT,
             content=content,
