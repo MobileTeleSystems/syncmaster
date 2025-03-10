@@ -26,10 +26,5 @@ class ReadConnectionBaseSchema(BaseModel):
         populate_by_name = True
 
 
-class UpdateConnectionBaseSchema(BaseModel):
-    name: NameConstr | None = None  # noqa: F722
-    description: str | None = None
-
-
 class ReadAuthDataSchema(BaseModel):
     auth_data: ReadConnectionAuthDataSchema = Field(discriminator="type", default=...)

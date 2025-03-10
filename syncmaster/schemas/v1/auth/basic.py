@@ -18,6 +18,9 @@ class ReadBasicAuthSchema(BasicAuthSchema):
     user: str
 
 
-class UpdateBasicAuthSchema(BasicAuthSchema):
-    user: str | None = None  # noqa: F722
+class UpdateBasicAuthSchema(CreateBasicAuthSchema):
     password: SecretStr | None = None
+
+    @property
+    def secret_field(self) -> str:
+        return "password"

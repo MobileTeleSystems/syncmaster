@@ -7,13 +7,12 @@ from pydantic import BaseModel, Field, model_validator
 from syncmaster.schemas.v1.auth import (
     CreateS3AuthSchema,
     ReadS3AuthSchema,
-    UpdateS3AuthSchema,
 )
+from syncmaster.schemas.v1.auth.s3 import UpdateS3AuthSchema
 from syncmaster.schemas.v1.connection_types import S3_TYPE
 from syncmaster.schemas.v1.connections.connection_base import (
     CreateConnectionBaseSchema,
     ReadConnectionBaseSchema,
-    UpdateConnectionBaseSchema,
 )
 
 
@@ -46,15 +45,6 @@ class ReadS3ConnectionDataSchema(BaseModel):
     bucket_style: Literal["domain", "path"] = "domain"
 
 
-class UpdateS3ConnectionDataSchema(BaseModel):
-    host: str | None = None
-    bucket: str | None = None
-    port: int | None = None
-    region: str | None = None
-    protocol: Literal["http", "https"] | None = None
-    bucket_style: Literal["domain", "path"] | None = None
-
-
 class CreateS3ConnectionSchema(CreateConnectionBaseSchema):
     type: S3_TYPE = Field(..., description="Connection type")
     data: CreateS3ConnectionDataSchema = Field(
@@ -77,7 +67,7 @@ class ReadS3ConnectionSchema(ReadConnectionBaseSchema):
     auth_data: ReadS3AuthSchema | None = Field(discriminator="type", default=None)
 
 
-class UpdateS3ConnectionSchema(UpdateConnectionBaseSchema):
-    type: S3_TYPE
-    data: UpdateS3ConnectionDataSchema | None = Field(alias="connection_data", default=None)
-    auth_data: UpdateS3AuthSchema | None = Field(discriminator="type", default=None)
+class UpdateS3ConnectionSchema(CreateS3ConnectionSchema):
+    auth_data: UpdateS3AuthSchema = Field(
+        description="Credentials for authorization",
+    )

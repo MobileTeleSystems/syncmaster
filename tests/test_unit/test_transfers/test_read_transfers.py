@@ -5,6 +5,7 @@ import pytest
 from httpx import AsyncClient
 
 from tests.mocks import MockTransfer, MockUser, UserTestRoles
+from tests.test_unit.utils import build_transfer_json
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
@@ -14,17 +15,14 @@ async def test_guest_plus_can_read_transfers(
     group_transfer: MockTransfer,
     role_guest_plus: UserTestRoles,
 ):
-    # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_guest_plus)
 
-    # Act
     result = await client.get(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"group_id": group_transfer.owner_group.group.id},
     )
 
-    # Assert
     assert result.json() == {
         "meta": {
             "page": 1,
@@ -37,22 +35,7 @@ async def test_guest_plus_can_read_transfers(
             "previous_page": None,
         },
         "items": [
-            {
-                "id": group_transfer.id,
-                "group_id": group_transfer.group_id,
-                "name": group_transfer.name,
-                "description": group_transfer.description,
-                "schedule": group_transfer.schedule,
-                "is_scheduled": group_transfer.is_scheduled,
-                "source_connection_id": group_transfer.source_connection_id,
-                "target_connection_id": group_transfer.target_connection_id,
-                "source_params": group_transfer.source_params,
-                "target_params": group_transfer.target_params,
-                "strategy_params": group_transfer.strategy_params,
-                "transformations": group_transfer.transformations,
-                "resources": group_transfer.resources,
-                "queue_id": group_transfer.transfer.queue_id,
-            },
+            build_transfer_json(group_transfer),
         ],
     }
     assert result.status_code == 200
@@ -63,14 +46,12 @@ async def test_groupless_user_cannot_read_transfers(
     simple_user: MockUser,
     group_transfer: MockTransfer,
 ):
-    # Act
     result = await client.get(
         "v1/transfers",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         params={"group_id": group_transfer.owner_group.group.id},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -86,14 +67,12 @@ async def test_superuser_can_read_transfers(
     superuser: MockUser,
     group_transfer: MockTransfer,
 ):
-    # Act
     result = await client.get(
         "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"group_id": group_transfer.owner_group.group.id},
     )
 
-    # Assert
     assert result.json() == {
         "meta": {
             "page": 1,
@@ -106,22 +85,7 @@ async def test_superuser_can_read_transfers(
             "previous_page": None,
         },
         "items": [
-            {
-                "id": group_transfer.id,
-                "group_id": group_transfer.group_id,
-                "name": group_transfer.name,
-                "description": group_transfer.description,
-                "schedule": group_transfer.schedule,
-                "is_scheduled": group_transfer.is_scheduled,
-                "source_connection_id": group_transfer.source_connection_id,
-                "target_connection_id": group_transfer.target_connection_id,
-                "source_params": group_transfer.source_params,
-                "target_params": group_transfer.target_params,
-                "strategy_params": group_transfer.strategy_params,
-                "transformations": group_transfer.transformations,
-                "resources": group_transfer.resources,
-                "queue_id": group_transfer.transfer.queue_id,
-            },
+            build_transfer_json(group_transfer),
         ],
     }
     assert result.status_code == 200
@@ -165,22 +129,7 @@ async def test_search_transfers_with_query(
             "previous_page": None,
         },
         "items": [
-            {
-                "id": group_transfer.id,
-                "group_id": group_transfer.group_id,
-                "name": group_transfer.name,
-                "description": group_transfer.description,
-                "schedule": group_transfer.schedule,
-                "is_scheduled": group_transfer.is_scheduled,
-                "source_connection_id": group_transfer.source_connection_id,
-                "target_connection_id": group_transfer.target_connection_id,
-                "source_params": group_transfer.source_params,
-                "target_params": group_transfer.target_params,
-                "strategy_params": group_transfer.strategy_params,
-                "transformations": group_transfer.transformations,
-                "resources": group_transfer.resources,
-                "queue_id": group_transfer.transfer.queue_id,
-            },
+            build_transfer_json(group_transfer),
         ],
     }
     assert result.status_code == 200
@@ -247,22 +196,7 @@ async def test_filter_transfers(
             "previous_page": None,
         },
         "items": [
-            {
-                "id": group_transfer.id,
-                "group_id": group_transfer.group_id,
-                "name": group_transfer.name,
-                "description": group_transfer.description,
-                "schedule": group_transfer.schedule,
-                "is_scheduled": group_transfer.is_scheduled,
-                "source_connection_id": group_transfer.source_connection_id,
-                "target_connection_id": group_transfer.target_connection_id,
-                "source_params": group_transfer.source_params,
-                "target_params": group_transfer.target_params,
-                "strategy_params": group_transfer.strategy_params,
-                "transformations": group_transfer.transformations,
-                "resources": group_transfer.resources,
-                "queue_id": group_transfer.transfer.queue_id,
-            },
+            build_transfer_json(group_transfer),
         ],
     }
 
@@ -347,33 +281,13 @@ async def test_filter_transfers_with_multiple_transfers(
             expected_transfers.append(transfer)
 
     assert result.status_code == 200
-    expected_items = [
-        {
-            "id": t.id,
-            "group_id": t.group_id,
-            "name": t.name,
-            "description": t.description,
-            "schedule": t.schedule,
-            "is_scheduled": t.is_scheduled,
-            "source_connection_id": t.source_connection_id,
-            "target_connection_id": t.target_connection_id,
-            "source_params": t.source_params,
-            "target_params": t.target_params,
-            "strategy_params": t.strategy_params,
-            "transformations": t.transformations,
-            "resources": t.resources,
-            "queue_id": t.queue_id,
-        }
-        for t in expected_transfers
-    ]
+    expected_items = [build_transfer_json(t) for t in expected_transfers]
     assert result.json()["items"] == expected_items
 
 
 async def test_unauthorized_user_cannot_read_transfers(client: AsyncClient):
-    # Act
     result = await client.get("v1/transfers")
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -389,17 +303,14 @@ async def test_developer_plus_cannot_read_unknown_group_transfers_error(
     group_transfer: MockTransfer,
     role_developer_plus: UserTestRoles,
 ):
-    # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.get(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"group_id": -1},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -414,14 +325,12 @@ async def test_superuser_cannot_read_unknown_group_transfers_error(
     superuser: MockUser,
     group_transfer: MockTransfer,
 ):
-    # Act
     result = await client.get(
         "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"group_id": -1},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",

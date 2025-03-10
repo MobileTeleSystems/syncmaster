@@ -89,21 +89,17 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
     async def update(
         self,
         connection_id: int,
-        name: str | None,
-        type: str | None,
-        description: str | None,
+        name: str,
+        type: str,
+        description: str,
         data: dict[str, Any],
     ) -> Connection:
         try:
-            connection = await self.read_by_id(connection_id=connection_id)
-            for key in connection.data:
-                data[key] = data.get(key, None) or connection.data[key]
-
             return await self._update(
                 Connection.id == connection_id,
-                type=type or connection.type,
-                name=name or connection.name,
-                description=description or connection.description,
+                type=type,
+                name=name,
+                description=description,
                 data=data,
             )
         except IntegrityError as e:

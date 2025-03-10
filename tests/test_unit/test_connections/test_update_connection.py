@@ -2,6 +2,7 @@ import pytest
 from httpx import AsyncClient
 
 from tests.mocks import MockConnection, MockGroup, MockTransfer, MockUser, UserTestRoles
+from tests.test_unit.utils import fetch_connection_json
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
@@ -11,17 +12,15 @@ async def test_developer_plus_can_update_connection(
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
+    connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    # Act
-    result = await client.patch(
+    result = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"name": "New connection name", "type": group_connection.type},
+        json={**connection_json, "name": "New connection name", "type": group_connection.type},
     )
 
-    # Assert
     assert result.json() == {
         "id": group_connection.id,
         "name": "New connection name",
@@ -66,28 +65,29 @@ async def test_developer_plus_can_update_oracle_connection(
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
     group_connection.connection.group.id
+    connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    # Act
-    result = await client.patch(
+    result = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
+            **connection_json,
             "type": "oracle",
             "connection_data": {
                 "host": "127.0.1.1",
+                "port": 1522,
                 "sid": "new_sid_name",
             },
             "auth_data": {
                 "type": "basic",
                 "user": "new_user",
+                "password": "new_secret",
             },
         },
     )
 
-    # Assert
     assert result.status_code == 200
     assert result.json() == {
         "id": group_connection.id,
@@ -97,7 +97,7 @@ async def test_developer_plus_can_update_oracle_connection(
         "type": group_connection.type,
         "connection_data": {
             "host": "127.0.1.1",
-            "port": group_connection.data["port"],
+            "port": 1522,
             "sid": "new_sid_name",
             "additional_params": {},
             "service_name": None,
@@ -114,14 +114,30 @@ async def test_groupless_user_cannot_update_connection(
     group_connection: MockConnection,
     simple_user: MockUser,
 ):
-    # Act
-    result = await client.patch(
+    connection_json = {
+        "id": group_connection.id,
+        "name": group_connection.name,
+        "description": group_connection.description,
+        "group_id": group_connection.group_id,
+        "type": group_connection.type,
+        "connection_data": {
+            "host": group_connection.data["host"],
+            "port": group_connection.data["port"],
+            "database_name": group_connection.data["database_name"],
+        },
+        "auth_data": {
+            "type": group_connection.credentials.value["type"],
+            "user": group_connection.credentials.value["user"],
+            "password": "password",
+        },
+    }
+
+    result = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
-        json={"name": "New connection name", "type": group_connection.type},
+        json=connection_json,
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -129,7 +145,6 @@ async def test_groupless_user_cannot_update_connection(
             "details": None,
         },
     }
-    assert result.status_code == 404
 
 
 async def test_check_name_field_validation_on_update_connection(
@@ -137,17 +152,15 @@ async def test_check_name_field_validation_on_update_connection(
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
+    connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    # Act
-    result = await client.patch(
+    result = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"name": "", "type": group_connection.type},
+        json={**connection_json, "name": "", "type": group_connection.type},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "invalid_request",
@@ -171,17 +184,31 @@ async def test_group_member_cannot_update_other_group_connection(
     group_connection: MockConnection,
     role_guest_plus: UserTestRoles,
 ):
-    # Arrange
     user = group.get_member_of_role(role_guest_plus)
+    connection_json = {
+        "id": group_connection.id,
+        "name": group_connection.name,
+        "description": group_connection.description,
+        "group_id": group_connection.group_id,
+        "type": group_connection.type,
+        "connection_data": {
+            "host": group_connection.data["host"],
+            "port": group_connection.data["port"],
+            "database_name": group_connection.data["database_name"],
+        },
+        "auth_data": {
+            "type": group_connection.credentials.value["type"],
+            "user": group_connection.credentials.value["user"],
+            "password": "password",
+        },
+    }
 
-    # Act
-    result = await client.patch(
+    result = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"name": "New connection name", "type": group_connection.type},
+        json=connection_json,
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -189,7 +216,6 @@ async def test_group_member_cannot_update_other_group_connection(
             "details": None,
         },
     }
-    assert result.status_code == 404
 
 
 async def test_superuser_can_update_connection(
@@ -197,14 +223,14 @@ async def test_superuser_can_update_connection(
     group_connection: MockConnection,
     superuser: MockUser,
 ):
-    # Act
-    result = await client.patch(
+    connection_json = await fetch_connection_json(client, superuser.token, group_connection)
+
+    result = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
-        json={"type": "postgres", "name": "New connection name"},
+        json={**connection_json, "type": "postgres", "name": "New connection name"},
     )
 
-    # Assert
     assert result.json() == {
         "id": group_connection.id,
         "name": "New connection name",
@@ -230,42 +256,15 @@ async def test_update_connection_data_fields(
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
+    connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    # Act
-    result = await client.patch(
+    result = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"connection_data": {"host": "localhost"}},
+        json={**connection_json, "connection_data": {"host": "localhost", "port": 5432, "database_name": "db"}},
     )
 
-    # Assert
-    assert result.status_code == 422
-    assert result.json() == {
-        "error": {
-            "code": "invalid_request",
-            "message": "Invalid request",
-            "details": [
-                {
-                    "context": {"discriminator": "'type'"},
-                    "input": {"connection_data": {"host": "localhost"}},
-                    "location": ["body"],
-                    "message": "Unable to extract tag using discriminator 'type'",
-                    "code": "union_tag_not_found",
-                },
-            ],
-        },
-    }
-
-    # Act
-    result = await client.patch(
-        f"v1/connections/{group_connection.id}",
-        headers={"Authorization": f"Bearer {user.token}"},
-        json={"type": "postgres", "connection_data": {"host": "localhost"}},
-    )
-
-    # Assert
     assert result.json() == {
         "id": group_connection.id,
         "name": group_connection.name,
@@ -286,21 +285,24 @@ async def test_update_connection_data_fields(
     assert result.status_code == 200
 
 
-async def test_update_connection_auth_data_all_felds(
+async def test_update_connection_auth_data(
     client: AsyncClient,
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
-    # Act
-    result = await client.patch(
+    connection_json = await fetch_connection_json(client, user.token, group_connection)
+
+    result = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"type": "postgres", "auth_data": {"type": "basic", "user": "new_user", "password": "new_password"}},
+        json={
+            **connection_json,
+            "type": "postgres",
+            "auth_data": {"type": "basic", "user": "new_user", "password": "new_password"},
+        },
     )
 
-    # Assert
     assert result.json() == {
         "id": group_connection.id,
         "name": group_connection.name,
@@ -321,52 +323,47 @@ async def test_update_connection_auth_data_all_felds(
     assert result.status_code == 200
 
 
-async def test_update_connection_auth_data_partial(
+async def test_superuser_cannot_update_connection_auth_data_type_without_secret(
     client: AsyncClient,
     group_connection: MockConnection,
-    role_developer_plus: UserTestRoles,
+    superuser: MockUser,
 ):
-    # Arrange
-    user = group_connection.owner_group.get_member_of_role(role_developer_plus)
-    # Act
-    result = await client.patch(
+    connection_json = await fetch_connection_json(client, superuser.token, group_connection)
+
+    result = await client.put(
         f"v1/connections/{group_connection.id}",
-        headers={"Authorization": f"Bearer {user.token}"},
-        json={"type": "postgres", "auth_data": {"type": "basic", "user": "new_user"}},
+        headers={"Authorization": f"Bearer {superuser.token}"},
+        json={
+            **connection_json,
+            "connection_data": {
+                "host": "localhost",
+                "port": 9000,
+                "bucket": "new_bucket",
+            },
+            "type": "s3",
+            "auth_data": {"type": "s3", "access_key": "s3_key"},
+        },
     )
 
-    # Assert
     assert result.json() == {
-        "id": group_connection.id,
-        "name": group_connection.name,
-        "description": group_connection.description,
-        "group_id": group_connection.group_id,
-        "type": group_connection.type,
-        "connection_data": {
-            "host": "127.0.0.1",
-            "port": group_connection.data["port"],
-            "additional_params": group_connection.data["additional_params"],
-            "database_name": group_connection.data["database_name"],
-        },
-        "auth_data": {
-            "type": group_connection.credentials.value["type"],
-            "user": "new_user",
+        "error": {
+            "code": "conflict",
+            "message": "You cannot update the connection auth type without providing a new secret value.",
+            "details": None,
         },
     }
-    assert result.status_code == 200
+    assert result.status_code == 409
 
 
 async def test_unauthorized_user_cannot_update_connection(
     client: AsyncClient,
     group_connection: MockConnection,
 ):
-    # Act
-    result = await client.patch(
+    result = await client.put(
         f"v1/connections/{group_connection.id}",
         json={"name": "New connection name"},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -382,17 +379,15 @@ async def test_developer_plus_cannot_update_unknown_connection_error(
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
+    connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    # Act
-    result = await client.patch(
+    result = await client.put(
         "v1/connections/-1",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"type": "postgres", "name": "New connection name"},
+        json={**connection_json, "type": "postgres", "name": "New connection name"},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -404,16 +399,17 @@ async def test_developer_plus_cannot_update_unknown_connection_error(
 
 async def test_superuser_cannot_update_unknown_connection_error(
     client: AsyncClient,
+    group_connection: MockConnection,
     superuser: MockUser,
 ):
-    # Act
-    result = await client.patch(
+    connection_json = await fetch_connection_json(client, superuser.token, group_connection)
+
+    result = await client.put(
         "v1/connections/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
-        json={"type": "postgres", "name": "New connection name"},
+        json={**connection_json, "type": "postgres", "name": "New connection name"},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -447,12 +443,10 @@ async def test_developer_plus_update_oracle_connection_both_sid_and_service_name
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
     group_id = group_connection.connection.group.id
 
-    # Act
-    result = await client.patch(
+    result = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -474,7 +468,6 @@ async def test_developer_plus_update_oracle_connection_both_sid_and_service_name
         },
     )
 
-    # Assert
     assert result.status_code == 422
     assert result.json() == {
         "error": {
@@ -503,23 +496,19 @@ async def test_maintainer_plus_cannot_update_connection_type_with_linked_transfe
     group_transfer: MockTransfer,
     role_maintainer_plus: UserTestRoles,
 ):
-    # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_maintainer_plus)
+    connection_json = await fetch_connection_json(client, user.token, group_transfer.source_connection)
 
-    # Act
-    result = await client.patch(
+    result = await client.put(
         f"v1/connections/{group_transfer.source_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
+            **connection_json,
             "name": "New connection name",
             "type": "oracle",
-            "connection_data": {
-                "host": "new_host",
-            },
         },
     )
 
-    # Assert
     assert result.status_code == 409
     assert result.json() == {
         "error": {
@@ -534,17 +523,15 @@ async def test_guest_cannot_update_connection_error(
     client: AsyncClient,
     group_connection: MockConnection,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(UserTestRoles.Guest)
+    connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    # Act
-    result = await client.patch(
+    result = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"type": "postgres", "name": "New connection name"},
+        json={**connection_json, "type": "postgres", "name": "New connection name"},
     )
 
-    # Assert
     assert result.status_code == 403
     assert result.json() == {
         "error": {

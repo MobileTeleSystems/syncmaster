@@ -2,6 +2,7 @@ import pytest
 from httpx import AsyncClient
 
 from tests.mocks import MockConnection, UserTestRoles
+from tests.test_unit.utils import fetch_connection_json
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.clickhouse]
 
@@ -29,28 +30,28 @@ async def test_developer_plus_can_update_clickhouse_connection(
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
-    group_connection.connection.group.id
+    connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    # Act
-    result = await client.patch(
+    result = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
+            **connection_json,
             "type": group_connection.type,
             "connection_data": {
                 "host": "127.0.1.1",
+                "port": 8124,
                 "database_name": "new_name",
             },
             "auth_data": {
                 "type": "basic",
                 "user": "new_user",
+                "password": "new_password",
             },
         },
     )
 
-    # Assert
     assert result.status_code == 200
     assert result.json() == {
         "id": group_connection.id,
@@ -60,7 +61,7 @@ async def test_developer_plus_can_update_clickhouse_connection(
         "type": group_connection.type,
         "connection_data": {
             "host": "127.0.1.1",
-            "port": group_connection.data["port"],
+            "port": 8124,
             "database_name": "new_name",
             "additional_params": {},
         },

@@ -2,6 +2,7 @@ import pytest
 from httpx import AsyncClient
 
 from tests.mocks import MockConnection, UserTestRoles
+from tests.test_unit.utils import fetch_connection_json
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.s3]
 
@@ -33,33 +34,30 @@ async def test_developer_plus_can_update_s3_connection(
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
-    parameter_to_update = "region"
-    value_to_update = "new_region"
+    connection_json = await fetch_connection_json(client, user.token, group_connection)
+    new_connection_data = {
+        "bucket": "new_bucket",
+        "host": "new_host",
+        "port": 80,
+        "region": "new_region",
+        "protocol": "http",
+        "bucket_style": "domain",
+    }
 
-    # Act
-    result = await client.patch(
+    result = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"type": "s3", "connection_data": {parameter_to_update: value_to_update}},
+        json={**connection_json, "type": "s3", "connection_data": new_connection_data},
     )
 
-    # Assert
     assert result.json() == {
         "id": group_connection.id,
         "name": group_connection.connection.name,
         "description": group_connection.description,
         "group_id": group_connection.group_id,
         "type": group_connection.type,
-        "connection_data": {
-            parameter_to_update: value_to_update,
-            "host": group_connection.data["host"],
-            "bucket": group_connection.data["bucket"],
-            "port": group_connection.data["port"],
-            "protocol": group_connection.data["protocol"],
-            "bucket_style": group_connection.data["bucket_style"],
-        },
+        "connection_data": new_connection_data,
         "auth_data": {
             "type": group_connection.credentials.value["type"],
             "access_key": group_connection.credentials.value["access_key"],

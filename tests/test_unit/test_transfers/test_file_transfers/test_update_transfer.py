@@ -2,6 +2,7 @@ import pytest
 from httpx import AsyncClient
 
 from tests.mocks import MockTransfer, UserTestRoles
+from tests.test_unit.utils import build_transfer_json, fetch_transfer_json
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
@@ -70,6 +71,9 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
                 },
                 "options": {},
             },
+            "target_params": {
+                "file_name_template": "{run_created_at}-{index}.{extension}",
+            },
         },
         {
             "source_and_target_params": {
@@ -80,6 +84,9 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
                     "compression": "snappy",
                 },
                 "options": {},
+            },
+            "target_params": {
+                "file_name_template": "{run_created_at}-{index}.{extension}",
             },
             "transformations": [
                 {
@@ -143,8 +150,8 @@ async def test_developer_plus_can_update_s3_transfer(
     create_connection_data: dict,
     create_transfer_data: dict,
 ):
-    # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
+    transfer_json = await fetch_transfer_json(client, user.token, group_transfer)
     updated_fields = {
         "source_params": {
             "type": "ftp",
@@ -181,28 +188,11 @@ async def test_developer_plus_can_update_s3_transfer(
         },
     }
 
-    # Act
-    result = await client.patch(
+    result = await client.put(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json=updated_fields,
+        json=transfer_json | updated_fields,
     )
 
-    # Assert
     assert result.status_code == 200
-    assert result.json() == {
-        "id": group_transfer.id,
-        "group_id": group_transfer.group_id,
-        "name": group_transfer.transfer.name,
-        "description": group_transfer.description,
-        "schedule": group_transfer.schedule,
-        "is_scheduled": group_transfer.is_scheduled,
-        "source_connection_id": group_transfer.source_connection_id,
-        "target_connection_id": group_transfer.target_connection_id,
-        "source_params": updated_fields["source_params"],
-        "target_params": updated_fields["target_params"],
-        "strategy_params": updated_fields["strategy_params"],
-        "transformations": updated_fields["transformations"],
-        "resources": updated_fields["resources"],
-        "queue_id": group_transfer.transfer.queue_id,
-    }
+    assert result.json() == build_transfer_json(group_transfer) | updated_fields

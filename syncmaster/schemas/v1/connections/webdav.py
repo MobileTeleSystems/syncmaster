@@ -8,13 +8,12 @@ from pydantic import BaseModel, Field
 from syncmaster.schemas.v1.auth import (
     CreateBasicAuthSchema,
     ReadBasicAuthSchema,
-    UpdateBasicAuthSchema,
 )
+from syncmaster.schemas.v1.auth.basic import UpdateBasicAuthSchema
 from syncmaster.schemas.v1.connection_types import WEBDAV_TYPE
 from syncmaster.schemas.v1.connections.connection_base import (
     CreateConnectionBaseSchema,
     ReadConnectionBaseSchema,
-    UpdateConnectionBaseSchema,
 )
 
 
@@ -28,12 +27,6 @@ class ReadWebDAVConnectionDataSchema(BaseModel):
     host: str
     port: int | None
     protocol: Literal["http", "https"]
-
-
-class UpdateWebDAVConnectionDataSchema(BaseModel):
-    host: str | None = None
-    port: int | None = None
-    protocol: Literal["http", "https"] | None = None
 
 
 class CreateWebDAVConnectionSchema(CreateConnectionBaseSchema):
@@ -56,7 +49,7 @@ class ReadWebDAVConnectionSchema(ReadConnectionBaseSchema):
     auth_data: ReadBasicAuthSchema | None = None
 
 
-class UpdateWebDAVConnectionSchema(UpdateConnectionBaseSchema):
-    type: WEBDAV_TYPE
-    data: UpdateWebDAVConnectionDataSchema | None = Field(alias="connection_data", default=None)
-    auth_data: UpdateBasicAuthSchema | None = None
+class UpdateWebDAVConnectionSchema(CreateWebDAVConnectionSchema):
+    auth_data: UpdateBasicAuthSchema = Field(
+        description="Credentials for authorization",
+    )

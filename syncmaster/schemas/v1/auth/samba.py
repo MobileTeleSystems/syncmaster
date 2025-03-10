@@ -20,7 +20,9 @@ class ReadSambaAuthSchema(SambaAuthSchema):
     auth_type: Literal["NTLMv1", "NTLMv2"]
 
 
-class UpdateSambaAuthSchema(SambaAuthSchema):
-    user: str | None = None
+class UpdateSambaAuthSchema(CreateSambaAuthSchema):
     password: SecretStr | None = None
-    auth_type: Literal["NTLMv1", "NTLMv2"] | None = None
+
+    @property
+    def secret_field(self) -> str:
+        return "password"

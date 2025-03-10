@@ -2,6 +2,7 @@ import pytest
 from httpx import AsyncClient
 
 from tests.mocks import MockConnection, UserTestRoles
+from tests.test_unit.utils import fetch_connection_json
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.hdfs]
 
@@ -27,29 +28,26 @@ async def test_developer_plus_can_update_hdfs_connection(
     client: AsyncClient,
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
-    create_connection_data: dict,  # don't remove
-    create_connection_auth_data: dict,  # don't remove
+    create_connection_data: dict,
+    create_connection_auth_data: dict,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
-    parameter_to_update = "cluster"
-    value_to_update = "updated_cluser"
+    new_connection_data = {"cluster": "new_cluster"}
+    connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    # Act
-    result = await client.patch(
+    result = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"type": "hdfs", "connection_data": {parameter_to_update: value_to_update}},
+        json={**connection_json, "type": "hdfs", "connection_data": new_connection_data},
     )
 
-    # Assert
     assert result.json() == {
         "id": group_connection.id,
         "name": group_connection.connection.name,
         "description": group_connection.description,
         "type": group_connection.type,
         "group_id": group_connection.group_id,
-        "connection_data": {parameter_to_update: value_to_update},
+        "connection_data": new_connection_data,
         "auth_data": {
             "type": group_connection.credentials.value["type"],
             "user": group_connection.credentials.value["user"],

@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Any
 
+from httpx import AsyncClient
 from onetl.connection import FileConnection
 from onetl.impl import LocalPath, RemotePath
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,6 +25,7 @@ from syncmaster.db.models import (
 from syncmaster.db.repositories.utils import encrypt_auth_data
 from syncmaster.schemas.v1.transfers import ReadFullTransferSchema
 from syncmaster.server.settings import ServerAppSettings as Settings
+from tests.mocks import MockConnection, MockTransfer
 
 
 @asynccontextmanager
@@ -263,3 +265,46 @@ def upload_files(
         )
 
     return remote_files
+
+
+async def fetch_connection_json(client: AsyncClient, user_token: str, mock_connection: MockConnection) -> dict:
+    connection = await client.get(
+        f"v1/connections/{mock_connection.id}",
+        headers={"Authorization": f"Bearer {user_token}"},
+    )
+    connection_json = connection.json()
+
+    auth_data = connection_json["auth_data"]
+    if auth_data["type"] in ("basic", "samba"):
+        auth_data["password"] = mock_connection.credentials.value["password"]
+    elif auth_data["type"] == "s3":
+        auth_data["secret_key"] = mock_connection.credentials.value["secret_key"]
+
+    return connection_json
+
+
+async def fetch_transfer_json(client: AsyncClient, user_token: str, mock_transfer: MockTransfer) -> dict:
+    transfer = await client.get(
+        f"v1/transfers/{mock_transfer.id}",
+        headers={"Authorization": f"Bearer {user_token}"},
+    )
+    return transfer.json()
+
+
+def build_transfer_json(mock_transfer: MockTransfer) -> dict:
+    return {
+        "id": mock_transfer.id,
+        "group_id": mock_transfer.group_id,
+        "name": mock_transfer.name,
+        "description": mock_transfer.description,
+        "schedule": mock_transfer.schedule,
+        "is_scheduled": mock_transfer.is_scheduled,
+        "source_connection_id": mock_transfer.source_connection_id,
+        "target_connection_id": mock_transfer.target_connection_id,
+        "source_params": mock_transfer.source_params,
+        "target_params": mock_transfer.target_params,
+        "strategy_params": mock_transfer.strategy_params,
+        "transformations": mock_transfer.transformations,
+        "resources": mock_transfer.resources,
+        "queue_id": mock_transfer.transfer.queue_id,
+    }

@@ -2,6 +2,7 @@ import pytest
 from httpx import AsyncClient
 
 from tests.mocks import MockConnection, UserTestRoles
+from tests.test_unit.utils import fetch_connection_json
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.mysql]
 
@@ -30,28 +31,28 @@ async def test_developer_plus_can_update_mysql_connection(
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
-    group_connection.connection.group.id
+    connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    # Act
-    result = await client.patch(
+    result = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
+            **connection_json,
             "type": group_connection.type,
             "connection_data": {
                 "host": "127.0.1.1",
+                "port": 3307,
                 "database_name": "new_database",
             },
             "auth_data": {
                 "type": "basic",
                 "user": "new_user",
+                "password": "new_password",
             },
         },
     )
 
-    # Assert
     assert result.status_code == 200
     assert result.json() == {
         "id": group_connection.id,
@@ -61,7 +62,7 @@ async def test_developer_plus_can_update_mysql_connection(
         "type": "mysql",
         "connection_data": {
             "host": "127.0.1.1",
-            "port": group_connection.data["port"],
+            "port": 3307,
             "database_name": "new_database",
             "additional_params": {},
         },

@@ -6,13 +6,12 @@ from pydantic import BaseModel, Field
 from syncmaster.schemas.v1.auth import (
     CreateBasicAuthSchema,
     ReadBasicAuthSchema,
-    UpdateBasicAuthSchema,
 )
+from syncmaster.schemas.v1.auth.basic import UpdateBasicAuthSchema
 from syncmaster.schemas.v1.connection_types import HIVE_TYPE
 from syncmaster.schemas.v1.connections.connection_base import (
     CreateConnectionBaseSchema,
     ReadConnectionBaseSchema,
-    UpdateConnectionBaseSchema,
 )
 
 
@@ -22,10 +21,6 @@ class CreateHiveConnectionDataSchema(BaseModel):
 
 class ReadHiveConnectionDataSchema(BaseModel):
     cluster: str
-
-
-class UpdateHiveConnectionDataSchema(BaseModel):
-    cluster: str | None = None
 
 
 class CreateHiveConnectionSchema(CreateConnectionBaseSchema):
@@ -48,7 +43,7 @@ class ReadHiveConnectionSchema(ReadConnectionBaseSchema):
     auth_data: ReadBasicAuthSchema | None = None
 
 
-class UpdateHiveConnectionSchema(UpdateConnectionBaseSchema):
-    type: HIVE_TYPE
-    data: UpdateHiveConnectionDataSchema | None = Field(alias="connection_data", default=None)
-    auth_data: UpdateBasicAuthSchema | None = None
+class UpdateHiveConnectionSchema(CreateHiveConnectionSchema):
+    auth_data: UpdateBasicAuthSchema = Field(
+        description="Credentials for authorization",
+    )
