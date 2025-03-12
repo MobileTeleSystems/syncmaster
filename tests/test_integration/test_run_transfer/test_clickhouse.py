@@ -139,6 +139,56 @@ async def test_run_transfer_postgres_to_clickhouse_with_full_strategy(
     "strategy, transformations",
     [
         (
+            lf("incremental_strategy_by_number_column"),
+            [],
+        ),
+    ],
+)
+async def test_run_transfer_postgres_to_clickhouse_with_different_strategies(
+    client: AsyncClient,
+    group_owner: MockUser,
+    prepare_postgres,
+    prepare_clickhouse,
+    init_df: DataFrame,
+    postgres_to_clickhouse: Transfer,
+    update_transfer_strategy,
+    strategy,
+    transformations,
+):
+    """
+    Run three transfers:
+
+    1. Incremental transfer
+    2. Full transfer with HWM reset
+    3. Incremental transfer to verify that results match the snapshot.
+    """
+    _, fill_with_data = prepare_postgres
+    clickhouse, _ = prepare_clickhouse
+
+    first_transfer_df, second_transfer_df = split_df(df=init_df, ratio=0.6, keep_sorted_by="number")
+    fill_with_data(first_transfer_df)
+    await run_transfer_and_verify(client, group_owner, postgres_to_clickhouse.id)
+
+    fill_with_data(second_transfer_df)
+    await update_transfer_strategy(postgres_to_clickhouse, "full_strategy")
+    await run_transfer_and_verify(client, group_owner, postgres_to_clickhouse.id)
+
+    await update_transfer_strategy(postgres_to_clickhouse, "incremental_strategy_by_number_column")
+    await run_transfer_and_verify(client, group_owner, postgres_to_clickhouse.id)
+
+    reader = DBReader(
+        connection=clickhouse,
+        table=f"{clickhouse.user}.target_table",
+    )
+    df = reader.run()
+    df, init_df = cast_dataframe_types(df, init_df)
+    assert df.sort("ID").collect() == init_df.sort("ID").collect()
+
+
+@pytest.mark.parametrize(
+    "strategy, transformations",
+    [
+        (
             lf("full_strategy"),
             [],
         ),
@@ -239,11 +289,11 @@ async def test_run_transfer_clickhouse_to_postgres_with_full_strategy(
     prepare_clickhouse,
     prepare_postgres,
     init_df: DataFrame,
+    clickhouse_to_postgres: Transfer,
     source_type,
     strategy,
     transformations,
     expected_filter,
-    clickhouse_to_postgres: Transfer,
 ):
     _, fill_with_data = prepare_clickhouse
     fill_with_data(init_df)
@@ -315,9 +365,9 @@ async def test_run_transfer_clickhouse_to_postgres_with_incremental_strategy(
     prepare_clickhouse,
     prepare_postgres,
     init_df: DataFrame,
+    clickhouse_to_postgres: Transfer,
     strategy,
     transformations,
-    clickhouse_to_postgres: Transfer,
 ):
     _, fill_with_data = prepare_clickhouse
     postgres, _ = prepare_postgres
