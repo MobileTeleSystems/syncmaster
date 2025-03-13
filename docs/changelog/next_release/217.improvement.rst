@@ -1,0 +1,1 @@
+Reset HWM when changing strategy from `incremental` to `full`

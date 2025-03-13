@@ -4,6 +4,7 @@ import logging
 from tempfile import TemporaryDirectory
 from typing import Any
 
+from etl_entities.hwm_store import BaseHWMStore
 from horizon.client.auth import LoginPassword
 from horizon_hwm_store import HorizonHWMStore
 from onetl.strategy import IncrementalStrategy
@@ -198,6 +199,9 @@ class TransferController:
                 if self.source_handler.transfer_dto.strategy.type == "incremental":
                     return self._perform_incremental_transfer()
 
+                if self.source_handler.transfer_dto.strategy.type == "full" and self.settings.hwm_store.enabled:
+                    self._reset_transfer_hwm()
+
                 df = self.source_handler.read()
                 self.target_handler.write(df)
         finally:
@@ -235,25 +239,17 @@ class TransferController:
             temp_dir=temp_dir,
         )
 
-    def _perform_incremental_transfer(self) -> None:
-        with HorizonHWMStore(
+    def _get_hwm_store(self) -> BaseHWMStore:
+        return HorizonHWMStore(
             api_url=self.settings.hwm_store.url,
             auth=LoginPassword(login=self.settings.hwm_store.user, password=self.settings.hwm_store.password),
             namespace=self.settings.hwm_store.namespace,
-        ).force_create_namespace() as hwm_store:
+        ).force_create_namespace()
 
+    def _perform_incremental_transfer(self) -> None:
+        with self._get_hwm_store() as hwm_store:
             with IncrementalStrategy():
-                if self.source_handler.connection_dto.type in FILE_CONNECTION_TYPES:
-                    hwm_name_suffix = self.source_handler.transfer_dto.directory_path
-                else:
-                    hwm_name_suffix = self.source_handler.transfer_dto.table_name
-                hwm_name = "_".join(
-                    [
-                        str(self.source_handler.transfer_dto.id),
-                        self.source_handler.connection_dto.type,
-                        hwm_name_suffix,
-                    ],
-                )
+                hwm_name = self._get_transfer_hwm_name()
                 hwm = hwm_store.get_hwm(hwm_name)
 
                 self.source_handler.hwm = hwm
@@ -261,3 +257,29 @@ class TransferController:
 
                 df = self.source_handler.read()
                 self.target_handler.write(df)
+
+    def _get_transfer_hwm_name(self) -> str:
+        if self.source_handler.connection_dto.type in FILE_CONNECTION_TYPES:
+            hwm_name_suffix = self.source_handler.transfer_dto.directory_path
+        else:
+            hwm_name_suffix = self.source_handler.transfer_dto.table_name
+        hwm_name = "_".join(
+            [
+                str(self.source_handler.transfer_dto.id),
+                self.source_handler.connection_dto.type,
+                hwm_name_suffix,
+            ],
+        )
+        return hwm_name
+
+    def _reset_transfer_hwm(self) -> None:
+        with self._get_hwm_store() as hwm_store:
+            hwm_name = self._get_transfer_hwm_name()
+            hwm = hwm_store.get_hwm(hwm_name)
+            if hwm and hwm.value:
+                hwm.reset()
+                hwm_store.set_hwm(hwm)
+                logger.warning(
+                    "HWM value has been reset to its default for transfer with id = %r",
+                    self.source_handler.transfer_dto.id,
+                )

@@ -241,6 +241,63 @@ async def test_run_transfer_ftp_to_postgres_with_incremental_strategy(
 
 
 @pytest.mark.parametrize(
+    "source_file_format, file_format_flavor, strategy",
+    [
+        pytest.param(
+            ("csv", {}),
+            "with_header",
+            lf("incremental_strategy_by_file_name"),
+            id="csv",
+        ),
+    ],
+    indirect=["source_file_format", "file_format_flavor"],
+)
+async def test_run_transfer_ftp_to_postgres_with_different_strategies(
+    prepare_postgres,
+    group_owner: MockUser,
+    init_df: DataFrame,
+    client: AsyncClient,
+    ftp_to_postgres: Transfer,
+    update_transfer_strategy,
+    ftp_file_connection: FTP,
+    source_file_format: tuple[str, dict],
+    file_format_flavor: str,
+    strategy: dict,
+    tmp_path: Path,
+):
+    """
+    Run three transfers:
+
+    1. Incremental transfer
+    2. Full transfer with HWM reset
+    3. Incremental transfer to verify that results match the snapshot.
+    """
+    postgres, _ = prepare_postgres
+    file_format, _ = source_file_format
+
+    await run_transfer_and_verify(client, group_owner, ftp_to_postgres.id)
+
+    add_increment_to_files_and_upload(
+        file_connection=ftp_file_connection,
+        remote_path=f"/data/file_df_connection/{file_format}/{file_format_flavor}",
+        tmp_path=tmp_path,
+    )
+    await update_transfer_strategy(ftp_to_postgres, "full_strategy")
+    await run_transfer_and_verify(client, group_owner, ftp_to_postgres.id)
+
+    await update_transfer_strategy(ftp_to_postgres, "incremental_strategy_by_number_column")
+    await run_transfer_and_verify(client, group_owner, ftp_to_postgres.id)
+
+    reader = DBReader(
+        connection=postgres,
+        table="public.target_table",
+    )
+    df = reader.run()
+    df, init_df = cast_dataframe_types(df, init_df)
+    assert df.sort("id").collect() == init_df.union(init_df).sort("id").collect()
+
+
+@pytest.mark.parametrize(
     "target_file_format, file_format_flavor, expected_extension, strategy",
     [
         pytest.param(

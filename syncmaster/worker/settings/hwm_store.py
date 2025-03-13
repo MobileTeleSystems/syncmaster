@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class HWMStoreSettings(BaseModel):
@@ -19,18 +19,37 @@ class HWMStoreSettings(BaseModel):
         SYNCMASTER__HWM_STORE__URL=http://horizon:8000
     """
 
-    type: Literal["horizon"] = Field(
-        description=("HWM Store type"),
+    enabled: bool = Field(
+        default=False,
+        description="Enable or disable HWM Store",
     )
-    url: str = Field(
-        description=("HWM Store URL"),
+    type: Literal["horizon"] | None = Field(
+        default=None,
+        description="HWM Store type",
     )
-    user: str = Field(
-        description=("HWM Store user"),
+    url: str | None = Field(
+        default=None,
+        description="HWM Store URL",
     )
-    password: str = Field(
-        description=("HWM Store password"),
+    user: str | None = Field(
+        default=None,
+        description="HWM Store user",
     )
-    namespace: str = Field(
-        description=("HWM Store namespace"),
+    password: str | None = Field(
+        default=None,
+        description="HWM Store password",
     )
+    namespace: str | None = Field(
+        default=None,
+        description="HWM Store namespace",
+    )
+
+    @model_validator(mode="after")
+    def check_required_fields_if_enabled(self):
+        if self.enabled:
+            missing_fields = [
+                field for field in ["type", "url", "user", "password", "namespace"] if getattr(self, field) is None
+            ]
+            if missing_fields:
+                raise ValueError(f"All fields must be set with enabled HWMStore. Missing {', '.join(missing_fields)}")
+        return self
