@@ -6,6 +6,7 @@ from typing import ClassVar
 
 from onetl.file.format import CSV, JSON, ORC, XML, Excel, JSONLine, Parquet
 
+from syncmaster.dto.transfers_resources import Resources
 from syncmaster.dto.transfers_strategy import FullStrategy, IncrementalStrategy
 
 
@@ -19,6 +20,7 @@ class DBTransferDTO(TransferDTO):
     id: int
     table_name: str
     strategy: FullStrategy | IncrementalStrategy
+    resources: Resources
     transformations: list[dict] | None = None
     options: dict | None = None
 
@@ -34,6 +36,7 @@ class FileTransferDTO(TransferDTO):
     directory_path: str
     file_format: CSV | JSONLine | JSON | Excel | XML | ORC | Parquet
     strategy: FullStrategy | IncrementalStrategy
+    resources: Resources
     options: dict
     file_name_template: str | None = None
     df_schema: dict | None = None

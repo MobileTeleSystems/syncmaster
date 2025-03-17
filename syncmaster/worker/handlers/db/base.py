@@ -45,6 +45,8 @@ class DBHandler(Handler):
                 expression=self.transfer_dto.strategy.increment_by,
             )
 
+        reader_params.update(self._get_reading_options())
+
         reader = DBReader(
             connection=self.connection,
             table=self.transfer_dto.table_name,
@@ -103,6 +105,35 @@ class DBHandler(Handler):
                 expressions.extend(transformation["filters"])
 
         return self._make_columns_filter_expressions(expressions)
+
+    def _get_reading_options(self) -> dict:
+        options = {}
+
+        if self.transfer_dto.resources.max_parallel_tasks < 2:
+            return options
+
+        if self.transfer_dto.strategy.type == "incremental":
+            # using "range" partitioning if HWM is available for efficient min/max lookup,
+            # since the incremental column is usually an indexed primary key
+            options["options"] = {
+                "partition_column": self.transfer_dto.strategy.increment_by,
+                "num_partitions": self.transfer_dto.resources.max_parallel_tasks,
+                "partitioning_mode": "range" if self.hwm and self.hwm.value else "hash",
+            }
+
+        elif self.transfer_dto.strategy.type == "full":
+            schema = self.connection.get_df_schema(
+                source=self.transfer_dto.table_name,
+                columns=self._get_columns_filter_expressions(),
+            )
+            # using "hash" partitioning as it works with any column type and improves full scan performance
+            options["options"] = {
+                "partition_column": self._quote_field(schema[0].name),
+                "num_partitions": self.transfer_dto.resources.max_parallel_tasks,
+                "partitioning_mode": "hash",
+            }
+
+        return options
 
     @staticmethod
     def _quote_field(field: str) -> str:

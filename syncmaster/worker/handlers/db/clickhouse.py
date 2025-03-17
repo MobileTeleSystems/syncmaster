@@ -46,9 +46,9 @@ class ClickhouseHandler(DBHandler):
             (col for col in normalized_df.columns if col.lower().endswith("id")),
             normalized_df.columns[0],  # if there is no column with "id", take the first column
         )
-        quoted_sort_column = f'"{sort_column}"'
-
-        self.transfer_dto.options["createTableOptions"] = f"ENGINE = MergeTree() ORDER BY {quoted_sort_column}"
+        self.transfer_dto.options["createTableOptions"] = (
+            f"ENGINE = MergeTree() ORDER BY {self._quote_field(sort_column)}"
+        )
 
         if self.transfer_dto.strategy.type == "incremental" and self.hwm and self.hwm.value:
             self.transfer_dto.options["if_exists"] = "append"

@@ -47,6 +47,13 @@ async def postgres_to_clickhouse(
             "table_name": f"{clickhouse_for_conftest.user}.target_table",
         },
         strategy_params=strategy,
+        # this covers setting JDBC parallel reading options for full and incremental strategies
+        # TODO: add fixtures if usage increases
+        resources={
+            "max_parallel_tasks": 2,
+            "cpu_cores_per_task": 1,
+            "ram_bytes_per_task": 1024**3,
+        },
         transformations=transformations,
         queue_id=queue.id,
     )
