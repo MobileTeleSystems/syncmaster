@@ -41,6 +41,7 @@ from syncmaster.dto.transfers import (
     SFTPTransferDTO,
     WebDAVTransferDTO,
 )
+from syncmaster.dto.transfers_resources import Resources
 from syncmaster.dto.transfers_strategy import Strategy
 from syncmaster.exceptions.connection import ConnectionTypeNotRecognizedError
 from syncmaster.schemas.v1.connection_types import FILE_CONNECTION_TYPES
@@ -169,6 +170,7 @@ class TransferController:
             transfer_id=run.transfer.id,
             transfer_params=run.transfer.source_params,
             strategy_params=run.transfer.strategy_params,
+            resources=run.transfer.resources,
             transformations=run.transfer.transformations,
             connection_auth_data=source_auth_data,
             temp_dir=TemporaryDirectory(dir=self.temp_dir.name, prefix="downloaded_"),
@@ -179,6 +181,7 @@ class TransferController:
             transfer_id=run.transfer.id,
             transfer_params=run.transfer.target_params,
             strategy_params=run.transfer.strategy_params,
+            resources=run.transfer.resources,
             transformations=run.transfer.transformations,
             connection_auth_data=target_auth_data,
             temp_dir=TemporaryDirectory(dir=self.temp_dir.name, prefix="written_"),
@@ -215,6 +218,7 @@ class TransferController:
         transfer_id: int,
         transfer_params: dict[str, Any],
         strategy_params: dict[str, Any],
+        resources: dict[str, Any],
         transformations: list[dict],
         temp_dir: TemporaryDirectory,
     ) -> Handler:
@@ -232,6 +236,7 @@ class TransferController:
             transfer_dto=transfer_dto(
                 id=transfer_id,
                 strategy=Strategy.from_dict(strategy_params),
+                resources=Resources(**resources),
                 transformations=transformations,
                 **transfer_params,
             ),

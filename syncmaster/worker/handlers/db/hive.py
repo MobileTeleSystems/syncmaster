@@ -60,6 +60,9 @@ class HiveHandler(DBHandler):
 
         return " AND ".join(expressions) or None
 
+    def _get_reading_options(self) -> dict:
+        return {}
+
     @staticmethod
     def _quote_field(field):
         return f"`{field}`"
