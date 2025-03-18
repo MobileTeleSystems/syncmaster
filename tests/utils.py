@@ -171,6 +171,8 @@ async def run_transfer_and_verify(
         token=user.token,
     )
     assert run_data["status"] == Status.FINISHED.value
+    assert "correlation_id" in run_data["log_url"]
+    assert "run_id" in run_data["log_url"]
     verify_transfer_auth_data(run_data, source_auth, target_auth)
 
     return run_data

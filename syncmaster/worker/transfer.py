@@ -2,10 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 from datetime import datetime, timezone
 
+from asgi_correlation_id import correlation_id
 from asgi_correlation_id.extensions.celery import load_correlation_ids
 from celery import Celery
 from celery.signals import after_setup_task_logger
 from celery.utils.log import get_task_logger
+from jinja2 import Template
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -19,8 +21,6 @@ from syncmaster.worker.settings import WorkerAppSettings
 
 logger = get_task_logger(__name__)
 load_correlation_ids()
-
-WORKER_SETTINGS = WorkerAppSettings()
 
 
 @celery.task(name="run_transfer_task", bind=True, track_started=True)
@@ -50,6 +50,7 @@ def run_transfer(session: Session, run_id: int, settings: WorkerAppSettings):
 
     run.status = Status.STARTED
     run.started_at = datetime.now(tz=timezone.utc)
+    run.log_url = Template(settings.worker.log_url_template).render(run=run, correlation_id=correlation_id.get())
     session.add(run)
     session.commit()
 
@@ -61,7 +62,7 @@ def run_transfer(session: Session, run_id: int, settings: WorkerAppSettings):
 
     try:
         controller = TransferController(
-            settings=WORKER_SETTINGS,
+            settings=settings,
             run=run,
             source_connection=run.transfer.source_connection,
             target_connection=run.transfer.target_connection,

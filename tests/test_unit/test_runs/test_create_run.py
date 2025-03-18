@@ -157,8 +157,6 @@ async def test_superuser_can_create_run(
         "type": RunType.MANUAL,
     }
     assert result.status_code == 200
-    assert "correlation_id" in response.get("log_url")
-    assert "run_id" in response.get("log_url")
     mock_to_thread.assert_awaited_once_with(
         mock_send_task,
         "run_transfer_task",
