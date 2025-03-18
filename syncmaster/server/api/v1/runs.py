@@ -4,10 +4,8 @@ import asyncio
 from datetime import datetime
 from typing import Annotated
 
-from asgi_correlation_id import correlation_id
 from celery import Celery
 from fastapi import APIRouter, Depends, Query
-from jinja2 import Template
 from kombu.exceptions import KombuError
 
 from syncmaster.db.models import RunType, Status, User
@@ -120,15 +118,6 @@ async def start_run(
             source_creds=ReadAuthDataSchema(auth_data=credentials_source).dict(),
             target_creds=ReadAuthDataSchema(auth_data=credentials_target).dict(),
             type=RunType.MANUAL,
-        )
-
-        log_url = Template(settings.server.log_url_template).render(
-            run=run,
-            correlation_id=correlation_id.get(),
-        )
-        run = await unit_of_work.run.update(
-            run_id=run.id,
-            log_url=log_url,
         )
 
     try:

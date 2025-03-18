@@ -35,10 +35,6 @@ class ServerSettings(BaseModel):
             """,
         ),
     )
-    log_url_template: str = Field(
-        "",
-        description=":ref:`URL template to access worker logs <worker-log-url>`",
-    )
     request_id: RequestIDSettings = Field(
         default_factory=RequestIDSettings,
     )

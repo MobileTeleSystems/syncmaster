@@ -22,11 +22,16 @@ class WorkerSettings(BaseSettings):
     .. code-block:: bash
 
         SYNCMASTER__WORKER__CREATE_SPARK_SESSION_FUNCTION=custom_syncmaster.spark.get_worker_spark_session
+        SYNCMASTER__WORKER__LOG_URL_TEMPLATE=https://logs.location.example.com/syncmaster-worker?correlation_id={{ correlation_id }}&run_id={{ run.id }}
     """
 
     CREATE_SPARK_SESSION_FUNCTION: ImportString = Field(
         "syncmaster.worker.spark.get_worker_spark_session",
         description="Function to create Spark session for worker",
+    )
+    log_url_template: str = Field(
+        "",
+        description=":ref:`URL template to access worker logs <worker-log-url>`",
     )
 
 
