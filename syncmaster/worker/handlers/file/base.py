@@ -73,7 +73,7 @@ class FileHandler(Handler):
         file_format = self.transfer_dto.file_format.__class__.__name__.lower()
         extension_suffix = self._file_format_to_file_suffix[file_format]
 
-        compression = getattr(self.transfer_dto.file_format, "compression", "none")
+        compression = getattr(self.transfer_dto.file_format, "compression") or "none"
         if compression == "none":
             return extension_suffix
 
