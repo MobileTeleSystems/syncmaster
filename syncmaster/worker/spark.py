@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import math
 from typing import TYPE_CHECKING
 
 from syncmaster.db.models import Run
@@ -90,12 +91,14 @@ def get_spark_session_conf(
         maven_packages.extend(get_packages(connection_type=db_type.type))  # type: ignore
         excluded_packages.extend(get_excluded_packages(db_type=db_type.type))  # type: ignore
 
+    memory_mb = math.ceil(resources["ram_bytes_per_task"] / 1024 / 1024)
     config = {
         "spark.jars.packages": ",".join(maven_packages),
         "spark.sql.pyspark.jvmStacktrace.enabled": "true",
         "spark.hadoop.mapreduce.fileoutputcommitter.marksuccessfuljobs": "false",
         "spark.executor.cores": resources["cpu_cores_per_task"],
-        "spark.executor.memory": resources["ram_bytes_per_task"],
+        # Spark expects memory to be in MB
+        "spark.executor.memory": f"{memory_mb}M",
         "spark.executor.instances": resources["max_parallel_tasks"],
     }
 
