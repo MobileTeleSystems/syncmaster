@@ -43,6 +43,16 @@ jobs:
             echo "TAG=mtsrus/syncmaster-server:latest,mtsrus/syncmaster-server:${{ github.ref_name }}" >> $GITHUB_ENV
           fi
 
+      - name: Set platforms
+        id: set_platforms
+        run: |
+          # Building krb5 on ARM is time consuming, do this only at release
+          if [[ "${{ github.ref_type }}" == "branch" && "${{ github.ref_name }}" == "develop" ]]; then
+            echo "PLATFORMS=linux/amd64" >> $GITHUB_ENV
+          elif [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "PLATFORMS=linux/amd64,linux/arm64/v8" >> $GITHUB_ENV
+          fi
+
       - name: Build Server image
         uses: docker/build-push-action@v6
         with:
@@ -54,9 +64,7 @@ jobs:
           push: true
           cache-to: type=inline
           cache-from: mtsrus/syncmaster-server:develop
-          platforms: |
-            linux/amd64
-            linux/arm64/v8
+          platforms: ${{ env.PLATFORMS }}
           provenance: mode=max
 
       - name: Convert README to Markdown
