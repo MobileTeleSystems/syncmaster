@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "data-syncmaster"
-version = "0.1.6"
+version = "0.2.0"
 license = "Apache-2.0"
 description = "Syncmaster REST API + Worker"
 authors = ["DataOps.ETL <onetools@mts.ru>"]
@@ -451,7 +451,8 @@ ignore = [
 per-file-ignores = [
 # F401 imported but unused
 # WPS410 Found wrong metadata variable: __all__
-  "__init__.py:F401,WPS410",
+# WPS412 Found `__init__.py` module with logic
+  "__init__.py:F401,WPS410,WPS412",
 # WPS102 Found incorrect module name pattern
 # WPS432 Found magic number: 256
   "*migrations/*.py:WPS102,WPS432",
