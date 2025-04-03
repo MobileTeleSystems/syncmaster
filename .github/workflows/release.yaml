@@ -56,9 +56,7 @@ jobs:
         uses: snok/install-poetry@v1
 
       - name: Generate OpenAPI Schema
-        run: |
-          source .env.local
-          poetry run python -m syncmaster.server.scripts.export_openapi_schema openapi.json
+        run: make openapi
 
       - name: Fix logo in Readme
         run: |
