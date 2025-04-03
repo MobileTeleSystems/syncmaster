@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -112,7 +112,7 @@ async def get_run_on_end(
     token: str,
     timeout: int = 120,
 ) -> dict[str, Any]:
-    end_time = datetime.now().timestamp() + timeout
+    end_time = datetime.now(tz=timezone.utc).timestamp() + timeout
     while True:
         logger.info("Waiting for end of run")
         result = await client.get(
@@ -126,7 +126,7 @@ async def get_run_on_end(
         if data["status"] in [Status.FINISHED, Status.FAILED]:
             return data
 
-        if datetime.now().timestamp() > end_time:
+        if datetime.now(tz=timezone.utc).timestamp() > end_time:
             raise TimeoutError()
 
         await asyncio.sleep(1)
@@ -163,8 +163,7 @@ async def run_transfer_and_verify(
         headers={"Authorization": f"Bearer {user.token}"},
         json={"transfer_id": transfer_id},
     )
-    assert result.status_code == 200
-
+    assert result.status_code == 200, result.json()
     run_data = await get_run_on_end(
         client=client,
         run_id=result.json()["id"],

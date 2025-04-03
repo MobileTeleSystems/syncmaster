@@ -24,6 +24,8 @@ class ReadUserSchema(BaseModel):
     username: str
     is_superuser: bool
 
+    model_config = ConfigDict(from_attributes=True)
+
 
 class FullUserSchema(ReadGroupMember):
     is_active: bool

@@ -76,7 +76,7 @@ async def read_run(
     if resource_role == Permission.NONE:
         raise TransferNotFoundError
 
-    return ReadRunSchema.model_validate(run, from_attributes=True)
+    return ReadRunSchema.model_validate(run)
 
 
 @router.post("/runs")
@@ -134,7 +134,7 @@ async def start_run(  # noqa: WPS217
                 status=Status.FAILED,
             )
         raise CannotConnectToTaskQueueError(run_id=run.id) from e
-    return ReadRunSchema.model_validate(run, from_attributes=True)
+    return ReadRunSchema.model_validate(run)
 
 
 @router.post("/runs/{run_id}/stop")
@@ -160,4 +160,4 @@ async def stop_run(
     async with unit_of_work:
         run = await unit_of_work.run.stop(run_id=run_id)
         # TODO: add immediate stop transfer after stop Run
-    return ReadRunSchema.model_validate(run, from_attributes=True)
+    return ReadRunSchema.model_validate(run)

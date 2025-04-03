@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from syncmaster.db.models import RunType, Status
 from syncmaster.schemas.v1.page import PageSchema
@@ -18,6 +18,8 @@ class ShortRunSchema(BaseModel):
     status: Status
     log_url: str | None = None
     type: RunType
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RunPageSchema(PageSchema):

@@ -41,12 +41,12 @@ class Run(Base, TimestampMixin):
         index=True,
     )
     started_at: Mapped[datetime | None] = mapped_column(
-        DateTime,
+        DateTime(timezone=True),
         nullable=True,
         default=None,
     )
     ended_at: Mapped[datetime | None] = mapped_column(
-        DateTime,
+        DateTime(timezone=True),
         nullable=True,
         default=None,
     )

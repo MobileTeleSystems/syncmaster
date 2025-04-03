@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from syncmaster.schemas.v1.auth import ReadBasicAuthSchema, ReadS3AuthSchema
 from syncmaster.schemas.v1.auth.samba import ReadSambaAuthSchema
@@ -14,12 +14,16 @@ class CreateConnectionBaseSchema(BaseModel):
     name: NameConstr = Field(..., description="Connection name")  # noqa: F722
     description: str = Field(..., description="Additional description")
 
+    model_config = ConfigDict(populate_by_name=True)
+
 
 class ReadConnectionBaseSchema(BaseModel):
     id: int
     group_id: int
     name: str
     description: str
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class ReadAuthDataSchema(BaseModel):

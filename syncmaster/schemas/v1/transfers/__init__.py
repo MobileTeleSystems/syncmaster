@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from syncmaster.schemas.v1.connection_types import FILE_CONNECTION_TYPES
 from syncmaster.schemas.v1.connections.connection import ReadConnectionSchema
@@ -159,23 +159,20 @@ class ReadTransferSchema(BaseModel):
     schedule: str
     queue_id: int
     source_params: ReadTransferSchemaSource = Field(
-        ...,
         discriminator="type",
     )
     target_params: ReadTransferSchemaTarget = Field(
-        ...,
         discriminator="type",
     )
     strategy_params: FullStrategy | IncrementalStrategy = Field(
-        ...,
         discriminator="type",
     )
-    transformations: list[Annotated[TransformationSchema, Field(..., discriminator="type")]] = Field(
+    transformations: list[Annotated[TransformationSchema, Field(discriminator="type")]] = Field(
         default_factory=list,
     )
-    resources: Resources = Field(
-        ...,
-    )
+    resources: Resources
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CreateTransferSchema(BaseModel):
