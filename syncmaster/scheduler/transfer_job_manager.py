@@ -51,10 +51,9 @@ class TransferJobManager:
 
     async def remove_orphan_jobs(self) -> None:
         all_jobs = self.scheduler.get_jobs()
-        settings = self.settings
         job_transfer_ids = [int(job.id) for job in all_jobs]
 
-        async with get_async_engine(settings) as engine, get_async_session(engine) as session:
+        async with get_async_engine(self.settings) as engine, get_async_session(engine) as session:
             result = await session.execute(
                 select(Transfer).where(Transfer.id == any_(job_transfer_ids)),  # type: ignore[arg-type]
             )
