@@ -11,33 +11,15 @@
 
 .. toctree::
     :maxdepth: 2
-    :caption: Server
+    :caption: Reference
     :hidden:
 
-    server/install
-    server/architecture
-    server/auth/index
-    server/configuration/index
-    server/openapi
-
-
-.. toctree::
-    :maxdepth: 2
-    :caption: Worker
-    :hidden:
-
-    worker/install
-    worker/log_url
-    worker/configuration/index
-
-
-.. toctree::
-    :maxdepth: 2
-    :caption: Scheduler
-    :hidden:
-
-    scheduler/install
-    scheduler/configuration/index
+    reference/architecture
+    reference/database/index
+    reference/broker/index
+    reference/server/index
+    reference/worker/index
+    reference/scheduler/index
 
 .. toctree::
     :maxdepth: 2

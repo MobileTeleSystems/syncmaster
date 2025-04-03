@@ -12,6 +12,7 @@ Configuration
     broker
     credentials
     logging
+    hwm_store
 
 .. autopydantic_settings:: syncmaster.worker.settings.WorkerAppSettings
 .. autopydantic_settings:: syncmaster.worker.settings.WorkerSettings
