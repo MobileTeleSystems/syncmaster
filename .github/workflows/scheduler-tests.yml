@@ -48,7 +48,7 @@ jobs:
 
       - name: Run Scheduler Tests
         run: |
-          docker compose -f ./docker-compose.test.yml --profile worker exec -T worker coverage run -m pytest -vvv -s -m "worker and scheduler_integration"
+          docker compose -f ./docker-compose.test.yml --profile worker exec -T worker coverage run -m pytest "tests/test_integration/test_scheduler" -vvv -s
 
       - name: Dump worker logs on failure
         if: failure()

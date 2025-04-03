@@ -11,7 +11,7 @@ from syncmaster.scheduler.transfer_job_manager import TransferJobManager
 from syncmaster.server.settings import ServerAppSettings as Settings
 from tests.mocks import MockTransfer
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.worker, pytest.mark.scheduler_integration]
+pytestmark = [pytest.mark.asyncio, pytest.mark.worker, pytest.mark.scheduler]
 
 
 async def test_scheduler(
