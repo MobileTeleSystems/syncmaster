@@ -46,10 +46,7 @@ List of currently supported connections:
 * Samba
 * WebDAV
 
-Current Data.SyncMaster implementation provides following components:
-
-* REST API
-* Celery Worker
+Based on `onETL <https://onetl.readthedocs.io/>`_ and `Apache Spark <https://spark.apache.org/>`_.
 
 **Note**: service is under active development, and is not ready to use.
 
