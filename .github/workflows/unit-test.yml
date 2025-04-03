@@ -67,7 +67,7 @@ jobs:
         run: |
           source .env.local
           source .env.local.test
-          poetry run coverage run -m pytest -vvv -s -m "server or scheduler"
+          poetry run coverage run -m pytest -vvv -s -k "test_unit or test_database"
 
       - name: Shutdown
         if: always()
