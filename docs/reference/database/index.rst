@@ -107,3 +107,4 @@ See also
 
     configuration
     credentials_encryption
+    structure
