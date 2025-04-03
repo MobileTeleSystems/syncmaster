@@ -1,38 +1,24 @@
-ARG BASE_IMAGE=python:3.13-slim
-FROM $BASE_IMAGE AS base
+ARG PYTHON_VERSION=3.13
+FROM python:$PYTHON_VERSION-slim AS base
 
-RUN apt-get update && apt-get install -y curl \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN pip install --upgrade pip setuptools wheel packaging && \
-    curl -sSL https://install.python-poetry.org | python3 - && \
-    ln -s /root/.local/bin/poetry /usr/local/bin/poetry && \
-    poetry config virtualenvs.create false
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        # Used for healthcheck
+        curl \
+    && rm -rf /var/lib/apt/lists/* /var/cache/*
 
 WORKDIR /app
-ENV PYTHONPATH=/app
+ENV PYTHONPATH=/app \
+    PATH="/app/.venv/bin:$PATH" \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1
 
-COPY ./pyproject.toml ./poetry.lock* /app/
-
-RUN --mount=type=cache,target=/root/.cache/pypoetry \
-    poetry install \
-        --no-root \
-        --extras "server" \
-        --without test,docs,dev
-
-COPY ./docker/entrypoint_server.sh /app/entrypoint.sh
-ENTRYPOINT ["/app/entrypoint.sh"]
-
-
-FROM base AS prod
-
-COPY ./syncmaster/ /app/syncmaster/
 # add this when logo will be ready
 # COPY ./docs/_static/*.svg ./syncmaster/server/static/
 
 # Swagger UI
-ADD https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui-bundle.js /app/syncmaster/server/static/swagger/swagger-ui-bundle.js
-ADD https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui.css /app/syncmaster/server/static/swagger/swagger-ui.css
+ADD https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui-bundle.js https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui.css \
+    /app/syncmaster/server/static/swagger/
 
 # Redoc
 ADD https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js /app/syncmaster/server/static/redoc/redoc.standalone.js
@@ -42,14 +28,39 @@ ENV SYNCMASTER__SERVER__OPENAPI__SWAGGER__JS_URL=/static/swagger/swagger-ui-bund
     SYNCMASTER__SERVER__OPENAPI__REDOC__JS_URL=/static/redoc/redoc.standalone.js \
     SYNCMASTER__SERVER__STATIC_FILES__DIRECTORY=/app/syncmaster/server/static
 
+COPY ./docker/entrypoint_server.sh /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
 
-FROM base AS test
+
+FROM base AS builder
+
+RUN pip install poetry
+
+COPY ./pyproject.toml ./poetry.lock* ./
+RUN --mount=type=cache,target=/root/.cache/pypoetry \
+    poetry install \
+        --no-root \
+        --extras "server" \
+        --without test,docs,dev \
+    && python -m compileall .venv
+
+
+FROM base AS prod
+
+# We don't need poetry in final image
+COPY --from=builder /app/.venv/ /app/.venv/
+COPY ./syncmaster/ /app/syncmaster/
+RUN python -m compileall -b syncmaster
+
+
+FROM builder AS test
 
 RUN --mount=type=cache,target=/root/.cache/pypoetry \
     poetry install \
         --no-root \
         --extras "server" \
         --with test \
-        --without docs,dev
+        --without docs,dev \
+    && python -m compileall .venv
 
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh

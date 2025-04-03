@@ -1,42 +1,48 @@
-ARG BASE_IMAGE=python:3.13-slim
-FROM $BASE_IMAGE AS base
-
-RUN apt-get update && apt-get install -y curl \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN pip install --upgrade pip setuptools wheel packaging && \
-    curl -sSL https://install.python-poetry.org | python3 - && \
-    ln -s /root/.local/bin/poetry /usr/local/bin/poetry && \
-    poetry config virtualenvs.create false
+ARG PYTHON_VERSION=3.13
+FROM python:$PYTHON_VERSION-slim AS base
 
 WORKDIR /app
-ENV PYTHONPATH=/app
+ENV PYTHONPATH=/app \
+    PATH="/app/.venv/bin:$PATH" \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1
 
-COPY ./pyproject.toml ./poetry.lock* /app/
+COPY ./docker/entrypoint_scheduler.sh /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
 
+
+FROM base AS builder
+
+RUN pip install poetry
+
+COPY ./pyproject.toml ./poetry.lock ./
 RUN --mount=type=cache,target=/root/.cache/pypoetry \
     poetry install \
         --no-root \
         # TODO: make scheduler independent from server
         --extras "server" \
         --extras "scheduler" \
-        --without test,docs,dev
+        --without test,docs,dev \
+    && python -m compileall .venv
 
-COPY ./docker/entrypoint_scheduler.sh /app/entrypoint.sh
-ENTRYPOINT ["/app/entrypoint.sh"]
 
 FROM base AS prod
 
+# We don't need poetry in final image
+COPY --from=builder /app/.venv/ /app/.venv/
 COPY ./syncmaster/ /app/syncmaster/
+RUN python -m compileall -b syncmaster
 
 
-FROM base AS test
+FROM builder AS test
 
 RUN --mount=type=cache,target=/root/.cache/pypoetry \
     poetry install \
         --no-root \
+        --extras "server" \
         --extras "scheduler" \
         --with test \
-        --without docs,dev
+        --without docs,dev \
+    && python -m compileall .venv
 
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
