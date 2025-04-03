@@ -34,8 +34,8 @@ def upgrade():
         sa.Column("name", sa.String(length=128), nullable=False),
         sa.Column("description", sa.String(length=512), nullable=False),
         sa.Column("data", sa.JSON(), nullable=False),
-        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
         sa.Column("search_vector", postgresql.TSVECTOR(), sa.Computed(sql_expression, persisted=True), nullable=False),
         sa.ForeignKeyConstraint(
             ["group_id"],

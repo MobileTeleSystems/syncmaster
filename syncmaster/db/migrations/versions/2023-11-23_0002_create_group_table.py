@@ -25,8 +25,8 @@ def upgrade():
         sa.Column("name", sa.String(length=256), nullable=False),
         sa.Column("description", sa.String(length=512), nullable=False),
         sa.Column("owner_id", sa.BigInteger(), nullable=False),
-        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
         sa.Column(
             "search_vector",
             postgresql.TSVECTOR(),
