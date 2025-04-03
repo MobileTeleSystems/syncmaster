@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,7 +16,7 @@ async def group_runs(group_run: MockRun, session: AsyncSession) -> list[MockRun]
 
     # start with the run from group_run fixture
     runs = [group_run]
-    base_time = datetime.now()
+    base_time = datetime.now(tz=timezone.utc)
     statuses = list(Status)
 
     # since group_run already created a run, we start from index 1

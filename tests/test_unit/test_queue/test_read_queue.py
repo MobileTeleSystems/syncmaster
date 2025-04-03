@@ -30,7 +30,7 @@ async def test_group_member_can_read_queue(
         "group_id": group_queue.group_id,
         "slug": f"{group_queue.group.id}-{group_queue.name}",
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_superuser_can_read_queue(
@@ -52,7 +52,7 @@ async def test_superuser_can_read_queue(
         "group_id": group_queue.group_id,
         "slug": f"{group_queue.group.id}-{group_queue.name}",
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_groupless_user_cannot_read_queue(
@@ -119,7 +119,7 @@ async def test_anon_user_cannot_read_queue_error(
             "details": None,
         },
     }
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
 
 
 async def test_group_member_cannot_read_unknown_queue_error(

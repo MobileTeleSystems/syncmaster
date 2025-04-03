@@ -35,8 +35,7 @@ async def test_maintainer_plus_can_update_queue(
         "group_id": group_queue.group_id,
         "slug": f"{group_queue.group_id}-{group_queue.name}",
     }
-    assert result.status_code == 200
-
+    assert result.status_code == 200, result.json()
     queue = await session.get(Queue, group_queue.id)
     await session.refresh(queue)
 
@@ -66,7 +65,7 @@ async def test_superuser_can_update_queue(
     )
 
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_queue.id,
         "name": group_queue.name,
@@ -107,7 +106,7 @@ async def test_groupless_user_cannot_update_queue(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_anon_user_cannot_update_queue(
@@ -121,7 +120,7 @@ async def test_anon_user_cannot_update_queue(
         json={"description": "New description"},
     )
     # Assert
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -158,7 +157,7 @@ async def test_developer_or_below_cannot_update_queue(
             "details": None,
         },
     }
-    assert result.status_code == 403
+    assert result.status_code == 403, result.json()
 
 
 async def test_other_group_member_cannot_update_queue(
@@ -213,7 +212,7 @@ async def test_maintainer_plus_cannot_update_unknown_queue_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_cannot_update_unknown_queue_error(
@@ -240,4 +239,4 @@ async def test_superuser_cannot_update_unknown_queue_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()

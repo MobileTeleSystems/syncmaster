@@ -194,5 +194,5 @@ async def test_developer_plus_can_update_s3_transfer(
         json=transfer_json | updated_fields,
     )
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == build_transfer_json(group_transfer) | updated_fields

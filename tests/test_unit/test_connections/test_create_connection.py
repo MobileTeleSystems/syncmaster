@@ -90,7 +90,7 @@ async def test_developer_plus_can_create_connection(
             "user": decrypted["user"],
         },
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_unauthorized_user_cannot_create_connection(
@@ -116,7 +116,7 @@ async def test_unauthorized_user_cannot_create_connection(
             },
         },
     )
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -157,7 +157,7 @@ async def test_check_fields_validation_on_create_connection(
     )
 
     # Assert
-    assert result.status_code == 422
+    assert result.status_code == 422, result.json()
     assert result.json() == {
         "error": {
             "code": "invalid_request",
@@ -197,7 +197,7 @@ async def test_check_fields_validation_on_create_connection(
     )
 
     # Assert
-    assert result.status_code == 422
+    assert result.status_code == 422, result.json()
     assert result.json() == {
         "error": {
             "code": "invalid_request",
@@ -234,7 +234,7 @@ async def test_check_fields_validation_on_create_connection(
             },
         },
     )
-    assert result.status_code == 422
+    assert result.status_code == 422, result.json()
     assert result.json() == {
         "error": {
             "code": "invalid_request",
@@ -273,7 +273,7 @@ async def test_check_fields_validation_on_create_connection(
         },
     )
 
-    assert result.status_code == 422
+    assert result.status_code == 422, result.json()
     assert (
         result.json()["error"]["details"][0]["message"]
         == "Input tag 'POSTGRESQL' found using 'type' does not match any of the expected tags: 'oracle', 'postgres', 'mysql', 'mssql', 'clickhouse', 'hive', 'hdfs', 's3', 'sftp', 'ftp', 'ftps', 'webdav', 'samba'"
@@ -319,7 +319,7 @@ async def test_other_group_member_cannot_create_group_connection(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_can_create_connection(
@@ -366,7 +366,7 @@ async def test_superuser_can_create_connection(
         )
     ).one()
     decrypted = decrypt_auth_data(creds.value, settings=settings)
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": connection.id,
         "group_id": connection.group_id,
@@ -420,7 +420,7 @@ async def test_groupless_user_cannot_create_connection(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_group_member_cannot_create_connection_with_unknown_group_error(
@@ -536,7 +536,7 @@ async def test_guest_cannot_create_connection_error(
     )
 
     # Assert
-    assert result.status_code == 403
+    assert result.status_code == 403, result.json()
     assert result.json() == {
         "error": {
             "code": "forbidden",

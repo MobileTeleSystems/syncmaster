@@ -46,7 +46,7 @@ async def test_group_member_can_read_groups(
             },
         ],
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_groupless_user_cannot_get_any_groups(
@@ -73,7 +73,7 @@ async def test_groupless_user_cannot_get_any_groups(
         },
         "items": [],
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_superuser_can_read_all_groups(
@@ -120,7 +120,7 @@ async def test_superuser_can_read_all_groups(
             },
         ],
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_unauthorized_user_cannot_read_groups(
@@ -136,7 +136,7 @@ async def test_unauthorized_user_cannot_read_groups(
             "details": None,
         },
     }
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
 
 
 @pytest.mark.parametrize(
@@ -163,7 +163,7 @@ async def test_filter_groups_by_role(
         headers={"Authorization": f"Bearer {user_with_many_roles.token}"},
     )
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     response_json = result.json()
 
     assert response_json["meta"]["total"] == expected_total
@@ -196,7 +196,7 @@ async def test_filter_groups_not_applied_to_superuser(
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     response_json = result.json()
 
     assert response_json["meta"]["total"] == expected_total
@@ -236,7 +236,7 @@ async def test_search_groups_with_query(
         params={"search_query": search_value},
     )
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json()["meta"]["total"] == expected_total
     assert len(result.json()["items"]) == expected_total
 
@@ -293,7 +293,7 @@ async def test_superuser_search_groups_with_query(
             },
         ],
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_search_groups_with_nonexistent_query(
@@ -308,5 +308,5 @@ async def test_search_groups_with_nonexistent_query(
         params={"search_query": random_search_query},
     )
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json()["items"] == []

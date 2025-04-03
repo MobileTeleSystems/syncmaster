@@ -49,7 +49,7 @@ async def test_group_member_can_read_queues(
             "total": 1,
         },
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_superuser_can_read_queues(
@@ -88,7 +88,7 @@ async def test_superuser_can_read_queues(
             "total": 1,
         },
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_other_group_member_cannot_read_queues(
@@ -222,7 +222,7 @@ async def test_search_queues_with_query(
             },
         ],
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_search_queues_with_nonexistent_query(
@@ -241,5 +241,5 @@ async def test_search_queues_with_nonexistent_query(
         },
     )
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json()["items"] == []

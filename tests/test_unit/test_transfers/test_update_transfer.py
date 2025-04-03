@@ -35,7 +35,7 @@ async def test_developer_plus_can_update_transfer(
         json=transfer_json | updated_fields,
     )
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == build_transfer_json(group_transfer) | updated_fields
 
 
@@ -58,7 +58,7 @@ async def test_groupless_user_cannot_update_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_can_update_transfer(
@@ -75,7 +75,7 @@ async def test_superuser_can_update_transfer(
         json=transfer_json | updated_fields,
     )
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == build_transfer_json(group_transfer) | updated_fields
 
 
@@ -101,7 +101,7 @@ async def test_other_group_member_cannot_update_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_check_name_field_validation_on_update_transfer(
@@ -156,7 +156,7 @@ async def test_check_connection_types_and_its_params_transfer(
         json=transfer_json | updated_fields,
     )
 
-    assert result.status_code == 400
+    assert result.status_code == 400, result.json()
     assert result.json() == {
         "error": {
             "code": "bad_request",
@@ -173,7 +173,7 @@ async def test_check_connection_types_and_its_params_transfer(
     )
 
     assert result.json() == build_transfer_json(group_transfer) | updated_fields
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_check_different_connection_groups_for_transfer(
@@ -198,7 +198,7 @@ async def test_check_different_connection_groups_for_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 400
+    assert result.status_code == 400, result.json()
 
 
 async def test_check_different_queue_groups_for_transfer(
@@ -223,7 +223,7 @@ async def test_check_different_queue_groups_for_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 400
+    assert result.status_code == 400, result.json()
 
 
 async def test_developer_plus_not_in_new_connection_group_cannot_update_transfer(
@@ -248,7 +248,7 @@ async def test_developer_plus_not_in_new_connection_group_cannot_update_transfer
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_unauthorized_user_cannot_update_transfer(
@@ -262,7 +262,7 @@ async def test_unauthorized_user_cannot_update_transfer(
         json={**transfer_json, "name": "New transfer name"},
     )
 
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -294,7 +294,7 @@ async def test_developer_plus_cannot_update_transfer_with_other_group_queue(
             "details": None,
         },
     }
-    assert result.status_code == 400
+    assert result.status_code == 400, result.json()
 
 
 async def test_superuser_cannot_update_transfer_with_other_group_queue(
@@ -318,7 +318,7 @@ async def test_superuser_cannot_update_transfer_with_other_group_queue(
             "details": None,
         },
     }
-    assert result.status_code == 400
+    assert result.status_code == 400, result.json()
 
 
 async def test_group_member_cannot_update_unknown_transfer_error(
@@ -342,7 +342,7 @@ async def test_group_member_cannot_update_unknown_transfer_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_cannot_update_unknown_transfer_error(
@@ -365,7 +365,7 @@ async def test_superuser_cannot_update_unknown_transfer_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_developer_plus_cannot_update_transfer_with_unknown_queue_id_error(
@@ -389,7 +389,7 @@ async def test_developer_plus_cannot_update_transfer_with_unknown_queue_id_error
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_cannot_update_transfer_with_unknown_queue_id(
@@ -413,4 +413,4 @@ async def test_superuser_cannot_update_transfer_with_unknown_queue_id(
         },
     }
 
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()

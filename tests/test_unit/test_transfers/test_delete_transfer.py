@@ -25,7 +25,7 @@ async def test_maintainer_plus_can_delete_group_transfer(
     )
 
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
         "status_code": 200,
@@ -53,7 +53,7 @@ async def test_superuser_can_delete_transfer(
     )
 
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
         "status_code": 200,
@@ -78,7 +78,7 @@ async def test_groupless_user_cannot_delete_transfer(
     )
 
     # Assert
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -112,8 +112,7 @@ async def test_developer_or_below_cannot_delete_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 403
-
+    assert result.status_code == 403, result.json()
     # Assert transfer was not deleted
     session.expunge(transfer)
     transfer_in_db = await session.get(Transfer, transfer.id)
@@ -143,7 +142,7 @@ async def test_group_member_cannot_delete_other_group_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_unauthorized_user_cannot_delete_transfer(
@@ -163,7 +162,7 @@ async def test_unauthorized_user_cannot_delete_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
 
 
 async def test_superuser_cannot_delete_unknown_transfer_error(
@@ -186,7 +185,7 @@ async def test_superuser_cannot_delete_unknown_transfer_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_maintainer_plus_cannot_delete_unknown_transfer_error(

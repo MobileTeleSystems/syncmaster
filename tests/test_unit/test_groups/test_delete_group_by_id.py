@@ -25,7 +25,7 @@ async def test_only_superuser_can_delete_group(
         },
     )
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
         "status_code": 200,
@@ -59,14 +59,14 @@ async def test_not_superuser_cannot_delete_group(
             "details": None,
         },
     }
-    assert result.status_code == 403
+    assert result.status_code == 403, result.json()
 
 
 async def test_not_authorized_user_cannot_delete_group(client: AsyncClient, empty_group: MockGroup):
     # Arrange
     result = await client.delete(f"v1/groups/{empty_group.id}")
     # Assert
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -96,7 +96,7 @@ async def test_groupless_user_cannot_delete_group(
             "details": None,
         },
     }
-    assert result.status_code == 403
+    assert result.status_code == 403, result.json()
 
 
 async def test_superuser_cannot_delete_unknown_group_error(
@@ -118,4 +118,4 @@ async def test_superuser_cannot_delete_unknown_group_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()

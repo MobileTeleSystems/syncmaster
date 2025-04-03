@@ -30,8 +30,7 @@ async def test_owner_can_add_user_to_group(
         "status_code": 200,
         "message": "User was successfully added to group",
     }
-    assert result.status_code == 200
-
+    assert result.status_code == 200, result.json()
     check_result = await client.get(
         f"v1/groups/{empty_group.id}/users",
         headers={"Authorization": f"Bearer {simple_user.token}"},
@@ -78,7 +77,7 @@ async def test_groupless_user_cannot_add_user_to_group(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_maintainer_or_below_cannot_add_user_to_group(
@@ -107,7 +106,7 @@ async def test_maintainer_or_below_cannot_add_user_to_group(
             "details": None,
         },
     }
-    assert result.status_code == 403
+    assert result.status_code == 403, result.json()
 
 
 async def test_owner_cannot_add_user_to_group_with_wrong_role(
@@ -141,7 +140,7 @@ async def test_owner_cannot_add_user_to_group_with_wrong_role(
             ],
         },
     }
-    assert result.status_code == 422
+    assert result.status_code == 422, result.json()
 
 
 async def test_owner_cannot_add_user_to_group_without_role(
@@ -174,7 +173,7 @@ async def test_owner_cannot_add_user_to_group_without_role(
             ],
         },
     }
-    assert result.status_code == 422
+    assert result.status_code == 422, result.json()
 
 
 async def test_superuser_can_add_user_to_group(
@@ -198,13 +197,12 @@ async def test_superuser_can_add_user_to_group(
         "status_code": 200,
         "message": "User was successfully added to group",
     }
-    assert result.status_code == 200
-
+    assert result.status_code == 200, result.json()
     result = await client.get(
         f"v1/groups/{empty_group.id}/users",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "meta": {
             "page": 1,
@@ -243,7 +241,7 @@ async def test_owner_cannot_add_user_to_group_twice(
         },
     )
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
         "status_code": 200,
@@ -264,7 +262,7 @@ async def test_owner_cannot_add_user_to_group_twice(
             "details": None,
         },
     }
-    assert result.status_code == 409
+    assert result.status_code == 409, result.json()
 
 
 async def test_not_authorized_user_cannot_add_user_to_group(
@@ -276,7 +274,7 @@ async def test_not_authorized_user_cannot_add_user_to_group(
     result = await client.post(f"v1/groups/{empty_group.id}/users/{simple_user.id}")
 
     # Assert
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -309,7 +307,7 @@ async def test_owner_add_user_to_unknown_group_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_owner_add_unknown_user_to_group_error(
@@ -352,7 +350,7 @@ async def test_add_existing_owner_as_a_group_member(
         },
     )
 
-    assert result.status_code == 409
+    assert result.status_code == 409, result.json()
     assert result.json() == {
         "error": {
             "code": "conflict",
@@ -384,7 +382,7 @@ async def test_superuser_add_user_to_unknown_group_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_add_unknown_user_error(
@@ -410,4 +408,4 @@ async def test_superuser_add_unknown_user_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()

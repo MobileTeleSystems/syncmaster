@@ -66,4 +66,4 @@ async def test_guest_plus_can_read_s3_connection(
             "access_key": group_connection.credentials.value["access_key"],
         },
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()

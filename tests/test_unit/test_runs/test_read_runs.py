@@ -56,7 +56,7 @@ async def test_developer_plus_can_read_runs_of_the_transfer(
             },
         ],
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_groupless_user_cannot_read_runs_transfer(
@@ -79,7 +79,7 @@ async def test_groupless_user_cannot_read_runs_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_can_read_runs(
@@ -117,7 +117,7 @@ async def test_superuser_can_read_runs(
             },
         ],
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_unauthorized_user_cannot_read_run(
@@ -130,7 +130,7 @@ async def test_unauthorized_user_cannot_read_run(
         params={"transfer_id": group_transfer.id},
     )
     # Assert
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -267,7 +267,7 @@ async def test_filter_runs(
     )
 
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json()["meta"]["total"] == expected_total
     assert len(result.json()["items"]) == expected_total
 
@@ -323,7 +323,7 @@ async def test_filter_runs_no_results(
     )
 
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     data = result.json()
     assert data["items"] == []
     assert data["meta"]["total"] == 0

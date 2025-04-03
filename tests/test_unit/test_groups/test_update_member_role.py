@@ -26,7 +26,7 @@ async def test_owner_of_group_can_update_user_role(
 
     # Assert
     assert result.json() == {"role": role_guest_plus_without_owner}
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_superuser_can_update_user_role(
@@ -49,7 +49,7 @@ async def test_superuser_can_update_user_role(
 
     # Assert
     assert result.json() == {"role": role_guest_plus_without_owner}
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_owner_of_group_can_not_update_user_role_with_wrong_role(
@@ -84,7 +84,7 @@ async def test_owner_of_group_can_not_update_user_role_with_wrong_role(
             ],
         },
     }
-    assert result.status_code == 422
+    assert result.status_code == 422, result.json()
 
 
 async def test_maintainer_below_can_not_update_user_role(
@@ -114,7 +114,7 @@ async def test_maintainer_below_can_not_update_user_role(
             "details": None,
         },
     }
-    assert result.status_code == 403
+    assert result.status_code == 403, result.json()
 
 
 async def test_other_group_member_can_not_update_user_role(
@@ -144,7 +144,7 @@ async def test_other_group_member_can_not_update_user_role(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_update_unknown_group_error(

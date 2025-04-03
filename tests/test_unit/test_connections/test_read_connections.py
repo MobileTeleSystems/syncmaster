@@ -29,7 +29,7 @@ async def test_guest_plus_can_read_connections(
     )
 
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "meta": {
             "page": 1,
@@ -89,7 +89,7 @@ async def test_other_group_member_cannot_read_group_connections(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_groupless_user_cannot_read_group_connections(
@@ -114,7 +114,7 @@ async def test_groupless_user_cannot_read_group_connections(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_can_read_connections(
@@ -130,7 +130,7 @@ async def test_superuser_can_read_connections(
     )
 
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "meta": {
             "page": 1,
@@ -169,7 +169,7 @@ async def test_unauthorized_user_cannot_read_connections(client: AsyncClient):
     result = await client.get("v1/connections")
 
     # Assert
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -203,7 +203,7 @@ async def test_guest_plus_cannot_read_unknown_group_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_cannot_read_from_unknown_group_error(
@@ -226,7 +226,7 @@ async def test_superuser_cannot_read_from_unknown_group_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 @pytest.mark.parametrize(
@@ -284,7 +284,7 @@ async def test_search_connections_with_query(
             },
         ],
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_search_connections_with_nonexistent_query(
@@ -300,7 +300,7 @@ async def test_search_connections_with_nonexistent_query(
         params={"group_id": group_connection.connection.group_id, "search_query": random_search_query},
     )
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json()["items"] == []
 
 
@@ -356,7 +356,7 @@ async def test_filter_connections(
     )
 
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json()["meta"]["total"] == expected_total
     assert len(result.json()["items"]) == expected_total
 
@@ -382,5 +382,5 @@ async def test_filter_connections_unknown_type(
     )
 
     # Assert
-    assert result.status_code == 422
+    assert result.status_code == 422, result.json()
     assert result.json()["error"]["details"][0]["code"] == "enum"

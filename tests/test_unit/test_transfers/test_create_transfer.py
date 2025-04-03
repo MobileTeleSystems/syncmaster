@@ -122,7 +122,7 @@ async def test_developer_plus_can_create_transfer(
     ).one()
 
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": transfer.id,
         "group_id": transfer.group_id,
@@ -209,7 +209,7 @@ async def test_groupless_user_cannot_create_transfer(
     )
 
     # Assert
-    assert result.status_code == 403
+    assert result.status_code == 403, result.json()
     assert result.json() == {
         "error": {
             "code": "forbidden",
@@ -248,7 +248,7 @@ async def test_other_group_user_plus_cannot_create_group_transfer(
             "queue_id": group_queue.id,
         },
     )
-    assert result.status_code == 403
+    assert result.status_code == 403, result.json()
     assert result.json() == {
         "error": {
             "code": "forbidden",
@@ -318,7 +318,7 @@ async def test_superuser_can_create_transfer(
         )
     ).one()
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": transfer.id,
         "group_id": transfer.group_id,
@@ -847,8 +847,7 @@ async def test_check_fields_validation_on_create_transfer(
     )
 
     # Assert
-    assert result.status_code == 422
-
+    assert result.status_code == 422, result.json()
     if (
         (new_data == {"schedule": None})
         or ("strategy_params" in new_data and new_data["strategy_params"].get("increment_by") == "unknown")
@@ -895,7 +894,7 @@ async def test_check_connection_types_and_its_params_on_create_transfer(
     )
 
     # Assert
-    assert result.status_code == 400
+    assert result.status_code == 400, result.json()
     assert result.json() == {
         "error": {
             "code": "bad_request",
@@ -944,7 +943,7 @@ async def test_check_different_connections_owner_group_on_create_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 400
+    assert result.status_code == 400, result.json()
 
 
 async def test_unauthorized_user_cannot_create_transfer(
@@ -967,7 +966,7 @@ async def test_unauthorized_user_cannot_create_transfer(
     )
 
     # Assert
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -1058,7 +1057,7 @@ async def test_developer_plus_cannot_create_transfer_with_target_format_json(
     )
 
     # Assert
-    assert result.status_code == 422
+    assert result.status_code == 422, result.json()
     assert result.json() == {
         "error": {
             "code": "invalid_request",

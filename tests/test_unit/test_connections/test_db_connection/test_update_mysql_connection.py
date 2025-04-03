@@ -53,7 +53,7 @@ async def test_developer_plus_can_update_mysql_connection(
         },
     )
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_connection.id,
         "name": group_connection.name,

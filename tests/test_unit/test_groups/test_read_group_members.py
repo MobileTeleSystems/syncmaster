@@ -49,7 +49,7 @@ async def test_member_of_group_can_read_group_members(
         },
         "items": members,
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_groupless_user_cannot_read_group_members(
@@ -70,7 +70,7 @@ async def test_groupless_user_cannot_read_group_members(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_other_group_member_cannot_read_group_members(
@@ -94,7 +94,7 @@ async def test_other_group_member_cannot_read_group_members(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_can_read_group_members(
@@ -136,14 +136,14 @@ async def test_superuser_can_read_group_members(
         },
         "items": members,
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_not_authorized_user_cannot_read_group_members(client: AsyncClient, group: MockGroup):
     # Act
     result = await client.get(f"v1/groups/{group.id}/users")
     # Assert
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",

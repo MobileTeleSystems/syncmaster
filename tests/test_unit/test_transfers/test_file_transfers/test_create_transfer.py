@@ -156,7 +156,7 @@ async def test_developer_plus_can_create_s3_transfer(
         )
     ).one()
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": transfer.id,
         "group_id": transfer.group_id,
@@ -338,7 +338,7 @@ async def test_developer_plus_can_create_hdfs_transfer(
     ).one()
 
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": transfer.id,
         "group_id": transfer.group_id,
@@ -481,7 +481,7 @@ async def test_cannot_create_file_transfer_with_relative_path(
     )
 
     # Assert
-    assert result.status_code == 422
+    assert result.status_code == 422, result.json()
     assert result.json() == {
         "error": {
             "code": "invalid_request",
@@ -647,7 +647,7 @@ async def test_file_name_template_validation(
         },
     )
 
-    assert result.status_code == 422
+    assert result.status_code == 422, result.json()
     assert result.json() == {
         "error": {
             "code": "invalid_request",

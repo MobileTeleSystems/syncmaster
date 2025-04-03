@@ -35,7 +35,7 @@ async def test_simple_user_can_create_group(
 
     # Assert
     assert group
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group.id,
         "name": group_name,
@@ -63,8 +63,7 @@ async def test_simple_user_cannot_create_group_twice(
     )
 
     # Assert
-    assert result.status_code == 200
-
+    assert result.status_code == 200, result.json()
     second_result = await client.post(
         "v1/groups",
         headers={"Authorization": f"Bearer {simple_user.token}"},
@@ -102,4 +101,4 @@ async def test_not_authorized_user_cannot_create_group(
             "details": None,
         },
     }
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()

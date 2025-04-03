@@ -11,7 +11,7 @@ async def test_unauthorized_user_cannot_read_connection_types(client: AsyncClien
     # Act
     result = await client.get("v1/connections/known_types")
     # Assert
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -28,5 +28,5 @@ async def test_groupless_user_can_read_connection_types(client: AsyncClient, sim
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert set(result.json()) == set(CONNECTION_TYPES)

@@ -25,7 +25,7 @@ async def test_owner_can_delete_anyone_from_group(
         "status_code": 200,
         "message": "User was successfully removed from group",
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_groupless_user_cannot_remove_user_from_group(
@@ -49,7 +49,7 @@ async def test_groupless_user_cannot_remove_user_from_group(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_other_group_member_cannot_remove_user_from_group(
@@ -75,7 +75,7 @@ async def test_other_group_member_cannot_remove_user_from_group(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_maintainer_and_user_can_delete_self_from_group(
@@ -96,7 +96,7 @@ async def test_maintainer_and_user_can_delete_self_from_group(
         "status_code": 200,
         "message": "User was successfully removed from group",
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_owner_cannot_delete_self_from_group(
@@ -118,7 +118,7 @@ async def test_owner_cannot_delete_self_from_group(
             "details": None,
         },
     }
-    assert result.status_code == 409
+    assert result.status_code == 409, result.json()
 
 
 async def test_maintainer_or_below_cannot_delete_others_from_group(
@@ -144,7 +144,7 @@ async def test_maintainer_or_below_cannot_delete_others_from_group(
                 "details": None,
             },
         }
-        assert result.status_code == 403
+        assert result.status_code == 403, result.json()
 
 
 async def test_superuser_can_delete_user_from_group(
@@ -166,7 +166,7 @@ async def test_superuser_can_delete_user_from_group(
         "status_code": 200,
         "message": "User was successfully removed from group",
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_not_authorized_user_cannot_remove_user_from_group(client: AsyncClient, group: MockGroup):
@@ -182,7 +182,7 @@ async def test_not_authorized_user_cannot_remove_user_from_group(client: AsyncCl
             "details": None,
         },
     }
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
 
 
 async def test_owner_delete_unknown_user_error(
@@ -204,7 +204,7 @@ async def test_owner_delete_unknown_user_error(
             "details": None,
         },
     }
-    assert result.status_code == 409
+    assert result.status_code == 409, result.json()
 
 
 async def test_owner_delete_user_from_unknown_group_error(
@@ -228,7 +228,7 @@ async def test_owner_delete_user_from_unknown_group_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_delete_unknown_user_error(
@@ -249,7 +249,7 @@ async def test_superuser_delete_unknown_user_error(
             "details": None,
         },
     }
-    assert result.status_code == 409
+    assert result.status_code == 409, result.json()
 
 
 async def test_superuser_delete_user_from_unknown_group_error(
@@ -273,4 +273,4 @@ async def test_superuser_delete_user_from_unknown_group_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()

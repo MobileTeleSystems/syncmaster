@@ -109,7 +109,7 @@ async def test_search_users_with_query(
             },
         ],
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_search_users_with_nonexistent_query(
@@ -124,5 +124,5 @@ async def test_search_users_with_nonexistent_query(
         params={"search_query": random_search_query},
     )
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json()["items"] == []

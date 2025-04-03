@@ -40,7 +40,7 @@ async def test_guest_plus_can_read_connection(
             "user": group_connection.credentials.value["user"],
         },
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_groupless_user_cannot_read_connection(
@@ -62,7 +62,7 @@ async def test_groupless_user_cannot_read_connection(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_other_group_member_cannot_read_connection(
@@ -88,7 +88,7 @@ async def test_other_group_member_cannot_read_connection(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_can_read_connection(
@@ -103,7 +103,7 @@ async def test_superuser_can_read_connection(
     )
 
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_connection.id,
         "description": group_connection.description,
@@ -128,7 +128,7 @@ async def test_unauthorized_user_cannot_read_connection(client: AsyncClient, gro
     result = await client.get(f"v1/connections/{group_connection.id}")
 
     # Assert
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -160,7 +160,7 @@ async def test_guest_plus_cannot_read_unknown_connection_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_cannot_read_unknown_connection_error(
@@ -182,4 +182,4 @@ async def test_superuser_cannot_read_unknown_connection_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()

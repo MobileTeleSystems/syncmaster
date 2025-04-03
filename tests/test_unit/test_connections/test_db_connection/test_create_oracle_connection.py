@@ -60,7 +60,7 @@ async def test_developer_plus_can_create_oracle_connection_with_service_name(
 
     # Assert
     decrypted = decrypt_auth_data(creds.value, settings=settings)
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": connection.id,
         "name": connection.name,
@@ -130,7 +130,7 @@ async def test_developer_plus_can_create_oracle_connection_with_sid(
 
     # Assert
     decrypted = decrypt_auth_data(creds.value, settings=settings)
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": connection.id,
         "name": connection.name,
@@ -184,7 +184,7 @@ async def test_developer_plus_create_oracle_connection_with_sid_and_service_name
     )
 
     # Assert
-    assert result.status_code == 422
+    assert result.status_code == 422, result.json()
     assert result.json() == {
         "error": {
             "code": "invalid_request",

@@ -32,7 +32,7 @@ async def test_developer_plus_can_read_run(
         "transfer_dump": group_run.transfer_dump,
         "type": RunType.MANUAL,
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_groupless_user_cannot_read_run(
@@ -54,7 +54,7 @@ async def test_groupless_user_cannot_read_run(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_another_group_member_cannot_read_run(
@@ -104,7 +104,7 @@ async def test_superuser_can_read_runs(
         "transfer_dump": group_run.transfer_dump,
         "type": RunType.MANUAL,
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_unauthorized_user_cannot_read_run(
@@ -122,7 +122,7 @@ async def test_unauthorized_user_cannot_read_run(
             "details": None,
         },
     }
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
 
 
 async def test_group_member_cannot_read_unknown_run_error(

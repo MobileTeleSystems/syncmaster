@@ -203,7 +203,7 @@ async def test_groupless_user_cannot_copy_transfer(
     )
 
     # Assert
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -242,7 +242,7 @@ async def test_other_group_guest_plus_member_cannot_copy_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_can_copy_transfer_with_remove_source(
@@ -354,8 +354,7 @@ async def test_maintainer_plus_can_copy_transfer_with_new_name(
     request.addfinalizer(delete_rows)
 
     # Assert
-    assert result.status_code == 200
-
+    assert result.status_code == 200, result.json()
     copied_transfer_response = await client.get(
         f"v1/transfers/{result_json['copied_transfer_id']}",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -469,7 +468,7 @@ async def test_developer_plus_cannot_copy_transfer_if_new_queue_in_another_group
             "details": None,
         },
     }
-    assert result.status_code == 400
+    assert result.status_code == 400, result.json()
 
 
 async def test_superuser_cannot_copy_unknown_transfer_error(
@@ -552,7 +551,7 @@ async def test_developer_plus_cannot_copy_transfer_with_unknown_new_group_error(
     )
 
     assert result.json()["error"]["message"] == "Group not found"
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_copy_unknown_transfer_error(
@@ -577,7 +576,7 @@ async def test_copy_unknown_transfer_error(
 
     # Assert
     assert result.json()["error"]["message"] == "Transfer not found"
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_developer_plus_cannot_copy_transfer_with_unknown_new_queue_id_error(

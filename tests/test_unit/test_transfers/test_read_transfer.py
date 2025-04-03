@@ -20,7 +20,7 @@ async def test_guest_plus_can_read_transfer(
     )
 
     assert result.json() == build_transfer_json(group_transfer)
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_groupless_user_cannot_read_transfer(
@@ -40,7 +40,7 @@ async def test_groupless_user_cannot_read_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_group_member_cannot_read_transfer_of_other_group(
@@ -63,7 +63,7 @@ async def test_group_member_cannot_read_transfer_of_other_group(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_can_read_transfer(
@@ -77,7 +77,7 @@ async def test_superuser_can_read_transfer(
     )
 
     assert result.json() == build_transfer_json(group_transfer)
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_unauthorized_user_cannot_read_transfer(
@@ -86,7 +86,7 @@ async def test_unauthorized_user_cannot_read_transfer(
 ):
     result = await client.get(f"v1/transfers/{group_transfer.id}")
 
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -105,7 +105,7 @@ async def test_superuser_read_not_exist_transfer_error(
         "v1/transfers/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -134,4 +134,4 @@ async def test_group_member_cannot_read_unknown_transfer_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()

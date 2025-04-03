@@ -37,7 +37,7 @@ async def test_maintainer_plus_can_create_queue(
         "group_id": mock_group.group.id,
         "slug": f"{mock_group.group.id}-New_queue",
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     queue = (await session.scalars(select(Queue).filter_by(id=result.json()["id"]))).one()
 
     assert queue.id == result.json()["id"]
@@ -75,7 +75,7 @@ async def test_superuser_can_create_queue(
         "group_id": mock_group.group.id,
         "slug": f"{mock_group.group.id}-New_queue",
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     queue = (await session.scalars(select(Queue).filter_by(id=result.json()["id"]))).one()
 
     assert queue.id == result.json()["id"]
@@ -173,7 +173,7 @@ async def test_groupless_user_cannot_create_queue_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_maintainer_plus_cannot_create_queue_with_unknown_group_error(
@@ -391,7 +391,7 @@ async def test_maintainer_plus_can_not_create_queue_with_duplicate_name_error(
     )
 
     # Assert
-    assert result.status_code == 409
+    assert result.status_code == 409, result.json()
     assert result.json() == {
         "error": {
             "code": "conflict",

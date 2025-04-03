@@ -38,7 +38,7 @@ async def test_developer_plus_can_update_connection(
             "user": group_connection.credentials.value["user"],
         },
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 @pytest.mark.parametrize(
@@ -88,7 +88,7 @@ async def test_developer_plus_can_update_oracle_connection(
         },
     )
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_connection.id,
         "name": group_connection.name,
@@ -248,7 +248,7 @@ async def test_superuser_can_update_connection(
             "user": group_connection.credentials.value["user"],
         },
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_update_connection_data_fields(
@@ -282,7 +282,7 @@ async def test_update_connection_data_fields(
             "user": group_connection.credentials.value["user"],
         },
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_update_connection_auth_data(
@@ -320,7 +320,7 @@ async def test_update_connection_auth_data(
             "user": "new_user",
         },
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_superuser_cannot_update_connection_auth_data_type_without_secret(
@@ -352,7 +352,7 @@ async def test_superuser_cannot_update_connection_auth_data_type_without_secret(
             "details": None,
         },
     }
-    assert result.status_code == 409
+    assert result.status_code == 409, result.json()
 
 
 async def test_unauthorized_user_cannot_update_connection(
@@ -371,7 +371,7 @@ async def test_unauthorized_user_cannot_update_connection(
             "details": None,
         },
     }
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
 
 
 async def test_developer_plus_cannot_update_unknown_connection_error(
@@ -468,7 +468,7 @@ async def test_developer_plus_update_oracle_connection_both_sid_and_service_name
         },
     )
 
-    assert result.status_code == 422
+    assert result.status_code == 422, result.json()
     assert result.json() == {
         "error": {
             "code": "invalid_request",
@@ -509,7 +509,7 @@ async def test_maintainer_plus_cannot_update_connection_type_with_linked_transfe
         },
     )
 
-    assert result.status_code == 409
+    assert result.status_code == 409, result.json()
     assert result.json() == {
         "error": {
             "code": "conflict",
@@ -532,7 +532,7 @@ async def test_guest_cannot_update_connection_error(
         json={**connection_json, "type": "postgres", "name": "New connection name"},
     )
 
-    assert result.status_code == 403
+    assert result.status_code == 403, result.json()
     assert result.json() == {
         "error": {
             "code": "forbidden",

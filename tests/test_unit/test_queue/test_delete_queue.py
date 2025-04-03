@@ -30,8 +30,7 @@ async def test_maintainer_plus_can_delete_queue(
         "ok": True,
         "status_code": 200,
     }
-    assert result.status_code == 200
-
+    assert result.status_code == 200, result.json()
     # Assert queue was deleted
     session.expunge_all()
     queue_in_db = await session.get(Queue, q_id)
@@ -58,8 +57,7 @@ async def test_superuser_can_delete_queue(
         "ok": True,
         "status_code": 200,
     }
-    assert result.status_code == 200
-
+    assert result.status_code == 200, result.json()
     # Assert queue was deleted
     session.expunge_all()
     queue_in_db = await session.get(Queue, q_id)
@@ -84,7 +82,7 @@ async def test_groupless_user_cannot_delete_queue(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_developer_or_below_cannot_delete_queue(
@@ -159,7 +157,7 @@ async def test_maintainer_plus_cannot_delete_queue_with_linked_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 409
+    assert result.status_code == 409, result.json()
 
 
 async def test_superuser_cannot_delete_queue_with_linked_transfer(
@@ -181,7 +179,7 @@ async def test_superuser_cannot_delete_queue_with_linked_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 409
+    assert result.status_code == 409, result.json()
 
 
 async def test_anon_user_cannot_delete_queue(
@@ -201,7 +199,7 @@ async def test_anon_user_cannot_delete_queue(
             "details": None,
         },
     }
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
 
 
 async def test_maintainer_plus_cannot_delete_unknown_queue_error(

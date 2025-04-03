@@ -56,7 +56,7 @@ async def test_maintainer_plus_can_copy_connection_without_deleting_source(
     )
 
     # Assertions
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
         "status_code": 200,
@@ -124,7 +124,7 @@ async def test_maintainer_plus_can_copy_connection_and_delete_source(
         },
     )
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
         "status_code": 200,
@@ -189,7 +189,7 @@ async def test_superuser_can_copy_connection_without_deleting_source(
         },
     )
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
         "status_code": 200,
@@ -255,7 +255,7 @@ async def test_superuser_can_copy_connection_and_delete_source(
         },
     )
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
         "status_code": 200,
@@ -292,7 +292,7 @@ async def test_unauthorized_user_cannot_copy_connection(
             "new_group_id": empty_group.id,
         },
     )
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -315,7 +315,7 @@ async def test_groupless_user_cannot_copy_connection(
             "new_group_id": empty_group.id,
         },
     )
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -342,7 +342,7 @@ async def test_other_group_member_cannot_copy_connection(
             "new_group_id": group.group.id,
         },
     )
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -404,7 +404,7 @@ async def test_not_in_both_groups_user_can_not_copy_connection(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_groupless_user_can_not_copy_connection(
@@ -451,7 +451,7 @@ async def test_groupless_user_can_not_copy_connection(
     )
 
     # Assert
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -482,7 +482,7 @@ async def test_developer_plus_can_copy_connection_without_remove_source(
     )
 
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
         "status_code": 200,
@@ -511,7 +511,7 @@ async def test_developer_plus_can_copy_connection_with_new_connection_name(
     )
 
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
         "status_code": 200,
@@ -633,7 +633,7 @@ async def test_developer_below_can_not_copy_connection_with_remove_source(
             "details": None,
         },
     }
-    assert result.status_code == 403
+    assert result.status_code == 403, result.json()
 
 
 async def test_cannot_copy_connection_with_unknown_connection_error(
@@ -664,7 +664,7 @@ async def test_cannot_copy_connection_with_unknown_connection_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_cannot_copy_unknown_connection_error(
@@ -689,7 +689,7 @@ async def test_superuser_cannot_copy_unknown_connection_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_cannot_copy_connection_with_unknown_new_group_id_error(
@@ -719,7 +719,7 @@ async def test_cannot_copy_connection_with_unknown_new_group_id_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_cannot_copy_connection_with_unknown_new_group_id_error(
@@ -744,4 +744,4 @@ async def test_superuser_cannot_copy_connection_with_unknown_new_group_id_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()

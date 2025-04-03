@@ -54,4 +54,4 @@ async def test_guest_plus_can_read_hdfs_connection(
             "user": group_connection.credentials.value["user"],
         },
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()

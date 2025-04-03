@@ -32,8 +32,7 @@ async def test_maintainer_plus_can_delete_connection(
         "status_code": 200,
         "message": "Connection was deleted",
     }
-    assert result.status_code == 200
-
+    assert result.status_code == 200, result.json()
     session.expunge(connection)
     connection = await session.get(Connection, connection_id)
     assert connection is None
@@ -52,7 +51,7 @@ async def test_groupless_user_cannot_delete_connection(
     )
 
     # Assert
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -89,8 +88,7 @@ async def test_maintainer_plus_cannot_delete_connection_with_linked_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 409
-
+    assert result.status_code == 409, result.json()
     session.expunge(group_transfer.source_connection)
     connection = await session.get(Connection, group_transfer.source_connection.id)
     assert connection is not None
@@ -112,7 +110,7 @@ async def test_other_group_member_cannot_delete_group_connection(
     )
 
     # Assert
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -134,7 +132,7 @@ async def test_superuser_can_delete_group_connection(
     )
 
     # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
         "status_code": 200,
@@ -164,7 +162,7 @@ async def test_developer_or_below_cannot_delete_connection(
             "details": None,
         },
     }
-    assert result.status_code == 403
+    assert result.status_code == 403, result.json()
 
 
 async def test_unauthorized_user_cannot_delete_connection(client: AsyncClient, group_connection: MockConnection):
@@ -174,7 +172,7 @@ async def test_unauthorized_user_cannot_delete_connection(client: AsyncClient, g
     )
 
     # Assert
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -207,7 +205,7 @@ async def test_maintainer_plus_delete_unknown_connection_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_delete_unknown_connection_error(
@@ -230,4 +228,4 @@ async def test_superuser_delete_unknown_connection_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()

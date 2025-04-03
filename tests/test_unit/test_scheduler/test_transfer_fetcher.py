@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -31,7 +31,7 @@ async def test_fetch_jobs_with_outdated_last_updated_at(
     group_transfers: list[MockTransfer],
 ):
     # Arrange
-    transfer_fetcher.last_updated_at = datetime.now() - timedelta(days=1)
+    transfer_fetcher.last_updated_at = datetime.now(tz=timezone.utc) - timedelta(days=1)
     wanted_transfers = [t for t in group_transfers if t.transfer.updated_at > transfer_fetcher.last_updated_at]
 
     # Act
@@ -48,7 +48,7 @@ async def test_fetch_jobs_with_up_to_date_last_updated_at(
     group_transfers: list[MockTransfer],
 ):
     # Arrange
-    transfer_fetcher.last_updated_at = datetime.now()
+    transfer_fetcher.last_updated_at = datetime.now(tz=timezone.utc)
 
     # Act
     fetched_transfers = await transfer_fetcher.fetch_updated_jobs()

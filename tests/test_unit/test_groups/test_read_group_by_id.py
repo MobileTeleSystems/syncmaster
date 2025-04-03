@@ -28,7 +28,7 @@ async def test_member_of_group_can_read_by_id(
         },
         "role": user.role.value,
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_groupless_user_cannot_read_group(
@@ -49,7 +49,7 @@ async def test_groupless_user_cannot_read_group(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_other_member_group_cannot_read_group(
@@ -74,7 +74,7 @@ async def test_other_member_group_cannot_read_group(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_can_read_group(
@@ -97,7 +97,7 @@ async def test_superuser_can_read_group(
         },
         "role": superuser.role.value,
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_not_authorized_user_cannot_read_by_id(
@@ -114,7 +114,7 @@ async def test_not_authorized_user_cannot_read_by_id(
             "details": None,
         },
     }
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
 
 
 async def test_member_of_group_read_unknown_group_error(
@@ -137,7 +137,7 @@ async def test_member_of_group_read_unknown_group_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_read_unknown_group_error(
@@ -157,4 +157,4 @@ async def test_superuser_read_unknown_group_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()

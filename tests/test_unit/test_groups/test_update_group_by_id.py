@@ -22,8 +22,7 @@ async def test_owner_of_group_can_update_group(client: AsyncClient, empty_group:
     # Assert
     group_data.update({"id": empty_group.id})
     assert result.json() == group_data
-    assert result.status_code == 200
-
+    assert result.status_code == 200, result.json()
     check_result = await client.get(
         f"v1/groups/{empty_group.id}",
         headers={"Authorization": f"Bearer {empty_group.get_member_of_role(UserTestRoles.Owner).token}"},
@@ -56,7 +55,7 @@ async def test_groupless_user_cannot_update_group(client: AsyncClient, empty_gro
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_other_group_member_cannot_update_group(
@@ -86,7 +85,7 @@ async def test_other_group_member_cannot_update_group(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_can_update_group(client: AsyncClient, empty_group: MockGroup, superuser: MockUser):
@@ -105,13 +104,12 @@ async def test_superuser_can_update_group(client: AsyncClient, empty_group: Mock
     # Assert
     group_data.update({"id": empty_group.id})
     assert result.json() == group_data
-    assert result.status_code == 200
-
+    assert result.status_code == 200, result.json()
     result = await client.get(
         f"v1/groups/{empty_group.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "data": group_data,
         "role": UserTestRoles.Superuser,
@@ -130,7 +128,7 @@ async def test_validation_on_update_group(
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
     # Assert
-    assert result.status_code == 422
+    assert result.status_code == 422, result.json()
     assert result.json() == {
         "error": {
             "code": "invalid_request",
@@ -160,7 +158,7 @@ async def test_validation_on_update_group(
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
     # Assert
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -181,7 +179,7 @@ async def test_validation_on_update_group(
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
     # Assert
-    assert result.status_code == 409
+    assert result.status_code == 409, result.json()
     assert result.json() == {
         "error": {
             "code": "conflict",
@@ -307,7 +305,7 @@ async def test_maintainer_or_below_cannot_change_group_owner(
             "details": None,
         },
     }
-    assert result.status_code == 403
+    assert result.status_code == 403, result.json()
 
 
 async def test_not_authorized_user_cannot_update_group(client: AsyncClient, empty_group: MockGroup):
@@ -321,7 +319,7 @@ async def test_not_authorized_user_cannot_update_group(client: AsyncClient, empt
             "details": None,
         },
     }
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
 
 
 async def test_owner_of_group_update_unknown_group_error(client: AsyncClient, empty_group: MockGroup):

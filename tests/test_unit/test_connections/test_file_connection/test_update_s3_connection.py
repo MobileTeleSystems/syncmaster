@@ -63,4 +63,4 @@ async def test_developer_plus_can_update_s3_connection(
             "access_key": group_connection.credentials.value["access_key"],
         },
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()

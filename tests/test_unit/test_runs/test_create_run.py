@@ -55,8 +55,7 @@ async def test_developer_plus_can_create_run_of_transfer_his_group(
         "transfer_dump": run.transfer_dump,
         "type": RunType.MANUAL,
     }
-    assert result.status_code == 200
-
+    assert result.status_code == 200, result.json()
     mock_to_thread.assert_awaited_once_with(
         mock_send_task,
         "run_transfer_task",
@@ -87,7 +86,7 @@ async def test_groupless_user_cannot_create_run(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_group_member_cannot_create_run_of_other_group_transfer(
@@ -114,8 +113,7 @@ async def test_group_member_cannot_create_run_of_other_group_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 404
-
+    assert result.status_code == 404, result.json()
     assert (
         await session.scalars(
             select(Run).filter_by(transfer_id=group_transfer.id, status=Status.CREATED).order_by(desc(Run.created_at)),
@@ -156,7 +154,7 @@ async def test_superuser_can_create_run(
         "transfer_dump": run.transfer_dump,
         "type": RunType.MANUAL,
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     mock_to_thread.assert_awaited_once_with(
         mock_send_task,
         "run_transfer_task",
@@ -184,7 +182,7 @@ async def test_unauthorized_user_cannot_create_run(
             "details": None,
         },
     }
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
 
 
 async def test_group_member_cannot_create_run_of_unknown_transfer_error(

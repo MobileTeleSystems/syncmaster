@@ -38,7 +38,7 @@ async def test_guest_plus_can_read_transfers(
             build_transfer_json(group_transfer),
         ],
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_groupless_user_cannot_read_transfers(
@@ -59,7 +59,7 @@ async def test_groupless_user_cannot_read_transfers(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_can_read_transfers(
@@ -88,7 +88,7 @@ async def test_superuser_can_read_transfers(
             build_transfer_json(group_transfer),
         ],
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 @pytest.mark.parametrize(
@@ -132,7 +132,7 @@ async def test_search_transfers_with_query(
             build_transfer_json(group_transfer),
         ],
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 async def test_search_transfers_with_nonexistent_query(
@@ -148,7 +148,7 @@ async def test_search_transfers_with_nonexistent_query(
         params={"group_id": group_transfer.group_id, "search_query": random_search_query},
     )
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json()["items"] == []
 
 
@@ -183,7 +183,7 @@ async def test_filter_transfers(
         headers={"Authorization": f"Bearer {superuser.token}"},
         params=params,
     )
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "meta": {
             "page": 1,
@@ -233,7 +233,7 @@ async def test_filter_transfers_no_results(
         params=params,
     )
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json()["items"] == []
 
 
@@ -280,7 +280,7 @@ async def test_filter_transfers_with_multiple_transfers(
         if connection_type_value == connection_type:
             expected_transfers.append(transfer)
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     expected_items = [build_transfer_json(t) for t in expected_transfers]
     assert result.json()["items"] == expected_items
 
@@ -295,7 +295,7 @@ async def test_unauthorized_user_cannot_read_transfers(client: AsyncClient):
             "details": None,
         },
     }
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
 
 
 async def test_developer_plus_cannot_read_unknown_group_transfers_error(

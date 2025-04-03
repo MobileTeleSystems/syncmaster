@@ -65,4 +65,4 @@ async def test_developer_plus_can_update_samba_connection(
             "auth_type": group_connection.credentials.value["auth_type"],
         },
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()

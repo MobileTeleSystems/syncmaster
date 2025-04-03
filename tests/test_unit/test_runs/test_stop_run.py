@@ -27,7 +27,7 @@ async def test_developer_plus_can_stop_run_of_transfer_his_group(
     await session.refresh(group_run.run)
     assert group_run.status == Status.SEND_STOP_SIGNAL
 
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_run.id,
         "transfer_id": group_run.transfer_id,
@@ -59,7 +59,7 @@ async def test_groupless_user_cannot_stop_run(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_other_group_member_cannot_stop_run_of_other_group_transfer(
@@ -85,7 +85,7 @@ async def test_other_group_member_cannot_stop_run_of_other_group_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
     await session.refresh(group_run.run)
     assert group_run.status != Status.SEND_STOP_SIGNAL
 
@@ -115,7 +115,7 @@ async def test_superuser_can_stop_run(
         "transfer_dump": group_run.transfer_dump,
         "type": RunType.MANUAL,
     }
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
 
 @pytest.mark.parametrize("status", (Status.SEND_STOP_SIGNAL, Status.FINISHED, Status.FAILED, Status.STOPPED))
@@ -146,7 +146,7 @@ async def test_developer_plus_cannot_stop_run_in_status_except_started_or_create
             "details": None,
         },
     }
-    assert result.status_code == 400
+    assert result.status_code == 400, result.json()
 
 
 async def test_unauthorized_user_cannot_stop_run(
@@ -157,7 +157,7 @@ async def test_unauthorized_user_cannot_stop_run(
     result = await client.post(f"v1/runs/{group_run.id}/stop")
 
     # Assert
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -193,7 +193,7 @@ async def test_developer_plus_cannot_stop_unknown_run_of_transfer_error(
             "details": None,
         },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_cannot_stop_unknown_run_error(

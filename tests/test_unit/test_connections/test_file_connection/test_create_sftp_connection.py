@@ -59,7 +59,7 @@ async def test_developer_plus_can_create_sftp_connection(
 
     # Assert
     decrypted = decrypt_auth_data(creds.value, settings=settings)
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": connection.id,
         "group_id": connection.group_id,
