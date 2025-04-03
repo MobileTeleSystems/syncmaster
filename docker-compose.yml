@@ -120,6 +120,25 @@ services:
       - scheduler
       - all
 
+  frontend:
+    image: mtsrus/syncmaster-ui:${VERSION:-develop}
+    restart: unless-stopped
+    env_file: .env.docker
+    ports:
+      - 3000:3000
+    healthcheck:
+      test: [CMD-SHELL, curl -f http://localhost:3000/]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    depends_on:
+      server:
+        condition: service_healthy
+    profiles:
+      - frontend
+      - all
+
 volumes:
   postgres_data:
   rabbitmq_data:
