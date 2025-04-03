@@ -31,7 +31,7 @@ class DummyAuthProvider(AuthProvider):
 
     @classmethod
     def setup(cls, app: FastAPI) -> FastAPI:
-        settings = DummyAuthProviderSettings.parse_obj(app.state.settings.auth.dict(exclude={"provider"}))
+        settings = DummyAuthProviderSettings.model_validate(app.state.settings.auth.model_dump(exclude={"provider"}))
         log.info("Using %s provider with settings:\n%s", cls.__name__, pformat(settings))
         app.dependency_overrides[AuthProvider] = cls
         app.dependency_overrides[DummyAuthProviderSettings] = lambda: settings

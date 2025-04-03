@@ -33,7 +33,7 @@ async def read_runs(
     transfer_id: int,
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
     page: int = Query(gt=0, default=1),
-    page_size: int = Query(gt=0, le=200, default=20),
+    page_size: int = Query(gt=0, le=50, default=20),  # noqa: WPS432
     status: list[Status] | None = Query(default=None),
     started_at_since: datetime | None = Query(default=None),
     started_at_until: datetime | None = Query(default=None),
@@ -76,11 +76,11 @@ async def read_run(
     if resource_role == Permission.NONE:
         raise TransferNotFoundError
 
-    return ReadRunSchema.from_orm(run)
+    return ReadRunSchema.model_validate(run, from_attributes=True)
 
 
 @router.post("/runs")
-async def start_run(
+async def start_run(  # noqa: WPS217
     create_run_data: CreateRunSchema,
     settings: Annotated[Settings, Depends(Stub(Settings))],
     celery: Annotated[Celery, Depends(Stub(Celery))],
@@ -115,8 +115,8 @@ async def start_run(
             transfer_id=create_run_data.transfer_id,
             # Since fields with credentials may have different names (for example, S3 and Postgres have different names)
             # the work of checking fields and removing passwords is delegated to the ReadAuthDataSchema class
-            source_creds=ReadAuthDataSchema(auth_data=credentials_source).dict(),
-            target_creds=ReadAuthDataSchema(auth_data=credentials_target).dict(),
+            source_creds=ReadAuthDataSchema(auth_data=credentials_source).model_dump(),
+            target_creds=ReadAuthDataSchema(auth_data=credentials_target).model_dump(),
             type=RunType.MANUAL,
         )
 
@@ -134,7 +134,7 @@ async def start_run(
                 status=Status.FAILED,
             )
         raise CannotConnectToTaskQueueError(run_id=run.id) from e
-    return ReadRunSchema.from_orm(run)
+    return ReadRunSchema.model_validate(run, from_attributes=True)
 
 
 @router.post("/runs/{run_id}/stop")
@@ -160,4 +160,4 @@ async def stop_run(
     async with unit_of_work:
         run = await unit_of_work.run.stop(run_id=run_id)
         # TODO: add immediate stop transfer after stop Run
-    return ReadRunSchema.from_orm(run)
+    return ReadRunSchema.model_validate(run, from_attributes=True)

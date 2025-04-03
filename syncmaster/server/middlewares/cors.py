@@ -13,6 +13,6 @@ def apply_cors_middleware(app: FastAPI, settings: CORSSettings) -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        **settings.dict(exclude={"enabled"}),
+        **settings.model_dump(exclude={"enabled"}),
     )
     return app

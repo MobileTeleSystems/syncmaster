@@ -35,7 +35,7 @@ router = APIRouter(tags=["Transfers"], responses=get_error_responses())
 async def read_transfers(
     group_id: int,
     page: int = Query(gt=0, default=1),
-    page_size: int = Query(gt=0, le=200, default=20),
+    page_size: int = Query(gt=0, le=50, default=20),  # noqa: WPS432
     search_query: str | None = Query(
         None,
         title="Search Query",
@@ -79,7 +79,7 @@ async def read_transfers(
 
 
 @router.post("/transfers")
-async def create_transfer(
+async def create_transfer(  # noqa: WPS217, WPS238
     transfer_data: CreateTransferSchema,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
@@ -126,16 +126,16 @@ async def create_transfer(
             description=transfer_data.description,
             target_connection_id=transfer_data.target_connection_id,
             source_connection_id=transfer_data.source_connection_id,
-            source_params=transfer_data.source_params.dict(),
-            target_params=transfer_data.target_params.dict(),
-            strategy_params=transfer_data.strategy_params.dict(),
-            transformations=[tr.dict() for tr in transfer_data.transformations],
-            resources=transfer_data.resources.dict(),
+            source_params=transfer_data.source_params.model_dump(),
+            target_params=transfer_data.target_params.model_dump(),
+            strategy_params=transfer_data.strategy_params.model_dump(),
+            transformations=[tr.model_dump() for tr in transfer_data.transformations],
+            resources=transfer_data.resources.model_dump(),
             queue_id=transfer_data.queue_id,
             is_scheduled=transfer_data.is_scheduled,
             schedule=transfer_data.schedule,
         )
-    return ReadTransferSchema.from_orm(transfer)
+    return ReadTransferSchema.model_validate(transfer, from_attributes=True)
 
 
 @router.get("/transfers/{transfer_id}")
@@ -154,11 +154,11 @@ async def read_transfer(
         raise TransferNotFoundError
 
     transfer = await unit_of_work.transfer.read_by_id(transfer_id=transfer_id)
-    return ReadTransferSchema.from_orm(transfer)
+    return ReadTransferSchema.model_validate(transfer, from_attributes=True)
 
 
 @router.post("/transfers/{transfer_id}/copy_transfer")
-async def copy_transfer(
+async def copy_transfer(  # noqa: WPS217, WPS238
     transfer_id: int,
     transfer_data: CopyTransferSchema,
     current_user: User = Depends(get_user(is_active=True)),
@@ -245,7 +245,7 @@ async def copy_transfer(
 
 
 @router.put("/transfers/{transfer_id}")
-async def update_transfer(
+async def update_transfer(  # noqa: WPS217, WPS238
     transfer_id: int,
     transfer_data: CreateTransferSchema,
     current_user: User = Depends(get_user(is_active=True)),
@@ -312,16 +312,16 @@ async def update_transfer(
             description=transfer_data.description,
             target_connection_id=transfer_data.target_connection_id,
             source_connection_id=transfer_data.source_connection_id,
-            source_params=transfer_data.source_params.dict(),
-            target_params=transfer_data.target_params.dict(),
-            strategy_params=transfer_data.strategy_params.dict(),
-            transformations=[tr.dict() for tr in transfer_data.transformations],
-            resources=transfer_data.resources.dict(),
+            source_params=transfer_data.source_params.model_dump(),
+            target_params=transfer_data.target_params.model_dump(),
+            strategy_params=transfer_data.strategy_params.model_dump(),
+            transformations=[tr.model_dump() for tr in transfer_data.transformations],
+            resources=transfer_data.resources.model_dump(),
             is_scheduled=transfer_data.is_scheduled,
             schedule=transfer_data.schedule,
             queue_id=transfer_data.queue_id,
         )
-    return ReadTransferSchema.from_orm(transfer)
+    return ReadTransferSchema.model_validate(transfer, from_attributes=True)
 
 
 @router.delete("/transfers/{transfer_id}")

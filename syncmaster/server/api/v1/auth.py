@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
+from http.client import NOT_FOUND
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -38,7 +39,7 @@ async def token(
         client_id=form_data.client_id,
         client_secret=form_data.client_secret,
     )
-    return AuthTokenSchema.parse_obj(token)
+    return AuthTokenSchema.model_validate(token)
 
 
 @router.get("/callback")
@@ -50,7 +51,7 @@ async def auth_callback(
 ):
     original_redirect_url = validate_state(state)
     if not original_redirect_url:
-        raise HTTPException(status_code=400, detail="Invalid state parameter")
+        raise HTTPException(status_code=NOT_FOUND, detail="Invalid state parameter")
     token = await auth_provider.get_token_authorization_code_grant(
         code=code,
         redirect_uri=auth_provider.settings.keycloak.redirect_uri,

@@ -237,8 +237,16 @@ markers = [
     "hive: tests for Hive",
     "postgres: tests on Postgres",
     "oracle: tests for Oracle",
+    "clickhouse: tests for Clickhouse",
+    "mysql: tests for MySQL",
+    "mssql: tests for MSSQL",
     "hdfs: tests for hadoop hdfs",
     "s3: tests for S3",
+    "ftp: tests for FTP",
+    "ftps: tests for FTPS",
+    "sftp: tests for SFTP",
+    "samba: tests for Samba",
+    "webdav: tests for WebDAV",
 ]
 
 [tool.coverage.paths]
@@ -457,6 +465,8 @@ per-file-ignores = [
 # WPS432 Found magic number: 256
   "*migrations/*.py:WPS102,WPS432",
   "*db/models/*.py:WPS102,WPS432",
+# WPS404 Found complex default value
+  "*server/api/*.py:WPS404",
 # WPS237 Found a too complex `f` string
   "*exceptions/*.py:WPS237",
   "*exceptions/__init__.py:F40,WPS410",

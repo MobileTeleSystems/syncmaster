@@ -27,7 +27,7 @@ def celery_factory(settings: Settings) -> Celery:
     app = Celery(
         __name__,
         broker=settings.broker.url,
-        backend="db+" + settings.database.sync_url,
+        backend="db+" + settings.database.sync_url,  # noqa: WPS336
     )
     return app
 
@@ -50,7 +50,7 @@ def application_factory(settings: Settings) -> FastAPI:
     application.exception_handler(HTTPException)(http_exception_handler)
     application.exception_handler(Exception)(unknown_exception_handler)
 
-    engine = async_engine_from_config(settings.database.dict(), prefix="")
+    engine = async_engine_from_config(settings.database.model_dump(), prefix="")
     session_factory = create_session_factory(engine=engine)
 
     application.dependency_overrides.update(

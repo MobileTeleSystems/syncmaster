@@ -11,7 +11,7 @@ import pytest_asyncio
 from alembic.config import Config as AlembicConfig
 from celery import Celery
 from fastapi import FastAPI
-from httpx import AsyncClient
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -50,7 +50,7 @@ pytest_plugins = [
 
 @pytest.fixture
 def access_token_settings(settings: Settings) -> JWTSettings:
-    return JWTSettings.parse_obj(settings.auth.access_token)
+    return JWTSettings.model_validate(settings.auth.access_token)
 
 
 @pytest.fixture
@@ -75,17 +75,17 @@ def event_loop():
 
 @pytest.fixture(scope="session", params=[{}])
 def settings(request: pytest.FixtureRequest) -> Settings:
-    return Settings.parse_obj(request.param)
+    return Settings.model_validate(request.param)
 
 
 @pytest.fixture(scope="session", params=[{}])
 def scheduler_settings(request: pytest.FixtureRequest) -> SchedulerAppSettings:
-    return SchedulerAppSettings.parse_obj(request.param)
+    return SchedulerAppSettings.model_validate(request.param)
 
 
 @pytest.fixture(scope="session", params=[{}])
 def worker_settings(request: pytest.FixtureRequest) -> WorkerAppSettings:
-    return WorkerAppSettings.parse_obj(request.param)
+    return WorkerAppSettings.model_validate(request.param)
 
 
 @pytest.fixture(scope="session")
@@ -148,7 +148,7 @@ async def app(settings: Settings, mocked_celery: Celery) -> FastAPI:
 
 @pytest_asyncio.fixture(scope="session")
 async def client_with_mocked_celery(app: FastAPI) -> AsyncGenerator:
-    async with AsyncClient(app=app, base_url="http://testserver") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
         yield client
 
 
@@ -156,7 +156,7 @@ async def client_with_mocked_celery(app: FastAPI) -> AsyncGenerator:
 async def client(settings: Settings) -> AsyncGenerator:
     logger.info("START CLIENT FIXTURE")
     app = application_factory(settings=settings)
-    async with AsyncClient(app=app, base_url="http://testserver") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
         yield client
         logger.info("END CLIENT FIXTURE")
 

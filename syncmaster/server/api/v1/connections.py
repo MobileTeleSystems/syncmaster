@@ -37,7 +37,7 @@ router = APIRouter(tags=["Connections"], responses=get_error_responses())
 async def read_connections(
     group_id: int,
     page: int = Query(gt=0, default=1),
-    page_size: int = Query(gt=0, le=200, default=20),
+    page_size: int = Query(gt=0, le=50, default=20),  # noqa: WPS432
     type: list[ConnectionType] | None = Query(None),
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
@@ -122,12 +122,12 @@ async def create_connection(
             type=connection_data.type,
             description=connection_data.description,
             group_id=connection_data.group_id,
-            data=connection_data.data.dict(),
+            data=connection_data.data.model_dump(),
         )
 
         await unit_of_work.credentials.create(
             connection_id=connection.id,
-            data=connection_data.auth_data.dict(),
+            data=connection_data.auth_data.model_dump(),
         )
 
     credentials = await unit_of_work.credentials.read(connection.id)
@@ -183,7 +183,7 @@ async def read_connection(
 
 
 @router.put("/connections/{connection_id}")
-async def update_connection(
+async def update_connection(  # noqa: WPS217, WPS238
     connection_id: int,
     connection_data: UpdateConnectionSchema,
     current_user: User = Depends(get_user(is_active=True)),
@@ -208,7 +208,7 @@ async def update_connection(
                 raise ConnectionTypeUpdateError
 
         existing_credentials = await unit_of_work.credentials.read(connection_id=connection_id)
-        auth_data = connection_data.auth_data.dict()
+        auth_data = connection_data.auth_data.model_dump()
         secret_field = connection_data.auth_data.secret_field
 
         if auth_data[secret_field] is None:
@@ -222,7 +222,7 @@ async def update_connection(
             name=connection_data.name,
             type=connection_data.type,
             description=connection_data.description,
-            data=connection_data.data.dict(),
+            data=connection_data.data.model_dump(),
         )
         await unit_of_work.credentials.update(
             connection_id=connection_id,
@@ -277,7 +277,7 @@ async def delete_connection(
 
 
 @router.post("/connections/{connection_id}/copy_connection")
-async def copy_connection(
+async def copy_connection(  # noqa: WPS238
     connection_id: int,
     copy_connection_data: ConnectionCopySchema,
     current_user: User = Depends(get_user(is_active=True)),

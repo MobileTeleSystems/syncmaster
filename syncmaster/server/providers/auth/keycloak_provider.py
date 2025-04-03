@@ -36,7 +36,7 @@ class KeycloakAuthProvider(AuthProvider):
 
     @classmethod
     def setup(cls, app: FastAPI) -> FastAPI:
-        settings = KeycloakAuthProviderSettings.parse_obj(app.state.settings.auth.dict(exclude={"provider"}))
+        settings = KeycloakAuthProviderSettings.model_validate(app.state.settings.auth.model_dump(exclude={"provider"}))
         log.info("Using %s provider with settings:\n%s", cls.__name__, settings)
         app.dependency_overrides[AuthProvider] = cls
         app.dependency_overrides[KeycloakAuthProviderSettings] = lambda: settings

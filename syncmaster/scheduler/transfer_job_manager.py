@@ -66,7 +66,7 @@ class TransferJobManager:
             self.scheduler.remove_job(str(job_id))
 
     @staticmethod
-    async def send_job_to_celery(transfer_id: int) -> None:
+    async def send_job_to_celery(transfer_id: int) -> None:  # noqa: WPS602, WPS217
         """
         1. Do not pass additional arguments like settings,
         otherwise they will be serialized in jobs table.
@@ -90,8 +90,8 @@ class TransferJobManager:
             async with unit_of_work:
                 run = await unit_of_work.run.create(
                     transfer_id=transfer_id,
-                    source_creds=ReadAuthDataSchema(auth_data=credentials_source).dict(),
-                    target_creds=ReadAuthDataSchema(auth_data=credentials_target).dict(),
+                    source_creds=ReadAuthDataSchema(auth_data=credentials_source).model_dump(),
+                    target_creds=ReadAuthDataSchema(auth_data=credentials_target).model_dump(),
                     type=RunType.SCHEDULED,
                 )
 

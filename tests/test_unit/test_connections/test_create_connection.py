@@ -429,7 +429,6 @@ async def test_group_member_cannot_create_connection_with_unknown_group_error(
     session: AsyncSession,
     settings: Settings,
     role_guest_plus: UserTestRoles,
-    event_loop,
 ):
     # Arrange
     user = group.get_member_of_role(role_guest_plus)

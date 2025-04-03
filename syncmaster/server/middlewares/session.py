@@ -12,6 +12,6 @@ def apply_session_middleware(app: FastAPI, settings: SessionSettings) -> FastAPI
 
     app.add_middleware(
         SessionMiddleware,
-        **settings.dict(),
+        **settings.model_dump(),
     )
     return app

@@ -25,7 +25,7 @@ router = APIRouter(tags=["Queues"], responses=get_error_responses())
 async def read_queues(
     group_id: int,
     page: int = Query(gt=0, default=1),
-    page_size: int = Query(gt=0, le=200, default=20),
+    page_size: int = Query(gt=0, le=50, default=20),  # noqa: WPS432
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
     search_query: str | None = Query(
@@ -68,7 +68,7 @@ async def read_queue(
     queue = await unit_of_work.queue.read_by_id(
         queue_id=queue_id,
     )
-    return ReadQueueSchema.from_orm(queue)
+    return ReadQueueSchema.model_validate(queue, from_attributes=True)
 
 
 @router.post("/queues", description="Create new queue")
@@ -88,9 +88,9 @@ async def create_queue(
         raise ActionNotAllowedError
 
     async with unit_of_work:
-        queue = await unit_of_work.queue.create(queue_data.dict())
+        queue = await unit_of_work.queue.create(queue_data.model_dump())
 
-    return ReadQueueSchema.from_orm(queue)
+    return ReadQueueSchema.model_validate(queue, from_attributes=True)
 
 
 @router.patch("/queues/{queue_id}", description="Updating queue information")
@@ -116,7 +116,7 @@ async def update_queue(
             queue_id=queue_id,
             queue_data=queue_data,
         )
-    return ReadQueueSchema.from_orm(queue)
+    return ReadQueueSchema.model_validate(queue, from_attributes=True)
 
 
 @router.delete("/queues/{queue_id}", description="Delete queue by id")

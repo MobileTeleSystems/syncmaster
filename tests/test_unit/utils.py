@@ -225,7 +225,7 @@ async def create_run(
             joinedload(Transfer.target_connection),
         ),
     )
-    dump = ReadFullTransferSchema.from_orm(transfer).dict()
+    dump = ReadFullTransferSchema.model_validate(transfer, from_attributes=True).model_dump()
     r = Run(
         transfer_id=transfer_id,
         started_at=started_at,

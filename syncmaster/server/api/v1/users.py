@@ -19,7 +19,7 @@ router = APIRouter(tags=["Users"], responses=get_error_responses())
 @router.get("/users")
 async def get_users(
     page: int = Query(gt=0, default=1),
-    page_size: int = Query(gt=0, le=200, default=20),
+    page_size: int = Query(gt=0, le=50, default=20),  # noqa: WPS432
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
     search_query: str | None = Query(
@@ -41,7 +41,7 @@ async def get_users(
 async def read_current_user(
     current_user: User = Depends(get_user(is_active=True)),
 ) -> ReadUserSchema:
-    return ReadUserSchema.from_orm(current_user)
+    return ReadUserSchema.model_validate(current_user, from_attributes=True)
 
 
 @router.get("/users/{user_id}", dependencies=[Depends(get_user(is_active=True))])
@@ -50,4 +50,4 @@ async def read_user(
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadUserSchema:
     user = await unit_of_work.user.read_by_id(user_id=user_id, is_active=True)
-    return ReadUserSchema.from_orm(user)
+    return ReadUserSchema.model_validate(user, from_attributes=True)

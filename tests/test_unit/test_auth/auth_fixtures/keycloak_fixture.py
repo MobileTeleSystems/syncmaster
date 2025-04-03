@@ -81,8 +81,9 @@ def create_session_cookie(rsa_keys, settings):
 
 @pytest.fixture
 def mock_keycloak_well_known(settings):
-    server_url = settings.auth.dict()["keycloak"]["server_url"]
-    realm_name = settings.auth.dict()["keycloak"]["client_id"]
+    keycloak_settings = settings.auth.model_dump()["keycloak"]
+    server_url = keycloak_settings["server_url"]
+    realm_name = keycloak_settings["client_id"]
     well_known_url = f"{server_url}/realms/{realm_name}/.well-known/openid-configuration"
 
     responses.add(
@@ -103,8 +104,9 @@ def mock_keycloak_well_known(settings):
 
 @pytest.fixture
 def mock_keycloak_realm(settings, rsa_keys):
-    server_url = settings.auth.dict()["keycloak"]["server_url"]
-    realm_name = settings.auth.dict()["keycloak"]["client_id"]
+    keycloak_settings = settings.auth.model_dump()["keycloak"]
+    server_url = keycloak_settings["server_url"]
+    realm_name = keycloak_settings["client_id"]
     realm_url = f"{server_url}/realms/{realm_name}"
     public_pem_str = get_public_key_pem(rsa_keys["public_key"])
 
@@ -124,8 +126,9 @@ def mock_keycloak_realm(settings, rsa_keys):
 
 @pytest.fixture
 def mock_keycloak_token_refresh(settings, rsa_keys):
-    server_url = settings.auth.dict()["keycloak"]["server_url"]
-    realm_name = settings.auth.dict()["keycloak"]["client_id"]
+    keycloak_settings = settings.auth.model_dump()["keycloak"]
+    server_url = keycloak_settings["server_url"]
+    realm_name = keycloak_settings["client_id"]
     token_url = f"{server_url}/realms/{realm_name}/protocol/openid-connect/token"
 
     # generate new access and refresh tokens

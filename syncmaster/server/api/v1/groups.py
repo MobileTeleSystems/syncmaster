@@ -1,5 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
+from http.client import OK
+
 from fastapi import APIRouter, Depends, Query
 
 from syncmaster.db.models import User
@@ -27,7 +29,7 @@ router = APIRouter(tags=["Groups"], responses=get_error_responses())
 @router.get("/groups")
 async def read_groups(
     page: int = Query(gt=0, default=1),
-    page_size: int = Query(gt=0, le=200, default=20),
+    page_size: int = Query(gt=0, le=50, default=20),  # noqa: WPS432
     role: str | None = Query(default=None),
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
@@ -66,7 +68,7 @@ async def create_group(
             description=group_data.description,
             owner_id=current_user.id,
         )
-    return ReadGroupSchema.from_orm(group)
+    return ReadGroupSchema.model_validate(group, from_attributes=True)
 
 
 @router.get("/groups/{group_id}")
@@ -85,11 +87,14 @@ async def read_group(
 
     group = await unit_of_work.group.read_by_id(group_id=group_id)
     user_role = await unit_of_work.group.get_member_role(group_id=group_id, user_id=current_user.id)
-    return GroupWithUserRoleSchema.from_orm({"data": group, "role": user_role})
+    return GroupWithUserRoleSchema(
+        data=ReadGroupSchema.model_validate(group, from_attributes=True),
+        role=GroupMemberRole(user_role),
+    )
 
 
 @router.patch("/groups/{group_id}")
-async def update_group(
+async def update_group(  # noqa: WPS217
     group_id: int,
     group_data: UpdateGroupSchema,
     current_user: User = Depends(get_user(is_active=True)),
@@ -129,7 +134,7 @@ async def update_group(
                 new_user_id=previous_owner_id,
                 role=GroupMemberRole.Guest,
             )
-    return ReadGroupSchema.from_orm(group)
+    return ReadGroupSchema.model_validate(group, from_attributes=True)
 
 
 @router.delete("/groups/{group_id}", dependencies=[Depends(get_user(is_superuser=True))])
@@ -139,14 +144,14 @@ async def delete_group(
 ) -> StatusResponseSchema:
     async with unit_of_work:
         await unit_of_work.group.delete(group_id=group_id)
-    return StatusResponseSchema(ok=True, status_code=200, message="Group was deleted")
+    return StatusResponseSchema(ok=True, status_code=OK, message="Group was deleted")
 
 
 @router.get("/groups/{group_id}/users")
 async def read_group_users(
     group_id: int,
     page: int = Query(gt=0, default=1),
-    page_size: int = Query(gt=0, le=200, default=20),
+    page_size: int = Query(gt=0, le=50, default=20),  # noqa: WPS432
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> UserPageSchemaAsGroupMember:
@@ -192,7 +197,7 @@ async def update_user_role_group(
             role=update_user_data.role,
         )
 
-    return AddUserSchema.from_orm(result)
+    return AddUserSchema.model_validate(result, from_attributes=True)
 
 
 @router.post("/groups/{group_id}/users/{user_id}")
@@ -226,7 +231,7 @@ async def add_user_to_group(
         )
     return StatusResponseSchema(
         ok=True,
-        status_code=200,
+        status_code=OK,
         message="User was successfully added to group",
     )
 
@@ -256,4 +261,4 @@ async def delete_user_from_group(
             group_id=group_id,
             target_user_id=user_id,
         )
-    return StatusResponseSchema(ok=True, status_code=200, message="User was successfully removed from group")
+    return StatusResponseSchema(ok=True, status_code=OK, message="User was successfully removed from group")

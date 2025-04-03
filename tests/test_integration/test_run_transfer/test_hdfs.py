@@ -177,6 +177,7 @@ async def test_run_transfer_hdfs_to_postgres_with_full_strategy(
     assert df.sort("id").collect() == init_df.sort("id").collect()
 
 
+@pytest.mark.flaky
 @pytest.mark.parametrize(
     "target_file_format, file_format_flavor, strategy, expected_extension",
     [

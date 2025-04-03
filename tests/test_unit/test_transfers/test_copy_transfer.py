@@ -154,7 +154,6 @@ async def test_developer_plus_can_copy_transfer_without_remove_source(
 async def test_developer_or_below_cannot_copy_transfer_with_remove_source(
     client: AsyncClient,
     session: AsyncSession,
-    event_loop,
     group_transfer_and_group_developer_or_below: str,
     group_transfer: MockTransfer,
     group_queue: Queue,
@@ -220,7 +219,6 @@ async def test_other_group_guest_plus_member_cannot_copy_transfer(
     group: MockGroup,
     session: AsyncSession,
     role_guest_plus: UserTestRoles,
-    event_loop,
     group_queue: Queue,
 ):
     # Arrange
@@ -369,7 +367,6 @@ async def test_maintainer_plus_can_copy_transfer_with_new_name(
 async def test_check_validate_copy_transfer_parameter_new_name(
     client: AsyncClient,
     session: AsyncSession,
-    event_loop,
     group_transfer_and_group_maintainer_plus: str,
     group_transfer: MockTransfer,
     group_queue: Queue,
@@ -585,7 +582,6 @@ async def test_copy_unknown_transfer_error(
 
 async def test_developer_plus_cannot_copy_transfer_with_unknown_new_queue_id_error(
     client: AsyncClient,
-    event_loop,
     group_transfer_and_group_developer_plus: str,
     group_transfer: MockTransfer,
     group_queue: Queue,
@@ -616,7 +612,6 @@ async def test_developer_plus_cannot_copy_transfer_with_unknown_new_queue_id_err
 
 async def test_superuser_cannot_copy_transfer_with_unknown_new_queue_id_error(
     client: AsyncClient,
-    event_loop,
     superuser: MockUser,
     group_transfer: MockTransfer,
     group_queue: Queue,
