@@ -112,7 +112,9 @@ services:
       target: test
     command: --loglevel=info -Q test_queue
     entrypoint: [coverage, run, -m, celery, -A, tests.test_integration.celery_test, worker, --max-tasks-per-child=1]
-    env_file: .env.docker
+    env_file:
+      - .env.docker
+      - .env.docker.test
     environment:
       # CI runs tests in the worker container, so we need to turn off interaction with static files for it
       - SYNCMASTER__SERVER__STATIC_FILES__ENABLED=false
@@ -134,7 +136,6 @@ services:
   horizon:
     image: mtsrus/horizon-backend:develop
     restart: unless-stopped
-    env_file: .env.docker
     environment:
       # list here usernames which should be assigned SUPERADMIN role on application start
       HORIZON__ENTRYPOINT__ADMIN_USERS: admin

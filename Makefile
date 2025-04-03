@@ -1,6 +1,7 @@
 #!make
 
 include .env.local
+include .env.local.test
 
 VERSION = develop
 PIP = .venv/bin/pip
