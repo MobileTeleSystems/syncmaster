@@ -15,7 +15,7 @@ from syncmaster.scheduler.settings import SchedulerAppSettings as Settings
 
 @contextlib.asynccontextmanager
 async def get_async_engine(settings: Settings) -> AsyncGenerator[AsyncEngine, None]:
-    engine = create_async_engine(url=settings.database.sync_url)
+    engine = create_async_engine(url=settings.database.url)
     try:
         yield engine
     finally:
