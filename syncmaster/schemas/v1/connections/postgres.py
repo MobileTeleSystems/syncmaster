@@ -24,7 +24,7 @@ class CreatePostgresConnectionDataSchema(BaseModel):
 
 class ReadPostgresConnectionDataSchema(BaseModel):
     host: str
-    port: int = Field(gt=0, le=65535)
+    port: int = Field(gt=0, le=65535)  # noqa: WPS432
     database_name: str
     additional_params: dict = Field(default_factory=dict)
 

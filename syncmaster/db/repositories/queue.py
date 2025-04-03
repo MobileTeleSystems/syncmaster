@@ -137,7 +137,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
 
         return Permission.DELETE
 
-    async def get_resource_permission(self, user: User, resource_id: int) -> Permission:
+    async def get_resource_permission(self, user: User, resource_id: int) -> Permission:  # noqa: WPS212
         """
         Method for determining CRUD rights in a repository (self.model) for a resource
         'DEVELOPER' does not have WRITE permission in the QUEUE repository
@@ -192,8 +192,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
 
         return Permission.DELETE
 
-    @staticmethod
-    def _raise_error(err: DBAPIError) -> NoReturn:
+    def _raise_error(self, err: DBAPIError) -> NoReturn:
         constraint = err.__cause__.__cause__.constraint_name
         if constraint == "uq__queue__slug":
             raise DuplicatedQueueNameError

@@ -21,10 +21,6 @@ class ReadConnectionBaseSchema(BaseModel):
     name: str
     description: str
 
-    class Config:
-        from_attributes = True
-        populate_by_name = True
-
 
 class ReadAuthDataSchema(BaseModel):
     auth_data: ReadConnectionAuthDataSchema = Field(discriminator="type", default=...)

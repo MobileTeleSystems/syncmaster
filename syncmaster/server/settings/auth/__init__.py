@@ -1,9 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 
-from pydantic import BaseModel, Field, ImportString
-
-from syncmaster.server.settings.auth.keycloak import KeycloakAuthProviderSettings
+from pydantic import BaseModel, ConfigDict, Field, ImportString
 
 
 class AuthSettings(BaseModel):
@@ -28,5 +26,4 @@ class AuthSettings(BaseModel):
         validate_default=True,
     )
 
-    class Config:
-        extra = "allow"
+    model_config = ConfigDict(extra="allow")

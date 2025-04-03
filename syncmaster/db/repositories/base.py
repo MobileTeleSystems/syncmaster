@@ -29,8 +29,7 @@ class Repository(Generic[Model], ABC):
             raise EntityNotFoundError
         return obj
 
-    @staticmethod
-    def _model_as_dict(model: Model) -> dict[str, Any]:
+    def _model_as_dict(self, model: Model) -> dict[str, Any]:
         d = []
         for c in model.__table__.columns:
             if c.name in ("id", "search_vector"):

@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from syncmaster.db.models import GroupMemberRole
 from syncmaster.schemas.v1.page import PageSchema
@@ -21,6 +21,8 @@ class CreateGroupSchema(BaseModel):
 class AddUserSchema(BaseModel):
     role: GroupMemberRole
 
+    model_config = ConfigDict(from_attributes=True)
+
     @model_validator(mode="before")
     def validate_role(cls, values):
         if isinstance(values, dict):
@@ -35,9 +37,6 @@ class AddUserSchema(BaseModel):
             )
         return values
 
-    class Config:
-        from_attributes = True
-
 
 class ReadGroupSchema(BaseModel):
     id: int
@@ -45,16 +44,14 @@ class ReadGroupSchema(BaseModel):
     description: str
     owner_id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class GroupWithUserRoleSchema(BaseModel):
     data: ReadGroupSchema
     role: GroupMemberRole
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class GroupPageSchema(PageSchema):

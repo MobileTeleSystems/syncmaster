@@ -39,7 +39,9 @@ class DBHandler(Handler):
         reader_params = {}
         if self.transfer_dto.strategy.type == "incremental":
             self.transfer_dto.strategy.increment_by = self._quote_field(self.transfer_dto.strategy.increment_by)
-            hwm_name = f"{self.transfer_dto.id}_{self.connection_dto.type}_{self.transfer_dto.table_name}"
+            hwm_name = (
+                f"{self.transfer_dto.id}_{self.connection_dto.type}_{self.transfer_dto.table_name}"  # noqa: WPS237
+            )
             reader_params["hwm"] = DBReader.AutoDetectHWM(
                 name=hwm_name,
                 expression=self.transfer_dto.strategy.increment_by,
@@ -135,6 +137,5 @@ class DBHandler(Handler):
 
         return options
 
-    @staticmethod
-    def _quote_field(field: str) -> str:
+    def _quote_field(self, field: str) -> str:
         return f'"{field}"'

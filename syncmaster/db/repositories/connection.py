@@ -132,7 +132,7 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         except IntegrityError as integrity_error:
             self._raise_error(integrity_error)
 
-    def _raise_error(self, err: DBAPIError) -> NoReturn:
+    def _raise_error(self, err: DBAPIError) -> NoReturn:  # noqa: WPS238
         constraint = err.__cause__.__cause__.constraint_name
         if constraint == "fk__connection__group_id__group":
             raise GroupNotFoundError from err

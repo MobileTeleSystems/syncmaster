@@ -30,7 +30,7 @@ class CreateS3ConnectionDataSchema(BaseModel):
         protocol = values.get("protocol")
 
         if port is None:
-            port = 443 if protocol == "https" else 80
+            port = 443 if protocol == "https" else 80  # noqa: WPS432
             values["port"] = port
 
         return values

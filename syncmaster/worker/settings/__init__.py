@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from pydantic import Field
 from pydantic.types import ImportString
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from syncmaster.settings import (
     CredentialsEncryptionSettings,
@@ -76,6 +76,4 @@ class WorkerAppSettings(BaseSettings):
     )
     hwm_store: HWMStoreSettings = Field(default_factory=HWMStoreSettings, description="HWM Store settings")
 
-    class Config:
-        env_prefix = "SYNCMASTER__"
-        env_nested_delimiter = "__"
+    model_config = SettingsConfigDict(env_prefix="SYNCMASTER__", env_nested_delimiter="__")

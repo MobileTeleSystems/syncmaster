@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import asyncio
@@ -18,7 +19,7 @@ async def main():
     transfer_job_manager = TransferJobManager(settings)
     transfer_job_manager.scheduler.start()
 
-    while True:
+    while True:  # noqa: WPS457
         logger.info("Looking at the transfer table...")
 
         await transfer_job_manager.remove_orphan_jobs()

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from syncmaster.server.settings.auth import AuthSettings
 from syncmaster.server.settings.server import ServerSettings
@@ -58,6 +58,4 @@ class ServerAppSettings(BaseSettings):
         description="Settings for encrypting credential data",
     )
 
-    class Config:
-        env_prefix = "SYNCMASTER__"
-        env_nested_delimiter = "__"
+    model_config = SettingsConfigDict(env_prefix="SYNCMASTER__", env_nested_delimiter="__")

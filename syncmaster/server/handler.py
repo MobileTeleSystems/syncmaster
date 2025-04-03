@@ -108,7 +108,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
-async def syncmsater_exception_handler(request: Request, exc: SyncmasterError):
+async def syncmsater_exception_handler(request: Request, exc: SyncmasterError):  # noqa: WPS231, WPS212
     response = get_response_for_exception(SyncmasterError)
     if not response:
         return unknown_exception_handler(request, exc)

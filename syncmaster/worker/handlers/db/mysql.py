@@ -60,6 +60,5 @@ class MySQLHandler(DBHandler):
 
         return " AND ".join(expressions) or None
 
-    @staticmethod
-    def _quote_field(field: str) -> str:
+    def _quote_field(self, field: str) -> str:
         return f"`{field}`"

@@ -6,7 +6,7 @@ import re
 from pathlib import PurePosixPath
 from typing import Any, ClassVar
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from syncmaster.schemas.v1.transfers.file_format import (
     CSV,
@@ -45,8 +45,7 @@ class CreateFileTransferSource(BaseModel):
     file_format: CSV | JSONLine | JSON | Excel | XML | ORC | Parquet = Field(..., discriminator="type")
     options: dict[str, Any] = Field(default_factory=dict)
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @field_validator("directory_path", mode="before")
     @classmethod
@@ -69,10 +68,9 @@ class CreateFileTransferTarget(BaseModel):
     )
     options: dict[str, Any] = Field(default_factory=dict)
 
-    FILE_NAME_PATTERN: ClassVar[re.Pattern] = re.compile(r"^[a-zA-Z0-9_.{}-]+$")
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    class Config:
-        arbitrary_types_allowed = True
+    FILE_NAME_PATTERN: ClassVar[re.Pattern] = re.compile(r"^[a-zA-Z0-9_.{}-]+$")
 
     @field_validator("directory_path", mode="before")
     @classmethod
@@ -83,7 +81,7 @@ class CreateFileTransferTarget(BaseModel):
 
     @field_validator("file_name_template")
     @classmethod
-    def validate_file_name_template(cls, value: str) -> str:
+    def _validate_file_name_template(cls, value: str) -> str:  # noqa: WPS238
         if not cls.FILE_NAME_PATTERN.match(value):
             raise ValueError("Template contains invalid characters. Allowed: letters, numbers, '.', '_', '-', '{', '}'")
 
@@ -92,7 +90,8 @@ class CreateFileTransferTarget(BaseModel):
 
         missing_keys = sorted(required_keys - placeholders)
         if missing_keys:
-            raise ValueError(f"Missing required placeholders: {', '.join(missing_keys)}")
+            missing_keys_str = " ".join(missing_keys)
+            raise ValueError(f"Missing required placeholders: {missing_keys_str}")
 
         if "{run_id}" not in value and "{run_created_at}" not in value:
             raise ValueError("At least one of placeholders must be present: {run_id} or {run_created_at}")

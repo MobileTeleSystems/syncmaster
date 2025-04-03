@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CORSSettings(BaseModel):
@@ -55,5 +55,4 @@ class CORSSettings(BaseModel):
     )
     expose_headers: list[str] = Field(default=["X-Request-ID"], description="HTTP headers exposed from server")
 
-    class Config:
-        extra = "allow"
+    model_config = ConfigDict(extra="allow")

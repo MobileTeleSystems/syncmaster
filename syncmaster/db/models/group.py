@@ -109,3 +109,4 @@ class UserGroup(Base):
         ChoiceType(GroupMemberRole),
         nullable=False,
     )
+    group: Mapped[Group] = relationship(viewonly=True)

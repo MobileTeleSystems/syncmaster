@@ -19,9 +19,6 @@ class ShortRunSchema(BaseModel):
     log_url: str | None = None
     type: RunType
 
-    class Config:
-        from_attributes = True
-
 
 class RunPageSchema(PageSchema):
     items: list[ShortRunSchema]
@@ -29,9 +26,6 @@ class RunPageSchema(PageSchema):
 
 class ReadRunSchema(ShortRunSchema):
     transfer_dump: dict
-
-    class Config:
-        from_attributes = True
 
 
 class CreateRunSchema(BaseModel):

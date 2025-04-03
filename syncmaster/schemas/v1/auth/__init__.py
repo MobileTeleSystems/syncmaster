@@ -19,3 +19,20 @@ from syncmaster.schemas.v1.auth.samba import (
     UpdateSambaAuthSchema,
 )
 from syncmaster.schemas.v1.auth.token import AuthTokenSchema, TokenPayloadSchema
+
+__all__ = [
+    "BasicAuthSchema",
+    "CreateBasicAuthSchema",
+    "ReadBasicAuthSchema",
+    "UpdateBasicAuthSchema",
+    "CreateS3AuthSchema",
+    "ReadS3AuthSchema",
+    "S3AuthSchema",
+    "UpdateS3AuthSchema",
+    "CreateSambaAuthSchema",
+    "ReadSambaAuthSchema",
+    "SambaAuthSchema",
+    "UpdateSambaAuthSchema",
+    "AuthTokenSchema",
+    "TokenPayloadSchema",
+]

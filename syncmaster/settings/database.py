@@ -3,7 +3,7 @@
 import textwrap
 from urllib.parse import urlparse, urlunparse
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DatabaseSettings(BaseModel):
@@ -47,5 +47,4 @@ class DatabaseSettings(BaseModel):
         sync_parsed_url = parsed_url._replace(scheme=scheme)
         return urlunparse(sync_parsed_url)
 
-    class Config:
-        extra = "allow"
+    model_config = ConfigDict(extra="allow")

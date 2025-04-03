@@ -177,9 +177,6 @@ class ReadTransferSchema(BaseModel):
         ...,
     )
 
-    class Config:
-        from_attributes = True
-
 
 class CreateTransferSchema(BaseModel):
     group_id: int = Field(..., description="Transfer owner group id")
@@ -248,9 +245,6 @@ class CreateTransferSchema(BaseModel):
 class ReadFullTransferSchema(ReadTransferSchema):
     source_connection: ReadConnectionSchema
     target_connection: ReadConnectionSchema
-
-    class Config:
-        from_attributes = True
 
 
 class TransferPageSchema(PageSchema):

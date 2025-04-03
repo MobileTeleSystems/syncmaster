@@ -47,7 +47,7 @@ def get_next_revision_id():
                 id_num = int(id_part)
                 existing_ids.append(id_num)
             except ValueError:
-                continue
+                pass
 
     if existing_ids:
         next_id = max(existing_ids) + 1

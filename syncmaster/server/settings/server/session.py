@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class SessionSettings(BaseModel):
@@ -40,7 +40,10 @@ class SessionSettings(BaseModel):
 
     secret_key: str = Field(description="A random string for signing cookies.")
     session_cookie: str | None = Field(default="session", description="Name of the session cookie.")
-    max_age: int | None = Field(default=1209600, description="Session expiry time in seconds. Defaults to 2 weeks.")
+    max_age: int | None = Field(
+        default=14 * 24 * 60 * 60,
+        description="Session expiry time in seconds. Defaults to 2 weeks.",
+    )
     same_site: str | None = Field(
         default="lax",
         description="Prevents cookie from being sent with cross-site requests.",
@@ -52,5 +55,4 @@ class SessionSettings(BaseModel):
         description="Domain for sharing cookies between subdomains or cross-domains.",
     )
 
-    class Config:
-        extra = "allow"
+    model_config = ConfigDict(extra="allow")

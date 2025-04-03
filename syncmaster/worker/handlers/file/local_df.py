@@ -23,7 +23,9 @@ class LocalDFFileHandler(FileHandler):
 
         downloader_params = {}
         if self.transfer_dto.strategy.type == "incremental":
-            hwm_name = f"{self.transfer_dto.id}_{self.connection_dto.type}_{self.transfer_dto.directory_path}"
+            hwm_name = (
+                f"{self.transfer_dto.id}_{self.connection_dto.type}_{self.transfer_dto.directory_path}"  # noqa: WPS237
+            )
             if self.transfer_dto.strategy.increment_by == "file_modified_since":
                 downloader_params["hwm"] = FileModifiedTimeHWM(name=hwm_name)
             elif self.transfer_dto.strategy.increment_by == "file_name":

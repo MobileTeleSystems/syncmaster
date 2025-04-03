@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class RabbitMQSettings(BaseModel):
@@ -26,5 +26,4 @@ class RabbitMQSettings(BaseModel):
         ),
     )
 
-    class Config:
-        extra = "allow"
+    model_config = ConfigDict(extra="allow")

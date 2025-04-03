@@ -63,6 +63,5 @@ class HiveHandler(DBHandler):
     def _get_reading_options(self) -> dict:
         return {}
 
-    @staticmethod
-    def _quote_field(field):
+    def _quote_field(self, field: str) -> str:
         return f"`{field}`"

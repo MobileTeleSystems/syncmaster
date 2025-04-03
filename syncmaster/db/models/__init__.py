@@ -9,3 +9,20 @@ from syncmaster.db.models.queue import Queue
 from syncmaster.db.models.run import Run, RunType, Status
 from syncmaster.db.models.transfer import Transfer
 from syncmaster.db.models.user import User
+
+__all__ = [
+    "Base",
+    "User",
+    "Group",
+    "UserGroup",
+    "GroupMemberRole",
+    "Connection",
+    "ConnectionType",
+    "Transfer",
+    "Queue",
+    "Run",
+    "RunType",
+    "Status",
+    "AuthData",
+    "APSchedulerJob",
+]

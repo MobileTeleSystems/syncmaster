@@ -225,7 +225,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         result = await self._session.scalars(query)
         return result.fetchall()
 
-    def _raise_error(self, err: DBAPIError) -> NoReturn:
+    def _raise_error(self, err: DBAPIError) -> NoReturn:  # noqa: WPS238
         constraint = err.__cause__.__cause__.constraint_name
         if constraint == "fk__transfer__group_id__group":
             raise GroupNotFoundError from err

@@ -3,3 +3,9 @@
 from syncmaster.db.mixins.deletable import DeletableMixin
 from syncmaster.db.mixins.resource import ResourceMixin
 from syncmaster.db.mixins.timestamp import TimestampMixin
+
+__all__ = [
+    "DeletableMixin",
+    "ResourceMixin",
+    "TimestampMixin",
+]

@@ -455,22 +455,28 @@ ignore = [
   "E704",
 # WPS220 Found too deep nesting: 34 > 20
   "WPS220",
+# WPS412 Found `__init__.py` module with logic
+  "WPS412",
+# WPS410 Found wrong metadata variable: __all__
+  "WPS410",
 ]
 
 per-file-ignores = [
-# F401 imported but unused
-# WPS410 Found wrong metadata variable: __all__
-# WPS412 Found `__init__.py` module with logic
-  "__init__.py:F401,WPS410,WPS412",
 # WPS102 Found incorrect module name pattern
 # WPS432 Found magic number: 256
   "*migrations/*.py:WPS102,WPS432",
   "*db/models/*.py:WPS102,WPS432",
+  "*db/mixins/*.py:WPS102,WPS432",
+# WPS432 Found magic number: 180
+  "*settings/*.py:WPS432",
 # WPS404 Found complex default value
   "*server/api/*.py:WPS404",
 # WPS237 Found a too complex `f` string
   "*exceptions/*.py:WPS237",
   "*exceptions/__init__.py:F40,WPS410",
+# WPS201 Found module with too many imports: 30 > 25
+# WPS203 Found module with too many imported names: 55 > 50
+  "syncmaster/worker/controller.py:WPS201,WPS203",
 # TAE001 too few type annotations
 # WPS231 Found function with too much cognitive complexity
 # S101 Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
