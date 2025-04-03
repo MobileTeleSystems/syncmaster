@@ -43,6 +43,6 @@ RUN --mount=type=cache,target=/root/.cache/pypoetry \
         --extras "scheduler" \
         --with test \
         --without docs,dev \
-    && python -m compileall .venv
+    && python -m compileall -j 4 .venv
 
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
