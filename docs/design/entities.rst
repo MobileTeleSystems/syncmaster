@@ -77,6 +77,7 @@ Example:
     {
         "group_id": 1,
         "name": "Beautiful name",
+        "slug": "1-beautiful-name",
         "description": "What a great queue !",
     }
 
@@ -104,6 +105,7 @@ Example:
         "source_params": {"type": "postgres", "table_name": "source_table"},
         "target_params": {"type": "mysql", "table_name": "target_table"},
         "strategy_params": {"type": "full"},
+        "transformations": [],
         "resources": {"max_parallel_tasks": 2, "cpu_cores_per_task": 2, "ram_bytes_per_task": "1 GiB"}
     }
 
@@ -146,7 +148,6 @@ Entity Diagram
         is_superuser
         created_at
         updated_at
-        is_deleted
     }
 
     entity Group {
@@ -154,20 +155,19 @@ Entity Diagram
         ----
         name
         description
-        * owner_id
+        owner_id
         created_at
         updated_at
-        is_deleted
     }
 
     entity Connection {
         * id
         ----
-        * group_id
+        group_id
+        type
         name
         description
         data
-        is_deleted
         created_at
         updated_at
     }
@@ -175,28 +175,28 @@ Entity Diagram
     entity Queue {
         * id
         ----
-        * group_id
         name
+        slug
+        group_id
         description
         created_at
         updated_at
-        is_deleted
     }
 
     entity Transfer {
         * id
         ----
-        * group_id
-        * source_connection_id
-        * target_connection_id
-        * queue_id
-        description
+        group_id
+        name
+        source_connection_id
+        target_connection_id
         strategy_params
-        source_params
         target_params
+        transformations
+        resources
         is_scheduled
         schedule
-        is_deleted
+        queue_id
         created_at
         updated_at
     }
@@ -204,22 +204,24 @@ Entity Diagram
     entity Run {
         * id
         ----
-        * transfer_id
+        transfer_id
         started_at
         ended_at
         status
+        type
         log_url
         transfer_dump
         created_at
         updated_at
     }
 
-    Run }o--|| Transfer
-    Transfer }o--||Queue
-    Transfer }o--|| Connection
-    Transfer }o--|| Group
-    Connection }o--|{ Group
-    Queue }o--|{ Group
+    Run ||--o{ Transfer
+    Transfer ||--o{ Queue
+    Transfer ||--o{ Connection
+    Transfer ||--o{ Group
+    Connection ||--o{ Group
+    Queue ||--o{ Group
     Group }o--o{ User
+    Group "owner_id" ||--o{ User
 
     @enduml

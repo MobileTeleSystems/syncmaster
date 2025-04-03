@@ -46,7 +46,7 @@ Database structure
     entity connection {
         * id: bigint
         ----
-        * group_id: bigint
+        group_id: bigint
         type: varchar(23)
         name: varchar(123)
         description: varchar(512)
@@ -68,8 +68,8 @@ Database structure
         * id: bigint
         ----
         name: varchar(128)
-        slut: varchar(256)
-        * group_id: bigint
+        slug: varchar(256)
+        group_id: bigint
         description: varchar(512)
         created_at: timestamptz
         updated_at: timestamptz
@@ -78,17 +78,17 @@ Database structure
     entity transfer {
         * id: bigint
         ----
-        * group_id: bigint
+        group_id: bigint
         name: varchar(128)
-        * source_connection_id: bigint
-        * target_connection_id: bigint
+        source_connection_id: bigint
+        target_connection_id: bigint
         strategy_params: json
         target_params: json
         transformations: json
         resources: json
         is_scheduled: boolean
         schedule: varchar(32)
-        * queue_id: bigint
+        queue_id: bigint
         created_at: timestamptz
         updated_at: timestamptz
     }
@@ -96,7 +96,7 @@ Database structure
     entity run {
         * id: bigint
         ----
-        * transfer_id
+        transfer_id
         started_at: timestamptz
         ended_at: timestamptz
         status: varchar(255)
