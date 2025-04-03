@@ -3,7 +3,7 @@ on:
   workflow_call:
 
 env:
-  DEFAULT_PYTHON: '3.12'
+  DEFAULT_PYTHON: '3.13'
 
 jobs:
   tests:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      POETRY_VERSION: 1.6.1
+      POETRY_VERSION: 2.1.2
 
     steps:
       - name: Checkout code

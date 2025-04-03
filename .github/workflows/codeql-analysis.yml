@@ -15,7 +15,7 @@ concurrency:
 
 env:
   # flake8-commas is failing on Python 3.12
-  DEFAULT_PYTHON: '3.12'
+  DEFAULT_PYTHON: '3.13'
 
 jobs:
   linters:
