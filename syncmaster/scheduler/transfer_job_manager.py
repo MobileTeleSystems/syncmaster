@@ -12,7 +12,7 @@ from syncmaster.exceptions.run import CannotConnectToTaskQueueError
 from syncmaster.exceptions.transfer import TransferNotFoundError
 from syncmaster.scheduler.celery import app as celery
 from syncmaster.scheduler.settings import SchedulerAppSettings as Settings
-from syncmaster.scheduler.utils import get_async_session
+from syncmaster.scheduler.utils import get_async_engine, get_async_session
 from syncmaster.schemas.v1.connections.connection_base import ReadAuthDataSchema
 from syncmaster.server.services.unit_of_work import UnitOfWork
 
@@ -54,7 +54,7 @@ class TransferJobManager:
         settings = self.settings
         job_transfer_ids = [int(job.id) for job in all_jobs]
 
-        async with get_async_session(settings) as session:
+        async with get_async_engine(settings) as engine, get_async_session(engine) as session:
             result = await session.execute(
                 select(Transfer).where(Transfer.id == any_(job_transfer_ids)),  # type: ignore[arg-type]
             )
@@ -76,7 +76,7 @@ class TransferJobManager:
         """
         settings = Settings()
 
-        async with get_async_session(settings) as session:
+        async with get_async_engine(settings) as engine, get_async_session(engine) as session:
             unit_of_work = UnitOfWork(session=session, settings=settings)
 
             try:
