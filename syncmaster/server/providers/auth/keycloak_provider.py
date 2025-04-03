@@ -72,7 +72,7 @@ class KeycloakAuthProvider(AuthProvider):
         except Exception as e:
             raise AuthorizationError("Failed to get token") from e
 
-    async def get_current_user(self, access_token: str, *args, **kwargs) -> Any:
+    async def get_current_user(self, access_token: str, *args, **kwargs) -> Any:  # noqa: WPS231
         request: Request = kwargs["request"]
         refresh_token = request.session.get("refresh_token")
 
@@ -113,15 +113,11 @@ class KeycloakAuthProvider(AuthProvider):
         # these names are hardcoded in keycloak:
         # https://github.com/keycloak/keycloak/blob/3ca3a4ad349b4d457f6829eaf2ae05f1e01408be/core/src/main/java/org/keycloak/representations/IDToken.java
         # TODO: make sure which fields are guaranteed
-        user_id = token_info.get("sub")
         login = token_info["preferred_username"]
-        email = token_info["email"]
+        email = token_info.get("email")
         first_name = token_info.get("given_name")
         middle_name = token_info.get("middle_name")
         last_name = token_info.get("family_name")
-
-        if not user_id:
-            raise AuthorizationError("Invalid token payload")
 
         async with self._uow:
             try:
@@ -133,7 +129,6 @@ class KeycloakAuthProvider(AuthProvider):
                     first_name=first_name,
                     middle_name=middle_name,
                     last_name=last_name,
-                    is_active=True,
                 )
         return user
 

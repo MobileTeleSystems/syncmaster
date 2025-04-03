@@ -456,6 +456,7 @@ per-file-ignores = [
 # WPS102 Found incorrect module name pattern
 # WPS432 Found magic number: 256
   "*migrations/*.py:WPS102,WPS432",
+  "*db/models/*.py:WPS102,WPS432",
 # WPS237 Found a too complex `f` string
   "*exceptions/*.py:WPS237",
   "*exceptions/__init__.py:F40,WPS410",

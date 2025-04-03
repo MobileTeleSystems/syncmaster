@@ -29,7 +29,7 @@ async def add_superusers(session: AsyncSession, usernames: list[str]) -> None:
 
     if not_found:
         for username in not_found:
-            session.add(User(username=username, email=f"{username}@mts.ru", is_active=True, is_superuser=True))
+            session.add(User(username=username, is_superuser=True))
             logging.info("    %r (new user)", username)
 
     await session.commit()

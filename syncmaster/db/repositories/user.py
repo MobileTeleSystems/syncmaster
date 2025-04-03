@@ -58,8 +58,7 @@ class UserRepository(Repository[User]):
     async def create(
         self,
         username: str,
-        email: str,
-        is_active: bool,
+        email: str | None = None,
         first_name: str | None = None,
         middle_name: str | None = None,
         last_name: str | None = None,
@@ -73,7 +72,6 @@ class UserRepository(Repository[User]):
                 first_name=first_name,
                 middle_name=middle_name,
                 last_name=last_name,
-                is_active=is_active,
                 is_superuser=is_superuser,
             )
             .returning(User)
