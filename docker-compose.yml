@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres
+    image: postgres:17
     restart: unless-stopped
     environment:
       POSTGRES_DB: syncmaster
@@ -17,8 +17,21 @@ services:
       timeout: 5s
       retries: 3
 
+  db-migrations:
+    image: mtsrus/syncmaster-server:${VERSION:-develop}
+    restart: no
+    build:
+      dockerfile: docker/Dockerfile.server
+      context: .
+      target: prod
+    entrypoint: [python, -m, syncmaster.db.migrations, upgrade, head]
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+
   rabbitmq:
-    image: rabbitmq
+    image: rabbitmq:4
     restart: unless-stopped
     ports:
       - 5672:5672
@@ -31,21 +44,8 @@ services:
       timeout: 5s
       retries: 3
 
-  migrations:
-    image: mtsrus/syncmaster-server:${TAG:-develop}
-    restart: no
-    build:
-      dockerfile: docker/Dockerfile.server
-      context: .
-      target: prod
-    entrypoint: [python, -m, syncmaster.db.migrations, upgrade, head]
-    env_file: .env.docker
-    depends_on:
-      db:
-        condition: service_healthy
-
   server:
-    image: mtsrus/syncmaster-server:${TAG:-develop}
+    image: mtsrus/syncmaster-server:${VERSION:-develop}
     restart: unless-stopped
     build:
       dockerfile: docker/Dockerfile.server
@@ -66,7 +66,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      migrations:
+      db-migrations:
         condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
@@ -76,25 +76,33 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
+    profiles:
+      - server
+      - frontend
+      - all
 
   worker:
-    image: mtsrus/syncmaster-worker:${TAG:-develop}
+    image: mtsrus/syncmaster-worker:${VERSION:-develop}
     restart: unless-stopped
     build:
       dockerfile: docker/Dockerfile.worker
       context: .
       target: prod
     env_file: .env.docker
+    command: --loglevel=info -Q test_queue
     depends_on:
       db:
         condition: service_healthy
-      migrations:
+      db-migrations:
         condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
+    profiles:
+      - worker
+      - all
 
   scheduler:
-    image: mtsrus/syncmaster-scheduler:${TAG:-develop}
+    image: mtsrus/syncmaster-scheduler:${VERSION:-develop}
     restart: unless-stopped
     build:
       dockerfile: docker/Dockerfile.scheduler
@@ -104,10 +112,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      migrations:
+      db-migrations:
         condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
+    profiles:
+      - scheduler
+      - all
 
 volumes:
   postgres_data:

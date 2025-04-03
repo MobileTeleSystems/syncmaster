@@ -2,6 +2,7 @@
 
 include .env.local
 
+VERSION = develop
 PIP = .venv/bin/pip
 POETRY = .venv/bin/poetry
 
@@ -158,13 +159,13 @@ prod-build-scheduler: ##@Application Build docker image for scheduler
 prod-build-worker: ##@Application Build docker image for worker
 	docker build --progress=plain -t mtsrus/syncmaster-worker:develop -f ./docker/Dockerfile.worker --target=prod $(ARGS) .
 
-prod-build: prod-build-server prod-build-worker ##@Application Build docker images
+prod-build: prod-build-server prod-build-scheduler prod-build-worker ##@Application Build docker images
 
 prod: ##@Application Run production server (with docker)
-	docker compose up -d
+	docker compose -f docker-compose.yml --profile all up -d $(ARGS)
 
 prod-stop: ##@Application Stop production server
-	docker compose down $(ARGS)
+	docker compose -f docker-compose.yml --profile all down --remove-orphans $(ARGS)
 
 
 .PHONY: docs

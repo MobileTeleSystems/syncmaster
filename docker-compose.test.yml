@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres
+    image: postgres:17
     restart: unless-stopped
     environment:
       TZ: UTC
@@ -19,7 +19,7 @@ services:
       retries: 3
 
   rabbitmq:
-    image: rabbitmq
+    image: rabbitmq:4
     restart: unless-stopped
     ports:
       - 5672:5672
