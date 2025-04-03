@@ -68,7 +68,7 @@ Without docker
 
   .. code-block:: console
 
-      $ pip install syncmaster[server,worker,postgres]
+      $ pip install syncmaster[server,worker]
 
 * Start :ref:`server` and :ref:`frontend`, create Group and Queue, get slug (e.g. ``test_queue``)
 * Run worker process:

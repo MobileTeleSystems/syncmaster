@@ -54,7 +54,7 @@ Without docker
 
   .. code-block:: console
 
-      $ pip install syncmaster[server,postgres]
+      $ pip install syncmaster[server]
 
 * Run server process
 

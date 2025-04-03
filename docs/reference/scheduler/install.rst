@@ -49,7 +49,7 @@ Without docker
 
   .. code-block:: console
 
-      $ pip install syncmaster[scheduler,postgres]
+      $ pip install syncmaster[scheduler]
 
 * Run scheduler process
 

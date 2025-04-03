@@ -5,7 +5,7 @@ Relation Database
 
 SyncMaster requires relational database for storing internal data.
 
-Currently, SyncMaster supports only `PostgreSQL <https://www.postgresql.org/>`_ as storage for lineage entities and relations.
+Currently, SyncMaster supports only `PostgreSQL <https://www.postgresql.org/>`_.
 
 Migrations
 ------------
