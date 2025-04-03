@@ -18,6 +18,7 @@
     reference/database/index
     reference/broker/index
     reference/server/index
+    reference/frontend/index
     reference/worker/index
     reference/scheduler/index
 
