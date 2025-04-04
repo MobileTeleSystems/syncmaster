@@ -16,7 +16,6 @@ from syncmaster.exceptions.transfer import (
     TransferNotFoundError,
 )
 from syncmaster.schemas.v1.status import (
-    StatusCopyTransferResponseSchema,
     StatusResponseSchema,
 )
 from syncmaster.schemas.v1.transfers import (
@@ -163,7 +162,7 @@ async def copy_transfer(  # noqa: WPS217, WPS238
     transfer_data: CopyTransferSchema,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
-) -> StatusCopyTransferResponseSchema:
+) -> ReadTransferSchema:
     resource_role = await unit_of_work.transfer.get_resource_permission(
         user=current_user,
         resource_id=transfer_id,
@@ -234,14 +233,7 @@ async def copy_transfer(  # noqa: WPS217, WPS238
         if transfer_data.remove_source:
             await unit_of_work.transfer.delete(transfer_id=transfer_id)
 
-    return StatusCopyTransferResponseSchema(
-        ok=True,
-        status_code=status.HTTP_200_OK,
-        message="Transfer was copied.",
-        source_connection_id=copied_source_connection.id,
-        target_connection_id=copied_target_connection.id,
-        copied_transfer_id=copied_transfer.id,
-    )
+    return ReadTransferSchema.model_validate(copied_transfer, from_attributes=True)
 
 
 @router.put("/transfers/{transfer_id}")
