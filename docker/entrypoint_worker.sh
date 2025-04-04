@@ -5,5 +5,4 @@ set -e
 # Required to start each Celery task in separated process, avoiding issues with global Spark session object
 
 # exec is required to forward all signals to the main process
-exec python -m celery -A syncmaster.worker.config.celery worker --max-tasks-per-child=1 "$@"
-
+exec python -m celery -A syncmaster.worker.celery worker --max-tasks-per-child=1 "$@"

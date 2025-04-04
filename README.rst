@@ -1,22 +1,21 @@
-.. title
+.. _readme:
 
-==========
-SyncMaster
-==========
+Data.SyncMaster
+===============
 
 |Repo Status| |PyPI| |PyPI License| |PyPI Python Version| |Docker image| |Documentation|
 |Build Status| |Coverage|  |pre-commit.ci|
 
-.. |Repo Status| image:: https://www.repostatus.org/badges/latest/active.svg
-    :target: https://github.com/MobileTeleSystems/syncmaster
+.. |Repo Status| image:: https://www.repostatus.org/badges/latest/wip.svg
+    :target: https://www.repostatus.org/#wip
 .. |PyPI| image:: https://img.shields.io/pypi/v/data-syncmaster
     :target: https://pypi.org/project/data-syncmaster/
 .. |PyPI License| image:: https://img.shields.io/pypi/l/data-syncmaster.svg
     :target: https://github.com/MobileTeleSystems/syncmaster/blob/develop/LICENSE.txt
 .. |PyPI Python Version| image:: https://img.shields.io/pypi/pyversions/data-syncmaster.svg
     :target: https://badge.fury.io/py/data-syncmaster
-.. |Docker image| image:: https://img.shields.io/docker/v/mtsrus/syncmaster-backend?sort=semver&label=docker
-    :target: https://hub.docker.com/r/mtsrus/syncmaster-backend
+.. |Docker image| image:: https://img.shields.io/docker/v/mtsrus/syncmaster-server?sort=semver&label=docker
+    :target: https://hub.docker.com/r/mtsrus/syncmaster-server
 .. |Documentation| image:: https://readthedocs.org/projects/syncmaster/badge/?version=stable
     :target: https://syncmaster.readthedocs.io
 .. |Build Status| image:: https://github.com/MobileTeleSystems/syncmaster/workflows/Run%20All%20Tests/badge.svg
@@ -27,22 +26,29 @@ SyncMaster
     :target: https://results.pre-commit.ci/latest/github/MobileTeleSystems/syncmaster/develop
 
 
-What is Syncmaster?
--------------------
+What is Data.SyncMaster?
+------------------------
 
-Syncmaster is as low-code ETL tool for transfering data between databases and file systems.
+Data.SyncMaster is as low-code ETL tool for transfering data between databases and file systems.
 List of currently supported connections:
 
 * Apache Hive
+* Clickhouse
 * Postgres
 * Oracle
+* MSSQL
+* MySQL
 * HDFS
 * S3
+* FTP
+* FTPS
+* SFTP
+* Samba
+* WebDAV
 
-Current SyncMaster implementation provides following components:
+Based on `onETL <https://onetl.readthedocs.io/>`_ and `Apache Spark <https://spark.apache.org/>`_.
 
-* REST API
-* Celery Worker
+**Note**: service is under active development, and is not ready to use.
 
 Goals
 -----
@@ -55,7 +61,6 @@ Non-goals
 ---------
 
 * This is not a backup system
-* This is not a CDC solution
 * Only batch, no streaming
 
 .. documentation

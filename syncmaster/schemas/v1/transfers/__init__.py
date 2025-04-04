@@ -1,15 +1,33 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
-from pydantic import BaseModel, Field, model_validator
+from typing import Annotated
 
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+from syncmaster.schemas.v1.connection_types import FILE_CONNECTION_TYPES
 from syncmaster.schemas.v1.connections.connection import ReadConnectionSchema
 from syncmaster.schemas.v1.page import PageSchema
 from syncmaster.schemas.v1.transfers.db import (
+    ClickhouseReadTransferSourceAndTarget,
     HiveReadTransferSourceAndTarget,
+    MSSQLReadTransferSourceAndTarget,
+    MySQLReadTransferSourceAndTarget,
     OracleReadTransferSourceAndTarget,
     PostgresReadTransferSourceAndTarget,
+)
+from syncmaster.schemas.v1.transfers.file.ftp import (
+    FTPCreateTransferSource,
+    FTPCreateTransferTarget,
+    FTPReadTransferSource,
+    FTPReadTransferTarget,
+)
+from syncmaster.schemas.v1.transfers.file.ftps import (
+    FTPSCreateTransferSource,
+    FTPSCreateTransferTarget,
+    FTPSReadTransferSource,
+    FTPSReadTransferTarget,
 )
 from syncmaster.schemas.v1.transfers.file.hdfs import (
     HDFSCreateTransferSource,
@@ -23,58 +41,102 @@ from syncmaster.schemas.v1.transfers.file.s3 import (
     S3ReadTransferSource,
     S3ReadTransferTarget,
 )
+from syncmaster.schemas.v1.transfers.file.samba import (
+    SambaCreateTransferSource,
+    SambaCreateTransferTarget,
+    SambaReadTransferSource,
+    SambaReadTransferTarget,
+)
+from syncmaster.schemas.v1.transfers.file.sftp import (
+    SFTPCreateTransferSource,
+    SFTPCreateTransferTarget,
+    SFTPReadTransferSource,
+    SFTPReadTransferTarget,
+)
+from syncmaster.schemas.v1.transfers.file.webdav import (
+    WebDAVCreateTransferSource,
+    WebDAVCreateTransferTarget,
+    WebDAVReadTransferSource,
+    WebDAVReadTransferTarget,
+)
+from syncmaster.schemas.v1.transfers.resources import Resources
 from syncmaster.schemas.v1.transfers.strategy import FullStrategy, IncrementalStrategy
+from syncmaster.schemas.v1.transfers.transformations.dataframe_columns_filter import (
+    DataframeColumnsFilter,
+)
+from syncmaster.schemas.v1.transfers.transformations.dataframe_rows_filter import (
+    DataframeRowsFilter,
+)
+from syncmaster.schemas.v1.transfers.transformations.file_metadata_filter import (
+    FileMetadataFilter,
+)
 from syncmaster.schemas.v1.types import NameConstr
 
 ReadTransferSchemaSource = (
     PostgresReadTransferSourceAndTarget
-    | HDFSReadTransferSource
     | HiveReadTransferSourceAndTarget
     | OracleReadTransferSourceAndTarget
+    | ClickhouseReadTransferSourceAndTarget
+    | MSSQLReadTransferSourceAndTarget
+    | MySQLReadTransferSourceAndTarget
+    | HDFSReadTransferSource
     | S3ReadTransferSource
+    | SFTPReadTransferSource
+    | FTPReadTransferSource
+    | FTPSReadTransferSource
+    | WebDAVReadTransferSource
+    | SambaReadTransferSource
 )
 
 ReadTransferSchemaTarget = (
     PostgresReadTransferSourceAndTarget
-    | HDFSReadTransferTarget
     | HiveReadTransferSourceAndTarget
     | OracleReadTransferSourceAndTarget
+    | ClickhouseReadTransferSourceAndTarget
+    | MSSQLReadTransferSourceAndTarget
+    | MySQLReadTransferSourceAndTarget
+    | HDFSReadTransferTarget
     | S3ReadTransferTarget
+    | SFTPReadTransferTarget
+    | FTPReadTransferTarget
+    | FTPSReadTransferTarget
+    | WebDAVReadTransferTarget
+    | SambaReadTransferTarget
 )
 
 CreateTransferSchemaSource = (
     PostgresReadTransferSourceAndTarget
-    | HDFSCreateTransferSource
     | HiveReadTransferSourceAndTarget
     | OracleReadTransferSourceAndTarget
+    | ClickhouseReadTransferSourceAndTarget
+    | MSSQLReadTransferSourceAndTarget
+    | MySQLReadTransferSourceAndTarget
+    | HDFSCreateTransferSource
     | S3CreateTransferSource
+    | SFTPCreateTransferSource
+    | FTPCreateTransferSource
+    | FTPSCreateTransferSource
+    | WebDAVCreateTransferSource
+    | SambaCreateTransferSource
 )
 
 CreateTransferSchemaTarget = (
     PostgresReadTransferSourceAndTarget
+    | HiveReadTransferSourceAndTarget
+    | OracleReadTransferSourceAndTarget
+    | ClickhouseReadTransferSourceAndTarget
+    | MSSQLReadTransferSourceAndTarget
+    | MySQLReadTransferSourceAndTarget
     | HDFSCreateTransferTarget
-    | HiveReadTransferSourceAndTarget
-    | OracleReadTransferSourceAndTarget
     | S3CreateTransferTarget
+    | SFTPCreateTransferTarget
+    | FTPCreateTransferTarget
+    | FTPSCreateTransferTarget
+    | WebDAVCreateTransferTarget
+    | SambaCreateTransferTarget
 )
 
-UpdateTransferSchemaSource = (
-    PostgresReadTransferSourceAndTarget
-    | HDFSReadTransferSource
-    | HiveReadTransferSourceAndTarget
-    | OracleReadTransferSourceAndTarget
-    | S3CreateTransferSource
-    | None
-)
-
-UpdateTransferSchemaTarget = (
-    PostgresReadTransferSourceAndTarget
-    | HDFSReadTransferSource
-    | HiveReadTransferSourceAndTarget
-    | OracleReadTransferSourceAndTarget
-    | S3CreateTransferTarget
-    | None
-)
+TransformationSchema = DataframeRowsFilter | DataframeColumnsFilter | FileMetadataFilter
 
 
 class CopyTransferSchema(BaseModel):
@@ -97,20 +159,20 @@ class ReadTransferSchema(BaseModel):
     schedule: str
     queue_id: int
     source_params: ReadTransferSchemaSource = Field(
-        ...,
         discriminator="type",
     )
     target_params: ReadTransferSchemaTarget = Field(
-        ...,
         discriminator="type",
     )
     strategy_params: FullStrategy | IncrementalStrategy = Field(
-        ...,
         discriminator="type",
     )
+    transformations: list[Annotated[TransformationSchema, Field(discriminator="type")]] = Field(
+        default_factory=list,
+    )
+    resources: Resources
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CreateTransferSchema(BaseModel):
@@ -137,35 +199,49 @@ class CreateTransferSchema(BaseModel):
         discriminator="type",
         description="Incremental or archive download options",
     )
+    transformations: list[
+        Annotated[TransformationSchema, Field(None, discriminator="type", description="List of transformations")]
+    ] = Field(default_factory=list)
+    resources: Resources = Field(
+        default_factory=Resources,
+        description="Transfer resources",
+    )
 
     @model_validator(mode="before")
-    def check_owner_id(cls, values):
+    def validate_scheduling(cls, values):
         is_scheduled, schedule = values.get("is_scheduled"), values.get("schedule")
         if is_scheduled and schedule is None:
             # TODO make checking cron string
             raise ValueError("If transfer must be scheduled than set schedule param")
         return values
 
+    @model_validator(mode="after")
+    def validate_increment_by(cls, values):
+        if not isinstance(values.strategy_params, IncrementalStrategy):
+            return values
 
-class UpdateTransferSchema(BaseModel):
-    source_connection_id: int | None = None
-    target_connection_id: int | None = None
-    name: NameConstr | None = None  # noqa: F722
-    description: str | None = None
-    is_scheduled: bool | None = None
-    schedule: str | None = None
-    new_queue_id: int | None = None
-    source_params: UpdateTransferSchemaSource = Field(discriminator="type", default=None)
-    target_params: UpdateTransferSchemaTarget = Field(discriminator="type", default=None)
-    strategy_params: FullStrategy | IncrementalStrategy | None = Field(discriminator="type", default=None)
+        source_type = values.source_params.type
+        increment_by = values.strategy_params.increment_by
+
+        if source_type in FILE_CONNECTION_TYPES and increment_by not in ("file_modified_since", "file_name"):
+            raise ValueError(
+                "Field 'increment_by' must be equal to 'file_modified_since' or 'file_name' for file source types",
+            )
+
+        return values
+
+    @model_validator(mode="after")
+    def validate_strategy(cls, values):
+
+        if values.source_params.type in ("s3", "hdfs") and isinstance(values.strategy_params, IncrementalStrategy):
+            raise ValueError("S3 and HDFS sources do not support incremental strategy for now")
+
+        return values
 
 
 class ReadFullTransferSchema(ReadTransferSchema):
     source_connection: ReadConnectionSchema
     target_connection: ReadConnectionSchema
-
-    class Config:
-        from_attributes = True
 
 
 class TransferPageSchema(PageSchema):

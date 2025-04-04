@@ -1,19 +1,107 @@
-version: '3.8'
 services:
   db:
-    image: postgres
+    image: postgres:17
     restart: unless-stopped
-    env_file: .env.docker
+    environment:
+      TZ: UTC
+      POSTGRES_DB: syncmaster
+      POSTGRES_USER: syncmaster
+      POSTGRES_PASSWORD: changeme
     ports:
       - 5432:5432
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_test_data:/var/lib/postgresql/data
     healthcheck:
       test: pg_isready
       start_period: 5s
       interval: 30s
       timeout: 5s
       retries: 3
+
+  rabbitmq:
+    image: rabbitmq:4
+    restart: unless-stopped
+    ports:
+      - 5672:5672
+    volumes:
+      - rabbitmq_test_data:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      start_period: 5s
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Using worker image here to skip building server image build in CI.
+  # Worker test image already has all neccessary dependencies
+  migrations:
+    image: mtsrus/syncmaster-worker:${WORKER_IMAGE_TAG:-test}
+    restart: no
+    build:
+      dockerfile: docker/Dockerfile.worker
+      context: .
+      target: test
+    volumes:
+      - ./syncmaster:/app/syncmaster
+      - ./tests:/app/tests
+    entrypoint: [python, -m, syncmaster.db.migrations, upgrade, head]
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+
+  server:
+    image: mtsrus/syncmaster-server:${SERVER_IMAGE_TAG:-test}
+    restart: unless-stopped
+    build:
+      dockerfile: docker/Dockerfile.server
+      context: .
+      target: test
+    env_file: .env.docker
+    ports:
+      - 8000:8000
+    volumes:
+      - ./syncmaster:/app/syncmaster
+      - ./docs/_static:/app/docs/_static
+      - ./reports:/app/reports
+      - ./tests:/app/tests
+      - ./pyproject.toml:/app/pyproject.toml
+    depends_on:
+      db:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD-SHELL, curl -f http://localhost:8000/monitoring/ping]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    profiles: [server, all]
+
+  scheduler:
+    image: mtsrus/syncmaster-scheduler:${SCHEDULER_IMAGE_TAG:-test}
+    restart: unless-stopped
+    build:
+      dockerfile: docker/Dockerfile.scheduler
+      context: .
+      target: test
+    env_file: .env.docker
+    volumes:
+      - ./syncmaster:/app/syncmaster
+      - ./tests:/app/tests
+      - ./reports:/app/reports
+      - ./pyproject.toml:/app/pyproject.toml
+    depends_on:
+      db:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+    profiles: [scheduler, all]
 
   worker:
     image: mtsrus/syncmaster-worker:${WORKER_IMAGE_TAG:-test}
@@ -22,9 +110,14 @@ services:
       dockerfile: docker/Dockerfile.worker
       context: .
       target: test
-      network: host
     command: --loglevel=info -Q test_queue
-    env_file: .env.docker
+    entrypoint: [coverage, run, -m, celery, -A, tests.test_integration.celery_test, worker, --max-tasks-per-child=1]
+    env_file:
+      - .env.docker
+      - .env.docker.test
+    environment:
+      # CI runs tests in the worker container, so we need to turn off interaction with static files for it
+      - SYNCMASTER__SERVER__STATIC_FILES__ENABLED=false
     volumes:
       - ./syncmaster:/app/syncmaster
       - ./cached_jars:/root/.ivy2
@@ -34,51 +127,81 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
+    profiles: [worker, scheduler, s3, hdfs, hive, oracle, clickhouse, mysql, mssql, sftp, ftp, ftps, samba, webdav, all]
 
-  backend:
-    image: mtsrus/syncmaster-backend::${BACKEND_IMAGE_TAG:-test}
+  horizon:
+    image: mtsrus/horizon-backend:develop
     restart: unless-stopped
-    build:
-      dockerfile: docker/Dockerfile.backend
-      context: .
-      target: test
-      network: host
-    env_file: .env.docker
+    environment:
+      # list here usernames which should be assigned SUPERADMIN role on application start
+      HORIZON__ENTRYPOINT__ADMIN_USERS: admin
+      HORIZON__DATABASE__URL: postgresql+asyncpg://horizon:changeme@horizon-db:5432/horizon
+      HORIZON__AUTH__ACCESS_TOKEN__SECRET_KEY: generate_another_random_string
+      HORIZON__AUTH__PROVIDER: horizon.backend.providers.auth.dummy.DummyAuthProvider
+      HORIZON__SERVER__LOGGING__PRESET: colored
+      # PROMETHEUS_MULTIPROC_DIR is required for multiple workers, see:
+      # https://prometheus.github.io/client_python/multiprocess/
+      PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus-metrics
+    # tmpfs dir is cleaned up each container restart
+    tmpfs:
+      - /tmp/prometheus-metrics
     ports:
-      - 8000:8000
-    volumes:
-      - ./syncmaster:/app/syncmaster
-      - ./cached_jars:/root/.ivy2
-      - ./reports:/app/reports
-      - ./tests:/app/tests
-      - ./pyproject.toml:/app/pyproject.toml
+      - 8020:8000
     depends_on:
-      db:
+      horizon-db:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+    profiles: [horizon, s3, hdfs, hive, oracle, clickhouse, mysql, mssql, sftp, ftp, ftps, samba, webdav, all]
 
-  rabbitmq:
-    image: rabbitmq
+  horizon-db:
+    image: postgres
     restart: unless-stopped
+    environment:
+      TZ: UTC
+      POSTGRES_DB: horizon
+      POSTGRES_USER: horizon
+      POSTGRES_PASSWORD: changeme
     ports:
-      - 5672:5672
+      - 5434:5432
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+      - horizon_test_data:/var/lib/postgresql/data
     healthcheck:
-      test: rabbitmq-diagnostics -q ping
+      test: pg_isready
       start_period: 5s
       interval: 30s
       timeout: 5s
       retries: 3
+    profiles: [horizon, s3, hdfs, hive, oracle, clickhouse, mysql, mssql, sftp, ftp, ftps, samba, webdav, all]
+
+  test-postgres:
+    image: postgres
+    restart: unless-stopped
+    ports:
+      - 5433:5432
+    environment:
+      TZ: UTC
+      POSTGRES_DB: syncmaster
+      POSTGRES_USER: syncmaster
+      POSTGRES_PASSWORD: 123UsedForTestOnly@!
+    healthcheck:
+      test: pg_isready
+      start_period: 5s
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    profiles: [s3, hdfs, hive, oracle, clickhouse, mysql, mssql, sftp, ftp, ftps, samba, webdav, all]
 
   test-s3:
     image: bitnami/minio:latest
     container_name: test-s3
     restart: unless-stopped
-    env_file: .env.docker
+    environment:
+      TZ: UTC
+      MINIO_ROOT_USER: syncmaster
+      MINIO_ROOT_PASSWORD: 123UsedForTestOnly@!
     ports:
       - 9010:9000
       - 9011:9001
@@ -88,19 +211,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-
-  test-postgres:
-    image: postgres
-    restart: unless-stopped
-    ports:
-      - 5433:5432
-    env_file: .env.docker
-    healthcheck:
-      test: pg_isready
-      start_period: 5s
-      interval: 30s
-      timeout: 5s
-      retries: 3
+    profiles: [s3, all]
 
   test-oracle:
     image: gvenzl/oracle-xe:slim-faststart
@@ -109,15 +220,58 @@ services:
       - 1522:1521
     environment:
       TZ: UTC
-      ORACLE_PASSWORD: test_password
-      ORACLE_DATABASE: test_oracle
-      APP_USER: test_user
-      APP_USER_PASSWORD: test_password
+      ORACLE_PASSWORD: 123AdminUserForTests@!
+      APP_USER: syncmaster
+      APP_USER_PASSWORD: 123UsedForTestOnly@!
+    profiles: [oracle, all]
+
+  test-clickhouse:
+    image: clickhouse/clickhouse-server
+    restart: unless-stopped
+    environment:
+      TZ: UTC
+      CLICKHOUSE_USER: syncmaster
+      CLICKHOUSE_PASSWORD: 123UsedForTestOnly@!
+      CLICKHOUSE_DB: syncmaster
+    ports:
+      - 8123:8123
+      - 9001:9000
+    profiles: [clickhouse, all]
+
+  test-mssql:
+    image: mcr.microsoft.com/mssql/server
+    restart: unless-stopped
+    environment:
+      TZ: UTC
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: 123AdminUserForTests@!@!
+    ports:
+      - 1433:1433
+    volumes:
+      - ./docker/mssql/:/usr/config/
+    entrypoint: [/usr/config/entrypoint.sh]
+    platform: linux/amd64
+    profiles: [mssql, all]
+
+  test-mysql:
+    image: mysql
+    restart: unless-stopped
+    environment:
+      TZ: UTC
+      MYSQL_ROOT_PASSWORD: 123RootUserForTestsOnly@!
+      MYSQL_DATABASE: syncmaster
+      MYSQL_USER: syncmaster
+      MYSQL_PASSWORD: 123UsedForTestOnly@!
+    ports:
+      - 3306:3306
+    platform: linux/amd64
+    profiles: [mysql, all]
 
   metastore-hive:
     image: postgres
     restart: unless-stopped
     environment:
+      TZ: UTC
       POSTGRES_DB: metastore
       POSTGRES_USER: test_hive
       POSTGRES_PASSWORD: test_hive
@@ -129,6 +283,21 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+    profiles: [hive, hdfs, s3, sftp, ftp, ftps, samba, webdav, all]
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    command: start-dev
+    restart: unless-stopped
+    environment:
+      TZ: UTC
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - 8080:8080
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+    profiles: [keycloak, all]
 
   test-hive:
     image: mtsrus/hadoop:hadoop2.7.3-hive2.3.9
@@ -148,12 +317,99 @@ services:
       - 9083:9083  # Hive Metastore server
       - 9864:9864 # Datanode UI
     environment:
+      TZ: UTC
       WITH_HIVE_SERVER: 'false'  # We leave only the metastore server, we don’t need Hive itself, we don’t waste resources on it
       HIVE_METASTORE_DB_URL: jdbc:postgresql://metastore-hive:5432/metastore
       HIVE_METASTORE_DB_DRIVER: org.postgresql.Driver
       HIVE_METASTORE_DB_USER: test_hive
       HIVE_METASTORE_DB_PASSWORD: test_hive
+    # writing spark dataframe to s3, sftp, ftp, ftps xml file fails without running hive metastore server
+    profiles: [hive, hdfs, s3, sftp, ftp, ftps, samba, webdav, all]
+
+  test-sftp:
+    image: ${SFTP_IMAGE:-linuxserver/openssh-server}
+    restart: unless-stopped
+    ports:
+      - 2222:2222
+    environment:
+      TZ: UTC
+      PUID: 1000
+      PGID: 1000
+      USER_NAME: syncmaster
+      PASSWORD_ACCESS: 'true'
+      SUDO_ACCESS: 'true'
+      USER_PASSWORD: 123UsedForTestOnly@!
+    profiles: [sftp, all]
+
+  test-ftp:
+    image: ${FTP_IMAGE:-chonjay21/ftps:latest}
+    restart: unless-stopped
+    environment:
+      TZ: UTC
+      USE_SSL: 'false'
+      PASSV_MIN_PORT: 30000
+      PASSV_MAX_PORT: 30010
+      APP_USER_NAME: syncmaster
+      APP_USER_PASSWD: 123UsedForTestOnly@!
+      APP_UID: 1000
+      APP_GID: 1000
+    ports:
+      - 2121:21
+      - 30000-30010:30000-30010
+    volumes:
+      - ./docker/ftp/on_post_init.sh:/sources/ftp/eventscripts/on_post_init.sh
+    profiles: [ftp, all]
+
+  test-ftps:
+    image: ${FTPS_IMAGE:-chonjay21/ftps:latest}
+    restart: unless-stopped
+    environment:
+      TZ: UTC
+      USE_SSL: 'true'
+      PASSV_MIN_PORT: 30020
+      PASSV_MAX_PORT: 30030
+      APP_USER_NAME: syncmaster
+      APP_USER_PASSWD: 123UsedForTestOnly@!
+      APP_UID: 1000
+      APP_GID: 1000
+    ports:
+      - 2122:21
+      - 30020-30030:30020-30030
+    volumes:
+      - ./docker/ftp/on_post_init.sh:/sources/ftps/eventscripts/on_post_init.sh
+    profiles: [ftps, all]
+
+  test-samba:
+    image: ${SAMBA_IMAGE:-elswork/samba}
+    restart: unless-stopped
+    ports:
+      - 139:139
+      - 1445:445
+    environment:
+      TZ: UTC
+    volumes:
+      - ./docker/samba/custom_entrypoint.sh:/custom_entrypoint.sh
+    entrypoint: [/custom_entrypoint.sh]
+    profiles: [samba, all]
+
+  test-webdav:
+    image: ${WEBDAV_IMAGE:-chonjay21/webdav:latest}
+    restart: unless-stopped
+    environment:
+      TZ: UTC
+      APP_USER_NAME: syncmaster
+      APP_USER_PASSWD: 123UsedForTestOnly@!
+      APP_UID: 1000
+      APP_GID: 1000
+    ports:
+      - 8010:80
+    volumes:
+      # Remove after https://github.com/chonjay21/docker-webdav/pull/3
+      - ./docker/webdav/on_post_init.sh:/sources/webdav/eventscripts/on_post_init.sh
+    profiles: [webdav, all]
 
 volumes:
-  postgres_data:
-  rabbitmq_data:
+  postgres_test_data:
+  rabbitmq_test_data:
+  horizon_test_data:
+  keycloak_data:

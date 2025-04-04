@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from syncmaster.db.models import Group
 from tests.mocks import MockUser
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 async def test_simple_user_can_create_group(
@@ -16,26 +16,20 @@ async def test_simple_user_can_create_group(
     session: AsyncSession,
     client: AsyncClient,
 ):
-    # Arrange
     group_name = f"{secrets.token_hex(5)}"
     group_data = {
         "name": group_name,
         "description": "description of new test group",
     }
 
-    # Act
     result = await client.post(
         "v1/groups",
         json=group_data,
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
+    assert result.status_code == 200, result.json()
 
-    # pre assert
-    group = (await session.scalars(select(Group).where(Group.name == group_name))).one_or_none()
-
-    # Assert
-    assert group
-    assert result.status_code == 200
+    group = (await session.scalars(select(Group).where(Group.name == group_name))).one()
     assert result.json() == {
         "id": group.id,
         "name": group_name,
@@ -48,33 +42,32 @@ async def test_simple_user_cannot_create_group_twice(
     client: AsyncClient,
     simple_user: MockUser,
 ):
-    # Arrange
     group_data = {
         "name": "test_superuser_cannot_create_group_twice",
         "description": "description of new test group",
         "owner_id": simple_user.id,
     }
 
-    # Act
     result = await client.post(
         "v1/groups",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json=group_data,
     )
 
-    # Assert
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
 
     second_result = await client.post(
         "v1/groups",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json=group_data,
     )
-    assert second_result.status_code == 400
+    assert second_result.status_code == 409
     assert second_result.json() == {
-        "ok": False,
-        "status_code": 400,
-        "message": "Group name already taken",
+        "error": {
+            "code": "conflict",
+            "message": "Group name already taken",
+            "details": None,
+        },
     }
 
 
@@ -82,20 +75,19 @@ async def test_not_authorized_user_cannot_create_group(
     client: AsyncClient,
     simple_user: MockUser,
 ):
-    # Arrange
     group_data = {
         "name": "new_test_group",
         "description": "description of new test group",
         "owner_id": simple_user.id,
     }
 
-    # Act
     result = await client.post("v1/groups", json=group_data)
 
-    # Assert
+    assert result.status_code == 401, result.json()
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
-    assert result.status_code == 401

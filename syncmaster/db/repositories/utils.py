@@ -1,18 +1,24 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
+from __future__ import annotations
+
 import json
+from typing import TYPE_CHECKING
 
 from cryptography.fernet import Fernet
 from pydantic import SecretStr
 
-from syncmaster.config import Settings
+if TYPE_CHECKING:
+    from syncmaster.scheduler.settings import SchedulerAppSettings
+    from syncmaster.server.settings import ServerAppSettings
+    from syncmaster.worker.settings import WorkerAppSettings
 
 
 def decrypt_auth_data(
     value: str,
-    settings: Settings,
+    settings: WorkerAppSettings | SchedulerAppSettings | ServerAppSettings,
 ) -> dict:
-    decryptor = Fernet(settings.CRYPTO_KEY)
+    decryptor = Fernet(settings.encryption.secret_key)
     decrypted = decryptor.decrypt(value)
     return json.loads(decrypted)
 
@@ -24,9 +30,9 @@ def _json_default(value):
 
 def encrypt_auth_data(
     value: dict,
-    settings: Settings,
+    settings: WorkerAppSettings | SchedulerAppSettings | ServerAppSettings,
 ) -> str:
-    encryptor = Fernet(settings.CRYPTO_KEY)
+    encryptor = Fernet(settings.encryption.secret_key)
     serialized = json.dumps(
         value,
         ensure_ascii=False,

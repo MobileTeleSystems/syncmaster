@@ -1,0 +1,48 @@
+ARG PYTHON_VERSION=3.13
+FROM python:$PYTHON_VERSION-slim AS base
+
+WORKDIR /app
+ENV PYTHONPATH=/app \
+    PATH="/app/.venv/bin:$PATH" \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1
+
+COPY ./docker/entrypoint_scheduler.sh /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+
+FROM base AS builder
+
+RUN pip install poetry
+
+COPY ./pyproject.toml ./poetry.lock ./
+RUN --mount=type=cache,target=/root/.cache/pypoetry \
+    poetry install \
+        --no-root \
+        # TODO: make scheduler independent from server
+        --extras "server" \
+        --extras "scheduler" \
+        --without test,docs,dev \
+    && python -m compileall -j 4 .venv
+
+
+FROM base AS prod
+
+# We don't need poetry in final image
+COPY --from=builder /app/.venv/ /app/.venv/
+COPY ./syncmaster/ /app/syncmaster/
+RUN python -m compileall -b syncmaster
+
+
+FROM builder AS test
+
+RUN --mount=type=cache,target=/root/.cache/pypoetry \
+    poetry install \
+        --no-root \
+        --extras "server" \
+        --extras "scheduler" \
+        --with test \
+        --without docs,dev \
+    && python -m compileall -j 4 .venv
+
+RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh

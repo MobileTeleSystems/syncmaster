@@ -1,16 +1,18 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import asyncio
+import os
 from logging.config import fileConfig
 
 from alembic import context
+from alembic.script import ScriptDirectory
 from celery.backends.database.session import ResultModelBase
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from syncmaster.config import Settings
-from syncmaster.db.base import Base
+from syncmaster.db.models import Base
+from syncmaster.server.settings import ServerAppSettings as Settings
 
 config = context.config
 
@@ -20,12 +22,46 @@ if config.config_file_name is not None:
 
 if not config.get_main_option("sqlalchemy.url"):
     # read application settings only if sqlalchemy.url is not being passed via cli arguments
-    config.set_main_option("sqlalchemy.url", Settings().build_db_connection_uri())
+    # TODO: remove settings object creating during import
+    config.set_main_option("sqlalchemy.url", Settings().database.url)
 
 target_metadata = (
     Base.metadata,
     ResultModelBase.metadata,
 )
+
+
+def get_next_revision_id():
+    script_directory = ScriptDirectory.from_config(context.config)
+    versions_path = script_directory.versions
+
+    existing_filenames = os.listdir(versions_path)
+    existing_ids = []
+
+    for filename in existing_filenames:
+        # Assuming filename format: YYYY-MM-DD_XXXX_slug.py
+        parts = filename.split("_")
+        if len(parts) >= 2:
+            id_part = parts[1]
+            try:
+                id_num = int(id_part)
+                existing_ids.append(id_num)
+            except ValueError:
+                pass
+
+    if existing_ids:
+        next_id = max(existing_ids) + 1
+    else:
+        next_id = 1
+
+    return next_id
+
+
+def process_revision_directives(context, revision, directives):
+    if directives:
+        script = directives[0]
+        next_id = get_next_revision_id()
+        script.rev_id = f"{next_id:04d}"
 
 
 def run_migrations_offline() -> None:
@@ -45,6 +81,7 @@ def run_migrations_offline() -> None:
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
+        process_revision_directives=process_revision_directives,
         dialect_opts={"paramstyle": "named"},
     )
 
@@ -53,7 +90,11 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        process_revision_directives=process_revision_directives,
+    )
 
     with context.begin_transaction():
         context.run_migrations()

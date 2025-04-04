@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from collections.abc import AsyncGenerator, Callable
 from typing import Any
@@ -10,8 +10,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from syncmaster.backend.services import UnitOfWork
-from syncmaster.config import Settings
+from syncmaster.server.services.unit_of_work import UnitOfWork
+from syncmaster.server.settings import ServerAppSettings as Settings
 
 
 def create_engine(connection_uri: str, **engine_kwargs: Any) -> AsyncEngine:

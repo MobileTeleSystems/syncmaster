@@ -1,26 +1,30 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-import logging
 from datetime import datetime, timezone
 
-import onetl
+from asgi_correlation_id import correlation_id
+from asgi_correlation_id.extensions.celery import load_correlation_ids
+from celery import Celery
+from celery.signals import after_setup_task_logger
+from celery.utils.log import get_task_logger
+from jinja2 import Template
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from syncmaster.config import Settings
 from syncmaster.db.models import AuthData, Run, Status, Transfer
 from syncmaster.db.repositories.utils import decrypt_auth_data
 from syncmaster.exceptions.run import RunNotFoundError
-from syncmaster.worker.base import WorkerTask
-from syncmaster.worker.config import celery
+from syncmaster.settings.log import setup_logging
+from syncmaster.worker.celery import app as celery
 from syncmaster.worker.controller import TransferController
+from syncmaster.worker.settings import WorkerAppSettings
 
-logger = logging.getLogger(__name__)
+logger = get_task_logger(__name__)
+load_correlation_ids()
 
 
 @celery.task(name="run_transfer_task", bind=True, track_started=True)
-def run_transfer_task(self: WorkerTask, run_id: int) -> None:
-    onetl.log.setup_logging(level=logging.INFO)
+def run_transfer_task(self: Celery, run_id: int) -> None:
     with Session(self.engine) as session:
         run_transfer(
             session=session,
@@ -29,7 +33,7 @@ def run_transfer_task(self: WorkerTask, run_id: int) -> None:
         )
 
 
-def run_transfer(session: Session, run_id: int, settings: Settings):
+def run_transfer(session: Session, run_id: int, settings: WorkerAppSettings):
     logger.info("Start transfer")
     run = session.get(
         Run,
@@ -46,6 +50,7 @@ def run_transfer(session: Session, run_id: int, settings: Settings):
 
     run.status = Status.STARTED
     run.started_at = datetime.now(tz=timezone.utc)
+    run.log_url = Template(settings.worker.log_url_template).render(run=run, correlation_id=correlation_id.get())
     session.add(run)
     session.commit()
 
@@ -57,12 +62,12 @@ def run_transfer(session: Session, run_id: int, settings: Settings):
 
     try:
         controller = TransferController(
+            settings=settings,
             run=run,
             source_connection=run.transfer.source_connection,
             target_connection=run.transfer.target_connection,
             source_auth_data=source_auth_data,
             target_auth_data=target_auth_data,
-            settings=settings,
         )
         controller.perform_transfer()
     except Exception:
@@ -75,3 +80,8 @@ def run_transfer(session: Session, run_id: int, settings: Settings):
     run.ended_at = datetime.now(tz=timezone.utc)
     session.add(run)
     session.commit()
+
+
+@after_setup_task_logger.connect
+def setup_loggers(*args, **kwargs):
+    setup_logging(WorkerAppSettings().logging.get_log_config_path())

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from typing import Any, NoReturn
 
@@ -28,11 +28,19 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         page: int,
         page_size: int,
         group_id: int,
+        search_query: str | None = None,
+        connection_type: list[str] | None = None,
     ) -> Pagination:
         stmt = select(Connection).where(
-            Connection.is_deleted.is_(False),
             Connection.group_id == group_id,
         )
+        if search_query:
+            processed_query = search_query.replace(".", " ")
+            combined_query = f"{search_query} {processed_query}"
+            stmt = self._construct_vector_search(stmt, combined_query)
+
+        if connection_type is not None:
+            stmt = stmt.where(Connection.type.in_(connection_type))
 
         return await self._paginate_scalar_result(
             query=stmt.order_by(Connection.name),
@@ -44,7 +52,7 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         self,
         connection_id: int,
     ) -> Connection:
-        stmt = select(Connection).where(Connection.id == connection_id, Connection.is_deleted.is_(False))
+        stmt = select(Connection).where(Connection.id == connection_id)
         result: ScalarResult[Connection] = await self._session.scalars(stmt)
         try:
             return result.one()
@@ -54,6 +62,7 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
     async def create(
         self,
         group_id: int,
+        type: str,
         name: str,
         description: str,
         data: dict[str, Any],
@@ -62,6 +71,7 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
             insert(Connection)
             .values(
                 group_id=group_id,
+                type=type,
                 name=name,
                 description=description,
                 data=data,
@@ -79,20 +89,17 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
     async def update(
         self,
         connection_id: int,
-        name: str | None,
-        description: str | None,
+        name: str,
+        type: str,
+        description: str,
         data: dict[str, Any],
     ) -> Connection:
         try:
-            connection = await self.read_by_id(connection_id=connection_id)
-            for key in connection.data:
-                data[key] = data.get(key, None) or connection.data[key]
-
             return await self._update(
                 Connection.id == connection_id,
-                Connection.is_deleted.is_(False),
-                name=name or connection.name,
-                description=description or connection.description,
+                type=type,
+                name=name,
+                description=description,
                 data=data,
             )
         except IntegrityError as e:
@@ -125,7 +132,7 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         except IntegrityError as integrity_error:
             self._raise_error(integrity_error)
 
-    def _raise_error(self, err: DBAPIError) -> NoReturn:
+    def _raise_error(self, err: DBAPIError) -> NoReturn:  # noqa: WPS238
         constraint = err.__cause__.__cause__.constraint_name
         if constraint == "fk__connection__group_id__group":
             raise GroupNotFoundError from err

@@ -1,9 +1,11 @@
-version: '3.8'
 services:
   db:
-    image: postgres
+    image: postgres:17
     restart: unless-stopped
-    env_file: .env.docker
+    environment:
+      POSTGRES_DB: syncmaster
+      POSTGRES_USER: syncmaster
+      POSTGRES_PASSWORD: changeme
     ports:
       - 5432:5432
     volumes:
@@ -15,33 +17,21 @@ services:
       timeout: 5s
       retries: 3
 
-  worker:
-    image: mtsrus/syncmaster-worker
-    restart: unless-stopped
+  db-migrations:
+    image: mtsrus/syncmaster-server:${VERSION:-develop}
+    restart: no
     build:
-      dockerfile: docker/Dockerfile.worker
+      dockerfile: docker/Dockerfile.server
       context: .
-      network: host
+      target: prod
+    entrypoint: [python, -m, syncmaster.db.migrations, upgrade, head]
     env_file: .env.docker
-
-  backend:
-    image: mtsrus/syncmaster-backend
-    restart: unless-stopped
-    build:
-      dockerfile: docker/Dockerfile.backend
-      context: .
-      network: host
-    ports:
-      - 8000:8000
     depends_on:
       db:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    env_file: .env.docker
 
   rabbitmq:
-    image: rabbitmq
+    image: rabbitmq:4
     restart: unless-stopped
     ports:
       - 5672:5672
@@ -53,6 +43,101 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+
+  server:
+    image: mtsrus/syncmaster-server:${VERSION:-develop}
+    restart: unless-stopped
+    build:
+      dockerfile: docker/Dockerfile.server
+      context: .
+      target: prod
+    ports:
+      - 8000:8000
+    environment:
+      # list here usernames which should be assigned SUPERUSER role on application start
+      SYNCMASTER__ENTRYPOINT__SUPERUSERS: admin
+      # PROMETHEUS_MULTIPROC_DIR is required for multiple workers, see:
+      # https://prometheus.github.io/client_python/multiprocess/
+      PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus-metrics
+    # tmpfs dir is cleaned up each container restart
+    tmpfs:
+      - /tmp/prometheus-metrics
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+      db-migrations:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD-SHELL, curl -f http://localhost:8000/monitoring/ping]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    profiles:
+      - server
+      - frontend
+      - all
+
+  worker:
+    image: mtsrus/syncmaster-worker:${VERSION:-develop}
+    restart: unless-stopped
+    build:
+      dockerfile: docker/Dockerfile.worker
+      context: .
+      target: prod
+    env_file: .env.docker
+    command: --loglevel=info -Q test_queue
+    depends_on:
+      db:
+        condition: service_healthy
+      db-migrations:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+    profiles:
+      - worker
+      - all
+
+  scheduler:
+    image: mtsrus/syncmaster-scheduler:${VERSION:-develop}
+    restart: unless-stopped
+    build:
+      dockerfile: docker/Dockerfile.scheduler
+      context: .
+      target: prod
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+      db-migrations:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+    profiles:
+      - scheduler
+      - all
+
+  frontend:
+    image: mtsrus/syncmaster-ui:${VERSION:-develop}
+    restart: unless-stopped
+    env_file: .env.docker
+    ports:
+      - 3000:3000
+    healthcheck:
+      test: [CMD-SHELL, curl -f http://localhost:3000/]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    depends_on:
+      server:
+        condition: service_healthy
+    profiles:
+      - frontend
+      - all
 
 volumes:
   postgres_data:

@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from pydantic import BaseModel, constr
+from pydantic import BaseModel, ConfigDict, constr
 
 from syncmaster.db.models import GroupMemberRole
 from syncmaster.db.utils import Pagination
@@ -16,8 +16,7 @@ class ReadGroupMember(BaseModel):
     username: str
     role: GroupMemberRole
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ReadUserSchema(BaseModel):
@@ -25,15 +24,11 @@ class ReadUserSchema(BaseModel):
     username: str
     is_superuser: bool
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class FullUserSchema(ReadGroupMember):
     is_active: bool
-
-    class Config:
-        from_attributes = True
 
 
 class UserPageSchemaAsGroupMember(PageSchema):

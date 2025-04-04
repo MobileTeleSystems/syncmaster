@@ -12,6 +12,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
+env:
+  DEFAULT_PYTHON: '3.13'
+
 jobs:
   release:
     name: Build & push worker image to Dockerhub
@@ -34,29 +37,55 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set tag
-        id: set_tag
+      - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.DEFAULT_PYTHON }}
+
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+
+      - name: Get version
+        id: get_version
         run: |
+          echo "VERSION=$(poetry version --short)" >> $GITHUB_ENV
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: mtsrus/syncmaster-worker
+          labels: |
+            org.opencontainers.image.title=SyncMaster Worker
+            org.opencontainers.image.vendor=MTS PJSC
+            org.opencontainers.image.documentation=https://syncmaster.readthedocs.io
+            org.opencontainers.image.url=https://hub.docker.com/r/mtsrus/syncmaster-worker
+            org.opencontainers.image.authors=DataOps.ETL <onetools@mts.ru>
+            org.opencontainers.image.version=${{ env.VERSION }}
+
+      - name: Set platforms
+        id: set_platforms
+        run: |
+          # Building krb5 on ARM is time consuming, do this only at release
           if [[ "${{ github.ref_type }}" == "branch" && "${{ github.ref_name }}" == "develop" ]]; then
-            echo "TAG=mtsrus/syncmaster-worker:develop" >> $GITHUB_ENV
+            echo "PLATFORMS=linux/amd64" >> $GITHUB_ENV
           elif [[ "${{ github.ref_type }}" == "tag" ]]; then
-            echo "TAG=mtsrus/syncmaster-worker:latest,mtsrus/syncmaster-worker:${{ github.ref_name }}" >> $GITHUB_ENV
+            echo "PLATFORMS=linux/amd64,linux/arm64/v8" >> $GITHUB_ENV
           fi
 
       - name: Build worker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          tags: ${{ env.TAG }}
           context: .
           target: prod
           file: docker/Dockerfile.worker
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           pull: true
           push: true
-          cache-to: type=gha,mode=max
-          cache-from: type=gha
-          platforms: |
-            linux/amd64
-            linux/arm64/v8
+          cache-to: type=inline
+          cache-from: mtsrus/syncmaster-worker:develop
+          platforms: ${{ env.PLATFORMS }}
           provenance: mode=max
 
       - name: Convert README to Markdown
@@ -77,5 +106,5 @@ jobs:
           # this requires token with read+write+delete permissions. read+write is not enough!
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: mtsrus/syncmaster-worker
-          short-description: ${{ github.event.repository.description }}
+          short-description: ${{ github.event.repository.description }} (Worker)
           enable-url-completion: true

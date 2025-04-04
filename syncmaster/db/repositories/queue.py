@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from typing import NoReturn
 
@@ -12,7 +12,7 @@ from syncmaster.db.repositories.repository_with_owner import RepositoryWithOwner
 from syncmaster.db.utils import Permission
 from syncmaster.exceptions import EntityNotFoundError, SyncmasterError
 from syncmaster.exceptions.group import GroupNotFoundError
-from syncmaster.exceptions.queue import QueueNotFoundError
+from syncmaster.exceptions.queue import DuplicatedQueueNameError, QueueNotFoundError
 
 # TODO: remove HTTP response schemes from repositories, these are different layers
 from syncmaster.schemas.v1.queue import UpdateQueueSchema
@@ -38,7 +38,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
     ) -> Queue:
         stmt = (
             select(Queue)
-            .where(Queue.id == queue_id, Queue.is_deleted.is_(False))
+            .where(Queue.id == queue_id)
             .options(selectinload(Queue.transfers))
             .options(selectinload(Queue.group))
         )
@@ -53,11 +53,14 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         page: int,
         page_size: int,
         group_id: int,
+        search_query: str | None = None,
     ):
         stmt = select(Queue).where(
-            Queue.is_deleted.is_(False),
             Queue.group_id == group_id,
         )
+        if search_query:
+            stmt = self._construct_vector_search(stmt, search_query)
+
         return await self._paginate_scalar_result(
             query=stmt.order_by(Queue.id),
             page=page,
@@ -73,7 +76,6 @@ class QueueRepository(RepositoryWithOwner[Queue]):
             queue = await self.read_by_id(queue_id=queue_id)
             return await self._update(
                 Queue.id == queue_id,
-                Queue.is_deleted.is_(False),
                 description=queue_data.description or queue.description,
             )
         except IntegrityError as e:
@@ -135,7 +137,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
 
         return Permission.DELETE
 
-    async def get_resource_permission(self, user: User, resource_id: int) -> Permission:
+    async def get_resource_permission(self, user: User, resource_id: int) -> Permission:  # noqa: WPS212
         """
         Method for determining CRUD rights in a repository (self.model) for a resource
         'DEVELOPER' does not have WRITE permission in the QUEUE repository
@@ -190,6 +192,9 @@ class QueueRepository(RepositoryWithOwner[Queue]):
 
         return Permission.DELETE
 
-    @staticmethod
-    def _raise_error(err: DBAPIError) -> NoReturn:
+    def _raise_error(self, err: DBAPIError) -> NoReturn:
+        constraint = err.__cause__.__cause__.constraint_name
+        if constraint == "uq__queue__slug":
+            raise DuplicatedQueueNameError
+
         raise SyncmasterError from err

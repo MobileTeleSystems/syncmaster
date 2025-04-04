@@ -3,13 +3,12 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.config import Settings
 from syncmaster.db.models import AuthData, Connection
 from syncmaster.db.repositories.utils import decrypt_auth_data
+from syncmaster.server.settings import ServerAppSettings as Settings
 from tests.mocks import MockConnection, MockGroup, MockUser, UserTestRoles
-from tests.test_unit.conftest import ALLOWED_SOURCES
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 async def test_developer_plus_can_create_connection(
@@ -21,10 +20,8 @@ async def test_developer_plus_can_create_connection(
     event_loop,
     request,
 ):
-    # Arrange
     user = group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -32,14 +29,14 @@ async def test_developer_plus_can_create_connection(
             "group_id": group.id,
             "name": "New connection",
             "description": "",
+            "type": "postgres",
             "connection_data": {
-                "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -50,7 +47,7 @@ async def test_developer_plus_can_create_connection(
         await session.scalars(
             select(Connection).filter_by(
                 name="New connection",
-            )
+            ),
         )
     ).first()
 
@@ -58,7 +55,7 @@ async def test_developer_plus_can_create_connection(
         await session.scalars(
             select(AuthData).filter_by(
                 connection_id=connection.id,
-            )
+            ),
         )
     ).one()
 
@@ -72,15 +69,15 @@ async def test_developer_plus_can_create_connection(
 
     request.addfinalizer(delete_rows)
 
-    # Assert
+    assert result.status_code == 200, result.json()
     decrypted = decrypt_auth_data(creds.value, settings=settings)
     assert result.json() == {
         "id": connection.id,
         "name": connection.name,
         "description": connection.description,
         "group_id": connection.group_id,
+        "type": connection.type,
         "connection_data": {
-            "type": connection.data["type"],
             "host": connection.data["host"],
             "port": connection.data["port"],
             "database_name": connection.data["database_name"],
@@ -91,7 +88,6 @@ async def test_developer_plus_can_create_connection(
             "user": decrypted["user"],
         },
     }
-    assert result.status_code == 200
 
 
 async def test_unauthorized_user_cannot_create_connection(
@@ -104,24 +100,26 @@ async def test_unauthorized_user_cannot_create_connection(
             "group_id": group_connection.id,
             "name": "New connection",
             "description": "",
+            "type": "postgres",
             "connection_data": {
-                "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
         },
     )
-    assert result.status_code == 401
+    assert result.status_code == 401, result.json()
     assert result.json() == {
-        "ok": False,
-        "status_code": 401,
-        "message": "Not authenticated",
+        "error": {
+            "code": "unauthorized",
+            "message": "Not authenticated",
+            "details": None,
+        },
     }
 
 
@@ -130,10 +128,8 @@ async def test_check_fields_validation_on_create_connection(
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(UserTestRoles.Developer)
 
-    # Act
     result = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -141,35 +137,37 @@ async def test_check_fields_validation_on_create_connection(
             "group_id": group_connection.id,
             "name": "",
             "description": "",
+            "type": "postgres",
             "connection_data": {
-                "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
         },
     )
 
-    # Assert
-    assert result.status_code == 422
+    assert result.status_code == 422, result.json()
     assert result.json() == {
-        "detail": [
-            {
-                "ctx": {"min_length": 1},
-                "input": "",
-                "loc": ["body", "name"],
-                "msg": "String should have at least 1 character",
-                "type": "string_too_short",
-            }
-        ]
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {"min_length": 1},
+                    "input": "",
+                    "location": ["body", "postgres", "name"],
+                    "message": "String should have at least 1 character",
+                    "code": "string_too_short",
+                },
+            ],
+        },
     }
 
-    # Act
     result = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -177,31 +175,35 @@ async def test_check_fields_validation_on_create_connection(
             "group_id": group_connection.id,
             "name": None,
             "description": "",
+            "type": "postgres",
             "connection_data": {
-                "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
         },
     )
 
-    # Assert
-    assert result.status_code == 422
+    assert result.status_code == 422, result.json()
     assert result.json() == {
-        "detail": [
-            {
-                "input": None,
-                "loc": ["body", "name"],
-                "msg": "Input should be a valid string",
-                "type": "string_type",
-            }
-        ]
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {},
+                    "input": None,
+                    "location": ["body", "postgres", "name"],
+                    "message": "Input should be a valid string",
+                    "code": "string_type",
+                },
+            ],
+        },
     }
 
     result = await client.post(
@@ -211,29 +213,34 @@ async def test_check_fields_validation_on_create_connection(
             "group_id": group_connection.id,
             "name": "None",
             "description": None,
+            "type": "postgres",
             "connection_data": {
-                "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
         },
     )
-    assert result.status_code == 422
+    assert result.status_code == 422, result.json()
     assert result.json() == {
-        "detail": [
-            {
-                "input": None,
-                "loc": ["body", "description"],
-                "msg": "Input should be a valid string",
-                "type": "string_type",
-            }
-        ]
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "context": {},
+                    "input": None,
+                    "location": ["body", "postgres", "description"],
+                    "message": "Input should be a valid string",
+                    "code": "string_type",
+                },
+            ],
+        },
     }
 
     result = await client.post(
@@ -243,43 +250,26 @@ async def test_check_fields_validation_on_create_connection(
             "group_id": group_connection.id,
             "name": "None",
             "description": "None",
+            "type": "POSTGRESQL",
             "connection_data": {
-                "type": "POSTGRESQL",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "user": "user",
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
         },
     )
-    assert result.status_code == 422
-    assert result.json() == {
-        "detail": [
-            {
-                "ctx": {
-                    "discriminator": "'type'",
-                    "expected_tags": ALLOWED_SOURCES,
-                    "tag": "POSTGRESQL",
-                },
-                "input": {
-                    "database_name": "postgres",
-                    "host": "127.0.0.1",
-                    "port": 5432,
-                    "type": "POSTGRESQL",
-                    "user": "user",
-                },
-                "loc": ["body", "connection_data"],
-                "msg": "Input tag 'POSTGRESQL' found using 'type' does not match "
-                f"any of the expected tags: {ALLOWED_SOURCES}",
-                "type": "union_tag_invalid",
-            }
-        ]
-    }
+
+    assert result.status_code == 422, result.json()
+    assert (
+        result.json()["error"]["details"][0]["message"]
+        == "Input tag 'POSTGRESQL' found using 'type' does not match any of the expected tags: 'oracle', 'postgres', 'mysql', 'mssql', 'clickhouse', 'hive', 'hdfs', 's3', 'sftp', 'ftp', 'ftps', 'webdav', 'samba'"
+    )
 
 
 async def test_other_group_member_cannot_create_group_connection(
@@ -288,10 +278,8 @@ async def test_other_group_member_cannot_create_group_connection(
     group: MockGroup,
     role_guest_plus: UserTestRoles,
 ):
-    # Arrange
     user = group.get_member_of_role(role_guest_plus)
 
-    # Act
     result = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -299,27 +287,28 @@ async def test_other_group_member_cannot_create_group_connection(
             "group_id": empty_group.id,
             "name": "New connection",
             "description": "",
+            "type": "postgres",
             "connection_data": {
-                "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
         },
     )
 
-    # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_can_create_connection(
@@ -336,14 +325,14 @@ async def test_superuser_can_create_connection(
             "group_id": group.id,
             "name": "New connection from superuser",
             "description": "",
+            "type": "postgres",
             "connection_data": {
-                "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
@@ -354,7 +343,7 @@ async def test_superuser_can_create_connection(
             select(Connection).filter_by(
                 name="New connection from superuser",
                 group_id=group.id,
-            )
+            ),
         )
     ).first()
 
@@ -362,18 +351,18 @@ async def test_superuser_can_create_connection(
         await session.scalars(
             select(AuthData).filter_by(
                 connection_id=connection.id,
-            )
+            ),
         )
     ).one()
     decrypted = decrypt_auth_data(creds.value, settings=settings)
-    assert result.status_code == 200
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": connection.id,
         "group_id": connection.group_id,
         "name": connection.name,
         "description": connection.description,
+        "type": connection.type,
         "connection_data": {
-            "type": connection.data["type"],
             "host": connection.data["host"],
             "port": connection.data["port"],
             "database_name": connection.data["database_name"],
@@ -399,6 +388,7 @@ async def test_groupless_user_cannot_create_connection(
             "group_id": group.id,
             "name": "New connection",
             "description": "",
+            "type": "postgres",
             "connection_data": {
                 "type": "postgres",
                 "host": "127.0.0.1",
@@ -406,18 +396,20 @@ async def test_groupless_user_cannot_create_connection(
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
         },
     )
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_group_member_cannot_create_connection_with_unknown_group_error(
@@ -426,12 +418,9 @@ async def test_group_member_cannot_create_connection_with_unknown_group_error(
     session: AsyncSession,
     settings: Settings,
     role_guest_plus: UserTestRoles,
-    event_loop,
 ):
-    # Arrange
     user = group.get_member_of_role(role_guest_plus)
 
-    # Act
     result = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -439,25 +428,26 @@ async def test_group_member_cannot_create_connection_with_unknown_group_error(
             "group_id": -1,
             "name": "New connection",
             "description": "",
+            "type": "postgres",
             "connection_data": {
-                "type": "postgres",
                 "host": "127.0.0.1",
                 "port": 5432,
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
         },
     )
 
-    # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
 
 
@@ -468,7 +458,6 @@ async def test_superuser_cannot_create_connection_with_unknown_group_error(
     session: AsyncSession,
     settings: Settings,
 ):
-    # Act
     result = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -476,6 +465,7 @@ async def test_superuser_cannot_create_connection_with_unknown_group_error(
             "group_id": -1,
             "name": "New connection from superuser",
             "description": "",
+            "type": "postgres",
             "connection_data": {
                 "type": "postgres",
                 "host": "127.0.0.1",
@@ -483,16 +473,55 @@ async def test_superuser_cannot_create_connection_with_unknown_group_error(
                 "database_name": "postgres",
             },
             "auth_data": {
-                "type": "postgres",
+                "type": "basic",
                 "user": "user",
                 "password": "secret",
             },
         },
     )
 
-    # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
+    }
+
+
+async def test_guest_cannot_create_connection_error(
+    client: AsyncClient,
+    group: MockGroup,
+):
+    user = group.get_member_of_role(UserTestRoles.Guest)
+
+    result = await client.post(
+        "v1/connections",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "group_id": group.id,
+            "name": "New connection",
+            "description": "",
+            "type": "postgres",
+            "connection_data": {
+                "type": "postgres",
+                "host": "127.0.0.1",
+                "port": 5432,
+                "database_name": "postgres",
+            },
+            "auth_data": {
+                "type": "basic",
+                "user": "user",
+                "password": "secret",
+            },
+        },
+    )
+
+    assert result.status_code == 403, result.json()
+    assert result.json() == {
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
     }

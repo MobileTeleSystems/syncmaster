@@ -64,7 +64,7 @@ def get_pyarrow_schema() -> ArrowSchema:
             pa.field("REGION", pa.string()),
             pa.field("NUMBER", pa.int32()),
             pa.field("BIRTH_DATE", pa.date32()),
-            pa.field("REGISTERED_AT", pa.timestamp("ms")),
+            pa.field("REGISTERED_AT", pa.timestamp("us")),
             pa.field("ACCOUNT_BALANCE", pa.float64()),
         ],
     )
@@ -103,11 +103,11 @@ def _to_string(obj):
     return obj
 
 
-def _write_csv(data: list[dict], file: TextIO, header: bool = False, **kwargs) -> None:
+def _write_csv(data: list[dict], file: TextIO, include_header: bool = False, **kwargs) -> None:
     columns = list(data[0].keys())
     writer = csv.DictWriter(file, fieldnames=columns, lineterminator="\n", **kwargs)
 
-    if header:
+    if include_header:
         writer.writeheader()
 
     for row in data:
@@ -123,7 +123,7 @@ def save_as_csv_without_header(data: list[dict], path: Path) -> None:
 def save_as_csv_with_header(data: list[dict], path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
     with open(path / "file.csv", "w", newline="") as file:
-        _write_csv(data, file, header=True)
+        _write_csv(data, file, include_header=True)
 
 
 def save_as_csv_with_delimiter(data: list[dict], path: Path) -> None:
@@ -403,12 +403,12 @@ def save_as_xlsx(data: list[dict], path: Path) -> None:
     shutil.rmtree(root, ignore_errors=True)
     root.mkdir(parents=True, exist_ok=True)
 
-    save_as_xlsx_with_options(data, root / "without_header", header=False)
-    save_as_xlsx_with_options(data, root / "with_header", header=True)
+    save_as_xlsx_with_options(data, root / "without_header", include_header=False)
+    save_as_xlsx_with_options(data, root / "with_header", include_header=True)
     save_as_xlsx_with_options(
         data,
         root / "with_data_address",
-        header=False,
+        include_header=False,
         sheet_name="ABC",
         startcol=10,
         startrow=5,
@@ -420,12 +420,12 @@ def save_as_xls(data: list[dict], path: Path) -> None:
     shutil.rmtree(root, ignore_errors=True)
     root.mkdir(parents=True, exist_ok=True)
 
-    save_as_xls_with_options(data, root / "without_header", header=False)
-    save_as_xls_with_options(data, root / "with_header", header=True)
+    save_as_xls_with_options(data, root / "without_header", include_header=False)
+    save_as_xls_with_options(data, root / "with_header", include_header=True)
     save_as_xls_with_options(
         data,
         root / "with_data_address",
-        header=False,
+        include_header=False,
         sheet_name="ABC",
         startcol=10,
         startrow=5,

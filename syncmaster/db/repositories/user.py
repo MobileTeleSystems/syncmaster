@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from typing import Any, NoReturn
 
@@ -17,11 +17,21 @@ class UserRepository(Repository[User]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(model=User, session=session)
 
-    async def paginate(self, page: int, page_size: int, is_superuser: bool) -> Pagination:
-        stmt = select(User).where(User.is_deleted.is_(False))
+    async def paginate(
+        self,
+        page: int,
+        page_size: int,
+        is_superuser: bool,
+        search_query: str | None = None,
+    ) -> Pagination:
+        stmt = select(User)
+
+        if search_query:
+            stmt = stmt.where(User.username.bool_op("%")(search_query))  # similarity_threshold defaults to 0.3
 
         if not is_superuser:
             stmt = stmt.where(User.is_active.is_(True))
+
         return await self._paginate_scalar_result(query=stmt.order_by(User.username), page=page, page_size=page_size)
 
     async def read_by_id(self, user_id: int, **kwargs: Any) -> User:
@@ -39,18 +49,29 @@ class UserRepository(Repository[User]):
 
     async def update(self, user_id: int, data: dict) -> User:
         try:
-            return await self._update(User.id == user_id, User.is_deleted.is_(False), **data)
+            return await self._update(User.id == user_id, **data)
         except EntityNotFoundError as e:
             raise UserNotFoundError from e
         except IntegrityError as e:
             self._raise_error(e)
 
-    async def create(self, username: str, is_active: bool, is_superuser: bool = False) -> User:
+    async def create(
+        self,
+        username: str,
+        email: str | None = None,
+        first_name: str | None = None,
+        middle_name: str | None = None,
+        last_name: str | None = None,
+        is_superuser: bool = False,
+    ) -> User:
         query = (
             insert(User)
             .values(
                 username=username,
-                is_active=is_active,
+                email=email,
+                first_name=first_name,
+                middle_name=middle_name,
+                last_name=last_name,
                 is_superuser=is_superuser,
             )
             .returning(User)

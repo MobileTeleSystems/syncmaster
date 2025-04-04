@@ -4,22 +4,25 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.mocks import MockConnection, UserTestRoles
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend, pytest.mark.hdfs]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.hdfs]
 
 
 @pytest.mark.parametrize(
-    "create_connection_data,create_connection_auth_data",
+    "connection_type,create_connection_data,create_connection_auth_data",
     [
         (
-            {"type": "hdfs", "cluster": "cluster"},
+            "hdfs",
             {
-                "type": "hdfs",
+                "cluster": "cluster",
+            },
+            {
+                "type": "basic",
                 "user": "user",
                 "password": "password",
             },
-        )
+        ),
     ],
-    indirect=True,
+    indirect=["create_connection_data", "create_connection_auth_data"],
 )
 async def test_guest_plus_can_read_hdfs_connection(
     client: AsyncClient,
@@ -29,25 +32,23 @@ async def test_guest_plus_can_read_hdfs_connection(
     create_connection_data: dict,  # don't remove
     create_connection_auth_data: dict,  # don't remove
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_guest_plus)
 
-    # Act
     result = await client.get(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    # Assert
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_connection.id,
         "description": group_connection.description,
         "group_id": group_connection.group_id,
         "name": group_connection.name,
-        "connection_data": {"type": group_connection.data["type"], "cluster": group_connection.data["cluster"]},
+        "type": group_connection.type,
+        "connection_data": {"cluster": group_connection.data["cluster"]},
         "auth_data": {
             "type": group_connection.credentials.value["type"],
             "user": group_connection.credentials.value["user"],
         },
     }
-    assert result.status_code == 200

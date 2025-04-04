@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from celery.signals import worker_process_init, worker_process_shutdown
 from coverage import Coverage
-from onetl.connection import SparkHDFS
+from onetl.connection import HDFS, SparkHDFS
 from onetl.hooks import hook
 
 from syncmaster.worker.spark import get_worker_spark_session
@@ -32,6 +32,30 @@ def is_namenode_active(host: str, cluster: str) -> bool:
 def get_ipc_port(cluster: str) -> int | None:
     if cluster == "test-hive":
         return 9820
+    return None
+
+
+@HDFS.Slots.get_cluster_namenodes.bind
+@hook
+def get_cluster_namenodes(cluster: str) -> set[str] | None:
+    if cluster == "test-hive":
+        return {"test-hive"}
+    return None
+
+
+@HDFS.Slots.is_namenode_active.bind
+@hook
+def is_namenode_active(host: str, cluster: str) -> bool:
+    if cluster == "test-hive":
+        return True
+    return False
+
+
+@HDFS.Slots.get_webhdfs_port.bind
+@hook
+def get_webhdfs_port(cluster: str) -> int | None:
+    if cluster == "test-hive":
+        return 9870
     return None
 
 

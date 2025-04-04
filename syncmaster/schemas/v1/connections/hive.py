@@ -1,40 +1,49 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel, Field
 
+from syncmaster.schemas.v1.auth import (
+    CreateBasicAuthSchema,
+    ReadBasicAuthSchema,
+)
+from syncmaster.schemas.v1.auth.basic import UpdateBasicAuthSchema
 from syncmaster.schemas.v1.connection_types import HIVE_TYPE
+from syncmaster.schemas.v1.connections.connection_base import (
+    CreateConnectionBaseSchema,
+    ReadConnectionBaseSchema,
+)
 
 
-class HiveBaseSchema(BaseModel):
+class CreateHiveConnectionDataSchema(BaseModel):
+    cluster: str
+
+
+class ReadHiveConnectionDataSchema(BaseModel):
+    cluster: str
+
+
+class CreateHiveConnectionSchema(CreateConnectionBaseSchema):
+    type: HIVE_TYPE = Field(..., description="Connection type")
+    data: CreateHiveConnectionDataSchema = Field(
+        ...,
+        alias="connection_data",
+        description=(
+            "Data required to connect to the database. These are the parameters that are specified in the URL request."
+        ),
+    )
+    auth_data: CreateBasicAuthSchema = Field(
+        description="Credentials for authorization",
+    )
+
+
+class ReadHiveConnectionSchema(ReadConnectionBaseSchema):
     type: HIVE_TYPE
-
-    class Config:
-        from_attributes = True
-
-
-class ReadHiveConnectionSchema(HiveBaseSchema):
-    cluster: str
+    data: ReadHiveConnectionDataSchema = Field(alias="connection_data")
+    auth_data: ReadBasicAuthSchema | None = None
 
 
-class ReadHiveAuthSchema(HiveBaseSchema):
-    user: str
-
-
-class UpdateHiveConnectionSchema(HiveBaseSchema):
-    cluster: str | None = None
-
-
-class UpdateHiveAuthSchema(HiveBaseSchema):
-    user: str | None = None
-    password: SecretStr | None = None
-
-
-class CreateHiveConnectionSchema(HiveBaseSchema):
-    cluster: str
-
-
-class CreateHiveAuthSchema(HiveBaseSchema):
-    # Needed to create a spark session. For authorization in Kerberos
-    user: str
-    password: SecretStr
+class UpdateHiveConnectionSchema(CreateHiveConnectionSchema):
+    auth_data: UpdateBasicAuthSchema = Field(
+        description="Credentials for authorization",
+    )

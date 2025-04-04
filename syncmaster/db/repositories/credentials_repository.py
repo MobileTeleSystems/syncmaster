@@ -1,26 +1,30 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
-from typing import NoReturn
+from typing import TYPE_CHECKING, NoReturn
 
 from sqlalchemy import ScalarResult, insert, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from syncmaster.config import Settings
 from syncmaster.db.models import AuthData
 from syncmaster.db.repositories.base import Repository
 from syncmaster.db.repositories.utils import decrypt_auth_data, encrypt_auth_data
 from syncmaster.exceptions import SyncmasterError
 from syncmaster.exceptions.credentials import AuthDataNotFoundError
 
+if TYPE_CHECKING:
+    from syncmaster.scheduler.settings import SchedulerAppSettings
+    from syncmaster.server.settings import ServerAppSettings
+    from syncmaster.worker.settings import WorkerAppSettings
+
 
 class CredentialsRepository(Repository[AuthData]):
     def __init__(
         self,
+        settings: WorkerAppSettings | SchedulerAppSettings | ServerAppSettings,
         session: AsyncSession,
-        settings: Settings,
         model: type[AuthData],
     ):
         super().__init__(model=model, session=session)
@@ -67,10 +71,7 @@ class CredentialsRepository(Repository[AuthData]):
         connection_id: int,
         data: dict,
     ) -> AuthData:
-        creds = await self.read(connection_id)
         try:
-            for key in creds:
-                data[key] = data.get(key, None) or creds[key]
             return await self._update(
                 AuthData.connection_id == connection_id,
                 value=encrypt_auth_data(value=data, settings=self._settings),

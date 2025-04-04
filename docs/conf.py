@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 # Configuration file for the Sphinx documentation builder.
 #
@@ -26,7 +26,7 @@ sys.path.insert(0, os.fspath(PROJECT_ROOT_DIR))
 # -- Project information -----------------------------------------------------
 
 project = "syncmaster"
-copyright = "2023-2024 MTS (Mobile Telesystems)"
+copyright = "2023-2024 MTS PJSC"
 author = "DataOps.ETL"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -36,7 +36,7 @@ author = "DataOps.ETL"
 # The short X.Y version.
 
 # this value is updated automatically by `poetry version ...` and poetry-bumpversion plugin
-ver = Version.parse("0.1.5")
+ver = Version.parse("0.2.0")
 version = ver.base_version
 # The full version, including alpha/beta/rc tags.
 release = ver.public
@@ -60,7 +60,9 @@ extensions = [
     "sphinxcontrib.plantuml",
     "sphinx_favicon",
     "sphinxarg.ext",
+    "sphinx_last_updated_by_git",
 ]
+
 swagger = [
     {
         "name": "syncmaster REST API",
@@ -69,8 +71,9 @@ swagger = [
         "options": {
             "url": "_static/openapi.json",
         },
-    }
+    },
 ]
+
 numpydoc_show_class_members = True
 autodoc_pydantic_model_show_config = False
 autodoc_pydantic_model_show_config_summary = False
@@ -117,9 +120,7 @@ html_theme = "furo"
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {
-    "sidebar_hide_name": True,
-}
+html_theme_options = {}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -128,10 +129,6 @@ html_static_path = ["_static"]
 html_extra_path = ["robots.txt"]
 html_css_files = [
     "custom.css",
-]
-
-favicons = [
-    {"rel": "icon", "href": "icon.svg", "type": "image/svg+xml"},
 ]
 
 # The master toctree document.
@@ -149,6 +146,7 @@ pygments_style = "sphinx"
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
+
 
 # -- Options for HTMLHelp output ------------------------------------------
 

@@ -6,17 +6,21 @@
     :caption: High-level design
     :hidden:
 
-    design/entities
+    design/entities/index
     design/permissions
 
 .. toctree::
     :maxdepth: 2
-    :caption: Backend
+    :caption: Reference
     :hidden:
 
-    backend/install
-    backend/architecture
-    backend/openapi
+    reference/architecture
+    reference/database/index
+    reference/broker/index
+    reference/server/index
+    reference/frontend/index
+    reference/worker/index
+    reference/scheduler/index
 
 .. toctree::
     :maxdepth: 2

@@ -6,27 +6,20 @@ reports, improving documentation, submitting feature requests, reviewing
 new submissions, or contributing code that can be incorporated into the
 project.
 
-Limitations
------------
-
-We should keep close to these items during development:
-
-* Different users uses SyncMaster in different ways - someone store data in Postgres, someone in MySQL. Such dependencies should be optional.
-
 Initial setup for local development
 -----------------------------------
 
 Install Git
 ~~~~~~~~~~~
 
-Please follow `instruction <https://docs.gitlab.com/ee/topics/git/>`_.
+Please follow `instruction <https://docs.github.com/en/get-started/quickstart/set-up-git>`_.
 
 Create a fork
 ~~~~~~~~~~~~~
 
-If you are not a member of a development team building syncmaster, you should create a fork before making any changes.
+If you are not a member of a development team building Data.SyncMaster, you should create a fork before making any changes.
 
-Please follow `instruction <https://docs.gitlab.com/ee/user/project/repository/forking_workflow.html>`_.
+Please follow `instruction <https://docs.github.com/en/get-started/quickstart/fork-a-repo>`_.
 
 Clone the repo
 ~~~~~~~~~~~~~~
@@ -35,36 +28,40 @@ Open terminal and run these commands:
 
 .. code:: bash
 
-    git clone https://github.com/MobileTeleSystems/syncmaster.git -b develop
+    git clone https://github.com/MobileTeleSystems/syncmaster -b develop
 
     cd syncmaster
 
 Setup environment
 ~~~~~~~~~~~~~~~~~
 
-Firstly,Z create virtualenv and install dependencies:
+Firstly, install `make <https://www.gnu.org/software/make/manual/make.html>`_. It is used for running complex commands in local environment.
+
+Secondly, create virtualenv and install dependencies:
 
 .. code:: bash
 
-    python -m venv .venv/
+    make venv
 
 If you already have venv, but need to install dependencies required for development:
 
 .. code:: bash
 
-    source .venv/bin/activate
-    pip install -U pip poetry
-    poetry install --no-root
+    make venv-install
 
 We are using `poetry <https://python-poetry.org/docs/managing-dependencies/>`_ for managing dependencies and building the package.
 It allows to keep development environment the same for all developers due to using lock file with fixed dependency versions.
 
-There are dependency **groups**:
+There are *extra* dependencies (included into package as optional):
 
-* ``backend`` - for running backend
+* ``server`` - for running server
 * ``worker`` - for running Celery workers
+
+And *groups* (not included into package, used locally and in CI):
+
 * ``test`` - for running tests
 * ``dev`` - for development, like linters, formatters, mypy, pre-commit and so on
+* ``docs`` - for building documentation
 
 Enable pre-commit hooks
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -90,23 +87,27 @@ How to
 Run development instance locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Firstly, install `make <https://www.gnu.org/software/make/manual/make.html>`_. It is used for running complex commands in local environment.
-
-Start DB and RabbitMQ containers:
+Start DB container:
 
 .. code:: bash
 
-    docker-compose up -d db rabbitmq
+    make db broker
 
 Then start development server:
 
 .. code:: bash
 
-    make run
+    make dev-server
 
 And open http://localhost:8000/docs
 
-Settings are stored in ``.env.dev`` file.
+Settings are stored in ``.env.local`` file.
+
+To start development worker, open a new terminal window/tab, and run:
+
+.. code:: bash
+
+    make dev-worker
 
 Working with migrations
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -115,49 +116,113 @@ Start database:
 
 .. code:: bash
 
-    docker-compose up -d db
+    make db-start
 
 Generate revision:
 
 .. code:: bash
 
-    make revision
+    make db-revision ARGS="-m 'Message'"
 
 Upgrade db to ``head`` migration:
 
 .. code:: bash
 
-    make migrate
+    make db-upgrade
+
+Downgrade db to ``head-1`` migration:
+
+.. code:: bash
+
+    make db-downgrade
 
 Run tests locally
 ~~~~~~~~~~~~~~~~~
 
-Start all containers with dependencies:
+Unit tests
+^^^^^^^^^^
+
+This is as simple as:
 
 .. code:: bash
 
-    docker-compose up -d db rabbitmq test-postgres test-oracle test-hive
+    make test-unit
 
-Run tests:
+This command starts all necessary containers (Postgres, RabbitMQ), runs all necessary migrations, and then runs Pytest.
 
-.. code:: bash
-
-    make test
-
-Stop all containers and remove created volumes:
+You can pass additional arguments to pytest like this:
 
 .. code:: bash
 
-    docker-compose down -v
+    make test-unit PYTEST_ARGS="-k some-test -lsx -vvvv --log-cli-level=INFO"
 
 Get fixtures not used by any test:
 
 .. code:: bash
 
-    make check-fixtures
+    make test-check-fixtures
+
+Integration tests
+^^^^^^^^^^^^^^^^^
+
+.. warning::
+
+    To run HDFS and Hive tests locally you should add the following line to your ``/etc/hosts`` (file path depends on OS):
+
+    .. code::
+
+        # HDFS/Hive server returns container hostname as connection address, causing error in DNS resolution
+        127.0.0.1 test-hive
+
+To run specific integration tests:
+
+.. code:: bash
+
+    make test-integration-hdfs
+
+This starts database, broker & worker containers, and also HDFS container. Then it runs only HDFS-related integration tests.
+
+To run full test suite:
+
+.. code:: bash
+
+    make test-integration
+
+This starts all containers and runs all integration tests.
+
+Like unit tests, you can pass extra arguments to Pytest:
+
+.. code:: bash
+
+    make test-integration-hdfs PYTEST_ARGS="-k some-test -lsx -vvvv --log-cli-level=INFO"
+
+Stop all containers and remove created volumes:
+
+.. code:: bash
+
+    make test-cleanup ARGS="-v"
+
+Run production instance locally
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Firstly, build production images:
+
+.. code:: bash
+
+    make prod-build
+
+And then start all necessary services:
+
+.. code:: bash
+
+    make prod
+
+Then open http://localhost:8000/docs
+
+Settings are stored in ``.env.docker`` file.
 
 Build documentation
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 Build documentation using Sphinx & open it:
 
@@ -205,7 +270,7 @@ After pull request is created, it get a corresponding number, e.g. 123 (``pr_num
 Write release notes
 ~~~~~~~~~~~~~~~~~~~
 
-``syncmaster`` uses `towncrier <https://pypi.org/project/towncrier/>`_
+Data.SyncMaster uses `towncrier <https://pypi.org/project/towncrier/>`_
 for changelog management.
 
 To submit a change note about your PR, add a text file into the
@@ -265,7 +330,7 @@ Examples for adding changelog entries to your Pull Requests
 .. code-block:: rst
     :caption: docs/changelog/next_release/2345.bugfix.rst
 
-    Fixed behavior of ``backend`` -- by :github:user:`someuser`
+    Fixed behavior of ``server`` -- by :github:user:`someuser`
 
 .. code-block:: rst
     :caption: docs/changelog/next_release/3456.feature.rst

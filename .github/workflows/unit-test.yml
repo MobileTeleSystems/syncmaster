@@ -3,7 +3,7 @@ on:
   workflow_call:
 
 env:
-  DEFAULT_PYTHON: '3.11'
+  DEFAULT_PYTHON: '3.13'
 
 jobs:
   tests:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      POETRY_VERSION: 1.6.1
+      POETRY_VERSION: 2.1.2
 
     steps:
       - name: Checkout code
@@ -28,6 +28,17 @@ jobs:
         with:
           python-version: ${{ env.DEFAULT_PYTHON }}
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y --no-install-recommends \
+            openjdk-17-jdk-headless \
+            gcc \
+            make \
+            libffi-dev \
+            libkrb5-dev \
+            curl
+
       - name: Install poetry ${{ env.POETRY_VERSION }}
         uses: snok/install-poetry@v1
         with:
@@ -41,12 +52,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-tests-unit-${{ hashFiles('**/poetry.lock') }}
             ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-tests-unit-
-            ${{ runner.os }}-python
-            ${{ runner.os }}
+            ${{ runner.os }}-python-
 
       - name: Install dependencies
         run: |
-          poetry install --no-root --extras "backend" --with test
+          poetry install --no-root --all-extras --with test
 
       - name: Start docker compose
         run: |
@@ -56,8 +66,8 @@ jobs:
       - name: Run Unit Tests
         run: |
           source .env.local
-          poetry run python -m syncmaster.db.migrations upgrade head
-          poetry run coverage run -m pytest -vvv -s -m backend
+          source .env.local.test
+          poetry run coverage run -m pytest -vvv -s -k "test_unit or test_database"
 
       - name: Shutdown
         if: always()
@@ -67,5 +77,7 @@ jobs:
       - name: Upload coverage results
         uses: actions/upload-artifact@v4
         with:
-          name: unit-tests
+          name: coverage-unit
           path: reports/*
+          # https://github.com/actions/upload-artifact/issues/602
+          include-hidden-files: true

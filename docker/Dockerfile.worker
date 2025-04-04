@@ -1,46 +1,63 @@
-ARG BASE_IMAGE=python:3.11-slim
-FROM $BASE_IMAGE AS base
+ARG PYTHON_VERSION=3.13
+FROM python:$PYTHON_VERSION-slim AS base
 
-RUN apt-get update && apt-get install -y \
-        libsasl2-dev \
-        libsasl2-modules-gssapi-mit \
-        libsasl2-modules-ldap \
-        libsasl2-modules \
-        openjdk-17-jdk \
-        libssl-dev \
-        libldap2-dev \
-        autoconf \
-        gcc \
-        g++ \
-        make \
-        libnghttp2-dev \
-        libffi-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN pip install --no-cache-dir --timeout 3 --retries 3 poetry && poetry config virtualenvs.create false
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        openjdk-17-jdk-headless \
+        # required for HDFS/Hive with Kerberos enabled
+        krb5-user \
+    && rm -rf /var/lib/apt/lists/* /var/cache/*
 
 WORKDIR /app
-ENV PYTHONPATH=/app
-
-COPY ./pyproject.toml ./poetry.lock* /app/
-
-RUN pip install --upgrade pip setuptools wheel packaging
-RUN poetry install --no-root --extras "worker" --without test,docs,dev
+ENV PYTHONPATH=/app \
+    PATH="/app/.venv/bin:$PATH" \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1
 
 COPY ./docker/entrypoint_worker.sh /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["--loglevel=info"]
 
 
-FROM base as prod
+FROM base AS builder
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        autoconf \
+        gcc \
+        make \
+        # required to build gssapi from sources
+        libkrb5-dev \
+    && rm -rf /var/lib/apt/lists/* /var/cache/*
+
+RUN pip install poetry
+
+COPY ./pyproject.toml ./poetry.lock ./
+RUN --mount=type=cache,target=/root/.cache/pypoetry \
+    poetry install \
+        --no-root \
+        --extras "worker" \
+        --without test,docs,dev \
+    && python -m compileall -j 4 .venv
+
+
+FROM base AS prod
+
+# We don't need poetry and compilers in final image
+COPY --from=builder /app/.venv/ /app/.venv/
 COPY ./syncmaster/ /app/syncmaster/
+RUN python -m compileall syncmaster
 
 
-FROM base as test
+FROM builder AS test
 
-ENV CREATE_SPARK_SESSION_FUNCTION=tests.spark.get_worker_spark_session
+RUN --mount=type=cache,target=/root/.cache/pypoetry \
+    poetry install \
+        --no-root \
+        # CI runs tests in the worker container,
+        # so we need server & scheduler dependencies too
+        --all-extras \
+        --with test \
+        --without docs,dev \
+    && python -m compileall -j 4 .venv
 
-# CI runs tests in the worker container, so we need backend dependencies too
-RUN poetry install --no-root --extras "worker backend" --with test --without docs,dev
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
+ENV SYNCMASTER__WORKER__CREATE_SPARK_SESSION_FUNCTION=tests.spark.get_worker_spark_session

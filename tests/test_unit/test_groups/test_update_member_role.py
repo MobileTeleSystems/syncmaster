@@ -3,7 +3,7 @@ from httpx import AsyncClient
 
 from tests.mocks import MockConnection, MockGroup, MockUser, UserTestRoles
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.backend]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 async def test_owner_of_group_can_update_user_role(
@@ -12,10 +12,8 @@ async def test_owner_of_group_can_update_user_role(
     role_maintainer_or_below: UserTestRoles,
     role_guest_plus_without_owner: UserTestRoles,
 ):
-    # Arrange
     user = group.get_member_of_role(role_maintainer_or_below)
     group_owner = group.get_member_of_role(UserTestRoles.Owner)
-    # Act
     result = await client.patch(
         f"v1/groups/{group.id}/users/{user.user.id}",
         headers={"Authorization": f"Bearer {group_owner.token}"},
@@ -24,9 +22,8 @@ async def test_owner_of_group_can_update_user_role(
         },
     )
 
-    # Assert
+    assert result.status_code == 200, result.json()
     assert result.json() == {"role": role_guest_plus_without_owner}
-    assert result.status_code == 200
 
 
 async def test_superuser_can_update_user_role(
@@ -36,9 +33,7 @@ async def test_superuser_can_update_user_role(
     role_maintainer_or_below: UserTestRoles,
     role_guest_plus_without_owner: UserTestRoles,
 ):
-    # Arrange
     user = group.get_member_of_role(role_maintainer_or_below)
-    # Act
     result = await client.patch(
         f"v1/groups/{group.id}/users/{user.user.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -47,9 +42,8 @@ async def test_superuser_can_update_user_role(
         },
     )
 
-    # Assert
+    assert result.status_code == 200, result.json()
     assert result.json() == {"role": role_guest_plus_without_owner}
-    assert result.status_code == 200
 
 
 async def test_owner_of_group_can_not_update_user_role_with_wrong_role(
@@ -57,9 +51,7 @@ async def test_owner_of_group_can_not_update_user_role_with_wrong_role(
     group: MockGroup,
     role_maintainer_or_below: UserTestRoles,
 ):
-    # Arrange
     user = group.get_member_of_role(role_maintainer_or_below)
-    # Act
     result = await client.patch(
         f"v1/groups/{group.id}/users/{user.user.id}",
         headers={"Authorization": f"Bearer {group.get_member_of_role(UserTestRoles.Owner).token}"},
@@ -68,19 +60,22 @@ async def test_owner_of_group_can_not_update_user_role_with_wrong_role(
         },
     )
 
-    # Assert
-    assert result.status_code == 422
     assert result.json() == {
-        "detail": [
-            {
-                "ctx": {"expected": "'Maintainer', 'Developer' or 'Guest'"},
-                "input": "Unknown",
-                "loc": ["body", "role"],
-                "msg": "Input should be 'Maintainer', 'Developer' or 'Guest'",
-                "type": "enum",
-            }
-        ]
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [
+                {
+                    "location": ["body"],
+                    "message": "Value error, Input should be one of: Maintainer, Developer, Guest",
+                    "code": "value_error",
+                    "context": {},
+                    "input": {"role": "Unknown"},
+                },
+            ],
+        },
     }
+    assert result.status_code == 422, result.json()
 
 
 async def test_maintainer_below_can_not_update_user_role(
@@ -90,10 +85,8 @@ async def test_maintainer_below_can_not_update_user_role(
     role_guest_plus: UserTestRoles,
     role_guest_plus_without_owner: UserTestRoles,
 ):
-    # Arrange
     updating_user = group.get_member_of_role(role_maintainer_or_below)
     user_to_update = group.get_member_of_role(role_guest_plus)
-    # Act
     result = await client.patch(
         f"v1/groups/{group.id}/users/{user_to_update.user.id}",
         headers={"Authorization": f"Bearer {updating_user.token}"},
@@ -102,13 +95,14 @@ async def test_maintainer_below_can_not_update_user_role(
         },
     )
 
-    # Assert
     assert result.json() == {
-        "message": "You have no power here",
-        "ok": False,
-        "status_code": 403,
+        "error": {
+            "code": "forbidden",
+            "message": "You have no power here",
+            "details": None,
+        },
     }
-    assert result.status_code == 403
+    assert result.status_code == 403, result.json()
 
 
 async def test_other_group_member_can_not_update_user_role(
@@ -118,10 +112,8 @@ async def test_other_group_member_can_not_update_user_role(
     role_guest_plus: UserTestRoles,
     role_guest_plus_without_owner: UserTestRoles,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_guest_plus)
     group_member = group.get_member_of_role(role_guest_plus_without_owner)
-    # Act
     result = await client.patch(
         f"v1/groups/{group.id}/users/{group_member.user.id}",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -130,13 +122,14 @@ async def test_other_group_member_can_not_update_user_role(
         },
     )
 
-    # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
-    assert result.status_code == 404
+    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_update_unknown_group_error(
@@ -146,9 +139,7 @@ async def test_superuser_update_unknown_group_error(
     role_maintainer_or_below: UserTestRoles,
     role_guest_plus_without_owner: UserTestRoles,
 ):
-    # Arrange
     user = group.get_member_of_role(role_maintainer_or_below)
-    # Act
     result = await client.patch(
         f"v1/groups/-1/users/{user.user.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -157,11 +148,12 @@ async def test_superuser_update_unknown_group_error(
         },
     )
 
-    # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }
 
 
@@ -171,7 +163,6 @@ async def test_superuser_update_unknown_user_error(
     superuser: MockUser,
     role_guest_plus_without_owner: UserTestRoles,
 ):
-    # Act
     result = await client.patch(
         f"v1/groups/{group.id}/users/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -180,11 +171,12 @@ async def test_superuser_update_unknown_user_error(
         },
     )
 
-    # Assert
     assert result.json() == {
-        "message": "User not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "User not found",
+            "details": None,
+        },
     }
 
 
@@ -194,9 +186,7 @@ async def test_owner_of_group_update_unknown_user_error(
     role_maintainer_or_below: UserTestRoles,
     role_guest_plus_without_owner: UserTestRoles,
 ):
-    # Arrange
     group.get_member_of_role(role_maintainer_or_below)
-    # Act
     result = await client.patch(
         f"v1/groups/{group.id}/users/-1",
         headers={"Authorization": f"Bearer {group.get_member_of_role(UserTestRoles.Owner).token}"},
@@ -205,11 +195,12 @@ async def test_owner_of_group_update_unknown_user_error(
         },
     )
 
-    # Assert
     assert result.json() == {
-        "message": "User not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "User not found",
+            "details": None,
+        },
     }
 
 
@@ -219,9 +210,7 @@ async def test_owner_of_group_update_unknown_group_error(
     role_maintainer_or_below: UserTestRoles,
     role_guest_plus_without_owner: UserTestRoles,
 ):
-    # Arrange
     user = group.get_member_of_role(role_maintainer_or_below)
-    # Act
     result = await client.patch(
         f"v1/groups/-1/users/{user.user.id}",
         headers={"Authorization": f"Bearer {group.get_member_of_role(UserTestRoles.Owner).token}"},
@@ -230,9 +219,10 @@ async def test_owner_of_group_update_unknown_group_error(
         },
     )
 
-    # Assert
     assert result.json() == {
-        "message": "Group not found",
-        "ok": False,
-        "status_code": 404,
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
     }

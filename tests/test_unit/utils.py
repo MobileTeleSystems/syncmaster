@@ -6,12 +6,12 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Any
 
+from httpx import AsyncClient
 from onetl.connection import FileConnection
 from onetl.impl import LocalPath, RemotePath
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from syncmaster.config import Settings
 from syncmaster.db.models import (
     AuthData,
     Connection,
@@ -24,6 +24,8 @@ from syncmaster.db.models import (
 )
 from syncmaster.db.repositories.utils import encrypt_auth_data
 from syncmaster.schemas.v1.transfers import ReadFullTransferSchema
+from syncmaster.server.settings import ServerAppSettings as Settings
+from tests.mocks import MockConnection, MockTransfer
 
 
 @asynccontextmanager
@@ -32,13 +34,23 @@ async def create_user_cm(
     username: str,
     is_active: bool = False,
     is_superuser: bool = False,
-    is_deleted: bool = False,
+    email: str | None = None,
+    first_name: str | None = None,
+    middle_name: str | None = None,
+    last_name: str | None = None,
 ) -> AsyncGenerator[User, None]:
+    email = email or f"{username}@user.user"
+    first_name = first_name or f"{username}_first"
+    middle_name = middle_name or f"{username}_middle"
+    last_name = last_name or f"{username}_last"
     u = User(
         username=username,
+        email=email,
+        first_name=first_name,
+        middle_name=middle_name,
+        last_name=last_name,
         is_active=is_active,
         is_superuser=is_superuser,
-        is_deleted=is_deleted,
     )
     session.add(u)
     await session.commit()
@@ -53,13 +65,23 @@ async def create_user(
     username: str,
     is_active: bool = False,
     is_superuser: bool = False,
-    is_deleted: bool = False,
+    email: str | None = None,
+    first_name: str | None = None,
+    middle_name: str | None = None,
+    last_name: str | None = None,
 ) -> User:
+    email = email or f"{username}@user.user"
+    first_name = first_name or f"{username}_first"
+    middle_name = middle_name or f"{username}_middle"
+    last_name = last_name or f"{username}_last"
     u = User(
         username=username,
+        email=email,
+        first_name=first_name,
+        middle_name=middle_name,
+        last_name=last_name,
         is_active=is_active,
         is_superuser=is_superuser,
-        is_deleted=is_deleted,
     )
     session.add(u)
     await session.commit()
@@ -71,12 +93,14 @@ async def create_queue(
     session: AsyncSession,
     name: str,
     group_id: int,
+    slug: str | None = None,
     description: str | None = None,
 ) -> Queue:
     queue = Queue(
         name=name,
         description=description,
         group_id=group_id,
+        slug=slug if slug is not None else f"{group_id}-{name}",
     )
     session.add(queue)
     await session.commit()
@@ -100,7 +124,7 @@ async def create_credentials(
 ) -> AuthData:
     if auth_data is None:
         auth_data = {
-            "type": "postgres",
+            "type": "basic",
             "user": "user",
             "password": "password",
         }
@@ -119,13 +143,13 @@ async def create_credentials(
 async def create_connection(
     session: AsyncSession,
     name: str,
+    type: str = "postgres",
     group_id: int | None = None,
     description: str = "",
     data: dict[str, Any] | None = None,
 ) -> Connection:
     if data is None:
         data = {
-            "type": "postgres",
             "host": "127.0.0.1",
             "port": 5432,
             "database_name": "db",
@@ -136,6 +160,7 @@ async def create_connection(
         group_id=group_id,
         name=name,
         description=description,
+        type=type,
         data=data,
     )
     session.add(c)
@@ -153,8 +178,10 @@ async def create_transfer(
     group_id: int | None = None,
     source_params: dict | None = None,
     target_params: dict | None = None,
+    transformations: list | None = None,
+    resources: dict | None = None,
     is_scheduled: bool = True,
-    schedule: str = "0 0 * * *",
+    schedule: str = "* * * * *",
     strategy_params: dict | None = None,
     description: str = "",
 ) -> Transfer:
@@ -166,6 +193,8 @@ async def create_transfer(
         source_params=source_params or {"type": "postgres", "table_name": "table1"},
         target_connection_id=target_connection_id,
         target_params=target_params or {"type": "postgres", "table_name": "table1"},
+        transformations=transformations or [],
+        resources=resources or {"max_parallel_tasks": 1, "cpu_cores_per_task": 1, "ram_bytes_per_task": 1024**3},
         is_scheduled=is_scheduled,
         schedule=schedule,
         strategy_params=strategy_params or {"type": "full"},
@@ -192,7 +221,7 @@ async def create_run(
             joinedload(Transfer.target_connection),
         ),
     )
-    dump = ReadFullTransferSchema.from_orm(transfer).dict()
+    dump = ReadFullTransferSchema.model_validate(transfer, from_attributes=True).model_dump()
     r = Run(
         transfer_id=transfer_id,
         started_at=started_at,
@@ -232,3 +261,46 @@ def upload_files(
         )
 
     return remote_files
+
+
+async def fetch_connection_json(client: AsyncClient, user_token: str, mock_connection: MockConnection) -> dict:
+    connection = await client.get(
+        f"v1/connections/{mock_connection.id}",
+        headers={"Authorization": f"Bearer {user_token}"},
+    )
+    connection_json = connection.json()
+
+    auth_data = connection_json["auth_data"]
+    if auth_data["type"] in ("basic", "samba"):
+        auth_data["password"] = mock_connection.credentials.value["password"]
+    elif auth_data["type"] == "s3":
+        auth_data["secret_key"] = mock_connection.credentials.value["secret_key"]
+
+    return connection_json
+
+
+async def fetch_transfer_json(client: AsyncClient, user_token: str, mock_transfer: MockTransfer) -> dict:
+    transfer = await client.get(
+        f"v1/transfers/{mock_transfer.id}",
+        headers={"Authorization": f"Bearer {user_token}"},
+    )
+    return transfer.json()
+
+
+def build_transfer_json(mock_transfer: MockTransfer) -> dict:
+    return {
+        "id": mock_transfer.id,
+        "group_id": mock_transfer.group_id,
+        "name": mock_transfer.name,
+        "description": mock_transfer.description,
+        "schedule": mock_transfer.schedule,
+        "is_scheduled": mock_transfer.is_scheduled,
+        "source_connection_id": mock_transfer.source_connection_id,
+        "target_connection_id": mock_transfer.target_connection_id,
+        "source_params": mock_transfer.source_params,
+        "target_params": mock_transfer.target_params,
+        "strategy_params": mock_transfer.strategy_params,
+        "transformations": mock_transfer.transformations,
+        "resources": mock_transfer.resources,
+        "queue_id": mock_transfer.transfer.queue_id,
+    }

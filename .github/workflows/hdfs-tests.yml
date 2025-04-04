@@ -3,7 +3,7 @@ on:
   workflow_call:
 
 env:
-  DEFAULT_PYTHON: '3.11'
+  DEFAULT_PYTHON: '3.13'
 
 jobs:
   tests:
@@ -24,34 +24,31 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./cached_jars
-          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-hdfs-jars
+          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-hdfs
           restore-keys: |
-            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-hdfs-jars
-            ${{ runner.os }}-python
-            ${{ runner.os }}
+            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-hdfs
+            ${{ runner.os }}-python-
 
       - name: Build Worker Image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           tags: mtsrus/syncmaster-worker:${{ github.sha }}
           target: test
           file: docker/Dockerfile.worker
           load: true
-          cache-to: type=gha,mode=max
-          cache-from: type=gha
+          cache-from: mtsrus/syncmaster-worker:develop
 
       - name: Docker compose up
         run: |
-          docker compose -f docker-compose.test.yml down -v --remove-orphans
-          docker compose -f docker-compose.test.yml up -d db worker rabbitmq test-hive test-postgres --wait --wait-timeout 200
+          docker compose -f docker-compose.test.yml --profile all down -v --remove-orphans
+          docker compose -f docker-compose.test.yml --profile hdfs up -d --wait --wait-timeout 200
         env:
           WORKER_IMAGE_TAG: ${{ github.sha }}
 
-      # This is important, as coverage is exported after receiving SIGTERM
       - name: Run HDFS Tests
         run: |
-          docker compose -f ./docker-compose.test.yml exec -T worker coverage run -m pytest -vvv -s -m "worker and hdfs"
+          docker compose -f ./docker-compose.test.yml --profile hdfs exec -T worker coverage run -m pytest -vvv -s -m "worker and hdfs"
 
       - name: Dump worker logs on failure
         if: failure()
@@ -60,20 +57,23 @@ jobs:
           images: mtsrus/syncmaster-worker
           dest: ./logs
 
+      # This is important, as coverage is exported after receiving SIGTERM
       - name: Shutdown
         if: always()
         run: |
-          docker compose -f docker-compose.test.yml down -v --remove-orphans
-
-      - name: Upload coverage results
-        uses: actions/upload-artifact@v4
-        with:
-          name: hdfs-tests
-          path: reports/*
+          docker compose -f docker-compose.test.yml --profile all down -v --remove-orphans
 
       - name: Upload worker logs
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: hdfs-worker-logs
+          name: worker-logs-hdfs
           path: logs/*
+
+      - name: Upload coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-hdfs
+          path: reports/*
+          # https://github.com/actions/upload-artifact/issues/602
+          include-hidden-files: true

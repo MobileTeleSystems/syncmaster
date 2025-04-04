@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from syncmaster.db.models import Base
 from tests.utils import get_diff_db_metadata
 
-pytestmark = [pytest.mark.backend]
+pytestmark = [pytest.mark.server]
 
 
 @pytest.mark.asyncio

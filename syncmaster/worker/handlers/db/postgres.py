@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
@@ -20,6 +20,10 @@ class PostgresHandler(DBHandler):
     connection: Postgres
     connection_dto: PostgresConnectionDTO
     transfer_dto: PostgresTransferDTO
+    _operators = {
+        "regexp": "~",
+        **DBHandler._operators,
+    }
 
     def connect(self, spark: SparkSession):
         self.connection = Postgres(
@@ -32,7 +36,18 @@ class PostgresHandler(DBHandler):
             spark=spark,
         ).check()
 
-    def normalize_column_names(self, df: DataFrame) -> DataFrame:
+    def _normalize_column_names(self, df: DataFrame) -> DataFrame:
         for column_name in df.columns:
             df = df.withColumnRenamed(column_name, column_name.lower())
         return df
+
+    def _make_rows_filter_expression(self, filters: list[dict]) -> str | None:
+        expressions = []
+        for filter in filters:
+            field = self._quote_field(filter["field"])
+            op = self._operators[filter["type"]]
+            value = filter.get("value")
+
+            expressions.append(f"{field} {op} '{value}'" if value is not None else f"{field} {op}")
+
+        return " AND ".join(expressions) or None

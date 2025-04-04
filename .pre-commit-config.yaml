@@ -1,14 +1,13 @@
 default_language_version:
-  python: python3.11
+  python: python3.12
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-added-large-files
       - id: check-ast
       - id: check-merge-conflict
-      - id: check-yaml
       - id: debug-statements
       - id: detect-private-key
       - id: end-of-file-fixer
@@ -40,27 +39,32 @@ repos:
       - id: chmod
         args: ['644']
         exclude_types: [shell]
-        exclude: ^(.*__main__\.py)$
+        exclude: ^(.*__main__\.py|syncmaster/server/scripts/.*\.py)$
       - id: chmod
         args: ['755']
         types: [shell]
       - id: chmod
         args: ['755']
-        files: ^(.*__main__\.py)$
+        files: ^(.*__main__\.py|syncmaster/server/scripts/.*\.py)$
       - id: insert-license
-        files: .*\.py$
-        exclude: ^(tests/.*\.py)$
+        types: [python]
+        exclude: ^(syncmaster/server/dependencies/stub.py|docs/.*\.py|tests/.*\.py)$
         args:
           - --license-filepath
           - .spdx-license-header.txt
-          - --use-current-year
+          - --allow-past-years
           - --no-extra-eol
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.15.2
+    rev: v3.19.1
     hooks:
       - id: pyupgrade
         args: [--py311-plus, --keep-runtime-typing]
+
+  - repo: https://github.com/asottile/add-trailing-comma
+    rev: v3.1.0
+    hooks:
+      - id: add-trailing-comma
 
   - repo: https://github.com/pycqa/autoflake
     rev: v2.3.1
@@ -73,13 +77,12 @@ repos:
           - --ignore-init-module-imports
 
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 24.4.0
+    rev: 25.1.0
     hooks:
       - id: black
-        language_version: python3.11
 
   - repo: https://github.com/pycqa/bandit
-    rev: 1.7.8
+    rev: 1.8.3
     hooks:
       - id: bandit
         args:
@@ -89,18 +92,25 @@ repos:
         require_serial: true
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
+    rev: 6.0.1
     hooks:
       - id: isort
         name: isort (python)
 
   - repo: local
     hooks:
+      - id: flake8
+        name: flake8
+        entry: flake8
+        language: python
+        types: [python]
+        files: ^syncmaster/.*$
+        pass_filenames: true
+
       - id: mypy
         name: mypy
-        entry: mypy ./syncmaster/backend --config-file ./pyproject.toml
+        entry: mypy ./syncmaster/server --config-file ./pyproject.toml
         language: python
-        language_version: python3.11
         require_serial: true
         pass_filenames: false
 
@@ -111,13 +121,13 @@ repos:
       - id: docker-compose-check
 
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.13.0
+    rev: v2.14.0
     hooks:
       - id: pretty-format-yaml
         args: [--autofix, --indent, '2', --offset, '2']
 
   - repo: https://github.com/sbrunner/hooks
-    rev: 1.0.0
+    rev: 1.4.0
     hooks:
       - id: poetry-check
         additional_dependencies:
@@ -133,6 +143,7 @@ repos:
 
 ci:
   skip:
+    - flake8 # checked with Github Actions
     - mypy  # checked with Github Actions
     - chmod  # failing in pre-commit.ci
     - docker-compose-check  # cannot run on pre-commit.ci

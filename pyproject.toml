@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "data-syncmaster"
-version = "0.1.5"
+version = "0.2.0"
 license = "Apache-2.0"
 description = "Syncmaster REST API + Worker"
 authors = ["DataOps.ETL <onetools@mts.ru>"]
@@ -24,6 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
@@ -47,32 +48,52 @@ exclude = [
 
 [tool.poetry.dependencies]
 python = "^3.11"
-pydantic = "^2.7.0"
-pydantic-settings = { version = "^2.2.1", optional = true }
-sqlalchemy = { version = "^2.0.18", optional = true }
-sqlalchemy-utils = { version = "^0.41.1", optional = true }
-fastapi = { version = "^0.110.0", optional = true}
-uvicorn = { version = "^0.29.0", optional = true }
-alembic = { version = "^1.11.1", optional = true }
-asyncpg = { version = "^0.29.0", optional = true }
-python-jose = { version = "^3.3.0", extras = ["cryptography"], optional = true }
-python-multipart = { version = "^0.0.9", optional = true }
-celery = { version = "^5.3.3", optional = true }
-onetl = { version = "^0.10.2", extras = ["spark"], optional = true }
-psycopg2-binary = { version = "^2.9.7", optional = true }
+pydantic = "^2.11.1"
+pydantic-settings = { version = "^2.8.1", optional = true }
+sqlalchemy = { version = "^2.0.40", optional = true }
+sqlalchemy-utils = { version = "^0.41.2", optional = true }
+fastapi = { version = "^0.115.12", optional = true}
+asgi-correlation-id = {version = "^4.3.4", optional = true}
+uvicorn = { version = "^0.34.0", optional = true }
+alembic = { version = "^1.15.2", optional = true }
+pyjwt = { version = "^2.10.1", optional = true }
+jinja2 = { version = "^3.1.6", optional = true }
+python-multipart = { version = "^0.0.20", optional = true }
+celery = { version = "^5.5.0", optional = true }
+onetl = { version = "^0.13.4", extras = ["all"], optional = true }
+pyyaml = { version = "*", optional = true }
+psycopg2-binary = { version = "^2.9.10", optional = true }
+uuid6 = {version = "^2024.7.10", optional = true}
+coloredlogs = {version = "*", optional = true}
+python-json-logger = {version = "*", optional = true}
+asyncpg = { version = "^0.30.0", optional = true }
+apscheduler = { version = "^3.11.0", optional = true }
+starlette-exporter = { version = "^0.23.0", optional = true }
+python-keycloak = { version = "^5.3.1", optional = true }
+itsdangerous = { version = "^2.2.0", optional = true }
+horizon-hwm-store = { version = "^1.1.2", optional = true }
 
 [tool.poetry.extras]
-backend = [
+server = [
     "pydantic-settings",
     "sqlalchemy",
     "sqlalchemy-utils",
     "fastapi",
+    "starlette-exporter",
     "uvicorn",
     "alembic",
-    "asyncpg",
     "python-multipart",
-    "python-jose",
-    # migrations only
+    "pyjwt",
+    "asgi-correlation-id",
+    "jinja2",
+    "psycopg2-binary",
+    "uuid6",
+    "coloredlogs",
+    "python-json-logger",
+    "asyncpg",
+    "python-keycloak",
+    "itsdangerous",
+    "pyyaml",
     "celery",
 ]
 
@@ -82,51 +103,66 @@ worker = [
     "sqlalchemy-utils",
     "celery",
     "onetl",
+    "asgi-correlation-id",
+    "jinja2",
     "psycopg2-binary",
+    "uuid6",
+    "coloredlogs",
+    "python-json-logger",
+    "pyyaml",
+    "horizon-hwm-store",
+]
+
+scheduler = [
+    "apscheduler",
+    "pydantic-settings",
+    "sqlalchemy",
+    "sqlalchemy-utils",
+    "asyncpg",
+    "pyyaml",
+    "coloredlogs",
+    "python-json-logger",
+    "celery",
 ]
 
 [tool.poetry.group.test.dependencies]
-pandas-stubs = "^2.1.4.231227"
-pytest = "^8.1.1"
-httpx = "^0.27.0"
-pytest-asyncio = "^0.23.6"
-psycopg2-binary = "^2.9.7"
-pytest-randomly = "^3.13.0"
+pytest = "^8.3.5"
+httpx = "^0.28.1"
+pytest-asyncio = "^0.26.0"
+pytest-randomly = "^3.15.0"
+pytest-rerunfailures = "^15.0"
 pytest-deadfixtures = "^2.2.1"
-pytest-mock = "^3.11.1"
-onetl = {extras = ["spark", "s3", "hdfs"], version = "^0.10.2"}
-faker = "^24.4.0"
-coverage = "^7.4.3"
-gevent = "^24.2.1"
+pytest-mock = "^3.14.0"
+pytest-lazy-fixtures = "^1.1.1"
+faker = "^37.1.0"
+coverage = "^7.8.0"
+gevent = "^24.11.1"
+responses = "^0.25.7"
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^3.3.3"
-mypy = "^1.4.1"
-black = "^24.3.0"
-isort = "^5.12.0"
-flake8 = "^7.0.0"
-bandit = "^1.7.5"
-platformdirs = "4.2.0"
-sqlalchemy = {extras = ["mypy"], version = "^2.0.18"}
-types-python-jose = "^3.3.4.7"
+mypy = "^1.15.0"
+pre-commit = "^4.2.0"
+black = "^25.1.0"
+flake8 = "^7.2.0"
+flake8-pyproject = "^1.2.3"
+sqlalchemy = {extras = ["mypy"], version = "^2.0.40"}
 
 [tool.poetry.group.docs.dependencies]
-autodoc-pydantic = {version = "^2.0.1", python = ">=3.8"}
-numpydoc = {version = "^1.6.0", python = ">=3.8"}
-sphinx = [
-  {version = "^7.1.2", python = ">=3.8"},
-  {version = "^7.2.6", python = ">=3.9"},
-]
-furo = {version = "^2024.1.29", python = ">=3.8"}
-sphinx-copybutton = {version = "^0.5.2", python = ">=3.8"}
-sphinxcontrib-towncrier = {version = "^0.4.0a0", python = ">=3.8"}
-towncrier = {version = "^23.11.0", python = ">=3.8"}
-sphinx-issues = {version = ">=3.0.1,<5.0.0", python = ">=3.8"}
-sphinx-design = {version = "^0.5.0", python = ">=3.8"}
-sphinx-favicon = {version = "^1.0.1", python = ">=3.8"}
-sphinx-argparse = {version = "^0.4.0", python = ">=3.8"}
+autodoc-pydantic = "^2.2.0"
+numpydoc = "^1.8.0"
+sphinx = "^8.2.3"
+furo = "^2024.8.6"
+sphinx-copybutton = "^0.5.2"
+sphinxcontrib-towncrier = "^0.5.0a0"
+towncrier = "^24.8.0"
+sphinx-issues = "^5.0.0"
+sphinx-design = "^0.6.1"
+sphinx-favicon = "^1.0.1"
+sphinx-argparse = "^0.5.2"
+# https://github.com/mgeier/sphinx-last-updated-by-git/pull/77
+sphinx-last-updated-by-git = "^0.3.8"
 # uncomment after https://github.com/zqmillet/sphinx-plantuml/pull/4
-# sphinx-plantuml = {version = "^1.0.0", python = ">=3.8"}
+# sphinx-plantuml = "^1.0.0"
 
 [tool.black]
 line-length = 120
@@ -147,6 +183,10 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "pyarrow.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "keycloak.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
@@ -187,13 +227,22 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 markers = [
-    "backend: tests for backend (require running database)",
+    "server: tests for server (require running database)",
+    "scheduler: tests for scheduler (require running database)",
     "worker: tests for syncmaster worker",
     "hive: tests for Hive",
     "postgres: tests on Postgres",
     "oracle: tests for Oracle",
+    "clickhouse: tests for Clickhouse",
+    "mysql: tests for MySQL",
+    "mssql: tests for MSSQL",
     "hdfs: tests for hadoop hdfs",
     "s3: tests for S3",
+    "ftp: tests for FTP",
+    "ftps: tests for FTPS",
+    "sftp: tests for SFTP",
+    "samba: tests for Samba",
+    "webdav: tests for WebDAV",
 ]
 
 [tool.coverage.paths]
@@ -224,6 +273,215 @@ exclude_lines = [
   "@(abc\\.)?abstractmethod",
   "\\.\\.\\.",
   "def downgrade\\(\\)",
+]
+
+[tool.flake8]
+jobs = 4
+# We don't control ones who use our code
+i-control-code = false
+# Max of noqa in a module
+max-noqa-comments = 10
+max-annotation-complexity = 4
+max-returns = 5
+max-awaits = 5
+max-local-variables = 20
+max-name-length = 60
+# Max of expressions in a function
+max-expressions = 15
+# Max args in a function
+max-arguments = 15
+# Max classes and functions in a single module
+max-module-members = 35
+max-import-from-members = 35
+max-methods = 25
+# Max line complexity measured in AST nodes
+max-line-complexity = 24
+# Max Jones Score for a module: the median of all lines complexity sum
+max-jones-score = 15
+# Max amount of cognitive complexity per function
+max-cognitive-score = 20
+# Max amount of cognitive complexity per module
+max-cognitive-average = 25
+max-imports = 25
+max-imported-names = 50
+# Max of expression usages in a module
+max-module-expressions = 15
+# Max of expression usages in a function
+max-function-expressions = 15
+max-base-classes = 5
+max-decorators = 6
+# Max of repeated string constants in your modules
+max-string-usages = 15
+max-try-body-length = 15
+max-asserts = 15
+# Max number of access level in an expression
+max-access-level = 6
+# maximum number of public instance attributes
+max-attributes = 20
+
+max-line-length = 120
+max-doc-length = 120
+
+# https://pypi.org/project/flake8-quotes/
+inline-quotes = "double"
+multiline-quotes = "double"
+docstring-quotes = "double"
+
+# https://wemake-python-stylegui.de/en/latest/pages/usage/formatter.html
+show-source = true
+# Print total number of errors
+count = true
+statistics = true
+
+exclude = [
+  ".tox",
+  "migrations",
+  "dist",
+  "build",
+  "hadoop_archive_plugin",
+  "virtualenv",
+  "venv",
+  "venv36",
+  "ve",
+  ".venv",
+  "tox.ini",
+  "docker",
+  "Jenkinsfile",
+  "dags",
+  "setup.py",
+  "docs"
+]
+rst-directives = [
+  "autosummary",
+  "data",
+  "currentmodule",
+  "deprecated",
+  "glossary",
+  "moduleauthor",
+  "plot",
+  "testcode",
+  "versionadded",
+  "versionchanged"
+]
+# https://github.com/peterjc/flake8-rst-docstrings/pull/16
+rst-roles = [
+  "attr",
+  "class",
+  "func",
+  "meth",
+  "mod",
+  "obj",
+  "ref",
+  "term",
+  "py:func",
+  "py:mod"
+]
+
+ignore = [
+  "ANN",
+  "FI1",
+# Found upper-case constant in a class: DB_URL
+  "WPS115",
+# Found statement that has no effect
+  "WPS428",
+# Found `f` string [opinionated]
+  "WPS305",
+# Found class without a base class (goes against PEP8) [opinionated]
+  "WPS306",
+# Found line break before binary operator [goes against PEP8] [opinionated]
+  "W503",
+# Found multiline conditions [opinionated]
+  "WPS337",
+# Found mutable module constant [opinionated]
+  "WPS407",
+# Found empty module:
+  "WPS411",
+# Found nested import [opinionated]
+  "WPS433",
+# Found negated condition [opinionated]
+  "WPS504",
+# Found implicit `.get()` dict usage
+  "WPS529",
+# Docstrings [opinionated]
+  "D",
+# string does contain unindexed parameters'
+  "P101",
+  "P103",
+# Found implicit string concatenation [optional]
+  "WPS326",
+# Found wrong function call: locals'
+  "WPS421",
+# module level import not at top of file
+  "E402",
+# Document or section may not begin with a transition.
+  "RST399",
+# Error in "code" directive
+  "RST307",
+# Found `%` string formatting
+  "WPS323",
+# doc line too long
+  "W505",
+# line too long
+  "E501",
+# Found wrong module name: util
+  "WPS100",
+# Found wrong keyword: pass
+  "WPS420",
+# Found incorrect node inside `class` body: pass
+  "WPS604",
+# Found wrong variable name: data
+  "WPS110",
+# Found builtin shadowing: id
+  "WPS125",
+# Found too short name: e < 2
+  "WPS111",
+# Found a line that starts with a dot
+  "WPS348",
+# first argument of a method should be named 'self'
+  "N805",
+# Found `finally` in `try` block without `except`
+  "WPS501",
+# Wrong multiline string usage: textwrap.dedent + multiline comment
+  "WPS462",
+# Found incorrect multi-line string: 3-quoted docstring with just one line
+  "WPS322",
+# https://github.com/wemake-services/wemake-python-styleguide/issues/2847
+# E704 multiple statements on one line (def)
+  "E704",
+# WPS220 Found too deep nesting: 34 > 20
+  "WPS220",
+# WPS412 Found `__init__.py` module with logic
+  "WPS412",
+# WPS410 Found wrong metadata variable: __all__
+  "WPS410",
+]
+
+per-file-ignores = [
+# WPS102 Found incorrect module name pattern
+# WPS432 Found magic number: 256
+  "*migrations/*.py:WPS102,WPS432",
+  "*db/models/*.py:WPS102,WPS432",
+  "*db/mixins/*.py:WPS102,WPS432",
+# WPS432 Found magic number: 180
+  "*settings/*.py:WPS432",
+# WPS404 Found complex default value
+  "*server/api/*.py:WPS404",
+# WPS237 Found a too complex `f` string
+  "*exceptions/*.py:WPS237",
+  "*exceptions/__init__.py:F40,WPS410",
+# WPS201 Found module with too many imports: 30 > 25
+# WPS203 Found module with too many imported names: 55 > 50
+  "syncmaster/worker/controller.py:WPS201,WPS203",
+# TAE001 too few type annotations
+# WPS231 Found function with too much cognitive complexity
+# S101 Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+# WPS442 Found outer scope names shadowing
+# WPS432 Found magic number
+# WPS334 Found reversed complex comparison
+# WPS218 Found too many `assert` statements: 19 > 15
+# WPS226 Found string literal over-use: value > 15
+# WPS118 Found too long name:
+  "*tests/*.py:TAE001,WPS231,S101,WPS442,WPS432,WPS334,WPS218,WPS226,WPS118",
 ]
 
 [tool.towncrier]

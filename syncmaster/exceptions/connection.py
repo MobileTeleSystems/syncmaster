@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS (Mobile Telesystems)
+# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from syncmaster.exceptions.base import EntityNotFoundError, SyncmasterError
 
@@ -12,6 +12,14 @@ class ConnectionOwnerError(SyncmasterError):
 
 
 class ConnectionTypeNotRecognizedError(SyncmasterError):
+    pass
+
+
+class ConnectionTypeUpdateError(SyncmasterError):
+    pass
+
+
+class ConnectionAuthDataUpdateError(SyncmasterError):
     pass
 
 
