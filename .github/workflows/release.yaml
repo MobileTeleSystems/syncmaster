@@ -35,6 +35,9 @@ jobs:
         with:
           python-version: ${{ env.DEFAULT_PYTHON }}
 
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+
       - name: Cache poetry
         uses: actions/cache@v4
         with:
@@ -44,17 +47,14 @@ jobs:
             ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-release-${{ hashFiles('**/poetry.lock') }}
             ${{ runner.os }}-python-
 
-      - name: Install poetry
-        uses: snok/install-poetry@v1
-
       - name: Install dependencies
         run: |
-          poetry config virtualenvs.create false
           poetry install --no-root --all-extras --without test,dev,docs
 
       - name: Generate OpenAPI Schema
         run: |
-          python -m syncmaster.server.scripts.export_openapi_schema docs/_static/openapi.json
+          source .env.local
+          poetry run python -m syncmaster.server.scripts.export_openapi_schema docs/_static/openapi.json
 
       - name: Fix logo in Readme
         run: |
