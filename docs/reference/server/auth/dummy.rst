@@ -8,7 +8,7 @@ Description
 
 This auth provider allows to sign-in with any username and password, and and then issues an access token.
 
-After successful auth, username is saved to server database. It is then used for creating audit records for any object change, see ``changed_by`` field.
+After successful auth, username is saved to server database.
 
 Interaction schema
 ------------------
@@ -45,7 +45,7 @@ Interaction schema
                 "Server" x-[#red]> "Client" -- : 404 Not found
             end
 
-            == GET v1/namespaces ==
+            == GET v1/users/me ==
 
             alt Successful case
                 "Client" -> "Server" ++ : access_token
