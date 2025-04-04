@@ -76,7 +76,6 @@ class Group(Base, TimestampMixin):
     owner_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
 
     owner: Mapped[User] = relationship(User)
-    members: Mapped[list[User]] = relationship(User, secondary="user_group")
     queue: Mapped[Queue] = relationship(back_populates="group", cascade="all, delete-orphan")
 
     search_vector: Mapped[str] = mapped_column(
