@@ -15,10 +15,8 @@ async def test_maintainer_plus_can_create_queue(
     role_maintainer_plus: UserTestRoles,
     mock_group: MockGroup,
 ):
-    # Arrange
     user = mock_group.get_member_of_role(role_maintainer_plus)
 
-    # Act
     result = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -29,7 +27,7 @@ async def test_maintainer_plus_can_create_queue(
         },
     )
 
-    # Assert
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": result.json()["id"],
         "name": "New_queue",
@@ -37,9 +35,8 @@ async def test_maintainer_plus_can_create_queue(
         "group_id": mock_group.group.id,
         "slug": f"{mock_group.group.id}-New_queue",
     }
-    assert result.status_code == 200, result.json()
-    queue = (await session.scalars(select(Queue).filter_by(id=result.json()["id"]))).one()
 
+    queue = (await session.scalars(select(Queue).filter_by(id=result.json()["id"]))).one()
     assert queue.id == result.json()["id"]
     assert queue.group_id == mock_group.group.id
     assert queue.name == "New_queue"
@@ -56,7 +53,6 @@ async def test_superuser_can_create_queue(
     mock_group: MockGroup,
     superuser: MockUser,
 ):
-    # Act
     result = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -67,7 +63,7 @@ async def test_superuser_can_create_queue(
         },
     )
 
-    # Assert
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": result.json()["id"],
         "name": "New_queue",
@@ -75,7 +71,6 @@ async def test_superuser_can_create_queue(
         "group_id": mock_group.group.id,
         "slug": f"{mock_group.group.id}-New_queue",
     }
-    assert result.status_code == 200, result.json()
     queue = (await session.scalars(select(Queue).filter_by(id=result.json()["id"]))).one()
 
     assert queue.id == result.json()["id"]
@@ -94,10 +89,8 @@ async def test_developer_or_below_cannot_create_queue(
     role_developer_or_below: UserTestRoles,
     mock_group: MockGroup,
 ):
-    # Arrange
     user = mock_group.get_member_of_role(role_developer_or_below)
 
-    # Act
     result = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -108,7 +101,6 @@ async def test_developer_or_below_cannot_create_queue(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "forbidden",
@@ -124,10 +116,8 @@ async def test_other_group_member_cannot_create_queue(
     empty_group: MockGroup,
     group: MockGroup,
 ):
-    # Arrange
     user = group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -138,7 +128,6 @@ async def test_other_group_member_cannot_create_queue(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -154,7 +143,6 @@ async def test_groupless_user_cannot_create_queue_error(
     empty_group: MockGroup,
     session: AsyncSession,
 ):
-    # Act
     result = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {simple_user.token}"},
@@ -165,7 +153,6 @@ async def test_groupless_user_cannot_create_queue_error(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -181,10 +168,8 @@ async def test_maintainer_plus_cannot_create_queue_with_unknown_group_error(
     role_maintainer_plus: UserTestRoles,
     mock_group: MockGroup,
 ):
-    # Arrange
     user = mock_group.get_member_of_role(role_maintainer_plus)
 
-    # Act
     result = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -195,7 +180,6 @@ async def test_maintainer_plus_cannot_create_queue_with_unknown_group_error(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -209,7 +193,6 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
     client: AsyncClient,
     superuser: MockUser,
 ):
-    # Act
     result = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -220,7 +203,6 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -351,10 +333,8 @@ async def test_maintainer_plus_cannot_create_queue_with_wrong_name(
     name_value: str,
     error: dict,
 ):
-    # Arrange
     user = mock_group.get_member_of_role(role_maintainer_plus)
 
-    # Act
     result = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -365,7 +345,6 @@ async def test_maintainer_plus_cannot_create_queue_with_wrong_name(
         },
     )
 
-    # Assert
     assert result.json() == error
 
 
@@ -376,10 +355,8 @@ async def test_maintainer_plus_can_not_create_queue_with_duplicate_name_error(
     mock_group: MockGroup,
     group_queue: Queue,
 ):
-    # Arrange
     user = mock_group.get_member_of_role(role_maintainer_plus)
 
-    # Act
     result = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -390,7 +367,6 @@ async def test_maintainer_plus_can_not_create_queue_with_duplicate_name_error(
         },
     )
 
-    # Assert
     assert result.status_code == 409, result.json()
     assert result.json() == {
         "error": {
@@ -408,11 +384,9 @@ async def test_maintainer_plus_can_create_queues_with_the_same_name_but_diff_gro
     mock_group: MockGroup,
     group: MockGroup,
 ):
-    # Arrange
     mock_group_user = mock_group.get_member_of_role(role_maintainer_plus)
     group_user = group.get_member_of_role(role_maintainer_plus)
 
-    # Act
     queue_1 = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {mock_group_user.token}"},
@@ -434,7 +408,6 @@ async def test_maintainer_plus_can_create_queues_with_the_same_name_but_diff_gro
     queue_1_json = queue_1.json()
     queue_2_json = queue_2.json()
 
-    # Assert
     assert queue_1.status_code == 200
     assert queue_1_json == {
         "id": queue_1_json["id"],

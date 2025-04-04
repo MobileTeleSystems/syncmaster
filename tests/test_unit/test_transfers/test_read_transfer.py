@@ -19,8 +19,8 @@ async def test_guest_plus_can_read_transfer(
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    assert result.json() == build_transfer_json(group_transfer)
     assert result.status_code == 200, result.json()
+    assert result.json() == build_transfer_json(group_transfer)
 
 
 async def test_groupless_user_cannot_read_transfer(
@@ -33,6 +33,7 @@ async def test_groupless_user_cannot_read_transfer(
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
 
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -40,7 +41,6 @@ async def test_groupless_user_cannot_read_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
 
 
 async def test_group_member_cannot_read_transfer_of_other_group(
@@ -56,6 +56,7 @@ async def test_group_member_cannot_read_transfer_of_other_group(
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -63,7 +64,6 @@ async def test_group_member_cannot_read_transfer_of_other_group(
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_can_read_transfer(
@@ -76,8 +76,8 @@ async def test_superuser_can_read_transfer(
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 
-    assert result.json() == build_transfer_json(group_transfer)
     assert result.status_code == 200, result.json()
+    assert result.json() == build_transfer_json(group_transfer)
 
 
 async def test_unauthorized_user_cannot_read_transfer(
@@ -127,6 +127,7 @@ async def test_group_member_cannot_read_unknown_transfer_error(
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -134,4 +135,3 @@ async def test_group_member_cannot_read_unknown_transfer_error(
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()

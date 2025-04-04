@@ -123,11 +123,9 @@ async def test_developer_plus_can_create_s3_transfer(
     target_params: dict,
     create_connection_data: dict,
 ):
-    # Arrange
     first_connection, second_connection = two_group_connections
     user = mock_group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -155,7 +153,6 @@ async def test_developer_plus_can_create_s3_transfer(
             ),
         )
     ).one()
-    # Assert
     assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": transfer.id,
@@ -304,11 +301,9 @@ async def test_developer_plus_can_create_hdfs_transfer(
     session: AsyncSession,
     client: AsyncClient,
 ):
-    # Arrange
     first_connection, second_connection = two_group_connections
     user = mock_group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -337,7 +332,6 @@ async def test_developer_plus_can_create_hdfs_transfer(
         )
     ).one()
 
-    # Assert
     assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": transfer.id,
@@ -457,11 +451,9 @@ async def test_cannot_create_file_transfer_with_relative_path(
     target_source_params: dict,
     create_connection_data: dict,
 ):
-    # Arrange
     first_connection, second_connection = two_group_connections
     user = mock_group.get_member_of_role(UserTestRoles.Developer)
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -480,7 +472,6 @@ async def test_cannot_create_file_transfer_with_relative_path(
         },
     )
 
-    # Assert
     assert result.status_code == 422, result.json()
     assert result.json() == {
         "error": {

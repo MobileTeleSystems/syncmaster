@@ -18,10 +18,8 @@ async def test_developer_plus_can_create_mysql_connection(
     settings: Settings,
     role_developer_plus: UserTestRoles,
 ):
-    # Arrange
     user = group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -58,7 +56,6 @@ async def test_developer_plus_can_create_mysql_connection(
         )
     ).one()
 
-    # Assert
     decrypted = decrypt_auth_data(creds.value, settings=settings)
     assert result.status_code == 200, result.json()
     assert result.json() == {

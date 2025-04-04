@@ -12,7 +12,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 async def test_get_users_unauthorized(client: AsyncClient):
     response = await client.get("v1/users")
 
-    assert response.status_code == 401
+    assert response.status_code == 401, response.json()
     assert response.json() == {
         "error": {
             "code": "unauthorized",
@@ -56,7 +56,7 @@ async def test_get_users_inactive(client: AsyncClient, inactive_user: MockUser):
 
     response = await client.get("v1/users", headers=headers)
 
-    assert response.status_code == 403
+    assert response.status_code == 403, response.json()
     assert response.json() == {
         "error": {
             "code": "forbidden",
@@ -96,6 +96,7 @@ async def test_search_users_with_query(
         params={"search_query": search_query},
     )
 
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "meta": {
             "page": 1,
@@ -115,7 +116,6 @@ async def test_search_users_with_query(
             },
         ],
     }
-    assert result.status_code == 200, result.json()
 
 
 async def test_search_users_with_nonexistent_query(

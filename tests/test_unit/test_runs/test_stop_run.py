@@ -14,16 +14,13 @@ async def test_developer_plus_can_stop_run_of_transfer_his_group(
     session: AsyncSession,
     role_developer_plus: UserTestRoles,
 ) -> None:
-    # Arrange
     user = group_run.transfer.owner_group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.post(
         f"v1/runs/{group_run.id}/stop",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    # Assert
     await session.refresh(group_run.run)
     assert group_run.status == Status.SEND_STOP_SIGNAL
 
@@ -46,12 +43,11 @@ async def test_groupless_user_cannot_stop_run(
     group_run: MockRun,
     session: AsyncSession,
 ) -> None:
-    # Act
     result = await client.post(
         f"v1/runs/{group_run.id}/stop",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -59,7 +55,6 @@ async def test_groupless_user_cannot_stop_run(
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
 
 
 async def test_other_group_member_cannot_stop_run_of_other_group_transfer(
@@ -72,12 +67,11 @@ async def test_other_group_member_cannot_stop_run_of_other_group_transfer(
     # Arrenge
     user = group.get_member_of_role(role_guest_plus)
 
-    # Act
     result = await client.post(
         f"v1/runs/{group_run.id}/stop",
         headers={"Authorization": f"Bearer {user.token}"},
     )
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -85,7 +79,6 @@ async def test_other_group_member_cannot_stop_run_of_other_group_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
     await session.refresh(group_run.run)
     assert group_run.status != Status.SEND_STOP_SIGNAL
 
@@ -96,15 +89,14 @@ async def test_superuser_can_stop_run(
     group_run: MockRun,
     session: AsyncSession,
 ) -> None:
-    # Act
     result = await client.post(
         f"v1/runs/{group_run.id}/stop",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
-    # Assert
     await session.refresh(group_run.run)
     assert group_run.status == Status.SEND_STOP_SIGNAL
 
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_run.id,
         "transfer_id": group_run.transfer_id,
@@ -115,7 +107,6 @@ async def test_superuser_can_stop_run(
         "transfer_dump": group_run.transfer_dump,
         "type": RunType.MANUAL,
     }
-    assert result.status_code == 200, result.json()
 
 
 @pytest.mark.parametrize("status", (Status.SEND_STOP_SIGNAL, Status.FINISHED, Status.FAILED, Status.STOPPED))
@@ -126,19 +117,17 @@ async def test_developer_plus_cannot_stop_run_in_status_except_started_or_create
     session: AsyncSession,
     role_developer_plus: UserTestRoles,
 ) -> None:
-    # Arrange
     user = group_run.transfer.owner_group.get_member_of_role(role_developer_plus)
     group_run.run.status = status
     session.add(group_run.run)
     await session.commit()
 
-    # Act
     result = await client.post(
         f"v1/runs/{group_run.id}/stop",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    # Assert
+    assert result.status_code == 400, result.json()
     assert result.json() == {
         "error": {
             "code": "bad_request",
@@ -146,17 +135,14 @@ async def test_developer_plus_cannot_stop_run_in_status_except_started_or_create
             "details": None,
         },
     }
-    assert result.status_code == 400, result.json()
 
 
 async def test_unauthorized_user_cannot_stop_run(
     client: AsyncClient,
     group_run: MockRun,
 ) -> None:
-    # Act
     result = await client.post(f"v1/runs/{group_run.id}/stop")
 
-    # Assert
     assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
@@ -173,19 +159,17 @@ async def test_developer_plus_cannot_stop_unknown_run_of_transfer_error(
     session: AsyncSession,
     role_developer_plus: UserTestRoles,
 ) -> None:
-    # Arrange
     user = group_run.transfer.owner_group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.post(
         "v1/runs/-1/stop",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    # Assert
     await session.refresh(group_run.run)
     assert group_run.status == Status.CREATED
 
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -193,7 +177,6 @@ async def test_developer_plus_cannot_stop_unknown_run_of_transfer_error(
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_cannot_stop_unknown_run_error(
@@ -202,15 +185,14 @@ async def test_superuser_cannot_stop_unknown_run_error(
     group_run: MockRun,
     session: AsyncSession,
 ) -> None:
-    # Act
     result = await client.post(
         "v1/runs/-1/stop",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
-    # Assert
     await session.refresh(group_run.run)
     assert group_run.status == Status.CREATED
 
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",

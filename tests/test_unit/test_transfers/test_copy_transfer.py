@@ -21,12 +21,10 @@ async def test_maintainer_plus_can_copy_transfer_with_remove_source(
     group_transfer: MockTransfer,
     group_queue: Queue,
 ):
-    # Arrange
     role = group_transfer_and_group_maintainer_plus
     user = group_transfer.owner_group.get_member_of_role(role)
 
-    # Act
-    result_response = await client.post(
+    result = await client.post(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -36,9 +34,8 @@ async def test_maintainer_plus_can_copy_transfer_with_remove_source(
         },
     )
 
-    # Assert
-    result_json = result_response.json()
-    assert result_response.status_code == 200
+    result_json = result.json()
+    assert result.status_code == 200
 
     def delete_rows():
         async def afin():
@@ -91,12 +88,10 @@ async def test_developer_plus_can_copy_transfer_without_remove_source(
     group_transfer: MockTransfer,
     group_queue: Queue,
 ):
-    # Arrange
     role = group_transfer_and_group_developer_plus
     user = group_transfer.owner_group.get_member_of_role(role)
 
-    # Act
-    result_response = await client.post(
+    result = await client.post(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -105,9 +100,8 @@ async def test_developer_plus_can_copy_transfer_without_remove_source(
         },
     )
 
-    # Assert
-    result_json = result_response.json()
-    assert result_response.status_code == 200
+    result_json = result.json()
+    assert result.status_code == 200
 
     def delete_rows():
         async def afin():
@@ -158,12 +152,10 @@ async def test_developer_or_below_cannot_copy_transfer_with_remove_source(
     group_transfer: MockTransfer,
     group_queue: Queue,
 ):
-    # Arrange
     role = group_transfer_and_group_developer_or_below
     user = group_transfer.owner_group.get_member_of_role(role)
 
-    # Act
-    result_response = await client.post(
+    result = await client.post(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -173,8 +165,7 @@ async def test_developer_or_below_cannot_copy_transfer_with_remove_source(
         },
     )
 
-    # Assert
-    result_json = result_response.json()
+    result_json = result.json()
     assert result_json == {
         "error": {
             "code": "forbidden",
@@ -182,7 +173,7 @@ async def test_developer_or_below_cannot_copy_transfer_with_remove_source(
             "details": None,
         },
     }
-    assert result_response.status_code == 403
+    assert result.status_code == 403
 
 
 async def test_groupless_user_cannot_copy_transfer(
@@ -192,7 +183,6 @@ async def test_groupless_user_cannot_copy_transfer(
     group_transfer: MockTransfer,
     group_queue: Queue,
 ):
-    # Act
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {simple_user.token}"},
@@ -202,7 +192,6 @@ async def test_groupless_user_cannot_copy_transfer(
         },
     )
 
-    # Assert
     assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
@@ -221,10 +210,8 @@ async def test_other_group_guest_plus_member_cannot_copy_transfer(
     role_guest_plus: UserTestRoles,
     group_queue: Queue,
 ):
-    # Arrange
     user = group.get_member_of_role(role_guest_plus)
 
-    # Act
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -234,7 +221,7 @@ async def test_other_group_guest_plus_member_cannot_copy_transfer(
         },
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -242,7 +229,6 @@ async def test_other_group_guest_plus_member_cannot_copy_transfer(
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_can_copy_transfer_with_remove_source(
@@ -254,8 +240,7 @@ async def test_superuser_can_copy_transfer_with_remove_source(
     group_transfer: MockTransfer,
     group_queue: Queue,
 ):
-    # Act
-    result_response = await client.post(
+    result = await client.post(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
@@ -265,9 +250,8 @@ async def test_superuser_can_copy_transfer_with_remove_source(
         },
     )
 
-    # Assert
-    result_json = result_response.json()
-    assert result_response.status_code == 200
+    result_json = result.json()
+    assert result.status_code == 200
 
     def delete_rows():
         async def afin():
@@ -320,12 +304,10 @@ async def test_maintainer_plus_can_copy_transfer_with_new_name(
     group_queue: Queue,
     request,
 ):
-    # Arrange
     role = group_transfer_and_group_maintainer_plus
     user = group_transfer.owner_group.get_member_of_role(role)
     new_name = f"{secrets.token_hex(5)}"
 
-    # Act
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -353,7 +335,6 @@ async def test_maintainer_plus_can_copy_transfer_with_new_name(
 
     request.addfinalizer(delete_rows)
 
-    # Assert
     assert result.status_code == 200, result.json()
     copied_transfer_response = await client.get(
         f"v1/transfers/{result_json['copied_transfer_id']}",
@@ -370,12 +351,10 @@ async def test_check_validate_copy_transfer_parameter_new_name(
     group_transfer: MockTransfer,
     group_queue: Queue,
 ):
-    # Arrange
     role = group_transfer_and_group_maintainer_plus
     user = group_transfer.owner_group.get_member_of_role(role)
     new_name = ""
 
-    # Act
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -388,7 +367,6 @@ async def test_check_validate_copy_transfer_parameter_new_name(
 
     result.json()
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "invalid_request",
@@ -414,12 +392,10 @@ async def test_maintainer_plus_can_not_copy_transfer_with_same_name_in_new_group
     group_transfer: MockTransfer,
     group_queue: Queue,
 ):
-    # Arrange
     role = group_transfer_with_same_name_maintainer_plus
     user = group_transfer.owner_group.get_member_of_role(role)
     new_name = "duplicated_group_transfer"
 
-    # Act
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -430,7 +406,6 @@ async def test_maintainer_plus_can_not_copy_transfer_with_same_name_in_new_group
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "conflict",
@@ -447,11 +422,9 @@ async def test_developer_plus_cannot_copy_transfer_if_new_queue_in_another_group
     group_queue: Queue,
     mock_queue: Queue,
 ):
-    # Arrange
     role = group_transfer_and_group_maintainer_plus
     user = group_transfer.owner_group.get_member_of_role(role)
 
-    # Act
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -477,8 +450,7 @@ async def test_superuser_cannot_copy_unknown_transfer_error(
     group: MockGroup,
     group_queue: Queue,
 ):
-    # Act
-    result_response = await client.post(
+    result = await client.post(
         "v1/transfers/-1/copy_transfer",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
@@ -488,16 +460,14 @@ async def test_superuser_cannot_copy_unknown_transfer_error(
         },
     )
 
-    # Assert
-    result_json = result_response.json()
-    assert result_json == {
+    assert result.status_code == 404, result.json()
+    assert result.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",
             "details": None,
         },
     }
-    assert result_response.status_code == 404
 
 
 async def test_superuser_cannot_copy_transfer_with_unknown_new_group_error(
@@ -506,8 +476,7 @@ async def test_superuser_cannot_copy_transfer_with_unknown_new_group_error(
     group_transfer: MockTransfer,
     group_queue: Queue,
 ):
-    # Act
-    result_response = await client.post(
+    result = await client.post(
         f"v1/transfers/{group_transfer.transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
@@ -517,16 +486,14 @@ async def test_superuser_cannot_copy_transfer_with_unknown_new_group_error(
         },
     )
 
-    # Assert
-    result_json = result_response.json()
-    assert result_json == {
+    assert result.status_code == 404, result.json()
+    assert result.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
             "details": None,
         },
     }
-    assert result_response.status_code == 404
 
 
 async def test_developer_plus_cannot_copy_transfer_with_unknown_new_group_error(
@@ -536,11 +503,9 @@ async def test_developer_plus_cannot_copy_transfer_with_unknown_new_group_error(
     group_transfer: MockTransfer,
     group_queue: Queue,
 ):
-    # Arrange
     role = group_transfer_and_group_developer_plus
     user = group_transfer.owner_group.get_member_of_role(role)
 
-    # Act
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -550,8 +515,14 @@ async def test_developer_plus_cannot_copy_transfer_with_unknown_new_group_error(
         },
     )
 
-    assert result.json()["error"]["message"] == "Group not found"
     assert result.status_code == 404, result.json()
+    assert result.json() == {
+        "error": {
+            "code": "not_found",
+            "message": "Group not found",
+            "details": None,
+        },
+    }
 
 
 async def test_copy_unknown_transfer_error(
@@ -564,7 +535,6 @@ async def test_copy_unknown_transfer_error(
     role = group_transfer_and_group_maintainer_plus
     user = group_transfer.owner_group.get_member_of_role(role)
 
-    # Act
     result = await client.post(
         "v1/transfers/-1/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -574,9 +544,14 @@ async def test_copy_unknown_transfer_error(
         },
     )
 
-    # Assert
-    assert result.json()["error"]["message"] == "Transfer not found"
     assert result.status_code == 404, result.json()
+    assert result.json() == {
+        "error": {
+            "code": "not_found",
+            "message": "Transfer not found",
+            "details": None,
+        },
+    }
 
 
 async def test_developer_plus_cannot_copy_transfer_with_unknown_new_queue_id_error(
@@ -585,11 +560,9 @@ async def test_developer_plus_cannot_copy_transfer_with_unknown_new_queue_id_err
     group_transfer: MockTransfer,
     group_queue: Queue,
 ):
-    # Arrange
     role = group_transfer_and_group_developer_plus
     user = group_transfer.owner_group.get_member_of_role(role)
 
-    # Act
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -599,7 +572,7 @@ async def test_developer_plus_cannot_copy_transfer_with_unknown_new_queue_id_err
         },
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -615,7 +588,6 @@ async def test_superuser_cannot_copy_transfer_with_unknown_new_queue_id_error(
     group_transfer: MockTransfer,
     group_queue: Queue,
 ):
-    # Act
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -626,7 +598,7 @@ async def test_superuser_cannot_copy_transfer_with_unknown_new_queue_id_error(
         },
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",

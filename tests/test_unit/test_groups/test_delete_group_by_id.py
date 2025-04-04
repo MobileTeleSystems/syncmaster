@@ -14,17 +14,14 @@ async def test_only_superuser_can_delete_group(
     superuser: MockUser,
     session: AsyncSession,
 ):
-    # Arrange
     g_id = empty_group.group.id
 
-    # Act
     result = await client.delete(
         f"v1/groups/{empty_group.id}",
         headers={
             "Authorization": f"Bearer {superuser.token}",
         },
     )
-    # Assert
     assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
@@ -32,7 +29,6 @@ async def test_only_superuser_can_delete_group(
         "message": "Group was deleted",
     }
 
-    # Assert group was deleted
     session.expunge_all()
     group_in_db = await session.get(Group, g_id)
     assert group_in_db is None
@@ -43,15 +39,12 @@ async def test_not_superuser_cannot_delete_group(
     group: MockGroup,
     role_guest_plus: UserTestRoles,
 ):
-    # Arrange
     user = group.get_member_of_role(role_guest_plus)
 
-    # Act
     result = await client.delete(
         f"v1/groups/{group.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
-    # Assert
     assert result.json() == {
         "error": {
             "code": "forbidden",
@@ -63,9 +56,7 @@ async def test_not_superuser_cannot_delete_group(
 
 
 async def test_not_authorized_user_cannot_delete_group(client: AsyncClient, empty_group: MockGroup):
-    # Arrange
     result = await client.delete(f"v1/groups/{empty_group.id}")
-    # Assert
     assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
@@ -81,14 +72,12 @@ async def test_groupless_user_cannot_delete_group(
     empty_group: MockGroup,
     simple_user: MockUser,
 ):
-    # Act
     result = await client.delete(
         "v1/groups/-1",
         headers={
             "Authorization": f"Bearer {simple_user.token}",
         },
     )
-    # Assert
     assert result.json() == {
         "error": {
             "code": "forbidden",
@@ -103,14 +92,12 @@ async def test_superuser_cannot_delete_unknown_group_error(
     client: AsyncClient,
     superuser: MockUser,
 ):
-    # Act
     result = await client.delete(
         "v1/groups/-1",
         headers={
             "Authorization": f"Bearer {superuser.token}",
         },
     )
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",

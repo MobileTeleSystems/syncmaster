@@ -16,26 +16,20 @@ async def test_simple_user_can_create_group(
     session: AsyncSession,
     client: AsyncClient,
 ):
-    # Arrange
     group_name = f"{secrets.token_hex(5)}"
     group_data = {
         "name": group_name,
         "description": "description of new test group",
     }
 
-    # Act
     result = await client.post(
         "v1/groups",
         json=group_data,
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
-
-    # pre assert
-    group = (await session.scalars(select(Group).where(Group.name == group_name))).one_or_none()
-
-    # Assert
-    assert group
     assert result.status_code == 200, result.json()
+
+    group = (await session.scalars(select(Group).where(Group.name == group_name))).one()
     assert result.json() == {
         "id": group.id,
         "name": group_name,
@@ -48,22 +42,20 @@ async def test_simple_user_cannot_create_group_twice(
     client: AsyncClient,
     simple_user: MockUser,
 ):
-    # Arrange
     group_data = {
         "name": "test_superuser_cannot_create_group_twice",
         "description": "description of new test group",
         "owner_id": simple_user.id,
     }
 
-    # Act
     result = await client.post(
         "v1/groups",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json=group_data,
     )
 
-    # Assert
     assert result.status_code == 200, result.json()
+
     second_result = await client.post(
         "v1/groups",
         headers={"Authorization": f"Bearer {simple_user.token}"},
@@ -83,17 +75,15 @@ async def test_not_authorized_user_cannot_create_group(
     client: AsyncClient,
     simple_user: MockUser,
 ):
-    # Arrange
     group_data = {
         "name": "new_test_group",
         "description": "description of new test group",
         "owner_id": simple_user.id,
     }
 
-    # Act
     result = await client.post("v1/groups", json=group_data)
 
-    # Assert
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -101,4 +91,3 @@ async def test_not_authorized_user_cannot_create_group(
             "details": None,
         },
     }
-    assert result.status_code == 401, result.json()

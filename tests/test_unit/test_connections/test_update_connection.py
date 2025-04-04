@@ -21,6 +21,7 @@ async def test_developer_plus_can_update_connection(
         json={**connection_json, "name": "New connection name", "type": group_connection.type},
     )
 
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_connection.id,
         "name": "New connection name",
@@ -38,7 +39,6 @@ async def test_developer_plus_can_update_connection(
             "user": group_connection.credentials.value["user"],
         },
     }
-    assert result.status_code == 200, result.json()
 
 
 @pytest.mark.parametrize(
@@ -231,6 +231,7 @@ async def test_superuser_can_update_connection(
         json={**connection_json, "type": "postgres", "name": "New connection name"},
     )
 
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_connection.id,
         "name": "New connection name",
@@ -248,7 +249,6 @@ async def test_superuser_can_update_connection(
             "user": group_connection.credentials.value["user"],
         },
     }
-    assert result.status_code == 200, result.json()
 
 
 async def test_update_connection_data_fields(
@@ -265,6 +265,7 @@ async def test_update_connection_data_fields(
         json={**connection_json, "connection_data": {"host": "localhost", "port": 5432, "database_name": "db"}},
     )
 
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_connection.id,
         "name": group_connection.name,
@@ -282,7 +283,6 @@ async def test_update_connection_data_fields(
             "user": group_connection.credentials.value["user"],
         },
     }
-    assert result.status_code == 200, result.json()
 
 
 async def test_update_connection_auth_data(
@@ -303,6 +303,7 @@ async def test_update_connection_auth_data(
         },
     )
 
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_connection.id,
         "name": group_connection.name,
@@ -320,7 +321,6 @@ async def test_update_connection_auth_data(
             "user": "new_user",
         },
     }
-    assert result.status_code == 200, result.json()
 
 
 async def test_superuser_cannot_update_connection_auth_data_type_without_secret(

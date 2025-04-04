@@ -21,7 +21,6 @@ async def test_maintainer_plus_can_copy_connection_without_deleting_source(
     empty_group: MockGroup,
     group_connection_and_group_maintainer_plus: str,
 ):
-    # Arrange
     role = group_connection_and_group_maintainer_plus
     user = group_connection.owner_group.get_member_of_role(role)
 
@@ -45,7 +44,6 @@ async def test_maintainer_plus_can_copy_connection_without_deleting_source(
     row_copy_not_exist = (await session.scalars(query_copy_not_exist)).one_or_none()
     assert not row_copy_not_exist
 
-    # Act
     result = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -55,7 +53,6 @@ async def test_maintainer_plus_can_copy_connection_without_deleting_source(
         },
     )
 
-    # Assertions
     assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
@@ -97,7 +94,6 @@ async def test_maintainer_plus_can_copy_connection_and_delete_source(
     empty_group: MockGroup,
     group_connection_and_group_maintainer_plus: str,
 ):
-    # Arrange
     role = group_connection_and_group_maintainer_plus
     user = group_connection.owner_group.get_member_of_role(role)
 
@@ -114,7 +110,6 @@ async def test_maintainer_plus_can_copy_connection_and_delete_source(
         "password": "password",
     }
 
-    # Act
     result = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -157,7 +152,6 @@ async def test_superuser_can_copy_connection_without_deleting_source(
     session: AsyncSession,
     settings: Settings,
 ):
-    # Arrange
     query_current_row = select(Connection).where(Connection.id == group_connection.id)
     current = (await session.scalars(query_current_row)).one()
     curr_id = current.id
@@ -179,7 +173,6 @@ async def test_superuser_can_copy_connection_without_deleting_source(
     row_copy_not_exist = (await session.scalars(query_copy_not_exist)).one_or_none()
     assert not row_copy_not_exist
 
-    # Act
     result = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -196,7 +189,6 @@ async def test_superuser_can_copy_connection_without_deleting_source(
         "message": "Connection was copied",
     }
 
-    # Assert original still there
     origin = await session.get(Connection, curr_id)
     assert origin is not None
     assert origin.id == curr_id
@@ -210,7 +202,6 @@ async def test_superuser_can_copy_connection_without_deleting_source(
         "password": "password",
     }
 
-    # Assert new copy
     query_new_row = select(Connection).filter(
         Connection.group_id == empty_group.id,
         Connection.name == group_connection.name,
@@ -231,7 +222,6 @@ async def test_superuser_can_copy_connection_and_delete_source(
     session: AsyncSession,
     settings: Settings,
 ):
-    # Arrange
     query_current_row = select(Connection).where(Connection.id == group_connection.id)
     current = (await session.scalars(query_current_row)).one()
     curr_id = current.id
@@ -245,7 +235,6 @@ async def test_superuser_can_copy_connection_and_delete_source(
         "password": "password",
     }
 
-    # Act
     result = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -360,7 +349,6 @@ async def test_not_in_both_groups_user_can_not_copy_connection(
     settings: Settings,
     role_developer_plus: UserTestRoles,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
 
     query_current_row = select(Connection).where(Connection.id == group_connection.id)
@@ -387,7 +375,6 @@ async def test_not_in_both_groups_user_can_not_copy_connection(
 
     assert not row_copy_not_exist
 
-    # Act
     result = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -396,7 +383,6 @@ async def test_not_in_both_groups_user_can_not_copy_connection(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -417,7 +403,6 @@ async def test_groupless_user_can_not_copy_connection(
     settings: Settings,
     role_guest_plus: UserTestRoles,
 ):
-    # Arrange
     user = simple_user
 
     query_current_row = select(Connection).where(Connection.id == group_connection.id)
@@ -441,7 +426,6 @@ async def test_groupless_user_can_not_copy_connection(
 
     assert not row_copy_not_exist
 
-    # Act
     result = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -450,7 +434,6 @@ async def test_groupless_user_can_not_copy_connection(
         },
     )
 
-    # Assert
     assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
@@ -468,11 +451,9 @@ async def test_developer_plus_can_copy_connection_without_remove_source(
     group_connection: MockConnection,
     empty_group: MockGroup,
 ):
-    # Arrange
     role = group_connection_and_group_developer_plus
     user = group_connection.owner_group.get_member_of_role(role)
 
-    # Act
     result = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -481,7 +462,6 @@ async def test_developer_plus_can_copy_connection_without_remove_source(
         },
     )
 
-    # Assert
     assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
@@ -498,19 +478,16 @@ async def test_developer_plus_can_copy_connection_with_new_connection_name(
     group_connection: MockConnection,
     empty_group: MockGroup,
 ):
-    # Arrange
     role = group_connection_and_group_developer_plus
     user = group_connection.owner_group.get_member_of_role(role)
     new_name = f"{secrets.token_hex(5)}"
 
-    # Act
     result = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
         json={"new_group_id": empty_group.id, "new_name": new_name},
     )
 
-    # Assert
     assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
@@ -543,19 +520,16 @@ async def test_check_name_validation_copy_connection_with_new_connection_name(
     group_connection: MockConnection,
     empty_group: MockGroup,
 ):
-    # Arrange
     role = group_connection_and_group_developer_plus
     user = group_connection.owner_group.get_member_of_role(role)
     new_name = ""
 
-    # Act
     result = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
         json={"new_group_id": empty_group.id, "new_name": new_name},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "invalid_request",
@@ -581,11 +555,9 @@ async def test_maintainer_plus_cannot_copy_connection_with_same_name_in_new_grou
     group_connection: MockConnection,
     empty_group: MockGroup,
 ):
-    # Arrange
     role = group_connection_with_same_name_maintainer_plus
     user = group_connection.owner_group.get_member_of_role(role)
 
-    # Act
     result = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -594,7 +566,6 @@ async def test_maintainer_plus_cannot_copy_connection_with_same_name_in_new_grou
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "conflict",
@@ -611,11 +582,9 @@ async def test_developer_below_can_not_copy_connection_with_remove_source(
     group_connection: MockConnection,
     empty_group: MockGroup,
 ):
-    # Arrange
     role = group_connection_and_group_developer_or_below
     user = group_connection.owner_group.get_member_of_role(role)
 
-    # Act
     result = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -625,7 +594,6 @@ async def test_developer_below_can_not_copy_connection_with_remove_source(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "forbidden",
@@ -643,11 +611,9 @@ async def test_cannot_copy_connection_with_unknown_connection_error(
     group_connection: MockConnection,
     empty_group: MockGroup,
 ):
-    # Arrange
     role = group_connection_and_group_developer_plus
     user = group_connection.owner_group.get_member_of_role(role)
 
-    # Act
     result = await client.post(
         "v1/connections/-1/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -656,7 +622,6 @@ async def test_cannot_copy_connection_with_unknown_connection_error(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -672,7 +637,6 @@ async def test_superuser_cannot_copy_unknown_connection_error(
     superuser: MockUser,
     empty_group: MockGroup,
 ):
-    # Act
     result = await client.post(
         "v1/connections/-1/copy_connection",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -681,7 +645,6 @@ async def test_superuser_cannot_copy_unknown_connection_error(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -698,11 +661,9 @@ async def test_cannot_copy_connection_with_unknown_new_group_id_error(
     group_connection_and_group_developer_plus: str,
     group_connection: MockConnection,
 ):
-    # Arrange
     role = group_connection_and_group_developer_plus
     user = group_connection.owner_group.get_member_of_role(role)
 
-    # Act
     result = await client.post(
         f"v1/connections/{group_connection.connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -711,7 +672,6 @@ async def test_cannot_copy_connection_with_unknown_new_group_id_error(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -727,7 +687,6 @@ async def test_superuser_cannot_copy_connection_with_unknown_new_group_id_error(
     superuser: MockUser,
     group_connection: MockConnection,
 ):
-    # Act
     result = await client.post(
         f"v1/connections/{group_connection.connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -736,7 +695,6 @@ async def test_superuser_cannot_copy_connection_with_unknown_new_group_id_error(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",

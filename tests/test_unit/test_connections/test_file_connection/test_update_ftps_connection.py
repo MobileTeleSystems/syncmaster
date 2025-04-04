@@ -42,6 +42,7 @@ async def test_developer_plus_can_update_ftps_connection(
         json={**connection_json, "type": "ftps", "connection_data": new_connection_data},
     )
 
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_connection.id,
         "name": group_connection.connection.name,
@@ -54,4 +55,3 @@ async def test_developer_plus_can_update_ftps_connection(
             "user": group_connection.credentials.value["user"],
         },
     }
-    assert result.status_code == 200, result.json()

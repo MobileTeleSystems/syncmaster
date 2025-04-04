@@ -20,10 +20,8 @@ async def test_developer_plus_can_create_connection(
     event_loop,
     request,
 ):
-    # Arrange
     user = group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -71,7 +69,7 @@ async def test_developer_plus_can_create_connection(
 
     request.addfinalizer(delete_rows)
 
-    # Assert
+    assert result.status_code == 200, result.json()
     decrypted = decrypt_auth_data(creds.value, settings=settings)
     assert result.json() == {
         "id": connection.id,
@@ -90,7 +88,6 @@ async def test_developer_plus_can_create_connection(
             "user": decrypted["user"],
         },
     }
-    assert result.status_code == 200, result.json()
 
 
 async def test_unauthorized_user_cannot_create_connection(
@@ -131,10 +128,8 @@ async def test_check_fields_validation_on_create_connection(
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(UserTestRoles.Developer)
 
-    # Act
     result = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -156,7 +151,6 @@ async def test_check_fields_validation_on_create_connection(
         },
     )
 
-    # Assert
     assert result.status_code == 422, result.json()
     assert result.json() == {
         "error": {
@@ -174,7 +168,6 @@ async def test_check_fields_validation_on_create_connection(
         },
     }
 
-    # Act
     result = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -196,7 +189,6 @@ async def test_check_fields_validation_on_create_connection(
         },
     )
 
-    # Assert
     assert result.status_code == 422, result.json()
     assert result.json() == {
         "error": {
@@ -286,10 +278,8 @@ async def test_other_group_member_cannot_create_group_connection(
     group: MockGroup,
     role_guest_plus: UserTestRoles,
 ):
-    # Arrange
     user = group.get_member_of_role(role_guest_plus)
 
-    # Act
     result = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -311,7 +301,6 @@ async def test_other_group_member_cannot_create_group_connection(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -430,10 +419,8 @@ async def test_group_member_cannot_create_connection_with_unknown_group_error(
     settings: Settings,
     role_guest_plus: UserTestRoles,
 ):
-    # Arrange
     user = group.get_member_of_role(role_guest_plus)
 
-    # Act
     result = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -455,7 +442,6 @@ async def test_group_member_cannot_create_connection_with_unknown_group_error(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -472,7 +458,6 @@ async def test_superuser_cannot_create_connection_with_unknown_group_error(
     session: AsyncSession,
     settings: Settings,
 ):
-    # Act
     result = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -495,7 +480,6 @@ async def test_superuser_cannot_create_connection_with_unknown_group_error(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -509,10 +493,8 @@ async def test_guest_cannot_create_connection_error(
     client: AsyncClient,
     group: MockGroup,
 ):
-    # Arrange
     user = group.get_member_of_role(UserTestRoles.Guest)
 
-    # Act
     result = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -535,7 +517,6 @@ async def test_guest_cannot_create_connection_error(
         },
     )
 
-    # Assert
     assert result.status_code == 403, result.json()
     assert result.json() == {
         "error": {

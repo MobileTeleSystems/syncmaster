@@ -18,17 +18,14 @@ async def test_guest_plus_can_read_connections(
     role_guest_plus: UserTestRoles,
     settings: Settings,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_guest_plus)
 
-    # Act
     result = await client.get(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"group_id": group_connection.connection.group_id},
     )
 
-    # Assert
     assert result.status_code == 200, result.json()
     assert result.json() == {
         "meta": {
@@ -71,17 +68,14 @@ async def test_other_group_member_cannot_read_group_connections(
     group_connection: MockConnection,
     role_guest_plus: UserTestRoles,
 ):
-    # Arrange
     user = group.get_member_of_role(role_guest_plus)
 
-    # Act
     result = await client.get(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"group_id": group_connection.connection.group_id},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -99,14 +93,12 @@ async def test_groupless_user_cannot_read_group_connections(
     settings: Settings,
     group_connection: MockConnection,
 ):
-    # Act
     result = await client.get(
         "v1/connections",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         params={"group_id": group_connection.connection.group_id},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -122,14 +114,12 @@ async def test_superuser_can_read_connections(
     superuser: MockUser,
     group_connection: MockConnection,
 ):
-    # Act
     result = await client.get(
         "v1/connections",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"group_id": group_connection.connection.group_id},
     )
 
-    # Assert
     assert result.status_code == 200, result.json()
     assert result.json() == {
         "meta": {
@@ -165,10 +155,8 @@ async def test_superuser_can_read_connections(
 
 
 async def test_unauthorized_user_cannot_read_connections(client: AsyncClient):
-    # Act
     result = await client.get("v1/connections")
 
-    # Assert
     assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
@@ -185,17 +173,14 @@ async def test_guest_plus_cannot_read_unknown_group_error(
     role_guest_plus: UserTestRoles,
     settings: Settings,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_guest_plus)
 
-    # Act
     result = await client.get(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"group_id": -1},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -211,14 +196,12 @@ async def test_superuser_cannot_read_from_unknown_group_error(
     superuser: MockUser,
     group_connection: MockConnection,
 ):
-    # Act
     result = await client.get(
         "v1/connections",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"group_id": -1},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -253,6 +236,7 @@ async def test_search_connections_with_query(
         params={"group_id": group_connection.connection.group_id, "search_query": search_query},
     )
 
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "meta": {
             "page": 1,
@@ -284,7 +268,6 @@ async def test_search_connections_with_query(
             },
         ],
     }
-    assert result.status_code == 200, result.json()
 
 
 async def test_search_connections_with_nonexistent_query(
@@ -345,17 +328,14 @@ async def test_filter_connections(
     expected_total: int,
     group_connections: list[MockConnection],
 ):
-    # Arrange
     params = {**filter_params, "group_id": group_connections[0].connection.group_id}
 
-    # Act
     result = await client.get(
         "v1/connections",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params=params,
     )
 
-    # Assert
     assert result.status_code == 200, result.json()
     assert result.json()["meta"]["total"] == expected_total
     assert len(result.json()["items"]) == expected_total
@@ -371,16 +351,13 @@ async def test_filter_connections_unknown_type(
     superuser: MockUser,
     group_connections: list[MockConnection],
 ):
-    # Arrange
     params = {"type": "unknown", "group_id": group_connections[0].connection.group_id}
 
-    # Act
     result = await client.get(
         "v1/connections",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params=params,
     )
 
-    # Assert
     assert result.status_code == 422, result.json()
     assert result.json()["error"]["details"][0]["code"] == "enum"

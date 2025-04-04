@@ -15,14 +15,12 @@ async def test_group_member_can_read_groups(
     group: MockGroup,
     role_guest_plus: UserTestRoles,
 ):
-    # Arrange
     user = group.get_member_of_role(role_guest_plus)
-    # Act
     result = await client.get(
         "v1/groups",
         headers={"Authorization": f"Bearer {user.token}"},
     )
-    # Assert
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "meta": {
             "page": 1,
@@ -46,7 +44,6 @@ async def test_group_member_can_read_groups(
             },
         ],
     }
-    assert result.status_code == 200, result.json()
 
 
 async def test_groupless_user_cannot_get_any_groups(
@@ -54,12 +51,11 @@ async def test_groupless_user_cannot_get_any_groups(
     simple_user: MockUser,
     group: MockGroup,  # do not delete this group, it is not used but is needed to show that the group is not read
 ):
-    # Act
     result = await client.get(
         "v1/groups",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
-    # Assert
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "meta": {
             "page": 1,
@@ -73,7 +69,6 @@ async def test_groupless_user_cannot_get_any_groups(
         },
         "items": [],
     }
-    assert result.status_code == 200, result.json()
 
 
 async def test_superuser_can_read_all_groups(
@@ -82,12 +77,11 @@ async def test_superuser_can_read_all_groups(
     empty_group: MockGroup,
     group: MockGroup,
 ):
-    # Act
     result = await client.get(
         "v1/groups",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
-    # Assert
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "meta": {
             "page": 1,
@@ -120,15 +114,13 @@ async def test_superuser_can_read_all_groups(
             },
         ],
     }
-    assert result.status_code == 200, result.json()
 
 
 async def test_unauthorized_user_cannot_read_groups(
     client: AsyncClient,
 ):
-    # Act
     result = await client.get("v1/groups")
-    # Assert
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -136,7 +128,6 @@ async def test_unauthorized_user_cannot_read_groups(
             "details": None,
         },
     }
-    assert result.status_code == 401, result.json()
 
 
 @pytest.mark.parametrize(
@@ -270,6 +261,7 @@ async def test_superuser_search_groups_with_query(
         params={"search_query": search_query},
     )
 
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "meta": {
             "page": 1,
@@ -293,7 +285,6 @@ async def test_superuser_search_groups_with_query(
             },
         ],
     }
-    assert result.status_code == 200, result.json()
 
 
 async def test_search_groups_with_nonexistent_query(

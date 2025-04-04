@@ -51,6 +51,7 @@ async def test_developer_plus_can_update_s3_connection(
         json={**connection_json, "type": "s3", "connection_data": new_connection_data},
     )
 
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_connection.id,
         "name": group_connection.connection.name,
@@ -63,4 +64,3 @@ async def test_developer_plus_can_update_s3_connection(
             "access_key": group_connection.credentials.value["access_key"],
         },
     }
-    assert result.status_code == 200, result.json()

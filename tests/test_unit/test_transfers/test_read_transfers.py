@@ -23,6 +23,7 @@ async def test_guest_plus_can_read_transfers(
         params={"group_id": group_transfer.owner_group.group.id},
     )
 
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "meta": {
             "page": 1,
@@ -38,7 +39,6 @@ async def test_guest_plus_can_read_transfers(
             build_transfer_json(group_transfer),
         ],
     }
-    assert result.status_code == 200, result.json()
 
 
 async def test_groupless_user_cannot_read_transfers(
@@ -52,6 +52,7 @@ async def test_groupless_user_cannot_read_transfers(
         params={"group_id": group_transfer.owner_group.group.id},
     )
 
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -59,7 +60,6 @@ async def test_groupless_user_cannot_read_transfers(
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_can_read_transfers(
@@ -73,6 +73,7 @@ async def test_superuser_can_read_transfers(
         params={"group_id": group_transfer.owner_group.group.id},
     )
 
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "meta": {
             "page": 1,
@@ -88,7 +89,6 @@ async def test_superuser_can_read_transfers(
             build_transfer_json(group_transfer),
         ],
     }
-    assert result.status_code == 200, result.json()
 
 
 @pytest.mark.parametrize(
@@ -117,6 +117,7 @@ async def test_search_transfers_with_query(
         params={"group_id": group_transfer.group_id, "search_query": search_query},
     )
 
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "meta": {
             "page": 1,
@@ -132,7 +133,6 @@ async def test_search_transfers_with_query(
             build_transfer_json(group_transfer),
         ],
     }
-    assert result.status_code == 200, result.json()
 
 
 async def test_search_transfers_with_nonexistent_query(
@@ -288,6 +288,7 @@ async def test_filter_transfers_with_multiple_transfers(
 async def test_unauthorized_user_cannot_read_transfers(client: AsyncClient):
     result = await client.get("v1/transfers")
 
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -295,7 +296,6 @@ async def test_unauthorized_user_cannot_read_transfers(client: AsyncClient):
             "details": None,
         },
     }
-    assert result.status_code == 401, result.json()
 
 
 async def test_developer_plus_cannot_read_unknown_group_transfers_error(
@@ -311,6 +311,7 @@ async def test_developer_plus_cannot_read_unknown_group_transfers_error(
         params={"group_id": -1},
     )
 
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -331,6 +332,7 @@ async def test_superuser_cannot_read_unknown_group_transfers_error(
         params={"group_id": -1},
     )
 
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",

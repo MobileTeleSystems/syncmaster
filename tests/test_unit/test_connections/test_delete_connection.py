@@ -14,25 +14,22 @@ async def test_maintainer_plus_can_delete_connection(
     role_maintainer_plus: UserTestRoles,
     session: AsyncSession,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_maintainer_plus)
     connection_id = group_connection.connection.id
     connection = await session.get(Connection, connection_id)
     assert connection is not None
 
-    # Act
     result = await client.delete(
         f"v1/connections/{connection_id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    # Assert
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
         "status_code": 200,
         "message": "Connection was deleted",
     }
-    assert result.status_code == 200, result.json()
     session.expunge(connection)
     connection = await session.get(Connection, connection_id)
     assert connection is None
@@ -44,13 +41,11 @@ async def test_groupless_user_cannot_delete_connection(
     simple_user: MockUser,
     session: AsyncSession,
 ):
-    # Act
     result = await client.delete(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
 
-    # Assert
     assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
@@ -71,16 +66,13 @@ async def test_maintainer_plus_cannot_delete_connection_with_linked_transfer(
     session: AsyncSession,
     role_maintainer_plus: UserTestRoles,
 ):
-    # Arrange
     user = group_transfer.owner_group.get_member_of_role(role_maintainer_plus)
 
-    # Act
     result = await client.delete(
         f"v1/connections/{group_transfer.source_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "conflict",
@@ -100,16 +92,13 @@ async def test_other_group_member_cannot_delete_group_connection(
     group_connection: MockConnection,
     role_guest_plus: UserTestRoles,
 ):
-    # Arrange
     user = group.get_member_of_role(role_guest_plus)
 
-    # Act
     result = await client.delete(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    # Assert
     assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
@@ -125,13 +114,11 @@ async def test_superuser_can_delete_group_connection(
     group_connection: MockConnection,
     superuser: MockUser,
 ):
-    # Act
     result = await client.delete(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 
-    # Assert
     assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
@@ -145,16 +132,13 @@ async def test_developer_or_below_cannot_delete_connection(
     group_connection: MockConnection,
     role_developer_or_below: UserTestRoles,
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_developer_or_below)
 
-    # Act
     result = await client.delete(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "forbidden",
@@ -166,12 +150,10 @@ async def test_developer_or_below_cannot_delete_connection(
 
 
 async def test_unauthorized_user_cannot_delete_connection(client: AsyncClient, group_connection: MockConnection):
-    # Act
     result = await client.delete(
         f"v1/connections/{group_connection.id}",
     )
 
-    # Assert
     assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
@@ -191,13 +173,11 @@ async def test_maintainer_plus_delete_unknown_connection_error(
     # Arraange
     user = group_connection.owner_group.get_member_of_role(role_maintainer_plus)
 
-    # Act
     result = await client.delete(
         "v1/connections/-1",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -214,13 +194,11 @@ async def test_superuser_delete_unknown_connection_error(
     session: AsyncSession,
     superuser: MockUser,
 ):
-    # Act
     result = await client.delete(
         "v1/connections/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "not_found",

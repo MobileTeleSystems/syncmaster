@@ -18,11 +18,9 @@ async def test_developer_plus_can_create_transfer(
     group_queue: Queue,
     mock_group: MockGroup,
 ):
-    # Arrange
     first_connection, second_connection = two_group_connections
     user = mock_group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -121,7 +119,6 @@ async def test_developer_plus_can_create_transfer(
         )
     ).one()
 
-    # Assert
     assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": transfer.id,
@@ -147,11 +144,9 @@ async def test_guest_cannot_create_transfer(
     mock_group: MockGroup,
     group_queue: Queue,
 ):
-    # Arrange
     first_connection, second_connection = two_group_connections
     user = mock_group.get_member_of_role(UserTestRoles.Guest)
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -170,7 +165,6 @@ async def test_guest_cannot_create_transfer(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "forbidden",
@@ -186,10 +180,8 @@ async def test_groupless_user_cannot_create_transfer(
     two_group_connections: tuple[MockConnection, MockConnection],
     group_queue: Queue,
 ):
-    # Arrange
     first_conn, second_conn = two_group_connections
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {simple_user.token}"},
@@ -208,7 +200,6 @@ async def test_groupless_user_cannot_create_transfer(
         },
     )
 
-    # Assert
     assert result.status_code == 403, result.json()
     assert result.json() == {
         "error": {
@@ -226,11 +217,9 @@ async def test_other_group_user_plus_cannot_create_group_transfer(
     role_developer_plus: UserTestRoles,
     group_queue: Queue,
 ):
-    # Arrange
     first_conn, second_conn = two_group_connections
     user = group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -266,10 +255,8 @@ async def test_superuser_can_create_transfer(
     mock_group: MockGroup,
     group_queue: Queue,
 ):
-    # Arrange
     first_conn, second_conn = two_group_connections
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -820,11 +807,9 @@ async def test_check_fields_validation_on_create_transfer(
     mock_group: MockGroup,
     group_queue: Queue,
 ):
-    # Arrange
     first_conn, second_conn = two_group_connections
     user = mock_group.get_member_of_role(role_developer_plus)
 
-    # Act
     transfer_data = {
         "name": "new test transfer",
         "group_id": mock_group.id,
@@ -846,7 +831,6 @@ async def test_check_fields_validation_on_create_transfer(
         json=transfer_data,
     )
 
-    # Assert
     assert result.status_code == 422, result.json()
     if (
         (new_data == {"schedule": None})
@@ -870,11 +854,9 @@ async def test_check_connection_types_and_its_params_on_create_transfer(
     mock_group: MockGroup,
     group_queue: Queue,
 ):
-    # Arrange
     first_conn, second_conn = two_group_connections
     user = mock_group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -893,7 +875,6 @@ async def test_check_connection_types_and_its_params_on_create_transfer(
         },
     )
 
-    # Assert
     assert result.status_code == 400, result.json()
     assert result.json() == {
         "error": {
@@ -912,11 +893,9 @@ async def test_check_different_connections_owner_group_on_create_transfer(
     mock_group: MockGroup,
     group_queue: Queue,
 ):
-    # Arrange
     first_conn, _ = two_group_connections
     user = mock_group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -935,7 +914,6 @@ async def test_check_different_connections_owner_group_on_create_transfer(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "bad_request",
@@ -951,7 +929,6 @@ async def test_unauthorized_user_cannot_create_transfer(
     group_transfer: MockTransfer,
     group_queue: Queue,
 ):
-    # Act
     result = await client.post(
         "v1/transfers",
         json={
@@ -965,7 +942,6 @@ async def test_unauthorized_user_cannot_create_transfer(
         },
     )
 
-    # Assert
     assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
@@ -982,11 +958,9 @@ async def test_developer_plus_cannot_create_transfer_with_other_group_queue(
     role_developer_plus: UserTestRoles,
     group_transfer: MockTransfer,
 ):
-    # Arrange
     first_conn, second_conn = two_group_connections
     user = first_conn.owner_group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -1005,7 +979,6 @@ async def test_developer_plus_cannot_create_transfer_with_other_group_queue(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "bad_request",
@@ -1023,11 +996,9 @@ async def test_developer_plus_cannot_create_transfer_with_target_format_json(
     group_queue: Queue,
     mock_group: MockGroup,
 ):
-    # Arrange
     first_connection, second_connection = two_group_connections
     user = mock_group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -1056,7 +1027,6 @@ async def test_developer_plus_cannot_create_transfer_with_target_format_json(
         },
     )
 
-    # Assert
     assert result.status_code == 422, result.json()
     assert result.json() == {
         "error": {
@@ -1085,10 +1055,8 @@ async def test_superuser_cannot_create_transfer_with_other_group_queue(
     group_transfer: MockTransfer,
     superuser: MockUser,
 ):
-    # Arrange
     first_conn, second_conn = two_group_connections
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -1107,7 +1075,6 @@ async def test_superuser_cannot_create_transfer_with_other_group_queue(
         },
     )
 
-    # Assert
     assert result.json() == {
         "error": {
             "code": "bad_request",
@@ -1126,11 +1093,9 @@ async def test_group_member_cannot_create_transfer_with_unknown_connection_error
     mock_group: MockGroup,
     group_queue: Queue,
 ):
-    # Arrange
     first_conn, second_conn = two_group_connections
     user = mock_group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -1149,7 +1114,7 @@ async def test_group_member_cannot_create_transfer_with_unknown_connection_error
         },
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -1165,11 +1130,9 @@ async def test_developer_plus_cannot_create_transfer_with_unknown_group_error(
     role_developer_plus: UserTestRoles,
     group_queue: Queue,
 ):
-    # Arrange
     first_conn, second_conn = two_group_connections
     user = first_conn.owner_group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -1188,7 +1151,7 @@ async def test_developer_plus_cannot_create_transfer_with_unknown_group_error(
         },
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -1206,10 +1169,8 @@ async def test_superuser_cannot_create_transfer_with_unknown_connection_error(
     superuser: MockUser,
     group_queue: Queue,
 ):
-    # Arrange
     first_conn, second_conn = two_group_connections
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -1228,7 +1189,7 @@ async def test_superuser_cannot_create_transfer_with_unknown_connection_error(
         },
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -1243,11 +1204,9 @@ async def test_developer_plus_cannot_create_transfer_with_unknown_queue_error(
     two_group_connections: tuple[MockConnection, MockConnection],
     role_developer_plus: UserTestRoles,
 ):
-    # Arrange
     first_conn, second_conn = two_group_connections
     user = first_conn.owner_group.get_member_of_role(role_developer_plus)
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -1266,7 +1225,7 @@ async def test_developer_plus_cannot_create_transfer_with_unknown_queue_error(
         },
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -1282,10 +1241,8 @@ async def test_superuser_cannot_create_transfer_with_unknown_group_error(
     superuser: MockUser,
     group_queue: Queue,
 ):
-    # Arrange
     first_conn, second_conn = two_group_connections
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -1304,7 +1261,7 @@ async def test_superuser_cannot_create_transfer_with_unknown_group_error(
         },
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -1319,10 +1276,8 @@ async def test_superuser_cannot_create_transfer_with_unknown_queue_error(
     two_group_connections: tuple[MockConnection, MockConnection],
     superuser: MockUser,
 ):
-    # Arrange
     first_conn, second_conn = two_group_connections
 
-    # Act
     result = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -1341,7 +1296,7 @@ async def test_superuser_cannot_create_transfer_with_unknown_queue_error(
         },
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",

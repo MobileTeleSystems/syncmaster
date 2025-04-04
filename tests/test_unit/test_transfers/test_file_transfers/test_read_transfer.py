@@ -137,5 +137,5 @@ async def test_guest_plus_can_read_s3_transfer(
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    assert result.json() == build_transfer_json(group_transfer)
     assert result.status_code == 200, result.json()
+    assert result.json() == build_transfer_json(group_transfer)

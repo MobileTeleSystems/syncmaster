@@ -37,16 +37,14 @@ async def test_guest_plus_can_read_s3_connection(
     create_connection_data: dict,  # don't remove
     create_connection_auth_data: dict,  # don't remove
 ):
-    # Arrange
     user = group_connection.owner_group.get_member_of_role(role_guest_plus)
 
-    # Act
     result = await client.get(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    # Assert
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_connection.id,
         "description": group_connection.description,
@@ -66,4 +64,3 @@ async def test_guest_plus_can_read_s3_connection(
             "access_key": group_connection.credentials.value["access_key"],
         },
     }
-    assert result.status_code == 200, result.json()

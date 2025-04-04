@@ -12,10 +12,8 @@ async def test_owner_can_add_user_to_group(
     simple_user: MockUser,
     role_maintainer_or_below: UserTestRoles,
 ):
-    # Arrange
     user = empty_group.get_member_of_role(UserTestRoles.Owner)
 
-    # Act
     result = await client.post(
         f"v1/groups/{empty_group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -24,13 +22,13 @@ async def test_owner_can_add_user_to_group(
         },
     )
 
-    # Assert
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
         "status_code": 200,
         "message": "User was successfully added to group",
     }
-    assert result.status_code == 200, result.json()
+
     check_result = await client.get(
         f"v1/groups/{empty_group.id}/users",
         headers={"Authorization": f"Bearer {simple_user.token}"},
@@ -61,7 +59,6 @@ async def test_groupless_user_cannot_add_user_to_group(
     empty_group: MockGroup,
     simple_user: MockUser,
 ):
-    # Act
     result = await client.post(
         f"v1/groups/{empty_group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
@@ -69,7 +66,7 @@ async def test_groupless_user_cannot_add_user_to_group(
             "role": UserTestRoles.Developer,
         },
     )
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -77,7 +74,6 @@ async def test_groupless_user_cannot_add_user_to_group(
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
 
 
 async def test_maintainer_or_below_cannot_add_user_to_group(
@@ -86,10 +82,8 @@ async def test_maintainer_or_below_cannot_add_user_to_group(
     simple_user: MockUser,
     role_maintainer_or_below: UserTestRoles,
 ):
-    # Arrange
     user = group.get_member_of_role(role_maintainer_or_below)
 
-    # Act
     result = await client.post(
         f"v1/groups/{group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -98,7 +92,7 @@ async def test_maintainer_or_below_cannot_add_user_to_group(
         },
     )
 
-    # Assert
+    assert result.status_code == 403, result.json()
     assert result.json() == {
         "error": {
             "code": "forbidden",
@@ -106,7 +100,6 @@ async def test_maintainer_or_below_cannot_add_user_to_group(
             "details": None,
         },
     }
-    assert result.status_code == 403, result.json()
 
 
 async def test_owner_cannot_add_user_to_group_with_wrong_role(
@@ -114,10 +107,8 @@ async def test_owner_cannot_add_user_to_group_with_wrong_role(
     group: MockGroup,
     simple_user: MockUser,
 ):
-    # Arrange
     user = group.get_member_of_role(UserTestRoles.Owner)
 
-    # Act
     result = await client.post(
         f"v1/groups/{group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -125,6 +116,7 @@ async def test_owner_cannot_add_user_to_group_with_wrong_role(
             "role": "WrongRole",
         },
     )
+    assert result.status_code == 422, result.json()
     assert result.json() == {
         "error": {
             "code": "invalid_request",
@@ -140,7 +132,6 @@ async def test_owner_cannot_add_user_to_group_with_wrong_role(
             ],
         },
     }
-    assert result.status_code == 422, result.json()
 
 
 async def test_owner_cannot_add_user_to_group_without_role(
@@ -148,16 +139,14 @@ async def test_owner_cannot_add_user_to_group_without_role(
     group: MockGroup,
     simple_user: MockUser,
 ):
-    # Arrange
     user = group.get_member_of_role(UserTestRoles.Owner)
 
-    # Act
     result = await client.post(
         f"v1/groups/{group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    # Assert
+    assert result.status_code == 422, result.json()
     assert result.json() == {
         "error": {
             "code": "invalid_request",
@@ -173,7 +162,6 @@ async def test_owner_cannot_add_user_to_group_without_role(
             ],
         },
     }
-    assert result.status_code == 422, result.json()
 
 
 async def test_superuser_can_add_user_to_group(
@@ -182,7 +170,6 @@ async def test_superuser_can_add_user_to_group(
     simple_user: MockUser,
     superuser: MockUser,
 ):
-    # Act
     result = await client.post(
         f"v1/groups/{empty_group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -191,13 +178,13 @@ async def test_superuser_can_add_user_to_group(
         },
     )
 
-    # Assert
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
         "status_code": 200,
         "message": "User was successfully added to group",
     }
-    assert result.status_code == 200, result.json()
+
     result = await client.get(
         f"v1/groups/{empty_group.id}/users",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -229,10 +216,8 @@ async def test_owner_cannot_add_user_to_group_twice(
     group: MockGroup,
     simple_user: MockUser,
 ):
-    # Arrange
     user = group.get_member_of_role(UserTestRoles.Owner)
 
-    # Act
     result = await client.post(
         f"v1/groups/{group.id}/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {user.token}"},
@@ -240,7 +225,6 @@ async def test_owner_cannot_add_user_to_group_twice(
             "role": UserTestRoles.Developer,
         },
     )
-    # Assert
     assert result.status_code == 200, result.json()
     assert result.json() == {
         "ok": True,
@@ -255,6 +239,7 @@ async def test_owner_cannot_add_user_to_group_twice(
             "role": UserTestRoles.Developer,
         },
     )
+    assert result.status_code == 409, result.json()
     assert result.json() == {
         "error": {
             "code": "conflict",
@@ -262,7 +247,6 @@ async def test_owner_cannot_add_user_to_group_twice(
             "details": None,
         },
     }
-    assert result.status_code == 409, result.json()
 
 
 async def test_not_authorized_user_cannot_add_user_to_group(
@@ -270,10 +254,8 @@ async def test_not_authorized_user_cannot_add_user_to_group(
     empty_group: MockGroup,
     simple_user: MockUser,
 ):
-    # Act
     result = await client.post(f"v1/groups/{empty_group.id}/users/{simple_user.id}")
 
-    # Assert
     assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
@@ -290,7 +272,6 @@ async def test_owner_add_user_to_unknown_group_error(
     simple_user: MockUser,
     role_maintainer_or_below: UserTestRoles,
 ):
-    # Act
     result = await client.post(
         f"v1/groups/-1/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {empty_group.get_member_of_role(UserTestRoles.Owner).token}"},
@@ -299,7 +280,7 @@ async def test_owner_add_user_to_unknown_group_error(
         },
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -307,7 +288,6 @@ async def test_owner_add_user_to_unknown_group_error(
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
 
 
 async def test_owner_add_unknown_user_to_group_error(
@@ -316,7 +296,6 @@ async def test_owner_add_unknown_user_to_group_error(
     simple_user: MockUser,
     role_maintainer_or_below: UserTestRoles,
 ):
-    # Act
     result = await client.post(
         f"v1/groups/{empty_group.id}/users/-1",
         headers={"Authorization": f"Bearer {empty_group.get_member_of_role(UserTestRoles.Owner).token}"},
@@ -325,7 +304,7 @@ async def test_owner_add_unknown_user_to_group_error(
         },
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -365,7 +344,6 @@ async def test_superuser_add_user_to_unknown_group_error(
     superuser: MockUser,
     simple_user: MockUser,
 ):
-    # Act
     result = await client.post(
         f"v1/groups/-1/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -374,7 +352,7 @@ async def test_superuser_add_user_to_unknown_group_error(
         },
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -382,7 +360,6 @@ async def test_superuser_add_user_to_unknown_group_error(
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
 
 
 async def test_superuser_add_unknown_user_error(
@@ -391,7 +368,6 @@ async def test_superuser_add_unknown_user_error(
     simple_user: MockUser,
     empty_group: MockGroup,
 ):
-    # Act
     result = await client.post(
         f"v1/groups/{empty_group.group.id}/users/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
@@ -400,7 +376,7 @@ async def test_superuser_add_unknown_user_error(
         },
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -408,4 +384,3 @@ async def test_superuser_add_unknown_user_error(
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()

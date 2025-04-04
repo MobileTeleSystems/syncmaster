@@ -27,7 +27,7 @@ async def test_get_keycloak_user_unauthorized(client: AsyncClient, mock_keycloak
     response = await client.get("/v1/users/some_user_id")
 
     # redirect unauthorized user to Keycloak
-    assert response.status_code == 307
+    assert response.status_code == 307, response.text
     assert "protocol/openid-connect/auth?" in str(
         response.next_request.url,
     )
@@ -63,7 +63,7 @@ async def test_get_keycloak_user_authorized(
     )
 
     assert response.cookies.get("session") == session_cookie
-    assert response.status_code == 200
+    assert response.status_code == 200, response.json()
     assert response.json() == {
         "id": simple_user.id,
         "is_superuser": simple_user.is_superuser,
@@ -108,7 +108,7 @@ async def test_get_keycloak_user_expired_access_token(
     assert "Access token refreshed and decoded successfully" in caplog.text
 
     assert response.cookies.get("session") != session_cookie  # cookie is updated
-    assert response.status_code == 200
+    assert response.status_code == 200, response.json()
     assert response.json() == {
         "id": simple_user.id,
         "is_superuser": simple_user.is_superuser,
@@ -146,7 +146,7 @@ async def test_get_keycloak_user_inactive(
         f"/v1/users/{simple_user.id}",
         headers=headers,
     )
-    assert response.status_code == 403
+    assert response.status_code == 403, response.json()
     assert response.json() == {
         "error": {
             "code": "forbidden",

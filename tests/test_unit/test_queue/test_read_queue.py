@@ -13,16 +13,14 @@ async def test_group_member_can_read_queue(
     mock_group: MockGroup,
     role_guest_plus: UserTestRoles,
 ):
-    # Arrange
     user = mock_group.get_member_of_role(role_guest_plus)
 
-    # Act
     result = await client.get(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    # Assert
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_queue.id,
         "name": group_queue.name,
@@ -30,7 +28,6 @@ async def test_group_member_can_read_queue(
         "group_id": group_queue.group_id,
         "slug": f"{group_queue.group.id}-{group_queue.name}",
     }
-    assert result.status_code == 200, result.json()
 
 
 async def test_superuser_can_read_queue(
@@ -38,13 +35,12 @@ async def test_superuser_can_read_queue(
     group_queue: Queue,
     superuser: MockUser,
 ):
-    # Act
     result = await client.get(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 
-    # Assert
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_queue.id,
         "name": group_queue.name,
@@ -52,7 +48,6 @@ async def test_superuser_can_read_queue(
         "group_id": group_queue.group_id,
         "slug": f"{group_queue.group.id}-{group_queue.name}",
     }
-    assert result.status_code == 200, result.json()
 
 
 async def test_groupless_user_cannot_read_queue(
@@ -61,13 +56,12 @@ async def test_groupless_user_cannot_read_queue(
     mock_group: MockGroup,
     simple_user: MockUser,
 ):
-    # Act
     result = await client.get(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -84,16 +78,14 @@ async def test_other_group_guest_plus_cannot_read_queue(
     role_guest_plus: UserTestRoles,
     group: MockGroup,
 ):
-    # Arrange
     user = group.get_member_of_role(role_guest_plus)
 
-    # Act
     result = await client.get(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -107,11 +99,10 @@ async def test_anon_user_cannot_read_queue_error(
     client: AsyncClient,
     group_queue: Queue,
 ):
-    # Act
     result = await client.get(
         f"v1/queues/{group_queue.id}",
     )
-    # Assert
+    assert result.status_code == 401, result.json()
     assert result.json() == {
         "error": {
             "code": "unauthorized",
@@ -119,7 +110,6 @@ async def test_anon_user_cannot_read_queue_error(
             "details": None,
         },
     }
-    assert result.status_code == 401, result.json()
 
 
 async def test_group_member_cannot_read_unknown_queue_error(
@@ -127,16 +117,14 @@ async def test_group_member_cannot_read_unknown_queue_error(
     mock_group: MockGroup,
     role_guest_plus: UserTestRoles,
 ):
-    # Arrange
     user = mock_group.get_member_of_role(role_guest_plus)
 
-    # Act
     result = await client.get(
         "v1/queues/-1",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -151,13 +139,12 @@ async def test_superuser_cannot_read_unknow_queue_error(
     group_queue: Queue,
     superuser: MockUser,
 ):
-    # Act
     result = await client.get(
         "v1/queues/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",

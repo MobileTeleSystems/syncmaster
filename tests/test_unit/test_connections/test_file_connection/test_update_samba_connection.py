@@ -52,6 +52,7 @@ async def test_developer_plus_can_update_samba_connection(
         json={**connection_json, "type": "samba", "connection_data": new_connection_data},
     )
 
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_connection.id,
         "name": group_connection.connection.name,
@@ -65,4 +66,3 @@ async def test_developer_plus_can_update_samba_connection(
             "auth_type": group_connection.credentials.value["auth_type"],
         },
     }
-    assert result.status_code == 200, result.json()

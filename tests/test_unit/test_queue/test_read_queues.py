@@ -19,15 +19,13 @@ async def test_group_member_can_read_queues(
     mock_group: MockGroup,
     role_guest_plus: UserTestRoles,
 ):
-    # Arrange
     user = mock_group.get_member_of_role(role_guest_plus)
-    # Act
     result = await client.get(
         f"v1/queues?group_id={mock_group.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"group_id": mock_group.id},
     )
-    # Assert
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "items": [
             {
@@ -49,7 +47,6 @@ async def test_group_member_can_read_queues(
             "total": 1,
         },
     }
-    assert result.status_code == 200, result.json()
 
 
 async def test_superuser_can_read_queues(
@@ -60,13 +57,12 @@ async def test_superuser_can_read_queues(
     superuser: MockUser,
     group_transfer: MockTransfer,  # another group with queue
 ):
-    # Act
     result = await client.get(
         "v1/queues",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"group_id": mock_group.id},
     )
-    # Assert
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "items": [
             {
@@ -88,7 +84,6 @@ async def test_superuser_can_read_queues(
             "total": 1,
         },
     }
-    assert result.status_code == 200, result.json()
 
 
 async def test_other_group_member_cannot_read_queues(
@@ -99,16 +94,14 @@ async def test_other_group_member_cannot_read_queues(
     group: MockGroup,
     role_guest_plus: UserTestRoles,
 ):
-    # Arrange
     user = group.get_member_of_role(role_guest_plus)
-    # Act
     result = await client.get(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"group_id": mock_group.id},
     )
 
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -126,15 +119,13 @@ async def test_group_member_cannot_read__unknown_group_queues_error(
     mock_group: MockGroup,
     role_guest_plus: UserTestRoles,
 ):
-    # Arrange
     user = mock_group.get_member_of_role(role_guest_plus)
-    # Act
     result = await client.get(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"group_id": -1},
     )
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -152,13 +143,12 @@ async def test_superuser_cannot_read_unknown_group_queues_error(
     superuser: MockUser,
     group_transfer: MockTransfer,  # another group with queue
 ):
-    # Act
     result = await client.get(
         "v1/queues",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"group_id": -1},
     )
-    # Assert
+    assert result.status_code == 404, result.json()
     assert result.json() == {
         "error": {
             "code": "not_found",
@@ -201,6 +191,7 @@ async def test_search_queues_with_query(
         },
     )
 
+    assert result.status_code == 200, result.json()
     assert result.json() == {
         "meta": {
             "page": 1,
@@ -222,7 +213,6 @@ async def test_search_queues_with_query(
             },
         ],
     }
-    assert result.status_code == 200, result.json()
 
 
 async def test_search_queues_with_nonexistent_query(
