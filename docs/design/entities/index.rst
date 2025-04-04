@@ -68,7 +68,7 @@ Run
 ---
 
 Each time transfer is started (manually or at some schedule), SyncMaster creates dedicated Run
-which tracks the ETL process status.
+which tracks the ETL process status, URL to worker logs and so on.
 
 .. image:: ./run_list.png
 .. image:: ./run_info.png
