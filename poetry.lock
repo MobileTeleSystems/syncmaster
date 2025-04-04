@@ -1698,9 +1698,10 @@ files = [
 name = "itsdangerous"
 version = "2.2.0"
 description = "Safely pass data to untrusted environments and back."
-optional = false
+optional = true
 python-versions = ">=3.8"
-groups = ["test"]
+groups = ["main"]
+markers = "extra == \"server\""
 files = [
     {file = "itsdangerous-2.2.0-py3-none-any.whl", hash = "sha256:c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef"},
     {file = "itsdangerous-2.2.0.tar.gz", hash = "sha256:e0050c0b7da1eea53ffaf149c0cfbb5c6e2e2b69c4bef22c81fa6eb73e5f6173"},
@@ -4138,10 +4139,10 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 
 [extras]
 scheduler = ["apscheduler", "asyncpg", "celery", "coloredlogs", "pydantic-settings", "python-json-logger", "pyyaml", "sqlalchemy", "sqlalchemy-utils"]
-server = ["alembic", "asgi-correlation-id", "asyncpg", "celery", "coloredlogs", "fastapi", "jinja2", "psycopg2-binary", "pydantic-settings", "pyjwt", "python-json-logger", "python-keycloak", "python-multipart", "pyyaml", "sqlalchemy", "sqlalchemy-utils", "starlette-exporter", "uuid6", "uvicorn"]
+server = ["alembic", "asgi-correlation-id", "asyncpg", "celery", "coloredlogs", "fastapi", "itsdangerous", "jinja2", "psycopg2-binary", "pydantic-settings", "pyjwt", "python-json-logger", "python-keycloak", "python-multipart", "pyyaml", "sqlalchemy", "sqlalchemy-utils", "starlette-exporter", "uuid6", "uvicorn"]
 worker = ["asgi-correlation-id", "celery", "coloredlogs", "horizon-hwm-store", "jinja2", "onetl", "psycopg2-binary", "pydantic-settings", "python-json-logger", "pyyaml", "sqlalchemy", "sqlalchemy-utils", "uuid6"]
 
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "8cf1429a50dbfc72c7063beafece119f1b7db04e83e9422881d0960b549090a2"
+content-hash = "0dab6ffb3e02dc03eca3b652b97ad76e9a24954e0a2c289c6fdcef5147b63661"

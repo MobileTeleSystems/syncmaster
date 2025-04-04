@@ -70,6 +70,7 @@ asyncpg = { version = "^0.30.0", optional = true }
 apscheduler = { version = "^3.11.0", optional = true }
 starlette-exporter = { version = "^0.23.0", optional = true }
 python-keycloak = { version = "^5.3.1", optional = true }
+itsdangerous = { version = "^2.2.0", optional = true }
 horizon-hwm-store = { version = "^1.1.2", optional = true }
 
 [tool.poetry.extras]
@@ -91,6 +92,7 @@ server = [
     "python-json-logger",
     "asyncpg",
     "python-keycloak",
+    "itsdangerous",
     "pyyaml",
     "celery",
 ]
@@ -136,7 +138,6 @@ faker = "^37.1.0"
 coverage = "^7.8.0"
 gevent = "^24.11.1"
 responses = "^0.25.7"
-itsdangerous = "^2.2.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.15.0"
