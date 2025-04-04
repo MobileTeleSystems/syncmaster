@@ -5,11 +5,11 @@ from __future__ import annotations
 from sqlalchemy import BigInteger, Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from syncmaster.db.mixins import DeletableMixin, TimestampMixin
+from syncmaster.db.mixins import TimestampMixin
 from syncmaster.db.models.base import Base
 
 
-class User(Base, TimestampMixin, DeletableMixin):
+class User(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     username: Mapped[str] = mapped_column(String(256), nullable=False, unique=True, index=True)
     email: Mapped[str | None] = mapped_column(String(256), nullable=True)

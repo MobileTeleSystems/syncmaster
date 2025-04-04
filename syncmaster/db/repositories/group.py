@@ -265,7 +265,6 @@ class GroupRepository(Repository[Group]):
                 UserGroup.user_id == User.id,
             )
             .where(
-                User.is_deleted.is_(False),
                 User.is_active.is_(True),
                 UserGroup.group_id == group.id,
             )

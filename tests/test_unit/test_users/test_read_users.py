@@ -22,14 +22,14 @@ async def test_get_users_unauthorized(client: AsyncClient):
     }
 
 
-async def test_get_users_authorized(client: AsyncClient, simple_user: MockUser, deleted_user: MockUser):
+async def test_get_users_authorized(client: AsyncClient, simple_user: MockUser):
+    user = simple_user
     headers = {"Authorization": f"Bearer {simple_user.token}"}
 
     response = await client.get("v1/users", headers=headers)
 
-    assert response.status_code == 200
+    assert response.status_code == 200, response.json()
     result = response.json()
-    assert result.keys() == {"items", "meta"}
     assert result["items"][0].keys() == {"id", "is_superuser", "username"}
     assert result["meta"] == {
         "page": 1,
@@ -42,7 +42,13 @@ async def test_get_users_authorized(client: AsyncClient, simple_user: MockUser, 
         "previous_page": None,
     }
     for user_data in result["items"]:
-        assert user_data["username"] != deleted_user.username
+        assert user_data.keys() == {"id", "is_superuser", "username"}
+        if user_data["id"] == user.id:
+            assert user_data == {
+                "id": user.id,
+                "username": user.username,
+                "is_superuser": user.is_superuser,
+            }
 
 
 async def test_get_users_inactive(client: AsyncClient, inactive_user: MockUser):

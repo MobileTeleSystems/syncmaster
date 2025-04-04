@@ -34,7 +34,6 @@ async def create_user_cm(
     username: str,
     is_active: bool = False,
     is_superuser: bool = False,
-    is_deleted: bool = False,
     email: str | None = None,
     first_name: str | None = None,
     middle_name: str | None = None,
@@ -52,7 +51,6 @@ async def create_user_cm(
         last_name=last_name,
         is_active=is_active,
         is_superuser=is_superuser,
-        is_deleted=is_deleted,
     )
     session.add(u)
     await session.commit()
@@ -67,7 +65,6 @@ async def create_user(
     username: str,
     is_active: bool = False,
     is_superuser: bool = False,
-    is_deleted: bool = False,
     email: str | None = None,
     first_name: str | None = None,
     middle_name: str | None = None,
@@ -85,7 +82,6 @@ async def create_user(
         last_name=last_name,
         is_active=is_active,
         is_superuser=is_superuser,
-        is_deleted=is_deleted,
     )
     session.add(u)
     await session.commit()

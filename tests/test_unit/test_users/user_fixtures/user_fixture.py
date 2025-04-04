@@ -50,7 +50,6 @@ async def simple_users(
             last_name=f"{username}_last",
             is_active=True,
             is_superuser=False,
-            is_deleted=False,
         )
         token = access_token_factory(user.id)
         mock_user = MockUser(
@@ -76,21 +75,6 @@ async def inactive_user(session: AsyncSession, access_token_factory) -> AsyncGen
         yield MockUser(
             user=user,
             auth_token=access_token_factory(user.id),
-            role=UserTestRoles.Developer,
-        )
-
-
-@pytest_asyncio.fixture
-async def deleted_user(session: AsyncSession, access_token_factory) -> AsyncGenerator[MockUser, None]:
-    async with create_user_cm(
-        session,
-        username="deleted_user",
-        is_deleted=True,
-    ) as user:
-        token = access_token_factory(user.id)
-        yield MockUser(
-            user=user,
-            auth_token=token,
             role=UserTestRoles.Developer,
         )
 

@@ -24,7 +24,7 @@ class UserRepository(Repository[User]):
         is_superuser: bool,
         search_query: str | None = None,
     ) -> Pagination:
-        stmt = select(User).where(User.is_deleted.is_(False))
+        stmt = select(User)
 
         if search_query:
             stmt = stmt.where(User.username.bool_op("%")(search_query))  # similarity_threshold defaults to 0.3
@@ -49,7 +49,7 @@ class UserRepository(Repository[User]):
 
     async def update(self, user_id: int, data: dict) -> User:
         try:
-            return await self._update(User.id == user_id, User.is_deleted.is_(False), **data)
+            return await self._update(User.id == user_id, **data)
         except EntityNotFoundError as e:
             raise UserNotFoundError from e
         except IntegrityError as e:

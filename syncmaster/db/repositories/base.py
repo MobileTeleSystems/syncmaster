@@ -3,7 +3,7 @@
 from abc import ABC
 from typing import Any, Generic, TypeVar
 
-from sqlalchemy import ScalarResult, Select, and_, delete, func, insert, select, update
+from sqlalchemy import ScalarResult, Select, delete, func, insert, select, update
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,11 +20,7 @@ class Repository(Generic[Model], ABC):
         self._session = session
 
     async def _read_by_id(self, id: int, **kwargs: Any) -> Model:
-        if hasattr(self._model, "is_deleted"):
-            query = select(self._model).filter_by(is_deleted=False, id=id, **kwargs)
-            obj = (await self._session.scalars(query)).first()
-        else:
-            obj = await self._session.get(self._model, id)
+        obj = await self._session.get(self._model, id)
         if obj is None:
             raise EntityNotFoundError
         return obj
@@ -71,12 +67,6 @@ class Repository(Generic[Model], ABC):
         return obj
 
     async def _delete(self, id: int) -> Model:
-        if hasattr(self._model, "is_deleted"):
-            return await self._update(
-                and_(self._model.is_deleted.is_(False), self._model.id == id),
-                is_deleted=True,
-            )
-
         query = delete(self._model).filter_by(id=id).returning(self._model)
         result = await self._session.scalars(query)
         await self._session.flush()

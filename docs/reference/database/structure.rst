@@ -22,7 +22,6 @@ Database structure
         is_active: boolean
         created_at: timestamp
         updated_at: timestamp
-        is_deleted: boolean
     }
 
     entity group {
