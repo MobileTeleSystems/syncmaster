@@ -17,12 +17,11 @@ Group
 All entity types (Connection, Transfer, Run, Queue) can be created only within some group.
 Groups are independent from each other, and have globally unique name.
 
-Currently groups can be created only by ``SUPERUSER``.
-
 .. image:: ./group_list.png
 .. image:: ./group_info.png
 
-Group has an ``OWNER`` which can add members to the group, and assign them speficic roles:
+Group can be created by any user, which automatically get ``OWNER`` role.
+This role allows adding members to the group, and assign them speficic roles:
 
 .. image:: ./group_add_member.png
 
