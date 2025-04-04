@@ -35,7 +35,7 @@ def celery_factory(settings: Settings) -> Celery:
 
 def application_factory(settings: Settings) -> FastAPI:
     application = FastAPI(
-        title="Syncmaster",
+        title="SyncMaster",
         version=syncmaster_version,
         debug=settings.server.debug,
         # will be set up by middlewares

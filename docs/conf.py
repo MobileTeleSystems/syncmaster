@@ -65,7 +65,7 @@ extensions = [
 
 swagger = [
     {
-        "name": "syncmaster REST API",
+        "name": "SyncMaster REST API",
         "page": "openapi",
         "id": "syncmaster-api",
         "options": {
