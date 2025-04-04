@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from fastapi import APIRouter, Depends, Query, status
+from http.client import NO_CONTENT
+
+from fastapi import APIRouter, Depends, Query
 
 from syncmaster.db.models import User
 from syncmaster.db.utils import Permission
@@ -14,7 +16,6 @@ from syncmaster.schemas.v1.queue import (
     ReadQueueSchema,
     UpdateQueueSchema,
 )
-from syncmaster.schemas.v1.status import StatusResponseSchema
 from syncmaster.server.services.get_user import get_user
 from syncmaster.server.services.unit_of_work import UnitOfWork
 
@@ -119,12 +120,12 @@ async def update_queue(
     return ReadQueueSchema.model_validate(queue, from_attributes=True)
 
 
-@router.delete("/queues/{queue_id}", description="Delete queue by id")
+@router.delete("/queues/{queue_id}", description="Delete queue by id", status_code=NO_CONTENT)
 async def delete_queue(
     queue_id: int,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
-) -> StatusResponseSchema:
+):
     resource_role = await unit_of_work.queue.get_resource_permission(
         user=current_user,
         resource_id=queue_id,
@@ -147,9 +148,3 @@ async def delete_queue(
 
     async with unit_of_work:
         await unit_of_work.queue.delete(queue_id=queue_id)
-
-    return StatusResponseSchema(
-        ok=True,
-        status_code=status.HTTP_200_OK,
-        message="Queue was deleted",
-    )

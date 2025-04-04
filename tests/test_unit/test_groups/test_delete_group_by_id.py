@@ -22,12 +22,7 @@ async def test_only_superuser_can_delete_group(
             "Authorization": f"Bearer {superuser.token}",
         },
     )
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
-        "ok": True,
-        "status_code": 200,
-        "message": "Group was deleted",
-    }
+    assert result.status_code == 204, result.json()
 
     session.expunge_all()
     group_in_db = await session.get(Group, g_id)

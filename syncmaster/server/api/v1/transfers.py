@@ -1,7 +1,9 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 
-from fastapi import APIRouter, Depends, Query, status
+from http.client import NO_CONTENT
+
+from fastapi import APIRouter, Depends, Query
 
 from syncmaster.db.models import ConnectionType, User
 from syncmaster.db.utils import Permission
@@ -14,9 +16,6 @@ from syncmaster.exceptions.transfer import (
     DifferentTransferAndConnectionsGroupsError,
     DifferentTypeConnectionsAndParamsError,
     TransferNotFoundError,
-)
-from syncmaster.schemas.v1.status import (
-    StatusResponseSchema,
 )
 from syncmaster.schemas.v1.transfers import (
     CopyTransferSchema,
@@ -316,12 +315,12 @@ async def update_transfer(  # noqa: WPS217, WPS238
     return ReadTransferSchema.model_validate(transfer, from_attributes=True)
 
 
-@router.delete("/transfers/{transfer_id}")
+@router.delete("/transfers/{transfer_id}", status_code=NO_CONTENT)
 async def delete_transfer(
     transfer_id: int,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
-) -> StatusResponseSchema:
+):
     resource_role = await unit_of_work.transfer.get_resource_permission(
         user=current_user,
         resource_id=transfer_id,
@@ -337,9 +336,3 @@ async def delete_transfer(
         await unit_of_work.transfer.delete(
             transfer_id=transfer_id,
         )
-
-    return StatusResponseSchema(
-        ok=True,
-        status_code=status.HTTP_200_OK,
-        message="Transfer was deleted",
-    )

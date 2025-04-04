@@ -22,12 +22,7 @@ async def test_maintainer_plus_can_delete_group_transfer(
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
-        "ok": True,
-        "status_code": 200,
-        "message": "Transfer was deleted",
-    }
+    assert result.status_code == 204, result.json()
     session.expunge(transfer)
     transfer_in_db = await session.get(Transfer, transfer.id)
     assert transfer_in_db is None
@@ -46,12 +41,7 @@ async def test_superuser_can_delete_transfer(
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
-        "ok": True,
-        "status_code": 200,
-        "message": "Transfer was deleted",
-    }
+    assert result.status_code == 204, result.json()
     session.expunge(transfer)
     transfer_in_db = await session.get(Transfer, transfer.id)
     assert transfer_in_db is None

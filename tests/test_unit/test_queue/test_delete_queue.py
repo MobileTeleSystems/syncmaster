@@ -21,12 +21,7 @@ async def test_maintainer_plus_can_delete_queue(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
-        "message": "Queue was deleted",
-        "ok": True,
-        "status_code": 200,
-    }
+    assert result.status_code == 204, result.json()
     session.expunge_all()
     queue_in_db = await session.get(Queue, group_queue.id)
     assert queue_in_db is None
@@ -43,12 +38,7 @@ async def test_superuser_can_delete_queue(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
-        "message": "Queue was deleted",
-        "ok": True,
-        "status_code": 200,
-    }
+    assert result.status_code == 204, result.json()
     session.expunge_all()
     queue_in_db = await session.get(Queue, group_queue.id)
     assert queue_in_db is None

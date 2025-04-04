@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from http.client import OK
+from http.client import NO_CONTENT
 
 from fastapi import APIRouter, Depends, Query
 
@@ -18,7 +18,6 @@ from syncmaster.schemas.v1.groups import (
     ReadGroupSchema,
     UpdateGroupSchema,
 )
-from syncmaster.schemas.v1.status import StatusResponseSchema
 from syncmaster.schemas.v1.users import UserPageSchemaAsGroupMember
 from syncmaster.server.services.get_user import get_user
 from syncmaster.server.services.unit_of_work import UnitOfWork
@@ -137,14 +136,17 @@ async def update_group(  # noqa: WPS217
     return ReadGroupSchema.model_validate(group, from_attributes=True)
 
 
-@router.delete("/groups/{group_id}", dependencies=[Depends(get_user(is_superuser=True))])
+@router.delete(
+    "/groups/{group_id}",
+    dependencies=[Depends(get_user(is_superuser=True))],
+    status_code=NO_CONTENT,
+)
 async def delete_group(
     group_id: int,
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
-) -> StatusResponseSchema:
+):
     async with unit_of_work:
         await unit_of_work.group.delete(group_id=group_id)
-    return StatusResponseSchema(ok=True, status_code=OK, message="Group was deleted")
 
 
 @router.get("/groups/{group_id}/users")
@@ -200,14 +202,14 @@ async def update_user_role_group(
     return AddUserSchema.model_validate(result, from_attributes=True)
 
 
-@router.post("/groups/{group_id}/users/{user_id}")
+@router.post("/groups/{group_id}/users/{user_id}", status_code=NO_CONTENT)
 async def add_user_to_group(
     group_id: int,
     user_id: int,
     add_user_data: AddUserSchema,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
-) -> StatusResponseSchema:
+):
     resource_rule = await unit_of_work.group.get_group_permission(
         user=current_user,
         group_id=group_id,
@@ -229,20 +231,15 @@ async def add_user_to_group(
             new_user_id=user_id,
             role=add_user_data.role,
         )
-    return StatusResponseSchema(
-        ok=True,
-        status_code=OK,
-        message="User was successfully added to group",
-    )
 
 
-@router.delete("/groups/{group_id}/users/{user_id}")
+@router.delete("/groups/{group_id}/users/{user_id}", status_code=NO_CONTENT)
 async def delete_user_from_group(
     group_id: int,
     user_id: int,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
-) -> StatusResponseSchema:
+):
     resource_rule = await unit_of_work.group.get_group_permission(
         user=current_user,
         group_id=group_id,
@@ -261,4 +258,3 @@ async def delete_user_from_group(
             group_id=group_id,
             target_user_id=user_id,
         )
-    return StatusResponseSchema(ok=True, status_code=OK, message="User was successfully removed from group")

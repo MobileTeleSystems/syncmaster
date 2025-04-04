@@ -1,8 +1,9 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from collections.abc import Sequence
+from http.client import NO_CONTENT
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query
 from pydantic import TypeAdapter
 
 from syncmaster.db.models import Connection, ConnectionType, Transfer, User
@@ -26,7 +27,6 @@ from syncmaster.schemas.v1.connections.connection import (
     UpdateConnectionSchema,
 )
 from syncmaster.schemas.v1.page import MetaPageSchema
-from syncmaster.schemas.v1.status import StatusResponseSchema
 from syncmaster.server.services.get_user import get_user
 from syncmaster.server.services.unit_of_work import UnitOfWork
 
@@ -243,12 +243,12 @@ async def update_connection(  # noqa: WPS217, WPS238
     )
 
 
-@router.delete("/connections/{connection_id}")
+@router.delete("/connections/{connection_id}", status_code=NO_CONTENT)
 async def delete_connection(
     connection_id: int,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
-) -> StatusResponseSchema:
+):
     resource_role = await unit_of_work.connection.get_resource_permission(
         user=current_user,
         resource_id=connection_id,
@@ -268,12 +268,6 @@ async def delete_connection(
 
     async with unit_of_work:
         await unit_of_work.connection.delete(connection_id)
-
-    return StatusResponseSchema(
-        ok=True,
-        status_code=status.HTTP_200_OK,
-        message="Connection was deleted",
-    )
 
 
 @router.post("/connections/{connection_id}/copy_connection")

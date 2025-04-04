@@ -17,12 +17,7 @@ async def test_owner_can_delete_anyone_from_group(
         f"v1/groups/{group.id}/users/{user.id}",
         headers={"Authorization": f"Bearer {group_owner.token}"},
     )
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
-        "ok": True,
-        "status_code": 200,
-        "message": "User was successfully removed from group",
-    }
+    assert result.status_code == 204, result.json()
 
 
 async def test_groupless_user_cannot_remove_user_from_group(
@@ -79,12 +74,7 @@ async def test_maintainer_and_user_can_delete_self_from_group(
         f"v1/groups/{group.id}/users/{user.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
-        "ok": True,
-        "status_code": 200,
-        "message": "User was successfully removed from group",
-    }
+    assert result.status_code == 204, result.json()
 
 
 async def test_owner_cannot_delete_self_from_group(
@@ -142,12 +132,7 @@ async def test_superuser_can_delete_user_from_group(
         f"v1/groups/{group.id}/users/{user.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
-        "ok": True,
-        "status_code": 200,
-        "message": "User was successfully removed from group",
-    }
+    assert result.status_code == 204, result.json()
 
 
 async def test_not_authorized_user_cannot_remove_user_from_group(client: AsyncClient, group: MockGroup):

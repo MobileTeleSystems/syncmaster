@@ -22,12 +22,7 @@ async def test_owner_can_add_user_to_group(
         },
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
-        "ok": True,
-        "status_code": 200,
-        "message": "User was successfully added to group",
-    }
+    assert result.status_code == 204, result.json()
 
     check_result = await client.get(
         f"v1/groups/{empty_group.id}/users",
@@ -178,12 +173,7 @@ async def test_superuser_can_add_user_to_group(
         },
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
-        "ok": True,
-        "status_code": 200,
-        "message": "User was successfully added to group",
-    }
+    assert result.status_code == 204, result.json()
 
     result = await client.get(
         f"v1/groups/{empty_group.id}/users",
@@ -225,12 +215,7 @@ async def test_owner_cannot_add_user_to_group_twice(
             "role": UserTestRoles.Developer,
         },
     )
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
-        "ok": True,
-        "status_code": 200,
-        "message": "User was successfully added to group",
-    }
+    assert result.status_code == 204, result.json()
 
     result = await client.post(
         f"v1/groups/{group.id}/users/{simple_user.id}",

@@ -24,12 +24,7 @@ async def test_maintainer_plus_can_delete_connection(
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
-        "ok": True,
-        "status_code": 200,
-        "message": "Connection was deleted",
-    }
+    assert result.status_code == 204, result.json()
     session.expunge(connection)
     connection = await session.get(Connection, connection_id)
     assert connection is None
@@ -119,12 +114,7 @@ async def test_superuser_can_delete_group_connection(
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
-        "ok": True,
-        "status_code": 200,
-        "message": "Connection was deleted",
-    }
+    assert result.status_code == 204, result.json()
 
 
 async def test_developer_or_below_cannot_delete_connection(
