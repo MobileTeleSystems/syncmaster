@@ -5,7 +5,7 @@ Auth Providers
 
 Syncmaster supports different auth provider implementations. You can change implementation via settings:
 
-.. autopydantic_model:: keycloak.server.settings.auth.AuthSettings
+.. autopydantic_model:: syncmaster.server.settings.auth.AuthSettings
 
 .. toctree::
     :maxdepth: 2
