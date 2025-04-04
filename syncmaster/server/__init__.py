@@ -6,6 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from syncmaster import _raw_version as syncmaster_version
 from syncmaster.db.factory import create_session_factory, get_uow
 from syncmaster.exceptions import SyncmasterError
 from syncmaster.server.api.router import api_router
@@ -35,6 +36,7 @@ def celery_factory(settings: Settings) -> Celery:
 def application_factory(settings: Settings) -> FastAPI:
     application = FastAPI(
         title="Syncmaster",
+        version=syncmaster_version,
         debug=settings.server.debug,
         # will be set up by middlewares
         openapi_url=None,
