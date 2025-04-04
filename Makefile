@@ -33,14 +33,12 @@ venv-cleanup: ##@Env Cleanup venv
 	@rm -rf .venv || true
 	python -m venv .venv
 	${PIP} install -U setuptools wheel pip
-	${PIP} install poetry
-	${PIP} install -U flake8-commas
-	${PIP} install --no-deps sphinx-plantuml
+	${PIP} install -U poetry poetry-bumpversion
 
 venv-install: ##@Env Install requirements to venv
 	${POETRY} config virtualenvs.create false
-	${POETRY} self add poetry-bumpversion
 	${POETRY} install --no-root --all-extras --with dev,test,docs $(ARGS)
+	${PIP} install -U flake8-commas
 	${PIP} install --no-deps sphinx-plantuml
 
 

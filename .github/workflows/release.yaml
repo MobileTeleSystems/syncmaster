@@ -54,13 +54,10 @@ jobs:
       - name: Install poetry
         uses: snok/install-poetry@v1
 
-      - name: Install dependencies
-        run: |
-          poetry config virtualenvs.create false
-          poetry install --no-root --extras server --without docs,dev,test
-
       - name: Generate OpenAPI Schema
-        run: make openapi
+        run: |
+          make venv
+          make openapi
 
       - name: Fix logo in Readme
         run: |
