@@ -1,1 +1,0 @@
-When starting the transfer, the connections' credentials were not dumped

@@ -1,1 +1,0 @@
-Now migrations are executed in a dedicated one-off container, instead of being run as a part of ``backend`` container.

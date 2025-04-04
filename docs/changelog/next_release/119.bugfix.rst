@@ -1,1 +1,0 @@
-Now `Queue.name` is made unique within `group_id`

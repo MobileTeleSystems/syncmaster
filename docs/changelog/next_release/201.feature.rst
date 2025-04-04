@@ -1,1 +1,0 @@
-Use the `file_name_template` field to specify the names of saved files

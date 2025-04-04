@@ -1,1 +1,0 @@
-Check that ``service_name`` and ``sid`` are mutually exclusive when editing oracle connection

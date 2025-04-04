@@ -1,1 +1,0 @@
-Prohibit updating connection type it if there is a transfer associated with this connection

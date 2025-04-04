@@ -1,1 +1,0 @@
-Fixing an error when updating the is_scheduled parameter

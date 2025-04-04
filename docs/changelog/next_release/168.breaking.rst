@@ -1,2 +1,0 @@
-Add deletion of **transfers**, **queues** and **groups** records
-instead of marking them as deleted

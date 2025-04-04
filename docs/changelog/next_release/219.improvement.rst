@@ -1,1 +1,0 @@
-Enable parallel reading from JDBC sources

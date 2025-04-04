@@ -1,1 +1,0 @@
-Add compression options to XML file format

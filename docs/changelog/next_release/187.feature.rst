@@ -1,1 +1,0 @@
-Add API schemas for SFTP, FTP, FTPS, WebDAV, Samba file sources

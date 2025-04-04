@@ -61,7 +61,7 @@ This is done by adding a specific filter to logging handler:
 
 .. dropdown:: ``logging.yml``
 
-    .. literalinclude:: ../../../syncmaster/settings/log/plain.yml
+    .. literalinclude:: ../../../../syncmaster/settings/log/plain.yml
         :emphasize-lines: 6-12,17-18,25
 
 Resulting logs look like:

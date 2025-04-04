@@ -1,1 +1,0 @@
-Implement a single error handling format to improve consistency

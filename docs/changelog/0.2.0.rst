@@ -1,0 +1,75 @@
+0.2.0 (2025-04-04)
+==================
+
+TL;DR
+-----
+
+- Completely new UI.
+- Add support for FileSystem connections.
+- Add support for simple tranformations within transfer - filter files, filter rows, change columns.
+- Add support for incremental read strategy.
+- Add support for running transfers by schedule.
+- Add support for changing SparkSession resource limits.
+
+Huge thanks to :user:`Dmitry Pedchenko <dmitry-pedchenko>`, :user:`Maxim Lixakov <maxim-lixakov>`, :user:`Ilyas Gasanov <IlyasDevelopment>`, :user:`Kirill Chernikov <Zabilsya>`.
+
+Breaking Changes
+----------------
+
+- Implement a single error handling format to improve consistency (:issue:`95`)
+- Change response format for ``GET /v1/groups`` - add **current user role** for each group (:issue:`97`)
+- Change response format for ``GET /v1/groups/:id`` - add **current user role** for group (:issue:`109`)
+- Now migrations are executed in a dedicated one-off container, instead of being run as a part of ``backend`` container. (:issue:`163`)
+- Delete **transfers**, **queues** and **groups** records instead of marking them as deleted (:issue:`168`)
+- Move the ``type`` field from nested ``connection_data`` field to the root level of the ``Connection`` response. (:issue:`169`)
+- Decouple ``auth_data.type`` from the connection type (e.g. ``postgres``) and link it to the authentication type (e.g. ``basic``). (:issue:`169`)
+- Add deletion of **connections** records instead of marking them as deleted (:issue:`170`)
+- Use PUT instead of PATCH for ``Connection`` and ``Transfer`` models (:issue:`215`)
+- Return new connection and transfer object in ``POST /v1/transfer/copy`` and ``POST /v1/connection/copy`` endpoints.
+- Change response status from 200 to 204 for all ``DELETE`` endpoints.
+
+Features
+--------
+
+- Add hive to known types (:issue:`67`)
+- Allow search for **groups**, **users**, **connections**, **transfers**, **queues** (:issue:`92`, :issue:`94`, :issue:`99`, :issue:`100`, :issue:`101`, :issue:`103`)
+- Add filters for **connections**, **transfers** and **runs** (:issue:`94`, :issue:`102`, :issue:`106`)
+- Implement a scheduler to run celery tasks on a schedule. This can be done by setting ``Transfer.is_scheduled=True`` and ``Transfer.schedule="..."`` (cron-like expression).
+  The Run model now has a ``type`` field with options ``MANUAL`` and ``SCHEDULED``. (:issue:`114`)
+- Add GET ``v1/monitoring/metrics`` endpoint to provide basic HTTP server metrics in Prometheus format (:issue:`121`)
+- Implemented ``KeycloakAuthProvider`` for Single Sign-On (SSO) authentication.(:issue:`123`)
+- Implemented ``DummyAuthProvider`` for development and testing environments. (:issue:`123`)
+- Add API schemas for new DB sources - Clickhouse, MSSQL, MySQL (:issue:`124`, :issue:`125`, :issue:`126`, :issue:`160`)
+- Add logic for handling FTP, FTPS, SFTP, Samba, WebDAV transfers (:issue:`189`, :issue:`191`, :issue:`192`, :issue:`194`)
+- Add API schemas for file sources - SFTP, FTP, FTPS, WebDAV, Samba (:issue:`187`)
+- Add API schemas for file formats - Excel, XML, ORC, Parquet (:issue:`140`, :issue:`142`, :issue:`143`, :issue:`144`)
+- Add compression options to file formats CSV, JSON, JSONLine, Excel, ORC, Parquet, XML (:issue:`159`, :issue:`161`)
+- Add transformations for **Transfers** with dataframe row filtering (:issue:`184`)
+- Add transformations for **Transfers** with dataframe column filtering (:issue:`186`)
+- Add transformations for **Transfers** with file filtering (:issue:`198`)
+- Add ``increment_by`` field to ``strategy_params`` (:issue:`202`)
+- Implement increment strategy for transfers with file sources (:issue:`209`)
+- Implement increment strategy for transfers with database sources (:issue:`211`)
+- Add ``resources`` field to ``Transfer``. (:issue:`214`)
+- Add ``file_name_template`` field to ``target_params`` (:issue:`196`, :issue:`201`)
+
+Improvements
+------------
+
+- Updated ``User`` model to include ``email``, ``first_name``, ``middle_name``, and ``last_name`` fields, all optional. (:issue:`123`)
+- Read env variable ``SYNCMASTER__ENTRYPOINT__SUPERUSERS`` to promote users to ``SUPERUSER`` role during server startup. (:issue:`137`)
+- Enabled dynamic selection of authentication provider via environment variable ``SYNCMASTER__AUTH__PROVIDER``. (:issue:`123`)
+- Enable parallel reading from JDBC sources. (:issue:`219`)
+- Reset HWM when changing strategy from ``incremental`` to ``full``. (:issue:`217`)
+- Grant read-only permissions for the previous group owner when ownership is transferred (:issue:`135`)
+
+Bug Fixes
+---------
+
+- Use Hadoop AWS ``magic`` commiter only if transfer *target* is S3. (:issue:`46`)
+- Check that ``service_name`` and ``sid`` are mutually exclusive when editing Oracle connection. (:issue:`52`)
+- Queue name is unique within a group, new field ``slug`` is globally-unique. (:issue:`54`, :issue:`119`)
+- Prohibit updating connection type it if there is a transfer associated with this connection. (:issue:`55`)
+- Fix error when ``is_scheduled`` field value was ignored. (:issue:`57`)
+- Group without any users assigned was missing in groups list. (:issue:`62`)
+- Dump connection credentials while starting a transfer. (:issue:`63`)

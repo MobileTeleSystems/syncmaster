@@ -1,1 +1,0 @@
-Add `increment_by` field to `strategy_params`

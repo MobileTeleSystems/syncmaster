@@ -1,1 +1,0 @@
-Change response format for `GET /v1/groups/:id` - add **current user role** for group

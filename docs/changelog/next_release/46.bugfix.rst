@@ -1,1 +1,0 @@
-Use Hadoop AWS ``magic`` commiter only if transfer *target* is S3.

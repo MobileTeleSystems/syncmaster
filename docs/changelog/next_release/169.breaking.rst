@@ -1,2 +1,0 @@
-- Moved the `type` field from within `connection_data` to the root level of the `Connection` model.
-- Decoupled `auth_data.type` from the connection type and linked it to the authentication type instead.

@@ -1,1 +1,0 @@
-Add deletion of **connections** records instead of marking them as deleted

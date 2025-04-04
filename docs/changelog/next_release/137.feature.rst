@@ -1,1 +1,0 @@
-Add new environment variable ``SYNCMASTER__ENTRYPOINT__SUPERUSERS`` to Docker image entrypoint. Here you can pass usernames which should be automatically promoted to SUPERUSER role during backend startup.
