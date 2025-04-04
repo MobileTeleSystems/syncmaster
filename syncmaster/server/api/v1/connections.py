@@ -282,7 +282,7 @@ async def copy_connection(  # noqa: WPS238
     copy_connection_data: ConnectionCopySchema,
     current_user: User = Depends(get_user(is_active=True)),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
-) -> StatusResponseSchema:
+) -> ReadConnectionSchema:
     resource_role = await unit_of_work.connection.get_resource_permission(
         user=current_user,
         resource_id=connection_id,
@@ -304,7 +304,7 @@ async def copy_connection(  # noqa: WPS238
         raise ActionNotAllowedError
 
     async with unit_of_work:
-        await unit_of_work.connection.copy(
+        connection = await unit_of_work.connection.copy(
             connection_id=connection_id,
             new_group_id=copy_connection_data.new_group_id,
             new_name=copy_connection_data.new_name,
@@ -313,8 +313,14 @@ async def copy_connection(  # noqa: WPS238
         if copy_connection_data.remove_source:
             await unit_of_work.connection.delete(connection_id)
 
-    return StatusResponseSchema(
-        ok=True,
-        status_code=status.HTTP_200_OK,
-        message="Connection was copied",
+    return TypeAdapter(ReadConnectionSchema).validate_python(
+        {
+            "id": connection.id,
+            "group_id": connection.group_id,
+            "name": connection.name,
+            "description": connection.description,
+            "type": connection.type,
+            "data": connection.data,
+            "auth_data": None,
+        },
     )
