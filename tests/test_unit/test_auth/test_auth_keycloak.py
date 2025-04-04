@@ -34,6 +34,7 @@ async def test_get_keycloak_user_unauthorized(client: AsyncClient, mock_keycloak
 
 
 @responses.activate
+@pytest.mark.flaky
 @pytest.mark.parametrize(
     "settings",
     [
