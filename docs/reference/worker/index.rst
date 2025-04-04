@@ -96,4 +96,5 @@ See also
     :maxdepth: 1
 
     configuration/index
+    create_spark_session
     log_url
