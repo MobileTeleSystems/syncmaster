@@ -25,6 +25,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install system dependencies
+        # this step is needed for successful installation of "krb5" library in python dependencies
+        run: sudo apt-get update && sudo apt-get install -y autoconf gcc make libkrb5-dev
+
       - name: Set up Python ${{ env.DEFAULT_PYTHON }}
         id: python
         uses: actions/setup-python@v5
@@ -47,16 +51,9 @@ jobs:
         run: |
           poetry install --no-root --all-extras --without test,dev
 
-      - name: Install system dependencies
-        # this step is needed for successful installation of "krb5" library in python dependencies
-        run: sudo apt-get update && sudo apt-get install -y autoconf gcc make libkrb5-dev
-
-      - name: Install poetry
-        uses: snok/install-poetry@v1
-
       - name: Generate OpenAPI Schema
         run: |
-          make venv
+          source .venv/bin/activate
           make openapi
 
       - name: Fix logo in Readme
