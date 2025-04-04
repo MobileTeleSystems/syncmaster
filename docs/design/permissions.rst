@@ -3,20 +3,23 @@
 Roles and permissions
 =====================
 
-- Object within the group can be seen/interacted with only by users which are members of the group.
-- Permissions are limited by role assigned to user within specific group.
-- There can be only one user in a group with the Owner role, all other roles are not limited in
-  number.
-- Superuser can read, write to the table and delete without being in the group.
+
+Object within the group can be seen/interacted with only by users which are members of the group.
+Permissions are limited by role assigned to user within specific group.
 
 Roles are:
 
-* ``GUEST`` - read-only
-* ``DEVELOPER`` - read-write
-* ``MAINTAINER`` (DevOps) - read-write + manage queues
-* ``OWNER`` (Product Owner) - read-write + manage queues + manage user-group mapping
-* ``SUPERUSER`` - meta role assigned to specific users (NOT within group). Read-write + manage queues + manage user-group mapping + create/delete groups.
-
+* ``GUEST``
+  Read-only access to objects within a group.
+* ``DEVELOPER``
+  Read-write (manage) connections and transfer, read-only for other objects.
+* ``MAINTAINER`` (DevOps):
+  Manage connections, transfers and queues.
+* ``OWNER`` (Product Owner)
+  Manage connections, transfers, queues and user-group membership. Group can have only one maintainer.
+* ``SUPERUSER`` (Admin)
+  Meta role assigned to specific users, NOT within group. All permissions, including ability to create/delete groups.
+  Superusers are created by :ref:`manage-superusers-cli`.
 
 Groups
 -------

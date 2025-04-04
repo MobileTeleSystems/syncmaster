@@ -162,10 +162,10 @@ prod-build-worker: ##@Application Build docker image for worker
 
 prod-build: prod-build-server prod-build-scheduler prod-build-worker ##@Application Build docker images
 
-prod: ##@Application Run production server (with docker)
+prod: ##@Application Run production containers (with docker)
 	docker compose -f docker-compose.yml --profile all up -d $(ARGS)
 
-prod-stop: ##@Application Stop production server
+prod-cleanup: ##@Application Stop production containers
 	docker compose -f docker-compose.yml --profile all down --remove-orphans $(ARGS)
 
 

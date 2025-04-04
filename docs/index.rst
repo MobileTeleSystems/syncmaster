@@ -6,7 +6,7 @@
     :caption: High-level design
     :hidden:
 
-    design/entities
+    design/entities/index
     design/permissions
 
 .. toctree::
