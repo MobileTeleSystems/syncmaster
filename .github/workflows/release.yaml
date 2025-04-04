@@ -121,5 +121,6 @@ jobs:
           name: ${{ steps.release-name.outputs.name }}
           body_path: changelog.md
           files: |
-            dist/*
-            openapi.json
+            dist/*.tar.gz
+            dist/*.whl
+            docs/_static/openapi.json
