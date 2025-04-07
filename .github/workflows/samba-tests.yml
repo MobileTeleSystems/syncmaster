@@ -37,7 +37,7 @@ jobs:
           target: test
           file: docker/Dockerfile.worker
           load: true
-          cache-from: mtsrus/syncmaster-worker:develop
+          cache-from: type=gha
 
       - name: Make custom entrypoint script executable
         run: chmod +x ./docker/samba/custom_entrypoint.sh

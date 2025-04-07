@@ -28,6 +28,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-mysql
             ${{ runner.os }}-python-
+
       - name: Build Worker Image
         uses: docker/build-push-action@v6
         with:
@@ -36,7 +37,7 @@ jobs:
           target: test
           file: docker/Dockerfile.worker
           load: true
-          cache-from: mtsrus/syncmaster-worker:develop
+          cache-from: type=gha
 
       - name: Docker compose up
         run: |

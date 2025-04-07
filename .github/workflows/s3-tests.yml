@@ -37,7 +37,7 @@ jobs:
           file: docker/Dockerfile.worker
           target: test
           load: true
-          cache-from: mtsrus/syncmaster-worker:develop
+          cache-from: type=gha
 
       - name: Docker compose up
         run: |
