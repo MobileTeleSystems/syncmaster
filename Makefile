@@ -183,5 +183,5 @@ docs-cleanup: ##@Docs Cleanup docs
 
 docs-fresh: docs-cleanup docs-build ##@Docs Cleanup & build docs
 
-openapi: ##@Docs Generate OpenAPI schema
+docs-openapi: ##@Docs Generate OpenAPI schema
 	python -m syncmaster.server.scripts.export_openapi_schema docs/_static/openapi.json
