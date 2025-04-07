@@ -83,8 +83,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           pull: true
           push: true
-          cache-to: type=inline
-          cache-from: mtsrus/syncmaster-scheduler:develop
+          cache-to: type=gha,mode=max
+          cache-from: type=gha
           platforms: ${{ env.PLATFORMS }}
           provenance: mode=max
           sbom: true
