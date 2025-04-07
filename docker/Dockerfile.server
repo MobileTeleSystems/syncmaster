@@ -36,7 +36,8 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 
 FROM base AS builder
 
-RUN pip install poetry
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install poetry
 
 COPY ./pyproject.toml ./poetry.lock* ./
 RUN --mount=type=cache,target=/root/.cache/pypoetry \
@@ -53,6 +54,11 @@ FROM base AS prod
 COPY --from=builder /app/.venv/ /app/.venv/
 COPY ./syncmaster/ /app/syncmaster/
 RUN python -m compileall -b syncmaster
+
+# Do not run production as root, to improve security.
+# Also user does not own anything inside the image, including venv and source code.
+RUN useradd syncmaster
+USER syncmaster
 
 
 FROM builder AS test
