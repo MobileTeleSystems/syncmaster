@@ -2,7 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-from pydantic import BaseModel, ConfigDict, Field
+import json
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class CORSSettings(BaseModel):
@@ -23,20 +26,20 @@ class CORSSettings(BaseModel):
     .. code-block:: bash
 
         SYNCMASTER__SERVER__CORS__ENABLED=True
-        SYNCMASTER__SERVER__CORS__ALLOW_ORIGINS=["*"]
-        SYNCMASTER__SERVER__CORS__ALLOW_METHODS=["*"]
-        SYNCMASTER__SERVER__CORS__ALLOW_HEADERS=["*"]
-        SYNCMASTER__SERVER__CORS__EXPOSE_HEADERS=["X-Request-ID"]
+        SYNCMASTER__SERVER__CORS__ALLOW_ORIGINS=*
+        SYNCMASTER__SERVER__CORS__ALLOW_METHODS=*
+        SYNCMASTER__SERVER__CORS__ALLOW_HEADERS=*
+        SYNCMASTER__SERVER__CORS__EXPOSE_HEADERS=X-Request-ID,Location,Access-Control-Allow-Credentials
 
     For production environment:
 
     .. code-block:: bash
 
         SYNCMASTER__SERVER__CORS__ENABLED=True
-        SYNCMASTER__SERVER__CORS__ALLOW_ORIGINS=["production.example.com"]
-        SYNCMASTER__SERVER__CORS__ALLOW_METHODS=["GET"]
-        SYNCMASTER__SERVER__CORS__ALLOW_HEADERS=["X-Request-ID", "X-Request-With"]
-        SYNCMASTER__SERVER__CORS__EXPOSE_HEADERS=["X-Request-ID"]
+        SYNCMASTER__SERVER__CORS__ALLOW_ORIGINS=production.example.com
+        SYNCMASTER__SERVER__CORS__ALLOW_METHODS=GET
+        SYNCMASTER__SERVER__CORS__ALLOW_HEADERS=X-Request-ID,X-Request-With
+        SYNCMASTER__SERVER__CORS__EXPOSE_HEADERS=X-Request-ID
         # custom option passed directly to middleware
         SYNCMASTER__SERVER__CORS__MAX_AGE=600
     """
@@ -54,5 +57,14 @@ class CORSSettings(BaseModel):
         description="HTTP headers allowed for CORS",
     )
     expose_headers: list[str] = Field(default=["X-Request-ID"], description="HTTP headers exposed from server")
+
+    @field_validator("allow_origins", "allow_methods", "allow_headers", "expose_headers", mode="before")
+    @classmethod
+    def _validate_bootstrap_servers(cls, value: Any):
+        if not isinstance(value, str):
+            return value
+        if "[" in value:
+            return json.loads(value)
+        return [item.strip() for item in value.split(",")]
 
     model_config = ConfigDict(extra="allow")
