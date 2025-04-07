@@ -3,6 +3,7 @@
 
 Improvements
 ------------
+
 - Change docker image user from ``root`` to ``syncmaster``, to improve security.
 
 Bug fixes
