@@ -1,0 +1,11 @@
+0.2.1 (2025-04-07)
+==================
+
+Improvements
+------------
+- Change docker image user from ``root`` to ``syncmaster``, to improve security.
+
+Bug fixes
+--------
+
+- Fix missing Swagger docs in prod image.
