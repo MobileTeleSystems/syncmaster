@@ -5,6 +5,7 @@ Improvements
 ------------
 
 - Change docker image user from ``root`` to ``syncmaster``, to improve security.
+- Move server healthcheck to Docker image.
 
 Bug fixes
 --------
