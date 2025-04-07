@@ -87,6 +87,7 @@ jobs:
           cache-from: mtsrus/syncmaster-server:develop
           platforms: ${{ env.PLATFORMS }}
           provenance: mode=max
+          sbom: true
 
       - name: Convert README to Markdown
         uses: docker://pandoc/core:2.9
