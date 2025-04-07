@@ -69,7 +69,7 @@ jobs:
       - name: Generate SBOM
         run: |
           pip install cyclonedx-bom
-          cyclonedx-py poetry --extras server,scheduler,worker --without dev,test,docs > sbom.spdx.json
+          cyclonedx-py poetry --extras server,scheduler,worker --without dev,test,docs > sbom.cyclonedx.json
 
       - name: Get changelog
         run: |
@@ -129,4 +129,4 @@ jobs:
             dist/*.tar.gz
             dist/*.whl
             docs/_static/openapi.json
-            sbom.spdx.json
+            sbom.cyclonedx.json
