@@ -29,6 +29,8 @@ ENV SYNCMASTER__SERVER__OPENAPI__SWAGGER__JS_URL=/static/swagger/swagger-ui-bund
     SYNCMASTER__SERVER__STATIC_FILES__DIRECTORY=/app/syncmaster/server/static
 
 COPY ./docker/entrypoint_server.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh \
+    && chmod +r -R /app/syncmaster/server/static
 ENTRYPOINT ["/app/entrypoint.sh"]
 
 

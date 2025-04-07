@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from fastapi import FastAPI
+from starlette.staticfiles import StaticFiles
 
 from syncmaster.server.settings.server.static_files import StaticFilesSettings
 
@@ -11,5 +12,5 @@ def apply_static_files(app: FastAPI, settings: StaticFilesSettings) -> FastAPI:
         return app
 
     # https://fastapi.tiangolo.com/how-to/custom-docs-ui-assets/#serve-the-static-files
-    # app.mount("/static", StaticFiles(directory=settings.directory), name="static")
+    app.mount("/static", StaticFiles(directory=settings.directory), name="static")
     return app

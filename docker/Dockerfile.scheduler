@@ -8,6 +8,7 @@ ENV PYTHONPATH=/app \
     POETRY_VIRTUALENVS_CREATE=1
 
 COPY ./docker/entrypoint_scheduler.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
 
 
