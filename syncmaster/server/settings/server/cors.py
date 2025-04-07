@@ -26,9 +26,9 @@ class CORSSettings(BaseModel):
     .. code-block:: bash
 
         SYNCMASTER__SERVER__CORS__ENABLED=True
-        SYNCMASTER__SERVER__CORS__ALLOW_ORIGINS=*
-        SYNCMASTER__SERVER__CORS__ALLOW_METHODS=*
-        SYNCMASTER__SERVER__CORS__ALLOW_HEADERS=*
+        SYNCMASTER__SERVER__CORS__ALLOW_ORIGINS="*"
+        SYNCMASTER__SERVER__CORS__ALLOW_METHODS="*"
+        SYNCMASTER__SERVER__CORS__ALLOW_HEADERS="*"
         SYNCMASTER__SERVER__CORS__EXPOSE_HEADERS=X-Request-ID,Location,Access-Control-Allow-Credentials
 
     For production environment:
@@ -36,10 +36,10 @@ class CORSSettings(BaseModel):
     .. code-block:: bash
 
         SYNCMASTER__SERVER__CORS__ENABLED=True
-        SYNCMASTER__SERVER__CORS__ALLOW_ORIGINS=production.example.com
-        SYNCMASTER__SERVER__CORS__ALLOW_METHODS=GET
-        SYNCMASTER__SERVER__CORS__ALLOW_HEADERS=X-Request-ID,X-Request-With
-        SYNCMASTER__SERVER__CORS__EXPOSE_HEADERS=X-Request-ID
+        SYNCMASTER__SERVER__CORS__ALLOW_ORIGINS="production.example.com"
+        SYNCMASTER__SERVER__CORS__ALLOW_METHODS="GET"
+        SYNCMASTER__SERVER__CORS__ALLOW_HEADERS="X-Request-ID,X-Request-With"
+        SYNCMASTER__SERVER__CORS__EXPOSE_HEADERS="X-Request-ID"
         # custom option passed directly to middleware
         SYNCMASTER__SERVER__CORS__MAX_AGE=600
     """
