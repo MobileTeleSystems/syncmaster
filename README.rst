@@ -3,19 +3,19 @@
 Data.SyncMaster
 ===============
 
-|Repo Status| |PyPI| |PyPI License| |PyPI Python Version| |Docker image| |Documentation|
-|Build Status| |Coverage|  |pre-commit.ci|
+|Repo Status| |Docker image| |PyPI| |PyPI License| |PyPI Python Version| |Documentation|
+|Build Status| |Coverage| |pre-commit.ci|
 
 .. |Repo Status| image:: https://www.repostatus.org/badges/latest/wip.svg
     :target: https://www.repostatus.org/#wip
+.. |Docker image| image:: https://img.shields.io/docker/v/mtsrus/syncmaster-server?sort=semver&label=docker
+    :target: https://hub.docker.com/r/mtsrus/syncmaster-server
 .. |PyPI| image:: https://img.shields.io/pypi/v/data-syncmaster
     :target: https://pypi.org/project/data-syncmaster/
 .. |PyPI License| image:: https://img.shields.io/pypi/l/data-syncmaster.svg
     :target: https://github.com/MobileTeleSystems/syncmaster/blob/develop/LICENSE.txt
 .. |PyPI Python Version| image:: https://img.shields.io/pypi/pyversions/data-syncmaster.svg
     :target: https://badge.fury.io/py/data-syncmaster
-.. |Docker image| image:: https://img.shields.io/docker/v/mtsrus/syncmaster-server?sort=semver&label=docker
-    :target: https://hub.docker.com/r/mtsrus/syncmaster-server
 .. |Documentation| image:: https://readthedocs.org/projects/syncmaster/badge/?version=stable
     :target: https://syncmaster.readthedocs.io
 .. |Build Status| image:: https://github.com/MobileTeleSystems/syncmaster/workflows/Run%20All%20Tests/badge.svg
