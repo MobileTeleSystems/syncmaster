@@ -10,9 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Group
 from syncmaster.dto.connections import HiveConnectionDTO
-from syncmaster.server.settings import ServerAppSettings as Settings
 from tests.settings import TestSettings
-from tests.test_unit.utils import create_connection, create_credentials
+from tests.test_unit.utils import create_connection
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +60,6 @@ def prepare_hive(
 @pytest_asyncio.fixture
 async def hive_connection(
     hive: HiveConnectionDTO,
-    settings: Settings,
     session: AsyncSession,
     group: Group,
 ):
@@ -75,16 +73,7 @@ async def hive_connection(
         group_id=group.id,
     )
 
-    await create_credentials(
-        session=session,
-        settings=settings,
-        connection_id=result.id,
-        auth_data=dict(
-            type="basic",
-            user=hive.user,
-            password=hive.password,
-        ),
-    )
+    # no credentials for test purpose
 
     yield result
     await session.delete(result)

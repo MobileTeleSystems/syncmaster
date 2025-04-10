@@ -23,6 +23,13 @@ class HDFSHandler(RemoteDFFileHandler):
             spark=spark,
         ).check()
 
-        self.file_connection = HDFS(
-            cluster=self.connection_dto.cluster,
-        ).check()
+        if self.connection_dto.user and self.connection_dto.password:
+            self.file_connection = HDFS(
+                cluster=self.connection_dto.cluster,
+                user=self.connection_dto.user,
+                password=self.connection_dto.password,
+            ).check()
+        else:
+            self.file_connection = HDFS(
+                cluster=self.connection_dto.cluster,
+            ).check()

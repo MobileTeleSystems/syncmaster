@@ -230,11 +230,9 @@ async def mock_queue(
     await session.commit()
 
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture(params=[None])
 async def create_connection_data(request) -> dict | None:
-    if hasattr(request, "param"):
-        return request.param
-    return None
+    return request.param
 
 
 @pytest_asyncio.fixture
@@ -294,18 +292,22 @@ async def two_group_connections(
     await session.commit()
 
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture(
+    params=[
+        {
+            "type": "basic",
+            "user": "user",
+            "password": "password",
+        },
+    ],
+)
 async def create_connection_auth_data(request) -> dict | None:
-    if hasattr(request, "param"):
-        return request.param
-    return None
+    return request.param
 
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture(params=[None])
 async def connection_type(request) -> str | None:
-    if hasattr(request, "param"):
-        return request.param
-    return None
+    return request.param
 
 
 @pytest_asyncio.fixture

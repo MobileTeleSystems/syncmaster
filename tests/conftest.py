@@ -169,16 +169,12 @@ def celery(worker_settings: WorkerAppSettings) -> Celery:
 
 @pytest_asyncio.fixture
 async def create_connection_data(request):
-    if hasattr(request, "param"):
-        return request.param
-    return None
+    return request.param
 
 
 @pytest_asyncio.fixture
 async def create_transfer_data(request):
-    if hasattr(request, "param"):
-        return request.param
-    return None
+    return request.param
 
 
 @pytest_asyncio.fixture(

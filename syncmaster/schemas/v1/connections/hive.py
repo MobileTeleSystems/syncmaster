@@ -32,7 +32,7 @@ class CreateHiveConnectionSchema(CreateConnectionBaseSchema):
             "Data required to connect to the database. These are the parameters that are specified in the URL request."
         ),
     )
-    auth_data: CreateBasicAuthSchema = Field(
+    auth_data: CreateBasicAuthSchema | None = Field(
         description="Credentials for authorization",
     )
 
@@ -44,6 +44,6 @@ class ReadHiveConnectionSchema(ReadConnectionBaseSchema):
 
 
 class UpdateHiveConnectionSchema(CreateHiveConnectionSchema):
-    auth_data: UpdateBasicAuthSchema = Field(
+    auth_data: UpdateBasicAuthSchema | None = Field(
         description="Credentials for authorization",
     )

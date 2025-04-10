@@ -65,17 +65,26 @@ async def group_connection(
         data=create_connection_data,
     )
 
-    credentials = await create_credentials(
-        session=session,
-        settings=settings,
-        connection_id=connection.id,
-        auth_data=create_connection_auth_data,
-    )
+    auth_data: dict | None = None
+    credentials = None
+    if create_connection_auth_data:
+        credentials = await create_credentials(
+            session=session,
+            settings=settings,
+            connection_id=connection.id,
+            auth_data=create_connection_auth_data,
+        )
+        auth_data = decrypt_auth_data(credentials.value, settings=settings)
+
     token = access_token_factory(group_owner.id)
     yield MockConnection(
-        credentials=MockCredentials(
-            value=decrypt_auth_data(credentials.value, settings=settings),
-            connection_id=connection.id,
+        credentials=(
+            MockCredentials(
+                value=auth_data,
+                connection_id=connection.id,
+            )
+            if auth_data
+            else None
         ),
         connection=connection,
         owner_group=MockGroup(
@@ -88,7 +97,8 @@ async def group_connection(
             members=members,
         ),
     )
-    await session.delete(credentials)
+    if credentials:
+        await session.delete(credentials)
     await session.delete(connection)
     await session.delete(group_owner)
     await session.delete(group)

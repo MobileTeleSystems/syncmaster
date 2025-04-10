@@ -9,14 +9,14 @@ from syncmaster.server.settings import ServerAppSettings as Settings
 from tests.mocks import MockConnection, UserTestRoles
 from tests.test_unit.utils import fetch_connection_json
 
-pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.hdfs]
+pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.hive]
 
 
 @pytest.mark.parametrize(
     "connection_type,create_connection_data,create_connection_auth_data",
     [
         (
-            "hdfs",
+            "hive",
             {
                 "cluster": "cluster",
             },
@@ -25,7 +25,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.hdfs]
     ],
     indirect=["create_connection_data", "create_connection_auth_data"],
 )
-async def test_developer_plus_can_update_hdfs_connection_no_credentials(
+async def test_developer_plus_can_update_hive_connection_no_credentials(
     client: AsyncClient,
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
@@ -55,14 +55,14 @@ async def test_developer_plus_can_update_hdfs_connection_no_credentials(
     "connection_type,create_connection_data,create_connection_auth_data",
     [
         (
-            "hdfs",
+            "hive",
             {
                 "cluster": "cluster",
             },
             None,
         ),
         (
-            "hdfs",
+            "hive",
             {
                 "cluster": "cluster",
             },
@@ -86,7 +86,7 @@ async def test_developer_plus_can_update_hdfs_connection_no_credentials(
         },
     ],
 )
-async def test_developer_plus_can_update_hdfs_connection_replace_credentials_full(
+async def test_developer_plus_can_update_hive_connection_replace_credentials_full(
     client: AsyncClient,
     session: AsyncSession,
     settings: Settings,
@@ -141,7 +141,7 @@ async def test_developer_plus_can_update_hdfs_connection_replace_credentials_ful
     "connection_type,create_connection_data,create_connection_auth_data",
     [
         (
-            "hdfs",
+            "hive",
             {
                 "cluster": "cluster",
             },
@@ -154,7 +154,7 @@ async def test_developer_plus_can_update_hdfs_connection_replace_credentials_ful
     ],
     indirect=["create_connection_data", "create_connection_auth_data"],
 )
-async def test_developer_plus_can_update_hdfs_connection_replace_credentials_partial(
+async def test_developer_plus_can_update_hive_connection_replace_credentials_partial(
     client: AsyncClient,
     session: AsyncSession,
     settings: Settings,
@@ -204,7 +204,7 @@ async def test_developer_plus_can_update_hdfs_connection_replace_credentials_par
     "connection_type,create_connection_data,create_connection_auth_data",
     [
         (
-            "hdfs",
+            "hive",
             {
                 "cluster": "cluster",
             },
@@ -213,7 +213,7 @@ async def test_developer_plus_can_update_hdfs_connection_replace_credentials_par
     ],
     indirect=["create_connection_data", "create_connection_auth_data"],
 )
-async def test_developer_plus_can_update_hdfs_connection_missing_credentials(
+async def test_developer_plus_can_update_hive_connection_missing_credentials(
     client: AsyncClient,
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,

@@ -57,8 +57,10 @@ def run_transfer(session: Session, run_id: int, settings: WorkerAppSettings):
     q_source_auth_data = select(AuthData).where(AuthData.connection_id == run.transfer.source_connection.id)
     q_target_auth_data = select(AuthData).where(AuthData.connection_id == run.transfer.target_connection.id)
 
-    target_auth_data = decrypt_auth_data(session.scalars(q_target_auth_data).one().value, settings)
-    source_auth_data = decrypt_auth_data(session.scalars(q_source_auth_data).one().value, settings)
+    source_auth_result = session.scalars(q_source_auth_data).one_or_none()
+    target_auth_result = session.scalars(q_target_auth_data).one_or_none()
+    source_auth_data = decrypt_auth_data(source_auth_result.value, settings) if source_auth_result else None
+    target_auth_data = decrypt_auth_data(target_auth_result.value, settings) if target_auth_result else None
 
     try:
         controller = TransferController(

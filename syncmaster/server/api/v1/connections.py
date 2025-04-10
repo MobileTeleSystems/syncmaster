@@ -125,10 +125,11 @@ async def create_connection(
             data=connection_data.data.model_dump(),
         )
 
-        await unit_of_work.credentials.create(
-            connection_id=connection.id,
-            data=connection_data.auth_data.model_dump(),
-        )
+        if connection_data.auth_data:
+            await unit_of_work.credentials.create(
+                connection_id=connection.id,
+                data=connection_data.auth_data.model_dump(),
+            )
 
     credentials = await unit_of_work.credentials.read(connection.id)
     return TypeAdapter(ReadConnectionSchema).validate_python(
@@ -183,7 +184,7 @@ async def read_connection(
 
 
 @router.put("/connections/{connection_id}")
-async def update_connection(  # noqa: WPS217, WPS238
+async def update_connection(  # noqa: WPS217, WPS238, WPS231
     connection_id: int,
     connection_data: UpdateConnectionSchema,
     current_user: User = Depends(get_user(is_active=True)),
@@ -200,23 +201,26 @@ async def update_connection(  # noqa: WPS217, WPS238
     if resource_role < Permission.WRITE:
         raise ActionNotAllowedError
 
-    async with unit_of_work:
-        existing_connection: Connection = await unit_of_work.connection.read_by_id(connection_id=connection_id)
-        if connection_data.type != existing_connection.type:
-            linked_transfers: Sequence[Transfer] = await unit_of_work.transfer.list_by_connection_id(connection_id)
-            if linked_transfers:
-                raise ConnectionTypeUpdateError
+    existing_connection: Connection = await unit_of_work.connection.read_by_id(connection_id=connection_id)
+    if connection_data.type != existing_connection.type:
+        linked_transfers: Sequence[Transfer] = await unit_of_work.transfer.list_by_connection_id(connection_id)
+        if linked_transfers:
+            raise ConnectionTypeUpdateError
 
-        existing_credentials = await unit_of_work.credentials.read(connection_id=connection_id)
-        auth_data = connection_data.auth_data.model_dump()
+    existing_credentials = await unit_of_work.credentials.read(connection_id=connection_id)
+    new_credentials: dict | None = None
+    if connection_data.auth_data:
+        new_credentials = connection_data.auth_data.model_dump()
         secret_field = connection_data.auth_data.secret_field
+        if new_credentials[secret_field] is None:
 
-        if auth_data[secret_field] is None:
-            if existing_credentials["type"] != auth_data["type"]:
+            # We don't return secret_field to client, so default field value means using existing secret
+            if not existing_credentials or existing_credentials["type"] != new_credentials["type"]:
                 raise ConnectionAuthDataUpdateError
 
-            auth_data[secret_field] = existing_credentials[secret_field]
+            new_credentials[secret_field] = existing_credentials[secret_field]
 
+    async with unit_of_work:
         connection = await unit_of_work.connection.update(
             connection_id=connection_id,
             name=connection_data.name,
@@ -224,12 +228,22 @@ async def update_connection(  # noqa: WPS217, WPS238
             description=connection_data.description,
             data=connection_data.data.model_dump(),
         )
-        await unit_of_work.credentials.update(
-            connection_id=connection_id,
-            data=auth_data,
-        )
 
-    credentials = await unit_of_work.credentials.read(connection_id)
+        if existing_credentials and new_credentials:
+            await unit_of_work.credentials.update(
+                connection_id=connection_id,
+                data=new_credentials,
+            )
+        elif new_credentials:
+            await unit_of_work.credentials.create(
+                connection_id=connection.id,
+                data=new_credentials,
+            )
+        elif existing_credentials:
+            await unit_of_work.credentials.delete(
+                connection_id=connection_id,
+            )
+
     return TypeAdapter(ReadConnectionSchema).validate_python(
         {
             "id": connection.id,
@@ -238,7 +252,7 @@ async def update_connection(  # noqa: WPS217, WPS238
             "description": connection.description,
             "type": connection.type,
             "data": connection.data,
-            "auth_data": credentials,
+            "auth_data": new_credentials,
         },
     )
 

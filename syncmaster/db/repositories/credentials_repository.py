@@ -4,15 +4,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, NoReturn
 
-from sqlalchemy import ScalarResult, insert, select
-from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
+from sqlalchemy import ScalarResult, delete, insert, select
+from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import AuthData
 from syncmaster.db.repositories.base import Repository
 from syncmaster.db.repositories.utils import decrypt_auth_data, encrypt_auth_data
 from syncmaster.exceptions import SyncmasterError
-from syncmaster.exceptions.credentials import AuthDataNotFoundError
 
 if TYPE_CHECKING:
     from syncmaster.scheduler.settings import SchedulerAppSettings
@@ -33,13 +32,13 @@ class CredentialsRepository(Repository[AuthData]):
     async def read(
         self,
         connection_id: int,
-    ) -> dict:
+    ) -> dict | None:
         query = select(AuthData).where(AuthData.connection_id == connection_id)
-        try:
-            result: ScalarResult[AuthData] = await self._session.scalars(query)
-            return decrypt_auth_data(result.one().value, settings=self._settings)
-        except NoResultFound as e:
-            raise AuthDataNotFoundError(f"Connection id = {connection_id}") from e
+        result: ScalarResult[AuthData] = await self._session.scalars(query)
+        result_row = result.one_or_none()
+        if not result_row:
+            return None
+        return decrypt_auth_data(result_row.value, settings=self._settings)
 
     async def read_bulk(
         self,
@@ -76,6 +75,18 @@ class CredentialsRepository(Repository[AuthData]):
                 AuthData.connection_id == connection_id,
                 value=encrypt_auth_data(value=data, settings=self._settings),
             )
+        except IntegrityError as e:
+            self._raise_error(e)
+
+    async def delete(
+        self,
+        connection_id: int,
+    ) -> AuthData:
+        try:
+            query = delete(AuthData).where(AuthData.connection_id == connection_id).returning(AuthData)
+            result = await self._session.scalars(query)
+            await self._session.flush()
+            return result.one()
         except IntegrityError as e:
             self._raise_error(e)
 

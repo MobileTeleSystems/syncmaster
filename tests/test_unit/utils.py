@@ -271,10 +271,11 @@ async def fetch_connection_json(client: AsyncClient, user_token: str, mock_conne
     connection_json = connection.json()
 
     auth_data = connection_json["auth_data"]
-    if auth_data["type"] in ("basic", "samba"):
-        auth_data["password"] = mock_connection.credentials.value["password"]
-    elif auth_data["type"] == "s3":
-        auth_data["secret_key"] = mock_connection.credentials.value["secret_key"]
+    if auth_data:
+        if auth_data["type"] in ("basic", "samba"):
+            auth_data["password"] = mock_connection.credentials.value["password"]
+        elif auth_data["type"] == "s3":
+            auth_data["secret_key"] = mock_connection.credentials.value["secret_key"]
 
     return connection_json
 

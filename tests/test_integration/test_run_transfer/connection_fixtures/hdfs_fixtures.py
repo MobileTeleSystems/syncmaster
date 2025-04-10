@@ -10,9 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Group
 from syncmaster.dto.connections import HDFSConnectionDTO
-from syncmaster.server.settings import ServerAppSettings as Settings
 from tests.settings import TestSettings
-from tests.test_unit.utils import create_connection, create_credentials, upload_files
+from tests.test_unit.utils import create_connection, upload_files
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +23,6 @@ logger = logging.getLogger(__name__)
 def hdfs(test_settings: TestSettings) -> HDFSConnectionDTO:
     return HDFSConnectionDTO(
         cluster=test_settings.TEST_HIVE_CLUSTER,
-        user=test_settings.TEST_HIVE_USER,
-        password=test_settings.TEST_HIVE_PASSWORD,
     )
 
 
@@ -99,7 +96,6 @@ def prepare_hdfs(
 @pytest_asyncio.fixture
 async def hdfs_connection(
     hdfs: HDFSConnectionDTO,
-    settings: Settings,
     session: AsyncSession,
     group: Group,
 ):
@@ -113,16 +109,7 @@ async def hdfs_connection(
         group_id=group.id,
     )
 
-    await create_credentials(
-        session=session,
-        settings=settings,
-        connection_id=result.id,
-        auth_data=dict(
-            type="basic",
-            user=hdfs.user,
-            password=hdfs.password,
-        ),
-    )
+    # no credentials for test purpose
 
     yield result
     await session.delete(result)

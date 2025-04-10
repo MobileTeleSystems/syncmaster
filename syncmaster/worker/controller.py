@@ -156,9 +156,9 @@ class TransferController:
         settings: WorkerAppSettings,
         run: Run,
         source_connection: Connection,
-        source_auth_data: dict,
+        source_auth_data: dict | None,
         target_connection: Connection,
-        target_auth_data: dict,
+        target_auth_data: dict | None,
     ):
         self.temp_dir = TemporaryDirectory(prefix=f"syncmaster_{run.id}_")
 
@@ -213,7 +213,7 @@ class TransferController:
     def get_handler(
         self,
         connection_data: dict[str, Any],
-        connection_auth_data: dict,
+        connection_auth_data: dict | None,
         run_data: dict[str, Any],
         transfer_id: int,
         transfer_params: dict[str, Any],
@@ -222,7 +222,7 @@ class TransferController:
         transformations: list[dict],
         temp_dir: TemporaryDirectory,
     ) -> Handler:
-        connection_data.update(connection_auth_data)
+        connection_data.update(connection_auth_data or {})
         connection_data.pop("type")
         handler_type = transfer_params.pop("type", None)
 

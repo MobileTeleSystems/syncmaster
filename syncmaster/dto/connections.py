@@ -75,9 +75,9 @@ class HiveConnectionDTO(ConnectionDTO):
 
 @dataclass
 class HDFSConnectionDTO(ConnectionDTO):
-    user: str
-    password: str
     cluster: str
+    user: str | None = None
+    password: str | None = None
     type: ClassVar[str] = "hdfs"
 
 

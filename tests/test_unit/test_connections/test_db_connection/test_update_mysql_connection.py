@@ -67,7 +67,7 @@ async def test_developer_plus_can_update_mysql_connection(
             "additional_params": {},
         },
         "auth_data": {
-            "type": group_connection.credentials.value["type"],
+            "type": "basic",
             "user": "new_user",
         },
     }

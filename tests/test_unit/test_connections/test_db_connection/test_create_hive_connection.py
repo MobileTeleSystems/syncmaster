@@ -70,3 +70,56 @@ async def test_developer_plus_can_create_hive_connection(
             "user": decrypted["user"],
         },
     }
+
+
+async def test_developer_plus_can_create_hive_connection_without_credentials(
+    client: AsyncClient,
+    group: MockGroup,
+    session: AsyncSession,
+    role_developer_plus: UserTestRoles,
+):
+    user = group.get_member_of_role(role_developer_plus)
+
+    result = await client.post(
+        "v1/connections",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "group_id": group.id,
+            "name": "New connection",
+            "description": "",
+            "type": "hive",
+            "connection_data": {
+                "cluster": "cluster",
+            },
+            "auth_data": None,
+        },
+    )
+    connection = (
+        await session.scalars(
+            select(Connection).filter_by(
+                name="New connection",
+            ),
+        )
+    ).first()
+
+    assert result.status_code == 200, result.json()
+    assert result.json() == {
+        "id": connection.id,
+        "group_id": connection.group_id,
+        "name": connection.name,
+        "description": connection.description,
+        "type": connection.type,
+        "connection_data": {
+            "cluster": connection.data["cluster"],
+        },
+        "auth_data": None,
+    }
+
+    creds = (
+        await session.scalars(
+            select(AuthData).filter_by(
+                connection_id=connection.id,
+            ),
+        )
+    ).one_or_none()
+    assert not creds

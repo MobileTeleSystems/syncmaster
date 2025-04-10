@@ -345,6 +345,7 @@ async def test_superuser_cannot_update_connection_auth_data_type_without_secret(
         },
     )
 
+    assert result.status_code == 409, result.json()
     assert result.json() == {
         "error": {
             "code": "conflict",
@@ -352,7 +353,6 @@ async def test_superuser_cannot_update_connection_auth_data_type_without_secret(
             "details": None,
         },
     }
-    assert result.status_code == 409, result.json()
 
 
 async def test_unauthorized_user_cannot_update_connection(

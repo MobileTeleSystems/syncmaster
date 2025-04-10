@@ -52,13 +52,17 @@ class RunRepository(Repository[Run]):
     async def create(
         self,
         transfer_id: int,
-        source_creds: dict,
-        target_creds: dict,
+        source_auth_data: dict | None,
+        target_auth_data: dict | None,
         type: RunType,
     ) -> Run:
         run = Run()
         run.transfer_id = transfer_id
-        run.transfer_dump = await self.read_full_serialized_transfer(transfer_id, source_creds, target_creds)
+        run.transfer_dump = await self.read_full_serialized_transfer(
+            transfer_id,
+            source_auth_data,
+            target_auth_data,
+        )
         run.type = type
         try:
             self._session.add(run)
@@ -84,8 +88,8 @@ class RunRepository(Repository[Run]):
     async def read_full_serialized_transfer(
         self,
         transfer_id: int,
-        source_creds: dict,
-        target_creds: dict,
+        source_auth_data: dict | None,
+        target_auth_data: dict | None,
     ) -> dict[str, Any]:
         transfer = await self._session.scalars(
             select(Transfer)
@@ -116,7 +120,7 @@ class RunRepository(Repository[Run]):
                 name=transfer.source_connection.name,
                 description=transfer.source_connection.description,
                 data=transfer.source_connection.data,
-                auth_data=source_creds["auth_data"],
+                auth_data=source_auth_data,
             ),
             target_connection=dict(
                 id=transfer.target_connection.id,
@@ -124,7 +128,7 @@ class RunRepository(Repository[Run]):
                 name=transfer.target_connection.name,
                 description=transfer.target_connection.description,
                 data=transfer.target_connection.data,
-                auth_data=target_creds["auth_data"],
+                auth_data=target_auth_data,
             ),
         )
 

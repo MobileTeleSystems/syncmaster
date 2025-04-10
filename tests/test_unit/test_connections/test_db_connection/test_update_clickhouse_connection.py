@@ -66,7 +66,7 @@ async def test_developer_plus_can_update_clickhouse_connection(
             "additional_params": {},
         },
         "auth_data": {
-            "type": group_connection.credentials.value["type"],
+            "type": "basic",
             "user": "new_user",
         },
     }

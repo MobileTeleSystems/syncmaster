@@ -83,14 +83,25 @@ class TransferJobManager:
             except TransferNotFoundError:
                 return
 
-            credentials_source = await unit_of_work.credentials.read(transfer.source_connection_id)
-            credentials_target = await unit_of_work.credentials.read(transfer.target_connection_id)
+            source_auth_data: dict | None = None
+            source_credentials = await unit_of_work.credentials.read(transfer.source_connection_id)
+            if source_credentials:
+                # remove secrets from the dump
+                source_credentials_filtered = ReadAuthDataSchema.model_validate(source_credentials)
+                source_auth_data = source_credentials_filtered.auth_data.model_dump()
+
+            target_auth_data: dict | None = None
+            target_credentials = await unit_of_work.credentials.read(transfer.target_connection_id)
+            if target_credentials:
+                # remove secrets from the dump
+                target_credentials_filtered = ReadAuthDataSchema.model_validate(target_credentials)
+                target_auth_data = target_credentials_filtered.auth_data.model_dump()
 
             async with unit_of_work:
                 run = await unit_of_work.run.create(
                     transfer_id=transfer_id,
-                    source_creds=ReadAuthDataSchema(auth_data=credentials_source).model_dump(),
-                    target_creds=ReadAuthDataSchema(auth_data=credentials_target).model_dump(),
+                    source_auth_data=source_auth_data,
+                    target_auth_data=target_auth_data,
                     type=RunType.SCHEDULED,
                 )
 

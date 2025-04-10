@@ -29,8 +29,8 @@ async def test_developer_plus_can_update_ftp_connection(
     client: AsyncClient,
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
-    create_connection_data: dict,
-    create_connection_auth_data: dict,
+    create_connection_data: dict,  # don't remove
+    create_connection_auth_data: dict,  # don't remove
 ):
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
     new_connection_data = {"host": "new_host", "port": 81}
