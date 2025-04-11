@@ -173,7 +173,7 @@ async def read_group_users(
     return UserPageSchemaAsGroupMember.from_pagination(pagination=pagination)
 
 
-@router.patch("/groups/{group_id}/users/{user_id}")
+@router.put("/groups/{group_id}/users/{user_id}")
 async def update_user_role_group(
     group_id: int,
     user_id: int,
