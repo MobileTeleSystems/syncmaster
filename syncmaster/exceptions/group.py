@@ -7,10 +7,6 @@ class GroupNameAlreadyExistsError(SyncmasterError):
     pass
 
 
-class GroupAdminNotFoundError(SyncmasterError):
-    pass
-
-
 class GroupAlreadyExistsError(SyncmasterError):
     pass
 

@@ -1,14 +1,10 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from pydantic import BaseModel, ConfigDict, constr
+from pydantic import BaseModel, ConfigDict
 
 from syncmaster.db.models import GroupMemberRole
 from syncmaster.db.utils import Pagination
 from syncmaster.schemas.v1.page import MetaPageSchema, PageSchema
-
-
-class UpdateUserSchema(BaseModel):
-    username: constr(pattern=r"^[_a-z0-9]+$")  # noqa: F722
 
 
 class ReadGroupMember(BaseModel):

@@ -25,7 +25,6 @@ from syncmaster.exceptions.group import (
     AlreadyIsGroupMemberError,
     AlreadyIsGroupOwnerError,
     AlreadyIsNotGroupMemberError,
-    GroupAdminNotFoundError,
     GroupAlreadyExistsError,
     GroupNotFoundError,
 )
@@ -165,13 +164,6 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterError): 
             content=content,
         )
 
-    if isinstance(exc, GroupAdminNotFoundError):
-        content.code = "not_found"
-        content.message = "Admin not found"
-        return exception_json_response(
-            status=status.HTTP_404_NOT_FOUND,
-            content=content,
-        )
     if isinstance(exc, GroupAlreadyExistsError):
         content.code = "conflict"
         content.message = "Group name already taken"

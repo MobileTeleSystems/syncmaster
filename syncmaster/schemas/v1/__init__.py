@@ -55,7 +55,6 @@ from syncmaster.schemas.v1.users import (
     FullUserSchema,
     ReadGroupMember,
     ReadUserSchema,
-    UpdateUserSchema,
     UserPageSchema,
     UserPageSchemaAsGroupMember,
 )
@@ -100,7 +99,6 @@ __all__ = [
     "JSONLine",
     "Parquet",
     "ReadUserSchema",
-    "UpdateUserSchema",
     "FullUserSchema",
     "ReadGroupMember",
     "UserPageSchema",

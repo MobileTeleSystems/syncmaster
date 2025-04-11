@@ -4,6 +4,7 @@
 Breaking
 --------
 
+- Use ``PUT /v1/qroups/:id`` instead of ``PATCH /v1/qroups/:id``.
 - Use ``PUT /v1/queues/:id`` instead of ``PATCH /v1/queues/:id``.
 - Minimal queue name is 3 symbols instead of 1.
 

@@ -92,7 +92,7 @@ async def read_group(
     )
 
 
-@router.patch("/groups/{group_id}")
+@router.put("/groups/{group_id}")
 async def update_group(  # noqa: WPS217
     group_id: int,
     group_data: UpdateGroupSchema,

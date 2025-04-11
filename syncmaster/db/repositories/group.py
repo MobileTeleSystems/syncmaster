@@ -15,7 +15,6 @@ from syncmaster.exceptions import EntityNotFoundError, SyncmasterError
 from syncmaster.exceptions.group import (
     AlreadyIsGroupMemberError,
     AlreadyIsNotGroupMemberError,
-    GroupAdminNotFoundError,
     GroupAlreadyExistsError,
     GroupNotFoundError,
 )
@@ -364,7 +363,7 @@ class GroupRepository(Repository[Group]):
         constraint = err.__cause__.__cause__.constraint_name
 
         if constraint == "fk__group__owner_id__user":
-            raise GroupAdminNotFoundError from err
+            raise UserNotFoundError from err
 
         if constraint == "uq__group__name":
             raise GroupAlreadyExistsError from err

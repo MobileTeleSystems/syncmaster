@@ -30,12 +30,18 @@ async def test_simple_user_can_create_group(
     assert result.status_code == 200, result.json()
 
     group = (await session.scalars(select(Group).where(Group.name == group_name))).one()
-    assert result.json() == {
-        "id": group.id,
-        "name": group_name,
-        "description": "description of new test group",
-        "owner_id": simple_user.user.id,
-    }
+    assert (
+        result.json()
+        == {
+            "id": group.id,
+            "owner_id": simple_user.user.id,
+        }
+        | group_data
+    )
+
+    assert group.name == group_data["name"]
+    assert group.description == group_data["description"]
+    assert group.owner_id == simple_user.user.id
 
 
 async def test_simple_user_cannot_create_group_twice(
