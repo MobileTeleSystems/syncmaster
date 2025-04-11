@@ -6,8 +6,14 @@ import logging
 import math
 from typing import TYPE_CHECKING
 
+from onetl.connection.kerberos_helpers import kinit_password
+
 from syncmaster.db.models import Run
-from syncmaster.dto.connections import ConnectionDTO
+from syncmaster.dto.connections import (
+    ConnectionDTO,
+    HDFSConnectionDTO,
+    HiveConnectionDTO,
+)
 
 if TYPE_CHECKING:
     from pyspark.sql import SparkSession
@@ -29,9 +35,14 @@ def get_worker_spark_session(
     for k, v in get_spark_session_conf(source, target, run.transfer.resources).items():
         spark_builder = spark_builder.config(k, v)
 
-    if source.type == "hive" or target.type == "hive":  # type: ignore
-        log.debug("Enabling Hive support")
-        spark_builder = spark_builder.enableHiveSupport()
+    for entity in source, target:
+        if isinstance(entity, HiveConnectionDTO):
+            log.debug("Enabling Hive support")
+            spark_builder = spark_builder.enableHiveSupport()
+
+        if isinstance(entity, (HiveConnectionDTO, HDFSConnectionDTO)):
+            log.debug("Using Kerberos auth for %s", entity.user)
+            kinit_password(entity.user, entity.password)
 
     return spark_builder.getOrCreate()
 
