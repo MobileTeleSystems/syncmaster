@@ -71,7 +71,7 @@ class GroupMemberRole(enum.StrEnum):
 
 class Group(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    name: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(String(512), nullable=False, default="")
     owner_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
 

@@ -10,9 +10,9 @@ ReadConnectionAuthDataSchema = ReadBasicAuthSchema | ReadS3AuthSchema | ReadSamb
 
 
 class CreateConnectionBaseSchema(BaseModel):
-    group_id: int = Field(..., description="Connection owner group id")
-    name: NameConstr = Field(..., description="Connection name")  # noqa: F722
-    description: str = Field(..., description="Additional description")
+    group_id: int = Field(description="Connection owner group id")
+    name: NameConstr = Field(description="Connection name")
+    description: str = Field(description="Additional description")
 
     model_config = ConfigDict(populate_by_name=True)
 

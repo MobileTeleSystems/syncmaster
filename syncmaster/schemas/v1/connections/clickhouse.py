@@ -29,7 +29,7 @@ class ReadClickhouseConnectionDataSchema(BaseModel):
 
 
 class CreateClickhouseConnectionSchema(CreateConnectionBaseSchema):
-    type: CLICKHOUSE_TYPE = Field(..., description="Connection type")
+    type: CLICKHOUSE_TYPE = Field(description="Connection type")
     data: CreateClickhouseConnectionDataSchema = Field(
         ...,
         alias="connection_data",

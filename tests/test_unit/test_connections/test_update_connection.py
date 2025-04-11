@@ -147,10 +147,37 @@ async def test_groupless_user_cannot_update_connection(
     }
 
 
+@pytest.mark.parametrize(
+    ("name", "error"),
+    [
+        (
+            "aa",
+            {
+                "context": {"min_length": 3},
+                "input": "aa",
+                "location": ["body", "postgres", "name"],
+                "message": "String should have at least 3 characters",
+                "code": "string_too_short",
+            },
+        ),
+        (
+            "a" * 129,
+            {
+                "context": {"max_length": 128},
+                "input": "a" * 129,
+                "location": ["body", "postgres", "name"],
+                "message": "String should have at most 128 characters",
+                "code": "string_too_long",
+            },
+        ),
+    ],
+)
 async def test_check_name_field_validation_on_update_connection(
     client: AsyncClient,
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
+    name: str,
+    error: dict,
 ):
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
     connection_json = await fetch_connection_json(client, user.token, group_connection)
@@ -158,22 +185,14 @@ async def test_check_name_field_validation_on_update_connection(
     result = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={**connection_json, "name": "", "type": group_connection.type},
+        json={**connection_json, "name": name, "description": name},
     )
 
     assert result.json() == {
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",
-            "details": [
-                {
-                    "context": {"min_length": 1},
-                    "input": "",
-                    "location": ["body", "postgres", "name"],
-                    "message": "String should have at least 1 character",
-                    "code": "string_too_short",
-                },
-            ],
+            "details": [error],
         },
     }
 

@@ -326,10 +326,10 @@ async def test_superuser_can_create_transfer(
 
 # TODO: refactor annotations & fixtures
 @pytest.mark.parametrize(
-    argnames=["new_data", "error_json"],
-    argvalues=(
+    ("new_data", "error_json"),
+    [
         (
-            {"name": ""},
+            {"name": "aa"},
             {
                 "error": {
                     "code": "invalid_request",
@@ -337,10 +337,10 @@ async def test_superuser_can_create_transfer(
                     "details": [
                         {
                             "location": ["body", "name"],
-                            "message": "String should have at least 1 character",
+                            "message": "String should have at least 3 characters",
                             "code": "string_too_short",
-                            "context": {"min_length": 1},
-                            "input": "",
+                            "context": {"min_length": 3},
+                            "input": "aa",
                         },
                     ],
                 },
@@ -796,7 +796,7 @@ async def test_superuser_can_create_transfer(
                 },
             },
         ),
-    ),
+    ],
 )
 async def test_check_fields_validation_on_create_transfer(
     new_data: dict,

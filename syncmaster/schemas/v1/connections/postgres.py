@@ -30,7 +30,7 @@ class ReadPostgresConnectionDataSchema(BaseModel):
 
 
 class CreatePostgresConnectionSchema(CreateConnectionBaseSchema):
-    type: POSTGRES_TYPE = Field(..., description="Connection type")
+    type: POSTGRES_TYPE = Field(description="Connection type")
     data: CreatePostgresConnectionDataSchema = Field(
         ...,
         alias="connection_data",

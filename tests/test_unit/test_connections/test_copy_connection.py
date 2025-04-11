@@ -261,35 +261,53 @@ async def test_maintainer_plus_cannot_copy_connection_with_same_name_in_new_grou
     }
 
 
-async def test_check_name_validation_copy_connection_with_new_connection_name(
+@pytest.mark.parametrize(
+    ("name", "error"),
+    [
+        (
+            "aa",
+            {
+                "context": {"min_length": 3},
+                "input": "aa",
+                "location": ["body", "new_name"],
+                "message": "String should have at least 3 characters",
+                "code": "string_too_short",
+            },
+        ),
+        (
+            "a" * 129,
+            {
+                "context": {"max_length": 128},
+                "input": "a" * 129,
+                "location": ["body", "new_name"],
+                "message": "String should have at most 128 characters",
+                "code": "string_too_long",
+            },
+        ),
+    ],
+)
+async def test_check_new_name_field_validation_on_copy_connection(
     client: AsyncClient,
     group_connection_and_group_developer_plus: str,
     group_connection: MockConnection,
     empty_group: MockGroup,
+    name: str,
+    error: dict,
 ):
     role = group_connection_and_group_developer_plus
     user = group_connection.owner_group.get_member_of_role(role)
-    new_name = ""
 
     result = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={"new_group_id": empty_group.id, "new_name": new_name},
+        json={"new_group_id": empty_group.id, "new_name": name},
     )
 
     assert result.json() == {
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",
-            "details": [
-                {
-                    "context": {"min_length": 1},
-                    "input": "",
-                    "location": ["body", "new_name"],
-                    "message": "String should have at least 1 character",
-                    "code": "string_too_short",
-                },
-            ],
+            "details": [error],
         },
     }
 

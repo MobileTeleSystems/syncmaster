@@ -29,7 +29,7 @@ class ReadMSSQLConnectionDataSchema(BaseModel):
 
 
 class CreateMSSQLConnectionSchema(CreateConnectionBaseSchema):
-    type: MSSQL_TYPE = Field(..., description="Connection type")
+    type: MSSQL_TYPE = Field(description="Connection type")
     data: CreateMSSQLConnectionDataSchema = Field(
         ...,
         alias="connection_data",

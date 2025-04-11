@@ -142,9 +142,9 @@ TransformationSchema = DataframeRowsFilter | DataframeColumnsFilter | FileMetada
 class CopyTransferSchema(BaseModel):
     new_group_id: int
     new_queue_id: int
-    new_source_connection_name: NameConstr | None = None  # noqa: F722
-    new_target_connection_name: NameConstr | None = None  # noqa: F722
-    new_name: NameConstr | None = None  # noqa: F722
+    new_source_connection_name: NameConstr | None = None
+    new_target_connection_name: NameConstr | None = None
+    new_name: NameConstr | None = None
     remove_source: bool = False
 
 
@@ -176,14 +176,14 @@ class ReadTransferSchema(BaseModel):
 
 
 class CreateTransferSchema(BaseModel):
-    group_id: int = Field(..., description="Transfer owner group id")
-    source_connection_id: int = Field(..., description="id of the connection that will be the data source")
-    target_connection_id: int = Field(..., description="id of the connection that will be the data receiver")
-    name: NameConstr = Field(..., description="Transfer name")  # noqa: F722
-    description: str = Field(..., description="Additional description")
-    is_scheduled: bool = Field(..., description="Is the transfer on schedule")
-    queue_id: int = Field(..., description="id of the queue in which the transfer will be performed")
-    schedule: str | None = Field(None, description="Execution schedule in cron format")
+    group_id: int = Field(description="Transfer owner group id")
+    source_connection_id: int = Field(description="id of the connection that will be the data source")
+    target_connection_id: int = Field(description="id of the connection that will be the data receiver")
+    name: NameConstr = Field(description="Transfer name")
+    description: str = Field(description="Additional description")
+    is_scheduled: bool = Field(description="Is the transfer on schedule")
+    queue_id: int = Field(description="id of the queue in which the transfer will be performed")
+    schedule: str | None = Field(default=None, description="Execution schedule in cron format")
     source_params: CreateTransferSchemaSource = Field(
         ...,
         discriminator="type",

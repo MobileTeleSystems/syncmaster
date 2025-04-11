@@ -50,4 +50,4 @@ MetadataFilter = NameGlobFilter | NameRegexpFilter | FileSizeMinFilter | FileSiz
 
 class FileMetadataFilter(BaseModel):
     type: FILE_METADATA_FILTER
-    filters: list[Annotated[MetadataFilter, Field(..., discriminator="type")]] = Field(default_factory=list)
+    filters: list[Annotated[MetadataFilter, Field(discriminator="type")]] = Field(default_factory=list)

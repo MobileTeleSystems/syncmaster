@@ -39,7 +39,7 @@ class ReadOracleConnectionDataSchema(BaseModel):
 
 
 class CreateOracleConnectionSchema(CreateConnectionBaseSchema):
-    type: ORACLE_TYPE = Field(..., description="Connection type")
+    type: ORACLE_TYPE = Field(description="Connection type")
     data: CreateOracleConnectionDataSchema = Field(
         ...,
         alias="connection_data",

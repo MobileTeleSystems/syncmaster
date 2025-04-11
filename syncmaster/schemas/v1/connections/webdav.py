@@ -30,7 +30,7 @@ class ReadWebDAVConnectionDataSchema(BaseModel):
 
 
 class CreateWebDAVConnectionSchema(CreateConnectionBaseSchema):
-    type: WEBDAV_TYPE = Field(..., description="Connection type")
+    type: WEBDAV_TYPE = Field(description="Connection type")
     data: CreateWebDAVConnectionDataSchema = Field(
         ...,
         alias="connection_data",

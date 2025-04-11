@@ -104,10 +104,37 @@ async def test_other_group_member_cannot_update_transfer(
     }
 
 
+@pytest.mark.parametrize(
+    ("name", "error"),
+    [
+        (
+            "aa",
+            {
+                "context": {"min_length": 3},
+                "input": "aa",
+                "location": ["body", "name"],
+                "message": "String should have at least 3 characters",
+                "code": "string_too_short",
+            },
+        ),
+        (
+            "a" * 129,
+            {
+                "context": {"max_length": 128},
+                "input": "a" * 129,
+                "location": ["body", "name"],
+                "message": "String should have at most 128 characters",
+                "code": "string_too_long",
+            },
+        ),
+    ],
+)
 async def test_check_name_field_validation_on_update_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
     role_developer_plus: UserTestRoles,
+    name: str,
+    error: dict,
 ):
     user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
     transfer_json = await fetch_transfer_json(client, user.token, group_transfer)
@@ -115,7 +142,7 @@ async def test_check_name_field_validation_on_update_transfer(
     result = await client.put(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={**transfer_json, "name": ""},
+        json={**transfer_json, "name": name, "description": name},
     )
 
     assert result.status_code == 422, result.json()
@@ -123,15 +150,7 @@ async def test_check_name_field_validation_on_update_transfer(
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",
-            "details": [
-                {
-                    "context": {"min_length": 1},
-                    "input": "",
-                    "location": ["body", "name"],
-                    "message": "String should have at least 1 character",
-                    "code": "string_too_short",
-                },
-            ],
+            "details": [error],
         },
     }
 

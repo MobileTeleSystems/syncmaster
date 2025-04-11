@@ -123,10 +123,37 @@ async def test_unauthorized_user_cannot_create_connection(
     }
 
 
-async def test_check_fields_validation_on_create_connection(
+@pytest.mark.parametrize(
+    ("name", "error"),
+    [
+        (
+            "aa",
+            {
+                "context": {"min_length": 3},
+                "input": "aa",
+                "location": ["body", "postgres", "name"],
+                "message": "String should have at least 3 characters",
+                "code": "string_too_short",
+            },
+        ),
+        (
+            "a" * 129,
+            {
+                "context": {"max_length": 128},
+                "input": "a" * 129,
+                "location": ["body", "postgres", "name"],
+                "message": "String should have at most 128 characters",
+                "code": "string_too_long",
+            },
+        ),
+    ],
+)
+async def test_check_name_field_validation_on_create_connection(
     client: AsyncClient,
     group_connection: MockConnection,
     role_developer_plus: UserTestRoles,
+    name: str,
+    error: dict,
 ):
     user = group_connection.owner_group.get_member_of_role(UserTestRoles.Developer)
 
@@ -135,8 +162,8 @@ async def test_check_fields_validation_on_create_connection(
         headers={"Authorization": f"Bearer {user.token}"},
         json={
             "group_id": group_connection.id,
-            "name": "",
-            "description": "",
+            "name": name,
+            "description": name,
             "type": "postgres",
             "connection_data": {
                 "host": "127.0.0.1",
@@ -156,15 +183,7 @@ async def test_check_fields_validation_on_create_connection(
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",
-            "details": [
-                {
-                    "context": {"min_length": 1},
-                    "input": "",
-                    "location": ["body", "postgres", "name"],
-                    "message": "String should have at least 1 character",
-                    "code": "string_too_short",
-                },
-            ],
+            "details": [error],
         },
     }
 
@@ -173,83 +192,8 @@ async def test_check_fields_validation_on_create_connection(
         headers={"Authorization": f"Bearer {user.token}"},
         json={
             "group_id": group_connection.id,
-            "name": None,
-            "description": "",
-            "type": "postgres",
-            "connection_data": {
-                "host": "127.0.0.1",
-                "port": 5432,
-                "database_name": "postgres",
-            },
-            "auth_data": {
-                "type": "basic",
-                "user": "user",
-                "password": "secret",
-            },
-        },
-    )
-
-    assert result.status_code == 422, result.json()
-    assert result.json() == {
-        "error": {
-            "code": "invalid_request",
-            "message": "Invalid request",
-            "details": [
-                {
-                    "context": {},
-                    "input": None,
-                    "location": ["body", "postgres", "name"],
-                    "message": "Input should be a valid string",
-                    "code": "string_type",
-                },
-            ],
-        },
-    }
-
-    result = await client.post(
-        "v1/connections",
-        headers={"Authorization": f"Bearer {user.token}"},
-        json={
-            "group_id": group_connection.id,
-            "name": "None",
-            "description": None,
-            "type": "postgres",
-            "connection_data": {
-                "host": "127.0.0.1",
-                "port": 5432,
-                "database_name": "postgres",
-            },
-            "auth_data": {
-                "type": "basic",
-                "user": "user",
-                "password": "secret",
-            },
-        },
-    )
-    assert result.status_code == 422, result.json()
-    assert result.json() == {
-        "error": {
-            "code": "invalid_request",
-            "message": "Invalid request",
-            "details": [
-                {
-                    "context": {},
-                    "input": None,
-                    "location": ["body", "postgres", "description"],
-                    "message": "Input should be a valid string",
-                    "code": "string_type",
-                },
-            ],
-        },
-    }
-
-    result = await client.post(
-        "v1/connections",
-        headers={"Authorization": f"Bearer {user.token}"},
-        json={
-            "group_id": group_connection.id,
-            "name": "None",
-            "description": "None",
+            "name": "New",
+            "description": "New",
             "type": "POSTGRESQL",
             "connection_data": {
                 "host": "127.0.0.1",

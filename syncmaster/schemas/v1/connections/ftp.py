@@ -26,7 +26,7 @@ class ReadFTPConnectionDataSchema(BaseModel):
 
 
 class CreateFTPConnectionSchema(CreateConnectionBaseSchema):
-    type: FTP_TYPE = Field(..., description="Connection type")
+    type: FTP_TYPE = Field(description="Connection type")
     data: CreateFTPConnectionDataSchema = Field(
         ...,
         alias="connection_data",

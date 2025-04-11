@@ -24,7 +24,7 @@ class ReadHiveConnectionDataSchema(BaseModel):
 
 
 class CreateHiveConnectionSchema(CreateConnectionBaseSchema):
-    type: HIVE_TYPE = Field(..., description="Connection type")
+    type: HIVE_TYPE = Field(description="Connection type")
     data: CreateHiveConnectionDataSchema = Field(
         ...,
         alias="connection_data",

@@ -217,91 +217,51 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
         (
             "очередь",
             {
-                "error": {
-                    "code": "invalid_request",
-                    "message": "Invalid request",
-                    "details": [
-                        {
-                            "context": {"pattern": "^[-_ a-zA-Z0-9]+$"},
-                            "input": "очередь",
-                            "location": ["body", "name"],
-                            "message": "String should match pattern '^[-_ a-zA-Z0-9]+$'",
-                            "code": "string_pattern_mismatch",
-                        },
-                    ],
-                },
+                "context": {"pattern": "^[-_ a-zA-Z0-9]+$"},
+                "input": "очередь",
+                "location": ["body", "name"],
+                "message": "String should match pattern '^[-_ a-zA-Z0-9]+$'",
+                "code": "string_pattern_mismatch",
             },
         ),
         (
             "♥︎♥︎♥︎",
             {
-                "error": {
-                    "code": "invalid_request",
-                    "message": "Invalid request",
-                    "details": [
-                        {
-                            "context": {"pattern": "^[-_ a-zA-Z0-9]+$"},
-                            "input": "♥︎♥︎♥︎",
-                            "location": ["body", "name"],
-                            "message": "String should match pattern '^[-_ a-zA-Z0-9]+$'",
-                            "code": "string_pattern_mismatch",
-                        },
-                    ],
-                },
+                "context": {"pattern": "^[-_ a-zA-Z0-9]+$"},
+                "input": "♥︎♥︎♥︎",
+                "location": ["body", "name"],
+                "message": "String should match pattern '^[-_ a-zA-Z0-9]+$'",
+                "code": "string_pattern_mismatch",
             },
         ),
         (
             "qq",
             {
-                "error": {
-                    "code": "invalid_request",
-                    "message": "Invalid request",
-                    "details": [
-                        {
-                            "context": {"min_length": 3},
-                            "input": "qq",
-                            "location": ["body", "name"],
-                            "message": "String should have at least 3 characters",
-                            "code": "string_too_short",
-                        },
-                    ],
-                },
+                "context": {"min_length": 3},
+                "input": "qq",
+                "location": ["body", "name"],
+                "message": "String should have at least 3 characters",
+                "code": "string_too_short",
             },
         ),
         (
             "q" * 129,
             {
-                "error": {
-                    "code": "invalid_request",
-                    "message": "Invalid request",
-                    "details": [
-                        {
-                            "context": {"max_length": 128},
-                            "input": 129 * "q",
-                            "location": ["body", "name"],
-                            "message": "String should have at most 128 characters",
-                            "code": "string_too_long",
-                        },
-                    ],
-                },
+                "context": {"max_length": 128},
+                "input": 129 * "q",
+                "location": ["body", "name"],
+                "message": "String should have at most 128 characters",
+                "code": "string_too_long",
             },
         ),
         (
             None,
             {
-                "error": {
-                    "code": "invalid_request",
-                    "message": "Invalid request",
-                    "details": [
-                        {
-                            "context": {},
-                            "input": None,
-                            "location": ["body", "name"],
-                            "message": "Input should be a valid string",
-                            "code": "string_type",
-                        },
-                    ],
-                },
+                "context": {},
+                "input": None,
+                "location": ["body", "name"],
+                "message": "Input should be a valid string",
+                "code": "string_type",
             },
         ),
     ],
@@ -326,7 +286,13 @@ async def test_maintainer_plus_cannot_create_queue_with_wrong_name(
     )
 
     assert result.status_code == 422, result.json()
-    assert result.json() == error
+    assert result.json() == {
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [error],
+        },
+    }
 
 
 async def test_maintainer_plus_can_not_create_queue_with_duplicate_name_error(

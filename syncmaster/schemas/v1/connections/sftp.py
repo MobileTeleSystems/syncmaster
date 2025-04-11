@@ -26,7 +26,7 @@ class ReadSFTPConnectionDataSchema(BaseModel):
 
 
 class CreateSFTPConnectionSchema(CreateConnectionBaseSchema):
-    type: SFTP_TYPE = Field(..., description="Connection type")
+    type: SFTP_TYPE = Field(description="Connection type")
     data: CreateSFTPConnectionDataSchema = Field(
         ...,
         alias="connection_data",

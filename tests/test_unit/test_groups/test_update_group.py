@@ -110,57 +110,65 @@ async def test_superuser_can_update_group(
     assert empty_group.group.owner_id == group_data["owner_id"]
 
 
-async def test_validation_on_update_group(
+@pytest.mark.parametrize(
+    ("name", "error"),
+    [
+        (
+            "aa",
+            {
+                "context": {"min_length": 3},
+                "input": "aa",
+                "location": ["body", "name"],
+                "message": "String should have at least 3 characters",
+                "code": "string_too_short",
+            },
+        ),
+        (
+            "a" * 129,
+            {
+                "context": {"max_length": 128},
+                "input": "a" * 129,
+                "location": ["body", "name"],
+                "message": "String should have at most 128 characters",
+                "code": "string_too_long",
+            },
+        ),
+    ],
+)
+async def test_check_name_field_validation_on_update_group(
+    client: AsyncClient,
+    empty_group: MockGroup,
+    name: str,
+    error: dict,
+):
+    owner = empty_group.get_member_of_role(UserTestRoles.Owner)
+    group_data = {
+        "owner_id": empty_group.owner_id,
+        "name": name,
+        "description": name,
+    }
+
+    result = await client.put(
+        f"v1/groups/{empty_group.id}",
+        headers={"Authorization": f"Bearer {owner.token}"},
+        json=group_data,
+    )
+
+    assert result.json() == {
+        "error": {
+            "code": "invalid_request",
+            "message": "Invalid request",
+            "details": [error],
+        },
+    }
+
+
+async def test_group_name_already_taken_error(
     client: AsyncClient,
     empty_group: MockGroup,
     group: MockGroup,
     superuser: MockUser,
 ):
-    result = await client.put(
-        f"v1/groups/{empty_group.id}",
-        headers={"Authorization": f"Bearer {superuser.token}"},
-        json={},
-    )
-    assert result.status_code == 422, result.json()
-    assert result.json() == {
-        "error": {
-            "code": "invalid_request",
-            "message": "Invalid request",
-            "details": [
-                {
-                    "code": "missing",
-                    "context": {},
-                    "input": {},
-                    "location": [
-                        "body",
-                        "name",
-                    ],
-                    "message": "Field required",
-                },
-                {
-                    "code": "missing",
-                    "context": {},
-                    "input": {},
-                    "location": [
-                        "body",
-                        "description",
-                    ],
-                    "message": "Field required",
-                },
-                {
-                    "code": "missing",
-                    "context": {},
-                    "input": {},
-                    "location": [
-                        "body",
-                        "owner_id",
-                    ],
-                    "message": "Field required",
-                },
-            ],
-        },
-    }
-
     group_data = {
         "owner_id": empty_group.owner_id,
         "name": group.name,

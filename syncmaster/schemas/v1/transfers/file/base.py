@@ -23,7 +23,7 @@ from syncmaster.schemas.v1.transfers.file_format import (
 # classes are identical but may change in the future
 class ReadFileTransferSource(BaseModel):
     directory_path: str
-    file_format: CSV | JSONLine | JSON | Excel | XML | ORC | Parquet = Field(..., discriminator="type")
+    file_format: CSV | JSONLine | JSON | Excel | XML | ORC | Parquet = Field(discriminator="type")
     options: dict[str, Any]
 
 
@@ -42,7 +42,7 @@ class ReadFileTransferTarget(BaseModel):
 # classes are identical but may change in the future
 class CreateFileTransferSource(BaseModel):
     directory_path: str
-    file_format: CSV | JSONLine | JSON | Excel | XML | ORC | Parquet = Field(..., discriminator="type")
+    file_format: CSV | JSONLine | JSON | Excel | XML | ORC | Parquet = Field(discriminator="type")
     options: dict[str, Any] = Field(default_factory=dict)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)

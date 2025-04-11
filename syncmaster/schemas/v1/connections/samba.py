@@ -33,7 +33,7 @@ class ReadSambaConnectionDataSchema(BaseModel):
 
 
 class CreateSambaConnectionSchema(CreateConnectionBaseSchema):
-    type: SAMBA_TYPE = Field(..., description="Connection type")
+    type: SAMBA_TYPE = Field(description="Connection type")
     data: CreateSambaConnectionDataSchema = Field(
         ...,
         alias="connection_data",

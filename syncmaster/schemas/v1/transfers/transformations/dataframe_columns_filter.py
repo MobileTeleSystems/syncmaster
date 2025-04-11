@@ -30,4 +30,4 @@ ColumnsFilter = IncludeFilter | RenameFilter | CastFilter
 
 class DataframeColumnsFilter(BaseModel):
     type: DATAFRAME_COLUMNS_FILTER
-    filters: list[Annotated[ColumnsFilter, Field(..., discriminator="type")]] = Field(default_factory=list)
+    filters: list[Annotated[ColumnsFilter, Field(discriminator="type")]] = Field(default_factory=list)

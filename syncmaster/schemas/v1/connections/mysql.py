@@ -29,7 +29,7 @@ class ReadMySQLConnectionDataSchema(BaseModel):
 
 
 class CreateMySQLConnectionSchema(CreateConnectionBaseSchema):
-    type: MYSQL_TYPE = Field(..., description="Connection type")
+    type: MYSQL_TYPE = Field(description="Connection type")
     data: CreateMySQLConnectionDataSchema = Field(
         ...,
         alias="connection_data",

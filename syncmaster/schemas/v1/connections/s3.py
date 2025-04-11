@@ -46,7 +46,7 @@ class ReadS3ConnectionDataSchema(BaseModel):
 
 
 class CreateS3ConnectionSchema(CreateConnectionBaseSchema):
-    type: S3_TYPE = Field(..., description="Connection type")
+    type: S3_TYPE = Field(description="Connection type")
     data: CreateS3ConnectionDataSchema = Field(
         ...,
         alias="connection_data",

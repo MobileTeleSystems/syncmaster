@@ -24,7 +24,7 @@ class ReadHDFSConnectionDataSchema(BaseModel):
 
 
 class CreateHDFSConnectionSchema(CreateConnectionBaseSchema):
-    type: HDFS_TYPE = Field(..., description="Connection type")
+    type: HDFS_TYPE = Field(description="Connection type")
     data: CreateHDFSConnectionDataSchema = Field(
         ...,
         alias="connection_data",

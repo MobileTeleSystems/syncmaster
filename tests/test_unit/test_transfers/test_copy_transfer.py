@@ -413,15 +413,41 @@ async def test_maintainer_plus_can_not_copy_transfer_with_same_name_in_new_group
     }
 
 
-async def test_check_validate_copy_transfer_parameter_new_name(
+@pytest.mark.parametrize(
+    ("name", "error"),
+    [
+        (
+            "aa",
+            {
+                "context": {"min_length": 3},
+                "input": "aa",
+                "location": ["body", "new_name"],
+                "message": "String should have at least 3 characters",
+                "code": "string_too_short",
+            },
+        ),
+        (
+            "a" * 129,
+            {
+                "context": {"max_length": 128},
+                "input": "a" * 129,
+                "location": ["body", "new_name"],
+                "message": "String should have at most 128 characters",
+                "code": "string_too_long",
+            },
+        ),
+    ],
+)
+async def test_check_new_name_field_validation_on_copy_transfer(
     client: AsyncClient,
     group_transfer_and_group_maintainer_plus: str,
     group_transfer: MockTransfer,
     group_queue: Queue,
+    name: str,
+    error: dict,
 ):
     role = group_transfer_and_group_maintainer_plus
     user = group_transfer.owner_group.get_member_of_role(role)
-    new_name = ""
 
     result = await client.post(
         f"v1/transfers/{group_transfer.id}/copy_transfer",
@@ -429,25 +455,16 @@ async def test_check_validate_copy_transfer_parameter_new_name(
         json={
             "new_group_id": group_queue.group_id,
             "new_queue_id": group_queue.id,
-            "new_name": new_name,
+            "new_name": name,
         },
     )
 
-    result.json()
-
+    assert result.status_code == 422, result.json()
     assert result.json() == {
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",
-            "details": [
-                {
-                    "context": {"min_length": 1},
-                    "input": "",
-                    "location": ["body", "new_name"],
-                    "message": "String should have at least 1 character",
-                    "code": "string_too_short",
-                },
-            ],
+            "details": [error],
         },
     }
 

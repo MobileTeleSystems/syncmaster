@@ -93,4 +93,4 @@ RowsFilter = (
 
 class DataframeRowsFilter(BaseModel):
     type: DATAFRAME_ROWS_FILTER
-    filters: list[Annotated[RowsFilter, Field(..., discriminator="type")]] = Field(default_factory=list)
+    filters: list[Annotated[RowsFilter, Field(discriminator="type")]] = Field(default_factory=list)

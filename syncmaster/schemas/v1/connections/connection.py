@@ -125,7 +125,7 @@ UpdateConnectionSchema = Annotated[
 
 class ConnectionCopySchema(BaseModel):
     new_group_id: int
-    new_name: NameConstr | None = None  # noqa: F722
+    new_name: NameConstr | None = None
     remove_source: bool = False
 
 

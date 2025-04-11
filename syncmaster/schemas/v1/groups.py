@@ -8,13 +8,13 @@ from syncmaster.schemas.v1.types import NameConstr
 
 
 class UpdateGroupSchema(BaseModel):
-    name: NameConstr  # noqa: F722
+    name: NameConstr
     description: str
     owner_id: int
 
 
 class CreateGroupSchema(BaseModel):
-    name: NameConstr  # noqa: F722
+    name: NameConstr
     description: str
 
 
@@ -40,7 +40,7 @@ class AddUserSchema(BaseModel):
 
 class ReadGroupSchema(BaseModel):
     id: int
-    name: NameConstr  # noqa: F722
+    name: str
     description: str
     owner_id: int
 
