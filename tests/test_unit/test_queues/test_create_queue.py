@@ -21,7 +21,7 @@ async def test_maintainer_plus_can_create_queue(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "name": "New  awesome_queue-123",
+            "name": r"New queue!\"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~",
             "description": "Some interesting description",
             "group_id": mock_group.group.id,
         },
@@ -30,7 +30,7 @@ async def test_maintainer_plus_can_create_queue(
     assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": result.json()["id"],
-        "name": "New  awesome_queue-123",
+        "name": r"New queue!\"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~",
         "description": "Some interesting description",
         "group_id": mock_group.group.id,
         "slug": f"{mock_group.group.id}-new_awesome_queue_123",
@@ -39,7 +39,7 @@ async def test_maintainer_plus_can_create_queue(
     queue = (await session.scalars(select(Queue).filter_by(id=result.json()["id"]))).one()
     assert queue.id == result.json()["id"]
     assert queue.group_id == mock_group.group.id
-    assert queue.name == "New  awesome_queue-123"
+    assert queue.name == r"New queue!\"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~"
     assert queue.description == "Some interesting description"
     assert queue.slug == f"{mock_group.group.id}-new_awesome_queue_123"
 
@@ -57,7 +57,7 @@ async def test_superuser_can_create_queue(
         "v1/queues",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
-            "name": "New  awesome_queue-123",
+            "name": "New queue",
             "description": "Some interesting description",
             "group_id": mock_group.group.id,
         },
@@ -66,7 +66,7 @@ async def test_superuser_can_create_queue(
     assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": result.json()["id"],
-        "name": "New  awesome_queue-123",
+        "name": "New queue",
         "description": "Some interesting description",
         "group_id": mock_group.group.id,
         "slug": f"{mock_group.group.id}-new_awesome_queue_123",
@@ -75,7 +75,7 @@ async def test_superuser_can_create_queue(
 
     assert queue.id == result.json()["id"]
     assert queue.group_id == mock_group.group.id
-    assert queue.name == "New  awesome_queue-123"
+    assert queue.name == "New queue"
     assert queue.description == "Some interesting description"
     assert queue.slug == f"{mock_group.group.id}-new_awesome_queue_123"
 
@@ -95,7 +95,7 @@ async def test_developer_or_below_cannot_create_queue(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "name": "New  awesome_queue-123",
+            "name": "New queue",
             "description": "Some interesting description",
             "group_id": mock_group.id,
         },
@@ -122,7 +122,7 @@ async def test_other_group_member_cannot_create_queue(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "name": "New  awesome_queue-123",
+            "name": "New queue",
             "description": "Some interesting description",
             "group_id": empty_group.group.id,
         },
@@ -146,7 +146,7 @@ async def test_groupless_user_cannot_create_queue_error(
         "v1/queues",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={
-            "name": "New  awesome_queue-123",
+            "name": "New queue",
             "description": "Some interesting description",
             "group_id": empty_group.group.id,
         },
@@ -173,7 +173,7 @@ async def test_maintainer_plus_cannot_create_queue_with_unknown_group_error(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "name": "New  awesome_queue-123",
+            "name": "New queue",
             "description": "Some interesting description",
             "group_id": -1,
         },
@@ -196,7 +196,7 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
         "v1/queues",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
-            "name": "New  awesome_queue-123",
+            "name": "New queue",
             "description": "Some interesting description",
             "group_id": -1,
         },
@@ -217,20 +217,20 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
         (
             "очередь",
             {
-                "context": {"pattern": "^[-_ a-zA-Z0-9]+$"},
+                "context": {"pattern": r"^[ -~]+$"},
                 "input": "очередь",
                 "location": ["body", "name"],
-                "message": "String should match pattern '^[-_ a-zA-Z0-9]+$'",
+                "message": r"String should match pattern '^[ -~]+$'",
                 "code": "string_pattern_mismatch",
             },
         ),
         (
             "♥︎♥︎♥︎",
             {
-                "context": {"pattern": "^[-_ a-zA-Z0-9]+$"},
+                "context": {"pattern": r"^[ -~]+$"},
                 "input": "♥︎♥︎♥︎",
                 "location": ["body", "name"],
-                "message": "String should match pattern '^[-_ a-zA-Z0-9]+$'",
+                "message": r"String should match pattern '^[ -~]+$'",
                 "code": "string_pattern_mismatch",
             },
         ),
@@ -336,7 +336,7 @@ async def test_maintainer_plus_can_create_queues_with_the_same_name_but_diff_gro
         "v1/queues",
         headers={"Authorization": f"Bearer {mock_group_user.token}"},
         json={
-            "name": "New  awesome_queue-123",
+            "name": "New queue",
             "description": "Some interesting description",
             "group_id": mock_group.group.id,
         },
@@ -345,7 +345,7 @@ async def test_maintainer_plus_can_create_queues_with_the_same_name_but_diff_gro
         "v1/queues",
         headers={"Authorization": f"Bearer {group_user.token}"},
         json={
-            "name": "New  awesome_queue-123",
+            "name": "New queue",
             "description": "Some interesting description",
             "group_id": group.group.id,
         },
@@ -356,17 +356,17 @@ async def test_maintainer_plus_can_create_queues_with_the_same_name_but_diff_gro
     assert queue_1.status_code == 200
     assert queue_1_json == {
         "id": queue_1_json["id"],
-        "name": "New  awesome_queue-123",
+        "name": "New queue",
         "description": "Some interesting description",
         "group_id": mock_group.group.id,
-        "slug": f"{mock_group.group.id}-new_awesome_queue_123",
+        "slug": f"{mock_group.group.id}-new_queue",
     }
     assert queue_2.status_code == 200
     assert queue_2_json == {
         "id": queue_2_json["id"],
-        "name": "New  awesome_queue-123",
+        "name": "New queue",
         "description": "Some interesting description",
         "group_id": group.group.id,
-        "slug": f"{group.group.id}-new_awesome_queue_123",
+        "slug": f"{group.group.id}-new_queue",
     }
     assert queue_1_json["slug"] != queue_2_json["slug"]

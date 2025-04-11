@@ -21,23 +21,23 @@ async def test_maintainer_plus_can_update_queue(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "name": "New  awesome_queue-123",
+            "name": r"New queue!\"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~",
             "description": "New description",
         },
     )
 
     assert result.json() == {
         "id": group_queue.id,
-        "name": "New  awesome_queue-123",
+        "name": r"New queue!\"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~",
         "description": "New description",
         "group_id": group_queue.group_id,
-        "slug": group_queue.slug,
+        "slug": group_queue.slug,  # slug is left intact
     }
     assert result.status_code == 200, result.json()
 
     queue = await session.get(Queue, group_queue.id)
     await session.refresh(queue)
-    assert queue.name == "New  awesome_queue-123"
+    assert queue.name == r"New queue!\"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~"
     assert queue.description == "New description"
     assert queue.slug == group_queue.slug
 
@@ -52,7 +52,7 @@ async def test_superuser_can_update_queue(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
-            "name": "New  awesome_queue-123",
+            "name": "New queue",
             "description": "New description",
         },
     )
@@ -60,7 +60,7 @@ async def test_superuser_can_update_queue(
     assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": group_queue.id,
-        "name": "New  awesome_queue-123",
+        "name": "New queue",
         "description": "New description",
         "group_id": group_queue.group_id,
         "slug": group_queue.slug,
@@ -68,7 +68,7 @@ async def test_superuser_can_update_queue(
 
     queue = await session.get(Queue, group_queue.id)
     await session.refresh(queue)
-    assert queue.name == "New  awesome_queue-123"
+    assert queue.name == "New queue"
     assert queue.description == "New description"
     assert queue.slug == group_queue.slug
 
@@ -82,7 +82,7 @@ async def test_groupless_user_cannot_update_queue(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={
-            "name": "New  awesome_queue-123",
+            "name": "New queue",
             "description": "New description",
         },
     )
@@ -103,7 +103,7 @@ async def test_anon_user_cannot_update_queue(
     result = await client.put(
         f"v1/queues/{group_queue.id}",
         json={
-            "name": "New  awesome_queue-123",
+            "name": "New queue",
             "description": "New description",
         },
     )
@@ -129,7 +129,7 @@ async def test_developer_or_below_cannot_update_queue(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "name": "New  awesome_queue-123",
+            "name": "New queue",
             "description": "New description",
         },
     )
@@ -155,7 +155,7 @@ async def test_other_group_member_cannot_update_queue(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "name": "New  awesome_queue-123",
+            "name": "New queue",
             "description": "New description",
         },
     )
@@ -180,7 +180,7 @@ async def test_maintainer_plus_cannot_update_unknown_queue_error(
         "v1/queues/-1",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "name": "New  awesome_queue-123",
+            "name": "New queue",
             "description": "New description",
         },
     )
@@ -203,7 +203,7 @@ async def test_superuser_cannot_update_unknown_queue_error(
         "v1/queues/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
-            "name": "New  awesome_queue-123",
+            "name": "New queue",
             "description": "New description",
         },
     )
@@ -224,20 +224,20 @@ async def test_superuser_cannot_update_unknown_queue_error(
         (
             "очередь",
             {
-                "context": {"pattern": "^[-_ a-zA-Z0-9]+$"},
+                "context": {"pattern": r"^[ -~]+$"},
                 "input": "очередь",
                 "location": ["body", "name"],
-                "message": "String should match pattern '^[-_ a-zA-Z0-9]+$'",
+                "message": r"String should match pattern '^[ -~]+$'",
                 "code": "string_pattern_mismatch",
             },
         ),
         (
             "♥︎♥︎♥︎",
             {
-                "context": {"pattern": "^[-_ a-zA-Z0-9]+$"},
+                "context": {"pattern": r"^[ -~]+$"},
                 "input": "♥︎♥︎♥︎",
                 "location": ["body", "name"],
-                "message": "String should match pattern '^[-_ a-zA-Z0-9]+$'",
+                "message": r"String should match pattern '^[ -~]+$'",
                 "code": "string_pattern_mismatch",
             },
         ),

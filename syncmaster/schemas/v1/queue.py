@@ -7,8 +7,8 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints, computed_f
 
 from syncmaster.schemas.v1.page import PageSchema
 
-ALLOWED_PATTERN = re.compile(r"^[-_ a-zA-Z0-9]+$")
-RESTRICTED_PATTERN = re.compile(r"[^\w\d]+")
+ALLOWED_PATTERN = re.compile(r"^[ -~]+$")
+RESTRICTED_PATTERN = re.compile(r"[^a-zA-Z0-9]+")
 
 QueueName = Annotated[
     str,
@@ -26,7 +26,7 @@ class CreateQueueSchema(BaseModel):
     @computed_field
     @property
     def slug(self) -> str:
-        short_name = RESTRICTED_PATTERN.sub("_", self.name.lower())
+        short_name = RESTRICTED_PATTERN.sub("_", self.name.lower()).strip("_")
         return f"{self.group_id}-{short_name}"
 
 

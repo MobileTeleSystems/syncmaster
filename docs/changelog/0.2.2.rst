@@ -12,7 +12,7 @@ Breaking
 Improvements
 ------------
 
-- Now queue name can include spaces.
+- Now queue name can include any ASCII printable characters.
 - Queue slug is always lowercase. Spaces, hyphens and underscores are replaced with ``-`` symbol.
 
 Bug fixes
