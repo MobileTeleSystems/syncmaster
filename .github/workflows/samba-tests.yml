@@ -37,7 +37,8 @@ jobs:
           target: test
           file: docker/Dockerfile.worker
           load: true
-          cache-from: type=gha,scope=worker
+          cache-from: type=gha,scope=test
+          cache-to: type=gha,scope=test,mode=max
 
       - name: Make custom entrypoint script executable
         run: chmod +x ./docker/samba/custom_entrypoint.sh
