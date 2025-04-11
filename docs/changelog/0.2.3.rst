@@ -1,4 +1,4 @@
-0.2.2 (2025-04-11)
+0.2.2 (2025-04-14)
 ==================
 
 Bug fixes
@@ -6,3 +6,7 @@ Bug fixes
 
 - Fix Worker not updating Run ``status`` and ``ended_at`` fields after executing a very long ETL process.
 
+Improvements
+------------
+
+- Change Celery log level from DEBUG to INFO.

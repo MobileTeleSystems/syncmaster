@@ -39,7 +39,7 @@ loggers:
     level: INFO
     propagate: false
   celery:
-    level: DEBUG
+    level: INFO
     handlers: [celery]
     propagate: false
   scheduler:
