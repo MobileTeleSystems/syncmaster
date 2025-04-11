@@ -48,18 +48,20 @@ def run_transfer(run_id: int, engine: Engine, settings: WorkerAppSettings):
                 ),
             )
             if run is None:
-                logger.info("Run not found or already executed by someone else")
+                logger.info("Run %r not found or already executed by someone else", run_id)
                 return
 
             source_connection = run.transfer.source_connection
-            q_source_auth_data = select(AuthData).where(AuthData.connection_id == run.transfer.source_connection.id)
-            source_auth_data = decrypt_auth_data(session.scalar(q_source_auth_data).value, settings)
+            source_auth_data_query = select(AuthData).where(AuthData.connection_id == run.transfer.source_connection.id)
+            source_auth_data_encrypted = session.scalar(source_auth_data_query)
+            source_auth_data = decrypt_auth_data(source_auth_data_encrypted.value, settings)
 
-            q_target_auth_data = select(AuthData).where(AuthData.connection_id == run.transfer.target_connection.id)
             target_connection = run.transfer.target_connection
-            target_auth_data = decrypt_auth_data(session.scalar(q_target_auth_data).value, settings)
+            target_auth_data_query = select(AuthData).where(AuthData.connection_id == run.transfer.target_connection.id)
+            target_auth_data_encrypted = session.scalar(target_auth_data_query)
+            target_auth_data = decrypt_auth_data(target_auth_data_encrypted.value, settings)
 
-            logger.info("Starting run")
+            logger.info("Starting run %r", run_id)
             run.status = Status.STARTED
             run.started_at = datetime.now(tz=timezone.utc)
             run.log_url = Template(settings.worker.log_url_template).render(
@@ -90,7 +92,7 @@ def run_transfer(run_id: int, engine: Engine, settings: WorkerAppSettings):
     with Session(engine) as session:
         run = session.get(Run, run_id)
         if run:
-            logger.info("Updating run status in DB")
+            logger.info("Updating run %r status in DB", run_id)
             run.status = status
             run.ended_at = datetime.now(tz=timezone.utc)
             session.commit()
