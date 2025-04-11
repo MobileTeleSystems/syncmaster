@@ -73,10 +73,10 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         queue_data: UpdateQueueSchema,
     ) -> Queue:
         try:
-            queue = await self.read_by_id(queue_id=queue_id)
             return await self._update(
                 Queue.id == queue_id,
-                description=queue_data.description or queue.description,
+                name=queue_data.name,
+                description=queue_data.description,
             )
         except IntegrityError as e:
             self._raise_error(e)

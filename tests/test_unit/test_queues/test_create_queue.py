@@ -21,7 +21,7 @@ async def test_maintainer_plus_can_create_queue(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "name": "New_queue",
+            "name": "New  awesome_queue-123",
             "description": "Some interesting description",
             "group_id": mock_group.group.id,
         },
@@ -30,18 +30,18 @@ async def test_maintainer_plus_can_create_queue(
     assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": result.json()["id"],
-        "name": "New_queue",
+        "name": "New  awesome_queue-123",
         "description": "Some interesting description",
         "group_id": mock_group.group.id,
-        "slug": f"{mock_group.group.id}-New_queue",
+        "slug": f"{mock_group.group.id}-new_awesome_queue_123",
     }
 
     queue = (await session.scalars(select(Queue).filter_by(id=result.json()["id"]))).one()
     assert queue.id == result.json()["id"]
     assert queue.group_id == mock_group.group.id
-    assert queue.name == "New_queue"
+    assert queue.name == "New  awesome_queue-123"
     assert queue.description == "Some interesting description"
-    assert queue.slug == f"{mock_group.group.id}-New_queue"
+    assert queue.slug == f"{mock_group.group.id}-new_awesome_queue_123"
 
     await session.delete(queue)
     await session.commit()
@@ -57,7 +57,7 @@ async def test_superuser_can_create_queue(
         "v1/queues",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
-            "name": "New_queue",
+            "name": "New  awesome_queue-123",
             "description": "Some interesting description",
             "group_id": mock_group.group.id,
         },
@@ -66,18 +66,18 @@ async def test_superuser_can_create_queue(
     assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": result.json()["id"],
-        "name": "New_queue",
+        "name": "New  awesome_queue-123",
         "description": "Some interesting description",
         "group_id": mock_group.group.id,
-        "slug": f"{mock_group.group.id}-New_queue",
+        "slug": f"{mock_group.group.id}-new_awesome_queue_123",
     }
     queue = (await session.scalars(select(Queue).filter_by(id=result.json()["id"]))).one()
 
     assert queue.id == result.json()["id"]
     assert queue.group_id == mock_group.group.id
-    assert queue.name == "New_queue"
+    assert queue.name == "New  awesome_queue-123"
     assert queue.description == "Some interesting description"
-    assert queue.slug == f"{mock_group.group.id}-New_queue"
+    assert queue.slug == f"{mock_group.group.id}-new_awesome_queue_123"
 
     await session.delete(queue)
     await session.commit()
@@ -95,7 +95,7 @@ async def test_developer_or_below_cannot_create_queue(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "name": "New_queue",
+            "name": "New  awesome_queue-123",
             "description": "Some interesting description",
             "group_id": mock_group.id,
         },
@@ -122,7 +122,7 @@ async def test_other_group_member_cannot_create_queue(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "name": "New_queue",
+            "name": "New  awesome_queue-123",
             "description": "Some interesting description",
             "group_id": empty_group.group.id,
         },
@@ -141,13 +141,12 @@ async def test_groupless_user_cannot_create_queue_error(
     client: AsyncClient,
     simple_user: MockUser,
     empty_group: MockGroup,
-    session: AsyncSession,
 ):
     result = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={
-            "name": "New_queue",
+            "name": "New  awesome_queue-123",
             "description": "Some interesting description",
             "group_id": empty_group.group.id,
         },
@@ -174,7 +173,7 @@ async def test_maintainer_plus_cannot_create_queue_with_unknown_group_error(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "name": "New_queue",
+            "name": "New  awesome_queue-123",
             "description": "Some interesting description",
             "group_id": -1,
         },
@@ -197,7 +196,7 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
         "v1/queues",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
-            "name": "New_queue",
+            "name": "New  awesome_queue-123",
             "description": "Some interesting description",
             "group_id": -1,
         },
@@ -223,10 +222,10 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
                     "message": "Invalid request",
                     "details": [
                         {
-                            "context": {"pattern": "^[-_a-zA-Z0-9]+$"},
+                            "context": {"pattern": "^[-_ a-zA-Z0-9]+$"},
                             "input": "очередь",
                             "location": ["body", "name"],
-                            "message": "String should match pattern '^[-_a-zA-Z0-9]+$'",
+                            "message": "String should match pattern '^[-_ a-zA-Z0-9]+$'",
                             "code": "string_pattern_mismatch",
                         },
                     ],
@@ -234,17 +233,17 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
             },
         ),
         (
-            "Queue name",
+            "♥︎♥︎♥︎",
             {
                 "error": {
                     "code": "invalid_request",
                     "message": "Invalid request",
                     "details": [
                         {
-                            "context": {"pattern": "^[-_a-zA-Z0-9]+$"},
-                            "input": "Queue name",
+                            "context": {"pattern": "^[-_ a-zA-Z0-9]+$"},
+                            "input": "♥︎♥︎♥︎",
                             "location": ["body", "name"],
-                            "message": "String should match pattern '^[-_a-zA-Z0-9]+$'",
+                            "message": "String should match pattern '^[-_ a-zA-Z0-9]+$'",
                             "code": "string_pattern_mismatch",
                         },
                     ],
@@ -252,18 +251,18 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
             },
         ),
         (
-            "♥︎",
+            "qq",
             {
                 "error": {
                     "code": "invalid_request",
                     "message": "Invalid request",
                     "details": [
                         {
-                            "context": {"pattern": "^[-_a-zA-Z0-9]+$"},
-                            "input": "♥︎",
+                            "context": {"min_length": 3},
+                            "input": "qq",
                             "location": ["body", "name"],
-                            "message": "String should match pattern '^[-_a-zA-Z0-9]+$'",
-                            "code": "string_pattern_mismatch",
+                            "message": "String should have at least 3 characters",
+                            "code": "string_too_short",
                         },
                     ],
                 },
@@ -282,24 +281,6 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
                             "location": ["body", "name"],
                             "message": "String should have at most 128 characters",
                             "code": "string_too_long",
-                        },
-                    ],
-                },
-            },
-        ),
-        (
-            "",
-            {
-                "error": {
-                    "code": "invalid_request",
-                    "message": "Invalid request",
-                    "details": [
-                        {
-                            "context": {"pattern": "^[-_a-zA-Z0-9]+$"},
-                            "input": "",
-                            "location": ["body", "name"],
-                            "message": "String should match pattern '^[-_a-zA-Z0-9]+$'",
-                            "code": "string_pattern_mismatch",
                         },
                     ],
                 },
@@ -327,7 +308,6 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
 )
 async def test_maintainer_plus_cannot_create_queue_with_wrong_name(
     client: AsyncClient,
-    session: AsyncSession,
     role_maintainer_plus: UserTestRoles,
     mock_group: MockGroup,
     name_value: str,
@@ -345,12 +325,12 @@ async def test_maintainer_plus_cannot_create_queue_with_wrong_name(
         },
     )
 
+    assert result.status_code == 422, result.json()
     assert result.json() == error
 
 
 async def test_maintainer_plus_can_not_create_queue_with_duplicate_name_error(
     client: AsyncClient,
-    session: AsyncSession,
     role_maintainer_plus: UserTestRoles,
     mock_group: MockGroup,
     group_queue: Queue,
@@ -379,7 +359,6 @@ async def test_maintainer_plus_can_not_create_queue_with_duplicate_name_error(
 
 async def test_maintainer_plus_can_create_queues_with_the_same_name_but_diff_groups(
     client: AsyncClient,
-    session: AsyncSession,
     role_maintainer_plus: UserTestRoles,
     mock_group: MockGroup,
     group: MockGroup,
@@ -391,7 +370,7 @@ async def test_maintainer_plus_can_create_queues_with_the_same_name_but_diff_gro
         "v1/queues",
         headers={"Authorization": f"Bearer {mock_group_user.token}"},
         json={
-            "name": "New_queue",
+            "name": "New  awesome_queue-123",
             "description": "Some interesting description",
             "group_id": mock_group.group.id,
         },
@@ -400,7 +379,7 @@ async def test_maintainer_plus_can_create_queues_with_the_same_name_but_diff_gro
         "v1/queues",
         headers={"Authorization": f"Bearer {group_user.token}"},
         json={
-            "name": "New_queue",
+            "name": "New  awesome_queue-123",
             "description": "Some interesting description",
             "group_id": group.group.id,
         },
@@ -411,17 +390,17 @@ async def test_maintainer_plus_can_create_queues_with_the_same_name_but_diff_gro
     assert queue_1.status_code == 200
     assert queue_1_json == {
         "id": queue_1_json["id"],
-        "name": "New_queue",
+        "name": "New  awesome_queue-123",
         "description": "Some interesting description",
         "group_id": mock_group.group.id,
-        "slug": f"{mock_group.group.id}-New_queue",
+        "slug": f"{mock_group.group.id}-new_awesome_queue_123",
     }
     assert queue_2.status_code == 200
     assert queue_2_json == {
         "id": queue_2_json["id"],
-        "name": "New_queue",
+        "name": "New  awesome_queue-123",
         "description": "Some interesting description",
         "group_id": group.group.id,
-        "slug": f"{group.group.id}-New_queue",
+        "slug": f"{group.group.id}-new_awesome_queue_123",
     }
     assert queue_1_json["slug"] != queue_2_json["slug"]

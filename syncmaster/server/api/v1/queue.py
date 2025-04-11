@@ -94,7 +94,7 @@ async def create_queue(
     return ReadQueueSchema.model_validate(queue, from_attributes=True)
 
 
-@router.patch("/queues/{queue_id}", description="Updating queue information")
+@router.put("/queues/{queue_id}", description="Updating queue information")
 async def update_queue(
     queue_id: int,
     queue_data: UpdateQueueSchema,

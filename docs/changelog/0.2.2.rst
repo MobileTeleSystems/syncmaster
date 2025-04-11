@@ -1,8 +1,21 @@
 0.2.2 (2025-04-11)
 ==================
 
+Breaking
+--------
+
+- Use ``PUT /v1/queues/:id`` instead of ``PATCH /v1/queues/:id``.
+- Minimal queue name is 3 symbols instead of 1.
+
+Improvements
+------------
+
+- Now queue name can include spaces.
+- Queue slug is always lowercase. Spaces, hyphens and underscores are replaced with ``-`` symbol.
+
 Bug fixes
 ---------
 
-- Call ``kinit`` before starting Spark session conecting to ``Hive`` cluster.
-- Fix ``HDFS`` connection was trying to use anonymous auth instead of user/password.
+- Call ``kinit`` before starting Spark session conecting to ``Hive`` cluster. (:issue:`225`)
+- Fix ``HDFS`` connection was trying to use anonymous auth instead of user/password. (:issue:`225`)
+- Fix updating queue ignored name and didn't reset description.

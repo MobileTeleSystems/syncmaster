@@ -1,22 +1,33 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from pydantic import BaseModel, ConfigDict, Field, computed_field, constr
+import re
+from typing import Annotated
+
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, computed_field
 
 from syncmaster.schemas.v1.page import PageSchema
 
+ALLOWED_PATTERN = re.compile(r"^[-_ a-zA-Z0-9]+$")
+RESTRICTED_PATTERN = re.compile(r"[^\w\d]+")
+
+QueueName = Annotated[
+    str,
+    StringConstraints(min_length=3, max_length=128, pattern=ALLOWED_PATTERN),  # noqa: WPS432
+]
+
 
 class CreateQueueSchema(BaseModel):
-    name: constr(max_length=128, pattern=r"^[-_a-zA-Z0-9]+$") = Field(  # noqa: F722, WPS432
-        ...,
+    name: QueueName = Field(
         description="Queue name that allows letters, numbers, dashes, and underscores",
     )
-    group_id: int = Field(..., description="Queue owner group id")
+    group_id: int = Field(description="Queue owner group id")
     description: str = Field(default="", description="Additional description")
 
     @computed_field
     @property
     def slug(self) -> str:
-        return f"{self.group_id}-{self.name}"
+        short_name = RESTRICTED_PATTERN.sub("_", self.name.lower())
+        return f"{self.group_id}-{short_name}"
 
 
 class ReadQueueSchema(BaseModel):
@@ -34,4 +45,5 @@ class QueuePageSchema(PageSchema):
 
 
 class UpdateQueueSchema(BaseModel):
-    description: str | None = None
+    name: QueueName
+    description: str = ""
