@@ -21,7 +21,7 @@ async def test_maintainer_plus_can_create_queue(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            "name": r"New queue!\"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~",
+            "name": r"New queue123!\"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~",
             "description": "Some interesting description",
             "group_id": mock_group.group.id,
         },
@@ -30,18 +30,18 @@ async def test_maintainer_plus_can_create_queue(
     assert result.status_code == 200, result.json()
     assert result.json() == {
         "id": result.json()["id"],
-        "name": r"New queue!\"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~",
+        "name": r"New queue123!\"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~",
         "description": "Some interesting description",
         "group_id": mock_group.group.id,
-        "slug": f"{mock_group.group.id}-new_awesome_queue_123",
+        "slug": f"{mock_group.group.id}-new_queue123",
     }
 
     queue = (await session.scalars(select(Queue).filter_by(id=result.json()["id"]))).one()
     assert queue.id == result.json()["id"]
     assert queue.group_id == mock_group.group.id
-    assert queue.name == r"New queue!\"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~"
+    assert queue.name == r"New queue123!\"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~"
     assert queue.description == "Some interesting description"
-    assert queue.slug == f"{mock_group.group.id}-new_awesome_queue_123"
+    assert queue.slug == f"{mock_group.group.id}-new_queue123"
 
     await session.delete(queue)
     await session.commit()
@@ -69,7 +69,7 @@ async def test_superuser_can_create_queue(
         "name": "New queue",
         "description": "Some interesting description",
         "group_id": mock_group.group.id,
-        "slug": f"{mock_group.group.id}-new_awesome_queue_123",
+        "slug": f"{mock_group.group.id}-new_queue",
     }
     queue = (await session.scalars(select(Queue).filter_by(id=result.json()["id"]))).one()
 
@@ -77,7 +77,7 @@ async def test_superuser_can_create_queue(
     assert queue.group_id == mock_group.group.id
     assert queue.name == "New queue"
     assert queue.description == "Some interesting description"
-    assert queue.slug == f"{mock_group.group.id}-new_awesome_queue_123"
+    assert queue.slug == f"{mock_group.group.id}-new_queue"
 
     await session.delete(queue)
     await session.commit()
