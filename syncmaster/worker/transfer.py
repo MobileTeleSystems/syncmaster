@@ -33,30 +33,28 @@ def run_transfer_task(self: WorkerTask, run_id: int) -> None:
 
 
 def run_transfer(run_id: int, engine: Engine, settings: WorkerAppSettings):
-    run_query = (
-        select(Run)
-        .where(
-            Run.id == run_id,
-            Run.status == Status.CREATED,
-        )
-        .options(
-            selectinload(Run.transfer),
-            selectinload(Run.transfer).selectinload(Transfer.group),
-            selectinload(Run.transfer).selectinload(Transfer.source_connection),
-            selectinload(Run.transfer).selectinload(Transfer.target_connection),
-        )
-    )
-
     with Session(engine) as session:
-        run = session.scalar(run_query)
+        run = session.scalar(
+            select(Run)
+            .where(
+                Run.id == run_id,
+                Run.status == Status.CREATED,
+            )
+            .options(
+                selectinload(Run.transfer),
+                selectinload(Run.transfer).selectinload(Transfer.group),
+                selectinload(Run.transfer).selectinload(Transfer.source_connection),
+                selectinload(Run.transfer).selectinload(Transfer.target_connection),
+            ),
+        )
         if run is None:
             raise RunNotFoundError
 
         q_source_auth_data = select(AuthData).where(AuthData.connection_id == run.transfer.source_connection.id)
         q_target_auth_data = select(AuthData).where(AuthData.connection_id == run.transfer.target_connection.id)
 
-        target_auth_data = decrypt_auth_data(session.scalars(q_target_auth_data).one().value, settings)
-        source_auth_data = decrypt_auth_data(session.scalars(q_source_auth_data).one().value, settings)
+        target_auth_data = decrypt_auth_data(session.scalar(q_target_auth_data).value, settings)
+        source_auth_data = decrypt_auth_data(session.scalar(q_source_auth_data).value, settings)
 
         logger.info("Starting run")
         run.status = Status.STARTED
@@ -76,12 +74,14 @@ def run_transfer(run_id: int, engine: Engine, settings: WorkerAppSettings):
             target_auth_data=target_auth_data,
         )
         controller.perform_transfer()
-    except Exception:
+    except Exception as e:
         status = Status.FAILED
-        logger.exception("Run %r was failed", run.id)
+        logger.exception("Run %r failed", run.id)
+        exception = e
     else:
         status = Status.FINISHED
-        logger.warning("Run %r was successful", run.id)
+        logger.info("Run %r was successful", run.id)
+        exception = None
 
     with Session(engine) as session:
         run = session.get(Run, run_id)
@@ -93,6 +93,9 @@ def run_transfer(run_id: int, engine: Engine, settings: WorkerAppSettings):
         run.ended_at = datetime.now(tz=timezone.utc)
         session.add(run)
         session.commit()
+
+    if exception is not None:
+        raise exception
 
 
 @after_setup_task_logger.connect
