@@ -33,7 +33,7 @@ def run_transfer_task(self: WorkerTask, run_id: int) -> None:
 
 def run_transfer(run_id: int, engine: Engine, settings: WorkerAppSettings):
     try:
-        with Session(engine) as session:
+        with Session(engine, expire_on_commit=False) as session:
             run = session.scalar(
                 select(Run)
                 .where(
@@ -66,8 +66,8 @@ def run_transfer(run_id: int, engine: Engine, settings: WorkerAppSettings):
                 run=run,
                 correlation_id=correlation_id.get(),
             )
-            session.add(run)
             session.commit()
+            session.expunge_all()  # do not hold open DB connection while run is executed
 
         controller = TransferController(
             settings=settings,
@@ -80,7 +80,7 @@ def run_transfer(run_id: int, engine: Engine, settings: WorkerAppSettings):
         controller.perform_transfer()
     except Exception as e:
         status = Status.FAILED
-        logger.exception("Run %r failed", run_id)
+        logger.error("Run %r failed", run_id)
         exception = e
     else:
         status = Status.FINISHED
@@ -90,10 +90,9 @@ def run_transfer(run_id: int, engine: Engine, settings: WorkerAppSettings):
     with Session(engine) as session:
         run = session.get(Run, run_id)
         if run:
-            logger.info("Updating run status")
+            logger.info("Updating run status in DB")
             run.status = status
             run.ended_at = datetime.now(tz=timezone.utc)
-            session.add(run)
             session.commit()
 
     if exception is not None:
