@@ -83,8 +83,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           pull: true
           push: true
-          cache-to: type=gha,mode=max
-          cache-from: type=gha
+          cache-to: type=gha,mode=max,scope=server
+          cache-from: type=gha,scope=server
           platforms: ${{ env.PLATFORMS }}
           provenance: mode=max
           sbom: true
