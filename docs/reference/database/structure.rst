@@ -46,7 +46,7 @@ Database structure
         * id: bigint
         ----
         group_id: bigint
-        type: varchar(23)
+        type: varchar(32)
         name: varchar(123)
         description: varchar(512)
         data: json

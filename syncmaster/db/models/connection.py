@@ -32,7 +32,7 @@ class ConnectionType(StrEnum):
 
 
 class Connection(Base, ResourceMixin, TimestampMixin):
-    type: Mapped[ConnectionType] = mapped_column(ChoiceType(ConnectionType, impl=String(23)), nullable=False)
+    type: Mapped[ConnectionType] = mapped_column(ChoiceType(ConnectionType, impl=String(32)), nullable=False)
     data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
 
     group: Mapped[Group] = relationship("Group")
