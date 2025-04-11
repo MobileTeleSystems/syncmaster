@@ -1,0 +1,8 @@
+0.2.2 (2025-04-11)
+==================
+
+Bug fixes
+---------
+
+- Fix Worker not updating Run ``status`` and ``ended_at`` fields after executing a very long ETL process.
+
