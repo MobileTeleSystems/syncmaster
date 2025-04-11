@@ -142,7 +142,7 @@ services:
       PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus-metrics
     # tmpfs dir is cleaned up each container restart
     tmpfs:
-      - /tmp/prometheus-metrics
+      - /tmp/prometheus-metrics:mode=1777
     ports:
       - 8020:8000
     depends_on:
