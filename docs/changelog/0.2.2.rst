@@ -1,0 +1,8 @@
+0.2.2 (2025-04-11)
+==================
+
+Bug fixes
+---------
+
+- Call ``kinit`` before starting Spark session conecting to ``Hive`` cluster.
+- Fix ``HDFS`` connection was trying to use anonymous auth instead of user/password.

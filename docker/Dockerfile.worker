@@ -66,5 +66,13 @@ RUN --mount=type=cache,target=/root/.cache/pypoetry \
         --without docs,dev \
     && python -m compileall -j 4 .venv
 
-RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
 ENV SYNCMASTER__WORKER__CREATE_SPARK_SESSION_FUNCTION=tests.spark.get_worker_spark_session
+
+# Collect coverage from worker
+RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
+
+# Replace kinit binary with dummy, to skip Kerberos interaction in tests
+RUN mkdir -p /app/.local/bin && \
+    echo "#!/bin/bash" > /app/.local/bin/kinit \
+    && chmod +x /app/.local/bin/kinit
+ENV PATH="/app/.local/bin:$PATH"

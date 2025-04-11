@@ -25,4 +25,6 @@ class HDFSHandler(RemoteDFFileHandler):
 
         self.file_connection = HDFS(
             cluster=self.connection_dto.cluster,
+            user=self.connection_dto.user,
+            password=self.connection_dto.password,
         ).check()
