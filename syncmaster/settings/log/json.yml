@@ -50,3 +50,7 @@ loggers:
     handlers: [main]
     level: WARNING
     propagate: false
+  hdfs.client:
+    handlers: [main]
+    level: WARNING
+    propagate: false
