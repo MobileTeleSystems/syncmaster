@@ -132,7 +132,7 @@ pytest-mock = "^3.14.0"
 pytest-lazy-fixtures = "^1.1.1"
 faker = "^37.1.0"
 coverage = "^7.8.0"
-gevent = "^24.11.1"
+gevent = ">=24.11.1,<26.0.0"
 responses = "^0.25.7"
 
 [tool.poetry.group.dev.dependencies]
