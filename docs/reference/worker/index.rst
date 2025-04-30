@@ -22,7 +22,9 @@ With docker
 
 * Install `Docker <https://docs.docker.com/engine/install/>`_
 * Install `docker-compose <https://github.com/docker/compose/releases/>`_
-* Start :ref:`server` and :ref:`frontend`, create Group and Queue, get slug (e.g. ``test_queue``)
+* Go to `frontend <http://localhost:3000>`
+* Create new Group
+* Create Queue in this group, and then get **Queue.slug** (e.g. ``123-test_queue``)
 * Run the following command:
 
   .. code:: console
