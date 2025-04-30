@@ -50,9 +50,10 @@ RUN python -m compileall syncmaster
 
 # Do not run production as root, to improve security.
 # Also user does not own anything inside the image, including venv and source code.
-RUN useradd syncmaster
+RUN useradd syncmaster && \
+    mkdir -p /home/syncmaster && \
+    chown -R syncmaster:syncmaster /home/syncmaster
 USER syncmaster
-RUN mkdir -p ~/.ivy2 && chmod +x ~/.ivy2
 
 
 FROM builder AS test
