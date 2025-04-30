@@ -12,7 +12,7 @@ executes them and updates status & log url in :ref:`database`. Implemented using
     This can be done via :ref:`frontend` or via :ref:`server` REST API.
 
     Queue field ``slug`` value is then should be passed to Celery argument ``-Q``.
-    For example, for slug ``test_queue`` this should be ``-Q test_queue``.
+    For example, for slug ``123-test_queue`` this should be ``-Q 123-test_queue``.
 
 Install & run
 -------------
@@ -70,18 +70,20 @@ Without docker
 
       $ pip install syncmaster[server,worker]
 
-* Start :ref:`server` and :ref:`frontend`, create Group and Queue, get slug (e.g. ``test_queue``)
+* Start :ref:`server` and :ref:`frontend`
+* Create new Group
+* Create Queue in this group, and then get **Queue.slug** (e.g. ``123-test_queue``)
 * Run worker process:
 
   .. code-block:: console
 
-    $ python -m celery -A syncmaster.worker.celery worker -Q test_queue --max-tasks-per-child=1
+    $ python -m celery -A syncmaster.worker.celery worker -Q 123-test_queue --max-tasks-per-child=1
 
   You can specify options like concurrency and queues by adding additional flags:
 
   .. code-block:: bash
 
-    $ python -m celery -A syncmaster.worker.celery worker -Q test_queue --max-tasks-per-child=1 --concurrency=4 --loglevel=info
+    $ python -m celery -A syncmaster.worker.celery worker -Q 123-test_queue --max-tasks-per-child=1 --concurrency=4 --loglevel=info
 
   Refer to the `Celery <https://docs.celeryq.dev/en/stable/>`_ documentation for more advanced start options.
 

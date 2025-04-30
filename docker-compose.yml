@@ -83,7 +83,7 @@ services:
       context: .
       target: prod
     env_file: .env.docker
-    command: --loglevel=info -Q test_queue
+    command: --loglevel=info -Q 123-test_queue  # Queue.slug
     depends_on:
       db:
         condition: service_healthy

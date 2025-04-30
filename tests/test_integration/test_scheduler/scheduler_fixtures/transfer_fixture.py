@@ -45,9 +45,9 @@ async def group_transfer_integration_mock(
 
     queue = await create_queue(
         session=session,
-        name="test_queue",
+        name="123-test_queue",
         group_id=group.id,
-        slug="test_queue",
+        slug="123-test_queue",
     )
 
     members: list[MockUser] = []

@@ -44,7 +44,7 @@ async def group(
     await session.commit()
 
 
-@pytest_asyncio.fixture(params=["test_queue"])
+@pytest_asyncio.fixture(params=["123-test_queue"])
 async def queue(
     request: FixtureRequest,
     session: AsyncSession,
