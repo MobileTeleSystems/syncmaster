@@ -52,6 +52,7 @@ RUN python -m compileall syncmaster
 # Also user does not own anything inside the image, including venv and source code.
 RUN useradd syncmaster
 USER syncmaster
+RUN mkdir ~/.ivy2 && chmod +x ~/.ivy2
 
 
 FROM builder AS test
