@@ -4,7 +4,7 @@
 
 import textwrap
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, SecretStr
 
 
 class SessionSettings(BaseModel):
@@ -40,7 +40,7 @@ class SessionSettings(BaseModel):
 
     """
 
-    secret_key: str = Field(
+    secret_key: SecretStr = Field(
         description=textwrap.dedent(
             """
             Secret key for encrypting cookies.
