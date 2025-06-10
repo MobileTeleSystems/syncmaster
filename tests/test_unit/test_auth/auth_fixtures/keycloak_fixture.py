@@ -48,7 +48,7 @@ def get_public_key_pem(public_key):
 def create_session_cookie(rsa_keys, settings):
     def _create_session_cookie(user, expire_in_msec=60000) -> str:
         private_pem = rsa_keys["private_pem"]
-        session_secret_key = settings.server.session.secret_key
+        session_secret_key = settings.server.session.secret_key.get_secret_value()
 
         payload = {
             "sub": str(user.id),
