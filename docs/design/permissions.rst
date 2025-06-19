@@ -12,11 +12,11 @@ Roles are:
 * ``GUEST``
   Read-only access to objects within a group.
 * ``DEVELOPER``
-  Read-write (manage) connections and transfer, read-only for other objects.
+  Read-write (manage) connections, transfers and runs. Read-only for queues.
 * ``MAINTAINER`` (DevOps):
-  Manage connections, transfers and queues.
+  Manage connections, transfers, runs and queues.
 * ``OWNER`` (Product Owner)
-  Manage connections, transfers, queues and user-group membership. Group can have only one maintainer.
+  Manage connections, transfers, runs, queues and user-group membership. Group can have only one owner.
 * ``SUPERUSER`` (Admin)
   Meta role assigned to specific users, NOT within group. All permissions, including ability to create/delete groups.
   Superusers are created by :ref:`manage-superusers-cli`.
@@ -62,7 +62,7 @@ Add user to the group and delete
 ---------------------------------
 Each user has the right to remove himself from a group, regardless of his role in the group.
 
-.. list-table:: Rights to delete and add users to a group.
+.. list-table:: Rights to add/delete users to a group
    :header-rows: 1
 
    * - Rule \ Role
@@ -84,10 +84,10 @@ Each user has the right to remove himself from a group, regardless of his role i
      - x
      - x
 
-Transfers, Runs and Connections
---------------------------------
+Transfers, and Connections
+--------------------------
 
-.. list-table:: Right to work wirh Transfers, Runs and Connections repositories.
+.. list-table:: Right to work with Transfers and Connections within a group
    :header-rows: 1
 
 
@@ -116,10 +116,36 @@ Transfers, Runs and Connections
      - x
      - x
 
+Runs
+----
+
+.. list-table:: Right to work with Runs within a group
+   :header-rows: 1
+
+
+   * - Rule \ Role
+     - Guest
+     - Developer
+     - Maintainer
+     - Owner
+     - Superuser
+   * - READ
+     - x
+     - x
+     - x
+     - x
+     - x
+   * - CREATE (START), STOP
+     -
+     - x
+     - x
+     - x
+     - x
+
 Queues
 ------
 
-.. list-table:: Rights to read, delete and update queues.
+.. list-table:: Rights to work with Queues within a namespace
    :header-rows: 1
 
    * - Rule \ Role

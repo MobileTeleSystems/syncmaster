@@ -23,7 +23,6 @@ from syncmaster.schemas.v1.transfers.run import (
 from syncmaster.server.dependencies import Stub
 from syncmaster.server.services.get_user import get_user
 from syncmaster.server.services.unit_of_work import UnitOfWork
-from syncmaster.server.settings import ServerAppSettings as Settings
 
 router = APIRouter(tags=["Runs"], responses=get_error_responses())
 
@@ -82,7 +81,6 @@ async def read_run(
 @router.post("/runs")
 async def start_run(  # noqa: WPS217
     create_run_data: CreateRunSchema,
-    settings: Annotated[Settings, Depends(Stub(Settings))],
     celery: Annotated[Celery, Depends(Stub(Celery))],
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
     current_user: User = Depends(get_user(is_active=True)),
