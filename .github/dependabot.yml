@@ -24,7 +24,7 @@ updates:
       - dependency-name: towncrier
       # https://github.com/MobileTeleSystems/onetl/pull/297
       - dependency-name: pyspark
-        versions: [4.x]
+        versions: ['4']
     # https://til.simonwillison.net/github/dependabot-python-setup
     groups:
       python-packages:
