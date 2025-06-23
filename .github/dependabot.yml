@@ -25,6 +25,8 @@ updates:
       # https://github.com/MobileTeleSystems/onetl/pull/297
       - dependency-name: pyspark
         versions: ['4']
+      - dependency-name: pytest-asyncio
+        versions: ['1']
     # https://til.simonwillison.net/github/dependabot-python-setup
     groups:
       python-packages:
