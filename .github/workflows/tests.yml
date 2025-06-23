@@ -79,7 +79,6 @@ jobs:
     name: Tests done
     runs-on: ubuntu-latest
 
-    if: always()
     needs:
       - unit_tests
       - scheduler_tests
