@@ -50,7 +50,7 @@ sqlalchemy = { version = "^2.0.40", optional = true }
 sqlalchemy-utils = { version = "^0.41.2", optional = true }
 fastapi = { version = "^0.115.12", optional = true}
 asgi-correlation-id = {version = "^4.3.4", optional = true}
-uvicorn = { version = "^0.34.0", optional = true }
+uvicorn = { version = ">=0.34,<0.36", optional = true }
 alembic = { version = "^1.15.2", optional = true }
 pyjwt = { version = "^2.10.1", optional = true }
 jinja2 = { version = "^3.1.6", optional = true }
