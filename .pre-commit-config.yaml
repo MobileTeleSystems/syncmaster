@@ -39,13 +39,13 @@ repos:
       - id: chmod
         args: ['644']
         exclude_types: [shell]
-        exclude: ^(.*__main__\.py|syncmaster/server/scripts/.*\.py)$
+        exclude: ^(.*__main__\.py|syncmaster/server/scripts/.*\.py|docker/.*\.py)$
       - id: chmod
         args: ['755']
         types: [shell]
       - id: chmod
         args: ['755']
-        files: ^(.*__main__\.py|syncmaster/server/scripts/.*\.py)$
+        files: ^(.*__main__\.py|syncmaster/server/scripts/.*\.py|docker/.*\.py)$
       - id: insert-license
         types: [python]
         exclude: ^(syncmaster/server/dependencies/stub.py|docs/.*\.py|tests/.*\.py)$
