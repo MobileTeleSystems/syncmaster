@@ -41,18 +41,41 @@ RUN --mount=type=cache,target=/root/.cache/pypoetry \
     && python -m compileall -j 4 .venv
 
 
-FROM base AS prod
+FROM builder AS maven_packages
 
-# We don't need poetry and compilers in final image
-COPY --from=builder /app/.venv/ /app/.venv/
-COPY ./syncmaster/ /app/syncmaster/
-RUN python -m compileall syncmaster
+RUN --mount=type=bind,source=./syncmaster/,target=/app/syncmaster/ \
+    --mount=type=bind,source=./docker/download_maven_packages.py,target=/app/docker/download_maven_packages.py \
+    mkdir /root/.ivy2 && \
+    # Try to download all dependencies at once.
+    # If multiple packages depends on the same transitive dependency, Spark uses maximum version of this dependency.
+    python /app/docker/download_maven_packages.py all && \
+    # Then try to download specific connectors to fetch exact dependency version specified within connector.
+    # Yes, this is slow, but overwise using worker without internet access will fail, unless custom ivysettings.xml is used
+    python /app/docker/download_maven_packages.py s3 && \
+    python /app/docker/download_maven_packages.py hdfs && \
+    python /app/docker/download_maven_packages.py clickhouse && \
+    python /app/docker/download_maven_packages.py postgres && \
+    python /app/docker/download_maven_packages.py oracle && \
+    python /app/docker/download_maven_packages.py mssql && \
+    python /app/docker/download_maven_packages.py mysql
+    # if someone uses custom worker image, they should download jars on their own
+
+
+FROM base AS prod
 
 # Do not run production as root, to improve security.
 # Also user does not own anything inside the image, including venv and source code.
 RUN useradd syncmaster && \
-    mkdir -p /home/syncmaster && \
+    mkdir -p /home/syncmaster /home/syncmaster/.ivy2 && \
     chown -R syncmaster:syncmaster /home/syncmaster
+
+# We don't need poetry and compilers in final image
+COPY --from=builder /app/.venv/ /app/.venv/
+# custom Spark session function may download different jars, so syncmaster have to own them
+COPY --from=maven_packages --chown=syncmaster:syncmaster /root/.ivy2/ /home/syncmaster/.ivy2/
+
+COPY ./syncmaster/ /app/syncmaster/
+RUN python -m compileall syncmaster
 USER syncmaster
 
 

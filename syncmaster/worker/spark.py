@@ -47,44 +47,41 @@ def get_worker_spark_session(
     return spark_builder.getOrCreate()
 
 
-def get_packages(connection_type: str) -> list[str]:  # noqa: WPS212
+def get_packages(connection_types: set[str]) -> list[str]:  # noqa: WPS212
     import pyspark
     from onetl.connection import MSSQL, Clickhouse, MySQL, Oracle, Postgres, SparkS3
     from onetl.file.format import XML, Excel
 
+    spark_version = pyspark.__version__
     # excel version is hardcoded due to https://github.com/nightscape/spark-excel/issues/902
     file_formats_spark_packages: list[str] = [
-        *XML.get_packages(spark_version=pyspark.__version__),
+        *XML.get_packages(spark_version=spark_version),
         *Excel.get_packages(spark_version="3.5.1"),
     ]
 
-    if connection_type == "postgres":
-        return Postgres.get_packages()
-    if connection_type == "oracle":
-        return Oracle.get_packages()
-    if connection_type == "clickhouse":
-        return [
-            "io.github.mtsongithub.doetl:spark-dialect-extension_2.12:0.0.2",
-            *Clickhouse.get_packages(),
-        ]
-    if connection_type == "mssql":
-        return MSSQL.get_packages()
-    if connection_type == "mysql":
-        return MySQL.get_packages()
-    if connection_type == "s3":
-        import pyspark
+    result = []
+    if connection_types & {"postgres", "all"}:
+        result.extend(Postgres.get_packages())
+    if connection_types & {"oracle", "all"}:
+        result.extend(Oracle.get_packages())
+    if connection_types & {"clickhouse", "all"}:
+        result.append("io.github.mtsongithub.doetl:spark-dialect-extension_2.12:0.0.2")
+        result.extend(Clickhouse.get_packages())
+    if connection_types & {"mssql", "all"}:
+        result.extend(MSSQL.get_packages())
+    if connection_types & {"mysql", "all"}:
+        result.extend(MySQL.get_packages())
 
-        spark_version = pyspark.__version__
-        return SparkS3.get_packages(spark_version=spark_version) + file_formats_spark_packages
+    if connection_types & {"s3", "all"}:
+        result.extend(SparkS3.get_packages(spark_version=spark_version))
 
-    if connection_type in ("hdfs", "sftp", "ftp", "ftps", "samba", "webdav"):
-        return file_formats_spark_packages
+    if connection_types & {"s3", "hdfs", "sftp", "ftp", "ftps", "samba", "webdav", "all"}:
+        result.extend(file_formats_spark_packages)
 
-    # If the database type does not require downloading .jar packages
-    return []
+    return result
 
 
-def get_excluded_packages(db_type: str) -> list[str]:
+def get_excluded_packages() -> list[str]:
     from onetl.connection import SparkS3
 
     return SparkS3.get_exclude_packages()
@@ -95,16 +92,11 @@ def get_spark_session_conf(
     target: ConnectionDTO,
     resources: dict,
 ) -> dict:
-    maven_packages: list[str] = []
-    excluded_packages: list[str] = []
-
-    for db_type in source, target:
-        maven_packages.extend(get_packages(connection_type=db_type.type))  # type: ignore
-        excluded_packages.extend(get_excluded_packages(db_type=db_type.type))  # type: ignore
+    maven_packages: list[str] = get_packages(connection_types={source.type, target.type})
+    excluded_packages: list[str] = get_excluded_packages()
 
     memory_mb = math.ceil(resources["ram_bytes_per_task"] / 1024 / 1024)
     config = {
-        "spark.jars.packages": ",".join(maven_packages),
         "spark.sql.pyspark.jvmStacktrace.enabled": "true",
         "spark.hadoop.mapreduce.fileoutputcommitter.marksuccessfuljobs": "false",
         "spark.executor.cores": resources["cpu_cores_per_task"],

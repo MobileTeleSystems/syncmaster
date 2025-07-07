@@ -114,7 +114,6 @@ services:
       - SYNCMASTER__SERVER__STATIC_FILES__ENABLED=false
     volumes:
       - ./syncmaster:/app/syncmaster
-      - ./cached_jars:/root/.ivy2
       - ./reports:/app/reports
       - ./tests:/app/tests
       - ./pyproject.toml:/app/pyproject.toml
