@@ -1,8 +1,8 @@
-0.2.4 (2025-07-07)
+0.2.4 (2025-07-09)
 ==================
 
 Improvements
 ------------
 
-- Include all required jars from Maven to worker image. This increases image size, but drastically reduces time of Spark session startup.
+Include all required jars from Maven to worker image. This increases image size, but drastically reduces time of Spark session startup.
 
