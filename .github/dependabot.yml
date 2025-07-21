@@ -24,9 +24,9 @@ updates:
       - dependency-name: towncrier
       # https://github.com/MobileTeleSystems/onetl/pull/297
       - dependency-name: pyspark
-        versions: ['4']
+        update-types: [version-update:semver-major]
       - dependency-name: pytest-asyncio
-        versions: ['1']
+        update-types: [version-update:semver-major]
     # https://til.simonwillison.net/github/dependabot-python-setup
     groups:
       python-packages:
