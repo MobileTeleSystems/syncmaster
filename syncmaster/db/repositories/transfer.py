@@ -10,6 +10,7 @@ from sqlalchemy.orm import aliased, selectinload
 
 from syncmaster.db.models import Connection, Transfer
 from syncmaster.db.repositories.repository_with_owner import RepositoryWithOwner
+from syncmaster.db.repositories.search import make_tsquery
 from syncmaster.db.utils import Pagination
 from syncmaster.exceptions import EntityNotFoundError, SyncmasterError
 from syncmaster.exceptions.connection import ConnectionNotFoundError
@@ -45,9 +46,8 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         )
 
         if search_query:
-            processed_query = search_query.replace("/", " ").replace(".", " ")
-            combined_query = f"{search_query} {processed_query}"
-            stmt = self._construct_vector_search(stmt, combined_query)
+            ts_query = make_tsquery(search_query)
+            stmt = self._construct_vector_search(stmt, ts_query)
 
         if source_connection_id is not None:
             stmt = stmt.where(Transfer.source_connection_id == source_connection_id)

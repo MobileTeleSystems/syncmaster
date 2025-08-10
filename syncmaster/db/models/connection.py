@@ -41,11 +41,15 @@ class Connection(Base, ResourceMixin, TimestampMixin):
         TSVECTOR,
         Computed(
             """
-            to_tsvector(
-                'english'::regconfig,
-                name || ' ' ||
-                COALESCE(json_extract_path_text(data, 'host'), '') || ' ' ||
-                COALESCE(translate(json_extract_path_text(data, 'host'), '.', ' '), '')
+            to_tsvector('russian', coalesce(name, ''))
+         || to_tsvector('simple',  coalesce(name, ''))
+         || to_tsvector('simple', coalesce(data->>'host', ''))
+         || to_tsvector(
+                'simple',
+                translate(
+                    coalesce(data->>'host', ''),
+                    './-_:\\', '      '
+                )
             )
             """,
             persisted=True,

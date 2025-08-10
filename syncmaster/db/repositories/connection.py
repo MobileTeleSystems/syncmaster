@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Connection
 from syncmaster.db.repositories.repository_with_owner import RepositoryWithOwner
+from syncmaster.db.repositories.search import make_tsquery
 from syncmaster.db.utils import Pagination
 from syncmaster.exceptions import EntityNotFoundError, SyncmasterError
 from syncmaster.exceptions.connection import (
@@ -35,9 +36,8 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
             Connection.group_id == group_id,
         )
         if search_query:
-            processed_query = search_query.replace(".", " ")
-            combined_query = f"{search_query} {processed_query}"
-            stmt = self._construct_vector_search(stmt, combined_query)
+            ts_query = make_tsquery(search_query)
+            stmt = self._construct_vector_search(stmt, ts_query)
 
         if connection_type is not None:
             stmt = stmt.where(Connection.type.in_(connection_type))

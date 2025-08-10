@@ -77,13 +77,17 @@ class Group(Base, TimestampMixin):
 
     owner: Mapped[User] = relationship(User)
     queue: Mapped[Queue] = relationship(back_populates="group", cascade="all, delete-orphan")
-
     search_vector: Mapped[str] = mapped_column(
         TSVECTOR,
-        Computed("to_tsvector('english'::regconfig, name)", persisted=True),
+        Computed(
+            """
+            to_tsvector('russian', coalesce(name, ''))
+         || to_tsvector('simple',  coalesce(name, ''))
+            """,
+            persisted=True,
+        ),
         nullable=False,
         deferred=True,
-        doc="Full-text search vector",
     )
 
     def __repr__(self) -> str:
