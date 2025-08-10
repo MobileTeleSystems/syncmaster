@@ -25,10 +25,15 @@ class Queue(Base, ResourceMixin, TimestampMixin):
 
     search_vector: Mapped[str] = mapped_column(
         TSVECTOR,
-        Computed("to_tsvector('english'::regconfig, name)", persisted=True),
+        Computed(
+            """
+            to_tsvector('russian', coalesce(name, ''))
+         || to_tsvector('simple',  coalesce(name, ''))
+            """,
+            persisted=True,
+        ),
         nullable=False,
         deferred=True,
-        doc="Full-text search vector",
     )
 
     def __repr__(self):

@@ -10,6 +10,7 @@ from sqlalchemy.orm import joinedload
 
 from syncmaster.db.models import Group, GroupMemberRole, User, UserGroup
 from syncmaster.db.repositories.base import Repository
+from syncmaster.db.repositories.search import make_tsquery
 from syncmaster.db.utils import Pagination, Permission
 from syncmaster.exceptions import EntityNotFoundError, SyncmasterError
 from syncmaster.exceptions.group import (
@@ -33,7 +34,8 @@ class GroupRepository(Repository[Group]):
     ) -> Pagination:
         stmt = select(Group)
         if search_query:
-            stmt = self._construct_vector_search(stmt, search_query)
+            ts_query = make_tsquery(search_query)
+            stmt = self._construct_vector_search(stmt, ts_query)
 
         paginated_result = await self._paginate_scalar_result(
             query=stmt.order_by(Group.name),
@@ -78,7 +80,8 @@ class GroupRepository(Repository[Group]):
 
             # apply search filtering if a search query is provided
             if search_query:
-                owned_groups_stmt = self._construct_vector_search(owned_groups_stmt, search_query)
+                ts_query = make_tsquery(search_query)
+                owned_groups_stmt = self._construct_vector_search(owned_groups_stmt, ts_query)
 
             # get total count of owned groups
             total_owned_groups = (
@@ -114,7 +117,8 @@ class GroupRepository(Repository[Group]):
 
         # apply search filtering if a search query is provided
         if search_query:
-            user_groups_stmt = self._construct_vector_search(user_groups_stmt, search_query)
+            ts_query = make_tsquery(search_query)
+            user_groups_stmt = self._construct_vector_search(user_groups_stmt, ts_query)
 
         # get total count of user groups
         total_user_groups = (

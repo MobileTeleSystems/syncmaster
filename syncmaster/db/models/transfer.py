@@ -65,18 +65,25 @@ class Transfer(
         TSVECTOR,
         Computed(
             """
-            to_tsvector(
-                'english'::regconfig,
-                name || ' ' ||
-                COALESCE(json_extract_path_text(source_params, 'table_name'), '') || ' ' ||
-                COALESCE(json_extract_path_text(target_params, 'table_name'), '') || ' ' ||
-                COALESCE(json_extract_path_text(source_params, 'directory_path'), '') || ' ' ||
-                COALESCE(json_extract_path_text(target_params, 'directory_path'), '') || ' ' ||
-                translate(name, './', '  ') || ' ' ||
-                COALESCE(translate(json_extract_path_text(source_params, 'table_name'), './', '  '), '') || ' ' ||
-                COALESCE(translate(json_extract_path_text(target_params, 'table_name'), './', '  '), '') || ' ' ||
-                COALESCE(translate(json_extract_path_text(source_params, 'directory_path'), './', '  '), '') || ' ' ||
-                COALESCE(translate(json_extract_path_text(target_params, 'directory_path'), './', '  '), '')
+            to_tsvector('russian', coalesce(name, ''))
+
+         || to_tsvector('simple', coalesce(name, ''))
+         || to_tsvector('simple', coalesce(source_params->>'table_name', ''))
+         || to_tsvector('simple', coalesce(target_params->>'table_name', ''))
+         || to_tsvector('simple', coalesce(source_params->>'directory_path', ''))
+         || to_tsvector('simple', coalesce(target_params->>'directory_path', ''))
+
+         || to_tsvector('simple',
+                translate(coalesce(source_params->>'table_name', ''), './-_:\\', '      ')
+            )
+         || to_tsvector('simple',
+                translate(coalesce(target_params->>'table_name', ''), './-_:\\', '      ')
+            )
+         || to_tsvector('simple',
+                translate(coalesce(source_params->>'directory_path', ''), './-_:\\', '      ')
+            )
+         || to_tsvector('simple',
+                translate(coalesce(target_params->>'directory_path', ''), './-_:\\', '      ')
             )
             """,
             persisted=True,
