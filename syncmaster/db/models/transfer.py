@@ -65,24 +65,43 @@ class Transfer(
         TSVECTOR,
         Computed(
             """
+            -- === NAME FIELD ===
+            -- Russian stemming for better morphological matching of regular words
             to_tsvector('russian', coalesce(name, ''))
+            -- Simple dictionary (no stemming) for exact token match
+            || to_tsvector('simple', coalesce(name, ''))
+            -- Simple dictionary with translate(): split by . / - _ : \
+            -- (used when 'name' contains technical fields)
+            || to_tsvector(
+                'simple',
+                translate(coalesce(name, ''), './-_:\\', '      ')
+            )
 
-         || to_tsvector('simple', coalesce(name, ''))
-         || to_tsvector('simple', coalesce(source_params->>'table_name', ''))
-         || to_tsvector('simple', coalesce(target_params->>'table_name', ''))
-         || to_tsvector('simple', coalesce(source_params->>'directory_path', ''))
-         || to_tsvector('simple', coalesce(target_params->>'directory_path', ''))
-
-         || to_tsvector('simple',
+            -- === TABLE NAME FIELDS ===
+            -- Simple dictionary (no stemming) for exact match
+            || to_tsvector('simple', coalesce(source_params->>'table_name', ''))
+            || to_tsvector('simple', coalesce(target_params->>'table_name', ''))
+            -- Simple dictionary with translate(): split by . / - _ : \\ for partial token matching
+            || to_tsvector(
+                'simple',
                 translate(coalesce(source_params->>'table_name', ''), './-_:\\', '      ')
             )
-         || to_tsvector('simple',
+            || to_tsvector(
+                'simple',
                 translate(coalesce(target_params->>'table_name', ''), './-_:\\', '      ')
             )
-         || to_tsvector('simple',
+
+            -- === DIRECTORY PATH FIELDS ===
+            -- Simple dictionary (no stemming) for exact match
+            || to_tsvector('simple', coalesce(source_params->>'directory_path', ''))
+            || to_tsvector('simple', coalesce(target_params->>'directory_path', ''))
+            -- Simple dictionary with translate(): split by . / - _ : \\ for partial token matching
+            || to_tsvector(
+                'simple',
                 translate(coalesce(source_params->>'directory_path', ''), './-_:\\', '      ')
             )
-         || to_tsvector('simple',
+            || to_tsvector(
+                'simple',
                 translate(coalesce(target_params->>'directory_path', ''), './-_:\\', '      ')
             )
             """,

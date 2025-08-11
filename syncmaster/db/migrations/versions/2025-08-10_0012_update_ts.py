@@ -33,7 +33,28 @@ def upgrade() -> None:
             "search_vector",
             postgresql.TSVECTOR(),
             sa.Computed(
-                "\n            to_tsvector('russian', coalesce(name, ''))\n         || to_tsvector('simple',  coalesce(name, '')) \n         || to_tsvector('simple', coalesce(data->>'host', ''))\n         || to_tsvector(\n                'simple',\n                translate(\n                    coalesce(data->>'host', ''),\n                    './-_:\\', '      '\n                )\n            )\n            ",
+                """
+                -- === NAME FIELD ===
+                -- Russian stemming for better morphological matching of regular words
+                to_tsvector('russian', coalesce(name, ''))
+                -- Simple dictionary (no stemming) for exact token match
+                || to_tsvector('simple', coalesce(name, ''))
+                -- Simple dictionary with translate(): split by . / - _ : \
+                -- (used when 'name' contains technical fields)
+                || to_tsvector(
+                    'simple',
+                    translate(coalesce(name, ''), './-_:\\', '      ')
+                )
+
+                -- === HOST FIELD (from JSON) ===
+                -- Simple dictionary (no stemming) for exact match
+                || to_tsvector('simple', coalesce(data->>'host', ''))
+                -- Simple dictionary with translate(): split by . / - _ : \\ for partial token matching
+                || to_tsvector(
+                    'simple',
+                    translate(coalesce(data->>'host', ''), './-_:\\', '      ')
+                )
+                """,
                 persisted=True,
             ),
             nullable=False,
@@ -46,43 +67,110 @@ def upgrade() -> None:
         unique=False,
         postgresql_using="gin",
     )
+
     op.add_column(
         "group",
         sa.Column(
             "search_vector",
             postgresql.TSVECTOR(),
             sa.Computed(
-                "\n            to_tsvector('russian', coalesce(name, ''))\n         || to_tsvector('simple',  coalesce(name, '')) \n            ",
+                """
+                -- === NAME FIELD ===
+                -- Russian stemming for better morphological matching of regular words
+                to_tsvector('russian', coalesce(name, ''))
+                -- Simple dictionary (no stemming) for exact token match
+                || to_tsvector('simple', coalesce(name, ''))
+                -- Simple dictionary with translate(): split by . / - _ : \
+                -- (used when 'name' contains technical fields)
+                || to_tsvector(
+                    'simple',
+                    translate(coalesce(name, ''), './-_:\\', '      ')
+                )
+                """,
                 persisted=True,
             ),
             nullable=False,
         ),
     )
-    op.add_column(
-        "transfer",
-        sa.Column(
-            "search_vector",
-            postgresql.TSVECTOR(),
-            sa.Computed(
-                "\n            to_tsvector('russian', coalesce(name, ''))\n\n         || to_tsvector('simple', coalesce(name, ''))\n         || to_tsvector('simple', coalesce(source_params->>'table_name', ''))\n         || to_tsvector('simple', coalesce(target_params->>'table_name', ''))\n         || to_tsvector('simple', coalesce(source_params->>'directory_path', ''))\n         || to_tsvector('simple', coalesce(target_params->>'directory_path', ''))\n\n         || to_tsvector('simple',\n                translate(coalesce(source_params->>'table_name', ''), './-_:\\', '      ')\n            )\n         || to_tsvector('simple',\n                translate(coalesce(target_params->>'table_name', ''), './-_:\\', '      ')\n            )\n         || to_tsvector('simple',\n                translate(coalesce(source_params->>'directory_path', ''), './-_:\\', '      ')\n            )\n         || to_tsvector('simple',\n                translate(coalesce(target_params->>'directory_path', ''), './-_:\\', '      ')\n            )\n            ",
-                persisted=True,
-            ),
-            nullable=False,
-        ),
-    )
-    op.create_index("idx_transfer_search_vector", "transfer", ["search_vector"], unique=False, postgresql_using="gin")
+
     op.add_column(
         "queue",
         sa.Column(
             "search_vector",
             postgresql.TSVECTOR(),
             sa.Computed(
-                "\n            to_tsvector('russian', coalesce(name, ''))\n         || to_tsvector('simple',  coalesce(name, ''))\n            ",
+                """
+                -- === NAME FIELD ===
+                -- Russian stemming for better morphological matching of regular words
+                to_tsvector('russian', coalesce(name, ''))
+                -- Simple dictionary (no stemming) for exact token match
+                || to_tsvector('simple', coalesce(name, ''))
+                -- Simple dictionary with translate(): split by . / - _ : \
+                -- (used when 'name' contains technical fields)
+                || to_tsvector(
+                    'simple',
+                    translate(coalesce(name, ''), './-_:\\', '      ')
+                )
+                """,
                 persisted=True,
             ),
             nullable=False,
         ),
     )
+
+    op.add_column(
+        "transfer",
+        sa.Column(
+            "search_vector",
+            postgresql.TSVECTOR(),
+            sa.Computed(
+                """
+                -- === NAME FIELD ===
+                -- Russian stemming for better morphological matching of regular words
+                to_tsvector('russian', coalesce(name, ''))
+                -- Simple dictionary (no stemming) for exact token match
+                || to_tsvector('simple', coalesce(name, ''))
+                -- Simple dictionary with translate(): split by . / - _ : \
+                -- (used when 'name' contains technical fields)
+                || to_tsvector(
+                    'simple',
+                    translate(coalesce(name, ''), './-_:\\', '      ')
+                )
+
+                -- === TABLE NAME FIELDS ===
+                -- Simple dictionary (no stemming) for exact match
+                || to_tsvector('simple', coalesce(source_params->>'table_name', ''))
+                || to_tsvector('simple', coalesce(target_params->>'table_name', ''))
+                -- Simple dictionary with translate(): split by . / - _ : \\ for partial token matching
+                || to_tsvector(
+                    'simple',
+                    translate(coalesce(source_params->>'table_name', ''), './-_:\\', '      ')
+                )
+                || to_tsvector(
+                    'simple',
+                    translate(coalesce(target_params->>'table_name', ''), './-_:\\', '      ')
+                )
+
+                -- === DIRECTORY PATH FIELDS ===
+                -- Simple dictionary (no stemming) for exact match
+                || to_tsvector('simple', coalesce(source_params->>'directory_path', ''))
+                || to_tsvector('simple', coalesce(target_params->>'directory_path', ''))
+                -- Simple dictionary with translate(): split by . / - _ : \\ for partial token matching
+                || to_tsvector(
+                    'simple',
+                    translate(coalesce(source_params->>'directory_path', ''), './-_:\\', '      ')
+                )
+                || to_tsvector(
+                    'simple',
+                    translate(coalesce(target_params->>'directory_path', ''), './-_:\\', '      ')
+                )
+                """,
+                persisted=True,
+            ),
+            nullable=False,
+        ),
+    )
+    op.create_index("idx_transfer_search_vector", "transfer", ["search_vector"], unique=False, postgresql_using="gin")
 
 
 def downgrade() -> None:
