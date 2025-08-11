@@ -27,8 +27,17 @@ class Queue(Base, ResourceMixin, TimestampMixin):
         TSVECTOR,
         Computed(
             """
+            -- === NAME FIELD ===
+            -- Russian stemming for better morphological matching of regular words
             to_tsvector('russian', coalesce(name, ''))
-         || to_tsvector('simple',  coalesce(name, ''))
+            -- Simple dictionary (no stemming) for exact token match
+            || to_tsvector('simple', coalesce(name, ''))
+            -- Simple dictionary with translate(): split by . / - _ : \
+            -- (used when 'name' contains technical fields)
+            || to_tsvector(
+                'simple',
+                translate(coalesce(name, ''), './-_:\\', '      ')
+            )
             """,
             persisted=True,
         ),
