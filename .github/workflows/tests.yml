@@ -16,7 +16,9 @@ env:
   DEFAULT_PYTHON: '3.13'
 
 permissions:
-  contents: read
+  contents: write
+  checks: write
+  pull-requests: write
 
 jobs:
   oracle_tests:
@@ -128,13 +130,12 @@ jobs:
           coverage combine
           coverage xml -o reports/coverage.xml -i
 
-      - name: Check coverage
-        uses: codecov/codecov-action@v5
+      - name: Coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./reports/coverage.xml
-          fail_ci_if_error: true
-          plugins: noop
+          pytest-xml-coverage-path: ./reports/coverage.xml
+          default-branch: develop
+          xml-skip-covered: true
 
       - name: All done
         run: echo 1
