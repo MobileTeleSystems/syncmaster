@@ -77,13 +77,26 @@ class Group(Base, TimestampMixin):
 
     owner: Mapped[User] = relationship(User)
     queue: Mapped[Queue] = relationship(back_populates="group", cascade="all, delete-orphan")
-
     search_vector: Mapped[str] = mapped_column(
         TSVECTOR,
-        Computed("to_tsvector('english'::regconfig, name)", persisted=True),
+        Computed(
+            """
+            -- === NAME FIELD ===
+            -- Russian stemming for better morphological matching of regular words
+            to_tsvector('russian', coalesce(name, ''))
+            -- Simple dictionary (no stemming) for exact token match
+            || to_tsvector('simple', coalesce(name, ''))
+            -- Simple dictionary with translate(): split by . / - _ : \
+            -- (used when 'name' contains technical fields)
+            || to_tsvector(
+                'simple',
+                translate(coalesce(name, ''), './-_:\\', '      ')
+            )
+            """,
+            persisted=True,
+        ),
         nullable=False,
         deferred=True,
-        doc="Full-text search vector",
     )
 
     def __repr__(self) -> str:

@@ -1,5 +1,5 @@
 ARG PYTHON_VERSION=3.13
-FROM python:$PYTHON_VERSION-slim AS base
+FROM python:$PYTHON_VERSION-slim-bookworm AS base
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         openjdk-17-jdk-headless \

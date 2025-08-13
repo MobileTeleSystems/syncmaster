@@ -9,6 +9,7 @@ from sqlalchemy.orm import selectinload
 
 from syncmaster.db.models import Group, GroupMemberRole, Queue, User, UserGroup
 from syncmaster.db.repositories.repository_with_owner import RepositoryWithOwner
+from syncmaster.db.repositories.search import make_tsquery
 from syncmaster.db.utils import Permission
 from syncmaster.exceptions import EntityNotFoundError, SyncmasterError
 from syncmaster.exceptions.group import GroupNotFoundError
@@ -59,7 +60,8 @@ class QueueRepository(RepositoryWithOwner[Queue]):
             Queue.group_id == group_id,
         )
         if search_query:
-            stmt = self._construct_vector_search(stmt, search_query)
+            ts_query = make_tsquery(search_query)
+            stmt = self._construct_vector_search(stmt, ts_query)
 
         return await self._paginate_scalar_result(
             query=stmt.order_by(Queue.id),

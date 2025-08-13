@@ -41,11 +41,25 @@ class Connection(Base, ResourceMixin, TimestampMixin):
         TSVECTOR,
         Computed(
             """
-            to_tsvector(
-                'english'::regconfig,
-                name || ' ' ||
-                COALESCE(json_extract_path_text(data, 'host'), '') || ' ' ||
-                COALESCE(translate(json_extract_path_text(data, 'host'), '.', ' '), '')
+            -- === NAME FIELD ===
+            -- Russian stemming for better morphological matching of regular words
+            to_tsvector('russian', coalesce(name, ''))
+            -- Simple dictionary (no stemming) for exact token match
+            || to_tsvector('simple', coalesce(name, ''))
+            -- Simple dictionary with translate(): split by . / - _ : \
+            -- (used when 'name' contains technical fields)
+            || to_tsvector(
+                'simple',
+                translate(coalesce(name, ''), './-_:\\', '      ')
+            )
+
+            -- === HOST FIELD (from JSON) ===
+            -- Simple dictionary (no stemming) for exact match
+            || to_tsvector('simple', coalesce(data->>'host', ''))
+            -- Simple dictionary with translate(): split by . / - _ : \\ for partial token matching
+            || to_tsvector(
+                'simple',
+                translate(coalesce(data->>'host', ''), './-_:\\', '      ')
             )
             """,
             persisted=True,
