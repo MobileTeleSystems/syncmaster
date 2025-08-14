@@ -136,6 +136,7 @@ jobs:
           pytest-xml-coverage-path: ./reports/coverage.xml
           default-branch: develop
           xml-skip-covered: true
+          report-only-changed-files: true
 
       - name: All done
         run: echo 1
