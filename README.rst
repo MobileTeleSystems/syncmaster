@@ -20,8 +20,9 @@ Data.SyncMaster
     :target: https://syncmaster.readthedocs.io
 .. |Build Status| image:: https://github.com/MobileTeleSystems/syncmaster/workflows/Run%20All%20Tests/badge.svg
     :target: https://github.com/MobileTeleSystems/syncmaster/actions
-.. |Coverage| image:: https://codecov.io/gh/MobileTeleSystems/syncmaster/graph/badge.svg?token=ky7UyUxolB
-    :target: https://codecov.io/gh/MobileTeleSystems/syncmaster
+.. |Coverage| image:: https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/
+    MTSOnGithub/03e73a82ecc4709934540ce8201cc3b4/raw/syncmaster_badge.json
+    :target: https://github.com/MobileTeleSystems/syncmaster/actions
 .. |pre-commit.ci| image:: https://results.pre-commit.ci/badge/github/MobileTeleSystems/syncmaster/develop.svg
     :target: https://results.pre-commit.ci/latest/github/MobileTeleSystems/syncmaster/develop
 
