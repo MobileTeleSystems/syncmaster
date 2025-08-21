@@ -14,6 +14,7 @@ concurrency:
 
 env:
   DEFAULT_PYTHON: '3.13'
+  MIN_COVERAGE: 92
 
 permissions:
   contents: write
@@ -152,9 +153,9 @@ jobs:
           color: ${{ steps.coverage.outputs.color }}
 
       - name: Fail if coverage too low
-        if: ${{ steps.coverage.outputs.coverage < 92 }}
+        if: ${{ steps.coverage.outputs.coverage < env.MIN_COVERAGE }}
         run: |
-          echo "Coverage is below 92%!"
+          echo "Coverage is below ${{ env.MIN_COVERAGE }}%!"
           exit 1
 
       - name: All done
