@@ -150,5 +150,11 @@ jobs:
           message: ${{ steps.coverage.outputs.coverage }}
           color: ${{ steps.coverage.outputs.color }}
 
+      - name: Fail if coverage too low
+        if: ${{ steps.coverage.outputs.coverage < 92 }}
+        run: |
+          echo "Coverage is below 92%!"
+          exit 1
+
       - name: All done
         run: echo 1
