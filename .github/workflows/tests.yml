@@ -132,7 +132,6 @@ jobs:
           coverage xml -o reports/coverage.xml -i
 
       - name: Coverage comment
-        if: github.event_name == 'pull_request'
         id: coverage
         uses: MishaKav/pytest-coverage-comment@v1
         with:
@@ -140,7 +139,7 @@ jobs:
           default-branch: develop
           xml-skip-covered: true
           report-only-changed-files: true
-
+          hide-comment: ${{ github.event_name != 'pull_request' }}
 
       - name: Dynamic Badges
         uses: schneegans/dynamic-badges-action@v1.7.0
