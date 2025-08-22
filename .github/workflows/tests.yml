@@ -132,6 +132,7 @@ jobs:
           coverage xml -o reports/coverage.xml -i
 
       - name: Coverage comment
+        if: github.event_name == 'pull_request'
         id: coverage
         uses: MishaKav/pytest-coverage-comment@v1
         with:
