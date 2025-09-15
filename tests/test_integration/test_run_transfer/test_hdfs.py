@@ -248,7 +248,7 @@ async def test_run_transfer_postgres_to_hdfs_with_full_strategy(
 
     await run_transfer_and_verify(client, group_owner, postgres_to_hdfs.id)
 
-    files = [file for file in hdfs_file_connection.list_dir(target_path) if file.is_file()]
+    files = [file.name for file in hdfs_file_connection.list_dir(target_path) if file.is_file()]
     verify_file_name_template(files, expected_extension)
 
     spark.catalog.clearCache()
@@ -304,7 +304,7 @@ async def test_run_transfer_postgres_to_hdfs_with_incremental_strategy(
     fill_with_data(first_transfer_df)
     await run_transfer_and_verify(client, group_owner, postgres_to_hdfs.id)
 
-    files = [file for file in hdfs_file_connection.list_dir(target_path) if file.is_file()]
+    files = [file.name for file in hdfs_file_connection.list_dir(target_path) if file.is_file()]
     verify_file_name_template(files, expected_extension)
 
     spark.catalog.clearCache()
@@ -323,7 +323,7 @@ async def test_run_transfer_postgres_to_hdfs_with_incremental_strategy(
     fill_with_data(second_transfer_df)
     await run_transfer_and_verify(client, group_owner, postgres_to_hdfs.id)
 
-    files = [file for file in hdfs_file_connection.list_dir(target_path) if file.is_file()]
+    files = [file.name for file in hdfs_file_connection.list_dir(target_path) if file.is_file()]
     verify_file_name_template(files, expected_extension)
 
     spark.catalog.clearCache()
