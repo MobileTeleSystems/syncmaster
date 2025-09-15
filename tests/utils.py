@@ -12,6 +12,7 @@ from alembic.script import ScriptDirectory
 from httpx import AsyncClient
 from onetl.connection import FileConnection
 from onetl.file import FileDownloader, FileUploader
+from onetl.impl import RemoteFile
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import (
     col,
@@ -240,9 +241,9 @@ def add_increment_to_files_and_upload(file_connection: FileConnection, remote_pa
     uploader.run()
 
 
-def verify_file_name_template(files: list, expected_extension: str) -> None:
-    for file_name in files:
-        run_created_at, index_and_extension = file_name.split("-")
+def verify_file_name_template(files: list[RemoteFile], expected_extension: str) -> None:
+    for file in files:
+        run_created_at, index_and_extension = file.name.split("-")
         assert len(run_created_at.split("_")) == 6, f"Got wrong {run_created_at=}"
         assert index_and_extension.split(".", 1)[1] == expected_extension
 

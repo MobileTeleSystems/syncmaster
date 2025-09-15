@@ -54,14 +54,13 @@ class FileHandler(Handler):
     def _rename_files(self, tmp_path: str) -> None:
         files = self.file_connection.list_dir(tmp_path)
 
-        for index, file_name in enumerate(files):
+        for index, old_path in enumerate(files):
             extension = self._get_file_extension()
-            new_name = self._get_file_name(str(index), extension)
-            old_path = os.path.join(tmp_path, file_name)
+            new_name = self._get_file_name(index, extension)
             new_path = os.path.join(tmp_path, new_name)
             self.file_connection.rename_file(old_path, new_path)
 
-    def _get_file_name(self, index: str, extension: str) -> str:
+    def _get_file_name(self, index: int, extension: str) -> str:
         return self.transfer_dto.file_name_template.format(
             index=index,
             extension=extension,
