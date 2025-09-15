@@ -71,7 +71,7 @@ def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
         # excel version is hardcoded due to https://github.com/nightscape/spark-excel/issues/902
         file_formats_spark_packages: list[str] = [
             *XML.get_packages(spark_version=pyspark.__version__),
-            *Excel.get_packages(spark_version="3.5.1"),
+            *Excel.get_packages(package_version="0.31.2", spark_version="3.5.6"),
         ]
         maven_packages.extend(file_formats_spark_packages)
 

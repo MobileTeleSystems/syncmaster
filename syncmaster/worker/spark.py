@@ -56,7 +56,7 @@ def get_packages(connection_types: set[str]) -> list[str]:  # noqa: WPS212
     # excel version is hardcoded due to https://github.com/nightscape/spark-excel/issues/902
     file_formats_spark_packages: list[str] = [
         *XML.get_packages(spark_version=spark_version),
-        *Excel.get_packages(spark_version="3.5.1"),
+        *Excel.get_packages(package_version="0.31.2", spark_version="3.5.6"),
     ]
 
     result = []
