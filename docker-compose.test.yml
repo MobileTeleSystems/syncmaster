@@ -188,7 +188,7 @@ services:
     profiles: [s3, hdfs, hive, oracle, clickhouse, mysql, mssql, sftp, ftp, ftps, samba, webdav, all]
 
   test-s3:
-    image: bitnami/minio:latest
+    image: bitnamilegacy/minio:latest
     container_name: test-s3
     restart: unless-stopped
     environment:
