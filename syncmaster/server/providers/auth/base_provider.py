@@ -52,7 +52,7 @@ class AuthProvider(ABC):
         ...
 
     @abstractmethod
-    async def get_current_user(self, access_token: Any, request: Request) -> User:
+    async def get_current_user(self, access_token: str | None, request: Request) -> User:
         """
         This method should return currently logged in user.
 
