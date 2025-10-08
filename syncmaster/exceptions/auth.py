@@ -28,3 +28,19 @@ class AuthorizationError(SyncmasterError):
     @property
     def details(self) -> Any:
         return self._details
+
+
+class LogoutError(SyncmasterError):
+    """Error on logout request"""
+
+    def __init__(self, details: str) -> None:
+        self._message = "Logout error"
+        self._details = details
+
+    @property
+    def message(self) -> str:
+        return self._message
+
+    @property
+    def details(self) -> Any:
+        return self._details

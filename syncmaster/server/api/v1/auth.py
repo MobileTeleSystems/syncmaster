@@ -6,6 +6,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 
+from syncmaster.db.models import User
 from syncmaster.errors.registration import get_error_responses
 from syncmaster.errors.schemas.invalid_request import InvalidRequestSchema
 from syncmaster.errors.schemas.not_authorized import NotAuthorizedSchema
@@ -16,6 +17,7 @@ from syncmaster.server.providers.auth import (
     DummyAuthProvider,
     KeycloakAuthProvider,
 )
+from syncmaster.server.services.get_user import get_user
 
 router = APIRouter(
     prefix="/auth",
@@ -48,9 +50,23 @@ async def auth_callback(
 ):
     token = await auth_provider.get_token_authorization_code_grant(
         code=code,
-        redirect_uri=auth_provider.settings.keycloak.redirect_uri,
     )
     request.session["access_token"] = token["access_token"]
     request.session["refresh_token"] = token["refresh_token"]
+    return Response(status_code=NO_CONTENT)
 
+
+@router.get(
+    "/logout",
+    summary="Logout user",
+    status_code=NO_CONTENT,
+)
+async def logout(
+    request: Request,
+    current_user: Annotated[User, Depends(get_user(is_active=True))],
+    auth_provider: Annotated[KeycloakAuthProvider, Depends(Stub(AuthProvider))],
+):
+    refresh_token = request.session.get("refresh_token", None)
+    request.session.clear()
+    await auth_provider.logout(user=current_user, refresh_token=refresh_token)
     return Response(status_code=NO_CONTENT)

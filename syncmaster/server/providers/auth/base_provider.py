@@ -4,7 +4,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 
 from syncmaster.db.models import User
 
@@ -52,7 +52,7 @@ class AuthProvider(ABC):
         ...
 
     @abstractmethod
-    async def get_current_user(self, access_token: Any, *args, **kwargs) -> User:
+    async def get_current_user(self, access_token: Any, request: Request) -> User:
         """
         This method should return currently logged in user.
 
@@ -104,11 +104,16 @@ class AuthProvider(ABC):
     async def get_token_authorization_code_grant(
         self,
         code: str,
-        redirect_uri: str,
         scopes: list[str] | None = None,
         client_id: str | None = None,
         client_secret: str | None = None,
     ) -> dict[str, Any]:
         """
         Obtain a token using the Authorization Code grant.
+        """
+
+    @abstractmethod
+    async def logout(self, user: User, refresh_token: str | None) -> None:
+        """
+        Logout user
         """

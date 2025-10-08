@@ -24,8 +24,14 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
     ],
     indirect=True,
 )
-async def test_keycloak_get_user_unauthorized(client: AsyncClient, mock_keycloak_well_known):
-    response = await client.get("/v1/users/some_user_id")
+async def test_keycloak_get_user_unauthorized(
+    client: AsyncClient,
+    simple_user: MockUser,
+    mock_keycloak_well_known,
+    mock_keycloak_realm,
+):
+    client.cookies.clear()
+    response = await client.get(f"/v1/users/{simple_user.id}")
 
     # redirect unauthorized user to Keycloak
     assert response.status_code == 401, response.text
@@ -59,17 +65,15 @@ async def test_keycloak_get_user_authorized(
     mock_keycloak_well_known,
     mock_keycloak_realm,
 ):
+    client.cookies.clear()
     session_cookie = create_session_cookie(simple_user)
-    headers = {
-        "Cookie": f"session={session_cookie}",
-    }
     response = await client.get(
         f"/v1/users/{simple_user.id}",
-        headers=headers,
+        cookies={"session": session_cookie},
     )
 
     assert response.cookies.get("session") == session_cookie
-    assert response.status_code == 200, response.json()
+    assert response.status_code == 200, response.text
     assert response.json() == {
         "id": simple_user.id,
         "is_superuser": simple_user.is_superuser,
@@ -100,21 +104,15 @@ async def test_keycloak_get_user_expired_access_token(
     mock_keycloak_token_refresh,
 ):
     session_cookie = create_session_cookie(simple_user, expire_in_msec=-100000000)  # expired access token
-    headers = {
-        "Cookie": f"session={session_cookie}",
-    }
-
+    client.cookies = {"session": session_cookie}
     with caplog.at_level(logging.DEBUG):
-        response = await client.get(
-            f"/v1/users/{simple_user.id}",
-            headers=headers,
-        )
+        response = await client.get(f"/v1/users/{simple_user.id}")
 
     assert "Access token is invalid or expired" in caplog.text
     assert "Access token refreshed and decoded successfully" in caplog.text
 
     assert response.cookies.get("session") != session_cookie  # cookie is updated
-    assert response.status_code == 200, response.json()
+    assert response.status_code == 200, response.text
     assert response.json() == {
         "id": simple_user.id,
         "is_superuser": simple_user.is_superuser,
@@ -143,16 +141,9 @@ async def test_keycloak_get_user_inactive(
     mock_keycloak_well_known,
     mock_keycloak_realm,
 ):
-    session_cookie = create_session_cookie(inactive_user)
-    headers = {
-        "Cookie": f"session={session_cookie}",
-    }
-
-    response = await client.get(
-        f"/v1/users/{simple_user.id}",
-        headers=headers,
-    )
-    assert response.status_code == 403, response.json()
+    client.cookies = {"session": create_session_cookie(inactive_user)}
+    response = await client.get(f"/v1/users/{simple_user.id}")
+    assert response.status_code == 403, response.text
     assert response.json() == {
         "error": {
             "code": "forbidden",
@@ -182,6 +173,7 @@ async def test_keycloak_auth_callback(
     mock_keycloak_token_refresh,
     caplog,
 ):
+    client.cookies.clear()
     with caplog.at_level(logging.DEBUG):
         response = await client.get(
             "/v1/auth/callback",
@@ -189,4 +181,32 @@ async def test_keycloak_auth_callback(
         )
 
     assert response.cookies.get("session"), caplog.text  # cookie is set
-    assert response.status_code == 204, response.json()
+    assert response.status_code == 204, response.text
+
+
+@responses.activate
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {
+            "auth": {
+                "provider": KEYCLOAK_PROVIDER,
+            },
+        },
+    ],
+    indirect=True,
+)
+async def test_keycloak_auth_logout(
+    simple_user: MockUser,
+    client: AsyncClient,
+    settings: Settings,
+    create_session_cookie,
+    mock_keycloak_well_known,
+    mock_keycloak_realm,
+    mock_keycloak_token_refresh,
+    mock_keycloak_logout,
+):
+    client.cookies = {"session": create_session_cookie(simple_user)}
+    response = await client.get("/v1/auth/logout")
+    assert response.status_code == 204, response.text
+    assert response.cookies.get("session") is None

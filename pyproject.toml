@@ -145,6 +145,7 @@ black = "^25.1.0"
 flake8 = "^7.2.0"
 flake8-pyproject = "^1.2.3"
 sqlalchemy = {extras = ["mypy"], version = "^2.0.40"}
+types-jwcrypto = "^1.5.0"
 
 [tool.poetry.group.docs.dependencies]
 autodoc-pydantic = "^2.2.0"
