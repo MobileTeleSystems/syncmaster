@@ -1,10 +1,9 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from http.client import NOT_FOUND
+from http.client import NO_CONTENT
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Depends, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 
 from syncmaster.errors.registration import get_error_responses
@@ -17,7 +16,6 @@ from syncmaster.server.providers.auth import (
     DummyAuthProvider,
     KeycloakAuthProvider,
 )
-from syncmaster.server.utils.state import validate_state
 
 router = APIRouter(
     prefix="/auth",
@@ -42,16 +40,12 @@ async def token(
     return AuthTokenSchema.model_validate(token)
 
 
-@router.get("/callback")
+@router.get("/callback", status_code=NO_CONTENT)
 async def auth_callback(
     request: Request,
     code: str,
-    state: str,
     auth_provider: Annotated[KeycloakAuthProvider, Depends(Stub(AuthProvider))],
 ):
-    original_redirect_url = validate_state(state)
-    if not original_redirect_url:
-        raise HTTPException(status_code=NOT_FOUND, detail="Invalid state parameter")
     token = await auth_provider.get_token_authorization_code_grant(
         code=code,
         redirect_uri=auth_provider.settings.keycloak.redirect_uri,
@@ -59,4 +53,4 @@ async def auth_callback(
     request.session["access_token"] = token["access_token"]
     request.session["refresh_token"] = token["refresh_token"]
 
-    return RedirectResponse(url=original_redirect_url)
+    return Response(status_code=NO_CONTENT)

@@ -73,11 +73,11 @@ Set ``client_authentication`` **ON** to receive client_secret
 Configure Redirect URI
 ~~~~~~~~~~~~~~~~~~~~~~
 
-To configure the redirect URI where the browser will redirect to exchange the code provided from Keycloak for an access token, set the `SYNCMASTER__AUTH__KEYCLOAK__REDIRECT_URI` environment variable. The default value for local development is `http://localhost:8000/auth/callback`.
+To configure the redirect URI where the browser will redirect to exchange the code provided from Keycloak for an access token, set the `SYNCMASTER__AUTH__KEYCLOAK__REDIRECT_URI` environment variable. The default value for local development is `http://localhost:3000/auth/callback`.
 
 .. code-block:: console
 
-    $ export SYNCMASTER__AUTH__KEYCLOAK__REDIRECT_URI=http://localhost:8000/auth/callback
+    $ export SYNCMASTER__AUTH__KEYCLOAK__REDIRECT_URI=http://localhost:3000/auth/callback
 
 Configure the client redirect URI
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -112,7 +112,7 @@ After this you can user `KeycloakAuthProvider` in your application with provided
 .. code-block:: console
 
     $ export SYNCMASTER__AUTH__KEYCLOAK__SERVER_URL=http://keycloak:8080
-    $ export SYNCMASTER__AUTH__KEYCLOAK__REDIRECT_URI=http://localhost:8000/auth/callback
+    $ export SYNCMASTER__AUTH__KEYCLOAK__REDIRECT_URI=http://localhost:3000/auth/callback
     $ export SYNCMASTER__AUTH__KEYCLOAK__REALM_NAME=fastapi_realm
     $ export SYNCMASTER__AUTH__KEYCLOAK__CLIENT_ID=fastapi_client
     $ export SYNCMASTER__AUTH__KEYCLOAK__CLIENT_SECRET=6x6gn8uJdWSBmP8FqbNRSoGdvaoaFeez
