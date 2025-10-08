@@ -13,7 +13,6 @@ from syncmaster.server.dependencies import Stub
 from syncmaster.server.providers.auth.base_provider import AuthProvider
 from syncmaster.server.services.unit_of_work import UnitOfWork
 from syncmaster.server.settings.auth.keycloak import KeycloakAuthProviderSettings
-from syncmaster.server.utils.state import generate_state
 
 log = logging.getLogger(__name__)
 
@@ -137,10 +136,8 @@ class KeycloakAuthProvider(AuthProvider):
         return new_tokens
 
     def redirect_to_auth(self, path: str) -> None:
-        state = generate_state(path)
         auth_url = self.keycloak_openid.auth_url(
             redirect_uri=self.settings.keycloak.redirect_uri,
             scope=self.settings.keycloak.scope,
-            state=state,
         )
         raise RedirectException(redirect_url=auth_url)

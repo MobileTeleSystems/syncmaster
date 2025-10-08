@@ -1,0 +1,1 @@
+Replace 307 redirect to Keycloak auth page with 401 response, due to browser restrictions for redirect + CORS + localhost.
