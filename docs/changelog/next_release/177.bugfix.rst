@@ -1,0 +1,1 @@
+Replace sync methods of Keycloak client with async ones. Previously interaction with Keycloak could block asyncio event loop.

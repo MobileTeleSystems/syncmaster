@@ -1,7 +1,6 @@
 import logging
 
 import pytest
-import responses
 from dirty_equals import IsStr
 from httpx import AsyncClient
 
@@ -12,7 +11,6 @@ KEYCLOAK_PROVIDER = "syncmaster.server.providers.auth.keycloak_provider.Keycloak
 pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
-@responses.activate
 @pytest.mark.parametrize(
     "settings",
     [
@@ -44,7 +42,6 @@ async def test_keycloak_get_user_unauthorized(
     }
 
 
-@responses.activate
 @pytest.mark.flaky
 @pytest.mark.parametrize(
     "settings",
@@ -81,7 +78,6 @@ async def test_keycloak_get_user_authorized(
     }
 
 
-@responses.activate
 @pytest.mark.parametrize(
     "settings",
     [
@@ -120,7 +116,6 @@ async def test_keycloak_get_user_expired_access_token(
     }
 
 
-@responses.activate
 @pytest.mark.parametrize(
     "settings",
     [
@@ -153,7 +148,6 @@ async def test_keycloak_get_user_inactive(
     }
 
 
-@responses.activate
 @pytest.mark.parametrize(
     "settings",
     [
@@ -184,7 +178,6 @@ async def test_keycloak_auth_callback(
     assert response.status_code == 204, response.text
 
 
-@responses.activate
 @pytest.mark.parametrize(
     "settings",
     [

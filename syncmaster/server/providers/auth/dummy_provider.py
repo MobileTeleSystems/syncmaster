@@ -37,7 +37,7 @@ class DummyAuthProvider(AuthProvider):  # noqa: WPS338
         app.dependency_overrides[DummyAuthProviderSettings] = lambda: settings
         return app
 
-    async def get_current_user(self, access_token: str, *args, **kwargs) -> User:
+    async def get_current_user(self, access_token: str | None, *args, **kwargs) -> User:
         if not access_token:
             raise AuthorizationError("Missing auth credentials")
 

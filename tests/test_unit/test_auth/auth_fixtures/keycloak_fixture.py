@@ -4,7 +4,8 @@ from base64 import b64encode
 
 import jwt
 import pytest
-import responses
+import pytest_asyncio
+import respx
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.serialization import (
     Encoding,
@@ -83,8 +84,17 @@ def create_session_cookie(rsa_keys, settings):
     return _create_session_cookie
 
 
+@pytest_asyncio.fixture
+async def mock_keycloak_api(settings):  # noqa: F811
+    keycloak_settings = settings.auth.model_dump()["keycloak"]
+    server_url = keycloak_settings["server_url"]
+
+    async with respx.mock(base_url=server_url, assert_all_called=False) as respx_mock:
+        yield respx_mock
+
+
 @pytest.fixture
-def mock_keycloak_well_known(settings):
+def mock_keycloak_well_known(settings, mock_keycloak_api):
     keycloak_settings = settings.auth.model_dump()["keycloak"]
     server_url = keycloak_settings["server_url"]
     realm_name = keycloak_settings["client_id"]
@@ -92,9 +102,7 @@ def mock_keycloak_well_known(settings):
     well_known_url = f"{realm_url}/.well-known/openid-configuration"
     openid_url = f"{realm_url}/protocol/openid-connect"
 
-    responses.add(
-        responses.GET,
-        well_known_url,
+    mock_keycloak_api.get(well_known_url).respond(
         json={
             "authorization_endpoint": f"{openid_url}/auth",
             "token_endpoint": f"{openid_url}/token",
@@ -103,35 +111,33 @@ def mock_keycloak_well_known(settings):
             "jwks_uri": f"{openid_url}/certs",
             "issuer": realm_url,
         },
-        status=200,
+        status_code=200,
         content_type="application/json",
     )
 
 
 @pytest.fixture
-def mock_keycloak_realm(settings, rsa_keys):
+def mock_keycloak_realm(settings, rsa_keys, mock_keycloak_api):
     keycloak_settings = settings.auth.model_dump()["keycloak"]
     server_url = keycloak_settings["server_url"]
     realm_name = keycloak_settings["client_id"]
     realm_url = f"{server_url}/realms/{realm_name}"
     public_pem_str = get_public_key_pem(rsa_keys["public_key"])
 
-    responses.add(
-        responses.GET,
-        realm_url,
+    mock_keycloak_api.get(realm_url).respond(
         json={
             "realm": realm_name,
             "public_key": public_pem_str,
             "token-service": f"{realm_url}/protocol/openid-connect/token",
             "account-service": f"{realm_url}/account",
         },
-        status=200,
+        status_code=200,
         content_type="application/json",
     )
 
 
 @pytest.fixture
-def mock_keycloak_token_refresh(settings, rsa_keys):
+def mock_keycloak_token_refresh(settings, rsa_keys, mock_keycloak_api):
     keycloak_settings = settings.auth.model_dump()["keycloak"]
     server_url = keycloak_settings["server_url"]
     realm_name = keycloak_settings["client_id"]
@@ -154,30 +160,24 @@ def mock_keycloak_token_refresh(settings, rsa_keys):
     new_access_token = jwt.encode(payload, private_pem, algorithm="RS256")
     new_refresh_token = "mock_new_refresh_token"
 
-    responses.add(
-        responses.POST,
-        token_url,
+    mock_keycloak_api.post(token_url).respond(
         json={
             "access_token": new_access_token,
             "refresh_token": new_refresh_token,
             "token_type": "bearer",
             "expires_in": expires_in,
         },
-        status=200,
+        status_code=200,
         content_type="application/json",
     )
 
 
 @pytest.fixture
-def mock_keycloak_logout(settings):
+def mock_keycloak_logout(settings, mock_keycloak_api):
     keycloak_settings = settings.auth.model_dump()["keycloak"]
     server_url = keycloak_settings["server_url"]
     realm_name = keycloak_settings["client_id"]
     realm_url = f"{server_url}/realms/{realm_name}"
     logout_url = f"{realm_url}/protocol/openid-connect/logout"
 
-    responses.add(
-        responses.POST,
-        logout_url,
-        status=204,
-    )
+    mock_keycloak_api.post(logout_url).respond(status_code=204)
