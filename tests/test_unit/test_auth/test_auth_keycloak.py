@@ -2,6 +2,7 @@ import logging
 
 import pytest
 import responses
+from dirty_equals import IsStr
 from httpx import AsyncClient
 
 from syncmaster.server.settings import ServerAppSettings as Settings
@@ -27,10 +28,17 @@ async def test_get_keycloak_user_unauthorized(client: AsyncClient, mock_keycloak
     response = await client.get("/v1/users/some_user_id")
 
     # redirect unauthorized user to Keycloak
-    assert response.status_code == 307, response.text
-    assert "protocol/openid-connect/auth?" in str(
-        response.next_request.url,
-    )
+    assert response.status_code == 401, response.text
+
+    details = IsStr()
+    assert response.json() == {
+        "error": {
+            "code": "unauthorized",
+            "message": "Please authorize using provided URL",
+            "details": details,
+        },
+    }
+    assert "protocol/openid-connect/auth?" in details
 
 
 @responses.activate
