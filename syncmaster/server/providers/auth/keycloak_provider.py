@@ -4,10 +4,12 @@ import logging
 from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, Request
-from keycloak import KeycloakOpenID
+from jwcrypto.common import JWException
+from keycloak import KeycloakOpenID, KeycloakOperationError
 
+from syncmaster.db.models.user import User
 from syncmaster.exceptions import EntityNotFoundError
-from syncmaster.exceptions.auth import AuthorizationError
+from syncmaster.exceptions.auth import AuthorizationError, LogoutError
 from syncmaster.exceptions.redirect import RedirectException
 from syncmaster.server.dependencies import Stub
 from syncmaster.server.providers.auth.base_provider import AuthProvider
@@ -55,35 +57,31 @@ class KeycloakAuthProvider(AuthProvider):
     async def get_token_authorization_code_grant(
         self,
         code: str,
-        redirect_uri: str,
         scopes: list[str] | None = None,
         client_id: str | None = None,
         client_secret: str | None = None,
     ) -> dict[str, Any]:
         try:
-            redirect_uri = redirect_uri or self.settings.keycloak.redirect_uri
             token = self.keycloak_openid.token(
                 grant_type="authorization_code",
                 code=code,
-                redirect_uri=redirect_uri,
+                redirect_uri=self.settings.keycloak.redirect_uri,
             )
             return token
-        except Exception as e:
+        except KeycloakOperationError as e:
             raise AuthorizationError("Failed to get token") from e
 
-    async def get_current_user(self, access_token: str, *args, **kwargs) -> Any:  # noqa: WPS231
-        request: Request = kwargs["request"]
-        refresh_token = request.session.get("refresh_token")
-
+    async def get_current_user(self, access_token: str, request: Request) -> User:  # noqa: WPS231
         if not access_token:
             log.debug("No access token found in session.")
-            self.redirect_to_auth(request.url.path)
+            self.redirect_to_auth()
 
+        refresh_token = request.session.get("refresh_token")
         try:
             # if user is disabled or blocked in Keycloak after the token is issued, he will
             # remain authorized until the token expires (not more than 15 minutes in MTS SSO)
             token_info = self.keycloak_openid.decode_token(token=access_token)
-        except Exception as e:
+        except (KeycloakOperationError, JWException) as e:
             log.info("Access token is invalid or expired: %s", e)
             token_info = None
 
@@ -91,7 +89,7 @@ class KeycloakAuthProvider(AuthProvider):
             log.debug("Access token invalid. Attempting to refresh.")
 
             try:
-                new_tokens = await self.refresh_access_token(refresh_token)
+                new_tokens = self.keycloak_openid.refresh_token(refresh_token)
 
                 new_access_token = new_tokens["access_token"]
                 new_refresh_token = new_tokens["refresh_token"]
@@ -102,9 +100,9 @@ class KeycloakAuthProvider(AuthProvider):
                     token=new_access_token,
                 )
                 log.debug("Access token refreshed and decoded successfully.")
-            except Exception as e:
+            except (KeycloakOperationError, JWException) as e:
                 log.debug("Failed to refresh access token: %s", e)
-                self.redirect_to_auth(request.url.path)
+                self.redirect_to_auth()
 
         if not token_info:
             raise AuthorizationError("Invalid token payload")
@@ -131,13 +129,21 @@ class KeycloakAuthProvider(AuthProvider):
                 )
         return user
 
-    async def refresh_access_token(self, refresh_token: str) -> dict[str, Any]:
-        new_tokens = self.keycloak_openid.refresh_token(refresh_token)
-        return new_tokens
-
-    def redirect_to_auth(self, path: str) -> None:
+    def redirect_to_auth(self) -> None:
         auth_url = self.keycloak_openid.auth_url(
             redirect_uri=self.settings.keycloak.redirect_uri,
             scope=self.settings.keycloak.scope,
         )
         raise RedirectException(redirect_url=auth_url)
+
+    async def logout(self, user: User, refresh_token: str | None) -> None:
+        if not refresh_token:
+            log.debug("No refresh token found in session.")
+            return
+
+        try:
+            self.keycloak_openid.logout(refresh_token)
+        except KeycloakOperationError as err:
+            msg = f"Can't logout user: {user.username}"
+            log.debug("%s. Error: %s", msg, err)
+            raise LogoutError(msg) from err

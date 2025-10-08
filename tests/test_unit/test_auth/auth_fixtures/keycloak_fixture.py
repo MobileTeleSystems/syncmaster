@@ -5,9 +5,13 @@ from base64 import b64encode
 import jwt
 import pytest
 import responses
-from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+from cryptography.hazmat.primitives.serialization import (
+    Encoding,
+    NoEncryption,
+    PrivateFormat,
+    PublicFormat,
+)
 from itsdangerous import TimestampSigner
 
 
@@ -19,9 +23,9 @@ def rsa_keys():
         key_size=2048,
     )
     private_pem = private_key.private_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption(),
+        encoding=Encoding.PEM,
+        format=PrivateFormat.PKCS8,
+        encryption_algorithm=NoEncryption(),
     )
     public_key = private_key.public_key()
 
@@ -84,18 +88,20 @@ def mock_keycloak_well_known(settings):
     keycloak_settings = settings.auth.model_dump()["keycloak"]
     server_url = keycloak_settings["server_url"]
     realm_name = keycloak_settings["client_id"]
-    well_known_url = f"{server_url}/realms/{realm_name}/.well-known/openid-configuration"
+    realm_url = f"{server_url}/realms/{realm_name}"
+    well_known_url = f"{realm_url}/.well-known/openid-configuration"
+    openid_url = f"{realm_url}/protocol/openid-connect"
 
     responses.add(
         responses.GET,
         well_known_url,
         json={
-            "authorization_endpoint": f"{server_url}/realms/{realm_name}/protocol/openid-connect/auth",
-            "token_endpoint": f"{server_url}/realms/{realm_name}/protocol/openid-connect/token",
-            "userinfo_endpoint": f"{server_url}/realms/{realm_name}/protocol/openid-connect/userinfo",
-            "end_session_endpoint": f"{server_url}/realms/{realm_name}/protocol/openid-connect/logout",
-            "jwks_uri": f"{server_url}/realms/{realm_name}/protocol/openid-connect/certs",
-            "issuer": f"{server_url}/realms/{realm_name}",
+            "authorization_endpoint": f"{openid_url}/auth",
+            "token_endpoint": f"{openid_url}/token",
+            "userinfo_endpoint": f"{openid_url}/userinfo",
+            "end_session_endpoint": f"{openid_url}/logout",
+            "jwks_uri": f"{openid_url}/certs",
+            "issuer": realm_url,
         },
         status=200,
         content_type="application/json",
@@ -116,8 +122,8 @@ def mock_keycloak_realm(settings, rsa_keys):
         json={
             "realm": realm_name,
             "public_key": public_pem_str,
-            "token-service": f"{server_url}/realms/{realm_name}/protocol/openid-connect/token",
-            "account-service": f"{server_url}/realms/{realm_name}/account",
+            "token-service": f"{realm_url}/protocol/openid-connect/token",
+            "account-service": f"{realm_url}/account",
         },
         status=200,
         content_type="application/json",
@@ -129,7 +135,8 @@ def mock_keycloak_token_refresh(settings, rsa_keys):
     keycloak_settings = settings.auth.model_dump()["keycloak"]
     server_url = keycloak_settings["server_url"]
     realm_name = keycloak_settings["client_id"]
-    token_url = f"{server_url}/realms/{realm_name}/protocol/openid-connect/token"
+    realm_url = f"{server_url}/realms/{realm_name}"
+    token_url = f"{realm_url}/protocol/openid-connect/token"
 
     # generate new access and refresh tokens
     expires_in = int(time.time()) + 1000
@@ -158,4 +165,19 @@ def mock_keycloak_token_refresh(settings, rsa_keys):
         },
         status=200,
         content_type="application/json",
+    )
+
+
+@pytest.fixture
+def mock_keycloak_logout(settings):
+    keycloak_settings = settings.auth.model_dump()["keycloak"]
+    server_url = keycloak_settings["server_url"]
+    realm_name = keycloak_settings["client_id"]
+    realm_url = f"{server_url}/realms/{realm_name}"
+    logout_url = f"{realm_url}/protocol/openid-connect/logout"
+
+    responses.add(
+        responses.POST,
+        logout_url,
+        status=204,
     )

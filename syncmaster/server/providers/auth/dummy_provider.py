@@ -20,7 +20,7 @@ from syncmaster.server.utils.jwt import decode_jwt, sign_jwt
 log = logging.getLogger(__name__)
 
 
-class DummyAuthProvider(AuthProvider):
+class DummyAuthProvider(AuthProvider):  # noqa: WPS338
     def __init__(
         self,
         settings: Annotated[DummyAuthProviderSettings, Depends(Stub(DummyAuthProviderSettings))],
@@ -76,16 +76,6 @@ class DummyAuthProvider(AuthProvider):
             "expires_at": expires_at,
         }
 
-    async def get_token_authorization_code_grant(
-        self,
-        code: str,
-        redirect_uri: str,
-        scopes: list[str] | None = None,
-        client_id: str | None = None,
-        client_secret: str | None = None,
-    ) -> dict[str, Any]:
-        raise NotImplementedError("Authorization code grant is not supported by DummyAuthProvider.")
-
     def _generate_access_token(self, user_id: int) -> tuple[str, float]:
         expires_at = time() + self._settings.access_token.expire_seconds
         payload = {
@@ -109,3 +99,15 @@ class DummyAuthProvider(AuthProvider):
             return int(payload["user_id"])
         except (KeyError, TypeError, ValueError) as e:
             raise AuthorizationError("Invalid token") from e
+
+    async def get_token_authorization_code_grant(
+        self,
+        code: str,
+        scopes: list[str] | None = None,
+        client_id: str | None = None,
+        client_secret: str | None = None,
+    ) -> dict[str, Any]:
+        raise NotImplementedError("Authorization code grant is not supported by DummyAuthProvider")
+
+    async def logout(self, user: User, refresh_token: str | None) -> None:
+        raise NotImplementedError("Logout is not supported by DummyAuthProvider")
