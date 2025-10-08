@@ -5,7 +5,6 @@ import logging
 
 from fastapi import HTTPException, Request, Response, status
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import RedirectResponse
 from pydantic import ValidationError
 
 from syncmaster.errors.base import APIErrorSchema, BaseErrorSchema
@@ -113,7 +112,7 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterError): 
         return unknown_exception_handler(request, exc)
 
     content = response.schema(  # type: ignore[call-arg]
-        message=exc.message if hasattr(exc, "message") else "",
+        message=getattr(exc, "message", ""),
     )
     if isinstance(exc, AuthDataNotFoundError):
         content.code = "not_found"
@@ -124,7 +123,10 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterError): 
         )
 
     if isinstance(exc, RedirectException):
-        return RedirectResponse(url=exc.redirect_url)
+        content.code = "unauthorized"
+        content.message = "Please authorize using provided URL"
+        content.details = exc.redirect_url
+        return exception_json_response(status=status.HTTP_401_UNAUTHORIZED, content=content)
 
     if isinstance(exc, AuthorizationError):
         content.code = "unauthorized"
