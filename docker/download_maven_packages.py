@@ -30,6 +30,7 @@ def get_spark_session_conf_for_docker_image(connection_types: set[str]) -> dict:
         "spark.executor.cores": "1",
         "spark.executor.memory": "512M",
         "spark.executor.instances": "1",
+        "spark.ui.enabled": "false",
     }
 
 
