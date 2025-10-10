@@ -1,1 +1,0 @@
-Improved full-text search by refining ``tsvector`` generation and adding better tokenization for technical fields such as hostnames, table names, and directory paths.

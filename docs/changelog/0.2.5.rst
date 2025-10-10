@@ -1,0 +1,21 @@
+0.2.5 (2025-10-10)
+==================
+
+Features
+--------
+
+- Implement Keycloak login page on frontend. (`#128 <https://github.com/MobileTeleSystems/syncmaster-ui/pull/128>`_)
+- Implement ``GET /v1/auth/logout`` endpoint for ``KeycloakAuthProvider``. (:issue:`275`)
+
+Improvements
+------------
+
+- Improved full-text search for technical fields such as hostnames, table names, and directory paths. (:issue:`255`)
+- Replace 307 redirect to Keycloak auth page with 401 response, due to browser restrictions for redirect + CORS + localhost. (:issue:`274`)
+
+Bug Fixes
+---------
+
+- Replace sync methods of Keycloak client with async ones.  (:issue:`177`)
+
+  Previously interaction with Keycloak could block asyncio event loop.

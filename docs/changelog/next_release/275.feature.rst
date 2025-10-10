@@ -1,1 +1,0 @@
-Implement ``GET /v1/auth/logout`` endpoint.
