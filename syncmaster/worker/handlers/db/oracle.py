@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from onetl.connection import Oracle
+from onetl.hooks import slot, support_hooks
 
 from syncmaster.dto.connections import OracleConnectionDTO
 from syncmaster.dto.transfers import OracleTransferDTO
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
     from pyspark.sql.dataframe import DataFrame
 
 
+@support_hooks
 class OracleHandler(DBHandler):
     connection: Oracle
     connection_dto: OracleConnectionDTO
@@ -36,6 +38,14 @@ class OracleHandler(DBHandler):
             extra=self.connection_dto.additional_params,
             spark=spark,
         ).check()
+
+    @slot
+    def read(self) -> DataFrame:
+        return super().read()
+
+    @slot
+    def write(self, df: DataFrame) -> None:
+        return super().write(df)
 
     def _normalize_column_names(self, df: DataFrame) -> DataFrame:
         for column_name in df.columns:
