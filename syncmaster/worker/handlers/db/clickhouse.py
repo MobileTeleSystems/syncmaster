@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from onetl.connection import Clickhouse
 from onetl.db import DBWriter
+from onetl.hooks import slot, support_hooks
 
 from syncmaster.dto.connections import ClickhouseConnectionDTO
 from syncmaster.dto.transfers import ClickhouseTransferDTO
@@ -17,6 +18,7 @@ if TYPE_CHECKING:
     from pyspark.sql.dataframe import DataFrame
 
 
+@support_hooks
 class ClickhouseHandler(DBHandler):
     connection: Clickhouse
     connection_dto: ClickhouseConnectionDTO
@@ -40,6 +42,11 @@ class ClickhouseHandler(DBHandler):
             spark=spark,
         ).check()
 
+    @slot
+    def read(self) -> DataFrame:
+        return super().read()
+
+    @slot
     def write(self, df: DataFrame) -> None:
         normalized_df = self._normalize_column_names(df)
         sort_column = next(

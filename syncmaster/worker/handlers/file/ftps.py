@@ -5,13 +5,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from onetl.hooks import slot, support_hooks
+
 from syncmaster.dto.connections import FTPSConnectionDTO
 from syncmaster.worker.handlers.file.local_df import LocalDFFileHandler
 
 if TYPE_CHECKING:
-    from pyspark.sql import SparkSession
+    from pyspark.sql import DataFrame, SparkSession
 
 
+@support_hooks
 class FTPSHandler(LocalDFFileHandler):
     connection_dto: FTPSConnectionDTO
 
@@ -28,3 +31,11 @@ class FTPSHandler(LocalDFFileHandler):
         self.local_df_connection = SparkLocalFS(
             spark=spark,
         ).check()
+
+    @slot
+    def read(self) -> DataFrame:
+        return super().read()
+
+    @slot
+    def write(self, df: DataFrame) -> None:
+        return super().write(df)

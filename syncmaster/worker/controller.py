@@ -7,6 +7,7 @@ from typing import Any
 from etl_entities.hwm_store import BaseHWMStore
 from horizon.client.auth import LoginPassword
 from horizon_hwm_store import HorizonHWMStore
+from onetl.hooks import slot, support_hooks
 from onetl.strategy import IncrementalStrategy
 
 from syncmaster.db.models import Connection, Run
@@ -146,6 +147,7 @@ connection_handler_proxy = {
 }
 
 
+@support_hooks
 class TransferController:
     settings: WorkerAppSettings
     source_handler: Handler
@@ -187,6 +189,7 @@ class TransferController:
             temp_dir=TemporaryDirectory(dir=self.temp_dir.name, prefix="written_"),
         )
 
+    @slot
     def perform_transfer(self) -> None:
         try:
             spark = self.settings.worker.CREATE_SPARK_SESSION_FUNCTION(

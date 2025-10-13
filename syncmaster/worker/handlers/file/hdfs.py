@@ -5,13 +5,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from onetl.hooks import slot, support_hooks
+
 from syncmaster.dto.connections import HDFSConnectionDTO
 from syncmaster.worker.handlers.file.remote_df import RemoteDFFileHandler
 
 if TYPE_CHECKING:
-    from pyspark.sql import SparkSession
+    from pyspark.sql import DataFrame, SparkSession
 
 
+@support_hooks
 class HDFSHandler(RemoteDFFileHandler):
     connection_dto: HDFSConnectionDTO
 
@@ -28,3 +31,11 @@ class HDFSHandler(RemoteDFFileHandler):
             user=self.connection_dto.user,
             password=self.connection_dto.password,
         ).check()
+
+    @slot
+    def read(self) -> DataFrame:
+        return super().read()
+
+    @slot
+    def write(self, df: DataFrame) -> None:
+        return super().write(df)

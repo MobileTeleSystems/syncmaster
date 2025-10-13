@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from onetl.file import FileDFReader
+from onetl.hooks import slot, support_hooks
 
 from syncmaster.dto.connections import S3ConnectionDTO
 from syncmaster.worker.handlers.file.remote_df import RemoteDFFileHandler
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
     from pyspark.sql import DataFrame, SparkSession
 
 
+@support_hooks
 class S3Handler(RemoteDFFileHandler):
     connection_dto: S3ConnectionDTO
 
@@ -42,6 +44,7 @@ class S3Handler(RemoteDFFileHandler):
             region=self.connection_dto.region,
         ).check()
 
+    @slot
     def read(self) -> DataFrame:
         from pyspark.sql.types import StructType
 
@@ -67,3 +70,7 @@ class S3Handler(RemoteDFFileHandler):
             df = df.selectExpr(*columns_filter_expressions)
 
         return df
+
+    @slot
+    def write(self, df: DataFrame) -> None:
+        return super().write(df)

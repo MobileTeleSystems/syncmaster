@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from onetl.connection import Hive
+from onetl.hooks import slot, support_hooks
 
 from syncmaster.dto.connections import HiveConnectionDTO
 from syncmaster.dto.transfers import HiveTransferDTO
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
     from pyspark.sql.dataframe import DataFrame
 
 
+@support_hooks
 class HiveHandler(DBHandler):
     connection: Hive
     connection_dto: HiveConnectionDTO
@@ -31,9 +33,14 @@ class HiveHandler(DBHandler):
             spark=spark,
         ).check()
 
+    @slot
     def read(self) -> DataFrame:
         self.connection.spark.catalog.refreshTable(self.transfer_dto.table_name)
         return super().read()
+
+    @slot
+    def write(self, df: DataFrame) -> None:
+        return super().write(df)
 
     def _normalize_column_names(self, df: DataFrame) -> DataFrame:
         for column_name in df.columns:
