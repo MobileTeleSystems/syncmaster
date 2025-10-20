@@ -1,16 +1,19 @@
 site_name: My Docs
 #site_name: Horizon Docs
-docs_dir: 'mddocs/en/docs'                           # Where to find the English markdown files
-#site_dir: '../../generated/en'                      # Where to put the English HTML files
+docs_dir: 'docs/en'                           # Where to find the English markdown files
+#site_dir: 'generated/en'                      # Where to put the English HTML files
 
 
 extra_css:
   - assets/stylesheets/autodoc_pydantic.css         # CSS is shared by all languages
 
 plugins:
-  - autorefs
-  - literate-nav:
-      nav_file: nav.md
+  - autorefs:
+      resolve_closest: true
+      scan_paths:
+        - docs/en 
+  # - literate-nav:
+  #     nav_file: nav.md
   - mkdocstrings:
       default_handler: python
       handlers:
@@ -59,4 +62,3 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
-
