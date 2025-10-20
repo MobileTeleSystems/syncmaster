@@ -1,0 +1,62 @@
+site_name: My Docs
+#site_name: Horizon Docs
+docs_dir: 'mddocs/en/docs'                           # Where to find the English markdown files
+#site_dir: '../../generated/en'                      # Where to put the English HTML files
+
+
+extra_css:
+  - assets/stylesheets/autodoc_pydantic.css         # CSS is shared by all languages
+
+plugins:
+  - autorefs
+  - literate-nav:
+      nav_file: nav.md
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_source: false
+            show_root_heading: false
+            show_root_toc_entry: false
+            # extensions:
+            # - griffe_sphinx
+            # - griffe_pydantic: {schema: false}
+  - macros
+  - plantuml:
+      puml_url: https://www.plantuml.com/plantuml/
+      puml_keyword: plantuml
+  # - i18n:
+  #     docs_structure: folder
+  #     languages:
+  #       - locale: en
+  #         default: true
+  #         name: English
+  #         build: true
+  #       - locale: ru
+  #         name: Русский
+  #         build: false
+
+markdown_extensions:
+  - footnotes
+  - attr_list
+  - md_in_html
+  - admonition
+  - pymdownx.details
+  - pymdownx.critic
+  - pymdownx.snippets:
+      base_path: ["."]
+      check_paths: true
+  - toc:
+      permalink: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
