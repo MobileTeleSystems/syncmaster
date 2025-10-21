@@ -1,22 +1,43 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
+# SPDX-FileCopyrightText: 2023-2025 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import logging
-from typing import Any
+from typing import Annotated, Any
 
-from fastapi import Request
+from fastapi import Depends, FastAPI, Request
 
 from syncmaster.db.models import User
 from syncmaster.exceptions import EntityNotFoundError
 from syncmaster.exceptions.auth import AuthorizationError
+from syncmaster.server.dependencies import Stub
+from syncmaster.server.providers.auth.base_provider import AuthProvider
 from syncmaster.server.providers.auth.keycloak_provider import (
     KeycloakAuthProvider,
     KeycloakOperationError,
 )
+from syncmaster.server.services.unit_of_work import UnitOfWork
+from syncmaster.server.settings.auth.oauth2_gateway import OAuth2GatewayProviderSettings
 
 log = logging.getLogger(__name__)
 
 
 class OAuth2GatewayProvider(KeycloakAuthProvider):
+    def __init__(
+        self,
+        settings: Annotated[OAuth2GatewayProviderSettings, Depends(Stub(OAuth2GatewayProviderSettings))],
+        unit_of_work: Annotated[UnitOfWork, Depends()],
+    ) -> None:
+        super().__init__(settings, unit_of_work)  # type: ignore[arg-type]
+
+    @classmethod
+    def setup(cls, app: FastAPI) -> FastAPI:
+        settings = OAuth2GatewayProviderSettings.model_validate(
+            app.state.settings.auth.model_dump(exclude={"provider"}),
+        )
+        log.info("Using %s provider with settings:\n%s", cls.__name__, settings)
+        app.dependency_overrides[AuthProvider] = cls
+        app.dependency_overrides[OAuth2GatewayProviderSettings] = lambda: settings
+        return app
+
     async def get_current_user(self, access_token: str | None, request: Request) -> User:  # noqa: WPS231, WPS217
 
         if not access_token:
