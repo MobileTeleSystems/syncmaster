@@ -52,7 +52,7 @@ class KeycloakAuthProvider(AuthProvider):
         client_id: str | None = None,
         client_secret: str | None = None,
     ) -> dict[str, Any]:
-        raise NotImplementedError("Password grant is not supported by KeycloakAuthProvider.")
+        raise NotImplementedError(f"Password grant is not supported by {self.__class__.__name__}.")
 
     async def get_token_authorization_code_grant(
         self,
