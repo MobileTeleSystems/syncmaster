@@ -209,13 +209,13 @@ async def update_connection(  # noqa: WPS217, WPS238
 
         existing_credentials = await unit_of_work.credentials.read(connection_id=connection_id)
         auth_data = connection_data.auth_data.model_dump()
-        secret_field = connection_data.auth_data.secret_field
 
-        if auth_data[secret_field] is None:
-            if existing_credentials["type"] != auth_data["type"]:
-                raise ConnectionAuthDataUpdateError
+        for secret_field in connection_data.auth_data.get_secret_fields():
+            if auth_data[secret_field] is None:
+                if existing_credentials["type"] != auth_data["type"]:
+                    raise ConnectionAuthDataUpdateError
 
-            auth_data[secret_field] = existing_credentials[secret_field]
+                auth_data[secret_field] = existing_credentials[secret_field]
 
         connection = await unit_of_work.connection.update(
             connection_id=connection_id,

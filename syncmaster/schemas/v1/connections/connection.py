@@ -30,6 +30,11 @@ from syncmaster.schemas.v1.connections.hive import (
     ReadHiveConnectionSchema,
     UpdateHiveConnectionSchema,
 )
+from syncmaster.schemas.v1.connections.iceberg import (
+    CreateIcebergConnectionSchema,
+    ReadIcebergConnectionSchema,
+    UpdateIcebergConnectionSchema,
+)
 from syncmaster.schemas.v1.connections.mssql import (
     CreateMSSQLConnectionSchema,
     ReadMSSQLConnectionSchema,
@@ -80,6 +85,7 @@ CreateConnectionSchema = Annotated[
     | CreateMSSQLConnectionSchema
     | CreateClickhouseConnectionSchema
     | CreateHiveConnectionSchema
+    | CreateIcebergConnectionSchema
     | CreateHDFSConnectionSchema
     | CreateS3ConnectionSchema
     | CreateSFTPConnectionSchema
@@ -96,6 +102,7 @@ ReadConnectionSchema = Annotated[
     | ReadMSSQLConnectionSchema
     | ReadClickhouseConnectionSchema
     | ReadHiveConnectionSchema
+    | ReadIcebergConnectionSchema
     | ReadHDFSConnectionSchema
     | ReadS3ConnectionSchema
     | ReadSFTPConnectionSchema
@@ -112,6 +119,7 @@ UpdateConnectionSchema = Annotated[
     | UpdateMSSQLConnectionSchema
     | UpdateClickhouseConnectionSchema
     | UpdateHiveConnectionSchema
+    | UpdateIcebergConnectionSchema
     | UpdateHDFSConnectionSchema
     | UpdateS3ConnectionSchema
     | UpdateSFTPConnectionSchema

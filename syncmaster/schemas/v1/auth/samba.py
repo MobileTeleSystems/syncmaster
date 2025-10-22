@@ -23,6 +23,5 @@ class ReadSambaAuthSchema(SambaAuthSchema):
 class UpdateSambaAuthSchema(CreateSambaAuthSchema):
     password: SecretStr | None = None
 
-    @property
-    def secret_field(self) -> str:
-        return "password"
+    def get_secret_fields(self) -> tuple[str, ...]:
+        return ("password",)
