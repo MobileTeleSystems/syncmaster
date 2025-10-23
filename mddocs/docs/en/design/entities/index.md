@@ -12,7 +12,9 @@ Users are automatically after successful login, there is no special registration
 All entity types (Connection, Transfer, Run, Queue) can be created only within some group.
 Groups are independent from each other, and have globally unique name.
 
-![image](group_list.png)![image](group_info.png)
+![image](group_list.png)
+
+![image](group_info.png)
 
 Group can be created by any user, which automatically get `OWNER` role.
 This role allows adding members to the group, and assign them speficic roles:
