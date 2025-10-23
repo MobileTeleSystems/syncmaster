@@ -181,3 +181,30 @@ def mock_keycloak_logout(settings, mock_keycloak_api):
     logout_url = f"{realm_url}/protocol/openid-connect/logout"
 
     mock_keycloak_api.post(logout_url).respond(status_code=204)
+
+
+@pytest.fixture
+def mock_keycloak_introspect_token(settings, mock_keycloak_api):
+    def _mock_keycloak_introspect_token(user):
+        keycloak_settings = settings.auth.model_dump()["keycloak"]
+        server_url = keycloak_settings["server_url"]
+        realm_name = keycloak_settings["client_id"]
+        realm_url = f"{server_url}/realms/{realm_name}"
+
+        payload = {
+            "preferred_username": user.username,
+            "email": user.email,
+            "given_name": user.first_name,
+            "middle_name": user.middle_name,
+            "family_name": user.last_name,
+            "active": user.is_active,
+        }
+        introspect_url = f"{realm_url}/protocol/openid-connect/token/introspect"
+
+        mock_keycloak_api.post(introspect_url).respond(
+            json=payload,
+            status_code=200,
+            content_type="application/json",
+        )
+
+    return _mock_keycloak_introspect_token

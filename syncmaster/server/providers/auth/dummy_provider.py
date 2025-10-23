@@ -107,7 +107,7 @@ class DummyAuthProvider(AuthProvider):  # noqa: WPS338
         client_id: str | None = None,
         client_secret: str | None = None,
     ) -> dict[str, Any]:
-        raise NotImplementedError("Authorization code grant is not supported by DummyAuthProvider")
+        raise NotImplementedError(f"Authorization code grant is not supported by {self.__class__.__name__}.")
 
     async def logout(self, user: User, refresh_token: str | None) -> None:
-        raise NotImplementedError("Logout is not supported by DummyAuthProvider")
+        raise NotImplementedError(f"Logout is not supported by {self.__class__.__name__}.")

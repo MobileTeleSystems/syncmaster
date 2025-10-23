@@ -81,6 +81,23 @@ Basic configuration
 .. autopydantic_model:: syncmaster.server.settings.auth.keycloak.KeycloakSettings
 .. autopydantic_model:: syncmaster.server.settings.auth.jwt.JWTSettings
 
+
+OAuth2 Gateway Provider
+-----------
+In case of using an OAuth2 Gateway, all API requests will come with an Authorization: Bearer header. For this scenario, Syncmaster provides an alternative authentication provider called OAuth2GatewayProvider. This provider works as follows:
+
+- It extracts the access token from the Authorization header.
+- It inspects the token in Keycloak.
+- It searches for the user in the Syncmaster database and creates it if not found.
+
+This provider ensures integration with OAuth2 Gateway and maintains the standard authorization flow as described in the Keycloak Auth Provider section. It also uses the `python-keycloak <https://pypi.org/project/python-keycloak/>`_ library for interactions with the Keycloak server and handles the token exchange process similarly.
+
+**Configuration**
+
+OAuth2GatewayProvider uses the same configuration models as KeycloakAuthProvider — namely:
+
+.. autopydantic_model:: syncmaster.server.settings.auth.oauth2_gateway.OAuth2GatewayProviderSettings
+
 .. toctree::
     :maxdepth: 1
     :caption: Keycloak
