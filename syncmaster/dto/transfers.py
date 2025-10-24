@@ -1,8 +1,9 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import ClassVar
+from uuid import uuid4
 
 from onetl.file.format import CSV, JSON, ORC, XML, Excel, JSONLine, Parquet
 
@@ -101,6 +102,16 @@ class MySQLTransferDTO(DBTransferDTO):
 @dataclass
 class HiveTransferDTO(DBTransferDTO):
     type: ClassVar[str] = "hive"
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.options.setdefault("if_exists", "replace_overlapping_partitions")
+
+
+@dataclass
+class IcebergRESTCatalogS3TransferDTO(DBTransferDTO):
+    type: ClassVar[str] = "iceberg_rest_s3"
+    catalog_name: str = field(default_factory=lambda: f"iceberg_rest_s3_{uuid4().hex[:8]}")
 
     def __post_init__(self):
         super().__post_init__()

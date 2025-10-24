@@ -2,11 +2,17 @@
 # SPDX-License-Identifier: Apache-2.0
 from pydantic import BaseModel, ConfigDict, Field
 
-from syncmaster.schemas.v1.auth import ReadBasicAuthSchema, ReadS3AuthSchema
-from syncmaster.schemas.v1.auth.samba import ReadSambaAuthSchema
+from syncmaster.schemas.v1.auth import (
+    ReadBasicAuthSchema,
+    ReadIcebergRESTCatalogBasicAuthSchema,
+    ReadS3AuthSchema,
+    ReadSambaAuthSchema,
+)
 from syncmaster.schemas.v1.types import NameConstr
 
-ReadConnectionAuthDataSchema = ReadBasicAuthSchema | ReadS3AuthSchema | ReadSambaAuthSchema
+ReadConnectionAuthDataSchema = (
+    ReadBasicAuthSchema | ReadS3AuthSchema | ReadSambaAuthSchema | ReadIcebergRESTCatalogBasicAuthSchema
+)
 
 
 class CreateConnectionBaseSchema(BaseModel):

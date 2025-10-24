@@ -17,6 +17,7 @@ from syncmaster.dto.connections import (
     FTPSConnectionDTO,
     HDFSConnectionDTO,
     HiveConnectionDTO,
+    IcebergRESTCatalogS3ConnectionDTO,
     MSSQLConnectionDTO,
     MySQLConnectionDTO,
     OracleConnectionDTO,
@@ -33,6 +34,7 @@ from syncmaster.dto.transfers import (
     FTPTransferDTO,
     HDFSTransferDTO,
     HiveTransferDTO,
+    IcebergRESTCatalogS3TransferDTO,
     MSSQLTransferDTO,
     MySQLTransferDTO,
     OracleTransferDTO,
@@ -45,10 +47,13 @@ from syncmaster.dto.transfers import (
 from syncmaster.dto.transfers_resources import Resources
 from syncmaster.dto.transfers_strategy import Strategy
 from syncmaster.exceptions.connection import ConnectionTypeNotRecognizedError
-from syncmaster.schemas.v1.connection_types import FILE_CONNECTION_TYPES
+from syncmaster.schemas.v1.connection_types import (
+    FILE_CONNECTION_TYPES,
+)
 from syncmaster.worker.handlers.base import Handler
 from syncmaster.worker.handlers.db.clickhouse import ClickhouseHandler
 from syncmaster.worker.handlers.db.hive import HiveHandler
+from syncmaster.worker.handlers.db.iceberg import IcebergRESTCatalogS3Handler
 from syncmaster.worker.handlers.db.mssql import MSSQLHandler
 from syncmaster.worker.handlers.db.mysql import MySQLHandler
 from syncmaster.worker.handlers.db.oracle import OracleHandler
@@ -70,6 +75,12 @@ connection_handler_proxy = {
         HiveHandler,
         HiveConnectionDTO,
         HiveTransferDTO,
+        RunDTO,
+    ),
+    "iceberg_rest_s3": (
+        IcebergRESTCatalogS3Handler,
+        IcebergRESTCatalogS3ConnectionDTO,
+        IcebergRESTCatalogS3TransferDTO,
         RunDTO,
     ),
     "oracle": (

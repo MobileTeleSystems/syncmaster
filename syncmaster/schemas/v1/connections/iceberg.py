@@ -10,7 +10,7 @@ from syncmaster.schemas.v1.auth.iceberg_rest_basic import (
     ReadIcebergRESTCatalogBasicAuthSchema,
     UpdateIcebergRESTCatalogBasicAuthSchema,
 )
-from syncmaster.schemas.v1.connection_types import ICEBERG_TYPE
+from syncmaster.schemas.v1.connection_types import ICEBERG_REST_S3_TYPE
 from syncmaster.schemas.v1.connections.connection_base import (
     CreateConnectionBaseSchema,
     ReadConnectionBaseSchema,
@@ -40,7 +40,7 @@ class ReadIcebergRESTCatalogS3ConnectionDataSchema(BaseModel):
 
 
 class CreateIcebergConnectionSchema(CreateConnectionBaseSchema):
-    type: ICEBERG_TYPE = Field(description="Connection type")
+    type: ICEBERG_REST_S3_TYPE = Field(description="Connection type")
     data: CreateIcebergRESTCatalogS3ConnectionDataSchema = Field(
         ...,
         alias="connection_data",
@@ -54,7 +54,7 @@ class CreateIcebergConnectionSchema(CreateConnectionBaseSchema):
 
 
 class ReadIcebergConnectionSchema(ReadConnectionBaseSchema):
-    type: ICEBERG_TYPE
+    type: ICEBERG_REST_S3_TYPE
     data: ReadIcebergRESTCatalogS3ConnectionDataSchema = Field(alias="connection_data")
     auth_data: ReadIcebergRESTCatalogBasicAuthSchema | None = None
 
