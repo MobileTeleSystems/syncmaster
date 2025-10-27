@@ -31,7 +31,7 @@ async def group_connections(
                     "cluster": "cluster",
                 },
             )
-        elif conn_type == ConnectionType.ICEBERG:
+        elif conn_type == ConnectionType.ICEBERG_REST_S3:
             new_data.update(
                 {
                     "metastore_url": "https://rest.domain.com",

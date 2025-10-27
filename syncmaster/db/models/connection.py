@@ -18,7 +18,7 @@ from syncmaster.db.models.group import Group
 class ConnectionType(StrEnum):
     POSTGRES = "postgres"
     HIVE = "hive"
-    ICEBERG = "iceberg_rest_s3"
+    ICEBERG_REST_S3 = "iceberg_rest_s3"
     ORACLE = "oracle"
     CLICKHOUSE = "clickhouse"
     MSSQL = "mssql"
