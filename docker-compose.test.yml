@@ -150,7 +150,7 @@ services:
     profiles: [horizon, s3, hdfs, hive, oracle, clickhouse, mysql, mssql, sftp, ftp, ftps, samba, webdav, all]
 
   horizon-db:
-    image: postgres
+    image: postgres:17
     restart: unless-stopped
     environment:
       TZ: UTC
@@ -170,7 +170,7 @@ services:
     profiles: [horizon, s3, hdfs, hive, oracle, clickhouse, mysql, mssql, sftp, ftp, ftps, samba, webdav, all]
 
   test-postgres:
-    image: postgres
+    image: postgres:17
     restart: unless-stopped
     ports:
       - 5433:5432
@@ -261,7 +261,7 @@ services:
     profiles: [mysql, all]
 
   metastore-hive:
-    image: postgres
+    image: postgres:17
     restart: unless-stopped
     environment:
       TZ: UTC
