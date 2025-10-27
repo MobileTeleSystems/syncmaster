@@ -65,14 +65,14 @@ jobs:
           docker compose -f docker-compose.test.yml --profile all down -v --remove-orphans
 
       - name: Upload worker logs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure()
         with:
           name: worker-logs-mssql
           path: logs/*
 
       - name: Upload coverage results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: coverage-mssql
           path: reports/*
