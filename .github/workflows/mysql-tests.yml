@@ -50,11 +50,12 @@ jobs:
       - name: Run MySQL Tests
         run: |
           docker compose -f ./docker-compose.test.yml --profile mysql exec -T worker coverage run -m pytest -vvv -s -m "worker and mysql"
+
       - name: Dump worker logs on failure
         if: failure()
         uses: jwalton/gh-docker-logs@v2
         with:
-          images: mtsrus/syncmaster-worker
+          images: mysql,mtsrus/syncmaster-worker,mtsrus/horizon-backend,postgres,rabbitmq
           dest: ./logs
 
       # This is important, as coverage is exported after receiving SIGTERM
@@ -62,6 +63,7 @@ jobs:
         if: always()
         run: |
           docker compose -f docker-compose.test.yml --profile all down -v --remove-orphans
+
       - name: Upload worker logs
         uses: actions/upload-artifact@v4
         if: failure()

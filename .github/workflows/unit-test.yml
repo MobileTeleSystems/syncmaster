@@ -69,10 +69,24 @@ jobs:
           source .env.local.test
           poetry run coverage run -m pytest -vvv -s -k "test_unit or test_database"
 
+      - name: Dump worker logs on failure
+        if: failure()
+        uses: jwalton/gh-docker-logs@v2
+        with:
+          images: postgres,rabbitmq
+          dest: ./logs
+
       - name: Shutdown
         if: always()
         run: |
           docker compose -f docker-compose.test.yml down -v --remove-orphans
+
+      - name: Upload worker logs
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: container-logs-unit
+          path: logs/*
 
       - name: Upload coverage results
         uses: actions/upload-artifact@v4

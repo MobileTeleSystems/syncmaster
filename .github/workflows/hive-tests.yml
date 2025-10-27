@@ -55,7 +55,7 @@ jobs:
         if: failure()
         uses: jwalton/gh-docker-logs@v2
         with:
-          images: mtsrus/syncmaster-worker
+          images: mtsrus/hadoop,mtsrus/syncmaster-worker,mtsrus/horizon-backend,postgres,rabbitmq
           dest: ./logs
 
       # This is important, as coverage is exported after receiving SIGTERM
