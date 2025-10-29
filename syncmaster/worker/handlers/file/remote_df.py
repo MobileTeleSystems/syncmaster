@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from onetl.file import FileDFReader, FileDFWriter, FileMover
 from onetl.file.filter import Glob
+from onetl.hooks import slot, support_hooks
 
 from syncmaster.worker.handlers.file.base import FileHandler
 
@@ -14,8 +15,10 @@ if TYPE_CHECKING:
     from pyspark.sql import DataFrame
 
 
+@support_hooks
 class RemoteDFFileHandler(FileHandler):
 
+    @slot
     def read(self) -> DataFrame:
         from pyspark.sql.types import StructType
 
@@ -38,6 +41,7 @@ class RemoteDFFileHandler(FileHandler):
 
         return df
 
+    @slot
     def write(self, df: DataFrame) -> None:
         tmp_path = os.path.join(self.transfer_dto.directory_path, ".tmp", str(self.run_dto.id))
         try:

@@ -38,10 +38,6 @@ class HiveHandler(DBHandler):
         self.connection.spark.catalog.refreshTable(self.transfer_dto.table_name)
         return super().read()
 
-    @slot
-    def write(self, df: DataFrame) -> None:
-        return super().write(df)
-
     def _normalize_column_names(self, df: DataFrame) -> DataFrame:
         for column_name in df.columns:
             df = df.withColumnRenamed(column_name, column_name.lower())

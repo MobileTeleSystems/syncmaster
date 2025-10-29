@@ -70,7 +70,3 @@ class S3Handler(RemoteDFFileHandler):
             df = df.selectExpr(*columns_filter_expressions)
 
         return df
-
-    @slot
-    def write(self, df: DataFrame) -> None:
-        return super().write(df)

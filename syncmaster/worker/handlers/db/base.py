@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 from onetl.base import BaseDBConnection
 from onetl.db import DBReader, DBWriter
+from onetl.hooks import slot, support_hooks
 
 from syncmaster.dto.transfers import DBTransferDTO
 from syncmaster.worker.handlers.base import Handler
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
     from pyspark.sql.dataframe import DataFrame
 
 
+@support_hooks
 class DBHandler(Handler):
     connection: BaseDBConnection
     transfer_dto: DBTransferDTO
@@ -35,6 +37,7 @@ class DBHandler(Handler):
         "not_ilike": "NOT ILIKE",
     }
 
+    @slot
     def read(self) -> DataFrame:
         reader_params = {}
         if self.transfer_dto.strategy.type == "incremental":
@@ -58,6 +61,7 @@ class DBHandler(Handler):
         )
         return reader.run()
 
+    @slot
     def write(self, df: DataFrame) -> None:
         if self.transfer_dto.strategy.type == "incremental" and self.hwm and self.hwm.value:
             self.transfer_dto.options["if_exists"] = "append"

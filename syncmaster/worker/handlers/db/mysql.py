@@ -6,7 +6,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from onetl.connection import MySQL
-from onetl.hooks import slot, support_hooks
 
 from syncmaster.dto.connections import MySQLConnectionDTO
 from syncmaster.dto.transfers import MySQLTransferDTO
@@ -17,7 +16,6 @@ if TYPE_CHECKING:
     from pyspark.sql.dataframe import DataFrame
 
 
-@support_hooks
 class MySQLHandler(DBHandler):
     connection: MySQL
     connection_dto: MySQLConnectionDTO
@@ -36,14 +34,6 @@ class MySQLHandler(DBHandler):
             database=self.connection_dto.database_name,
             spark=spark,
         ).check()
-
-    @slot
-    def read(self) -> DataFrame:
-        return super().read()
-
-    @slot
-    def write(self, df: DataFrame) -> None:
-        return super().write(df)
 
     def _normalize_column_names(self, df: DataFrame) -> DataFrame:
         for column_name in df.columns:

@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from etl_entities.hwm import FileListHWM, FileModifiedTimeHWM
 from onetl.file import FileDFReader, FileDFWriter, FileDownloader, FileUploader
 from onetl.file.filter import FileSizeRange, Glob, Regexp
+from onetl.hooks import slot, support_hooks
 
 from syncmaster.worker.handlers.file.base import FileHandler
 
@@ -16,8 +17,10 @@ if TYPE_CHECKING:
     from pyspark.sql import DataFrame
 
 
+@support_hooks
 class LocalDFFileHandler(FileHandler):
 
+    @slot
     def read(self) -> DataFrame:
         from pyspark.sql.types import StructType
 
@@ -59,8 +62,8 @@ class LocalDFFileHandler(FileHandler):
 
         return df
 
+    @slot
     def write(self, df: DataFrame) -> None:
-
         writer = FileDFWriter(
             connection=self.local_df_connection,
             format=self.transfer_dto.file_format,

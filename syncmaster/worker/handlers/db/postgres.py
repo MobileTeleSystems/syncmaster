@@ -6,7 +6,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from onetl.connection import Postgres
-from onetl.hooks import slot, support_hooks
 
 from syncmaster.dto.connections import PostgresConnectionDTO
 from syncmaster.dto.transfers import PostgresTransferDTO
@@ -17,7 +16,6 @@ if TYPE_CHECKING:
     from pyspark.sql.dataframe import DataFrame
 
 
-@support_hooks
 class PostgresHandler(DBHandler):
     connection: Postgres
     connection_dto: PostgresConnectionDTO
@@ -37,14 +35,6 @@ class PostgresHandler(DBHandler):
             extra=self.connection_dto.additional_params,
             spark=spark,
         ).check()
-
-    @slot
-    def read(self) -> DataFrame:
-        return super().read()
-
-    @slot
-    def write(self, df: DataFrame) -> None:
-        return super().write(df)
 
     def _normalize_column_names(self, df: DataFrame) -> DataFrame:
         for column_name in df.columns:
