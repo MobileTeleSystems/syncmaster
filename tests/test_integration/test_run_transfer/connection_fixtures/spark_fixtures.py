@@ -2,7 +2,15 @@ import logging
 
 import pyspark
 import pytest
-from onetl.connection import MSSQL, Clickhouse, MySQL, Oracle, Postgres, SparkS3
+from onetl.connection import (
+    MSSQL,
+    Clickhouse,
+    Iceberg,
+    MySQL,
+    Oracle,
+    Postgres,
+    SparkS3,
+)
 from onetl.file.format import XML, Excel
 from pyspark.sql import SparkSession
 from pytest import FixtureRequest
@@ -26,11 +34,13 @@ def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
 
     spark = (
         SparkSession.builder.appName("celery_worker")
-        .enableHiveSupport()
         .config("spark.sql.pyspark.jvmStacktrace.enabled", "true")
         .config("spark.driver.host", "localhost")
         .config("spark.hadoop.mapreduce.fileoutputcommitter.marksuccessfuljobs", "false")
     )
+
+    if "hive" in markers:
+        spark = spark.enableHiveSupport()
 
     if "postgres" in markers:
         maven_packages.extend(Postgres.get_packages())
@@ -65,6 +75,14 @@ def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
                 "spark.sql.sources.commitProtocolClass",
                 "org.apache.spark.internal.io.cloud.PathOutputCommitProtocol",
             )
+        )
+
+    if "iceberg" in markers:
+        maven_packages.extend(
+            [
+                *Iceberg.get_packages(package_version="1.10.0", spark_version="3.5"),
+                *Iceberg.S3Warehouse.get_packages(package_version="1.10.0"),
+            ],
         )
 
     if set(markers).intersection({"hdfs", "s3", "sftp", "ftp", "ftps", "samba", "webdav"}):

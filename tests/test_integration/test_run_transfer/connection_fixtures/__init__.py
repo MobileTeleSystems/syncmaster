@@ -61,6 +61,12 @@ from tests.test_integration.test_run_transfer.connection_fixtures.hive_fixtures 
     hive_connection,
     prepare_hive,
 )
+from tests.test_integration.test_run_transfer.connection_fixtures.iceberg_fixtures import (
+    iceberg_rest_s3_connection,
+    iceberg_rest_s3_for_conftest,
+    iceberg_rest_s3_for_worker,
+    prepare_iceberg_rest_s3,
+)
 from tests.test_integration.test_run_transfer.connection_fixtures.mssql_fixtures import (
     mssql_connection,
     mssql_for_conftest,

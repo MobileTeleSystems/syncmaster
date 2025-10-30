@@ -49,7 +49,15 @@ def get_worker_spark_session(
 
 def get_packages(connection_types: set[str]) -> list[str]:  # noqa: WPS212
     import pyspark
-    from onetl.connection import MSSQL, Clickhouse, MySQL, Oracle, Postgres, SparkS3
+    from onetl.connection import (
+        MSSQL,
+        Clickhouse,
+        Iceberg,
+        MySQL,
+        Oracle,
+        Postgres,
+        SparkS3,
+    )
     from onetl.file.format import XML, Excel
 
     spark_version = pyspark.__version__
@@ -74,6 +82,14 @@ def get_packages(connection_types: set[str]) -> list[str]:  # noqa: WPS212
 
     if connection_types & {"s3", "all"}:
         result.extend(SparkS3.get_packages(spark_version=spark_version))
+
+    if connection_types & {"iceberg_rest_s3", "all"}:
+        result.extend(
+            [
+                *Iceberg.get_packages(package_version="1.10.0", spark_version=spark_version),
+                *Iceberg.S3Warehouse.get_packages(package_version="1.10.0"),
+            ],
+        )
 
     if connection_types & {"s3", "hdfs", "sftp", "ftp", "ftps", "samba", "webdav", "all"}:
         result.extend(file_formats_spark_packages)

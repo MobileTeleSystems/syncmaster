@@ -53,6 +53,8 @@ class IcebergRESTCatalogS3Handler(DBHandler):
 
     @slot
     def read(self) -> DataFrame:
+        table = f"{self.transfer_dto.catalog_name}.{self.transfer_dto.table_name}"
+        self.connection.spark.catalog.refreshTable(table)
         return super().read()
 
     @slot

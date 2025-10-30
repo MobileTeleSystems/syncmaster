@@ -36,6 +36,7 @@ List of currently supported connections:
 * Apache Hive
 * Clickhouse
 * Postgres
+* Iceberg (REST Catalog + S3)
 * Oracle
 * MSSQL
 * MySQL

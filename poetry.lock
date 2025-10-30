@@ -2249,7 +2249,7 @@ webdav = ["webdavclient3"]
 type = "git"
 url = "https://github.com/MobileTeleSystems/onetl.git"
 reference = "develop"
-resolved_reference = "a1b7b5a0389ed668365cf57161ded6aa12556957"
+resolved_reference = "371acd14adc9b698fc7daa8d8669b162528e33f9"
 
 [[package]]
 name = "ordered-set"

@@ -89,6 +89,10 @@ test-integration-hive: test-db ##@Test          Run integration tests for Hive
 	docker compose -f docker-compose.test.yml --profile hive up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration -m hive $(PYTEST_ARGS)
 
+test-integration-iceberg: test-db ##@Test          Run integration tests for Iceberg
+	docker compose -f docker-compose.test.yml --profile iceberg up -d --wait $(DOCKER_COMPOSE_ARGS)
+	${POETRY} run pytest ./tests/test_integration -m iceberg $(PYTEST_ARGS)
+
 test-integration-clickhouse: test-db ##@Test    Run integration tests for Clickhouse
 	docker compose -f docker-compose.test.yml --profile clickhouse up -d --wait $(DOCKER_COMPOSE_ARGS)
 	${POETRY} run pytest ./tests/test_integration -m clickhouse $(PYTEST_ARGS)
