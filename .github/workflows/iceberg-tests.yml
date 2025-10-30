@@ -1,4 +1,4 @@
-name: S3 Tests
+name: Iceberg Tests
 on:
   workflow_call:
 
@@ -7,7 +7,7 @@ env:
 
 jobs:
   tests:
-    name: Run S3 tests
+    name: Run Iceberg tests
     runs-on: ubuntu-latest
 
     steps:
@@ -24,9 +24,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./cached_jars
-          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-s3
+          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-iceberg
           restore-keys: |
-            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-s3
+            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-iceberg
             ${{ runner.os }}-python-
 
       - name: Build Worker Image
@@ -34,8 +34,8 @@ jobs:
         with:
           context: .
           tags: mtsrus/syncmaster-worker:${{ github.sha }}
-          file: docker/Dockerfile.worker
           target: test
+          file: docker/Dockerfile.worker
           load: true
           cache-from: type=gha,scope=test
           cache-to: type=gha,scope=test,mode=max
@@ -43,13 +43,13 @@ jobs:
       - name: Docker compose up
         run: |
           docker compose -f docker-compose.test.yml --profile all down -v --remove-orphans
-          docker compose -f docker-compose.test.yml --profile s3 up -d --wait --wait-timeout 200
+          docker compose -f docker-compose.test.yml --profile iceberg up -d --wait --wait-timeout 200
         env:
           WORKER_IMAGE_TAG: ${{ github.sha }}
 
-      - name: Run S3 Tests
+      - name: Run Iceberg Tests
         run: |
-          docker compose -f ./docker-compose.test.yml --profile s3 exec -T worker coverage run -m pytest -vvv -s -m "worker and s3 and not iceberg"
+          docker compose -f ./docker-compose.test.yml --profile iceberg exec -T worker coverage run -m pytest -vvv -s -m "worker and iceberg"
 
       - name: Dump worker logs on failure
         if: failure()
@@ -62,19 +62,19 @@ jobs:
       - name: Shutdown
         if: always()
         run: |
-          docker compose -f docker-compose.test.yml down -v --remove-orphans
+          docker compose -f docker-compose.test.yml --profile all down -v --remove-orphans
 
       - name: Upload worker logs
         uses: actions/upload-artifact@v5
         if: failure()
         with:
-          name: worker-logs-s3
+          name: worker-logs-iceberg
           path: logs/*
 
       - name: Upload coverage results
         uses: actions/upload-artifact@v5
         with:
-          name: coverage-s3
+          name: coverage-iceberg
           path: reports/*
           # https://github.com/actions/upload-artifact/issues/602
           include-hidden-files: true

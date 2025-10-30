@@ -57,6 +57,7 @@ def dataframe_columns_filter_transformations(source_type: str):
         "mysql": "CHAR",
         "mssql": "VARCHAR(30)",
         "hive": "VARCHAR(30)",
+        "iceberg_rest_s3": "STRING",
         "s3": "STRING",
         "hdfs": "STRING",
     }

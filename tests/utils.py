@@ -133,22 +133,21 @@ async def get_run_on_end(
 
 
 def verify_transfer_auth_data(run_data: dict[str, Any], source_auth: str, target_auth: str) -> None:
-    source_auth_data = run_data["transfer_dump"]["source_connection"]["auth_data"]
-    target_auth_data = run_data["transfer_dump"]["target_connection"]["auth_data"]
-
-    if source_auth == "s3":
-        assert source_auth_data["access_key"]
-        assert "secret_key" not in source_auth_data
-    else:
-        assert source_auth_data["user"]
-        assert "password" not in source_auth_data
-
-    if target_auth == "s3":
-        assert target_auth_data["access_key"]
-        assert "secret_key" not in target_auth_data
-    else:
-        assert target_auth_data["user"]
-        assert "password" not in target_auth_data
+    for auth_type, auth_data in [
+        (source_auth, run_data["transfer_dump"]["source_connection"]["auth_data"]),
+        (target_auth, run_data["transfer_dump"]["target_connection"]["auth_data"]),
+    ]:
+        if auth_type == "s3":
+            assert auth_data["access_key"]
+            assert "secret_key" not in auth_data
+        elif auth_type == "iceberg_rest_basic_s3_basic":
+            assert auth_data["s3_access_key"]
+            assert auth_data["metastore_username"]
+            assert "s3_secret_key" not in auth_data
+            assert "metastore_password" not in auth_data
+        else:
+            assert auth_data["user"]
+            assert "password" not in auth_data
 
 
 async def run_transfer_and_verify(
