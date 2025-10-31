@@ -2925,6 +2925,22 @@ toml = ["tomli (>=2.0.1)"]
 yaml = ["pyyaml (>=6.0.1)"]
 
 [[package]]
+name = "pydantic-settings-logging"
+version = "0.1.1"
+description = "Pydantic models for Python logging configuration"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "pydantic_settings_logging-0.1.1-py3-none-any.whl", hash = "sha256:08a961882a6ef6bde4fc4f7ec121aa29ee46cbd2f013974702c9a57f84e6204b"},
+    {file = "pydantic_settings_logging-0.1.1.tar.gz", hash = "sha256:745879f91fe742b359765aa58bb42ea998985a04574391fc202fbd6c783e1715"},
+]
+
+[package.dependencies]
+pydantic = ">=2.0"
+pydantic-settings = ">=2.0"
+
+[[package]]
 name = "pyflakes"
 version = "3.4.0"
 description = "passive checker of Python programs"
@@ -4347,4 +4363,4 @@ worker = ["horizon-hwm-store", "jinja2", "onetl", "psycopg2-binary", "pyspark"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "ece82f25affbf7251f2b388f2e98e62022520748fcaffe5f12bc42100797c205"
+content-hash = "29ce2388721292623945956cb2c28009b0377532ef6c7d07135ce45432a264a2"

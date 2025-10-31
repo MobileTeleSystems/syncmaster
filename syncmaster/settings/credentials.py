@@ -21,10 +21,11 @@ class CredentialsEncryptionSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        # Set the encryption key
-        SYNCMASTER__ENCRYPTION__SECRET_KEY=secret_key
+        encryption:
+            secret_key: UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94=
     """
 
     secret_key: str = Field(

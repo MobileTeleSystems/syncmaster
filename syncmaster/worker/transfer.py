@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from syncmaster.db.models import AuthData, Run, Status, Transfer
 from syncmaster.db.repositories.utils import decrypt_auth_data
-from syncmaster.settings.log import setup_logging
+from syncmaster.settings.logging import setup_logging
 from syncmaster.worker.base import WorkerTask
 from syncmaster.worker.celery import app as celery
 from syncmaster.worker.controller import TransferController
@@ -103,4 +103,4 @@ def run_transfer(run_id: int, engine: Engine, settings: WorkerAppSettings):
 
 @after_setup_task_logger.connect
 def setup_loggers(*args, **kwargs):
-    setup_logging(WorkerAppSettings().logging.get_log_config_path())
+    setup_logging(WorkerAppSettings().logging)

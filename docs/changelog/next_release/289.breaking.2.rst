@@ -1,0 +1,1 @@
+Logging format is configured explicitly via ``config.yml`` instead of having a set of preset configuration files.

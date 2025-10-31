@@ -23,17 +23,17 @@ With Docker
 
   ``docker-compose`` will download SyncMaster UI image, create containers, and then start them.
 
-  Options can be set via ``.env`` file or ``environment`` section in ``docker-compose.yml``
-
   .. dropdown:: ``docker-compose.yml``
 
       .. literalinclude:: ../../../docker-compose.yml
-          :emphasize-lines: 123-140
+          :emphasize-lines: 118-130
 
-  .. dropdown:: ``.env.docker``
+  Options can be set via ``config.yml`` file:
 
-      .. literalinclude:: ../../../.env.docker
-          :emphasize-lines: 49-50
+  .. dropdown:: ``config.yml``
+
+      .. literalinclude:: ../../../config.yml
+          :emphasize-lines: 30-33
 
 * After frontend is started and ready, open http://localhost:3000.
 

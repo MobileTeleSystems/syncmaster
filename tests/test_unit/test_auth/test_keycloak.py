@@ -7,21 +7,25 @@ from httpx import AsyncClient
 from syncmaster.server.settings import ServerAppSettings as Settings
 from tests.mocks import MockUser
 
-KEYCLOAK_PROVIDER = "syncmaster.server.providers.auth.keycloak_provider.KeycloakAuthProvider"
 pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
-
-@pytest.mark.parametrize(
-    "settings",
-    [
-        {
-            "auth": {
-                "provider": KEYCLOAK_PROVIDER,
-            },
+KEYCLOAK_AUTH_SETTINGS = {
+    "auth": {
+        "provider": "syncmaster.server.providers.auth.keycloak_provider.KeycloakAuthProvider",
+        "keycloak": {
+            "server_url": "http://localhost:8080",
+            "realm_name": "manually_created",
+            "client_id": "manually_created",
+            "client_secret": "generated_by_keycloak",
+            "redirect_uri": "http://localhost:3000/auth/callback",
+            "scope": "email",
+            "verify_ssl": False,
         },
-    ],
-    indirect=True,
-)
+    },
+}
+
+
+@pytest.mark.parametrize("settings", [KEYCLOAK_AUTH_SETTINGS], indirect=True)
 async def test_keycloak_get_user_unauthorized(
     client: AsyncClient,
     simple_user: MockUser,
@@ -43,17 +47,7 @@ async def test_keycloak_get_user_unauthorized(
 
 
 @pytest.mark.flaky
-@pytest.mark.parametrize(
-    "settings",
-    [
-        {
-            "auth": {
-                "provider": KEYCLOAK_PROVIDER,
-            },
-        },
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("settings", [KEYCLOAK_AUTH_SETTINGS], indirect=True)
 async def test_keycloak_get_user_authorized(
     client: AsyncClient,
     simple_user: MockUser,
@@ -78,17 +72,7 @@ async def test_keycloak_get_user_authorized(
     }
 
 
-@pytest.mark.parametrize(
-    "settings",
-    [
-        {
-            "auth": {
-                "provider": KEYCLOAK_PROVIDER,
-            },
-        },
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("settings", [KEYCLOAK_AUTH_SETTINGS], indirect=True)
 async def test_keycloak_get_user_expired_access_token(
     caplog,
     client: AsyncClient,
@@ -116,17 +100,7 @@ async def test_keycloak_get_user_expired_access_token(
     }
 
 
-@pytest.mark.parametrize(
-    "settings",
-    [
-        {
-            "auth": {
-                "provider": KEYCLOAK_PROVIDER,
-            },
-        },
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("settings", [KEYCLOAK_AUTH_SETTINGS], indirect=True)
 async def test_keycloak_get_user_inactive(
     client: AsyncClient,
     simple_user: MockUser,
@@ -148,17 +122,7 @@ async def test_keycloak_get_user_inactive(
     }
 
 
-@pytest.mark.parametrize(
-    "settings",
-    [
-        {
-            "auth": {
-                "provider": KEYCLOAK_PROVIDER,
-            },
-        },
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("settings", [KEYCLOAK_AUTH_SETTINGS], indirect=True)
 async def test_keycloak_auth_callback(
     client: AsyncClient,
     settings: Settings,
@@ -178,17 +142,7 @@ async def test_keycloak_auth_callback(
     assert response.status_code == 204, response.text
 
 
-@pytest.mark.parametrize(
-    "settings",
-    [
-        {
-            "auth": {
-                "provider": KEYCLOAK_PROVIDER,
-            },
-        },
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("settings", [KEYCLOAK_AUTH_SETTINGS], indirect=True)
 async def test_keycloak_auth_logout(
     simple_user: MockUser,
     client: AsyncClient,

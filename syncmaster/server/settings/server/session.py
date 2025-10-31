@@ -22,21 +22,31 @@ class SessionSettings(BaseModel):
 
     For development environment:
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        SYNCMASTER__SERVER__SESSION__SECRET_KEY=secret
-        SYNCMASTER__SERVER__SESSION__SESSION_COOKIE=custom_cookie_name
-        SYNCMASTER__SERVER__SESSION__MAX_AGE=None  # cookie will last as long as the browser session
-        SYNCMASTER__SERVER__SESSION__SAME_SITE=strict
-        SYNCMASTER__SERVER__SESSION__HTTPS_ONLY=True
-        SYNCMASTER__SERVER__SESSION__DOMAIN=example.com
+        server:
+            session:
+                secret_key: cookie_secret
+                session_cookie: custom_cookie_name
+                max_age: null
+                same_site: lax
+                https_only: True
+                domain: localhost
 
     For production environment:
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        SYNCMASTER__SERVER__SESSION__SECRET_KEY=secret
-        SYNCMASTER__SERVER__SESSION__HTTPS_ONLY=True
+        server:
+            session:
+                secret_key: cookie_secret
+                session_cookie: custom_cookie_name
+                max_age: 3600
+                same_site: strict
+                https_only: True
+                domain: example.com
 
     """
 

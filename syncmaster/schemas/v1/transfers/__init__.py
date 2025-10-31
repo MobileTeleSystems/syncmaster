@@ -200,7 +200,7 @@ class CreateTransferSchema(BaseModel):
         description="Incremental or archive download options",
     )
     transformations: list[
-        Annotated[TransformationSchema, Field(None, discriminator="type", description="List of transformations")]
+        Annotated[TransformationSchema, Field(discriminator="type", description="List of transformations")]
     ] = Field(default_factory=list)
     resources: Resources = Field(
         default_factory=Resources,

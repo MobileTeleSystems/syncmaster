@@ -1,9 +1,10 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BaseModel, Field
 
 from syncmaster.settings import (
+    DEFAULT_LOGGING_SETTINGS,
+    BaseSettings,
     CredentialsEncryptionSettings,
     DatabaseSettings,
     LoggingSettings,
@@ -11,15 +12,18 @@ from syncmaster.settings import (
 )
 
 
-class SchedulerSettings(BaseSettings):
-    """Celery scheduler settings.
+class SchedulerSettings(BaseModel):
+    """Scheduler settings.
 
     Examples
     --------
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        SYNCMASTER__SCHEDULER__TRANSFER_FETCHING_TIMEOUT_SECONDS=200
+        scheduler:
+            transfer_fetching_timeout_seconds: 200
+            misfire_grace_time_seconds: 300
     """
 
     TRANSFER_FETCHING_TIMEOUT_SECONDS: int = Field(
@@ -36,14 +40,11 @@ class SchedulerAppSettings(BaseSettings):
     """
     Scheduler application settings.
 
-    This class is used to configure various settings for the scheduler application.
-    The settings can be defined in two ways:
+    The settings can be passed in several ways:
 
-    1. By explicitly passing a settings object as an argument.
-    2. By setting environment variables matching specific keys.
-
-    All environment variable names are written in uppercase and should be prefixed with ``SYNCMASTER__``.
-    Nested items are delimited with ``__``.
+    1. By storing settings in a configuration file ``config.yml`` (preferred).
+    2. By setting environment variables matching specific keys (``SYNCMASTER__DATABASE__URL`` == ``database.url``).
+    3. By explicitly passing a settings object as an argument of application factory function.
 
     More details can be found in
     `Pydantic documentation <https://docs.pydantic.dev/latest/concepts/pydantic_settings/>`_.
@@ -51,28 +52,25 @@ class SchedulerAppSettings(BaseSettings):
     Examples
     --------
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        # Example of setting a TRANSFER_FETCHING_TIMEOUT_SECONDS via environment variable
-        SYNCMASTER__SCHEDULER__TRANSFER_FETCHING_TIMEOUT_SECONDS=200
+        database:
+            url: postgresql+asyncpg://postgres:postgres@localhost:5432/syncmaster
 
-        # Example of setting a database URL via environment variable
-        SYNCMASTER__DATABASE__URL=postgresql+asyncpg://user:password@localhost:5432/dbname
+        broker:
+            url: amqp://user:password@localhost:5672/
 
-        # Example of setting a broker URL via environment variable
-        SYNCMASTER__BROKER__URL=amqp://user:password@localhost:5672/
-
-    Refer to `Pydantic documentation <https://docs.pydantic.dev/latest/concepts/pydantic_settings/>`_
-    for more details on configuration options and environment variable usage.
+        logging: {}
+        encryption: {}
+        scheduler: {}
     """
 
-    database: DatabaseSettings = Field(description="Database settings")
-    broker: RabbitMQSettings = Field(description="Broker settings")
-    logging: LoggingSettings = Field(default_factory=LoggingSettings, description="Logging settings")
+    database: DatabaseSettings = Field(default_factory=DatabaseSettings, description="Database settings")
+    broker: RabbitMQSettings = Field(default_factory=RabbitMQSettings, description="Broker settings")
+    logging: LoggingSettings = Field(default=DEFAULT_LOGGING_SETTINGS, description="Logging settings")
     scheduler: SchedulerSettings = Field(default_factory=SchedulerSettings, description="Scheduler-specific settings")
     encryption: CredentialsEncryptionSettings = Field(
         default_factory=CredentialsEncryptionSettings,
         description="Settings for encrypting credential data",
     )
-
-    model_config = SettingsConfigDict(env_prefix="SYNCMASTER__", env_nested_delimiter="__")

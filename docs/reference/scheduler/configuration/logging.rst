@@ -4,4 +4,4 @@ Logging settings
 ================
 
 
-.. autopydantic_model:: syncmaster.settings.log.LoggingSettings
+.. autopydantic_model:: syncmaster.settings.logging.LoggingSettings

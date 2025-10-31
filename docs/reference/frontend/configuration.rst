@@ -6,11 +6,13 @@ Frontend configuration
 API URL
 -------
 
-SyncMaster UI requires REST API to be accessible from browser. API url is set up using environment variable:
+SyncMaster UI requires REST API to be accessible from browser. API url is set up using config file:
 
-.. code:: bash
+.. code-block:: yaml
+    :caption: config.yml
 
-    SYNCMASTER__UI__API_BROWSER_URL=http://localhost:8000
+    ui:
+        api_browser_url: http://localhost:8000
 
 If both REST API and frontend are served on the same domain (e.g. through Nginx reverse proxy), for example:
 
@@ -19,16 +21,21 @@ If both REST API and frontend are served on the same domain (e.g. through Nginx 
 
 Then you can use relative path:
 
-.. code:: bash
+.. code-block:: yaml
+    :caption: config.yml
 
-    SYNCMASTER__UI__API_BROWSER_URL=/api
+    ui:
+        api_browser_url: /api
 
 Auth provider
 -------------
 
 By default, SyncMaster UI shows login page with username & password fields, designed for :ref:`server-auth-dummy`.
-To show a login page for :ref:`keycloak-auth-provider`, you should pass this environment variable to frontend container:
+To show a login page for :ref:`keycloak-auth-provider`, you should set config option:
 
-.. code:: bash
+.. code-block:: yaml
+    :caption: config.yml
 
-    SYNCMASTER__UI__AUTH_PROVIDER=keycloakAuthProvider
+    ui:
+        api_browser_url: keycloakAuthProvider
+        # api_browser_url: dummyAuth

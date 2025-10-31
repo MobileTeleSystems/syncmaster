@@ -9,12 +9,16 @@ Return debug info in REST API responses
 By default, server does not add error details to response bodies,
 to avoid exposing instance-specific information to end users.
 
-You can change this by setting:
+With debug enabled:
+
+.. code-block:: yaml
+    :caption: config.yml
+
+    server:
+        debug: true
 
 .. code-block:: console
 
-    $ export SYNCMASTER__SERVER__DEBUG=False
-    $ # start REST API server
     $ curl -XPOST http://localhost:8000/failing/endpoint ...
     {
         "error": {
@@ -24,10 +28,16 @@ You can change this by setting:
         },
     }
 
+With debug disabled:
+
+.. code-block:: yaml
+    :caption: config.yml
+
+    server:
+        debug: false
+
 .. code-block:: console
 
-    $ export SYNCMASTER__SERVER__DEBUG=True
-    $ # start REST API server
     $ curl -XPOST http://localhost:8000/failing/endpoint ...
     Traceback (most recent call last):
     File ".../uvicorn/protocols/http/h11_impl.py", line 408, in run_asgi
@@ -57,12 +67,19 @@ This is done by ``request_id`` middleware, which is enabled by default and can c
 Print request ID  to backend logs
 ---------------------------------
 
-This is done by adding a specific filter to logging handler:
+This is done by adding a specific filter to logging settings:
 
 .. dropdown:: ``logging.yml``
 
-    .. literalinclude:: ../../../../syncmaster/settings/log/plain.yml
-        :emphasize-lines: 6-12,17-18,25
+    .. code-block:: yaml
+        :caption: config.yml
+
+        logging:
+            filters:
+                correlation_id:
+                    class: asgi_correlation_id.CorrelationIdFilter
+                    uuid_length: 32
+                    default_value: '-'
 
 Resulting logs look like:
 

@@ -33,17 +33,17 @@ With docker
 
   ``docker-compose`` will download all necessary images, create containers, and then start the worker.
 
-  Options can be set via ``.env`` file or ``environment`` section in ``docker-compose.yml``
-
   .. dropdown:: ``docker-compose.yml``
 
     .. literalinclude:: ../../../docker-compose.yml
-        :emphasize-lines: 84-102
+        :emphasize-lines: 77-96
 
-  .. dropdown:: ``.env.docker``
+  Options can be set via ``config.yml`` file:
 
-    .. literalinclude:: ../../../.env.docker
-        :emphasize-lines: 8-16,40-47
+  .. dropdown:: ``config.yml``
+
+    .. literalinclude:: ../../../config.yml
+        :emphasize-lines: 1-10,57-67
 
 Without docker
 ^^^^^^^^^^^^^^

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from pathlib import Path
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
 
 class StaticFilesSettings(BaseModel):
@@ -13,10 +13,13 @@ class StaticFilesSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        SYNCMASTER__SERVER__STATIC_FILES__ENABLED=True
-        SYNCMASTER__SERVER__STATIC_FILES__DIRECTORY=/app/syncmaster/server/static
+        server:
+            static_files:
+                enabled: True
+                directory: /app/syncmaster/server/static
     """
 
     enabled: bool = Field(default=True, description="Set to ``True`` to enable static file serving")
@@ -26,7 +29,9 @@ class StaticFilesSettings(BaseModel):
     )
 
     @field_validator("directory")
-    def _validate_directory(cls, value: Path) -> Path:
+    def _validate_directory(cls, value: Path, info: ValidationInfo) -> Path:
+        if not info.data.get("enabled"):
+            return value
         if not value.exists():
             raise ValueError(f"Directory '{value}' does not exist")
         if not value.is_dir():

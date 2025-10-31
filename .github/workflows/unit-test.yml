@@ -65,7 +65,6 @@ jobs:
 
       - name: Run Unit Tests
         run: |
-          source .env.local
           source .env.local.test
           poetry run coverage run -m pytest -vvv -s -k "test_unit or test_database"
 

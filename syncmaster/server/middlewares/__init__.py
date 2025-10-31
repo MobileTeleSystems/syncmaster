@@ -12,7 +12,6 @@ from syncmaster.server.middlewares.request_id import apply_request_id_middleware
 from syncmaster.server.middlewares.session import apply_session_middleware
 from syncmaster.server.middlewares.static_files import apply_static_files
 from syncmaster.server.settings import ServerAppSettings as Settings
-from syncmaster.settings.log import setup_logging
 
 
 def apply_middlewares(
@@ -20,9 +19,6 @@ def apply_middlewares(
     settings: Settings,
 ) -> FastAPI:
     """Add middlewares to the application."""
-
-    if settings.logging.setup:
-        setup_logging(settings.logging.get_log_config_path())
 
     apply_cors_middleware(application, settings.server.cors)
     apply_monitoring_metrics_middleware(application, settings.server.monitoring)

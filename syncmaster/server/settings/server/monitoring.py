@@ -18,11 +18,22 @@ class MonitoringSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        SYNCMASTER__SERVER__MONITORING__ENABLED=True
-        SYNCMASTER__SERVER__MONITORING__SKIP_PATHS=["/some/path"]
-        SYNCMASTER__SERVER__MONITORING__SKIP_METHODS=["OPTIONS"]
+        server:
+            monitoring:
+                enabled: True
+                labels:
+                    instance: "production"
+                skip_paths:
+                    - "/some/path"
+                skip_methods:
+                    - OPTIONS
+                group_paths: True
+                filter_unhandled_paths: True
+
+                # custom option passed directly to starlette-exporter
     """
 
     enabled: bool = Field(default=True, description="Set to ``True`` to enable middleware")

@@ -7,14 +7,25 @@ from logging.config import fileConfig
 from alembic import context
 from alembic.script import ScriptDirectory
 from celery.backends.database.session import ResultModelBase
+from pydantic import Field
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from syncmaster.db.models import Base
-from syncmaster.server.settings import ServerAppSettings as Settings
+from syncmaster.server.settings import (
+    DEFAULT_LOGGING_SETTINGS,
+    BaseSettings,
+    DatabaseSettings,
+    LoggingSettings,
+)
 
 config = context.config
+
+
+class MigrationAppSettings(BaseSettings):
+    database: DatabaseSettings = Field(default_factory=DatabaseSettings, description="Database settings")
+    logging: LoggingSettings = Field(default=DEFAULT_LOGGING_SETTINGS, description="Logging settings")
 
 
 if config.config_file_name is not None:
@@ -23,7 +34,7 @@ if config.config_file_name is not None:
 if not config.get_main_option("sqlalchemy.url"):
     # read application settings only if sqlalchemy.url is not being passed via cli arguments
     # TODO: remove settings object creating during import
-    config.set_main_option("sqlalchemy.url", Settings().database.url)
+    config.set_main_option("sqlalchemy.url", MigrationAppSettings().database.url)
 
 target_metadata = (
     Base.metadata,

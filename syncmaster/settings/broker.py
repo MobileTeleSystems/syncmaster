@@ -11,13 +11,14 @@ class RabbitMQSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        # Set the RabbitMQ connection URL
-        SYNCMASTER__BROKER__URL=amqp://guest:guest@rabbitmq:5672/
+        broker:
+            url: amqp://guest:guest@rabbitmq:5672/
 
-        # Pass custom options directly
-        SYNCMASTER__BROKER__CONNECTION_TIMEOUT=30
+            # custom option passed directly to RabbitMQ client
+            connection_timeout: 30
     """
 
     url: str = Field(

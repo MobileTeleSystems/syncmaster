@@ -54,7 +54,6 @@ jobs:
 
       - name: Generate OpenAPI Schema
         run: |
-          source .env.local
           poetry run python -m syncmaster.server.scripts.export_openapi_schema docs/_static/openapi.json
 
       - name: Fix logo in Readme

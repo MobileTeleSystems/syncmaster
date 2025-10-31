@@ -14,11 +14,16 @@ class SwaggerSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        SYNCMASTER__SERVER__OPENAPI__SWAGGER__ENABLED=True
-        SYNCMASTER__SERVER__OPENAPI__SWAGGER__JS_URL=/static/swagger/swagger-ui-bundle.js
-        SYNCMASTER__SERVER__OPENAPI__SWAGGER__CSS_URL=/static/swagger/swagger-ui.css
+        server:
+            openapi:
+                swagger:
+                    enabled: True
+                    js_url: /static/swagger/swagger-ui-bundle.js
+                    css_url: /static/swagger/swagger-ui.css
+                    extra_parameters: {}
     """
 
     enabled: bool = Field(default=True, description="Set to ``True`` to enable Swagger UI endpoint")
@@ -49,10 +54,14 @@ class RedocSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        SYNCMASTER__SERVER__OPENAPI__REDOC__ENABLED=True
-        SYNCMASTER__SERVER__OPENAPI__REDOC__JS_URL=/static/redoc/redoc.standalone.js
+        server:
+            openapi:
+                redoc:
+                    enabled: True
+                    js_url: /static/redoc/redoc.standalone.js
     """
 
     enabled: bool = Field(default=True, description="Set to ``True`` to enable Redoc UI endpoint")
@@ -71,12 +80,16 @@ class LogoSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        SYNCMASTER__SERVER__OPENAPI__LOGO__URL=/static/logo.svg
-        SYNCMASTER__SERVER__OPENAPI__LOGO__BACKGROUND_COLOR=ffffff
-        SYNCMASTER__SERVER__OPENAPI__LOGO__ALT_TEXT=Syncmaster logo
-        SYNCMASTER__SERVER__OPENAPI__LOGO__HREF=http://mycompany.domain.com
+        server:
+            openapi:
+                logo:
+                    url: /static/logo.svg
+                    background_color: ffffff
+                    alt_text: Syncmaster logo
+                    href: http://mycompany.domain.com
     """
 
     url: str = Field(
@@ -103,9 +116,13 @@ class FaviconSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        SYNCMASTER__SERVER__OPENAPI__FAVICON__URL=/static/icon.svg
+        server:
+            openapi:
+                favicon:
+                    url: /static/icon.svg
     """
 
     url: str = Field(
@@ -122,11 +139,20 @@ class OpenAPISettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        SYNCMASTER__SERVER__OPENAPI__ENABLED=True
-        SYNCMASTER__SERVER__OPENAPI__SWAGGER__ENABLED=True
-        SYNCMASTER__SERVER__OPENAPI__REDOC__ENABLED=True
+        server:
+            openapi:
+                enabled: True
+                swagger:
+                    enabled: True
+                redoc:
+                    enabled: True
+                logo:
+                    url: /static/logo.svg
+                favicon:
+                    url: /static/icon.svg
     """
 
     enabled: bool = Field(default=True, description="Set to ``True`` to enable OpenAPI.json endpoint")

@@ -19,11 +19,23 @@ class ServerSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        SYNCMASTER__SERVER__DEBUG=True
-        SYNCMASTER__SERVER__REQUEST_ID__ENABLED=True
-        SYNCMASTER__SERVER__MONITORING__ENABLED=True
+        server:
+            debug: true
+            request_id:
+                enabled: true
+            session:
+                secret_key: super-secret-key
+            cors:
+                enabled: true
+            monitoring:
+                enabled: true
+            openapi:
+                enabled: true
+            static_files:
+                enabled: true
     """
 
     debug: bool = Field(
