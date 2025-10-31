@@ -12,10 +12,13 @@ class JWTSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        SYNCMASTER__AUTH__ACCESS_KEY__SECRET_KEY=somesecret
-        SYNCMASTER__AUTH__ACCESS_KEY__EXPIRE_SECONDS=3600  # 1 hour
+        auth:
+            access_key:
+                secret_key: jwt_secret
+                expire_seconds: 3600  # 1 hour
     """
 
     secret_key: SecretStr = Field(

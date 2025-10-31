@@ -23,17 +23,17 @@ With docker
 
   ``docker-compose`` will download all necessary images, create containers, and then start the server.
 
-  Options can be set via ``.env`` file or ``environment`` section in ``docker-compose.yml``
-
   .. dropdown:: ``docker-compose.yml``
 
     .. literalinclude:: ../../../docker-compose.yml
-        :emphasize-lines: 47-82
+        :emphasize-lines: 48-75
 
-  .. dropdown:: ``.env.docker``
+  Options can be set via ``config.yml`` file:
 
-    .. literalinclude:: ../../../.env.docker
-        :emphasize-lines: 4-35
+  .. dropdown:: ``config.yml``
+
+    .. literalinclude:: ../../../config.yml
+        :emphasize-lines: 7-27, 36-49, 70-71
 
 * After server is started and ready, open http://localhost:8000/docs.
 

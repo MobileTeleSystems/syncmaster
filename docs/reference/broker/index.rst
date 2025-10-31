@@ -30,17 +30,17 @@ With Docker
   ``docker-compose`` will download RabbitMQ image, create container and volume, and then start container.
   Image entrypoint will create database if volume is empty.
 
-  Options can be set via ``.env`` file or ``environment`` section in ``docker-compose.yml``
-
   .. dropdown:: ``docker-compose.yml``
 
     .. literalinclude:: ../../../docker-compose.yml
-        :emphasize-lines: 33-45,144
+        :emphasize-lines: 34-46,134
 
-  .. dropdown:: ``.env.docker``
+  Options can be set via ``config.yml`` file:
 
-    .. literalinclude:: ../../../.env.docker
-        :emphasize-lines: 15-16
+  .. dropdown:: ``config.yml``
+
+    .. literalinclude:: ../../../config.yml
+        :emphasize-lines: 4-5
 
 Without Docker
 ^^^^^^^^^^^^^^

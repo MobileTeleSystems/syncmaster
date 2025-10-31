@@ -1,11 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 
-
-import json
-from typing import Any
-
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CORSSettings(BaseModel):
@@ -23,25 +19,31 @@ class CORSSettings(BaseModel):
 
     For development environment:
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        SYNCMASTER__SERVER__CORS__ENABLED=True
-        SYNCMASTER__SERVER__CORS__ALLOW_ORIGINS="*"
-        SYNCMASTER__SERVER__CORS__ALLOW_METHODS="*"
-        SYNCMASTER__SERVER__CORS__ALLOW_HEADERS="*"
-        SYNCMASTER__SERVER__CORS__EXPOSE_HEADERS=X-Request-ID,Location,Access-Control-Allow-Credentials
+        server:
+            cors:
+                enabled: True
+                allow_origins: ["*"]
+                allow_methods: ["*"]
+                allow_headers: ["*"]
+                expose_headers: [X-Request-ID, Location, Access-Control-Allow-Credentials]
 
     For production environment:
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        SYNCMASTER__SERVER__CORS__ENABLED=True
-        SYNCMASTER__SERVER__CORS__ALLOW_ORIGINS="production.example.com"
-        SYNCMASTER__SERVER__CORS__ALLOW_METHODS="GET"
-        SYNCMASTER__SERVER__CORS__ALLOW_HEADERS="X-Request-ID,X-Request-With"
-        SYNCMASTER__SERVER__CORS__EXPOSE_HEADERS="X-Request-ID"
-        # custom option passed directly to middleware
-        SYNCMASTER__SERVER__CORS__MAX_AGE=600
+        server:
+            cors:
+                enabled: True
+                allow_origins: [production.example.com]
+                allow_methods: [GET]
+                allow_headers: [X-Request-ID, X-Request-With]
+                expose_headers: [X-Request-ID]
+                # custom option passed directly to middleware
+                max_age: 600
     """
 
     enabled: bool = Field(default=True, description="Set to ``True`` to enable middleware")
@@ -57,14 +59,5 @@ class CORSSettings(BaseModel):
         description="HTTP headers allowed for CORS",
     )
     expose_headers: list[str] = Field(default=["X-Request-ID"], description="HTTP headers exposed from server")
-
-    @field_validator("allow_origins", "allow_methods", "allow_headers", "expose_headers", mode="before")
-    @classmethod
-    def _validate_bootstrap_servers(cls, value: Any):
-        if not isinstance(value, str):
-            return value
-        if "[" in value:
-            return json.loads(value)
-        return [item.strip() for item in value.split(",")]
 
     model_config = ConfigDict(extra="allow")

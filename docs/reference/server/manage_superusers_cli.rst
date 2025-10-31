@@ -5,10 +5,25 @@ CLI for managing superusers
 
 There are two ways to manage users:
 
-* automatic:
+* automatic
 
-  Set ``SYNCMASTER__ENTRYPOINT__SUPERUSERS=user1,user2``, and :ref:`server` Docker container entrypoint
-  will automatically set ``is_superuser=True`` flag for them, and reset for other users in database.
+  :ref:`server` Docker container entrypoint will automatically create users with ``is_superuser=True`` in database
+  during startup.
+
+  Usernames can be passed via config file:
+
+  .. code-block:: yaml
+    :caption: config.yml
+
+    superusers:
+        - user1
+        - user2
+
+  Or via enviroment variable:
+
+  .. code-block:: bash
+
+    export 'SYNCMASTER__SUPERUSERS=["user1", "user2"]'
 
 * manual via CLI:
 

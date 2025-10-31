@@ -17,15 +17,17 @@ class HWMStoreSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        # Set the HWM Store connection URL
-        SYNCMASTER__HWM_STORE__ENABLED=True
-        SYNCMASTER__HWM_STORE__TYPE=horizon
-        SYNCMASTER__HWM_STORE__URL=http://horizon:8000
-        SYNCMASTER__HWM_STORE__USER=some_user
-        SYNCMASTER__HWM_STORE__PASSWORD=changeme
-        SYNCMASTER__HWM_STORE__NAMESPACE=syncmaster_internal
+        hwm_store:
+            # Set the HWM Store connection URL
+            enabled: true
+            type: horizon
+            url: http://horizon:8000
+            user: some_user
+            password: changeme
+            namespace: syncmaster_internal
     """
 
     enabled: bool = Field(

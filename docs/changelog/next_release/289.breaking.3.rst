@@ -1,0 +1,1 @@
+Environment variable ``SYNCMASTER__ENTRYPOINT__SUPERUSERS`` is renamed to ``SYNCMASTER__SUPERUSERS``.

@@ -4,21 +4,25 @@ from httpx import AsyncClient
 from syncmaster.server.settings import ServerAppSettings as Settings
 from tests.mocks import MockUser
 
-OAuth2GatewayProvider = "syncmaster.server.providers.auth.oauth2_gateway_provider.OAuth2GatewayProvider"
 pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
-
-@pytest.mark.parametrize(
-    "settings",
-    [
-        {
-            "auth": {
-                "provider": OAuth2GatewayProvider,
-            },
+OAUTH2GATEWAY_AUTH_SETTINGS = {
+    "auth": {
+        "provider": "syncmaster.server.providers.auth.oauth2_gateway_provider.OAuth2GatewayProvider",
+        "keycloak": {
+            "server_url": "http://localhost:8080",
+            "realm_name": "manually_created",
+            "client_id": "manually_created",
+            "client_secret": "generated_by_keycloak",
+            "redirect_uri": "http://localhost:3000/auth/callback",
+            "scope": "email",
+            "verify_ssl": False,
         },
-    ],
-    indirect=True,
-)
+    },
+}
+
+
+@pytest.mark.parametrize("settings", [OAUTH2GATEWAY_AUTH_SETTINGS], indirect=True)
 async def test_get_keycloak_token_active(
     client: AsyncClient,
     simple_user: MockUser,
@@ -44,17 +48,7 @@ async def test_get_keycloak_token_active(
     }
 
 
-@pytest.mark.parametrize(
-    "settings",
-    [
-        {
-            "auth": {
-                "provider": OAuth2GatewayProvider,
-            },
-        },
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("settings", [OAUTH2GATEWAY_AUTH_SETTINGS], indirect=True)
 async def test_get_keycloak_token_inactive(
     client: AsyncClient,
     simple_user: MockUser,

@@ -14,10 +14,14 @@ class RequestIDSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        SYNCMASTER__SERVER__REQUEST_ID__ENABLED=True
-        SYNCMASTER__SERVER__REQUEST_ID__UPDATE_REQUEST_HEADER=True
+        server:
+            request_id:
+                enabled: True
+                header_name: X-Request-ID
+                update_request_header: True
     """
 
     enabled: bool = Field(default=True, description="Set to ``True`` to enable middleware")

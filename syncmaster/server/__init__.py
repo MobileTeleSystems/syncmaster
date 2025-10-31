@@ -20,6 +20,7 @@ from syncmaster.server.middlewares import apply_middlewares
 from syncmaster.server.providers.auth import AuthProvider
 from syncmaster.server.services.unit_of_work import UnitOfWork
 from syncmaster.server.settings import ServerAppSettings as Settings
+from syncmaster.settings.logging import setup_logging
 
 __all__ = ["get_application", "application_factory"]
 
@@ -71,4 +72,6 @@ def application_factory(settings: Settings) -> FastAPI:
 
 
 def get_application() -> FastAPI:
-    return application_factory(settings=Settings())
+    settings = Settings()
+    setup_logging(settings.logging)
+    return application_factory(settings=settings)

@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from syncmaster.server.settings.auth import AuthSettings
 from syncmaster.server.settings.server import ServerSettings
 from syncmaster.settings import (
+    DEFAULT_LOGGING_SETTINGS,
+    BaseSettings,
     CredentialsEncryptionSettings,
     DatabaseSettings,
     LoggingSettings,
@@ -14,15 +15,13 @@ from syncmaster.settings import (
 
 
 class ServerAppSettings(BaseSettings):
-    """Syncmaster server settings.
+    """Server application settings.
 
-    Server can be configured in 2 ways:
+    The settings can be passed in several ways:
 
-    * By explicitly passing ``settings`` object as an argument to :obj:`application_factory <syncmaster.server.main.application_factory>`
-    * By setting up environment variables matching a specific key.
-
-    All environment variable names are written in uppercase and should be prefixed with ``SYNCMASTER__``.
-    Nested items are delimited with ``__``.
+    1. By storing settings in a configuration file ``config.yml`` (preferred).
+    2. By setting environment variables matching specific keys (``SYNCMASTER__DATABASE__URL`` == ``database.url``).
+    3. By explicitly passing a settings object as an argument of application factory function.
 
     More details can be found in
     `Pydantic documentation <https://docs.pydantic.dev/latest/concepts/pydantic_settings/>`_.
@@ -30,19 +29,31 @@ class ServerAppSettings(BaseSettings):
     Examples
     --------
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        # same as settings.database.url = "postgresql+asyncpg://postgres:postgres@localhost:5432/syncmaster"
-        SYNCMASTER__DATABASE__URL=postgresql+asyncpg://postgres:postgres@localhost:5432/syncmaster
+        database:
+            url: postgresql+asyncpg://postgres:postgres@localhost:5432/syncmaster
 
-        # same as settings.server.debug = True
-        SYNCMASTER__SERVER__DEBUG=True
+        broker:
+            url: amqp://user:password@localhost:5672/
+
+        logging: {}
+        encryption: {}
+        server: {}
+        auth: {}
     """
 
-    database: DatabaseSettings = Field(description=":ref:`Database settings <server-configuration-database>`")
-    broker: RabbitMQSettings = Field(description=":ref:`Broker settings <server-configuration-broker>`")
+    database: DatabaseSettings = Field(
+        default_factory=DatabaseSettings,  # type: ignore[arg-type]
+        description=":ref:`Database settings <server-configuration-database>`",
+    )
+    broker: RabbitMQSettings = Field(
+        default_factory=RabbitMQSettings,  # type: ignore[arg-type]
+        description=":ref:`Broker settings <server-configuration-broker>`",
+    )
     logging: LoggingSettings = Field(
-        default_factory=LoggingSettings,
+        default=DEFAULT_LOGGING_SETTINGS,
         description=":ref:`Logging settings <server-configuration-logging>`",
     )
     server: ServerSettings = Field(
@@ -57,5 +68,3 @@ class ServerAppSettings(BaseSettings):
         default_factory=CredentialsEncryptionSettings,  # type: ignore[arg-type]
         description="Settings for encrypting credential data",
     )
-
-    model_config = SettingsConfigDict(env_prefix="SYNCMASTER__", env_nested_delimiter="__")

@@ -8,12 +8,33 @@ import argparse
 import asyncio
 import logging
 
+from pydantic import Field
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.future import select
 
 from syncmaster.db.models.user import User
-from syncmaster.server.middlewares import setup_logging
-from syncmaster.server.settings import ServerAppSettings as Settings
+from syncmaster.server.settings import (
+    DEFAULT_LOGGING_SETTINGS,
+    BaseSettings,
+    DatabaseSettings,
+    LoggingSettings,
+)
+from syncmaster.settings.logging import setup_logging
+
+
+class SuperuserAppSettings(BaseSettings):
+    database: DatabaseSettings = Field(
+        default_factory=DatabaseSettings,  # type: ignore[arg-type]
+        description="Database settings",
+    )
+    logging: LoggingSettings = Field(
+        default=DEFAULT_LOGGING_SETTINGS,
+        description="Logging settings",
+    )
+    superusers: list[str] = Field(
+        default_factory=list,
+        description="List of superuser usernames",
+    )
 
 
 async def add_superusers(session: AsyncSession, usernames: list[str]) -> None:
@@ -93,13 +114,15 @@ async def main(args: argparse.Namespace, session: AsyncSession) -> None:
 
 
 if __name__ == "__main__":
-    settings = Settings()
-    if settings.logging.setup:
-        setup_logging(settings.logging.get_log_config_path())
+    settings = SuperuserAppSettings()
+    setup_logging(settings.logging)
 
     engine = create_async_engine(settings.database.url)
     SessionLocal = async_sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
     parser = create_parser()
     args = parser.parse_args()
+    if not args.usernames:
+        args.usernames = settings.superusers
+
     session = SessionLocal()
     asyncio.run(main(args, session))

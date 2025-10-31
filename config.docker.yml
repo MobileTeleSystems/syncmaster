@@ -1,0 +1,68 @@
+database:
+  url: postgresql+asyncpg://syncmaster:changeme@db:5432/syncmaster
+
+broker:
+  url: amqp://guest:guest@rabbitmq:5672
+
+encryption:
+  # Encrypt / Decrypt credentials data using this Fernet key.
+  # !!! GENERATE YOUR OWN COPY FOR PRODUCTION USAGE !!!
+  secret_key: UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94=
+
+
+auth:
+  # Dummy Auth
+  provider: syncmaster.server.providers.auth.dummy_provider.DummyAuthProvider
+  access_token:
+    secret_key: generate_another_random_string
+
+  # Keycloak Auth
+  # provider: syncmaster.server.providers.auth.keycloak_provider.KeycloakAuthProvider
+  # server_url: http://keycloak:8080
+  # realm_name: manually_created
+  # client_id: manually_created
+  # client_secret: generated_by_keycloak
+  # redirect_uri: http://localhost:3000/auth/callback
+  # scope: email
+  # verify_ssl: False
+
+
+ui:
+  api_browser_url: http://localhost:8000
+  auth_provider: dummyAuth
+  # auth_provider: keycloakAuth
+
+
+server:
+  debug: true # !!! NEVER USE ON PRODUCTION !!!
+
+  session:
+    secret_key: generate_some_random_string
+    max_age: 86400
+
+  cors:
+    enabled: true
+
+  allow_origins: [http://localhost:3000]
+  allow_credentials: true
+  allow_methods: ['*']
+  allow_headers: ['*']
+  expose_headers: [X-Request-ID, Location, Access-Control-Allow-Credentials]
+
+
+
+scheduler:
+  transfer_fetching_timeout_seconds: 200
+
+
+worker:
+  log_url_template: https://logs.location.example.com/syncmaster-worker?correlation_id={{ correlation_id }}&run_id={{ run.id }}
+
+
+hwm_store:
+  enabled: true
+  type: horizon
+  url: http://horizon:8000
+  namespace: syncmaster_namespace
+  user: admin
+  password: 123UsedForTestOnly@!

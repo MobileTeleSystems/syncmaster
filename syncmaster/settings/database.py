@@ -18,11 +18,14 @@ class DatabaseSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: bash
+    .. code-block:: yaml
+        :caption: config.yml
 
-        DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/syncmaster
-        # custom option passed directly to engine factory
-        DATABASE_POOL_PRE_PING=True
+        database:
+            url: postgresql+asyncpg://postgres:postgres@localhost:5432/syncmaster
+
+            # custom option passed directly to SQLAlchemy Engine
+            pool_pre_ping: True
     """
 
     url: str = Field(

@@ -25,7 +25,8 @@ services:
       context: .
       target: prod
     entrypoint: [python, -m, syncmaster.db.migrations, upgrade, head]
-    env_file: .env.docker
+    volumes:
+      - ./config.docker.yml:/app/config.yml
     depends_on:
       db:
         condition: service_healthy
@@ -54,15 +55,13 @@ services:
     ports:
       - 8000:8000
     environment:
-      # list here usernames which should be assigned SUPERUSER role on application start
-      SYNCMASTER__ENTRYPOINT__SUPERUSERS: admin
       # PROMETHEUS_MULTIPROC_DIR is required for multiple workers, see:
       # https://prometheus.github.io/client_python/multiprocess/
       PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus-metrics
     # tmpfs dir is cleaned up each container restart
     tmpfs:
+      - ./config.docker.yml:/app/config.yml
       - /tmp/prometheus-metrics:mode=1777
-    env_file: .env.docker
     depends_on:
       db:
         condition: service_healthy
@@ -82,8 +81,9 @@ services:
       dockerfile: docker/Dockerfile.worker
       context: .
       target: prod
-    env_file: .env.docker
     command: --loglevel=info -Q 123-test_queue  # Queue.slug
+    volumes:
+      - ./config.docker.yml:/app/config.yml
     depends_on:
       db:
         condition: service_healthy
@@ -102,7 +102,8 @@ services:
       dockerfile: docker/Dockerfile.scheduler
       context: .
       target: prod
-    env_file: .env.docker
+    volumes:
+      - ./config.docker.yml:/app/config.yml
     depends_on:
       db:
         condition: service_healthy
@@ -117,7 +118,8 @@ services:
   frontend:
     image: mtsrus/syncmaster-ui:${VERSION:-develop}
     restart: unless-stopped
-    env_file: .env.docker
+    volumes:
+      - ./config.docker.yml:/app/config.yml
     ports:
       - 3000:3000
     depends_on:

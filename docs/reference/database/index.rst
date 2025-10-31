@@ -43,17 +43,17 @@ With Docker
 
   After that, one-off container with migrations script will run.
 
-  Options can be set via ``.env`` file or ``environment`` section in ``docker-compose.yml``
-
   .. dropdown:: ``docker-compose.yml``
 
       .. literalinclude:: ../../../docker-compose.yml
-          :emphasize-lines: 1-31,142
+          :emphasize-lines: 1-32,133
 
-  .. dropdown:: ``.env.docker``
+  Options can be set via ``config.yml`` file:
 
-      .. literalinclude:: ../../../.env.docker
-          :emphasize-lines: 8-9
+  .. dropdown:: ``config.yml``
+
+      .. literalinclude:: ../../../config.yml
+          :emphasize-lines: 1-2
 
 Without Docker
 ~~~~~~~~~~~~~~
@@ -73,18 +73,19 @@ Without Docker
 
       $ pip install syncmaster[postgres]
 
-* Configure :ref:`Database connection <configuration-database>` using environment variables, e.g. by creating ``.env`` file:
+* Configure :ref:`Database connection <configuration-database>` by creating config file:
 
-  .. code-block:: console
-    :caption: /some/.env
+  .. code-block:: yaml
+    :caption: /some/config.yml
 
-    $ export SYNCMASTER__DATABASE__URL=postgresql+asyncpg://syncmaster:changeme@db:5432/syncmaster
+    database:
+        url: postgresql+asyncpg://syncmaster:changeme@db:5432/syncmaster
 
-  And then read values from this file:
+  File should be created in current directory. If not, you can override its location via environment variable:
 
   .. code:: console
 
-    $ source /some/.env
+    $ export SYNCMASTER_CONFIG_FILE=/some/config.yml
 
 * Run migrations:
 

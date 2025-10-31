@@ -24,17 +24,17 @@ With docker
 
   ``docker-compose`` will download all necessary images, create containers, and then start the scheduler.
 
-  Options can be set via ``.env`` file or ``environment`` section in ``docker-compose.yml``
-
   .. dropdown:: ``docker-compose.yml``
 
     .. literalinclude:: ../../../docker-compose.yml
-        :emphasize-lines: 104-121
+        :emphasize-lines: 98-116
 
-  .. dropdown:: ``.env.docker``
+  Options can be set via ``config.yml`` file:
 
-    .. literalinclude:: ../../../.env.docker
-        :emphasize-lines: 8-16,37-38
+  .. dropdown:: ``config.yml``
+
+    .. literalinclude:: ../../../config.yml
+        :emphasize-lines: 1-5,53-54
 
 Without docker
 ^^^^^^^^^^^^^^

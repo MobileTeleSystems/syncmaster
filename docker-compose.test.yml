@@ -42,10 +42,10 @@ services:
       context: .
       target: test
     volumes:
+      - ./config.docker.yml:/app/config.yml
       - ./syncmaster:/app/syncmaster
       - ./tests:/app/tests
     entrypoint: [python, -m, syncmaster.db.migrations, upgrade, head]
-    env_file: .env.docker
     depends_on:
       db:
         condition: service_healthy
@@ -57,10 +57,10 @@ services:
       dockerfile: docker/Dockerfile.server
       context: .
       target: test
-    env_file: .env.docker
     ports:
       - 8000:8000
     volumes:
+      - ./config.docker.yml:/app/config.yml
       - ./syncmaster:/app/syncmaster
       - ./docs/_static:/app/docs/_static
       - ./reports:/app/reports
@@ -82,8 +82,8 @@ services:
       dockerfile: docker/Dockerfile.scheduler
       context: .
       target: test
-    env_file: .env.docker
     volumes:
+      - ./config.docker.yml:/app/config.yml
       - ./syncmaster:/app/syncmaster
       - ./tests:/app/tests
       - ./reports:/app/reports
@@ -106,13 +106,12 @@ services:
       target: test
     command: --loglevel=info -Q 123-test_queue
     entrypoint: [coverage, run, -m, celery, -A, tests.test_integration.celery_test, worker, --max-tasks-per-child=1]
-    env_file:
-      - .env.docker
-      - .env.docker.test
+    env_file: .env.docker.test
     environment:
       # CI runs tests in the worker container, so we need to turn off interaction with static files for it
       - SYNCMASTER__SERVER__STATIC_FILES__ENABLED=false
     volumes:
+      - ./config.docker.yml:/app/config.yml
       - ./syncmaster:/app/syncmaster
       - ./reports:/app/reports
       - ./tests:/app/tests

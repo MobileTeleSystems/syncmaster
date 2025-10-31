@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "data-syncmaster"
-version = "0.2.6"
+version = "0.3.0"
 license = "Apache-2.0"
 description = "Syncmaster REST API + Worker"
 authors = ["DataOps.ETL <onetools@mts.ru>"]
@@ -46,6 +46,7 @@ exclude = [
 python = "^3.11"
 pydantic = "^2.12.4"
 pydantic-settings = "^2.8.1"
+pydantic-settings-logging = "^0.1.1"
 sqlalchemy = "^2.0.40"
 sqlalchemy-utils = "^0.42.0"
 pyyaml = "^6.0.3"

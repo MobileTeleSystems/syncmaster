@@ -101,7 +101,7 @@ Then start development server:
 
 And open http://localhost:8000/docs
 
-Settings are stored in ``.env.local`` file.
+Settings are stored in ``config.yml`` file.
 
 To start development worker, open a new terminal window/tab, and run:
 
@@ -181,6 +181,7 @@ To run specific integration tests:
     make test-integration-hdfs
 
 This starts database, broker & worker containers, and also HDFS container. Then it runs only HDFS-related integration tests.
+DB/filesystem addresses and credentials are stored in ``.env.local`` file.
 
 To run full test suite:
 
@@ -219,7 +220,7 @@ And then start all necessary services:
 
 Then open http://localhost:8000/docs
 
-Settings are stored in ``.env.docker`` file.
+Settings are stored in ``config.yml`` file.
 
 Build documentation
 ~~~~~~~~~~~~~~~~~~~

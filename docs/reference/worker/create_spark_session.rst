@@ -8,9 +8,11 @@ By default, SparkSession is created with ``master=local``, all required .jar pac
 
 It is possible to alter SparkSession config by providing custom function:
 
-.. code-block:: bash
+.. code-block:: yaml
+    :caption: config.yml
 
-  SYNCMASTER__WORKER__CREATE_SPARK_SESSION_FUNCTION=my_worker.spark.create_custom_spark_session
+    worker:
+        create_spark_session_function: my_worker.spark.create_custom_spark_session
 
 Here is a function example:
 
