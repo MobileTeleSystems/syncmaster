@@ -161,3 +161,89 @@ Transfers cannot be created without queue. If there are no workers bound to a qu
 
     @enduml
 ```
+
+```mermaid
+---
+title: Entity Diagram
+---
+erDiagram
+    direction LR
+    User {
+        id        
+        username
+        is_active
+        is_superuser
+        created_at
+        updated_at
+    }
+
+    Group {
+        id        
+        name
+        description
+        owner_id
+        created_at
+        updated_at
+    }
+
+    Connection {
+        id        
+        group_id
+        type
+        name
+        description
+        data
+        created_at
+        updated_at
+    }
+
+    Queue {
+        id        
+        name
+        slug
+        description
+        created_at
+        updated_at
+    }
+    
+
+    Transfer {
+        id        
+        group_id
+        name
+        source_connection_id
+        target_connection_id
+        strategy_params
+        target_params
+        transformations
+        resources
+        is_scheduled
+        schedule
+        queue_id
+        created_at
+        updated_at
+    }
+
+    Run {
+        id
+        transfer_id
+        started_at
+        ended_at
+        status
+        type
+        log_url
+        transfer_dump
+        created_at
+        updated_at
+    }
+    
+    Run ||--o{ Transfer: contains   
+   
+    Transfer ||--o{ Queue: contains
+    Transfer ||--o{ Connection: contains
+    Transfer ||--o{ Group: contains
+    Connection ||--o{ Group: contains
+    Queue ||--o{ Group: contains
+    Group }o--o{ User: contains
+    Group ||--o{ User: contains
+```

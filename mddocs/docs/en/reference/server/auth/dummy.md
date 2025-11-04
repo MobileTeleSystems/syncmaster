@@ -69,6 +69,45 @@ After successful auth, username is saved to server database.
         @enduml
 ```
 
+```mermaid
+sequenceDiagram
+participant "Client"
+participant "Server"
+activate "Client"
+alt Successful case
+"Client" ->> "Server" : login + password
+"Server" ->> "Server" : Password is completely ignored
+"Server" ->> "Server" : Check user in internal server database
+"Server" ->> "Server" : Create user if not exist
+else
+"Client" ->> "Server" : login + password
+"Server" ->> "Server" : Password is completely ignored
+"Server" ->> "Server" : Check user in internal server database
+else
+"Client" ->> "Server" : login + password
+"Server" ->> "Server" : Password is completely ignored
+"Server" ->> "Server" : Check user in internal server database
+end
+alt Successful case
+"Client" ->> "Server" : access_token
+"Server" ->> "Server" : Validate token
+"Server" ->> "Server" : Check user in internal server database
+"Server" ->> "Server" : Get data
+else
+"Client" ->> "Server" : access_token
+"Server" ->> "Server" : Validate token
+else
+"Client" ->> "Server" : access_token
+"Server" ->> "Server" : Validate token
+"Server" ->> "Server" : Check user in internal server database
+else
+"Client" ->> "Server" : access_token
+"Server" ->> "Server" : Validate token
+"Server" ->> "Server" : Check user in internal server database
+end
+deactivate "Client"
+```
+
 ## Configuration { #server-auth-dummy-configuration }
 
 ::: syncmaster.server.settings.auth.dummy.DummyAuthProviderSettings

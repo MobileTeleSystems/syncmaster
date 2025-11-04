@@ -1,8 +1,8 @@
 site_name: My Docs
-#site_name: Horizon Docs
-docs_dir: 'docs/en'                           # Where to find the English markdown files
-#site_dir: 'generated/en'                      # Where to put the English HTML files
+#site_name: Syncmaster Docs
 
+docs_dir: 'mddocs/docs/en'                           # Where to find the English markdown files
+#site_dir: 'generated/en'                      # Where to put the English HTML files
 
 extra_css:
   - assets/stylesheets/autodoc_pydantic.css         # CSS is shared by all languages
