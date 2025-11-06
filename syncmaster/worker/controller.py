@@ -203,10 +203,11 @@ class TransferController:
     @slot
     def perform_transfer(self) -> None:
         try:
-            spark = self.settings.worker.CREATE_SPARK_SESSION_FUNCTION(
+            spark = self.settings.worker.create_spark_session_function(
                 run=self.run,
                 source=self.source_handler.connection_dto,
                 target=self.target_handler.connection_dto,
+                settings=self.settings.worker,
             )
 
             with spark:

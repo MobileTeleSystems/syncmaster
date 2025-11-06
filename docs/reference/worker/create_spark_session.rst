@@ -1,12 +1,32 @@
 .. _worker-create-spark-session:
 
-Altering Spark session settings
-===============================
+Configuring Spark session
+=========================
 
 SyncMaster Worker creates `SparkSession <https://spark.apache.org/docs/latest/sql-getting-started.html#starting-point-sparksession>`_ for each Run.
-By default, SparkSession is created with ``master=local``, all required .jar packages for specific DB/FileSystem types, and limiter by transfer resources.
 
-It is possible to alter SparkSession config by providing custom function:
+By default, SparkSession is created with ``master=local``, including all required .jar packages for DB/FileSystem types, and limited by transfer resources.
+
+Custom Spark session configuration
+----------------------------------
+
+It is possible to alter default `Spark Session configuration <https://spark.apache.org/docs/latest/configuration.html>`_ worker settings:
+
+.. code-block:: yaml
+    :caption: config.yml
+
+    worker:
+        spark_session_default_config:
+            spark.master: local
+            spark.driver.host: 127.0.0.1
+            spark.driver.bindAddress: 0.0.0.0
+            spark.sql.pyspark.jvmStacktrace.enabled: true
+            spark.ui.enabled: false
+
+Custom Spark session factory
+----------------------------
+
+It is also possible to use custom function which returns ``SparkSession`` object:
 
 .. code-block:: yaml
     :caption: config.yml
@@ -21,17 +41,19 @@ Here is a function example:
 
     from syncmaster.db.models import Run
     from syncmaster.dto.connections import ConnectionDTO
+    from syncmaster.worker.settings import WorkerSettings
     from pyspark.sql import SparkSession
 
     def create_custom_spark_session(
         run: Run,
         source: ConnectionDTO,
         target: ConnectionDTO,
+        settings: WorkerSettings,
     ) -> SparkSession:
         # any custom code returning SparkSession object
         return SparkSession.builde.config(...).getOrCreate()
 
-Module with custom function should be placed in the same Docker image or Python virtual environment used by SyncMaster worker.
+Module with custom function should be placed into the same Docker image or Python virtual environment used by SyncMaster worker.
 
 .. note::
 
