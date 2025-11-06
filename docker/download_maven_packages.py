@@ -41,7 +41,7 @@ def get_worker_spark_session_for_docker(connection_types: set[str]) -> SparkSess
     """
     from pyspark.sql import SparkSession
 
-    spark_builder = SparkSession.builder.appName("syncmaster_jar_downloader").master("local")
+    spark_builder = SparkSession.builder.appName("syncmaster_jar_downloader").master("local[1]")
 
     for k, v in get_spark_session_conf_for_docker_image(connection_types).items():
         spark_builder = spark_builder.config(k, v)

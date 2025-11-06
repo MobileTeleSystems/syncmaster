@@ -1,0 +1,12 @@
+Allow passing default Spark session config via worker settings:
+
+.. code-block:: yaml
+    :caption: config.yml
+
+    worker:
+        spark_session_default_config:
+            spark.master: local
+            spark.driver.host: 127.0.0.1
+            spark.driver.bindAddress: 0.0.0.0
+            spark.sql.pyspark.jvmStacktrace.enabled: true
+            spark.ui.enabled: false

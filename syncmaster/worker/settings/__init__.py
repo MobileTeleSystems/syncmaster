@@ -1,5 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
+from typing import Any
+
 from pydantic import BaseModel, Field
 from pydantic.types import ImportString
 
@@ -24,13 +26,24 @@ class WorkerSettings(BaseModel):
         :caption: config.yml
 
         worker:
-            log_url_template: https://logs.location.example.com/syncmaster-worker?correlation_id={{ correlation_id }}&run_id={{ run.id }}
+            log_url_template: "https://logs.location.example.com/syncmaster-worker?correlation_id={{ correlation_id }}&run_id={{ run.id }}"
+
             create_spark_session_function: custom_syncmaster.spark.get_worker_spark_session
+            spark_session_default_config:
+                spark.master: local
+                spark.driver.host: 127.0.0.1
+                spark.driver.bindAddress: 0.0.0.0
+                spark.sql.pyspark.jvmStacktrace.enabled: true
+                spark.ui.enabled: false
     """
 
-    CREATE_SPARK_SESSION_FUNCTION: ImportString = Field(
+    create_spark_session_function: ImportString = Field(
         "syncmaster.worker.spark.get_worker_spark_session",
         description="Function to create Spark session for worker",
+    )
+    spark_session_default_config: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Default Spark session configuration",
     )
     log_url_template: str = Field(
         "",

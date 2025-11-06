@@ -14,6 +14,7 @@ from syncmaster.dto.connections import (
     HDFSConnectionDTO,
     HiveConnectionDTO,
 )
+from syncmaster.worker.settings import WorkerSettings
 
 if TYPE_CHECKING:
     from pyspark.sql import SparkSession
@@ -25,14 +26,18 @@ def get_worker_spark_session(
     run: Run,
     source: ConnectionDTO,
     target: ConnectionDTO,
+    settings: WorkerSettings,
 ) -> SparkSession:
     """Construct Spark Session using run parameters and application settings"""
     from pyspark.sql import SparkSession
 
     name = run.transfer.group.name + "_" + run.transfer.name  # noqa: WPS336
-    spark_builder = SparkSession.builder.appName(f"syncmaster_{name}")
+    spark_builder = SparkSession.builder.appName(f"SyncMaster__{name}")
 
-    for k, v in get_spark_session_conf(source, target, run.transfer.resources).items():
+    spark_session_config = settings.spark_session_default_config.copy()
+    spark_session_config.update(get_spark_session_conf(source, target, run.transfer.resources))
+
+    for k, v in spark_session_config.items():
         spark_builder = spark_builder.config(k, v)
 
     for entity in source, target:
