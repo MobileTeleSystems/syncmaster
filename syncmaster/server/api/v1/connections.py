@@ -39,7 +39,7 @@ async def read_connections(
     page: int = Query(gt=0, default=1),
     page_size: int = Query(gt=0, le=50, default=20),  # noqa: WPS432
     type: list[ConnectionType] | None = Query(None),
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
     search_query: str | None = Query(
         None,
@@ -102,7 +102,7 @@ async def read_connections(
 @router.post("/connections")
 async def create_connection(
     connection_data: CreateConnectionSchema,
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadConnectionSchema:
     """Create new connection"""
@@ -144,7 +144,7 @@ async def create_connection(
     )
 
 
-@router.get("/connections/known_types", dependencies=[Depends(get_user(is_active=True))])
+@router.get("/connections/known_types", dependencies=[Depends(get_user())])
 async def read_connection_types() -> list[str]:
     return CONNECTION_TYPES
 
@@ -152,7 +152,7 @@ async def read_connection_types() -> list[str]:
 @router.get("/connections/{connection_id}")
 async def read_connection(
     connection_id: int,
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadConnectionSchema:
     resource_role = await unit_of_work.connection.get_resource_permission(
@@ -186,7 +186,7 @@ async def read_connection(
 async def update_connection(  # noqa: WPS217, WPS238
     connection_id: int,
     connection_data: UpdateConnectionSchema,
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadConnectionSchema:
     resource_role = await unit_of_work.connection.get_resource_permission(
@@ -246,7 +246,7 @@ async def update_connection(  # noqa: WPS217, WPS238
 @router.delete("/connections/{connection_id}", status_code=NO_CONTENT)
 async def delete_connection(
     connection_id: int,
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ):
     resource_role = await unit_of_work.connection.get_resource_permission(
@@ -274,7 +274,7 @@ async def delete_connection(
 async def copy_connection(  # noqa: WPS238
     connection_id: int,
     copy_connection_data: ConnectionCopySchema,
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadConnectionSchema:
     resource_role = await unit_of_work.connection.get_resource_permission(

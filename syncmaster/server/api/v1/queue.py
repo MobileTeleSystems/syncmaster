@@ -27,7 +27,7 @@ async def read_queues(
     group_id: int,
     page: int = Query(gt=0, default=1),
     page_size: int = Query(gt=0, le=50, default=20),  # noqa: WPS432
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
     search_query: str | None = Query(
         None,
@@ -55,7 +55,7 @@ async def read_queues(
 @router.get("/queues/{queue_id}", description="Read queue by id")
 async def read_queue(
     queue_id: int,
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadQueueSchema:
     resource_role = await unit_of_work.queue.get_resource_permission(
@@ -75,7 +75,7 @@ async def read_queue(
 @router.post("/queues", description="Create new queue")
 async def create_queue(
     queue_data: CreateQueueSchema,
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadQueueSchema:
     group_permission = await unit_of_work.queue.get_group_permission(
@@ -98,7 +98,7 @@ async def create_queue(
 async def update_queue(
     queue_id: int,
     queue_data: UpdateQueueSchema,
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadQueueSchema:
     resource_role = await unit_of_work.queue.get_resource_permission(
@@ -123,7 +123,7 @@ async def update_queue(
 @router.delete("/queues/{queue_id}", description="Delete queue by id", status_code=NO_CONTENT)
 async def delete_queue(
     queue_id: int,
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ):
     resource_role = await unit_of_work.queue.get_resource_permission(

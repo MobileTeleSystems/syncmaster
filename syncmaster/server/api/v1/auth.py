@@ -63,7 +63,7 @@ async def auth_callback(
 )
 async def logout(
     request: Request,
-    current_user: Annotated[User, Depends(get_user(is_active=True))],
+    current_user: Annotated[User, Depends(get_user())],
     auth_provider: Annotated[KeycloakAuthProvider, Depends(Stub(AuthProvider))],
 ):
     refresh_token = request.session.get("refresh_token", None)

@@ -45,7 +45,7 @@ async def read_transfers(
     source_connection_type: list[ConnectionType] | None = Query(None),
     target_connection_type: list[ConnectionType] | None = Query(None),
     is_scheduled: bool | None = Query(None),
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> TransferPageSchema:
     """Return transfers in page format"""
@@ -79,7 +79,7 @@ async def read_transfers(
 @router.post("/transfers")
 async def create_transfer(  # noqa: WPS217, WPS238
     transfer_data: CreateTransferSchema,
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadTransferSchema:
     group_permission = await unit_of_work.transfer.get_group_permission(
@@ -139,7 +139,7 @@ async def create_transfer(  # noqa: WPS217, WPS238
 @router.get("/transfers/{transfer_id}")
 async def read_transfer(
     transfer_id: int,
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadTransferSchema:
     """Return transfer data by transfer ID"""
@@ -159,7 +159,7 @@ async def read_transfer(
 async def copy_transfer(  # noqa: WPS217, WPS238
     transfer_id: int,
     transfer_data: CopyTransferSchema,
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadTransferSchema:
     resource_role = await unit_of_work.transfer.get_resource_permission(
@@ -239,7 +239,7 @@ async def copy_transfer(  # noqa: WPS217, WPS238
 async def update_transfer(  # noqa: WPS217, WPS238
     transfer_id: int,
     transfer_data: CreateTransferSchema,
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ) -> ReadTransferSchema:
     # Check: user can update transfer
@@ -318,7 +318,7 @@ async def update_transfer(  # noqa: WPS217, WPS238
 @router.delete("/transfers/{transfer_id}", status_code=NO_CONTENT)
 async def delete_transfer(
     transfer_id: int,
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
 ):
     resource_role = await unit_of_work.transfer.get_resource_permission(

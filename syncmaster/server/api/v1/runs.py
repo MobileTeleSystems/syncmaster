@@ -36,7 +36,7 @@ async def read_runs(
     status: list[Status] | None = Query(default=None),
     started_at_since: datetime | None = Query(default=None),
     started_at_until: datetime | None = Query(default=None),
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
 ) -> RunPageSchema:
     """Return runs of transfer with pagination"""
     resource_rule = await unit_of_work.transfer.get_resource_permission(
@@ -63,7 +63,7 @@ async def read_runs(
 async def read_run(
     run_id: int,
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
 ) -> ReadRunSchema:
     run = await unit_of_work.run.read_by_id(run_id=run_id)
 
@@ -83,7 +83,7 @@ async def start_run(  # noqa: WPS217
     create_run_data: CreateRunSchema,
     celery: Annotated[Celery, Depends(Stub(Celery))],
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
 ) -> ReadRunSchema:
     # Check: user can start transfer
     resource_rule = await unit_of_work.transfer.get_resource_permission(
@@ -139,7 +139,7 @@ async def start_run(  # noqa: WPS217
 async def stop_run(
     run_id: int,
     unit_of_work: UnitOfWork = Depends(UnitOfWork),
-    current_user: User = Depends(get_user(is_active=True)),
+    current_user: User = Depends(get_user()),
 ) -> ReadRunSchema:
     run = await unit_of_work.run.read_by_id(run_id=run_id)
 
