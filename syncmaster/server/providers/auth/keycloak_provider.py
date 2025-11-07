@@ -52,7 +52,9 @@ class KeycloakAuthProvider(AuthProvider):
         client_id: str | None = None,
         client_secret: str | None = None,
     ) -> dict[str, Any]:
-        raise NotImplementedError(f"Password grant is not supported by {self.__class__.__name__}.")
+        raise NotImplementedError(
+            f"Password grant is not supported by {self.__class__.__name__}.",  # noqa: WPS237
+        )
 
     async def get_token_authorization_code_grant(
         self,
@@ -109,7 +111,10 @@ class KeycloakAuthProvider(AuthProvider):
         # these names are hardcoded in keycloak:
         # https://github.com/keycloak/keycloak/blob/3ca3a4ad349b4d457f6829eaf2ae05f1e01408be/core/src/main/java/org/keycloak/representations/IDToken.java
         # TODO: make sure which fields are guaranteed
-        login = token_info["preferred_username"]
+        login = token_info.get("preferred_username")
+        if not login:
+            raise AuthorizationError("Invalid token")
+
         email = token_info.get("email")
         first_name = token_info.get("given_name")
         middle_name = token_info.get("middle_name")

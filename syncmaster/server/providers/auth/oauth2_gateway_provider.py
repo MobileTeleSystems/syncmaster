@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 
 class OAuth2GatewayProvider(KeycloakAuthProvider):
-    def __init__(
+    def __init__(  # noqa: WPS612
         self,
         settings: Annotated[OAuth2GatewayProviderSettings, Depends(Stub(OAuth2GatewayProviderSettings))],
         unit_of_work: Annotated[UnitOfWork, Depends()],
@@ -38,8 +38,11 @@ class OAuth2GatewayProvider(KeycloakAuthProvider):
         app.dependency_overrides[OAuth2GatewayProviderSettings] = lambda: settings
         return app
 
-    async def get_current_user(self, access_token: str | None, request: Request) -> User:  # noqa: WPS231, WPS217
-
+    async def get_current_user(  # noqa: WPS231, WPS217, WPS238
+        self,
+        access_token: str | None,
+        request: Request,
+    ) -> User:
         if not access_token:
             log.debug("No access token found in request")
             raise AuthorizationError("Missing auth credentials")
@@ -56,7 +59,10 @@ class OAuth2GatewayProvider(KeycloakAuthProvider):
         # these names are hardcoded in keycloak:
         # https://github.com/keycloak/keycloak/blob/3ca3a4ad349b4d457f6829eaf2ae05f1e01408be/core/src/main/java/org/keycloak/representations/IDToken.java
         # TODO: make sure which fields are guaranteed
-        login = token_info["preferred_username"]
+        login = token_info.get("preferred_username")
+        if not login:
+            raise AuthorizationError("Invalid token")
+
         email = token_info.get("email")
         first_name = token_info.get("given_name")
         middle_name = token_info.get("middle_name")
@@ -82,7 +88,11 @@ class OAuth2GatewayProvider(KeycloakAuthProvider):
         client_id: str | None = None,
         client_secret: str | None = None,
     ) -> dict[str, Any]:
-        raise NotImplementedError(f"Authorization code grant is not supported by {self.__class__.__name__}.")
+        raise NotImplementedError(
+            f"Authorization code grant is not supported by {self.__class__.__name__}.",  # noqa: WPS237
+        )
 
     async def logout(self, user: User, refresh_token: str | None) -> None:
-        raise NotImplementedError(f"Logout is not supported by {self.__class__.__name__}.")
+        raise NotImplementedError(
+            f"Logout is not supported by {self.__class__.__name__}.",  # noqa: WPS237
+        )
