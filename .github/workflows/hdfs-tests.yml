@@ -20,15 +20,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Cache jars
-        uses: actions/cache@v4
-        with:
-          path: ./cached_jars
-          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-hdfs
-          restore-keys: |
-            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-test-hdfs
-            ${{ runner.os }}-python-
-
       - name: Build Worker Image
         uses: docker/build-push-action@v6
         with:
