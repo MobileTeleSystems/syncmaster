@@ -69,10 +69,9 @@ tz = ["tzdata"]
 name = "amqp"
 version = "5.3.1"
 description = "Low-level AMQP client for Python (fork of amqplib)."
-optional = true
+optional = false
 python-versions = ">=3.6"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
 files = [
     {file = "amqp-5.3.1-py3-none-any.whl", hash = "sha256:43b3319e1b4e7d1251833a93d672b4af1e40f3d632d479b98661a95f117880a2"},
     {file = "amqp-5.3.1.tar.gz", hash = "sha256:cddc00c725449522023bad949f70fff7b48f0b1ade74d170a6f10ab044739432"},
@@ -218,10 +217,9 @@ cffi = [
 name = "asgi-correlation-id"
 version = "4.3.4"
 description = "Middleware correlating project logs to individual requests"
-optional = true
+optional = false
 python-versions = "<4.0,>=3.8"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\""
 files = [
     {file = "asgi_correlation_id-4.3.4-py3-none-any.whl", hash = "sha256:36ce69b06c7d96b4acb89c7556a4c4f01a972463d3d49c675026cbbd08e9a0a2"},
     {file = "asgi_correlation_id-4.3.4.tar.gz", hash = "sha256:ea6bc310380373cb9f731dc2e8b2b6fb978a76afe33f7a2384f697b8d6cd811d"},
@@ -485,10 +483,9 @@ files = [
 name = "billiard"
 version = "4.2.2"
 description = "Python multiprocessing fork with improvements and bugfixes"
-optional = true
+optional = false
 python-versions = ">=3.7"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
 files = [
     {file = "billiard-4.2.2-py3-none-any.whl", hash = "sha256:4bc05dcf0d1cc6addef470723aac2a6232f3c7ed7475b0b580473a9145829457"},
     {file = "billiard-4.2.2.tar.gz", hash = "sha256:e815017a062b714958463e07ba15981d802dc53d41c5b69d28c5a7c238f8ecf3"},
@@ -548,10 +545,9 @@ uvloop = ["uvloop (>=0.15.2)"]
 name = "celery"
 version = "5.5.3"
 description = "Distributed Task Queue."
-optional = true
+optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
 files = [
     {file = "celery-5.5.3-py3-none-any.whl", hash = "sha256:0b5761a07057acee94694464ca482416b959568904c9dfa41ce8413a7d65d525"},
     {file = "celery-5.5.3.tar.gz", hash = "sha256:6c972ae7968c2b5281227f01c3a3f984037d21c5129d07bf3550cc2afc6b10a5"},
@@ -859,7 +855,6 @@ files = [
     {file = "click-8.3.0-py3-none-any.whl", hash = "sha256:9b9f285302c6e3064f4330c05f05b81945b2a39544279343e6e7c5f27a9baddc"},
     {file = "click-8.3.0.tar.gz", hash = "sha256:e7b8232224eba16f4ebe410c25ced9f7875cb5f3263ffc93cc3e8da705e229c4"},
 ]
-markers = {main = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""}
 
 [package.dependencies]
 colorama = {version = "*", markers = "platform_system == \"Windows\""}
@@ -868,10 +863,9 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 name = "click-didyoumean"
 version = "0.3.1"
 description = "Enables git-like *did-you-mean* feature in click"
-optional = true
+optional = false
 python-versions = ">=3.6.2"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
 files = [
     {file = "click_didyoumean-0.3.1-py3-none-any.whl", hash = "sha256:5c4bb6007cfea5f2fd6583a2fb6701a22a41eb98957e63d0fac41c10e7c3117c"},
     {file = "click_didyoumean-0.3.1.tar.gz", hash = "sha256:4f82fdff0dbe64ef8ab2279bd6aa3f6a99c3b28c05aa09cbfc07c9d7fbb5a463"},
@@ -884,10 +878,9 @@ click = ">=7"
 name = "click-plugins"
 version = "1.1.1.2"
 description = "An extension module for click to enable registering CLI commands via setuptools entry-points."
-optional = true
+optional = false
 python-versions = "*"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
 files = [
     {file = "click_plugins-1.1.1.2-py2.py3-none-any.whl", hash = "sha256:008d65743833ffc1f5417bf0e78e8d2c23aab04d9745ba817bd3e71b0feb6aa6"},
     {file = "click_plugins-1.1.1.2.tar.gz", hash = "sha256:d7af3984a99d243c131aa1a828331e7630f4a88a9741fd05c927b204bcf92261"},
@@ -903,10 +896,9 @@ dev = ["coveralls", "pytest (>=3.6)", "pytest-cov", "wheel"]
 name = "click-repl"
 version = "0.3.0"
 description = "REPL plugin for Click"
-optional = true
+optional = false
 python-versions = ">=3.6"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
 files = [
     {file = "click-repl-0.3.0.tar.gz", hash = "sha256:17849c23dba3d667247dc4defe1757fff98694e90fe37474f3feebb69ced26a9"},
     {file = "click_repl-0.3.0-py3-none-any.whl", hash = "sha256:fb7e06deb8da8de86180a33a9da97ac316751c094c6899382da7feeeeb51b812"},
@@ -930,16 +922,15 @@ files = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
 ]
-markers = {main = "(extra == \"server\" or extra == \"worker\" or extra == \"scheduler\") and platform_system == \"Windows\"", dev = "platform_system == \"Windows\"", docs = "platform_system == \"Windows\" or sys_platform == \"win32\"", test = "sys_platform == \"win32\""}
+markers = {main = "platform_system == \"Windows\"", dev = "platform_system == \"Windows\"", docs = "platform_system == \"Windows\" or sys_platform == \"win32\"", test = "sys_platform == \"win32\""}
 
 [[package]]
 name = "coloredlogs"
 version = "15.0.1"
 description = "Colored terminal output for Python's logging module"
-optional = true
+optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
 files = [
     {file = "coloredlogs-15.0.1-py2.py3-none-any.whl", hash = "sha256:612ee75c546f53e92e70049c9dbfcc18c935a2b9a53b66085ce9ef6a6e5c0934"},
     {file = "coloredlogs-15.0.1.tar.gz", hash = "sha256:7c991aa71a4577af2f82600d8f8f3a89f936baeaf9b50a9c197da014e5bf16b0"},
@@ -1570,7 +1561,7 @@ files = [
     {file = "greenlet-3.2.4-cp39-cp39-win_amd64.whl", hash = "sha256:d2e685ade4dafd447ede19c31277a224a239a0a1a4eca4e6390efedf20260cfb"},
     {file = "greenlet-3.2.4.tar.gz", hash = "sha256:0dca0d95ff849f9a364385f36ab49f50065d76964944638be9691e1832e9f86d"},
 ]
-markers = {main = "(extra == \"server\" or extra == \"worker\" or extra == \"scheduler\") and (platform_machine == \"aarch64\" or platform_machine == \"ppc64le\" or platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"AMD64\" or platform_machine == \"win32\" or platform_machine == \"WIN32\")", dev = "platform_machine == \"aarch64\" or platform_machine == \"ppc64le\" or platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"AMD64\" or platform_machine == \"win32\" or platform_machine == \"WIN32\"", test = "platform_python_implementation == \"CPython\""}
+markers = {main = "platform_machine == \"aarch64\" or platform_machine == \"ppc64le\" or platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"AMD64\" or platform_machine == \"win32\" or platform_machine == \"WIN32\"", dev = "platform_machine == \"aarch64\" or platform_machine == \"ppc64le\" or platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"AMD64\" or platform_machine == \"win32\" or platform_machine == \"WIN32\"", test = "platform_python_implementation == \"CPython\""}
 
 [package.extras]
 docs = ["Sphinx", "furo"]
@@ -1717,10 +1708,9 @@ zstd = ["zstandard (>=0.18.0)"]
 name = "humanfriendly"
 version = "10.0"
 description = "Human friendly output for text interfaces using Python"
-optional = true
+optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
 files = [
     {file = "humanfriendly-10.0-py2.py3-none-any.whl", hash = "sha256:1697e1a8a8f550fd43c2865cd84542fc175a61dcb779b6fee18cf6b6ccba1477"},
     {file = "humanfriendly-10.0.tar.gz", hash = "sha256:6b0b831ce8f15f7300721aa49829fc4e83921a9a301cc7f606be6686a2288ddc"},
@@ -1890,10 +1880,9 @@ typing-extensions = ">=4.5.0"
 name = "kombu"
 version = "5.5.4"
 description = "Messaging library for Python."
-optional = true
+optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
 files = [
     {file = "kombu-5.5.4-py3-none-any.whl", hash = "sha256:a12ed0557c238897d8e518f1d1fdf84bd1516c5e305af2dacd85c2015115feb8"},
     {file = "kombu-5.5.4.tar.gz", hash = "sha256:886600168275ebeada93b888e831352fe578168342f0d1d5833d88ba0d847363"},
@@ -2433,7 +2422,6 @@ files = [
     {file = "packaging-25.0-py3-none-any.whl", hash = "sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484"},
     {file = "packaging-25.0.tar.gz", hash = "sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f"},
 ]
-markers = {main = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""}
 
 [[package]]
 name = "paramiko"
@@ -2542,10 +2530,9 @@ twisted = ["twisted"]
 name = "prompt-toolkit"
 version = "3.0.52"
 description = "Library for building powerful interactive command lines in Python"
-optional = true
+optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
 files = [
     {file = "prompt_toolkit-3.0.52-py3-none-any.whl", hash = "sha256:9aac639a3bbd33284347de5ad8d68ecc044b91a762dc39b7c21095fcd6a19955"},
     {file = "prompt_toolkit-3.0.52.tar.gz", hash = "sha256:28cde192929c8e7321de85de1ddbe736f1375148b02f2e17edd840042b1be855"},
@@ -2924,7 +2911,6 @@ files = [
     {file = "pydantic_settings-2.11.0-py3-none-any.whl", hash = "sha256:fe2cea3413b9530d10f3a5875adffb17ada5c1e1bab0b2885546d7310415207c"},
     {file = "pydantic_settings-2.11.0.tar.gz", hash = "sha256:d0e87a1c7d33593beb7194adb8470fc426e95ba02af83a0f23474a04c9a08180"},
 ]
-markers = {main = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""}
 
 [package.dependencies]
 pydantic = ">=2.7.0"
@@ -3036,10 +3022,10 @@ tests = ["hypothesis (>=3.27.0)", "pytest (>=7.4.0)", "pytest-cov (>=2.10.1)", "
 name = "pyreadline3"
 version = "3.5.4"
 description = "A python implementation of GNU readline."
-optional = true
+optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "sys_platform == \"win32\" and (extra == \"server\" or extra == \"worker\" or extra == \"scheduler\")"
+markers = "sys_platform == \"win32\""
 files = [
     {file = "pyreadline3-3.5.4-py3-none-any.whl", hash = "sha256:eaf8e6cc3c49bcccf145fc6067ba8643d1df34d604a1ec0eccbf7a18e6d3fae6"},
     {file = "pyreadline3-3.5.4.tar.gz", hash = "sha256:8d57d53039a1c75adba8e50dd3d992b28143480816187ea5efbd5c78e6c885b7"},
@@ -3234,10 +3220,9 @@ pytest = ">=7.4,<8.2.2 || >8.2.2"
 name = "python-dateutil"
 version = "2.9.0.post0"
 description = "Extensions to the standard Python datetime module"
-optional = true
+optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
 files = [
     {file = "python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3"},
     {file = "python_dateutil-2.9.0.post0-py2.py3-none-any.whl", hash = "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"},
@@ -3257,7 +3242,6 @@ files = [
     {file = "python_dotenv-1.2.1-py3-none-any.whl", hash = "sha256:b81ee9561e9ca4004139c6cbba3a238c32b03e4894671e181b671e8cb8425d61"},
     {file = "python_dotenv-1.2.1.tar.gz", hash = "sha256:42667e897e16ab0d66954af0e60a9caa94f0fd4ecf3aaf6d2d260eec1aa36ad6"},
 ]
-markers = {main = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""}
 
 [package.extras]
 cli = ["click (>=5.0)"]
@@ -3266,10 +3250,9 @@ cli = ["click (>=5.0)"]
 name = "python-json-logger"
 version = "4.0.0"
 description = "JSON Log Formatter for the Python Logging Package"
-optional = true
+optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
 files = [
     {file = "python_json_logger-4.0.0-py3-none-any.whl", hash = "sha256:af09c9daf6a813aa4cc7180395f50f2a9e5fa056034c9953aec92e381c5ba1e2"},
     {file = "python_json_logger-4.0.0.tar.gz", hash = "sha256:f58e68eb46e1faed27e0f574a55a0455eecd7b8a5b88b85a784519ba3cff047f"},
@@ -3410,7 +3393,7 @@ files = [
     {file = "pyyaml-6.0.3-cp39-cp39-win_amd64.whl", hash = "sha256:2e71d11abed7344e42a8849600193d15b6def118602c4c176f748e4583246007"},
     {file = "pyyaml-6.0.3.tar.gz", hash = "sha256:d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"},
 ]
-markers = {main = "extra == \"worker\" or extra == \"server\" or extra == \"scheduler\""}
+markers = {main = "extra == \"server\" or extra == \"worker\""}
 
 [[package]]
 name = "requests"
@@ -3504,10 +3487,9 @@ test = ["pytest (>=8)"]
 name = "six"
 version = "1.17.0"
 description = "Python 2 and 3 compatibility utilities"
-optional = true
+optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
 files = [
     {file = "six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274"},
     {file = "six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"},
@@ -3906,7 +3888,6 @@ files = [
     {file = "sqlalchemy-2.0.44-py3-none-any.whl", hash = "sha256:19de7ca1246fbef9f9d1bff8f1ab25641569df226364a0e40457dc5457c54b05"},
     {file = "sqlalchemy-2.0.44.tar.gz", hash = "sha256:0ae7454e1ab1d780aee69fd2aae7d6b8670a581d8847f2d1e0f7ddfbf47e5a22"},
 ]
-markers = {main = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""}
 
 [package.dependencies]
 greenlet = {version = ">=1", markers = "platform_machine == \"aarch64\" or platform_machine == \"ppc64le\" or platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"AMD64\" or platform_machine == \"win32\" or platform_machine == \"WIN32\""}
@@ -3942,10 +3923,9 @@ sqlcipher = ["sqlcipher3_binary"]
 name = "sqlalchemy-utils"
 version = "0.42.0"
 description = "Various utility functions for SQLAlchemy."
-optional = true
+optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
 files = [
     {file = "sqlalchemy_utils-0.42.0-py3-none-any.whl", hash = "sha256:c8c0b7f00f4734f6f20e9a4d06b39d79d58c8629cba50924fcaeb20e28eb4f48"},
     {file = "sqlalchemy_utils-0.42.0.tar.gz", hash = "sha256:6d1ecd3eed8b941f0faf8a531f5d5cee7cffa2598fcf8163de8c31c7a417a5e0"},
@@ -4020,10 +4000,9 @@ files = [
 name = "starlette"
 version = "0.49.3"
 description = "The little ASGI library that shines."
-optional = true
+optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\""
 files = [
     {file = "starlette-0.49.3-py3-none-any.whl", hash = "sha256:b579b99715fdc2980cf88c8ec96d3bf1ce16f5a8051a7c2b84ef9b1cdecaea2f"},
     {file = "starlette-0.49.3.tar.gz", hash = "sha256:1c14546f299b5901a1ea0e34410575bc33bbd741377a10484a54445588d00284"},
@@ -4149,7 +4128,6 @@ files = [
     {file = "tzdata-2025.2-py2.py3-none-any.whl", hash = "sha256:1a403fada01ff9221ca8044d701868fa132215d84beb92242d9acd2147f667a8"},
     {file = "tzdata-2025.2.tar.gz", hash = "sha256:b60a638fcc0daffadf82fe0f57e53d06bdec2f36c4df66280ae79bce6bd6f2b9"},
 ]
-markers = {main = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\" or extra == \"scheduler\" and platform_system == \"Windows\""}
 
 [[package]]
 name = "tzlocal"
@@ -4193,10 +4171,9 @@ zstd = ["zstandard (>=0.18.0)"]
 name = "uuid6"
 version = "2025.0.1"
 description = "New time-based UUID formats which are suited for use as a database key"
-optional = true
+optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\""
 files = [
     {file = "uuid6-2025.0.1-py3-none-any.whl", hash = "sha256:80530ce4d02a93cdf82e7122ca0da3ebbbc269790ec1cb902481fa3e9cc9ff99"},
     {file = "uuid6-2025.0.1.tar.gz", hash = "sha256:cd0af94fa428675a44e32c5319ec5a3485225ba2179eefcf4c3f205ae30a81bd"},
@@ -4226,10 +4203,9 @@ standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.6.3)
 name = "vine"
 version = "5.1.0"
 description = "Python promises."
-optional = true
+optional = false
 python-versions = ">=3.6"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
 files = [
     {file = "vine-5.1.0-py3-none-any.whl", hash = "sha256:40fdf3c48b2cfe1c38a49e9ae2da6fda88e4794c810050a728bd7413811fb1dc"},
     {file = "vine-5.1.0.tar.gz", hash = "sha256:8b62e981d35c41049211cf62a0a1242d8c1ee9bd15bb196ce38aefd6799e61e0"},
@@ -4260,10 +4236,9 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 name = "wcwidth"
 version = "0.2.14"
 description = "Measures the displayed width of unicode strings in a terminal"
-optional = true
+optional = false
 python-versions = ">=3.6"
 groups = ["main"]
-markers = "extra == \"server\" or extra == \"worker\" or extra == \"scheduler\""
 files = [
     {file = "wcwidth-0.2.14-py2.py3-none-any.whl", hash = "sha256:a7bb560c8aee30f9957e5f9895805edd20602f2d7f720186dfd906e82b4982e1"},
     {file = "wcwidth-0.2.14.tar.gz", hash = "sha256:4d478375d31bc5395a3c55c40ccdf3354688364cd61c4f6adacaa9215d0b3605"},
@@ -4365,11 +4340,11 @@ test = ["coverage[toml]", "zope.event", "zope.testing"]
 testing = ["coverage[toml]", "zope.event", "zope.testing"]
 
 [extras]
-scheduler = ["apscheduler", "asyncpg", "celery", "coloredlogs", "pydantic-settings", "python-json-logger", "pyyaml", "sqlalchemy", "sqlalchemy-utils"]
-server = ["alembic", "asgi-correlation-id", "asyncpg", "celery", "coloredlogs", "fastapi", "itsdangerous", "jinja2", "psycopg2-binary", "pydantic-settings", "pyjwt", "python-json-logger", "python-keycloak", "python-multipart", "pyyaml", "sqlalchemy", "sqlalchemy-utils", "starlette-exporter", "uuid6", "uvicorn"]
-worker = ["asgi-correlation-id", "celery", "coloredlogs", "horizon-hwm-store", "jinja2", "onetl", "psycopg2-binary", "pydantic-settings", "pyspark", "python-json-logger", "pyyaml", "sqlalchemy", "sqlalchemy-utils", "uuid6"]
+scheduler = ["apscheduler", "asyncpg"]
+server = ["alembic", "asyncpg", "fastapi", "itsdangerous", "jinja2", "psycopg2-binary", "pyjwt", "python-keycloak", "python-multipart", "pyyaml", "starlette-exporter", "uvicorn"]
+worker = ["horizon-hwm-store", "jinja2", "onetl", "psycopg2-binary", "pyspark"]
 
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "8ed7874e86e1c4f0755f94a54e94bc27f935f100dda2107dacc448d94daa77a1"
+content-hash = "ece82f25affbf7251f2b388f2e98e62022520748fcaffe5f12bc42100797c205"

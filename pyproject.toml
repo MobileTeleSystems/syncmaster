@@ -44,84 +44,60 @@ exclude = [
 
 [tool.poetry.dependencies]
 python = "^3.11"
-pydantic = "^2.11.7"
-pydantic-settings = { version = "^2.8.1", optional = true }
-sqlalchemy = { version = "^2.0.40", optional = true }
-sqlalchemy-utils = { version = ">=0.41.2,<0.43.0", optional = true }
-fastapi = { version = ">=0.115.12,<0.122.0", optional = true}
-asgi-correlation-id = {version = "^4.3.4", optional = true}
-uvicorn = { version = ">=0.34,<0.39", optional = true }
-alembic = { version = "^1.15.2", optional = true }
+pydantic = "^2.12.4"
+pydantic-settings = "^2.8.1"
+sqlalchemy = "^2.0.40"
+sqlalchemy-utils = "^0.42.0"
+pyyaml = "^6.0.3"
+coloredlogs = "^15.0.1"
+python-json-logger = "^4.0.0"
+celery = "^5.5.0"
+asgi-correlation-id = "^4.3.4"
+uuid6 = "^2025.0.1"
+fastapi = { version = "^0.121.1", optional = true}
+uvicorn = { version = "^0.38.0", optional = true }
+alembic = { version = "^1.17.1", optional = true }
 pyjwt = { version = "^2.10.1", optional = true }
 jinja2 = { version = "^3.1.6", optional = true }
 python-multipart = { version = "^0.0.20", optional = true }
-celery = { version = "^5.5.0", optional = true }
 onetl = { git = "https://github.com/MobileTeleSystems/onetl.git", branch = "develop", extras = ["all"], optional = true }
 # TODO: revert before next syncmaster release
 pyspark = { version = "<4.0.0", optional = true }
-pyyaml = { version = "*", optional = true }
-psycopg2-binary = { version = "^2.9.10", optional = true }
-uuid6 = {version = "^2025.0.0", optional = true}
-coloredlogs = {version = "*", optional = true}
-python-json-logger = {version = "*", optional = true}
+psycopg2-binary = { version = "^2.9.11", optional = true }
 asyncpg = { version = "^0.30.0", optional = true }
-apscheduler = { version = "^3.11.0", optional = true }
+apscheduler = { version = "^3.11.1", optional = true }
 starlette-exporter = { version = "^0.23.0", optional = true }
-python-keycloak = { version = "^5.3.1", optional = true }
+python-keycloak = { version = "^5.8.1", optional = true }
 itsdangerous = { version = "^2.2.0", optional = true }
 horizon-hwm-store = { version = "^1.1.2", optional = true }
 
 [tool.poetry.extras]
 server = [
-    "pydantic-settings",
-    "sqlalchemy",
-    "sqlalchemy-utils",
     "fastapi",
     "starlette-exporter",
     "uvicorn",
     "alembic",
     "python-multipart",
     "pyjwt",
-    "asgi-correlation-id",
     "jinja2",
     "psycopg2-binary",
-    "uuid6",
-    "coloredlogs",
-    "python-json-logger",
     "asyncpg",
     "python-keycloak",
     "itsdangerous",
     "pyyaml",
-    "celery",
 ]
 
 worker = [
-    "pydantic-settings",
-    "sqlalchemy",
-    "sqlalchemy-utils",
-    "celery",
     "onetl",
     "pyspark",
-    "asgi-correlation-id",
     "jinja2",
     "psycopg2-binary",
-    "uuid6",
-    "coloredlogs",
-    "python-json-logger",
-    "pyyaml",
     "horizon-hwm-store",
 ]
 
 scheduler = [
     "apscheduler",
-    "pydantic-settings",
-    "sqlalchemy",
-    "sqlalchemy-utils",
     "asyncpg",
-    "pyyaml",
-    "coloredlogs",
-    "python-json-logger",
-    "celery",
 ]
 
 [tool.poetry.group.test.dependencies]
