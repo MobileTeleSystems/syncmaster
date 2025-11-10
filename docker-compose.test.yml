@@ -238,7 +238,8 @@ services:
     profiles: [oracle, all]
 
   test-clickhouse:
-    image: clickhouse/clickhouse-server
+    # https://github.com/ClickHouse/clickhouse-java/issues/2636
+    image: clickhouse/clickhouse-server:25.9
     restart: unless-stopped
     environment:
       TZ: UTC
