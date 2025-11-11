@@ -79,7 +79,7 @@ class IcebergRESTCatalogS3ConnectionDTO(ConnectionDTO):
     s3_warehouse_path: str
     s3_host: str
     s3_bucket: str
-    s3_bucket_style: str
+    s3_bucket_style: Literal["domain", "path"]
     s3_region: str
     s3_access_key: str
     s3_secret_key: str
@@ -105,7 +105,7 @@ class S3ConnectionDTO(ConnectionDTO):
     access_key: str
     secret_key: str
     bucket: str
-    bucket_style: str
+    bucket_style: Literal["domain", "path"]
     additional_params: dict
     region: str | None = None
     protocol: str = "https"

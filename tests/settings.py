@@ -1,5 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
+from typing import Literal
+
 from pydantic import model_validator
 from pydantic_settings import BaseSettings
 
@@ -56,7 +58,7 @@ class TestSettings(BaseSettings):
     TEST_ICEBERG_METASTORE_PASSWORD: str
     TEST_ICEBERG_S3_WAREHOUSE_PATH: str
     TEST_ICEBERG_S3_REGION: str
-    TEST_ICEBERG_S3_BUCKET_STYLE: bool = True
+    TEST_ICEBERG_S3_BUCKET_STYLE: Literal["domain", "path"] = "path"
 
     TEST_HDFS_HOST: str
     TEST_HDFS_WEBHDFS_PORT: int
@@ -67,6 +69,7 @@ class TestSettings(BaseSettings):
     TEST_S3_HOST_FOR_WORKER: str
     TEST_S3_PORT_FOR_WORKER: int
     TEST_S3_BUCKET: str
+    TEST_S3_BUCKET_STYLE: Literal["domain", "path"] = "path"
     TEST_S3_ACCESS_KEY: str
     TEST_S3_SECRET_KEY: str
     TEST_S3_PROTOCOL: str = "http"
