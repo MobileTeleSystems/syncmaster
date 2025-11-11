@@ -80,6 +80,7 @@ async def test_developer_plus_can_create_iceberg_rest_s3_connection(
             "s3_bucket": connection.data["s3_bucket"],
             "s3_region": connection.data["s3_region"],
             "s3_bucket_style": connection.data["s3_bucket_style"],
+            "s3_additional_params": connection.data["s3_additional_params"],
         },
         "auth_data": {
             "type": decrypted["type"],

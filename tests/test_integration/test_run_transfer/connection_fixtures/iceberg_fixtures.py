@@ -137,6 +137,7 @@ async def iceberg_rest_s3_connection(
             s3_bucket=iceberg.s3_bucket,
             s3_region=iceberg.s3_region,
             s3_bucket_style=iceberg.s3_bucket_style,
+            s3_additional_params=iceberg.s3_additional_params,
         ),
         group_id=group.id,
     )

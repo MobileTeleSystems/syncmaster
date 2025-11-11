@@ -164,6 +164,7 @@ async def s3_connection(
             bucket=s3.bucket,
             bucket_style=s3.bucket_style,
             protocol=s3.protocol,
+            additional_params=s3.additional_params,
         ),
         group_id=group.id,
     )

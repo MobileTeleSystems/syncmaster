@@ -2,7 +2,6 @@ import pytest
 from httpx import AsyncClient
 
 from tests.mocks import MockConnection, UserTestRoles
-from tests.test_unit.utils import fetch_connection_json
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.iceberg]
 
@@ -39,13 +38,11 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection(
     role_developer_plus: UserTestRoles,
 ):
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
-    connection_json = await fetch_connection_json(client, user.token, group_connection)
 
     result = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
-            **connection_json,
             "type": group_connection.type,
             "connection_data": {
                 "metastore_url": "http://rest.domain.com:8000",
@@ -81,6 +78,7 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection(
             "s3_bucket": "new_bucket",
             "s3_region": "us-east-2",
             "s3_bucket_style": "domain",
+            "s3_additional_params": {},
         },
         "auth_data": {
             "type": group_connection.credentials.value["type"],
