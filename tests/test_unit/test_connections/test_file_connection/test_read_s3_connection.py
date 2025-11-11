@@ -58,6 +58,7 @@ async def test_guest_plus_can_read_s3_connection(
             "region": group_connection.data["region"],
             "protocol": group_connection.data["protocol"],
             "bucket_style": group_connection.data["bucket_style"],
+            "additional_params": group_connection.data["additional_params"],
         },
         "auth_data": {
             "type": group_connection.credentials.value["type"],

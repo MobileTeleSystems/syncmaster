@@ -74,6 +74,7 @@ async def test_developer_plus_can_create_s3_connection(
             "region": connection.data["region"],
             "protocol": connection.data["protocol"],
             "bucket_style": connection.data["bucket_style"],
+            "additional_params": connection.data["additional_params"],
         },
         "auth_data": {
             "type": decrypted["type"],

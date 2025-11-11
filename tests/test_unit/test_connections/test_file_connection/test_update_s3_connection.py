@@ -36,6 +36,7 @@ async def test_developer_plus_can_update_s3_connection(
 ):
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
     connection_json = await fetch_connection_json(client, user.token, group_connection)
+    old_connection_data = connection_json["connection_data"]
     new_connection_data = {
         "bucket": "new_bucket",
         "host": "new_host",
@@ -58,7 +59,15 @@ async def test_developer_plus_can_update_s3_connection(
         "description": group_connection.description,
         "group_id": group_connection.group_id,
         "type": group_connection.type,
-        "connection_data": new_connection_data,
+        "connection_data": {
+            "host": new_connection_data["host"],
+            "bucket": new_connection_data["bucket"],
+            "port": new_connection_data["port"],
+            "region": new_connection_data["region"],
+            "protocol": new_connection_data["protocol"],
+            "bucket_style": new_connection_data["bucket_style"],
+            "additional_params": old_connection_data["additional_params"],
+        },
         "auth_data": {
             "type": group_connection.credentials.value["type"],
             "access_key": group_connection.credentials.value["access_key"],
