@@ -44,7 +44,7 @@ class IcebergRESTCatalogS3Handler(DBHandler):
                 port=self.connection_dto.s3_port,
                 protocol=self.connection_dto.s3_protocol,
                 bucket=self.connection_dto.s3_bucket,
-                path_style_access=self.connection_dto.s3_path_style_access,
+                path_style_access=self.connection_dto.s3_bucket_style == "path",
                 region=self.connection_dto.s3_region,
                 access_key=self.connection_dto.s3_access_key,
                 secret_key=self.connection_dto.s3_secret_key,
@@ -53,7 +53,7 @@ class IcebergRESTCatalogS3Handler(DBHandler):
 
     @slot
     def read(self) -> DataFrame:
-        table = f"{self.transfer_dto.catalog_name}.{self.transfer_dto.table_name}"
+        table = ".".join([self.transfer_dto.catalog_name, self.transfer_dto.table_name])
         self.connection.spark.catalog.refreshTable(table)
         return super().read()
 

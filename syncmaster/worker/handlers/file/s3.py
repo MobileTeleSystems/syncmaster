@@ -28,6 +28,7 @@ class S3Handler(RemoteDFFileHandler):
             access_key=self.connection_dto.access_key,
             secret_key=self.connection_dto.secret_key,
             bucket=self.connection_dto.bucket,
+            path_style_access=self.connection_dto.bucket_style == "path",
             protocol=self.connection_dto.protocol,
             region=self.connection_dto.region,
             extra=self.connection_dto.additional_params,

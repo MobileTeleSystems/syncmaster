@@ -25,7 +25,7 @@ class CreateIcebergRESTCatalogS3ConnectionDataSchema(BaseModel):
     s3_protocol: Literal["http", "https"] = "https"
     s3_bucket: str
     s3_region: str
-    s3_path_style_access: bool = False
+    s3_bucket_style: Literal["domain", "path"] = "path"
 
 
 class ReadIcebergRESTCatalogS3ConnectionDataSchema(BaseModel):
@@ -36,7 +36,7 @@ class ReadIcebergRESTCatalogS3ConnectionDataSchema(BaseModel):
     s3_protocol: Literal["http", "https"] = "https"
     s3_bucket: str
     s3_region: str
-    s3_path_style_access: bool = False
+    s3_bucket_style: Literal["domain", "path"] = "path"
 
 
 class CreateIcebergConnectionSchema(CreateConnectionBaseSchema):

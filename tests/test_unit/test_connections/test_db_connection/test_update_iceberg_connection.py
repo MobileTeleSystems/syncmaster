@@ -20,7 +20,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.iceberg]
                 "s3_port": 9010,
                 "s3_bucket": "some_bucket",
                 "s3_region": "us-east-1",
-                "s3_path_style_access": True,
+                "s3_bucket_style": True,
             },
             {
                 "type": "iceberg_rest_basic_s3_basic",
@@ -79,7 +79,7 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection(
             "s3_port": None,
             "s3_bucket": "new_bucket",
             "s3_region": "us-east-2",
-            "s3_path_style_access": False,
+            "s3_bucket_style": False,
         },
         "auth_data": {
             "type": group_connection.credentials.value["type"],

@@ -36,7 +36,7 @@ async def test_developer_plus_can_create_iceberg_rest_s3_connection(
                 "s3_port": 9010,
                 "s3_bucket": "some_bucket",
                 "s3_region": "us-east-1",
-                "s3_path_style_access": True,
+                "s3_bucket_style": True,
             },
             "auth_data": {
                 "type": "iceberg_rest_basic_s3_basic",
@@ -79,7 +79,7 @@ async def test_developer_plus_can_create_iceberg_rest_s3_connection(
             "s3_port": connection.data["s3_port"],
             "s3_bucket": connection.data["s3_bucket"],
             "s3_region": connection.data["s3_region"],
-            "s3_path_style_access": connection.data["s3_path_style_access"],
+            "s3_bucket_style": connection.data["s3_bucket_style"],
         },
         "auth_data": {
             "type": decrypted["type"],

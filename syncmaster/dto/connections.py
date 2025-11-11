@@ -79,6 +79,7 @@ class IcebergRESTCatalogS3ConnectionDTO(ConnectionDTO):
     s3_warehouse_path: str
     s3_host: str
     s3_bucket: str
+    s3_bucket_style: str
     s3_region: str
     s3_access_key: str
     s3_secret_key: str
@@ -86,7 +87,6 @@ class IcebergRESTCatalogS3ConnectionDTO(ConnectionDTO):
     metastore_password: str
     s3_port: int | None = None
     s3_protocol: str = "https"
-    s3_path_style_access: bool = False
     type: ClassVar[str] = "iceberg_rest_s3"
 
 
@@ -105,6 +105,7 @@ class S3ConnectionDTO(ConnectionDTO):
     access_key: str
     secret_key: str
     bucket: str
+    bucket_style: str
     additional_params: dict
     region: str | None = None
     protocol: str = "https"
