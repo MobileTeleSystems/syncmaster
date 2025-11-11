@@ -7,7 +7,7 @@ URL-адрес журнала генерируется на основе шаб�
 Параметр конфигурации:
 
 ```bash
-SYNCMASTER__WORKER__LOG_URL_TEMPLATE=https://grafana.example.com?correlation_id={{ relationships_id }}&run_id={{ run.id }}
+SYNCMASTER__WORKER__LOG_URL_TEMPLATE=https://grafana.example.com?correlation_id=\{\{ relationships_id \}\}&run_id=\{\{ run.id \}\}
 ```
 
 В этом примере журналы запуска можно получить либо по идентификатору корреляции `x-request-id` в http-заголовках, либо по значению поля `Run.Id`.

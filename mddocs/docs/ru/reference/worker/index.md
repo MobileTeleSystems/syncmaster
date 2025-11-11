@@ -216,7 +216,7 @@ SyncMaster worker - это выделенный процесс, который �
   SYNCMASTER__SCHEDULER__TRANSFER_FETCHING_TIMEOUT_SECONDS=200
 
   # Параметры Worker
-  SYNCMASTER__WORKER__LOG_URL_TEMPLATE=https://logs.location.example.com/syncmaster-worker?correlation_id={{ correlation_id }}&run_id={{ run.id }}
+  SYNCMASTER__WORKER__LOG_URL_TEMPLATE=https://logs.location.example.com/syncmaster-worker?correlation_id=\{\{ correlation_id \}\}&run_id=\{\{ run.id \}\}
   SYNCMASTER__HWM_STORE__ENABLED=true
   SYNCMASTER__HWM_STORE__TYPE=horizon
   SYNCMASTER__HWM_STORE__URL=http://horizon:8000
