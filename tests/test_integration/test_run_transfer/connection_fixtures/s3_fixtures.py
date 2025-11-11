@@ -80,7 +80,6 @@ def s3_file_connection(s3_server):
         access_key=s3_server.access_key,
         secret_key=s3_server.secret_key,
         protocol=s3_server.protocol,
-        path_style_access=s3_server.bucket_style == "path",
     )
 
     if not s3_connection.client.bucket_exists(s3_server.bucket):
