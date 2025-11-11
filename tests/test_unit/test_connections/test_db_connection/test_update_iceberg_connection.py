@@ -54,6 +54,7 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection(
                 "s3_host": "s3.domain.com",
                 "s3_bucket": "new_bucket",
                 "s3_region": "us-east-2",
+                "s3_bucket_style": "domain",
             },
             "auth_data": {
                 "type": "iceberg_rest_basic_s3_basic",

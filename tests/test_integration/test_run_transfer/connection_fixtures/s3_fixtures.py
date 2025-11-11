@@ -53,12 +53,16 @@ def s3_for_worker(test_settings: TestSettings) -> S3ConnectionDTO:
 
 @pytest.fixture(scope="session")
 def s3_server(s3_for_conftest):
-    S3Server = namedtuple("S3Server", ["host", "port", "bucket", "access_key", "secret_key", "protocol"])
+    S3Server = namedtuple(
+        "S3Server",
+        ["host", "port", "bucket", "bucket_style", "access_key", "secret_key", "protocol"],
+    )
 
     return S3Server(
         host=s3_for_conftest.host,
         port=s3_for_conftest.port,
         bucket=s3_for_conftest.bucket,
+        bucket_style=s3_for_conftest.bucket_style,
         access_key=s3_for_conftest.access_key,
         secret_key=s3_for_conftest.secret_key,
         protocol=s3_for_conftest.protocol,
@@ -76,6 +80,7 @@ def s3_file_connection(s3_server):
         access_key=s3_server.access_key,
         secret_key=s3_server.secret_key,
         protocol=s3_server.protocol,
+        path_style_access=s3_server.bucket_style == "path",
     )
 
     if not s3_connection.client.bucket_exists(s3_server.bucket):
@@ -118,9 +123,7 @@ def s3_file_df_connection(s3_file_connection, spark, s3_server):
         access_key=s3_server.access_key,
         secret_key=s3_server.secret_key,
         protocol=s3_server.protocol,
-        extra={
-            "path.style.access": True,
-        },
+        path_style_access=s3_server.bucket_style == "path",
         spark=spark,
     )
 
@@ -160,10 +163,8 @@ async def s3_connection(
             host=s3.host,
             port=s3.port,
             bucket=s3.bucket,
+            bucket_style=s3.bucket_style,
             protocol=s3.protocol,
-            additional_params={
-                "path.style.access": True,
-            },
         ),
         group_id=group.id,
     )
