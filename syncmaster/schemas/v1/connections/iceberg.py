@@ -26,6 +26,7 @@ class CreateIcebergRESTCatalogS3ConnectionDataSchema(BaseModel):
     s3_bucket: str
     s3_region: str
     s3_bucket_style: Literal["domain", "path"] = "path"
+    additional_params: dict = Field(default_factory=dict)
 
 
 class ReadIcebergRESTCatalogS3ConnectionDataSchema(BaseModel):
@@ -37,6 +38,7 @@ class ReadIcebergRESTCatalogS3ConnectionDataSchema(BaseModel):
     s3_bucket: str
     s3_region: str
     s3_bucket_style: Literal["domain", "path"] = "path"
+    additional_params: dict = Field(default_factory=dict)
 
 
 class CreateIcebergConnectionSchema(CreateConnectionBaseSchema):

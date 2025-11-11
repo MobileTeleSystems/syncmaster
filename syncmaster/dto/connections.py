@@ -85,8 +85,9 @@ class IcebergRESTCatalogS3ConnectionDTO(ConnectionDTO):
     s3_secret_key: str
     metastore_username: str
     metastore_password: str
-    s3_port: int | None = None
-    s3_protocol: str = "https"
+    s3_port: int | None
+    s3_protocol: str
+    additional_params: dict
     type: ClassVar[str] = "iceberg_rest_s3"
 
 

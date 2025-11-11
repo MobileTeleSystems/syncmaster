@@ -23,6 +23,7 @@ class CreateS3ConnectionDataSchema(BaseModel):
     region: str | None = None
     protocol: Literal["http", "https"] = "https"
     bucket_style: Literal["domain", "path"] = "domain"
+    additional_params: dict = Field(default_factory=dict)
 
     @model_validator(mode="before")
     def validate_port(cls, values: dict) -> dict:
@@ -43,6 +44,7 @@ class ReadS3ConnectionDataSchema(BaseModel):
     region: str | None = None
     protocol: Literal["http", "https"] = "https"
     bucket_style: Literal["domain", "path"] = "domain"
+    additional_params: dict = Field(default_factory=dict)
 
 
 class CreateS3ConnectionSchema(CreateConnectionBaseSchema):
