@@ -33,9 +33,9 @@ def iceberg_rest_s3_for_conftest(test_settings: TestSettings) -> IcebergRESTCata
         s3_bucket_style=test_settings.TEST_ICEBERG_S3_BUCKET_STYLE,
         s3_access_key=test_settings.TEST_S3_ACCESS_KEY,
         s3_secret_key=test_settings.TEST_S3_SECRET_KEY,
+        s3_additional_params=test_settings.TEST_ICEBERG_S3_ADDITIONAL_PARAMS,
         metastore_username=test_settings.TEST_ICEBERG_METASTORE_USERNAME,
         metastore_password=test_settings.TEST_ICEBERG_METASTORE_PASSWORD,
-        additional_params={},
     )
 
 
@@ -55,9 +55,9 @@ def iceberg_rest_s3_for_worker(test_settings: TestSettings) -> IcebergRESTCatalo
         s3_bucket_style=test_settings.TEST_ICEBERG_S3_BUCKET_STYLE,
         s3_access_key=test_settings.TEST_S3_ACCESS_KEY,
         s3_secret_key=test_settings.TEST_S3_SECRET_KEY,
+        s3_additional_params=test_settings.TEST_ICEBERG_S3_ADDITIONAL_PARAMS,
         metastore_username=test_settings.TEST_ICEBERG_METASTORE_USERNAME,
         metastore_password=test_settings.TEST_ICEBERG_METASTORE_PASSWORD,
-        additional_params={},
     )
 
 

@@ -14,6 +14,7 @@ class TestSettings(BaseSettings):
     TEST_POSTGRES_DB: str
     TEST_POSTGRES_USER: str
     TEST_POSTGRES_PASSWORD: str
+    TEST_POSTGRES_ADDITIONAL_PARAMS: dict = {}
 
     TEST_ORACLE_HOST_FOR_CONFTEST: str
     TEST_ORACLE_PORT_FOR_CONFTEST: int
@@ -23,6 +24,7 @@ class TestSettings(BaseSettings):
     TEST_ORACLE_PASSWORD: str
     TEST_ORACLE_SID: str | None = None
     TEST_ORACLE_SERVICE_NAME: str | None = None
+    TEST_ORACLE_ADDITIONAL_PARAMS: dict = {}
 
     TEST_CLICKHOUSE_HOST_FOR_CONFTEST: str
     TEST_CLICKHOUSE_PORT_FOR_CONFTEST: int
@@ -31,6 +33,7 @@ class TestSettings(BaseSettings):
     TEST_CLICKHOUSE_USER: str
     TEST_CLICKHOUSE_PASSWORD: str
     TEST_CLICKHOUSE_DB: str
+    TEST_CLICKHOUSE_ADDITIONAL_PARAMS: dict = {}
 
     TEST_MSSQL_HOST_FOR_CONFTEST: str
     TEST_MSSQL_PORT_FOR_CONFTEST: int
@@ -39,6 +42,7 @@ class TestSettings(BaseSettings):
     TEST_MSSQL_USER: str
     TEST_MSSQL_PASSWORD: str
     TEST_MSSQL_DB: str
+    TEST_MSSQL_ADDITIONAL_PARAMS: dict = {}
 
     TEST_MYSQL_HOST_FOR_CONFTEST: str
     TEST_MYSQL_PORT_FOR_CONFTEST: int
@@ -47,6 +51,7 @@ class TestSettings(BaseSettings):
     TEST_MYSQL_USER: str
     TEST_MYSQL_PASSWORD: str
     TEST_MYSQL_DB: str
+    TEST_MYSQL_ADDITIONAL_PARAMS: dict = {}
 
     TEST_HIVE_CLUSTER: str
     TEST_HIVE_USER: str
@@ -59,6 +64,7 @@ class TestSettings(BaseSettings):
     TEST_ICEBERG_S3_WAREHOUSE_PATH: str
     TEST_ICEBERG_S3_REGION: str
     TEST_ICEBERG_S3_BUCKET_STYLE: Literal["domain", "path"] = "path"
+    TEST_ICEBERG_S3_ADDITIONAL_PARAMS: dict = {}
 
     TEST_HDFS_HOST: str
     TEST_HDFS_WEBHDFS_PORT: int

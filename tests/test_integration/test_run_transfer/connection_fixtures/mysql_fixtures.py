@@ -28,7 +28,7 @@ def mysql_for_conftest(test_settings: TestSettings) -> MySQLConnectionDTO:
         user=test_settings.TEST_MYSQL_USER,
         password=test_settings.TEST_MYSQL_PASSWORD,
         database_name=test_settings.TEST_MYSQL_DB,
-        additional_params={},
+        additional_params=test_settings.TEST_MYSQL_ADDITIONAL_PARAMS,
     )
 
 
@@ -43,7 +43,7 @@ def mysql_for_worker(test_settings: TestSettings) -> MySQLConnectionDTO:
         user=test_settings.TEST_MYSQL_USER,
         password=test_settings.TEST_MYSQL_PASSWORD,
         database_name=test_settings.TEST_MYSQL_DB,
-        additional_params={},
+        additional_params=test_settings.TEST_MYSQL_ADDITIONAL_PARAMS,
     )
 
 
@@ -107,7 +107,7 @@ async def mysql_connection(
             host=mysql.host,
             port=mysql.port,
             database_name=mysql.database_name,
-            additional_params={},
+            additional_params=mysql.additional_params,
         ),
         group_id=group.id,
     )

@@ -28,7 +28,7 @@ def mssql_for_conftest(test_settings: TestSettings) -> MSSQLConnectionDTO:
         user=test_settings.TEST_MSSQL_USER,
         password=test_settings.TEST_MSSQL_PASSWORD,
         database_name=test_settings.TEST_MSSQL_DB,
-        additional_params={},
+        additional_params=test_settings.TEST_MSSQL_ADDITIONAL_PARAMS,
     )
 
 
@@ -43,7 +43,7 @@ def mssql_for_worker(test_settings: TestSettings) -> MSSQLConnectionDTO:
         user=test_settings.TEST_MSSQL_USER,
         password=test_settings.TEST_MSSQL_PASSWORD,
         database_name=test_settings.TEST_MSSQL_DB,
-        additional_params={},
+        additional_params=test_settings.TEST_MSSQL_ADDITIONAL_PARAMS,
     )
 
 
@@ -108,7 +108,7 @@ async def mssql_connection(
             host=mssql.host,
             port=mssql.port,
             database_name=mssql.database_name,
-            additional_params={},
+            additional_params=mssql.additional_params,
         ),
         group_id=group.id,
     )

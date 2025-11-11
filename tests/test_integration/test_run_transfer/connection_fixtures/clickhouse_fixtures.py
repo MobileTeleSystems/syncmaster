@@ -28,7 +28,7 @@ def clickhouse_for_conftest(test_settings: TestSettings) -> ClickhouseConnection
         user=test_settings.TEST_CLICKHOUSE_USER,
         password=test_settings.TEST_CLICKHOUSE_PASSWORD,
         database_name=test_settings.TEST_CLICKHOUSE_DB,
-        additional_params={},
+        additional_params=test_settings.TEST_CLICKHOUSE_ADDITIONAL_PARAMS,
     )
 
 
@@ -43,7 +43,7 @@ def clickhouse_for_worker(test_settings: TestSettings) -> ClickhouseConnectionDT
         user=test_settings.TEST_CLICKHOUSE_USER,
         password=test_settings.TEST_CLICKHOUSE_PASSWORD,
         database_name=test_settings.TEST_CLICKHOUSE_DB,
-        additional_params={},
+        additional_params=test_settings.TEST_CLICKHOUSE_ADDITIONAL_PARAMS,
     )
 
 
@@ -112,7 +112,7 @@ async def clickhouse_connection(
             host=clickhouse.host,
             port=clickhouse.port,
             database_name=clickhouse.database_name,
-            additional_params={},
+            additional_params=clickhouse.additional_params,
         ),
         group_id=group.id,
     )

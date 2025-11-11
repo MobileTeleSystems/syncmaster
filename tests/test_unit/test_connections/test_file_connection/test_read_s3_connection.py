@@ -19,6 +19,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.s3]
                 "region": "some_region",
                 "protocol": "http",
                 "bucket_style": "domain",
+                "additional_params": {},
             },
             {
                 "type": "s3",

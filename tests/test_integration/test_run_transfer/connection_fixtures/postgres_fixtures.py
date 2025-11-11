@@ -28,7 +28,7 @@ def postgres_for_conftest(test_settings: TestSettings) -> PostgresConnectionDTO:
         user=test_settings.TEST_POSTGRES_USER,
         password=test_settings.TEST_POSTGRES_PASSWORD,
         database_name=test_settings.TEST_POSTGRES_DB,
-        additional_params={},
+        additional_params=test_settings.TEST_POSTGRES_ADDITIONAL_PARAMS,
     )
 
 
@@ -43,7 +43,7 @@ def postgres_for_worker(test_settings: TestSettings) -> PostgresConnectionDTO:
         user=test_settings.TEST_POSTGRES_USER,
         password=test_settings.TEST_POSTGRES_PASSWORD,
         database_name=test_settings.TEST_POSTGRES_DB,
-        additional_params={},
+        additional_params=test_settings.TEST_POSTGRES_ADDITIONAL_PARAMS,
     )
 
 
@@ -95,7 +95,7 @@ async def postgres_connection(
             host=postgres.host,
             port=postgres.port,
             database_name=postgres.database_name,
-            additional_params={},
+            additional_params=postgres.additional_params,
         ),
         group_id=group.id,
     )

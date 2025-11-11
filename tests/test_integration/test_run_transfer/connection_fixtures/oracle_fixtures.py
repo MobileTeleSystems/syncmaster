@@ -29,7 +29,7 @@ def oracle_for_conftest(test_settings: TestSettings) -> OracleConnectionDTO:
         password=test_settings.TEST_ORACLE_PASSWORD,
         service_name=test_settings.TEST_ORACLE_SERVICE_NAME,
         sid=test_settings.TEST_ORACLE_SID,
-        additional_params={},
+        additional_params=test_settings.TEST_ORACLE_ADDITIONAL_PARAMS,
     )
 
 
@@ -45,7 +45,7 @@ def oracle_for_worker(test_settings: TestSettings) -> OracleConnectionDTO:
         password=test_settings.TEST_ORACLE_PASSWORD,
         service_name=test_settings.TEST_ORACLE_SERVICE_NAME,
         sid=test_settings.TEST_ORACLE_SID,
-        additional_params={},
+        additional_params=test_settings.TEST_ORACLE_ADDITIONAL_PARAMS,
     )
 
 
@@ -112,7 +112,7 @@ async def oracle_connection(
             port=oracle.port,
             sid=oracle.sid,
             service_name=oracle.service_name,
-            additional_params={},
+            additional_params=oracle.additional_params,
         ),
         group_id=group.id,
     )
