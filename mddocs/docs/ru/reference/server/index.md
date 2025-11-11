@@ -1,0 +1,267 @@
+# REST API Сервер { #server }
+
+Сервер SyncMaster предоставляет простой REST API для доступа к сущностям, хранящимся в [database][reference-server-configuration-database].
+Реализован с использованием [FastAPI](https://fastapi.tiangolo.com/).
+
+## Установка и запуск
+
+### С использованием docker
+
+- Установите [Docker](https://docs.docker.com/engine/install/)
+
+- Установите [docker-compose](https://github.com/docker/compose/releases/)
+
+- Выполните следующую команду:
+
+  ```console
+  $ docker compose --profile server up -d --wait
+  ...
+  ```
+
+  `docker-compose` загрузит все необходимые образы, создаст контейнеры, а затем запустит сервер.
+
+  Параметры можно установить через файл `.env` или раздел `environment` в `docker-compose.yml`
+
+### `docker-compose.yml`
+
+  ```default
+  services:
+    db:
+      image: postgres:17
+      restart: unless-stopped
+      environment:
+        POSTGRES_DB: syncmaster
+        POSTGRES_USER: syncmaster
+        POSTGRES_PASSWORD: changeme
+      ports:
+        - 5432:5432
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      healthcheck:
+        test: pg_isready
+        start_period: 5s
+        interval: 30s
+        timeout: 5s
+        retries: 3
+
+    db-migrations:
+      image: mtsrus/syncmaster-server:${VERSION:-develop}
+      restart: no
+      build:
+        dockerfile: docker/Dockerfile.server
+        context: .
+        target: prod
+      entrypoint: [python, -m, syncmaster.db.migrations, upgrade, head]
+      env_file: .env.docker
+      depends_on:
+        db:
+          condition: service_healthy
+
+    rabbitmq:
+      image: rabbitmq:4
+      restart: unless-stopped
+      ports:
+        - 5672:5672
+      volumes:
+        - rabbitmq_data:/var/lib/rabbitmq
+      healthcheck:
+        test: rabbitmq-diagnostics -q ping
+        start_period: 5s
+        interval: 30s
+        timeout: 5s
+        retries: 3
+
+    server:
+      image: mtsrus/syncmaster-server:${VERSION:-develop}
+      restart: unless-stopped
+      build:
+        dockerfile: docker/Dockerfile.server
+        context: .
+        target: prod
+      ports:
+        - 8000:8000
+      environment:
+        # список имен пользователей, которым должна быть присвоена роль SUPERUSER при запуске приложения
+        SYNCMASTER__ENTRYPOINT__SUPERUSERS: admin
+        # PROMETHEUS_MULTIPROC_DIR требуется для нескольких рабочих процессов, см.:
+        # https://prometheus.github.io/client_python/multiprocess/
+        PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus-metrics
+      # каталог tmpfs очищается при каждом перезапуске контейнера
+      tmpfs:
+        - /tmp/prometheus-metrics:mode=1777
+      env_file: .env.docker
+      depends_on:
+        db:
+          condition: service_healthy
+        db-migrations:
+          condition: service_completed_successfully
+        rabbitmq:
+          condition: service_healthy
+      profiles:
+        - server
+        - frontend
+        - all
+
+    worker:
+      image: mtsrus/syncmaster-worker:${VERSION:-develop}
+      restart: unless-stopped
+      build:
+        dockerfile: docker/Dockerfile.worker
+        context: .
+        target: prod
+      env_file: .env.docker
+      command: --loglevel=info -Q 123-test_queue  # Queue.slug
+      depends_on:
+        db:
+          condition: service_healthy
+        db-migrations:
+          condition: service_completed_successfully
+        rabbitmq:
+          condition: service_healthy
+      profiles:
+        - worker
+        - all
+
+    scheduler:
+      image: mtsrus/syncmaster-scheduler:${VERSION:-develop}
+      restart: unless-stopped
+      build:
+        dockerfile: docker/Dockerfile.scheduler
+        context: .
+        target: prod
+      env_file: .env.docker
+      depends_on:
+        db:
+          condition: service_healthy
+        db-migrations:
+          condition: service_completed_successfully
+        rabbitmq:
+          condition: service_healthy
+      profiles:
+        - scheduler
+        - all
+
+    frontend:
+      image: mtsrus/syncmaster-ui:${VERSION:-develop}
+      restart: unless-stopped
+      env_file: .env.docker
+      ports:
+        - 3000:3000
+      depends_on:
+        server:
+          condition: service_healthy
+      profiles:
+        - frontend
+        - all
+
+  volumes:
+    postgres_data:
+    rabbitmq_data:
+  ```
+
+### `.env.docker`
+
+  ```default
+  TZ=UTC
+  ENV=LOCAL
+
+  # Параметры логирования
+  SYNCMASTER__LOGGING__SETUP=True
+  SYNCMASTER__LOGGING__PRESET=colored
+
+  # Общие параметры базы данных
+  SYNCMASTER__DATABASE__URL=postgresql+asyncpg://syncmaster:changeme@db:5432/syncmaster
+
+  # Шифрование/дешифрование данных учетных записей с использованием этого ключа Fernet.
+  # !!! СГЕНЕРИРУЙТЕ СВОЮ СОБСТВЕННУЮ КОПИЮ ДЛЯ ИСПОЛЬЗОВАНИЯ В ПРОДАКШЕНЕ !!!
+  SYNCMASTER__ENCRYPTION__SECRET_KEY=UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94=
+
+  # Общие параметры RabbitMQ
+  SYNCMASTER__BROKER__URL=amqp://guest:guest@rabbitmq:5672
+
+  # Параметры сервера
+  SYNCMASTER__SERVER__SESSION__SECRET_KEY=generate_some_random_string
+  # !!! НИКОГДА НЕ ИСПОЛЬЗУЙТЕ В ПРОДАКШЕНЕ !!!
+  SYNCMASTER__SERVER__DEBUG=true
+
+  # Аутентификация Keycloak
+  #SYNCMASTER__AUTH__PROVIDER=syncmaster.server.providers.auth.keycloak_provider.KeycloakAuthProvider
+  SYNCMASTER__AUTH__KEYCLOAK__SERVER_URL=http://keycloak:8080
+  SYNCMASTER__AUTH__KEYCLOAK__REALM_NAME=manually_created
+  SYNCMASTER__AUTH__KEYCLOAK__CLIENT_ID=manually_created
+  SYNCMASTER__AUTH__KEYCLOAK__CLIENT_SECRET=generated_by_keycloak
+  SYNCMASTER__AUTH__KEYCLOAK__REDIRECT_URI=http://localhost:8000/auth/callback
+  SYNCMASTER__AUTH__KEYCLOAK__SCOPE=email
+  SYNCMASTER__AUTH__KEYCLOAK__VERIFY_SSL=False
+
+  # Фиктивная аутентификация
+  SYNCMASTER__AUTH__PROVIDER=syncmaster.server.providers.auth.dummy_provider.DummyAuthProvider
+  SYNCMASTER__AUTH__ACCESS_TOKEN__SECRET_KEY=generate_another_random_string
+
+  # Параметры планировщика
+  SYNCMASTER__SCHEDULER__TRANSFER_FETCHING_TIMEOUT_SECONDS=200
+
+  # Параметры рабочего процесса
+  SYNCMASTER__WORKER__LOG_URL_TEMPLATE=https://logs.location.example.com/syncmaster-worker?correlation_id={{ correlation_id }}&run_id={{ run.id }}
+  SYNCMASTER__HWM_STORE__ENABLED=true
+  SYNCMASTER__HWM_STORE__TYPE=horizon
+  SYNCMASTER__HWM_STORE__URL=http://horizon:8000
+  SYNCMASTER__HWM_STORE__NAMESPACE=syncmaster_namespace
+  SYNCMASTER__HWM_STORE__USER=admin
+  SYNCMASTER__HWM_STORE__PASSWORD=123UsedForTestOnly@!
+
+  # Параметры фронтенда
+  SYNCMASTER__UI__API_BROWSER_URL=http://localhost:8000
+
+  # Cors
+  SYNCMASTER__SERVER__CORS__ENABLED=True
+  SYNCMASTER__SERVER__CORS__ALLOW_ORIGINS=["http://localhost:3000"]
+  SYNCMASTER__SERVER__CORS__ALLOW_CREDENTIALS=True
+  SYNCMASTER__SERVER__CORS__ALLOW_METHODS=["*"]
+  SYNCMASTER__SERVER__CORS__ALLOW_HEADERS=["*"]
+  SYNCMASTER__SERVER__CORS__EXPOSE_HEADERS=["X-Request-ID","Location","Access-Control-Allow-Credentials"]
+  ```
+
+- После запуска и готовности сервера откройте <http://localhost:8000/docs>.
+
+### Без Docker
+
+- Установите Python 3.11 или выше
+
+- Настройте [Реляционную базу данных][database], запустите миграции
+
+- Настройте [Брокер сообщений][message-broker]
+
+- Создайте виртуальное окружение
+
+  ```console
+  $ python -m venv /some/.venv
+  $ source /some/.venv/activate
+  ...
+  ```
+
+- Установите пакет `syncmaster` со следующими *дополнительными* зависимостями:
+
+  ```console
+  $ pip install syncmaster[server]
+  ...
+  ```
+
+- Запустите процесс сервера
+
+  ```console
+  $ python -m syncmaster.server --host 0.0.0.0 --port 8000
+  ...
+  ```
+
+  Это тонкая обертка вокруг CLI [uvicorn](https://www.uvicorn.org/#command-line-options),
+  опции и команды точно такие же.
+
+- После запуска и готовности сервера откройте <http://localhost:8000/docs>.
+
+## Смотрите также
+
+- [Провайдеры аутентификации][server-auth-providers]
+- [Конфигурация][server-configuration]
+- [CLI для управления суперпользователями][manage-superusers-cli]
+- [Спецификация OpenAPI][server-openapi]

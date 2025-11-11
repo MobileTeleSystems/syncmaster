@@ -1,0 +1,168 @@
+# [Обязательное] Название сайта
+site_name: MWS Data
+
+# Базовый адрес сайта
+site_url: https://dataops.pages.mts.ru/documentation
+
+# Описание сайта. Добавляется в meta в html-заголовке каждой страницы.
+site_description: MWS Data user documentation.
+
+# Автор (или авторы) сайта. Добавляется в html-заголовок каждой страницы.
+site_author: dataops@mts.ru
+
+# Ссылка на репозиторий, в котором хранятся исходные материалы.
+repo_url: https://gitlab.services.mts.ru/dataops/documentation
+
+# Директория с исходниками документации
+docs_dir: 'docs\horizon\documentation'  
+
+# Директория с сгенерированной докой
+site_dir: public
+
+# Информация о теме, которая будет применена для сгенерированного сайта.
+# И её параметрах
+theme:
+  name: material
+  features:
+    - navigation.indexes
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/weather-night 
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  locale: ru
+  highlightjs: true
+  hljs_languages:
+    - yaml
+
+# Структура навигации генерируемого сайта.
+nav:
+  - index.md
+  - Руководство по вкладу в проект: contributing.md
+  - Безопасность: security.md
+  - Журнал изменений: changelog.md
+
+  - Бэкенд:
+    - Авторизация:
+      - Кешированный LDAP провайдер аутентификации: backend/auth/cached_ldap.md
+      - Пользовательский провайдер аутентификации: backend/auth/custom.md
+      - Фиктивный провайдер аутентификации: backend/auth/dummy.md
+      - Провайдеры аутентификации: backend/auth/index.md
+      - LDAP провайдер аутентификации: backend/auth/ldap.md
+    - Конфигурация:
+      - Настройки CORS: backend/configuration/cors.md
+      - Настройки базы данных: backend/configuration/database.md
+      - Включение отладки: backend/configuration/debug.md     
+      - Конфигурация: backend/configuration/index.md
+      - Настройки логирования: backend/configuration/logging.md
+      - Настройки мониторинга: backend/configuration/monitoring.md
+      - Настройки OpenAPI: backend/configuration/openapi.md
+      - Обслуживание статических файлов: backend/configuration/static-files.md     
+    - Скрипты:
+      - Скрипты: backend/scripts/index.md
+      - Управление администрированием: backend/scripts/manage_admins.md
+    - Архитектура бэкенда: backend/architecture.md
+    - Установка: backend/install.md
+    - OPenAPI: backend/openapi.md
+   
+  - Журнал изменений:
+    - 0.0.8 (2024-01-18): changelog/0.0.8.md
+    - 0.0.9 (2024-01-19): changelog/0.0.9.md
+    - 0.0.10 (2024-01-22): changelog/0.0.10.md
+    - 0.0.11 (2024-01-22): changelog/0.0.11.md
+    - 0.0.12 (2024-01-24): changelog/0.0.12.md
+    - 0.0.13 (2024-01-24): changelog/0.0.13.md
+    - 0.0.14 (2024-01-24): changelog/0.0.14.md
+    - 0.1.1 (2024-03-27): changelog/0.1.1.md
+    - 0.1.2 (2024-04-02): changelog/0.1.2.md
+    - 0.1.3 (2024-05-02): changelog/0.1.3.md
+    - 0.2.0 (2024-05-15): changelog/0.2.0.md
+    - 0.2.1 (2024-05-29): changelog/0.2.1.md
+    - 1.0.0 (2024-06-10): changelog/1.0.0.md
+    - 1.0.1 (2024-06-27): changelog/1.0.1.md
+    - 1.0.2 (2024-11-21): changelog/1.0.2.md
+    - 1.1.1 (2025-01-28): changelog/1.1.1.md
+    - 1.1.2 (2025-04-07): changelog/1.1.2.md
+    - Журнал изменений: changelog/index.md
+
+  - Клиент:
+    - Схемы: 
+      - Схемы, связанные с историей HWM: client/schemas/hwm_history.md
+      - Схемы, связанные с HWM: client/schemas/hwm.md
+      - Схемы: client/schemas/index.md
+      - Схемы, связанные с историей неймспейса(пространства имен): client/schemas/namespace_history.md
+      - Схемы, связанные с неймспейсом(пространством имен): client/schemas/namespace.md
+      - Схемы, связанные с пагинацией: client/schemas/pagination.md
+      - Схемы, связанные с разрешениями: client/schemas/permissions.md
+      - Схемы, связанные с пингом: client/schemas/ping.md
+      - Схемы, связанные с пользователями: client/schemas/user.md
+    - Авторизация: client/auth.md
+    - Исключения: client/exceptions.md
+    - Установка клиента: client/install.md
+    - Синхронный клиент: client/sync.md
+
+  - Дизайн:
+    - Сущности: design/entities.md
+    - Разрешения ролей: design/permissions.md
+  
+
+extra_css:
+  - assets/stylesheets/autodoc_pydantic.css         # CSS is shared by all languages
+
+plugins:
+  - autorefs
+  - literate-nav:
+      nav_file: nav.md
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_source: false
+            show_root_heading: false
+            show_root_toc_entry: false
+            # extensions:
+            # - griffe_sphinx
+            # - griffe_pydantic: {schema: false}
+  - macros
+  - plantuml:
+      puml_url: https://www.plantuml.com/plantuml/
+      puml_keyword: plantuml
+  # - i18n:
+  #     docs_structure: folder
+  #     languages:
+  #       - locale: en
+  #         default: true
+  #         name: English
+  #         build: true
+  #       - locale: ru
+  #         name: Русский
+  #         build: false
+
+markdown_extensions:
+  - footnotes
+  - attr_list
+  - md_in_html
+  - admonition
+  - pymdownx.details
+  - pymdownx.critic
+  - pymdownx.snippets:
+      base_path: ["."]
+      check_paths: true
+  - toc:
+      permalink: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
