@@ -36,7 +36,7 @@ async def test_developer_plus_can_create_iceberg_rest_s3_connection(
                 "s3_port": 9010,
                 "s3_bucket": "some_bucket",
                 "s3_region": "us-east-1",
-                "s3_bucket_style": True,
+                "s3_bucket_style": "path",
             },
             "auth_data": {
                 "type": "iceberg_rest_basic_s3_basic",
