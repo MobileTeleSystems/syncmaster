@@ -1,44 +1,44 @@
-# Relation Database { #database }
+# Реляционная база данных { #database }
 
-SyncMaster requires relational database for storing internal data.
+Для хранения внутренних данных SyncMaster требуется реляционная база данных .
 
-Currently, SyncMaster supports only [PostgreSQL](https://www.postgresql.org/).
+В настоящее время SyncMaster поддерживает только [PostgreSQL](https://www.postgresql.org/).
 
-## Migrations
+## Миграции
 
-After a database is started, it is required to run migration script.
-For empty database, it creates all the required tables and indexes.
-For non-empty database, it will perform database structure upgrade, using [Alembic](https://alembic.sqlalchemy.org/).
+После создания базы данных необходимо выполнить скрипт миграции.
+Для пустой базы данных он создает все необходимые таблицы и индексы.
+Для непустой базы данных он выполнит обновление структуры базы данных, используя [Alembic](https://alembic.sqlalchemy.org/).
 
-### WARNING
+### ПРЕДУПРЕЖДЕНИЕ
 
-Other containers (server, scheduler, worker) should be stopped while running migrations, to prevent interference.
+Другие контейнеры (server, scheduler, worker) должны быть остановлены во время выполнения миграций, чтобы предотвратить вмешательство.
 
-## Requirements
+## Требования
 
-- PostgreSQL 12 or higher. It is recommended to use latest Postgres version.
+- PostgreSQL 12 или выше. Рекомендуется использовать последнюю версию Postgres.
 
-## Install & run
+## Установка и запуск
 
-### With Docker
+### С Docker
 
-- Install [Docker](https://docs.docker.com/engine/install/)
+- Установите [Docker](https://docs.docker.com/engine/install/)
 
-- Install [docker-compose](https://github.com/docker/compose/releases/)
+- Установите [docker-compose](https://github.com/docker/compose/releases/)
 
-- Run the following command:
+- Выполните следующую команду:
 
   ```console
   $ docker compose up -d db db-migrations
   ...
   ```
 
-  `docker-compose` will download PostgreSQL image, create container and volume, and then start container.
-  Image entrypoint will create database if volume is empty.
+  `docker-compose` загрузит образ PostgreSQL, создаст контейнер и том, а затем запустит контейнер.
+  Точка входа образа создаст базу данных, если том пуст.
 
-  After that, one-off container with migrations script will run.
+  После этого будет запущен одноразовый контейнер со скриптом миграций.
 
-  Options can be set via `.env` file or `environment` section in `docker-compose.yml`
+  Параметры можно установить через файл `.env` или раздел `environment` в `docker-compose.yml`
 
 ### `docker-compose.yml`
 
@@ -99,12 +99,12 @@ Other containers (server, scheduler, worker) should be stopped while running mig
       ports:
         - 8000:8000
       environment:
-        # list here usernames which should be assigned SUPERUSER role on application start
+        # список имен пользователей, которым должна быть назначена роль SUPERUSER при запуске приложения
         SYNCMASTER__ENTRYPOINT__SUPERUSERS: admin
-        # PROMETHEUS_MULTIPROC_DIR is required for multiple workers, see:
+        # PROMETHEUS_MULTIPROC_DIR требуется для нескольких рабочих процессов, см.:
         # https://prometheus.github.io/client_python/multiprocess/
         PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus-metrics
-      # tmpfs dir is cleaned up each container restart
+      # каталог tmpfs очищается при каждом перезапуске контейнера
       tmpfs:
         - /tmp/prometheus-metrics:mode=1777
       env_file: .env.docker
@@ -183,26 +183,26 @@ Other containers (server, scheduler, worker) should be stopped while running mig
   TZ=UTC
   ENV=LOCAL
 
-  # Logging options
+  # Параметры логирования
   SYNCMASTER__LOGGING__SETUP=True
   SYNCMASTER__LOGGING__PRESET=colored
 
-  # Common DB options
+  # Общие параметры БД
   SYNCMASTER__DATABASE__URL=postgresql+asyncpg://syncmaster:changeme@db:5432/syncmaster
 
-  # Encrypt / Decrypt credentials data using this Fernet key.
-  # !!! GENERATE YOUR OWN COPY FOR PRODUCTION USAGE !!!
+  # Шифрование/дешифрование данных учетных записей с использованием этого ключа Fernet.
+  # !!! СГЕНЕРИРУЙТЕ СВОЮ СОБСТВЕННУЮ КОПИЮ ДЛЯ ИСПОЛЬЗОВАНИЯ В ПРОДАКШЕНЕ !!!
   SYNCMASTER__ENCRYPTION__SECRET_KEY=UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94=
 
-  # Common RabbitMQ options
+  # Общие параметры RabbitMQ
   SYNCMASTER__BROKER__URL=amqp://guest:guest@rabbitmq:5672
 
-  # Server options
+  # Параметры сервера
   SYNCMASTER__SERVER__SESSION__SECRET_KEY=generate_some_random_string
-  # !!! NEVER USE ON PRODUCTION !!!
+  # !!! НИКОГДА НЕ ИСПОЛЬЗУЙТЕ В ПРОДАКШЕНЕ !!!
   SYNCMASTER__SERVER__DEBUG=true
 
-  # Keycloak Auth
+  # Аутентификация Keycloak
   #SYNCMASTER__AUTH__PROVIDER=syncmaster.server.providers.auth.keycloak_provider.KeycloakAuthProvider
   SYNCMASTER__AUTH__KEYCLOAK__SERVER_URL=http://keycloak:8080
   SYNCMASTER__AUTH__KEYCLOAK__REALM_NAME=manually_created
@@ -212,14 +212,14 @@ Other containers (server, scheduler, worker) should be stopped while running mig
   SYNCMASTER__AUTH__KEYCLOAK__SCOPE=email
   SYNCMASTER__AUTH__KEYCLOAK__VERIFY_SSL=False
 
-  # Dummy Auth
+  # Фиктивная аутентификация
   SYNCMASTER__AUTH__PROVIDER=syncmaster.server.providers.auth.dummy_provider.DummyAuthProvider
   SYNCMASTER__AUTH__ACCESS_TOKEN__SECRET_KEY=generate_another_random_string
 
-  # Scheduler options
+  # Параметры планировщика
   SYNCMASTER__SCHEDULER__TRANSFER_FETCHING_TIMEOUT_SECONDS=200
 
-  # Worker options
+  # Параметры рабочего процесса
   SYNCMASTER__WORKER__LOG_URL_TEMPLATE=https://logs.location.example.com/syncmaster-worker?correlation_id=\{\{ correlation_id \}\}&run_id=\{\{ run.id \}\}
   SYNCMASTER__HWM_STORE__ENABLED=true
   SYNCMASTER__HWM_STORE__TYPE=horizon
@@ -228,7 +228,7 @@ Other containers (server, scheduler, worker) should be stopped while running mig
   SYNCMASTER__HWM_STORE__USER=admin
   SYNCMASTER__HWM_STORE__PASSWORD=123UsedForTestOnly@!
 
-  # Frontend options
+  # Параметры фронтенда
   SYNCMASTER__UI__API_BROWSER_URL=http://localhost:8000
 
   # Cors
@@ -240,13 +240,13 @@ Other containers (server, scheduler, worker) should be stopped while running mig
   SYNCMASTER__SERVER__CORS__EXPOSE_HEADERS=["X-Request-ID","Location","Access-Control-Allow-Credentials"]
   ```
 
-### Without Docker
+### Без Docker
 
-- For installing PostgreSQL, please follow [installation instruction](https://www.postgresql.org/download/).
+- Для установки PostgreSQL следуйте [инструкции по установке](https://www.postgresql.org/download/).
 
-- Install Python 3.11 or above
+- Установите Python 3.11 или выше
 
-- Create virtual environment
+- Создайте виртуальное окружение
 
   ```console
   $ python -m venv /some/.venv  
@@ -254,41 +254,41 @@ Other containers (server, scheduler, worker) should be stopped while running mig
   ...
   ```
 
-- Install `syncmaster` package with following *extra* dependencies:
+- Установите пакет `syncmaster` со следующими *дополнительными* зависимостями:
 
   ```console
   $ pip install syncmaster[postgres]
   ...
   ```
 
-- Configure [Database connection][configuration-database] using environment variables, e.g. by creating `.env` file:
+- Настройте [подключение к базе данных][configuration-database] с помощью переменных среды, например, создав файл `.env`:
 
   ```console
   $ export SYNCMASTER__DATABASE__URL=postgresql+asyncpg://syncmaster:changeme@db:5432/syncmaster
   ...
   ```
 
-  And then read values from this file:
+  А затем прочитайте значения из этого файла:
 
   ```console
   $ source /some/.env
   ...
   ```
 
-- Run migrations:
+- Запустите миграции:
 
   ```console
   $ python -m syncmaster.db.migrations upgrade head
   ...
   ```
 
-  This is a thin wrapper around [alembic cli](https://alembic.sqlalchemy.org/en/latest/tutorial.html#running-our-first-migration),
-  options and commands are just the same.
+  Это тонкая оболочка вокруг [alembic cli](https://alembic.sqlalchemy.org/en/latest/tutorial.html#running-our-first-migration),
+  опции и команды точно такие же.
 
-> **This command should be executed after each upgrade to new Data.Rentgen version.**
+> **Эта команда должна выполняться после каждого обновления до новой версии Data.Rentgen.**
 
-## See also
+## Смотрите также
 
-- [Database settings][configuration-database]
-- [Credentials encryption][configuration-credentials-encryption]
-- [Database structure][database-structure]
+- [Настройки базы данных][configuration-database]
+- [Шифрование учетных данных][configuration-credentials-encryption]
+- [Структура базы данных][database-structure]

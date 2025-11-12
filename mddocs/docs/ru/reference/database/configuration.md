@@ -1,3 +1,3 @@
-# Database settings { #configuration-database }
+# Настройки базы данных { #configuration-database }
 
 ::: syncmaster.settings.DatabaseSettings
