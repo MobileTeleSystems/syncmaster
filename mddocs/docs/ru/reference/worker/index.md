@@ -1,4 +1,4 @@
-# Worker { #reference-worker }
+# Worker { #worker }
 
 SyncMaster worker - это выделенный процесс, который получает новые запуски передачи данных из [брокера сообщений][message-broker],
 выполняет их и обновляет статус и URL логов в [базе данных][database]. Реализован с использованием [Celery](https://docs.celeryq.dev).

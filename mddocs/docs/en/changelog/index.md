@@ -1,4 +1,4 @@
-# Changelog
+# Changelog { #changelog }
 
 * [0.2.5 [UNRELEASED] (2025-09-30)][DRAFT]
 * [0.2.4 (2025-07-09)][0.2.4]

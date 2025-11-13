@@ -15,7 +15,7 @@ Roles are:
   Manage connections, transfers, runs, queues and user-group membership. Group can have only one owner.
 - `SUPERUSER` (Admin)
   Meta role assigned to specific users, NOT within group. All permissions, including ability to create/delete groups.
-  Superusers are created by {ref}`manage-superusers-cli`.
+  Superusers are created by [`manage-superusers-cli`][manage-superusers-cli].
 
 ## Groups
 
