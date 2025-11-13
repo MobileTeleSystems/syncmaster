@@ -101,6 +101,7 @@ class SessionSettings(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     @field_validator("secret_key")
+    @classmethod
     def _validate_secret_key(cls, value: SecretStr | None, info: ValidationInfo) -> SecretStr | None:
         if not value and info.data.get("enabled"):
             raise ValueError("secret_key is required")

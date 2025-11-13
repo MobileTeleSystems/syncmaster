@@ -29,6 +29,7 @@ class StaticFilesSettings(BaseModel):
     )
 
     @field_validator("directory")
+    @classmethod
     def _validate_directory(cls, value: Path, info: ValidationInfo) -> Path:
         if not info.data.get("enabled"):
             return value
