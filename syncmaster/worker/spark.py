@@ -34,8 +34,9 @@ def get_worker_spark_session(
     name = run.transfer.group.name + "_" + run.transfer.name  # noqa: WPS336
     spark_builder = SparkSession.builder.appName(f"SyncMaster__{name}")
 
+    master = settings.spark_session_default_config.get("spark.master")
     spark_session_config = settings.spark_session_default_config.copy()
-    spark_session_config.update(get_spark_session_conf(source, target, run.transfer.resources))
+    spark_session_config.update(get_spark_session_conf(master, source, target, run.transfer.resources))
 
     for k, v in spark_session_config.items():
         spark_builder = spark_builder.config(k, v)
@@ -109,6 +110,7 @@ def get_excluded_packages() -> list[str]:
 
 
 def get_spark_session_conf(
+    spark_master: str | None,
     source: ConnectionDTO,
     target: ConnectionDTO,
     resources: dict,
@@ -116,15 +118,25 @@ def get_spark_session_conf(
     maven_packages: list[str] = get_packages(connection_types={source.type, target.type})
     excluded_packages: list[str] = get_excluded_packages()
 
-    memory_mb = math.ceil(resources["ram_bytes_per_task"] / 1024 / 1024)
-    config = {
+    tasks: int = resources["max_parallel_tasks"]
+    cores_per_task: int = resources["cpu_cores_per_task"]
+    # Spark expects memory to be in MB
+    memory_mb: int = math.ceil(resources["ram_bytes_per_task"] / 1024 / 1024)
+
+    config: dict[str, str | int] = {
         "spark.sql.pyspark.jvmStacktrace.enabled": "true",
         "spark.hadoop.mapreduce.fileoutputcommitter.marksuccessfuljobs": "false",
-        "spark.executor.cores": resources["cpu_cores_per_task"],
-        # Spark expects memory to be in MB
-        "spark.executor.memory": f"{memory_mb}M",
-        "spark.executor.instances": resources["max_parallel_tasks"],
     }
+
+    if spark_master and spark_master.startswith("local"):
+        config["spark.master"] = f"local[{tasks}]"
+        config["spark.driver.memory"] = f"{memory_mb}M"
+        config["spark.default.parallelism"] = tasks * cores_per_task
+    else:
+        config["spark.executor.memory"] = f"{memory_mb}M"
+        config["spark.executor.cores"] = cores_per_task
+        config["spark.executor.instances"] = tasks
+        config["spark.dynamicAllocation.maxExecutors"] = tasks
 
     if maven_packages:
         log.debug("Include Maven packages: %s", maven_packages)
