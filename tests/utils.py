@@ -145,6 +145,11 @@ def verify_transfer_auth_data(run_data: dict[str, Any], source_auth: str, target
             assert auth_data["metastore_username"]
             assert "s3_secret_key" not in auth_data
             assert "metastore_password" not in auth_data
+        elif auth_type == "iceberg_rest_oauth2_client_credentials_s3_basic":
+            assert auth_data["s3_access_key"]
+            assert auth_data["metastore_oauth2_client_id"]
+            assert "s3_secret_key" not in auth_data
+            assert "metastore_oauth2_client_secret" not in auth_data
         else:
             assert auth_data["user"]
             assert "password" not in auth_data

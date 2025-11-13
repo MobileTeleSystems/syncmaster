@@ -278,6 +278,11 @@ async def fetch_connection_json(client: AsyncClient, user_token: str, mock_conne
     elif auth_data["type"] == "iceberg_rest_basic_s3_basic":
         auth_data["metastore_password"] = mock_connection.credentials.value["metastore_password"]
         auth_data["s3_secret_key"] = mock_connection.credentials.value["s3_secret_key"]
+    elif auth_data["type"] == "iceberg_rest_oauth2_client_credentials_s3_basic":
+        auth_data["metastore_oauth2_client_secret"] = mock_connection.credentials.value[
+            "metastore_oauth2_client_secret"
+        ]
+        auth_data["s3_secret_key"] = mock_connection.credentials.value["s3_secret_key"]
 
     return connection_json
 
