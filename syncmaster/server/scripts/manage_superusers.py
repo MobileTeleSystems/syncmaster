@@ -121,7 +121,8 @@ if __name__ == "__main__":
     SessionLocal = async_sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
     parser = create_parser()
     args = parser.parse_args()
-    if not args.usernames:
+
+    if args.command == "add" and not args.usernames:
         args.usernames = settings.superusers
 
     session = SessionLocal()
