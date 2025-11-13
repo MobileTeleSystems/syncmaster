@@ -16,7 +16,6 @@ ENV PYTHONPATH=/app \
 COPY ./docker/entrypoint_worker.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["--loglevel=info"]
 
 
 FROM base AS builder
