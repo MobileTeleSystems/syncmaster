@@ -43,7 +43,7 @@ With docker
   .. dropdown:: ``config.yml``
 
     .. literalinclude:: ../../../config.yml
-        :emphasize-lines: 1-10,57-67
+        :emphasize-lines: 1-10,58-68
 
 Without docker
 ^^^^^^^^^^^^^^

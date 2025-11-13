@@ -37,6 +37,7 @@ server:
   debug: true # !!! NEVER USE ON PRODUCTION !!!
 
   session:
+    enabled: true
     secret_key: generate_some_random_string
     max_age: 86400
 

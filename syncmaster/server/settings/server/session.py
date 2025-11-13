@@ -62,7 +62,7 @@ class SessionSettings(BaseModel):
     """
 
     enabled: bool = Field(
-        default=True,
+        default=False,
         description="Set to ``True`` to enable SessionMiddleware",
     )
     secret_key: SecretStr | None = Field(

@@ -85,7 +85,7 @@ Set URI to redirect from Keycloak login page for exchanging the code for an acce
 
     auth:
         keycloak:
-            # set here SyncMaster hostname/domain
+            # Set here URL of SyncMaster UI page handling callback redirects
             redirect_uri: http://localhost:3000/auth/callback
             # ...
 
@@ -108,6 +108,29 @@ Now go to **Credentials** tab and generate a client secret:
 
 Now you can use create users in this realm, check `Keycloak documentation <https://www.keycloak.org/docs/latest/server_admin/#assembly-managing-users_server_administration_guide>`_ on how to manage users creation.
 
+Enable session middleware
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Enable :ref:`server-configuration-session <SesionMiddleware>`, and generate random string to use as secret key for cookie encryption.
+
+.. code-block:: yaml
+    :caption: config.yml
+
+    server:
+        session:
+            enabled: true
+            secret_key: secret_key_for_session_cookie
+
+Replace login page with Keycloak redirect button
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: yaml
+    :caption: config.yml
+
+    ui:
+        # required by KeycloakAuthProvider
+        auth_provider: keycloakAuth
+
 Final configuration
 ~~~~~~~~~~~~~~~~~~~
 
@@ -121,7 +144,7 @@ After this you can use ``KeycloakAuthProvider`` in your application:
         keycloak:
             # Keycloak URL accessible from both SyncMaster server and from browser
             server_url: http://keycloak:8080
-            # set here SyncMaster hostname/domain
+            # Set here URL of SyncMaster UI page handling callback redirects
             redirect_uri: http://localhost:3000/auth/callback
             realm_name: fastapi_realm
             client_id: fastapi_client
@@ -129,7 +152,14 @@ After this you can use ``KeycloakAuthProvider`` in your application:
             scope: email
             verify_ssl: false
 
+    server:
+        session:
+            # required by KeycloakAuthProvider
+            enabled: true
+            secret_key: secret_key_for_session_cookie
+
     ui:
+        # required by KeycloakAuthProvider
         auth_provider: keycloakAuth
-        # set here SyncMaster hostname/domain
+        # SyncMaster API URL, accessible from browser
         api_browser_url: http://localhost:8000

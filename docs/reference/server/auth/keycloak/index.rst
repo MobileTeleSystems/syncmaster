@@ -83,7 +83,8 @@ Basic configuration
 
 
 OAuth2 Gateway Provider
------------
+-----------------------
+
 In case of using an OAuth2 Gateway, all API requests will come with an Authorization: Bearer header. For this scenario, Syncmaster provides an alternative authentication provider called OAuth2GatewayProvider. This provider works as follows:
 
 - It extracts the access token from the Authorization header.
