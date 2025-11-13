@@ -4,11 +4,20 @@
 
 import textwrap
 
-from pydantic import BaseModel, ConfigDict, Field, SecretStr
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    SecretStr,
+    ValidationInfo,
+    field_validator,
+)
 
 
 class SessionSettings(BaseModel):
     """Session Middleware Settings.
+
+    Required for :ref:`keycloak-auth-provider`.
 
     See `SessionMiddleware <https://www.starlette.io/middleware/#sessionmiddleware>`_ documentation.
 
@@ -27,6 +36,7 @@ class SessionSettings(BaseModel):
 
         server:
             session:
+                enabled: true
                 secret_key: cookie_secret
                 session_cookie: custom_cookie_name
                 max_age: null
@@ -41,6 +51,7 @@ class SessionSettings(BaseModel):
 
         server:
             session:
+                enabled: true
                 secret_key: cookie_secret
                 session_cookie: custom_cookie_name
                 max_age: 3600
@@ -50,7 +61,12 @@ class SessionSettings(BaseModel):
 
     """
 
-    secret_key: SecretStr = Field(
+    enabled: bool = Field(
+        default=True,
+        description="Set to ``True`` to enable SessionMiddleware",
+    )
+    secret_key: SecretStr | None = Field(
+        default=None,
         description=textwrap.dedent(
             """
             Secret key for encrypting cookies.
@@ -83,3 +99,9 @@ class SessionSettings(BaseModel):
     )
 
     model_config = ConfigDict(extra="allow")
+
+    @field_validator("secret_key")
+    def _validate_secret_key(cls, value: SecretStr | None, info: ValidationInfo) -> SecretStr | None:
+        if not value and info.data.get("enabled"):
+            raise ValueError("secret_key is required")
+        return value

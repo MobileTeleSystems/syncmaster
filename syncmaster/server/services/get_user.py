@@ -42,8 +42,8 @@ def get_user(  # noqa: WPS231
         elif oauth_token:
             # DummyAuth stores token in "Authorization" header
             access_token = oauth_token
-        elif "access_token" in request.session:
-            # KeyaockAuth patches session and store access_token in cookie
+        elif "session" in request.scope and "access_token" in request.session:
+            # KeycloakAuth patches session and store access_token in cookie
             access_token = request.session["access_token"]
 
         user = await auth_provider.get_current_user(
