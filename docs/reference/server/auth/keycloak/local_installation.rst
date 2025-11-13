@@ -111,7 +111,7 @@ Now you can use create users in this realm, check `Keycloak documentation <https
 Enable session middleware
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Enable :ref:`server-configuration-session <SesionMiddleware>`, and generate random string to use as secret key for cookie encryption.
+Enable :ref:`SesionMiddleware <server-configuration-session>`, and generate random string to use for cookie encryption.
 
 .. code-block:: yaml
     :caption: config.yml
@@ -123,6 +123,10 @@ Enable :ref:`server-configuration-session <SesionMiddleware>`, and generate rand
 
 Replace login page with Keycloak redirect button
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. image:: images/ui-login-page.png
+   :width: 400px
+   :align: center
 
 .. code-block:: yaml
     :caption: config.yml
