@@ -91,11 +91,11 @@ def create_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     parser_add = subparsers.add_parser("add", help="Add superuser privileges to users")
-    parser_add.add_argument("usernames", nargs="+", help="Usernames to add as superusers")
+    parser_add.add_argument("usernames", nargs="?", help="Usernames to add as superusers")
     parser_add.set_defaults(func=add_superusers)
 
     parser_remove = subparsers.add_parser("remove", help="Remove superuser privileges from users")
-    parser_remove.add_argument("usernames", nargs="+", help="Usernames to remove from superusers")
+    parser_remove.add_argument("usernames", nargs="?", help="Usernames to remove from superusers")
     parser_remove.set_defaults(func=remove_superusers)
 
     parser_list = subparsers.add_parser("list", help="List all superusers")
