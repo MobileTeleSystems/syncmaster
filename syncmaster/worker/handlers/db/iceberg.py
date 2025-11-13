@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from onetl.connection import Iceberg
 from onetl.hooks import slot, support_hooks
 
-from syncmaster.dto.connections import IcebergRESTCatalogS3ConnectionDTO
+from syncmaster.dto.connections import IcebergRESTCatalogS3ConnectionBaseDTO
 from syncmaster.dto.transfers import IcebergRESTCatalogS3TransferDTO
 from syncmaster.worker.handlers.db.base import DBHandler
 
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 @support_hooks
 class IcebergRESTCatalogS3Handler(DBHandler):
     connection: Iceberg
-    connection_dto: IcebergRESTCatalogS3ConnectionDTO
+    connection_dto: IcebergRESTCatalogS3ConnectionBaseDTO
     transfer_dto: IcebergRESTCatalogS3TransferDTO
     _operators = {
         "regexp": "RLIKE",
@@ -33,10 +33,7 @@ class IcebergRESTCatalogS3Handler(DBHandler):
             catalog_name=self.transfer_dto.catalog_name,
             catalog=Iceberg.RESTCatalog(
                 uri=self.connection_dto.metastore_url,
-                auth=Iceberg.RESTCatalog.BasicAuth(
-                    user=self.connection_dto.metastore_username,
-                    password=self.connection_dto.metastore_password,
-                ),
+                auth=self._make_auth(),
             ),
             warehouse=Iceberg.S3Warehouse(
                 path=self.connection_dto.s3_warehouse_path,
@@ -91,3 +88,18 @@ class IcebergRESTCatalogS3Handler(DBHandler):
 
     def _quote_field(self, field: str) -> str:
         return f"`{field}`"
+
+    def _make_auth(self):
+        if self.connection_dto.metastore_auth_type == "oauth2":
+            return Iceberg.RESTCatalog.OAuth2ClientCredentials(
+                client_id=self.connection_dto.metastore_oauth2_client_id,
+                client_secret=self.connection_dto.metastore_oauth2_client_secret,
+                scopes=self.connection_dto.metastore_oauth2_scopes,
+                resource=self.connection_dto.metastore_oauth2_resource,
+                audience=self.connection_dto.metastore_oauth2_audience,
+                server_uri=self.connection_dto.metastore_oauth2_server_uri,
+            )
+        return Iceberg.RESTCatalog.BasicAuth(
+            user=self.connection_dto.metastore_username,
+            password=self.connection_dto.metastore_password,
+        )

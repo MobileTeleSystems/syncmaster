@@ -6,12 +6,6 @@ from syncmaster.schemas.v1.auth.basic import (
     ReadBasicAuthSchema,
     UpdateBasicAuthSchema,
 )
-from syncmaster.schemas.v1.auth.iceberg_rest_basic import (
-    CreateIcebergRESTCatalogBasicAuthSchema,
-    IcebergRESTCatalogBasicAuthSchema,
-    ReadIcebergRESTCatalogBasicAuthSchema,
-    UpdateIcebergRESTCatalogBasicAuthSchema,
-)
 from syncmaster.schemas.v1.auth.s3 import (
     CreateS3AuthSchema,
     ReadS3AuthSchema,
@@ -41,8 +35,4 @@ __all__ = [
     "UpdateSambaAuthSchema",
     "AuthTokenSchema",
     "TokenPayloadSchema",
-    "IcebergRESTCatalogBasicAuthSchema",
-    "CreateIcebergRESTCatalogBasicAuthSchema",
-    "ReadIcebergRESTCatalogBasicAuthSchema",
-    "UpdateIcebergRESTCatalogBasicAuthSchema",
 ]

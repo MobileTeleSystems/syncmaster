@@ -4,14 +4,23 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from syncmaster.schemas.v1.auth import (
     ReadBasicAuthSchema,
-    ReadIcebergRESTCatalogBasicAuthSchema,
     ReadS3AuthSchema,
     ReadSambaAuthSchema,
+)
+from syncmaster.schemas.v1.auth.iceberg.basic import (
+    ReadIcebergRESTCatalogBasicAuthSchema,
+)
+from syncmaster.schemas.v1.auth.iceberg.oauth2_client_credentials import (
+    ReadIcebergRESTCatalogOAuth2ClientCredentialsAuthSchema,
 )
 from syncmaster.schemas.v1.types import NameConstr
 
 ReadConnectionAuthDataSchema = (
-    ReadBasicAuthSchema | ReadS3AuthSchema | ReadSambaAuthSchema | ReadIcebergRESTCatalogBasicAuthSchema
+    ReadBasicAuthSchema
+    | ReadS3AuthSchema
+    | ReadSambaAuthSchema
+    | ReadIcebergRESTCatalogBasicAuthSchema
+    | ReadIcebergRESTCatalogOAuth2ClientCredentialsAuthSchema
 )
 
 

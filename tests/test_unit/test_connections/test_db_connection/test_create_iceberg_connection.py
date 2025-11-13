@@ -88,3 +88,89 @@ async def test_developer_plus_can_create_iceberg_rest_s3_connection(
             "s3_access_key": decrypted["s3_access_key"],
         },
     }
+
+
+async def test_developer_plus_can_create_iceberg_rest_s3_connection_with_oauth2_client_credentials(
+    client: AsyncClient,
+    group: MockGroup,
+    session: AsyncSession,
+    settings: Settings,
+    role_developer_plus: UserTestRoles,
+):
+    user = group.get_member_of_role(role_developer_plus)
+
+    result = await client.post(
+        "v1/connections",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "group_id": group.id,
+            "name": "New connection",
+            "description": "",
+            "type": "iceberg_rest_s3",
+            "connection_data": {
+                "metastore_url": "https://rest.domain.com",
+                "s3_warehouse_path": "/some/warehouse",
+                "s3_protocol": "http",
+                "s3_host": "localhost",
+                "s3_port": 9010,
+                "s3_bucket": "some_bucket",
+                "s3_region": "us-east-1",
+                "s3_bucket_style": "path",
+            },
+            "auth_data": {
+                "type": "iceberg_rest_oauth2_client_credentials_s3_basic",
+                "metastore_oauth2_client_id": "my_client_id",
+                "metastore_oauth2_client_secret": "my_client_secret",
+                "metastore_oauth2_scopes": ["catalog:read"],
+                "metastore_oauth2_audience": "iceberg-catalog",
+                "metastore_oauth2_server_uri": "https://oauth.example.com/token",
+                "s3_access_key": "access_key",
+                "s3_secret_key": "secret_key",
+            },
+        },
+    )
+    connection = (
+        await session.scalars(
+            select(Connection).filter_by(
+                name="New connection",
+            ),
+        )
+    ).first()
+
+    creds = (
+        await session.scalars(
+            select(AuthData).filter_by(
+                connection_id=connection.id,
+            ),
+        )
+    ).one()
+
+    decrypted = decrypt_auth_data(creds.value, settings=settings)
+    assert result.status_code == 200, result.json()
+    assert result.json() == {
+        "id": connection.id,
+        "group_id": connection.group_id,
+        "name": connection.name,
+        "description": connection.description,
+        "type": connection.type,
+        "connection_data": {
+            "metastore_url": connection.data["metastore_url"],
+            "s3_warehouse_path": connection.data["s3_warehouse_path"],
+            "s3_protocol": connection.data["s3_protocol"],
+            "s3_host": connection.data["s3_host"],
+            "s3_port": connection.data["s3_port"],
+            "s3_bucket": connection.data["s3_bucket"],
+            "s3_region": connection.data["s3_region"],
+            "s3_bucket_style": connection.data["s3_bucket_style"],
+            "s3_additional_params": connection.data["s3_additional_params"],
+        },
+        "auth_data": {
+            "type": decrypted["type"],
+            "metastore_oauth2_client_id": decrypted["metastore_oauth2_client_id"],
+            "metastore_oauth2_scopes": decrypted["metastore_oauth2_scopes"],
+            "metastore_oauth2_audience": decrypted["metastore_oauth2_audience"],
+            "metastore_oauth2_resource": decrypted["metastore_oauth2_resource"],
+            "metastore_oauth2_server_uri": decrypted["metastore_oauth2_server_uri"],
+            "s3_access_key": decrypted["s3_access_key"],
+        },
+    }
