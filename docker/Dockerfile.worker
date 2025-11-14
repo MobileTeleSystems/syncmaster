@@ -2,6 +2,7 @@ ARG PYTHON_VERSION=3.13
 FROM python:$PYTHON_VERSION-slim-bookworm AS base
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+        tini \
         openjdk-17-jdk-headless \
         # required for HDFS/Hive with Kerberos enabled
         krb5-user \
