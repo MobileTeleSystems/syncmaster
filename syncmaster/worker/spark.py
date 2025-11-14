@@ -131,12 +131,14 @@ def get_spark_session_conf(
     if spark_master and spark_master.startswith("local"):
         config["spark.master"] = f"local[{tasks}]"
         config["spark.driver.memory"] = f"{memory_mb}M"
-        config["spark.default.parallelism"] = tasks * cores_per_task
     else:
         config["spark.executor.memory"] = f"{memory_mb}M"
-        config["spark.executor.cores"] = cores_per_task
         config["spark.executor.instances"] = tasks
-        config["spark.dynamicAllocation.maxExecutors"] = tasks
+
+    config["spark.executor.cores"] = cores_per_task
+    config["spark.default.parallelism"] = tasks * cores_per_task
+    config["spark.dynamicAllocation.maxExecutors"] = tasks  # yarn
+    config["spark.kubernetes.executor.limit.cores"] = cores_per_task  # k8s
 
     if maven_packages:
         log.debug("Include Maven packages: %s", maven_packages)

@@ -23,6 +23,20 @@ It is possible to alter default `Spark Session configuration <https://spark.apac
             spark.sql.pyspark.jvmStacktrace.enabled: true
             spark.ui.enabled: false
 
+For example, to use SyncMaster on Spark + Kubernetes, you can use worker image for Spark executor containers:
+
+.. code-block:: yaml
+    :caption: config.yml
+
+    worker:
+        spark_session_default_config:
+            spark.master: k8s://https://kubernetes.default.svc
+            spark.driver.bindAddress: 0.0.0.0
+            spark.kubernetes.authenticate.driver.serviceAccountName: spark
+            spark.sql.pyspark.jvmStacktrace.enabled: true
+            spark.kubernetes.container.image: mtsrus/syncmaster-worker:{TAG}
+
+
 Custom Spark session factory
 ----------------------------
 

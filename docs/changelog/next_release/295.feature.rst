@@ -1,0 +1,1 @@
+Allow using SyncMaster worker image as ``spark.kubernetes.container.image``.
