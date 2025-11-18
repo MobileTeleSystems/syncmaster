@@ -175,7 +175,7 @@ class LoggingSettings(BaseLoggingSettings):
                 json:
                     (): pythonjsonlogger.jsonlogger.JsonFormatter
                     # Add correlation_id to log records
-                    format: '%(processName)s %(process)d %(threadName)s %(thread)d %(name)s %(lineno)d %(levelname)s %(message)s %(correlation_id)s'
+                    fmt: '%(processName)s %(process)d %(threadName)s %(thread)d %(name)s %(lineno)d %(levelname)s %(message)s %(correlation_id)s'
                     timestamp: true
 
             handlers:
