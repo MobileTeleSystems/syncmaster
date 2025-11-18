@@ -61,11 +61,30 @@ class FileTransferDTO(TransferDTO):
 
         self.options.setdefault("if_exists", "replace_overlapping_partitions")
 
+    @staticmethod
+    def _rewrite_option_name(file_format: dict, from_name: str, to_name: str):  # noqa: WPS602
+        if from_name in file_format:
+            file_format[to_name] = file_format.pop(from_name)
+
     def _get_file_format(self, file_format: dict) -> CSV | JSONLine | JSON | Excel | XML | ORC | Parquet:
         file_type = file_format.pop("type", None)
-        # XML at spark-xml has no "none" option https://github.com/databricks/spark-xml?tab=readme-ov-file#features
-        if file_type == "xml" and file_format.get("compression") == "none":
-            file_format.pop("compression")
+        if file_type == "xml":
+            self._rewrite_option_name(file_format, "root_tag", "rootTag")
+            self._rewrite_option_name(file_format, "row_tag", "rowTag")
+            # XML at spark-xml has no "none" option https://github.com/databricks/spark-xml?tab=readme-ov-file#features
+            if file_format.get("compression") == "none":
+                file_format.pop("compression")
+
+        if file_type == "excel":
+            self._rewrite_option_name(file_format, "include_header", "header")
+            self._rewrite_option_name(file_format, "start_cell", "dataAddress")
+
+        if file_type == "csv":
+            self._rewrite_option_name(file_format, "line_sep", "lineSep")
+            self._rewrite_option_name(file_format, "include_header", "header")
+
+        if file_type == "json" or file_type == "jsonline":
+            self._rewrite_option_name(file_format, "line_sep", "lineSep")
 
         parser_class = self._format_parsers.get(file_type)
         if parser_class is not None:
@@ -111,7 +130,7 @@ class HiveTransferDTO(DBTransferDTO):
 @dataclass
 class IcebergRESTCatalogS3TransferDTO(DBTransferDTO):
     type: ClassVar[str] = "iceberg_rest_s3"
-    catalog_name: str = field(default_factory=lambda: f"iceberg_rest_s3_{uuid4().hex[:8]}")
+    catalog_name: str = field(default_factory=lambda: f"iceberg_rest_s3_{uuid4().hex[:8]}")  # noqa: WPS237
 
     def __post_init__(self):
         super().__post_init__()
