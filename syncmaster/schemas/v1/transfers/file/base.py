@@ -30,10 +30,7 @@ class ReadFileTransferSource(BaseModel):
 class ReadFileTransferTarget(BaseModel):
     directory_path: str
     # JSON format is not supported for writing
-    file_format: CSV | JSONLine | Excel | XML | ORC | Parquet = Field(
-        ...,
-        discriminator="type",
-    )
+    file_format: CSV | JSONLine | Excel | XML | ORC | Parquet = Field(discriminator="type")
     file_name_template: str
     options: dict[str, Any]
 
@@ -58,10 +55,7 @@ class CreateFileTransferSource(BaseModel):
 class CreateFileTransferTarget(BaseModel):
     directory_path: str
     # JSON format is not supported as a target
-    file_format: CSV | JSONLine | Excel | XML | ORC | Parquet = Field(
-        ...,
-        discriminator="type",
-    )
+    file_format: CSV | JSONLine | Excel | XML | ORC | Parquet = Field(discriminator="type")
     file_name_template: str = Field(
         default="{run_created_at}-{index}.{extension}",
         description="Template for file naming with required placeholders 'index' and 'extension'",
