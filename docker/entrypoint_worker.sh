@@ -47,10 +47,6 @@ elif ! [ -z ${SPARK_HOME+x} ]; then
   SPARK_CLASSPATH="$SPARK_HOME/conf:$SPARK_CLASSPATH";
 fi
 
-# Place IVY2 jars at the end of classpath to avoid conflicts with Spark and Hadoop jars
-IVY2_HOME=$(realpath ~/.ivy2)
-SPARK_CLASSPATH="$SPARK_CLASSPATH:${IVY2_HOME}/jars/*"
-
 # SPARK-43540: add current working directory into executor classpath
 SPARK_CLASSPATH="$SPARK_CLASSPATH:$PWD"
 
