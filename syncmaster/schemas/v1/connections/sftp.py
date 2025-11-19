@@ -15,24 +15,16 @@ from syncmaster.schemas.v1.connections.connection_base import (
 )
 
 
-class CreateSFTPConnectionDataSchema(BaseModel):
+class SFTPConnectionDataSchema(BaseModel):
     host: str
-    port: int
-
-
-class ReadSFTPConnectionDataSchema(BaseModel):
-    host: str
-    port: int
+    port: int = Field(default=22, gt=0, le=65535)  # noqa: WPS432
 
 
 class CreateSFTPConnectionSchema(CreateConnectionBaseSchema):
     type: SFTP_TYPE = Field(description="Connection type")
-    data: CreateSFTPConnectionDataSchema = Field(
-        ...,
+    data: SFTPConnectionDataSchema = Field(
         alias="connection_data",
-        description=(
-            "Data required to connect to the remote server. These are the parameters that are specified in the URL request."
-        ),
+        description="Data required to connect to the remote server",
     )
     auth_data: CreateBasicAuthSchema = Field(
         description="Credentials for authorization",
@@ -40,9 +32,15 @@ class CreateSFTPConnectionSchema(CreateConnectionBaseSchema):
 
 
 class ReadSFTPConnectionSchema(ReadConnectionBaseSchema):
-    type: SFTP_TYPE
-    data: ReadSFTPConnectionDataSchema = Field(alias="connection_data")
-    auth_data: ReadBasicAuthSchema | None = None
+    type: SFTP_TYPE = Field(description="Connection type")
+    data: SFTPConnectionDataSchema = Field(
+        alias="connection_data",
+        description="Data required to connect to the remote server",
+    )
+    auth_data: ReadBasicAuthSchema | None = Field(
+        default=None,
+        description="Credentials for authorization",
+    )
 
 
 class UpdateSFTPConnectionSchema(CreateSFTPConnectionSchema):

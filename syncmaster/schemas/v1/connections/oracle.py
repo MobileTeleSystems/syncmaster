@@ -6,8 +6,8 @@ from pydantic import BaseModel, Field, model_validator
 from syncmaster.schemas.v1.auth import (
     CreateBasicAuthSchema,
     ReadBasicAuthSchema,
+    UpdateBasicAuthSchema,
 )
-from syncmaster.schemas.v1.auth.basic import UpdateBasicAuthSchema
 from syncmaster.schemas.v1.connection_types import ORACLE_TYPE
 from syncmaster.schemas.v1.connections.connection_base import (
     CreateConnectionBaseSchema,
@@ -15,9 +15,9 @@ from syncmaster.schemas.v1.connections.connection_base import (
 )
 
 
-class CreateOracleConnectionDataSchema(BaseModel):
+class OracleConnectionDataSchema(BaseModel):
     host: str
-    port: int
+    port: int = Field(default=1521, gt=0, le=65535)  # noqa: WPS432
     service_name: str | None = None
     sid: str | None = None
     additional_params: dict = Field(default_factory=dict)
@@ -30,22 +30,11 @@ class CreateOracleConnectionDataSchema(BaseModel):
         return values
 
 
-class ReadOracleConnectionDataSchema(BaseModel):
-    host: str
-    port: int
-    service_name: str | None = None
-    sid: str | None = None
-    additional_params: dict = Field(default_factory=dict)
-
-
 class CreateOracleConnectionSchema(CreateConnectionBaseSchema):
     type: ORACLE_TYPE = Field(description="Connection type")
-    data: CreateOracleConnectionDataSchema = Field(
-        ...,
+    data: OracleConnectionDataSchema = Field(
         alias="connection_data",
-        description=(
-            "Data required to connect to the database. These are the parameters that are specified in the URL request."
-        ),
+        description="Data required to connect to the database",
     )
     auth_data: CreateBasicAuthSchema = Field(
         description="Credentials for authorization",
@@ -53,9 +42,15 @@ class CreateOracleConnectionSchema(CreateConnectionBaseSchema):
 
 
 class ReadOracleConnectionSchema(ReadConnectionBaseSchema):
-    type: ORACLE_TYPE
-    data: ReadOracleConnectionDataSchema = Field(alias="connection_data")
-    auth_data: ReadBasicAuthSchema | None = None
+    type: ORACLE_TYPE = Field(description="Connection type")
+    data: OracleConnectionDataSchema = Field(
+        alias="connection_data",
+        description="Data required to connect to the remote server",
+    )
+    auth_data: ReadBasicAuthSchema | None = Field(
+        default=None,
+        description="Credentials for authorization",
+    )
 
 
 class UpdateOracleConnectionSchema(CreateOracleConnectionSchema):

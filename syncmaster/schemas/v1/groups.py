@@ -7,15 +7,13 @@ from syncmaster.schemas.v1.page import PageSchema
 from syncmaster.schemas.v1.types import NameConstr
 
 
-class UpdateGroupSchema(BaseModel):
-    name: NameConstr
-    description: str
-    owner_id: int
-
-
 class CreateGroupSchema(BaseModel):
     name: NameConstr
     description: str
+
+
+class UpdateGroupSchema(CreateGroupSchema):
+    owner_id: int
 
 
 class AddUserSchema(BaseModel):
@@ -38,11 +36,8 @@ class AddUserSchema(BaseModel):
         return values
 
 
-class ReadGroupSchema(BaseModel):
+class ReadGroupSchema(UpdateGroupSchema):
     id: int
-    name: str
-    description: str
-    owner_id: int
 
     model_config = ConfigDict(from_attributes=True)
 

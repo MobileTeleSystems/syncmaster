@@ -1,14 +1,23 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from pydantic import BaseModel
+from typing import Annotated, Literal
 
-from syncmaster.schemas.v1.transfer_types import FULL_TYPE, INCREMENTAL_TYPE
+from pydantic import BaseModel, Field
 
 
 class FullStrategy(BaseModel):
-    type: FULL_TYPE
+    type: Literal["full"] = "full"
 
 
 class IncrementalStrategy(BaseModel):
-    type: INCREMENTAL_TYPE
+    type: Literal["incremental"] = "incremental"
     increment_by: str
+
+
+Strategy = Annotated[FullStrategy | IncrementalStrategy, Field(discriminator="type")]
+
+__all__ = [
+    "Strategy",
+    "FullStrategy",
+    "IncrementalStrategy",
+]

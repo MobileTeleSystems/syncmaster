@@ -4,24 +4,14 @@ from __future__ import annotations
 
 from syncmaster.schemas.v1.connection_types import WEBDAV_TYPE
 from syncmaster.schemas.v1.transfers.file.base import (
-    CreateFileTransferSource,
-    CreateFileTransferTarget,
-    ReadFileTransferSource,
-    ReadFileTransferTarget,
+    FileTransferSource,
+    FileTransferTarget,
 )
 
 
-class ReadWebDAVTransferSource(ReadFileTransferSource):
+class WebDAVTransferSource(FileTransferSource):
     type: WEBDAV_TYPE
 
 
-class ReadWebDAVTransferTarget(ReadFileTransferTarget):
-    type: WEBDAV_TYPE
-
-
-class CreateWebDAVTransferSource(CreateFileTransferSource):
-    type: WEBDAV_TYPE
-
-
-class CreateWebDAVTransferTarget(CreateFileTransferTarget):
+class WebDAVTransferTarget(FileTransferTarget):
     type: WEBDAV_TYPE

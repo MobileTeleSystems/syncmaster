@@ -4,24 +4,14 @@ from __future__ import annotations
 
 from syncmaster.schemas.v1.connection_types import SFTP_TYPE
 from syncmaster.schemas.v1.transfers.file.base import (
-    CreateFileTransferSource,
-    CreateFileTransferTarget,
-    ReadFileTransferSource,
-    ReadFileTransferTarget,
+    FileTransferSource,
+    FileTransferTarget,
 )
 
 
-class ReadSFTPTransferSource(ReadFileTransferSource):
+class SFTPTransferSource(FileTransferSource):
     type: SFTP_TYPE
 
 
-class ReadSFTPTransferTarget(ReadFileTransferTarget):
-    type: SFTP_TYPE
-
-
-class CreateSFTPTransferSource(CreateFileTransferSource):
-    type: SFTP_TYPE
-
-
-class CreateSFTPTransferTarget(CreateFileTransferTarget):
+class SFTPTransferTarget(FileTransferTarget):
     type: SFTP_TYPE

@@ -4,24 +4,14 @@ from __future__ import annotations
 
 from syncmaster.schemas.v1.connection_types import HDFS_TYPE
 from syncmaster.schemas.v1.transfers.file.base import (
-    CreateFileTransferSource,
-    CreateFileTransferTarget,
-    ReadFileTransferSource,
-    ReadFileTransferTarget,
+    FileTransferSource,
+    FileTransferTarget,
 )
 
 
-class ReadHDFSTransferSource(ReadFileTransferSource):
+class HDFSTransferSource(FileTransferSource):
     type: HDFS_TYPE
 
 
-class ReadHDFSTransferTarget(ReadFileTransferTarget):
-    type: HDFS_TYPE
-
-
-class CreateHDFSTransferSource(CreateFileTransferSource):
-    type: HDFS_TYPE
-
-
-class CreateHDFSTransferTarget(CreateFileTransferTarget):
+class HDFSTransferTarget(FileTransferTarget):
     type: HDFS_TYPE

@@ -4,15 +4,18 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from syncmaster.db.models import RunType, Status
 from syncmaster.schemas.v1.page import PageSchema
 
 
-class ShortRunSchema(BaseModel):
-    id: int
-    transfer_id: int
+class CreateRunSchema(BaseModel):
+    transfer_id: int = Field(description="Transfer id")
+
+
+class ShortRunSchema(CreateRunSchema):
+    id: int = Field(description="Run id")
     started_at: datetime | None = None
     ended_at: datetime | None = None
     status: Status
@@ -22,13 +25,9 @@ class ShortRunSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class RunPageSchema(PageSchema):
-    items: list[ShortRunSchema]
-
-
 class ReadRunSchema(ShortRunSchema):
     transfer_dump: dict
 
 
-class CreateRunSchema(BaseModel):
-    transfer_id: int
+class RunPageSchema(PageSchema):
+    items: list[ShortRunSchema]

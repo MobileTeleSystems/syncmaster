@@ -27,9 +27,6 @@ async def test_developer_plus_can_create_transfer(
         json={
             "group_id": mock_group.group.id,
             "name": "new test transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_connection.id,
             "target_connection_id": second_connection.id,
             "source_params": {
@@ -153,14 +150,10 @@ async def test_guest_cannot_create_transfer(
         json={
             "group_id": mock_group.id,
             "name": "new test transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_connection.id,
             "target_connection_id": second_connection.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
-            "strategy_params": {"type": "full"},
             "queue_id": group_queue.id,
         },
     )
@@ -188,14 +181,10 @@ async def test_groupless_user_cannot_create_transfer(
         json={
             "group_id": first_conn.owner_group.group.id,
             "name": "new test transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
-            "strategy_params": {"type": "full"},
             "queue_id": group_queue.id,
         },
     )
@@ -226,14 +215,10 @@ async def test_other_group_user_plus_cannot_create_group_transfer(
         json={
             "group_id": first_conn.owner_group.id,
             "name": "new test group transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
-            "strategy_params": {"type": "full"},
             "queue_id": group_queue.id,
         },
     )
@@ -263,14 +248,10 @@ async def test_superuser_can_create_transfer(
         json={
             "group_id": mock_group.id,
             "name": "new test group transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
-            "strategy_params": {"type": "full"},
             "transformations": [
                 {
                     "type": "dataframe_rows_filter",
@@ -328,7 +309,7 @@ async def test_superuser_can_create_transfer(
 @pytest.mark.parametrize(
     ("new_data", "error_json"),
     [
-        (
+        pytest.param(
             {"name": "aa"},
             {
                 "error": {
@@ -345,8 +326,9 @@ async def test_superuser_can_create_transfer(
                     ],
                 },
             },
+            id="name_too_short",
         ),
-        (
+        pytest.param(
             {"name": None},
             {
                 "error": {
@@ -363,8 +345,9 @@ async def test_superuser_can_create_transfer(
                     ],
                 },
             },
+            id="name_none",
         ),
-        (
+        pytest.param(
             {"is_scheduled": 2},
             {
                 "error": {
@@ -381,25 +364,28 @@ async def test_superuser_can_create_transfer(
                     ],
                 },
             },
+            id="is_scheduled_not_bool",
         ),
-        (
-            {"schedule": None},
+        pytest.param(
+            {"is_scheduled": True},
             {
                 "error": {
                     "code": "invalid_request",
                     "message": "Invalid request",
                     "details": [
                         {
-                            "location": ["body"],
-                            "message": "Value error, If transfer must be scheduled than set schedule param",
+                            "location": ["body", "schedule"],
+                            "message": "Value error, If transfer must be scheduled then set schedule",
                             "code": "value_error",
                             "context": {},
+                            "input": None,
                         },
                     ],
                 },
             },
+            id="scheduled_without_schedule",
         ),
-        (
+        pytest.param(
             {
                 "strategy_params": {"type": "new some strategy type"},
             },
@@ -425,8 +411,9 @@ async def test_superuser_can_create_transfer(
                     ],
                 },
             },
+            id="unknown_strategy_type",
         ),
-        (
+        pytest.param(
             {
                 "source_params": {
                     "type": "ftp",
@@ -446,19 +433,24 @@ async def test_superuser_can_create_transfer(
                     "message": "Invalid request",
                     "details": [
                         {
-                            "location": ["body"],
+                            "location": ["body", "strategy_params"],
                             "message": (
                                 "Value error, Field 'increment_by' must be equal to "
                                 "'file_modified_since' or 'file_name' for file source types"
                             ),
                             "code": "value_error",
                             "context": {},
+                            "input": {
+                                "increment_by": "unknown",
+                                "type": "incremental",
+                            },
                         },
                     ],
                 },
             },
+            id="unknown_increment_by",
         ),
-        (
+        pytest.param(
             {
                 "source_params": {
                     "type": "s3",
@@ -478,16 +470,21 @@ async def test_superuser_can_create_transfer(
                     "message": "Invalid request",
                     "details": [
                         {
-                            "location": ["body"],
+                            "location": ["body", "strategy_params"],
                             "message": ("Value error, S3 and HDFS sources do not support incremental strategy for now"),
                             "code": "value_error",
                             "context": {},
+                            "input": {
+                                "increment_by": "file_modified_since",
+                                "type": "incremental",
+                            },
                         },
                     ],
                 },
             },
+            id="no_increment_s3_or_hdfs",
         ),
-        (
+        pytest.param(
             {
                 "source_params": {
                     "type": "new some connection type",
@@ -524,8 +521,9 @@ async def test_superuser_can_create_transfer(
                     ],
                 },
             },
+            id="unknown_source_type",
         ),
-        (
+        pytest.param(
             {
                 "transformations": [
                     {
@@ -574,8 +572,9 @@ async def test_superuser_can_create_transfer(
                     ],
                 },
             },
+            id="unknown_transformation_type",
         ),
-        (
+        pytest.param(
             {
                 "transformations": [
                     {
@@ -621,8 +620,9 @@ async def test_superuser_can_create_transfer(
                     ],
                 },
             },
+            id="unknown_filter_type",
         ),
-        (
+        pytest.param(
             {
                 "transformations": [
                     {
@@ -663,8 +663,9 @@ async def test_superuser_can_create_transfer(
                     ],
                 },
             },
+            id="wrong_column_filter",
         ),
-        (
+        pytest.param(
             {
                 "transformations": [
                     {
@@ -703,8 +704,9 @@ async def test_superuser_can_create_transfer(
                     ],
                 },
             },
+            id="wrong_file_filter",
         ),
-        (
+        pytest.param(
             {
                 "transformations": [
                     {
@@ -742,8 +744,9 @@ async def test_superuser_can_create_transfer(
                     ],
                 },
             },
+            id="invalid_name_glob",
         ),
-        (
+        pytest.param(
             {
                 "transformations": [
                     {
@@ -781,8 +784,9 @@ async def test_superuser_can_create_transfer(
                     ],
                 },
             },
+            id="invalid_name_regexp",
         ),
-        (
+        pytest.param(
             {
                 "resources": {
                     "max_parallel_tasks": 1,
@@ -811,6 +815,7 @@ async def test_superuser_can_create_transfer(
                     ],
                 },
             },
+            id="ram_bytes_per_task_too_low",
         ),
     ],
 )
@@ -829,15 +834,10 @@ async def test_check_fields_validation_on_create_transfer(
     transfer_data = {
         "name": "new test transfer",
         "group_id": mock_group.id,
-        "description": "",
-        "is_scheduled": True,
-        "schedule": "",
         "source_connection_id": first_conn.id,
         "target_connection_id": second_conn.id,
         "source_params": {"type": "postgres", "table_name": "source_table"},
         "target_params": {"type": "postgres", "table_name": "target_table"},
-        "strategy_params": {"type": "full"},
-        "transformations": [],
         "queue_id": group_queue.id,
     }
     transfer_data.update(new_data)
@@ -848,18 +848,6 @@ async def test_check_fields_validation_on_create_transfer(
     )
 
     assert result.status_code == 422, result.json()
-    if (
-        (new_data == {"schedule": None})
-        or ("strategy_params" in new_data and new_data["strategy_params"].get("increment_by") == "unknown")
-        or (
-            "strategy_params" in new_data
-            and new_data["strategy_params"].get("type") == "incremental"
-            and "source_params" in new_data
-            and new_data["source_params"].get("type") == "s3"
-        )
-    ):
-        error_json["error"]["details"][0]["input"] = transfer_data
-
     assert result.json() == error_json
 
 
@@ -879,14 +867,10 @@ async def test_check_connection_types_and_its_params_on_create_transfer(
         json={
             "name": "new test transfer",
             "group_id": mock_group.id,
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_conn.connection.id,
             "target_connection_id": second_conn.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "oracle", "table_name": "target_table"},
-            "strategy_params": {"type": "full"},
             "queue_id": group_queue.id,
         },
     )
@@ -918,14 +902,10 @@ async def test_check_different_connections_owner_group_on_create_transfer(
         json={
             "name": "new test transfer",
             "group_id": mock_group.id,
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_conn.connection.id,
             "target_connection_id": group_connection.connection.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
-            "strategy_params": {"type": "full"},
             "queue_id": group_queue.id,
         },
     )
@@ -983,14 +963,10 @@ async def test_developer_plus_cannot_create_transfer_with_other_group_queue(
         json={
             "group_id": first_conn.owner_group.group.id,
             "name": "new test transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
-            "strategy_params": {"type": "full"},
             "queue_id": group_transfer.transfer.queue_id,
         },
     )
@@ -1021,9 +997,6 @@ async def test_developer_plus_cannot_create_transfer_with_target_format_json(
         json={
             "group_id": mock_group.group.id,
             "name": "new test transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_connection.id,
             "target_connection_id": second_connection.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
@@ -1038,7 +1011,6 @@ async def test_developer_plus_cannot_create_transfer_with_target_format_json(
                     "encoding": "utf-8",
                 },
             },
-            "strategy_params": {"type": "full"},
             "queue_id": group_queue.id,
         },
     )
@@ -1082,14 +1054,10 @@ async def test_superuser_cannot_create_transfer_with_other_group_queue(
         json={
             "group_id": first_conn.owner_group.group.id,
             "name": "new test transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
-            "strategy_params": {"type": "full"},
             "queue_id": group_transfer.transfer.queue_id,
         },
     )
@@ -1121,14 +1089,10 @@ async def test_group_member_cannot_create_transfer_with_unknown_connection_error
         json={
             "group_id": first_conn.owner_group.group.id,
             "name": "new test transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_conn.id if iter_conn_id[0] else -1,
             "target_connection_id": second_conn.id if iter_conn_id[1] else -1,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
-            "strategy_params": {"type": "full"},
             "queue_id": group_queue.id,
         },
     )
@@ -1158,14 +1122,10 @@ async def test_developer_plus_cannot_create_transfer_with_unknown_group_error(
         json={
             "group_id": -1,
             "name": "new test transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
-            "strategy_params": {"type": "full"},
             "queue_id": group_queue.id,
         },
     )
@@ -1196,14 +1156,10 @@ async def test_superuser_cannot_create_transfer_with_unknown_connection_error(
         json={
             "group_id": first_conn.owner_group.group.id,
             "name": "new test transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_conn.id if conn_id[0] else -1,
             "target_connection_id": second_conn.id if conn_id[1] else -1,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
-            "strategy_params": {"type": "full"},
             "queue_id": group_queue.id,
         },
     )
@@ -1232,14 +1188,10 @@ async def test_developer_plus_cannot_create_transfer_with_unknown_queue_error(
         json={
             "group_id": first_conn.owner_group.group.id,
             "name": "new test transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
-            "strategy_params": {"type": "full"},
             "queue_id": -1,
         },
     )
@@ -1268,14 +1220,10 @@ async def test_superuser_cannot_create_transfer_with_unknown_group_error(
         json={
             "group_id": -1,
             "name": "new test transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
-            "strategy_params": {"type": "full"},
             "queue_id": group_queue.id,
         },
     )
@@ -1303,14 +1251,10 @@ async def test_superuser_cannot_create_transfer_with_unknown_queue_error(
         json={
             "group_id": first_conn.owner_group.group.id,
             "name": "new test transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
             "source_params": {"type": "postgres", "table_name": "source_table"},
             "target_params": {"type": "postgres", "table_name": "target_table"},
-            "strategy_params": {"type": "full"},
             "queue_id": -1,
         },
     )

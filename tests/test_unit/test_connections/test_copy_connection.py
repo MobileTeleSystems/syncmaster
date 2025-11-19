@@ -264,7 +264,7 @@ async def test_maintainer_plus_cannot_copy_connection_with_same_name_in_new_grou
 @pytest.mark.parametrize(
     ("name", "error"),
     [
-        (
+        pytest.param(
             "aa",
             {
                 "context": {"min_length": 3},
@@ -273,8 +273,9 @@ async def test_maintainer_plus_cannot_copy_connection_with_same_name_in_new_grou
                 "message": "String should have at least 3 characters",
                 "code": "string_too_short",
             },
+            id="name_too_short",
         ),
-        (
+        pytest.param(
             "a" * 129,
             {
                 "context": {"max_length": 128},
@@ -283,6 +284,7 @@ async def test_maintainer_plus_cannot_copy_connection_with_same_name_in_new_grou
                 "message": "String should have at most 128 characters",
                 "code": "string_too_long",
             },
+            id="name_too_long",
         ),
     ],
 )

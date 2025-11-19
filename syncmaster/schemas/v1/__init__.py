@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from syncmaster.schemas.v1.auth import AuthTokenSchema, TokenPayloadSchema
-from syncmaster.schemas.v1.connections.connection import (
+from syncmaster.schemas.v1.connections import (
     ConnectionCopySchema,
     ConnectionPageSchema,
     CreateConnectionSchema,

@@ -16,30 +16,19 @@ from syncmaster.schemas.v1.connections.connection_base import (
 )
 
 
-class CreateSambaConnectionDataSchema(BaseModel):
+class SambaConnectionDataSchema(BaseModel):
     host: str
     share: str
-    port: int | None = None
+    port: int | None = Field(default=None, gt=0, le=65535)  # noqa: WPS432
     protocol: Literal["SMB", "NetBIOS"] = "SMB"
     domain: str = ""
 
 
-class ReadSambaConnectionDataSchema(BaseModel):
-    host: str
-    share: str
-    port: int | None
-    protocol: Literal["SMB", "NetBIOS"]
-    domain: str
-
-
 class CreateSambaConnectionSchema(CreateConnectionBaseSchema):
     type: SAMBA_TYPE = Field(description="Connection type")
-    data: CreateSambaConnectionDataSchema = Field(
-        ...,
+    data: SambaConnectionDataSchema = Field(
         alias="connection_data",
-        description=(
-            "Data required to connect to the remote server. These are the parameters that are specified in the URL request."
-        ),
+        description="Data required to connect to the remote server",
     )
     auth_data: CreateSambaAuthSchema = Field(
         description="Credentials for authorization",
@@ -47,8 +36,8 @@ class CreateSambaConnectionSchema(CreateConnectionBaseSchema):
 
 
 class ReadSambaConnectionSchema(ReadConnectionBaseSchema):
-    type: SAMBA_TYPE
-    data: ReadSambaConnectionDataSchema = Field(alias="connection_data")
+    type: SAMBA_TYPE = Field(description="Connection type")
+    data: SambaConnectionDataSchema = Field(alias="connection_data")
     auth_data: ReadSambaAuthSchema | None = None
 
 

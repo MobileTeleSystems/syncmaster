@@ -2,23 +2,19 @@
 # SPDX-License-Identifier: Apache-2.0
 from typing import Literal
 
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel, Field, SecretStr
 
 
-class S3AuthSchema(BaseModel):
-    type: Literal["s3"]
-
-
-class CreateS3AuthSchema(S3AuthSchema):
+class ReadS3AuthSchema(BaseModel):
+    type: Literal["s3"] = Field(description="Auth type")
     access_key: str
+
+
+class CreateS3AuthSchema(ReadS3AuthSchema):
     secret_key: SecretStr
 
 
-class ReadS3AuthSchema(S3AuthSchema):
-    access_key: str
-
-
-class UpdateS3AuthSchema(CreateS3AuthSchema):
+class UpdateS3AuthSchema(ReadS3AuthSchema):
     secret_key: SecretStr | None = None
 
     def get_secret_fields(self) -> tuple[str, ...]:

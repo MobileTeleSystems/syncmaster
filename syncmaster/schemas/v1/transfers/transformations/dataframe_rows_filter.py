@@ -4,8 +4,6 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
-from syncmaster.schemas.v1.transformation_types import DATAFRAME_ROWS_FILTER
-
 
 class BaseRowsFilter(BaseModel):
     field: str
@@ -92,5 +90,5 @@ RowsFilter = (
 
 
 class DataframeRowsFilter(BaseModel):
-    type: DATAFRAME_ROWS_FILTER
+    type: Literal["dataframe_rows_filter"]
     filters: list[Annotated[RowsFilter, Field(discriminator="type")]] = Field(default_factory=list)

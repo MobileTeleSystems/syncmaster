@@ -4,24 +4,14 @@ from __future__ import annotations
 
 from syncmaster.schemas.v1.connection_types import S3_TYPE
 from syncmaster.schemas.v1.transfers.file.base import (
-    CreateFileTransferSource,
-    CreateFileTransferTarget,
-    ReadFileTransferSource,
-    ReadFileTransferTarget,
+    FileTransferSource,
+    FileTransferTarget,
 )
 
 
-class ReadS3TransferSource(ReadFileTransferSource):
+class S3TransferSource(FileTransferSource):
     type: S3_TYPE
 
 
-class ReadS3TransferTarget(ReadFileTransferTarget):
-    type: S3_TYPE
-
-
-class CreateS3TransferSource(CreateFileTransferSource):
-    type: S3_TYPE
-
-
-class CreateS3TransferTarget(CreateFileTransferTarget):
+class S3TransferTarget(FileTransferTarget):
     type: S3_TYPE

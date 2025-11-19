@@ -2,26 +2,21 @@
 # SPDX-License-Identifier: Apache-2.0
 from typing import Literal
 
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel, Field, SecretStr
 
 
-class IcebergRESTCatalogBasicAuthSchema(BaseModel):
-    type: Literal["iceberg_rest_basic_s3_basic"]
-
-
-class CreateIcebergRESTCatalogBasicAuthSchema(IcebergRESTCatalogBasicAuthSchema):
+class ReadIcebergRESTCatalogBasicAuthSchema(BaseModel):
+    type: Literal["iceberg_rest_basic_s3_basic"] = Field(description="Auth type")
     metastore_username: str
-    metastore_password: SecretStr
     s3_access_key: str
+
+
+class CreateIcebergRESTCatalogBasicAuthSchema(ReadIcebergRESTCatalogBasicAuthSchema):
+    metastore_password: SecretStr
     s3_secret_key: SecretStr
 
 
-class ReadIcebergRESTCatalogBasicAuthSchema(IcebergRESTCatalogBasicAuthSchema):
-    metastore_username: str
-    s3_access_key: str
-
-
-class UpdateIcebergRESTCatalogBasicAuthSchema(CreateIcebergRESTCatalogBasicAuthSchema):
+class UpdateIcebergRESTCatalogBasicAuthSchema(ReadIcebergRESTCatalogBasicAuthSchema):
     metastore_password: SecretStr | None = None
     s3_secret_key: SecretStr | None = None
 

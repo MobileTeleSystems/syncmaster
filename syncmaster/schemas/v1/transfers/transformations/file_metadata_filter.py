@@ -6,8 +6,6 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ByteSize, Field, field_validator
 
-from syncmaster.schemas.v1.transformation_types import FILE_METADATA_FILTER
-
 
 class NameGlobFilter(BaseModel):
     type: Literal["name_glob"]
@@ -49,5 +47,5 @@ MetadataFilter = NameGlobFilter | NameRegexpFilter | FileSizeMinFilter | FileSiz
 
 
 class FileMetadataFilter(BaseModel):
-    type: FILE_METADATA_FILTER
+    type: Literal["file_metadata_filter"]
     filters: list[Annotated[MetadataFilter, Field(discriminator="type")]] = Field(default_factory=list)

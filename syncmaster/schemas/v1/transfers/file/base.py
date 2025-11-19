@@ -18,28 +18,16 @@ from syncmaster.schemas.v1.transfers.file_format import (
     Parquet,
 )
 
-
-# At the moment the ReadTransferSourceParams and ReadTransferTargetParams
-# classes are identical but may change in the future
-class ReadFileTransferSource(BaseModel):
-    directory_path: str
-    file_format: CSV | JSONLine | JSON | Excel | XML | ORC | Parquet = Field(discriminator="type")
-    options: dict[str, Any]
-
-
-class ReadFileTransferTarget(BaseModel):
-    directory_path: str
-    # JSON format is not supported for writing
-    file_format: CSV | JSONLine | Excel | XML | ORC | Parquet = Field(discriminator="type")
-    file_name_template: str
-    options: dict[str, Any]
+# JSON format is not supported for writing
+TARGET_FILE_FORMAT = CSV | JSONLine | Excel | XML | ORC | Parquet
+SOURCE_FILE_FORMAT = TARGET_FILE_FORMAT | JSON
 
 
 # At the moment the CreateTransferSourceParams and CreateTransferTargetParams
 # classes are identical but may change in the future
-class CreateFileTransferSource(BaseModel):
+class FileTransferSource(BaseModel):
     directory_path: str
-    file_format: CSV | JSONLine | JSON | Excel | XML | ORC | Parquet = Field(discriminator="type")
+    file_format: SOURCE_FILE_FORMAT = Field(discriminator="type")
     options: dict[str, Any] = Field(default_factory=dict)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -52,10 +40,9 @@ class CreateFileTransferSource(BaseModel):
         return value
 
 
-class CreateFileTransferTarget(BaseModel):
+class FileTransferTarget(BaseModel):
     directory_path: str
-    # JSON format is not supported as a target
-    file_format: CSV | JSONLine | Excel | XML | ORC | Parquet = Field(discriminator="type")
+    file_format: TARGET_FILE_FORMAT = Field(discriminator="type")
     file_name_template: str = Field(
         default="{run_created_at}-{index}.{extension}",
         description="Template for file naming with required placeholders 'index' and 'extension'",

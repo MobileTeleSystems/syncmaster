@@ -5,8 +5,8 @@ from pydantic import BaseModel, Field
 from syncmaster.schemas.v1.auth import (
     CreateBasicAuthSchema,
     ReadBasicAuthSchema,
+    UpdateBasicAuthSchema,
 )
-from syncmaster.schemas.v1.auth.basic import UpdateBasicAuthSchema
 from syncmaster.schemas.v1.connection_types import CLICKHOUSE_TYPE
 from syncmaster.schemas.v1.connections.connection_base import (
     CreateConnectionBaseSchema,
@@ -14,28 +14,18 @@ from syncmaster.schemas.v1.connections.connection_base import (
 )
 
 
-class CreateClickhouseConnectionDataSchema(BaseModel):
+class ClickhouseConnectionDataSchema(BaseModel):
     host: str
-    port: int
-    database_name: str | None = None
-    additional_params: dict = Field(default_factory=dict)
-
-
-class ReadClickhouseConnectionDataSchema(BaseModel):
-    host: str
-    port: int
+    port: int = Field(default=8123, gt=0, le=65535)  # noqa: WPS432
     database_name: str | None = None
     additional_params: dict = Field(default_factory=dict)
 
 
 class CreateClickhouseConnectionSchema(CreateConnectionBaseSchema):
     type: CLICKHOUSE_TYPE = Field(description="Connection type")
-    data: CreateClickhouseConnectionDataSchema = Field(
-        ...,
+    data: ClickhouseConnectionDataSchema = Field(
         alias="connection_data",
-        description=(
-            "Data required to connect to the database. These are the parameters that are specified in the URL request."
-        ),
+        description="Data required to connect to the database",
     )
     auth_data: CreateBasicAuthSchema = Field(
         description="Credentials for authorization",
@@ -43,9 +33,14 @@ class CreateClickhouseConnectionSchema(CreateConnectionBaseSchema):
 
 
 class ReadClickhouseConnectionSchema(ReadConnectionBaseSchema):
-    type: CLICKHOUSE_TYPE
-    data: ReadClickhouseConnectionDataSchema = Field(alias="connection_data")
-    auth_data: ReadBasicAuthSchema | None = None
+    type: CLICKHOUSE_TYPE = Field(description="Connection type")
+    data: ClickhouseConnectionDataSchema = Field(
+        alias="connection_data",
+        description="Data required to connect to the database",
+    )
+    auth_data: ReadBasicAuthSchema | None = Field(
+        description="Credentials for authorization",
+    )
 
 
 class UpdateClickhouseConnectionSchema(CreateClickhouseConnectionSchema):

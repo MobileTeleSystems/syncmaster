@@ -107,7 +107,7 @@ async def test_other_group_member_cannot_update_transfer(
 @pytest.mark.parametrize(
     ("name", "error"),
     [
-        (
+        pytest.param(
             "aa",
             {
                 "context": {"min_length": 3},
@@ -116,8 +116,9 @@ async def test_other_group_member_cannot_update_transfer(
                 "message": "String should have at least 3 characters",
                 "code": "string_too_short",
             },
+            id="name_too_short",
         ),
-        (
+        pytest.param(
             "a" * 129,
             {
                 "context": {"max_length": 128},
@@ -126,6 +127,7 @@ async def test_other_group_member_cannot_update_transfer(
                 "message": "String should have at most 128 characters",
                 "code": "string_too_long",
             },
+            id="name_too_long",
         ),
     ],
 )

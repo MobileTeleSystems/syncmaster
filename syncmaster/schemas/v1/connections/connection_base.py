@@ -25,21 +25,18 @@ ReadConnectionAuthDataSchema = (
 
 
 class CreateConnectionBaseSchema(BaseModel):
-    group_id: int = Field(description="Connection owner group id")
+    group_id: int = Field(description="Group id the connections is bound to")
     name: NameConstr = Field(description="Connection name")
-    description: str = Field(description="Additional description")
+    description: str = Field(description="Human-readable description")
 
     model_config = ConfigDict(populate_by_name=True)
 
 
-class ReadConnectionBaseSchema(BaseModel):
-    id: int
-    group_id: int
-    name: str
-    description: str
+class ReadConnectionBaseSchema(CreateConnectionBaseSchema):
+    id: int = Field(description="Connection id")
 
     model_config = ConfigDict(populate_by_name=True)
 
 
 class ReadAuthDataSchema(BaseModel):
-    auth_data: ReadConnectionAuthDataSchema = Field(discriminator="type", default=...)
+    auth_data: ReadConnectionAuthDataSchema = Field(discriminator="type")

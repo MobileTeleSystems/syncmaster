@@ -89,7 +89,7 @@ async def create_queue(
         raise ActionNotAllowedError
 
     async with unit_of_work:
-        queue = await unit_of_work.queue.create(queue_data.model_dump())
+        queue = await unit_of_work.queue.create(queue_data.model_dump(mode="json"))
 
     return ReadQueueSchema.model_validate(queue, from_attributes=True)
 

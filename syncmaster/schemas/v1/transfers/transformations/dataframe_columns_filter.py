@@ -4,8 +4,6 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
-from syncmaster.schemas.v1.transformation_types import DATAFRAME_COLUMNS_FILTER
-
 
 class BaseColumnsFilter(BaseModel):
     field: str
@@ -29,5 +27,5 @@ ColumnsFilter = IncludeFilter | RenameFilter | CastFilter
 
 
 class DataframeColumnsFilter(BaseModel):
-    type: DATAFRAME_COLUMNS_FILTER
+    type: Literal["dataframe_columns_filter"]
     filters: list[Annotated[ColumnsFilter, Field(discriminator="type")]] = Field(default_factory=list)

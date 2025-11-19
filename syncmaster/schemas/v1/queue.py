@@ -16,13 +16,15 @@ QueueName = Annotated[
 ]
 
 
-class CreateQueueSchema(BaseModel):
+class QueueSchema(BaseModel):
     name: QueueName = Field(
-        description="Queue name that allows letters, numbers, dashes, and underscores",
+        description="Queue name. Can contain allows letters, numbers, dashes, and underscores",
     )
-    group_id: int = Field(description="Queue owner group id")
-    description: str = Field(default="", description="Additional description")
+    group_id: int = Field(description="Group id the queue is bound to")
+    description: str = Field(default="", description="Human-readable description")
 
+
+class CreateQueueSchema(QueueSchema):
     @computed_field
     @property
     def slug(self) -> str:
@@ -30,11 +32,8 @@ class CreateQueueSchema(BaseModel):
         return f"{self.group_id}-{short_name}"
 
 
-class ReadQueueSchema(BaseModel):
-    name: str
+class ReadQueueSchema(QueueSchema):
     slug: str
-    description: str | None = None
-    group_id: int
     id: int
 
     model_config = ConfigDict(from_attributes=True)

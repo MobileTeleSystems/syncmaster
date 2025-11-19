@@ -89,8 +89,8 @@ class TransferJobManager:
             async with unit_of_work:
                 run = await unit_of_work.run.create(
                     transfer_id=transfer_id,
-                    source_creds=ReadAuthDataSchema(auth_data=credentials_source).model_dump(),
-                    target_creds=ReadAuthDataSchema(auth_data=credentials_target).model_dump(),
+                    source_creds=ReadAuthDataSchema(auth_data=credentials_source).model_dump(mode="json"),
+                    target_creds=ReadAuthDataSchema(auth_data=credentials_target).model_dump(mode="json"),
                     type=RunType.SCHEDULED,
                 )
 

@@ -132,14 +132,10 @@ async def test_developer_plus_can_create_s3_transfer(
         json={
             "group_id": mock_group.group.id,
             "name": "new test transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_connection.id,
             "target_connection_id": second_connection.id,
             "source_params": target_source_params,
             "target_params": {**target_source_params, **target_params},
-            "strategy_params": {"type": "full"},
             "queue_id": group_queue.id,
         },
     )
@@ -310,14 +306,10 @@ async def test_developer_plus_can_create_hdfs_transfer(
         json={
             "group_id": mock_group.group.id,
             "name": "new test transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_connection.id,
             "target_connection_id": second_connection.id,
             "source_params": target_source_params,
             "target_params": {**target_source_params, **target_params},
-            "strategy_params": {"type": "full"},
             "queue_id": group_queue.id,
         },
     )
@@ -460,14 +452,10 @@ async def test_cannot_create_file_transfer_with_relative_path(
         json={
             "group_id": mock_group.group.id,
             "name": "new test transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_connection.id,
             "target_connection_id": second_connection.id,
             "source_params": target_source_params,
             "target_params": target_source_params,
-            "strategy_params": {"type": "full"},
             "queue_id": group_queue.id,
         },
     )
@@ -626,14 +614,10 @@ async def test_file_name_template_validation(
         json={
             "group_id": mock_group.group.id,
             "name": "new test transfer",
-            "description": "",
-            "is_scheduled": False,
-            "schedule": "",
             "source_connection_id": first_connection.id,
             "target_connection_id": second_connection.id,
             "source_params": target_source_params,
             "target_params": {**target_source_params, **target_params},
-            "strategy_params": {"type": "full"},
             "queue_id": group_queue.id,
         },
     )

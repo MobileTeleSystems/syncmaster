@@ -4,24 +4,14 @@ from __future__ import annotations
 
 from syncmaster.schemas.v1.connection_types import FTP_TYPE
 from syncmaster.schemas.v1.transfers.file.base import (
-    CreateFileTransferSource,
-    CreateFileTransferTarget,
-    ReadFileTransferSource,
-    ReadFileTransferTarget,
+    FileTransferSource,
+    FileTransferTarget,
 )
 
 
-class ReadFTPTransferSource(ReadFileTransferSource):
+class FTPTransferSource(FileTransferSource):
     type: FTP_TYPE
 
 
-class ReadFTPTransferTarget(ReadFileTransferTarget):
-    type: FTP_TYPE
-
-
-class CreateFTPTransferSource(CreateFileTransferSource):
-    type: FTP_TYPE
-
-
-class CreateFTPTransferTarget(CreateFileTransferTarget):
+class FTPTransferTarget(FileTransferTarget):
     type: FTP_TYPE

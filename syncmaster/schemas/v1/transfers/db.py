@@ -45,3 +45,18 @@ class MySQLTransferSourceOrTarget(DBTransfer):
 
 class IcebergRESTCatalogS3TransferSourceOrTarget(DBTransfer):
     type: ICEBERG_REST_S3_TYPE
+
+
+DBTransferSourceOrTarget = (
+    ClickhouseTransferSourceOrTarget
+    | HiveTransferSourceOrTarget
+    | IcebergRESTCatalogS3TransferSourceOrTarget
+    | MSSQLTransferSourceOrTarget
+    | MySQLTransferSourceOrTarget
+    | OracleTransferSourceOrTarget
+    | PostgresTransferSourceOrTarget
+)
+
+__all__ = [
+    "DBTransferSourceOrTarget",
+]

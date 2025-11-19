@@ -19,7 +19,7 @@ from syncmaster.exceptions.connection import (
 from syncmaster.exceptions.credentials import AuthDataNotFoundError
 from syncmaster.exceptions.group import GroupNotFoundError
 from syncmaster.schemas.v1.connection_types import CONNECTION_TYPES
-from syncmaster.schemas.v1.connections.connection import (
+from syncmaster.schemas.v1.connections import (
     ConnectionCopySchema,
     ConnectionPageSchema,
     CreateConnectionSchema,
@@ -122,12 +122,12 @@ async def create_connection(
             type=connection_data.type,
             description=connection_data.description,
             group_id=connection_data.group_id,
-            data=connection_data.data.model_dump(),
+            data=connection_data.data.model_dump(mode="json"),
         )
 
         await unit_of_work.credentials.create(
             connection_id=connection.id,
-            data=connection_data.auth_data.model_dump(),
+            data=connection_data.auth_data.model_dump(mode="json"),
         )
 
     credentials = await unit_of_work.credentials.read(connection.id)
@@ -208,7 +208,7 @@ async def update_connection(  # noqa: WPS217, WPS238
                 raise ConnectionTypeUpdateError
 
         existing_credentials = await unit_of_work.credentials.read(connection_id=connection_id)
-        auth_data = connection_data.auth_data.model_dump()
+        auth_data = connection_data.auth_data.model_dump(mode="json")
 
         for secret_field in connection_data.auth_data.get_secret_fields():
             if auth_data[secret_field] is None:
@@ -222,7 +222,7 @@ async def update_connection(  # noqa: WPS217, WPS238
             name=connection_data.name,
             type=connection_data.type,
             description=connection_data.description,
-            data=connection_data.data.model_dump(),
+            data=connection_data.data.model_dump(mode="json"),
         )
         await unit_of_work.credentials.update(
             connection_id=connection_id,
