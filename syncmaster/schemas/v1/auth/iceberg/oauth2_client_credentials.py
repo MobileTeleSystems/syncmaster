@@ -13,7 +13,7 @@ class ReadIcebergRESTCatalogOAuth2ClientCredentialsAuthSchema(BaseModel):
     rest_catalog_oauth2_scopes: list[str] = Field(default_factory=list)
     rest_catalog_oauth2_resource: str | None = None
     rest_catalog_oauth2_audience: str | None = None
-    rest_catalog_oauth2_server_uri: URL | None = None
+    rest_catalog_oauth2_token_endpoint: URL | None = None
     s3_access_key: str
 
 

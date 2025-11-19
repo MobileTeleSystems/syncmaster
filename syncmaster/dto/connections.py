@@ -103,7 +103,7 @@ class IcebergRESTCatalogOAuth2ClientCredentialsS3DTO(IcebergRESTCatalogS3Connect
     rest_catalog_oauth2_scopes: list[str]
     rest_catalog_oauth2_resource: str | None = None
     rest_catalog_oauth2_audience: str | None = None
-    rest_catalog_oauth2_server_uri: str | None = None
+    rest_catalog_oauth2_token_endpoint: str | None = None
     rest_catalog_auth_type: Literal["oauth2"] = "oauth2"
 
 

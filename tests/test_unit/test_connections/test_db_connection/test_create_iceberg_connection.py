@@ -124,7 +124,7 @@ async def test_developer_plus_can_create_iceberg_rest_s3_connection_with_oauth2_
                 "rest_catalog_oauth2_client_secret": "my_client_secret",
                 "rest_catalog_oauth2_scopes": ["catalog:read"],
                 "rest_catalog_oauth2_audience": "iceberg-catalog",
-                "rest_catalog_oauth2_server_uri": "https://oauth.example.com/token",
+                "rest_catalog_oauth2_token_endpoint": "https://oauth.example.com/token",
                 "s3_access_key": "access_key",
                 "s3_secret_key": "secret_key",
             },
@@ -172,7 +172,7 @@ async def test_developer_plus_can_create_iceberg_rest_s3_connection_with_oauth2_
             "rest_catalog_oauth2_scopes": decrypted["rest_catalog_oauth2_scopes"],
             "rest_catalog_oauth2_audience": decrypted["rest_catalog_oauth2_audience"],
             "rest_catalog_oauth2_resource": decrypted["rest_catalog_oauth2_resource"],
-            "rest_catalog_oauth2_server_uri": decrypted["rest_catalog_oauth2_server_uri"],
+            "rest_catalog_oauth2_token_endpoint": decrypted["rest_catalog_oauth2_token_endpoint"],
             "s3_access_key": decrypted["s3_access_key"],
         },
     }

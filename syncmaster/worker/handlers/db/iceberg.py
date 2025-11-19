@@ -97,7 +97,7 @@ class IcebergRESTCatalogS3Handler(DBHandler):
                 scopes=self.connection_dto.rest_catalog_oauth2_scopes,
                 resource=self.connection_dto.rest_catalog_oauth2_resource,
                 audience=self.connection_dto.rest_catalog_oauth2_audience,
-                server_uri=self.connection_dto.rest_catalog_oauth2_server_uri,
+                oauth2_token_endpoint=self.connection_dto.rest_catalog_oauth2_token_endpoint,
             )
         return Iceberg.RESTCatalog.BasicAuth(
             user=self.connection_dto.rest_catalog_username,
