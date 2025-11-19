@@ -14,7 +14,7 @@ async def test_owner_of_group_can_update_user_role(
 ):
     user = group.get_member_of_role(role_maintainer_or_below)
     group_owner = group.get_member_of_role(UserTestRoles.Owner)
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{group.id}/users/{user.user.id}",
         headers={"Authorization": f"Bearer {group_owner.token}"},
         json={
@@ -22,8 +22,8 @@ async def test_owner_of_group_can_update_user_role(
         },
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {"role": role_guest_plus_without_owner}
+    assert response.status_code == 200, response.text
+    assert response.json() == {"role": role_guest_plus_without_owner}
 
 
 async def test_superuser_can_update_user_role(
@@ -34,7 +34,7 @@ async def test_superuser_can_update_user_role(
     role_guest_plus_without_owner: UserTestRoles,
 ):
     user = group.get_member_of_role(role_maintainer_or_below)
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{group.id}/users/{user.user.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
@@ -42,8 +42,8 @@ async def test_superuser_can_update_user_role(
         },
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {"role": role_guest_plus_without_owner}
+    assert response.status_code == 200, response.text
+    assert response.json() == {"role": role_guest_plus_without_owner}
 
 
 async def test_owner_of_group_can_not_update_user_role_with_wrong_role(
@@ -52,7 +52,7 @@ async def test_owner_of_group_can_not_update_user_role_with_wrong_role(
     role_maintainer_or_below: UserTestRoles,
 ):
     user = group.get_member_of_role(role_maintainer_or_below)
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{group.id}/users/{user.user.id}",
         headers={"Authorization": f"Bearer {group.get_member_of_role(UserTestRoles.Owner).token}"},
         json={
@@ -60,7 +60,7 @@ async def test_owner_of_group_can_not_update_user_role_with_wrong_role(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",
@@ -75,7 +75,7 @@ async def test_owner_of_group_can_not_update_user_role_with_wrong_role(
             ],
         },
     }
-    assert result.status_code == 422, result.json()
+    assert response.status_code == 422, response.text
 
 
 async def test_maintainer_below_can_not_update_user_role(
@@ -87,7 +87,7 @@ async def test_maintainer_below_can_not_update_user_role(
 ):
     updating_user = group.get_member_of_role(role_maintainer_or_below)
     user_to_update = group.get_member_of_role(role_guest_plus)
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{group.id}/users/{user_to_update.user.id}",
         headers={"Authorization": f"Bearer {updating_user.token}"},
         json={
@@ -95,14 +95,14 @@ async def test_maintainer_below_can_not_update_user_role(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "forbidden",
             "message": "You have no power here",
             "details": None,
         },
     }
-    assert result.status_code == 403, result.json()
+    assert response.status_code == 403, response.text
 
 
 async def test_other_group_member_can_not_update_user_role(
@@ -114,7 +114,7 @@ async def test_other_group_member_can_not_update_user_role(
 ):
     user = group_connection.owner_group.get_member_of_role(role_guest_plus)
     group_member = group.get_member_of_role(role_guest_plus_without_owner)
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{group.id}/users/{group_member.user.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -122,14 +122,14 @@ async def test_other_group_member_can_not_update_user_role(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
+    assert response.status_code == 404, response.text
 
 
 async def test_superuser_update_unknown_group_error(
@@ -140,7 +140,7 @@ async def test_superuser_update_unknown_group_error(
     role_guest_plus_without_owner: UserTestRoles,
 ):
     user = group.get_member_of_role(role_maintainer_or_below)
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/-1/users/{user.user.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
@@ -148,7 +148,7 @@ async def test_superuser_update_unknown_group_error(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
@@ -163,7 +163,7 @@ async def test_superuser_update_unknown_user_error(
     superuser: MockUser,
     role_guest_plus_without_owner: UserTestRoles,
 ):
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{group.id}/users/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
@@ -171,7 +171,7 @@ async def test_superuser_update_unknown_user_error(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "User not found",
@@ -187,7 +187,7 @@ async def test_owner_of_group_update_unknown_user_error(
     role_guest_plus_without_owner: UserTestRoles,
 ):
     group.get_member_of_role(role_maintainer_or_below)
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{group.id}/users/-1",
         headers={"Authorization": f"Bearer {group.get_member_of_role(UserTestRoles.Owner).token}"},
         json={
@@ -195,7 +195,7 @@ async def test_owner_of_group_update_unknown_user_error(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "User not found",
@@ -211,7 +211,7 @@ async def test_owner_of_group_update_unknown_group_error(
     role_guest_plus_without_owner: UserTestRoles,
 ):
     user = group.get_member_of_role(role_maintainer_or_below)
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/-1/users/{user.user.id}",
         headers={"Authorization": f"Bearer {group.get_member_of_role(UserTestRoles.Owner).token}"},
         json={
@@ -219,7 +219,7 @@ async def test_owner_of_group_update_unknown_group_error(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",

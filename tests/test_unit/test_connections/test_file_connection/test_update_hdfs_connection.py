@@ -35,14 +35,14 @@ async def test_developer_plus_can_update_hdfs_connection(
     new_connection_data = {"cluster": "new_cluster"}
     connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={**connection_json, "type": "hdfs", "connection_data": new_connection_data},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "id": group_connection.id,
         "name": group_connection.connection.name,
         "description": group_connection.description,

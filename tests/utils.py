@@ -115,14 +115,14 @@ async def get_run_on_end(
     end_time = datetime.now(tz=timezone.utc).timestamp() + timeout
     while True:
         logger.info("Waiting for end of run")
-        result = await client.get(
+        response = await client.get(
             f"v1/runs/{run_id}",
             headers={"Authorization": f"Bearer {token}"},
         )
-        if result.status_code != 200:
+        if response.status_code != 200:
             raise Exception("Run not found")
 
-        data = result.json()
+        data = response.json()
         if data["status"] in [Status.FINISHED, Status.FAILED]:
             return data
 
@@ -162,15 +162,16 @@ async def run_transfer_and_verify(
     source_auth: str = "basic",
     target_auth: str = "basic",
 ) -> dict[str, Any]:
-    result = await client.post(
+    response = await client.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
         json={"transfer_id": transfer_id},
     )
-    assert result.status_code == 200, result.json()
+    assert response.status_code == 200, response.text
+
     run_data = await get_run_on_end(
         client=client,
-        run_id=result.json()["id"],
+        run_id=response.json()["id"],
         token=user.token,
     )
     assert run_data["status"] == Status.FINISHED.value

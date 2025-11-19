@@ -35,7 +35,7 @@ async def test_developer_plus_can_copy_connection_without_remove_source(
     new_connection = (await session.scalars(new_connection_query)).one_or_none()
     assert not new_connection
 
-    result = await client.post(
+    response = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -44,12 +44,12 @@ async def test_developer_plus_can_copy_connection_without_remove_source(
         },
     )
 
-    assert result.status_code == 200, result.json()
+    assert response.status_code == 200, response.text
 
     # new connection with new name exist in target group
     new_connection = (await session.scalars(new_connection_query)).one()
 
-    assert result.json() == {
+    assert response.json() == {
         "id": new_connection.id,
         "group_id": empty_group.group.id,
         "name": old_connection.name,
@@ -101,7 +101,7 @@ async def test_developer_plus_can_copy_connection_with_new_connection_name(
     new_connection = (await session.scalars(new_connection_query)).one_or_none()
     assert not new_connection
 
-    result = await client.post(
+    response = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -110,12 +110,12 @@ async def test_developer_plus_can_copy_connection_with_new_connection_name(
         },
     )
 
-    assert result.status_code == 200, result.json()
+    assert response.status_code == 200, response.text
 
     # new connection with new name exist in target group
     new_connection = (await session.scalars(new_connection_query)).one()
 
-    assert result.json() == {
+    assert response.json() == {
         "id": new_connection.id,
         "group_id": empty_group.group.id,
         "name": new_name,
@@ -153,7 +153,7 @@ async def test_developer_below_can_not_copy_connection_with_remove_source(
     role = group_connection_and_group_developer_or_below
     user = group_connection.owner_group.get_member_of_role(role)
 
-    result = await client.post(
+    response = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -162,14 +162,14 @@ async def test_developer_below_can_not_copy_connection_with_remove_source(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "forbidden",
             "message": "You have no power here",
             "details": None,
         },
     }
-    assert result.status_code == 403, result.json()
+    assert response.status_code == 403, response.text
 
 
 async def test_maintainer_plus_can_copy_connection_and_delete_source(
@@ -192,7 +192,7 @@ async def test_maintainer_plus_can_copy_connection_and_delete_source(
     new_connection = (await session.scalars(new_connection_query)).one_or_none()
     assert not new_connection
 
-    result = await client.post(
+    response = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -201,12 +201,12 @@ async def test_maintainer_plus_can_copy_connection_and_delete_source(
         },
     )
 
-    assert result.status_code == 200, result.json()
+    assert response.status_code == 200, response.text
 
     # new connection with new name exist in target group
     new_connection = (await session.scalars(new_connection_query)).one()
 
-    assert result.json() == {
+    assert response.json() == {
         "id": new_connection.id,
         "group_id": empty_group.group.id,
         "name": old_connection.name,
@@ -244,7 +244,7 @@ async def test_maintainer_plus_cannot_copy_connection_with_same_name_in_new_grou
     role = group_connection_with_same_name_maintainer_plus
     user = group_connection.owner_group.get_member_of_role(role)
 
-    result = await client.post(
+    response = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -252,7 +252,7 @@ async def test_maintainer_plus_cannot_copy_connection_with_same_name_in_new_grou
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "conflict",
             "message": "The connection name already exists in the target group, please specify a new one",
@@ -299,13 +299,13 @@ async def test_check_new_name_field_validation_on_copy_connection(
     role = group_connection_and_group_developer_plus
     user = group_connection.owner_group.get_member_of_role(role)
 
-    result = await client.post(
+    response = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
         json={"new_group_id": empty_group.id, "new_name": name},
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",
@@ -333,7 +333,7 @@ async def test_superuser_can_copy_connection_without_deleting_source(
     new_connection = (await session.scalars(new_connection_query)).one_or_none()
     assert not new_connection
 
-    result = await client.post(
+    response = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
@@ -342,12 +342,12 @@ async def test_superuser_can_copy_connection_without_deleting_source(
         },
     )
 
-    assert result.status_code == 200, result.json()
+    assert response.status_code == 200, response.text
 
     # new connection with new name exist in target group
     new_connection = (await session.scalars(new_connection_query)).one()
 
-    assert result.json() == {
+    assert response.json() == {
         "id": new_connection.id,
         "group_id": empty_group.group.id,
         "name": old_connection.name,
@@ -393,7 +393,7 @@ async def test_superuser_can_copy_connection_and_delete_source(
     new_connection = (await session.scalars(new_connection_query)).one_or_none()
     assert not new_connection
 
-    result = await client.post(
+    response = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
@@ -402,12 +402,12 @@ async def test_superuser_can_copy_connection_and_delete_source(
         },
     )
 
-    assert result.status_code == 200, result.json()
+    assert response.status_code == 200, response.text
 
     # new connection with new name exist in target group
     new_connection = (await session.scalars(new_connection_query)).one()
 
-    assert result.json() == {
+    assert response.json() == {
         "id": new_connection.id,
         "group_id": empty_group.group.id,
         "name": old_connection.name,
@@ -441,14 +441,14 @@ async def test_unauthorized_user_cannot_copy_connection(
     empty_group: MockGroup,
     group_connection: MockConnection,
 ):
-    result = await client.post(
+    response = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         json={
             "new_group_id": empty_group.id,
         },
     )
-    assert result.status_code == 401, result.json()
-    assert result.json() == {
+    assert response.status_code == 401, response.text
+    assert response.json() == {
         "error": {
             "code": "unauthorized",
             "message": "Not authenticated",
@@ -463,15 +463,15 @@ async def test_groupless_user_cannot_copy_connection(
     empty_group: MockGroup,
     simple_user: MockUser,
 ):
-    result = await client.post(
+    response = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={
             "new_group_id": empty_group.id,
         },
     )
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Connection not found",
@@ -488,15 +488,15 @@ async def test_other_group_member_cannot_copy_connection(
 ):
     user = group.get_member_of_role(role_guest_plus)
 
-    result = await client.post(
+    response = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
             "new_group_id": group.group.id,
         },
     )
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Connection not found",
@@ -513,7 +513,7 @@ async def test_not_in_both_groups_user_can_not_copy_connection(
 ):
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
 
-    result = await client.post(
+    response = await client.post(
         f"v1/connections/{group_connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -521,14 +521,14 @@ async def test_not_in_both_groups_user_can_not_copy_connection(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
+    assert response.status_code == 404, response.text
 
 
 async def test_cannot_copy_connection_with_unknown_connection_error(
@@ -540,7 +540,7 @@ async def test_cannot_copy_connection_with_unknown_connection_error(
     role = group_connection_and_group_developer_plus
     user = group_connection.owner_group.get_member_of_role(role)
 
-    result = await client.post(
+    response = await client.post(
         "v1/connections/-1/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -548,14 +548,14 @@ async def test_cannot_copy_connection_with_unknown_connection_error(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Connection not found",
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
+    assert response.status_code == 404, response.text
 
 
 async def test_superuser_cannot_copy_unknown_connection_error(
@@ -563,7 +563,7 @@ async def test_superuser_cannot_copy_unknown_connection_error(
     superuser: MockUser,
     empty_group: MockGroup,
 ):
-    result = await client.post(
+    response = await client.post(
         "v1/connections/-1/copy_connection",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
@@ -571,14 +571,14 @@ async def test_superuser_cannot_copy_unknown_connection_error(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Connection not found",
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
+    assert response.status_code == 404, response.text
 
 
 async def test_cannot_copy_connection_with_unknown_new_group_id_error(
@@ -589,7 +589,7 @@ async def test_cannot_copy_connection_with_unknown_new_group_id_error(
     role = group_connection_and_group_developer_plus
     user = group_connection.owner_group.get_member_of_role(role)
 
-    result = await client.post(
+    response = await client.post(
         f"v1/connections/{group_connection.connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -597,14 +597,14 @@ async def test_cannot_copy_connection_with_unknown_new_group_id_error(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
+    assert response.status_code == 404, response.text
 
 
 async def test_superuser_cannot_copy_connection_with_unknown_new_group_id_error(
@@ -612,7 +612,7 @@ async def test_superuser_cannot_copy_connection_with_unknown_new_group_id_error(
     superuser: MockUser,
     group_connection: MockConnection,
 ):
-    result = await client.post(
+    response = await client.post(
         f"v1/connections/{group_connection.connection.id}/copy_connection",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
@@ -620,11 +620,11 @@ async def test_superuser_cannot_copy_connection_with_unknown_new_group_id_error(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
+    assert response.status_code == 404, response.text

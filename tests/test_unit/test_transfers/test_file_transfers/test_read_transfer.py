@@ -132,10 +132,10 @@ async def test_guest_plus_can_read_s3_transfer(
 ):
     user = group_transfer.owner_group.get_member_of_role(role_guest_plus)
 
-    result = await client.get(
+    response = await client.get(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == build_transfer_json(group_transfer)
+    assert response.status_code == 200, response.text
+    assert response.json() == build_transfer_json(group_transfer)

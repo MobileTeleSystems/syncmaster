@@ -14,13 +14,13 @@ async def test_developer_plus_can_read_run(
 ):
     user = group_run.transfer.owner_group.get_member_of_role(role_developer_plus)
 
-    result = await client.get(
+    response = await client.get(
         f"v1/runs/{group_run.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "id": group_run.id,
         "transfer_id": group_run.transfer_id,
         "status": group_run.status.value,
@@ -37,13 +37,13 @@ async def test_groupless_user_cannot_read_run(
     group_run: MockRun,
     simple_user: MockUser,
 ) -> None:
-    result = await client.get(
+    response = await client.get(
         f"v1/runs/{group_run.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",
@@ -60,13 +60,13 @@ async def test_another_group_member_cannot_read_run(
 ):
     user = group.get_member_of_role(role_guest_plus)
 
-    result = await client.get(
+    response = await client.get(
         f"v1/runs/{group_run.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",
@@ -80,13 +80,13 @@ async def test_superuser_can_read_runs(
     superuser: MockUser,
     group_run: MockRun,
 ) -> None:
-    result = await client.get(
+    response = await client.get(
         f"v1/runs/{group_run.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "id": group_run.id,
         "transfer_id": group_run.transfer_id,
         "status": group_run.status.value,
@@ -102,10 +102,10 @@ async def test_unauthorized_user_cannot_read_run(
     client: AsyncClient,
     group_run: MockRun,
 ) -> None:
-    result = await client.get(f"v1/runs/{group_run.id}")
+    response = await client.get(f"v1/runs/{group_run.id}")
 
-    assert result.status_code == 401, result.json()
-    assert result.json() == {
+    assert response.status_code == 401, response.text
+    assert response.json() == {
         "error": {
             "code": "unauthorized",
             "message": "Not authenticated",
@@ -121,13 +121,13 @@ async def test_group_member_cannot_read_unknown_run_error(
 ):
     user = group_run.transfer.owner_group.get_member_of_role(role_guest_plus)
 
-    result = await client.get(
+    response = await client.get(
         "v1/runs/-1",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Run not found",
@@ -141,13 +141,13 @@ async def test_superuser_cannot_read_unknown_run_error(
     superuser: MockUser,
     group_run: MockRun,
 ) -> None:
-    result = await client.get(
+    response = await client.get(
         "v1/runs/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Run not found",

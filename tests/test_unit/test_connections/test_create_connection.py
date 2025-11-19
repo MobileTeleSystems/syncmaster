@@ -22,7 +22,7 @@ async def test_developer_plus_can_create_connection(
 ):
     user = group.get_member_of_role(role_developer_plus)
 
-    result = await client.post(
+    response = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -42,6 +42,7 @@ async def test_developer_plus_can_create_connection(
             },
         },
     )
+    assert response.status_code == 200, response.text
 
     connection = (
         await session.scalars(
@@ -69,9 +70,8 @@ async def test_developer_plus_can_create_connection(
 
     request.addfinalizer(delete_rows)
 
-    assert result.status_code == 200, result.json()
     decrypted = decrypt_auth_data(creds.value, settings=settings)
-    assert result.json() == {
+    assert response.json() == {
         "id": connection.id,
         "name": connection.name,
         "description": connection.description,
@@ -94,7 +94,7 @@ async def test_unauthorized_user_cannot_create_connection(
     client: AsyncClient,
     group_connection: MockConnection,
 ):
-    result = await client.post(
+    response = await client.post(
         "v1/connections",
         json={
             "group_id": group_connection.id,
@@ -113,8 +113,8 @@ async def test_unauthorized_user_cannot_create_connection(
             },
         },
     )
-    assert result.status_code == 401, result.json()
-    assert result.json() == {
+    assert response.status_code == 401, response.text
+    assert response.json() == {
         "error": {
             "code": "unauthorized",
             "message": "Not authenticated",
@@ -159,7 +159,7 @@ async def test_check_name_field_validation_on_create_connection(
 ):
     user = group_connection.owner_group.get_member_of_role(UserTestRoles.Developer)
 
-    result = await client.post(
+    response = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -180,8 +180,8 @@ async def test_check_name_field_validation_on_create_connection(
         },
     )
 
-    assert result.status_code == 422, result.json()
-    assert result.json() == {
+    assert response.status_code == 422, response.text
+    assert response.json() == {
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",
@@ -189,7 +189,7 @@ async def test_check_name_field_validation_on_create_connection(
         },
     }
 
-    result = await client.post(
+    response = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -211,8 +211,8 @@ async def test_check_name_field_validation_on_create_connection(
         },
     )
 
-    assert result.status_code == 422, result.json()
-    message = result.json()["error"]["details"][0]["message"]
+    assert response.status_code == 422, response.text
+    message = response.json()["error"]["details"][0]["message"]
     assert message == (
         "Input tag 'POSTGRESQL' found using 'type' does not match any of the expected tags: "
         "'clickhouse', 'hive', 'iceberg_rest_s3', 'mssql', 'mysql', 'oracle', 'postgres', "
@@ -228,7 +228,7 @@ async def test_other_group_member_cannot_create_group_connection(
 ):
     user = group.get_member_of_role(role_guest_plus)
 
-    result = await client.post(
+    response = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -249,14 +249,14 @@ async def test_other_group_member_cannot_create_group_connection(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
+    assert response.status_code == 404, response.text
 
 
 async def test_superuser_can_create_connection(
@@ -266,7 +266,7 @@ async def test_superuser_can_create_connection(
     session: AsyncSession,
     settings: Settings,
 ):
-    result = await client.post(
+    response = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
@@ -286,6 +286,8 @@ async def test_superuser_can_create_connection(
             },
         },
     )
+    assert response.status_code == 200, response.text
+
     connection = (
         await session.scalars(
             select(Connection).filter_by(
@@ -303,8 +305,7 @@ async def test_superuser_can_create_connection(
         )
     ).one()
     decrypted = decrypt_auth_data(creds.value, settings=settings)
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.json() == {
         "id": connection.id,
         "group_id": connection.group_id,
         "name": connection.name,
@@ -329,7 +330,7 @@ async def test_groupless_user_cannot_create_connection(
     simple_user: MockUser,
     superuser: MockUser,
 ):
-    result = await client.post(
+    response = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={
@@ -350,14 +351,14 @@ async def test_groupless_user_cannot_create_connection(
             },
         },
     )
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
 
 
 async def test_group_member_cannot_create_connection_with_unknown_group_error(
@@ -369,7 +370,7 @@ async def test_group_member_cannot_create_connection_with_unknown_group_error(
 ):
     user = group.get_member_of_role(role_guest_plus)
 
-    result = await client.post(
+    response = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -389,8 +390,9 @@ async def test_group_member_cannot_create_connection_with_unknown_group_error(
             },
         },
     )
+    assert response.status_code == 404, response.text
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
@@ -406,7 +408,7 @@ async def test_superuser_cannot_create_connection_with_unknown_group_error(
     session: AsyncSession,
     settings: Settings,
 ):
-    result = await client.post(
+    response = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
@@ -427,8 +429,9 @@ async def test_superuser_cannot_create_connection_with_unknown_group_error(
             },
         },
     )
+    assert response.status_code == 404, response.text
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
@@ -443,7 +446,7 @@ async def test_guest_cannot_create_connection_error(
 ):
     user = group.get_member_of_role(UserTestRoles.Guest)
 
-    result = await client.post(
+    response = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -465,8 +468,8 @@ async def test_guest_cannot_create_connection_error(
         },
     )
 
-    assert result.status_code == 403, result.json()
-    assert result.json() == {
+    assert response.status_code == 403, response.text
+    assert response.json() == {
         "error": {
             "code": "forbidden",
             "message": "You have no power here",

@@ -29,14 +29,14 @@ async def test_developer_plus_can_update_transfer(
         },
     }
 
-    result = await client.put(
+    response = await client.put(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json=transfer_json | updated_fields,
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == build_transfer_json(group_transfer) | updated_fields
+    assert response.status_code == 200, response.text
+    assert response.json() == build_transfer_json(group_transfer) | updated_fields
 
 
 async def test_groupless_user_cannot_update_transfer(
@@ -45,14 +45,14 @@ async def test_groupless_user_cannot_update_transfer(
     simple_user: MockUser,
 ):
     transfer_json = build_transfer_json(group_transfer)
-    result = await client.put(
+    response = await client.put(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={**transfer_json, "name": "New transfer name"},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",
@@ -69,14 +69,14 @@ async def test_superuser_can_update_transfer(
     updated_fields = {"name": "New transfer name"}
     transfer_json = await fetch_transfer_json(client, superuser.token, group_transfer)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json=transfer_json | updated_fields,
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == build_transfer_json(group_transfer) | updated_fields
+    assert response.status_code == 200, response.text
+    assert response.json() == build_transfer_json(group_transfer) | updated_fields
 
 
 async def test_other_group_member_cannot_update_transfer(
@@ -88,14 +88,14 @@ async def test_other_group_member_cannot_update_transfer(
     user = group.get_member_of_role(role_developer_plus)
     transfer_json = build_transfer_json(group_transfer)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json=transfer_json,
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",
@@ -141,14 +141,14 @@ async def test_check_name_field_validation_on_update_transfer(
     user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
     transfer_json = await fetch_transfer_json(client, user.token, group_transfer)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={**transfer_json, "name": name, "description": name},
     )
 
-    assert result.status_code == 422, result.json()
-    assert result.json() == {
+    assert response.status_code == 422, response.text
+    assert response.json() == {
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",
@@ -172,14 +172,14 @@ async def test_check_connection_types_and_its_params_transfer(
         },
     }
 
-    result = await client.put(
+    response = await client.put(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json=transfer_json | updated_fields,
     )
 
-    assert result.status_code == 400, result.json()
-    assert result.json() == {
+    assert response.status_code == 400, response.text
+    assert response.json() == {
         "error": {
             "code": "bad_request",
             "message": "Source connection has type `postgres` but its params has `oracle` type",
@@ -188,14 +188,14 @@ async def test_check_connection_types_and_its_params_transfer(
     }
 
     updated_fields["source_params"]["type"] = "postgres"
-    result = await client.put(
+    response = await client.put(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json=transfer_json | updated_fields,
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == build_transfer_json(group_transfer) | updated_fields
+    assert response.status_code == 200, response.text
+    assert response.json() == build_transfer_json(group_transfer) | updated_fields
 
 
 async def test_check_different_connection_groups_for_transfer(
@@ -207,14 +207,14 @@ async def test_check_different_connection_groups_for_transfer(
     user = group_transfer.owner_group.get_member_of_role(role)
     transfer_json = await fetch_transfer_json(client, user.token, group_transfer)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={**transfer_json, "source_connection_id": connection.id},
     )
 
-    assert result.status_code == 400, result.json()
-    assert result.json() == {
+    assert response.status_code == 400, response.text
+    assert response.json() == {
         "error": {
             "code": "bad_request",
             "message": "Connections should belong to the transfer group",
@@ -232,14 +232,14 @@ async def test_check_different_queue_groups_for_transfer(
     user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
     transfer_json = await fetch_transfer_json(client, user.token, group_transfer)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={**transfer_json, "queue_id": group_queue.id},
     )
 
-    assert result.status_code == 400, result.json()
-    assert result.json() == {
+    assert response.status_code == 400, response.text
+    assert response.json() == {
         "error": {
             "code": "bad_request",
             "message": "Queue should belong to the transfer group",
@@ -257,14 +257,14 @@ async def test_developer_plus_not_in_new_connection_group_cannot_update_transfer
     user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
     transfer_json = await fetch_transfer_json(client, user.token, group_transfer)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={**transfer_json, "source_connection_id": group_connection.connection.id},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Connection not found",
@@ -279,13 +279,13 @@ async def test_unauthorized_user_cannot_update_transfer(
 ):
     transfer_json = build_transfer_json(group_transfer)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/transfers/{group_transfer.id}",
         json={**transfer_json, "name": "New transfer name"},
     )
 
-    assert result.status_code == 401, result.json()
-    assert result.json() == {
+    assert response.status_code == 401, response.text
+    assert response.json() == {
         "error": {
             "code": "unauthorized",
             "message": "Not authenticated",
@@ -303,14 +303,14 @@ async def test_developer_plus_cannot_update_transfer_with_other_group_queue(
     user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
     transfer_json = await fetch_transfer_json(client, user.token, group_transfer)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={**transfer_json, "queue_id": group_queue.id},
     )
 
-    assert result.status_code == 400, result.json()
-    assert result.json() == {
+    assert response.status_code == 400, response.text
+    assert response.json() == {
         "error": {
             "code": "bad_request",
             "message": "Queue should belong to the transfer group",
@@ -327,14 +327,14 @@ async def test_superuser_cannot_update_transfer_with_other_group_queue(
 ):
     transfer_json = await fetch_transfer_json(client, superuser.token, group_transfer)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={**transfer_json, "queue_id": group_queue.id},
     )
 
-    assert result.status_code == 400, result.json()
-    assert result.json() == {
+    assert response.status_code == 400, response.text
+    assert response.json() == {
         "error": {
             "code": "bad_request",
             "message": "Queue should belong to the transfer group",
@@ -351,14 +351,14 @@ async def test_group_member_cannot_update_unknown_transfer_error(
     user = group_transfer.owner_group.get_member_of_role(role_guest_plus)
     transfer_json = await fetch_transfer_json(client, user.token, group_transfer)
 
-    result = await client.put(
+    response = await client.put(
         "v1/transfers/-1",
         headers={"Authorization": f"Bearer {user.token}"},
         json={**transfer_json, "name": "New transfer name"},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",
@@ -374,14 +374,14 @@ async def test_superuser_cannot_update_unknown_transfer_error(
 ):
     transfer_json = await fetch_transfer_json(client, superuser.token, group_transfer)
 
-    result = await client.put(
+    response = await client.put(
         "v1/transfers/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={**transfer_json, "name": "New transfer name"},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",
@@ -398,14 +398,14 @@ async def test_developer_plus_cannot_update_transfer_with_unknown_queue_id_error
     user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
     transfer_json = await fetch_transfer_json(client, user.token, group_transfer)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={**transfer_json, "queue_id": -1},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Queue not found",
@@ -421,14 +421,14 @@ async def test_superuser_cannot_update_transfer_with_unknown_queue_id(
 ):
     transfer_json = await fetch_transfer_json(client, superuser.token, group_transfer)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={**transfer_json, "queue_id": -1},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Queue not found",

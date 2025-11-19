@@ -22,16 +22,16 @@ async def test_simple_user_can_create_group(
         "description": "description of new test group",
     }
 
-    result = await client.post(
+    response = await client.post(
         "v1/groups",
         json=group_data,
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
-    assert result.status_code == 200, result.json()
+    assert response.status_code == 200, response.text
 
     group = (await session.scalars(select(Group).where(Group.name == group_name))).one()
     assert (
-        result.json()
+        response.json()
         == {
             "id": group.id,
             "owner_id": simple_user.user.id,
@@ -54,21 +54,20 @@ async def test_simple_user_cannot_create_group_twice(
         "owner_id": simple_user.id,
     }
 
-    result = await client.post(
+    response = await client.post(
         "v1/groups",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json=group_data,
     )
+    assert response.status_code == 200, response.text
 
-    assert result.status_code == 200, result.json()
-
-    second_result = await client.post(
+    second_response = await client.post(
         "v1/groups",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json=group_data,
     )
-    assert second_result.status_code == 409
-    assert second_result.json() == {
+    assert second_response.status_code == 409
+    assert second_response.json() == {
         "error": {
             "code": "conflict",
             "message": "Group name already taken",
@@ -87,10 +86,10 @@ async def test_not_authorized_user_cannot_create_group(
         "owner_id": simple_user.id,
     }
 
-    result = await client.post("v1/groups", json=group_data)
+    response = await client.post("v1/groups", json=group_data)
 
-    assert result.status_code == 401, result.json()
-    assert result.json() == {
+    assert response.status_code == 401, response.text
+    assert response.json() == {
         "error": {
             "code": "unauthorized",
             "message": "Not authenticated",

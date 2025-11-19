@@ -24,14 +24,14 @@ async def test_developer_plus_can_read_runs_of_the_transfer(
 ) -> None:
     user = group_run.transfer.owner_group.get_member_of_role(role_developer_plus)
 
-    result = await client.get(
+    response = await client.get(
         "v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"transfer_id": group_run.transfer.id},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "meta": {
             "page": 1,
             "pages": 1,
@@ -61,14 +61,14 @@ async def test_groupless_user_cannot_read_runs_transfer(
     simple_user: MockUser,
     group_run: MockRun,
 ) -> None:
-    result = await client.get(
+    response = await client.get(
         "v1/runs",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         params={"transfer_id": group_run.transfer.id},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",
@@ -82,13 +82,13 @@ async def test_superuser_can_read_runs(
     superuser: MockUser,
     group_run: MockRun,
 ) -> None:
-    result = await client.get(
+    response = await client.get(
         "v1/runs",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"transfer_id": group_run.transfer.id},
     )
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "meta": {
             "page": 1,
             "pages": 1,
@@ -117,12 +117,12 @@ async def test_unauthorized_user_cannot_read_run(
     client: AsyncClient,
     group_transfer: MockTransfer,
 ) -> None:
-    result = await client.get(
+    response = await client.get(
         "v1/runs",
         params={"transfer_id": group_transfer.id},
     )
-    assert result.status_code == 401, result.json()
-    assert result.json() == {
+    assert response.status_code == 401, response.text
+    assert response.json() == {
         "error": {
             "code": "unauthorized",
             "message": "Not authenticated",
@@ -139,14 +139,14 @@ async def test_other_group_member_cannot_read_runs_of_the_transfer(
 ) -> None:
     user = group.get_member_of_role(role_guest_plus)
 
-    result = await client.get(
+    response = await client.get(
         "v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"transfer_id": group_run.transfer.id},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",
@@ -162,14 +162,14 @@ async def test_group_member_cannot_read_runs_of_the_unknown_transfer_error(
 ) -> None:
     user = group_run.transfer.owner_group.get_member_of_role(role_guest_plus)
 
-    result = await client.get(
+    response = await client.get(
         "v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"transfer_id": -1},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",
@@ -183,13 +183,13 @@ async def test_superuser_cannot_read_runs_of_unknown_transfer_error(
     superuser: MockUser,
     group_run: MockRun,
 ) -> None:
-    result = await client.get(
+    response = await client.get(
         "v1/runs",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"transfer_id": -1},
     )
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",
@@ -244,20 +244,20 @@ async def test_filter_runs(
 
     params.update(filter_params)
 
-    result = await client.get(
+    response = await client.get(
         "v1/runs",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params=params,
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json()["meta"]["total"] == expected_total
-    assert len(result.json()["items"]) == expected_total
+    assert response.status_code == 200, response.text
+    assert response.json()["meta"]["total"] == expected_total
+    assert len(response.json()["items"]) == expected_total
 
     # check that the statuses match
     if "status" in params and params["status"]:
         status_filter = params["status"]
-        returned_statuses = [run["status"] for run in result.json()["items"]]
+        returned_statuses = [run["status"] for run in response.json()["items"]]
         assert all(status in status_filter for status in returned_statuses)
 
 
@@ -286,7 +286,7 @@ async def test_filter_runs(
         "past_started_at_until_no_status",
     ],
 )
-async def test_filter_runs_no_results(
+async def test_filter_runs_no_responses(
     client: AsyncClient,
     superuser: MockUser,
     group_runs: list[MockRun],
@@ -297,13 +297,13 @@ async def test_filter_runs_no_results(
 
     computed_params.update(params)
 
-    result = await client.get(
+    response = await client.get(
         "v1/runs",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params=computed_params,
     )
 
-    assert result.status_code == 200, result.json()
-    data = result.json()
+    assert response.status_code == 200, response.text
+    data = response.json()
     assert data["items"] == []
     assert data["meta"]["total"] == 0

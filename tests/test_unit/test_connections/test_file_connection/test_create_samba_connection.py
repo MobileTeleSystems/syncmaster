@@ -20,7 +20,7 @@ async def test_developer_plus_can_create_samba_connection(
 ):
     user = group.get_member_of_role(role_developer_plus)
 
-    result = await client.post(
+    response = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -42,6 +42,8 @@ async def test_developer_plus_can_create_samba_connection(
             },
         },
     )
+    assert response.status_code == 200, response.text
+
     connection = (
         await session.scalars(
             select(Connection).filter_by(
@@ -59,8 +61,7 @@ async def test_developer_plus_can_create_samba_connection(
     ).one()
 
     decrypted = decrypt_auth_data(creds.value, settings=settings)
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.json() == {
         "id": connection.id,
         "group_id": connection.group_id,
         "name": connection.name,

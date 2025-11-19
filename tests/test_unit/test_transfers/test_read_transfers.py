@@ -17,14 +17,14 @@ async def test_guest_plus_can_read_transfers(
 ):
     user = group_transfer.owner_group.get_member_of_role(role_guest_plus)
 
-    result = await client.get(
+    response = await client.get(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"group_id": group_transfer.owner_group.group.id},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "meta": {
             "page": 1,
             "pages": 1,
@@ -46,14 +46,14 @@ async def test_groupless_user_cannot_read_transfers(
     simple_user: MockUser,
     group_transfer: MockTransfer,
 ):
-    result = await client.get(
+    response = await client.get(
         "v1/transfers",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         params={"group_id": group_transfer.owner_group.group.id},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
@@ -67,14 +67,14 @@ async def test_superuser_can_read_transfers(
     superuser: MockUser,
     group_transfer: MockTransfer,
 ):
-    result = await client.get(
+    response = await client.get(
         "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"group_id": group_transfer.owner_group.group.id},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "meta": {
             "page": 1,
             "pages": 1,
@@ -111,14 +111,14 @@ async def test_search_transfers_with_query(
     transfer = group_transfer.transfer
     search_query = search_value_extractor(transfer)
 
-    result = await client.get(
+    response = await client.get(
         "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"group_id": group_transfer.group_id, "search_query": search_query},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "meta": {
             "page": 1,
             "pages": 1,
@@ -142,14 +142,14 @@ async def test_search_transfers_with_nonexistent_query(
 ):
     random_search_query = "".join(random.choices(string.ascii_lowercase + string.digits, k=12))
 
-    result = await client.get(
+    response = await client.get(
         "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"group_id": group_transfer.group_id, "search_query": random_search_query},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json()["items"] == []
+    assert response.status_code == 200, response.text
+    assert response.json()["items"] == []
 
 
 @pytest.mark.parametrize(
@@ -178,13 +178,13 @@ async def test_filter_transfers(
         "group_id": group_id,
         filter_param: filter_value,
     }
-    result = await client.get(
+    response = await client.get(
         "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params=params,
     )
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "meta": {
             "page": 1,
             "pages": 1,
@@ -211,7 +211,7 @@ async def test_filter_transfers(
     ],
     ids=["source_connection_id", "target_connection_id", "queue_id", "is_scheduled"],
 )
-async def test_filter_transfers_no_results(
+async def test_filter_transfers_no_responses(
     client: AsyncClient,
     superuser: MockUser,
     group_transfer: MockTransfer,
@@ -227,14 +227,14 @@ async def test_filter_transfers_no_results(
         "group_id": group_id,
         filter_param: non_matching_value,
     }
-    result = await client.get(
+    response = await client.get(
         "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params=params,
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json()["items"] == []
+    assert response.status_code == 200, response.text
+    assert response.json()["items"] == []
 
 
 @pytest.mark.parametrize(
@@ -265,7 +265,7 @@ async def test_filter_transfers_with_multiple_transfers(
         "group_id": group_id,
         filter_param: [connection_type],
     }
-    result = await client.get(
+    response = await client.get(
         "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params=params,
@@ -280,16 +280,16 @@ async def test_filter_transfers_with_multiple_transfers(
         if connection_type_value == connection_type:
             expected_transfers.append(transfer)
 
-    assert result.status_code == 200, result.json()
+    assert response.status_code == 200, response.text
     expected_items = [build_transfer_json(t) for t in expected_transfers]
-    assert result.json()["items"] == expected_items
+    assert response.json()["items"] == expected_items
 
 
 async def test_unauthorized_user_cannot_read_transfers(client: AsyncClient):
-    result = await client.get("v1/transfers")
+    response = await client.get("v1/transfers")
 
-    assert result.status_code == 401, result.json()
-    assert result.json() == {
+    assert response.status_code == 401, response.text
+    assert response.json() == {
         "error": {
             "code": "unauthorized",
             "message": "Not authenticated",
@@ -305,14 +305,14 @@ async def test_developer_plus_cannot_read_unknown_group_transfers_error(
 ):
     user = group_transfer.owner_group.get_member_of_role(role_developer_plus)
 
-    result = await client.get(
+    response = await client.get(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"group_id": -1},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
@@ -326,14 +326,14 @@ async def test_superuser_cannot_read_unknown_group_transfers_error(
     superuser: MockUser,
     group_transfer: MockTransfer,
 ):
-    result = await client.get(
+    response = await client.get(
         "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"group_id": -1},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",

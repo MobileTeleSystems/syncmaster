@@ -40,7 +40,7 @@ async def test_get_keycloak_token_active(
         headers=headers,
     )
 
-    assert response.status_code == 200, response.json()
+    assert response.status_code == 200, response.text
     assert response.json() == {
         "id": simple_user.id,
         "is_superuser": simple_user.is_superuser,
@@ -66,5 +66,5 @@ async def test_get_keycloak_token_inactive(
         f"/v1/users/{simple_user.id}",
         headers=headers,
     )
-    assert response.status_code == 401, response.json()
+    assert response.status_code == 401, response.text
     assert response.json() == {"error": {"code": "unauthorized", "details": None, "message": "Not authenticated"}}

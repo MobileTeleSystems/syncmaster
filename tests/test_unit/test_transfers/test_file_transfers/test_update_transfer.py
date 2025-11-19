@@ -188,11 +188,11 @@ async def test_developer_plus_can_update_s3_transfer(
         },
     }
 
-    result = await client.put(
+    response = await client.put(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json=transfer_json | updated_fields,
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == build_transfer_json(group_transfer) | updated_fields
+    assert response.status_code == 200, response.text
+    assert response.json() == build_transfer_json(group_transfer) | updated_fields

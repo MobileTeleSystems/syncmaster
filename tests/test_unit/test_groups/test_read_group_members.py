@@ -12,7 +12,7 @@ async def test_member_of_group_can_read_group_members(
     role_guest_plus: UserTestRoles,
 ):
     user = group.get_member_of_role(role_guest_plus)
-    result = await client.get(
+    response = await client.get(
         f"v1/groups/{group.id}/users",
         headers={
             "Authorization": f"Bearer {user.token}",
@@ -33,8 +33,8 @@ async def test_member_of_group_can_read_group_members(
     ]
 
     members.sort(key=lambda x: x["username"])
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "meta": {
             "page": 1,
             "pages": 1,
@@ -54,18 +54,18 @@ async def test_groupless_user_cannot_read_group_members(
     group: MockGroup,
     simple_user: MockUser,
 ):
-    result = await client.get(
+    response = await client.get(
         f"v1/groups/{group.id}/users",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
+    assert response.status_code == 404, response.text
 
 
 async def test_other_group_member_cannot_read_group_members(
@@ -75,18 +75,18 @@ async def test_other_group_member_cannot_read_group_members(
     role_guest_plus: UserTestRoles,
 ):
     user = group_connection.owner_group.get_member_of_role(role_guest_plus)
-    result = await client.get(
+    response = await client.get(
         f"v1/groups/{group.id}/users",
         headers={"Authorization": f"Bearer {user.token}"},
     )
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
+    assert response.status_code == 404, response.text
 
 
 async def test_superuser_can_read_group_members(
@@ -94,7 +94,7 @@ async def test_superuser_can_read_group_members(
     group: MockGroup,
     superuser: MockUser,
 ):
-    result = await client.get(
+    response = await client.get(
         f"v1/groups/{group.id}/users",
         headers={
             "Authorization": f"Bearer {superuser.token}",
@@ -113,8 +113,8 @@ async def test_superuser_can_read_group_members(
         )
     ]
     members.sort(key=lambda x: x["username"])
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "meta": {
             "page": 1,
             "pages": 1,
@@ -130,9 +130,9 @@ async def test_superuser_can_read_group_members(
 
 
 async def test_not_authorized_user_cannot_read_group_members(client: AsyncClient, group: MockGroup):
-    result = await client.get(f"v1/groups/{group.id}/users")
-    assert result.status_code == 401, result.json()
-    assert result.json() == {
+    response = await client.get(f"v1/groups/{group.id}/users")
+    assert response.status_code == 401, response.text
+    assert response.json() == {
         "error": {
             "code": "unauthorized",
             "message": "Not authenticated",
@@ -147,14 +147,14 @@ async def test_member_of_group_cannot_read_unknown_group_members_error(
     role_guest_plus: UserTestRoles,
 ):
     user = group.get_member_of_role(role_guest_plus)
-    result = await client.get(
+    response = await client.get(
         "v1/groups/-1/users",
         headers={
             "Authorization": f"Bearer {user.token}",
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
@@ -168,13 +168,13 @@ async def test_superuser_read_unknown_group_members_error(
     group: MockGroup,
     superuser: MockUser,
 ):
-    result = await client.get(
+    response = await client.get(
         "v1/groups/-1/users",
         headers={
             "Authorization": f"Bearer {superuser.token}",
         },
     )
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",

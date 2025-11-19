@@ -12,12 +12,12 @@ async def test_member_of_group_can_read_by_id(
     role_guest_plus: UserTestRoles,
 ):
     user = group.get_member_of_role(role_guest_plus)
-    result = await client.get(
+    response = await client.get(
         f"v1/groups/{group.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "data": {
             "id": group.id,
             "name": group.name,
@@ -33,18 +33,18 @@ async def test_groupless_user_cannot_read_group(
     empty_group: MockGroup,
     simple_user: MockUser,
 ):
-    result = await client.get(
+    response = await client.get(
         f"v1/groups/{empty_group.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
+    assert response.status_code == 404, response.text
 
 
 async def test_other_member_group_cannot_read_group(
@@ -55,18 +55,18 @@ async def test_other_member_group_cannot_read_group(
     role_guest_plus: UserTestRoles,
 ):
     user = group.get_member_of_role(role_guest_plus)
-    result = await client.get(
+    response = await client.get(
         f"v1/groups/{empty_group.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
+    assert response.status_code == 404, response.text
 
 
 async def test_superuser_can_read_group(
@@ -74,12 +74,12 @@ async def test_superuser_can_read_group(
     group: MockGroup,
     superuser: MockUser,
 ):
-    result = await client.get(
+    response = await client.get(
         f"v1/groups/{group.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "data": {
             "id": group.id,
             "name": group.name,
@@ -94,9 +94,9 @@ async def test_not_authorized_user_cannot_read_by_id(
     client: AsyncClient,
     empty_group: MockGroup,
 ):
-    result = await client.get(f"v1/groups/{empty_group.id}")
-    assert result.status_code == 401, result.json()
-    assert result.json() == {
+    response = await client.get(f"v1/groups/{empty_group.id}")
+    assert response.status_code == 401, response.text
+    assert response.json() == {
         "error": {
             "code": "unauthorized",
             "message": "Not authenticated",
@@ -111,12 +111,12 @@ async def test_member_of_group_read_unknown_group_error(
     role_guest_plus: UserTestRoles,
 ):
     user = group.get_member_of_role(role_guest_plus)
-    result = await client.get(
+    response = await client.get(
         "v1/groups/-1",
         headers={"Authorization": f"Bearer {user.token}"},
     )
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
@@ -129,12 +129,12 @@ async def test_superuser_read_unknown_group_error(
     client: AsyncClient,
     superuser: MockUser,
 ):
-    result = await client.get(
+    response = await client.get(
         "v1/groups/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",

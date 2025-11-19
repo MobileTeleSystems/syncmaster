@@ -18,14 +18,14 @@ async def test_owner_of_group_can_update_group(
         "name": "New group name",
         "description": "some description",
     }
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{empty_group.id}",
         headers={"Authorization": f"Bearer {owner.token}"},
         json=group_data,
     )
     group_data.update({"id": empty_group.id})
-    assert result.status_code == 200, result.json()
-    assert result.json() == group_data
+    assert response.status_code == 200, response.text
+    assert response.json() == group_data
 
     await session.refresh(empty_group.group)
     assert empty_group.group.name == group_data["name"]
@@ -40,13 +40,13 @@ async def test_groupless_user_cannot_update_group(client: AsyncClient, empty_gro
         "description": " asdf",
     }
 
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{empty_group.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json=group_data,
     )
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
@@ -68,13 +68,13 @@ async def test_other_group_member_cannot_update_group(
         "description": " asdf",
     }
 
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{empty_group.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json=group_data,
     )
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
@@ -95,14 +95,14 @@ async def test_superuser_can_update_group(
         "description": "some description",
     }
 
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{empty_group.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json=group_data,
     )
     group_data.update({"id": empty_group.id})
-    assert result.status_code == 200, result.json()
-    assert result.json() == group_data
+    assert response.status_code == 200, response.text
+    assert response.json() == group_data
 
     await session.refresh(empty_group.group)
     assert empty_group.group.name == group_data["name"]
@@ -150,13 +150,13 @@ async def test_check_name_field_validation_on_update_group(
         "description": name,
     }
 
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{empty_group.id}",
         headers={"Authorization": f"Bearer {owner.token}"},
         json=group_data,
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",
@@ -177,13 +177,13 @@ async def test_group_name_already_taken_error(
         "description": "some description",
     }
 
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{empty_group.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json=group_data,
     )
-    assert result.status_code == 409, result.json()
-    assert result.json() == {
+    assert response.status_code == 409, response.text
+    assert response.json() == {
         "error": {
             "code": "conflict",
             "message": "Group name already taken",
@@ -197,7 +197,7 @@ async def test_owner_change_group_owner(client: AsyncClient, empty_group: MockGr
     new_owner = simple_user
 
     # Change a group owner
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{empty_group.id}",
         headers={"Authorization": f"Bearer {previous_owner.token}"},
         json={
@@ -206,21 +206,21 @@ async def test_owner_change_group_owner(client: AsyncClient, empty_group: MockGr
             "description": empty_group.description,
         },
     )
-    group_users_result = await client.get(
+    group_users_response = await client.get(
         f"v1/groups/{empty_group.id}/users",
         headers={"Authorization": f"Bearer {previous_owner.token}"},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "id": empty_group.id,
         "name": empty_group.name,
         "owner_id": new_owner.id,
         "description": empty_group.description,
     }
     # Make sure previous owner became a guest in group
-    assert group_users_result.status_code == 200, group_users_result.json()
-    assert group_users_result.json()["items"] == [
+    assert group_users_response.status_code == 200, group_users_response.json()
+    assert group_users_response.json()["items"] == [
         {
             "id": previous_owner.id,
             "username": previous_owner.username,
@@ -247,7 +247,7 @@ async def test_owner_change_group_owner_with_existing_role(
         },
     )
     # Upgrade user to a group owner
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{empty_group.id}",
         headers={"Authorization": f"Bearer {previous_owner.token}"},
         json={
@@ -256,13 +256,13 @@ async def test_owner_change_group_owner_with_existing_role(
             "description": empty_group.description,
         },
     )
-    group_users_result = await client.get(
+    group_users_response = await client.get(
         f"v1/groups/{empty_group.id}/users",
         headers={"Authorization": f"Bearer {new_owner.token}"},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "id": empty_group.id,
         "name": empty_group.name,
         "owner_id": new_owner.id,
@@ -270,8 +270,8 @@ async def test_owner_change_group_owner_with_existing_role(
     }
     # Make sure previous owner became a guest in group
     # As well as upgraded owner is no longer considered a group member
-    assert group_users_result.status_code == 200, group_users_result.json()
-    assert group_users_result.json()["items"] == [
+    assert group_users_response.status_code == 200, group_users_response.json()
+    assert group_users_response.json()["items"] == [
         {
             "id": previous_owner.id,
             "username": previous_owner.username,
@@ -287,7 +287,7 @@ async def test_maintainer_or_below_cannot_change_group_owner(
     role_maintainer_or_below: UserTestRoles,
 ):
     user = group.get_member_of_role(role_maintainer_or_below)
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{group.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -296,8 +296,8 @@ async def test_maintainer_or_below_cannot_change_group_owner(
             "description": group.description,
         },
     )
-    assert result.status_code == 403, result.json()
-    assert result.json() == {
+    assert response.status_code == 403, response.text
+    assert response.json() == {
         "error": {
             "code": "forbidden",
             "message": "You have no power here",
@@ -307,9 +307,9 @@ async def test_maintainer_or_below_cannot_change_group_owner(
 
 
 async def test_not_authorized_user_cannot_update_group(client: AsyncClient, empty_group: MockGroup):
-    result = await client.put(f"v1/groups/{empty_group.id}")
-    assert result.status_code == 401, result.json()
-    assert result.json() == {
+    response = await client.put(f"v1/groups/{empty_group.id}")
+    assert response.status_code == 401, response.text
+    assert response.json() == {
         "error": {
             "code": "unauthorized",
             "message": "Not authenticated",
@@ -325,13 +325,13 @@ async def test_owner_of_group_update_unknown_group_error(client: AsyncClient, em
         "name": "New group name",
         "description": "some description",
     }
-    result = await client.put(
+    response = await client.put(
         "v1/groups/-1",
         headers={"Authorization": f"Bearer {owner.token}"},
         json=group_data,
     )
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
@@ -347,13 +347,13 @@ async def test_owner_of_group_update_group_unknown_owner_error(client: AsyncClie
         "name": "New group name",
         "description": "some description",
     }
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{empty_group.id}",
         headers={"Authorization": f"Bearer {owner.token}"},
         json=group_data,
     )
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "User not found",
@@ -368,13 +368,13 @@ async def test_superuser_update_unknown_group_error(client: AsyncClient, empty_g
         "name": "New group name",
         "description": "some description",
     }
-    result = await client.put(
+    response = await client.put(
         "v1/groups/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json=group_data,
     )
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
@@ -393,13 +393,13 @@ async def test_superuser_update_group_unknown_owner_error(
         "name": "New group name",
         "description": "some description",
     }
-    result = await client.put(
+    response = await client.put(
         f"v1/groups/{empty_group.group.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json=group_data,
     )
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "User not found",

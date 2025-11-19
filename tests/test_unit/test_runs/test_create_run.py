@@ -33,11 +33,12 @@ async def test_developer_plus_can_create_run_of_transfer_his_group(
 
     assert not run
 
-    result = await client_with_mocked_celery.post(
+    response = await client_with_mocked_celery.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
         json={"transfer_id": group_transfer.id},
     )
+    assert response.status_code == 200, response.text
 
     run = (
         await session.scalars(
@@ -45,8 +46,7 @@ async def test_developer_plus_can_create_run_of_transfer_his_group(
         )
     ).first()
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.json() == {
         "id": run.id,
         "transfer_id": run.transfer_id,
         "status": run.status.value,
@@ -73,14 +73,14 @@ async def test_groupless_user_cannot_create_run(
 ) -> None:
     mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
-    result = await client_with_mocked_celery.post(
+    response = await client_with_mocked_celery.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={"transfer_id": group_transfer.id},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",
@@ -100,14 +100,14 @@ async def test_group_member_cannot_create_run_of_other_group_transfer(
     mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
     user = group.get_member_of_role(role_guest_plus)
 
-    result = await client_with_mocked_celery.post(
+    response = await client_with_mocked_celery.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
         json={"transfer_id": group_transfer.id},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",
@@ -132,19 +132,20 @@ async def test_superuser_can_create_run(
     mock_send_task = mocked_celery.send_task
     mock_to_thread = mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
-    result = await client_with_mocked_celery.post(
+    response = await client_with_mocked_celery.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={"transfer_id": group_transfer.id},
     )
+    assert response.status_code == 200, response.text
+
     run = (
         await session.scalars(
             select(Run).filter_by(transfer_id=group_transfer.id, status=Status.CREATED).order_by(desc(Run.created_at)),
         )
     ).first()
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.json() == {
         "id": run.id,
         "transfer_id": run.transfer_id,
         "status": run.status.value,
@@ -169,13 +170,13 @@ async def test_unauthorized_user_cannot_create_run(
 ) -> None:
     mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
-    result = await client_with_mocked_celery.post(
+    response = await client_with_mocked_celery.post(
         "v1/runs",
         json={"transfer_id": group_transfer.id},
     )
 
-    assert result.status_code == 401, result.json()
-    assert result.json() == {
+    assert response.status_code == 401, response.text
+    assert response.json() == {
         "error": {
             "code": "unauthorized",
             "message": "Not authenticated",
@@ -194,14 +195,14 @@ async def test_group_member_cannot_create_run_of_unknown_transfer_error(
     user = group_transfer.owner_group.get_member_of_role(role_guest_plus)
     mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
-    result = await client_with_mocked_celery.post(
+    response = await client_with_mocked_celery.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {user.token}"},
         json={"transfer_id": -1},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",
@@ -219,14 +220,14 @@ async def test_superuser_cannot_create_run_of_unknown_transfer_error(
 ) -> None:
     mocker.patch("asyncio.to_thread", new_callable=AsyncMock)
 
-    result = await client_with_mocked_celery.post(
+    response = await client_with_mocked_celery.post(
         "v1/runs",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={"transfer_id": -1},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",

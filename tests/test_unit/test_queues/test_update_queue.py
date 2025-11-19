@@ -17,7 +17,7 @@ async def test_maintainer_plus_can_update_queue(
 ):
     user = mock_group.get_member_of_role(role_maintainer_plus)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -26,14 +26,14 @@ async def test_maintainer_plus_can_update_queue(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "id": group_queue.id,
         "name": r"New queue!\"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~",
         "description": "New description",
         "group_id": group_queue.group_id,
         "slug": group_queue.slug,  # slug is left intact
     }
-    assert result.status_code == 200, result.json()
+    assert response.status_code == 200, response.text
 
     queue = await session.get(Queue, group_queue.id)
     await session.refresh(queue)
@@ -48,7 +48,7 @@ async def test_superuser_can_update_queue(
     group_queue: Queue,
     superuser: MockUser,
 ):
-    result = await client.put(
+    response = await client.put(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
@@ -57,8 +57,8 @@ async def test_superuser_can_update_queue(
         },
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "id": group_queue.id,
         "name": "New queue",
         "description": "New description",
@@ -78,7 +78,7 @@ async def test_groupless_user_cannot_update_queue(
     simple_user: MockUser,
     group_queue: Queue,
 ):
-    result = await client.put(
+    response = await client.put(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={
@@ -86,8 +86,8 @@ async def test_groupless_user_cannot_update_queue(
             "description": "New description",
         },
     )
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Queue not found",
@@ -100,15 +100,15 @@ async def test_anon_user_cannot_update_queue(
     client: AsyncClient,
     group_queue: Queue,
 ):
-    result = await client.put(
+    response = await client.put(
         f"v1/queues/{group_queue.id}",
         json={
             "name": "New queue",
             "description": "New description",
         },
     )
-    assert result.status_code == 401, result.json()
-    assert result.json() == {
+    assert response.status_code == 401, response.text
+    assert response.json() == {
         "error": {
             "code": "unauthorized",
             "message": "Not authenticated",
@@ -125,7 +125,7 @@ async def test_developer_or_below_cannot_update_queue(
 ):
     user = mock_group.get_member_of_role(role_developer_or_below)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -134,8 +134,8 @@ async def test_developer_or_below_cannot_update_queue(
         },
     )
 
-    assert result.status_code == 403, result.json()
-    assert result.json() == {
+    assert response.status_code == 403, response.text
+    assert response.json() == {
         "error": {
             "code": "forbidden",
             "message": "You have no power here",
@@ -151,7 +151,7 @@ async def test_other_group_member_cannot_update_queue(
     role_developer_plus: UserTestRoles,
 ):
     user = group.get_member_of_role(role_developer_plus)
-    result = await client.put(
+    response = await client.put(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -159,8 +159,8 @@ async def test_other_group_member_cannot_update_queue(
             "description": "New description",
         },
     )
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Queue not found",
@@ -176,7 +176,7 @@ async def test_maintainer_plus_cannot_update_unknown_queue_error(
 ):
     user = mock_group.get_member_of_role(role_maintainer_plus)
 
-    result = await client.put(
+    response = await client.put(
         "v1/queues/-1",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -185,8 +185,8 @@ async def test_maintainer_plus_cannot_update_unknown_queue_error(
         },
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Queue not found",
@@ -199,7 +199,7 @@ async def test_superuser_cannot_update_unknown_queue_error(
     client: AsyncClient,
     superuser: MockUser,
 ):
-    result = await client.put(
+    response = await client.put(
         "v1/queues/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
@@ -208,8 +208,8 @@ async def test_superuser_cannot_update_unknown_queue_error(
         },
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Queue not found",
@@ -283,7 +283,7 @@ async def test_maintainer_plus_cannot_update_queue_with_wrong_name(
 ):
     user = mock_group.get_member_of_role(role_maintainer_plus)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -292,8 +292,8 @@ async def test_maintainer_plus_cannot_update_queue_with_wrong_name(
         },
     )
 
-    assert result.status_code == 422, result.json()
-    assert result.json() == {
+    assert response.status_code == 422, response.text
+    assert response.json() == {
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",

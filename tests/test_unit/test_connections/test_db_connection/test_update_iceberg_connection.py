@@ -41,7 +41,7 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection(
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
     connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -65,8 +65,8 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection(
         },
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "id": group_connection.id,
         "name": group_connection.name,
         "description": group_connection.description,
@@ -129,7 +129,7 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection_with_oauth2_
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
     connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -158,8 +158,8 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection_with_oauth2_
         },
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "id": group_connection.id,
         "name": group_connection.name,
         "description": group_connection.description,

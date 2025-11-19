@@ -17,7 +17,7 @@ async def test_maintainer_plus_can_create_queue(
 ):
     user = mock_group.get_member_of_role(role_maintainer_plus)
 
-    result = await client.post(
+    response = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -27,17 +27,17 @@ async def test_maintainer_plus_can_create_queue(
         },
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
-        "id": result.json()["id"],
+    assert response.status_code == 200, response.text
+    assert response.json() == {
+        "id": response.json()["id"],
         "name": r"New queue123!\"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~",
         "description": "Some interesting description",
         "group_id": mock_group.group.id,
         "slug": f"{mock_group.group.id}-new_queue123",
     }
 
-    queue = (await session.scalars(select(Queue).filter_by(id=result.json()["id"]))).one()
-    assert queue.id == result.json()["id"]
+    queue = (await session.scalars(select(Queue).filter_by(id=response.json()["id"]))).one()
+    assert queue.id == response.json()["id"]
     assert queue.group_id == mock_group.group.id
     assert queue.name == r"New queue123!\"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~"
     assert queue.description == "Some interesting description"
@@ -53,7 +53,7 @@ async def test_superuser_can_create_queue(
     mock_group: MockGroup,
     superuser: MockUser,
 ):
-    result = await client.post(
+    response = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
@@ -63,17 +63,17 @@ async def test_superuser_can_create_queue(
         },
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
-        "id": result.json()["id"],
+    assert response.status_code == 200, response.text
+    assert response.json() == {
+        "id": response.json()["id"],
         "name": "New queue",
         "description": "Some interesting description",
         "group_id": mock_group.group.id,
         "slug": f"{mock_group.group.id}-new_queue",
     }
-    queue = (await session.scalars(select(Queue).filter_by(id=result.json()["id"]))).one()
+    queue = (await session.scalars(select(Queue).filter_by(id=response.json()["id"]))).one()
 
-    assert queue.id == result.json()["id"]
+    assert queue.id == response.json()["id"]
     assert queue.group_id == mock_group.group.id
     assert queue.name == "New queue"
     assert queue.description == "Some interesting description"
@@ -91,7 +91,7 @@ async def test_developer_or_below_cannot_create_queue(
 ):
     user = mock_group.get_member_of_role(role_developer_or_below)
 
-    result = await client.post(
+    response = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -101,7 +101,7 @@ async def test_developer_or_below_cannot_create_queue(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "forbidden",
             "message": "You have no power here",
@@ -118,7 +118,7 @@ async def test_other_group_member_cannot_create_queue(
 ):
     user = group.get_member_of_role(role_developer_plus)
 
-    result = await client.post(
+    response = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -128,7 +128,7 @@ async def test_other_group_member_cannot_create_queue(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
@@ -142,7 +142,7 @@ async def test_groupless_user_cannot_create_queue_error(
     simple_user: MockUser,
     empty_group: MockGroup,
 ):
-    result = await client.post(
+    response = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json={
@@ -152,14 +152,14 @@ async def test_groupless_user_cannot_create_queue_error(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
+    assert response.status_code == 404, response.text
 
 
 async def test_maintainer_plus_cannot_create_queue_with_unknown_group_error(
@@ -169,7 +169,7 @@ async def test_maintainer_plus_cannot_create_queue_with_unknown_group_error(
 ):
     user = mock_group.get_member_of_role(role_maintainer_plus)
 
-    result = await client.post(
+    response = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -179,7 +179,7 @@ async def test_maintainer_plus_cannot_create_queue_with_unknown_group_error(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
@@ -192,7 +192,7 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
     client: AsyncClient,
     superuser: MockUser,
 ):
-    result = await client.post(
+    response = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
@@ -202,7 +202,7 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
@@ -275,7 +275,7 @@ async def test_maintainer_plus_cannot_create_queue_with_wrong_name(
 ):
     user = mock_group.get_member_of_role(role_maintainer_plus)
 
-    result = await client.post(
+    response = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -285,8 +285,8 @@ async def test_maintainer_plus_cannot_create_queue_with_wrong_name(
         },
     )
 
-    assert result.status_code == 422, result.json()
-    assert result.json() == {
+    assert response.status_code == 422, response.text
+    assert response.json() == {
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",
@@ -303,7 +303,7 @@ async def test_maintainer_plus_can_not_create_queue_with_duplicate_name_error(
 ):
     user = mock_group.get_member_of_role(role_maintainer_plus)
 
-    result = await client.post(
+    response = await client.post(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -313,8 +313,8 @@ async def test_maintainer_plus_can_not_create_queue_with_duplicate_name_error(
         },
     )
 
-    assert result.status_code == 409, result.json()
-    assert result.json() == {
+    assert response.status_code == 409, response.text
+    assert response.json() == {
         "error": {
             "code": "conflict",
             "message": "The queue name already exists in the target group, please specify a new one",

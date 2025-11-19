@@ -16,12 +16,12 @@ async def test_group_member_can_read_groups(
     role_guest_plus: UserTestRoles,
 ):
     user = group.get_member_of_role(role_guest_plus)
-    result = await client.get(
+    response = await client.get(
         "v1/groups",
         headers={"Authorization": f"Bearer {user.token}"},
     )
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "meta": {
             "page": 1,
             "pages": 1,
@@ -51,12 +51,12 @@ async def test_groupless_user_cannot_get_any_groups(
     simple_user: MockUser,
     group: MockGroup,  # do not delete this group, it is not used but is needed to show that the group is not read
 ):
-    result = await client.get(
+    response = await client.get(
         "v1/groups",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "meta": {
             "page": 1,
             "pages": 1,
@@ -77,12 +77,12 @@ async def test_superuser_can_read_all_groups(
     empty_group: MockGroup,
     group: MockGroup,
 ):
-    result = await client.get(
+    response = await client.get(
         "v1/groups",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "meta": {
             "page": 1,
             "pages": 1,
@@ -119,9 +119,9 @@ async def test_superuser_can_read_all_groups(
 async def test_unauthorized_user_cannot_read_groups(
     client: AsyncClient,
 ):
-    result = await client.get("v1/groups")
-    assert result.status_code == 401, result.json()
-    assert result.json() == {
+    response = await client.get("v1/groups")
+    assert response.status_code == 401, response.text
+    assert response.json() == {
         "error": {
             "code": "unauthorized",
             "message": "Not authenticated",
@@ -149,13 +149,13 @@ async def test_filter_groups_by_role(
     expected_roles: set,
 ):
     role_query = f"?role={role}" if role else ""
-    result = await client.get(
+    response = await client.get(
         f"v1/groups{role_query}",
         headers={"Authorization": f"Bearer {user_with_many_roles.token}"},
     )
 
-    assert result.status_code == 200, result.json()
-    response_json = result.json()
+    assert response.status_code == 200, response.text
+    response_json = response.json()
 
     assert response_json["meta"]["total"] == expected_total
     assert len(response_json["items"]) == expected_total
@@ -182,13 +182,13 @@ async def test_filter_groups_not_applied_to_superuser(
     expected_total: int,
 ):
     role_query = f"?role={role}" if role else ""
-    result = await client.get(
+    response = await client.get(
         f"v1/groups{role_query}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 
-    assert result.status_code == 200, result.json()
-    response_json = result.json()
+    assert response.status_code == 200, response.text
+    response_json = response.json()
 
     assert response_json["meta"]["total"] == expected_total
     assert len(response_json["items"]) == expected_total
@@ -221,15 +221,15 @@ async def test_search_groups_with_query(
     expected_total: int,
 ):
 
-    result = await client.get(
+    response = await client.get(
         "v1/groups",
         headers={"Authorization": f"Bearer {user_with_many_roles.token}"},
         params={"search_query": search_value},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json()["meta"]["total"] == expected_total
-    assert len(result.json()["items"]) == expected_total
+    assert response.status_code == 200, response.text
+    assert response.json()["meta"]["total"] == expected_total
+    assert len(response.json()["items"]) == expected_total
 
 
 @pytest.mark.parametrize(
@@ -255,14 +255,14 @@ async def test_superuser_search_groups_with_query(
 ):
     search_query = search_value_extractor(group)
 
-    result = await client.get(
+    response = await client.get(
         "v1/groups",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"search_query": search_query},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "meta": {
             "page": 1,
             "pages": 1,
@@ -293,11 +293,11 @@ async def test_search_groups_with_nonexistent_query(
 ):
     random_search_query = "".join(random.choices(string.ascii_lowercase + string.digits, k=12))
 
-    result = await client.get(
+    response = await client.get(
         "v1/groups",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"search_query": random_search_query},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json()["items"] == []
+    assert response.status_code == 200, response.text
+    assert response.json()["items"] == []

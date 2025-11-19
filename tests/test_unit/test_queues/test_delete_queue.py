@@ -17,11 +17,11 @@ async def test_maintainer_plus_can_delete_queue(
 ):
     user = mock_group.get_member_of_role(role_maintainer_plus)
 
-    result = await client.delete(
+    response = await client.delete(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
-    assert result.status_code == 204, result.json()
+    assert response.status_code == 204, response.text
     session.expunge_all()
     queue_in_db = await session.get(Queue, group_queue.id)
     assert queue_in_db is None
@@ -34,11 +34,11 @@ async def test_superuser_can_delete_queue(
     mock_group: MockGroup,
     superuser: MockUser,
 ):
-    result = await client.delete(
+    response = await client.delete(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
-    assert result.status_code == 204, result.json()
+    assert response.status_code == 204, response.text
     session.expunge_all()
     queue_in_db = await session.get(Queue, group_queue.id)
     assert queue_in_db is None
@@ -49,18 +49,18 @@ async def test_groupless_user_cannot_delete_queue(
     group_queue: Queue,
     simple_user: MockUser,
 ):
-    result = await client.delete(
+    response = await client.delete(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Queue not found",
             "details": None,
         },
     }
-    assert result.status_code == 404, result.json()
+    assert response.status_code == 404, response.text
 
 
 async def test_developer_or_below_cannot_delete_queue(
@@ -72,11 +72,11 @@ async def test_developer_or_below_cannot_delete_queue(
 ):
     user = mock_group.get_member_of_role(role_developer_or_below)
 
-    result = await client.delete(
+    response = await client.delete(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "forbidden",
             "message": "You have no power here",
@@ -94,11 +94,11 @@ async def test_other_group_member_cannot_delete_queue(
 ):
     user = group.get_member_of_role(role_guest_plus)
 
-    result = await client.delete(
+    response = await client.delete(
         f"v1/queues/{group_queue.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Queue not found",
@@ -114,19 +114,19 @@ async def test_maintainer_plus_cannot_delete_queue_with_linked_transfer(
 ):
     user = group_transfer.owner_group.get_member_of_role(role_maintainer_plus)
 
-    result = await client.delete(
+    response = await client.delete(
         f"v1/queues/{group_transfer.transfer.queue_id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "conflict",
             "message": "The queue has an associated transfers(s). Number of the linked transfers: 1",
             "details": None,
         },
     }
-    assert result.status_code == 409, result.json()
+    assert response.status_code == 409, response.text
 
 
 async def test_superuser_cannot_delete_queue_with_linked_transfer(
@@ -134,19 +134,19 @@ async def test_superuser_cannot_delete_queue_with_linked_transfer(
     group_transfer: MockTransfer,
     superuser: MockUser,
 ):
-    result = await client.delete(
+    response = await client.delete(
         f"v1/queues/{group_transfer.transfer.queue_id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "conflict",
             "message": "The queue has an associated transfers(s). Number of the linked transfers: 1",
             "details": None,
         },
     }
-    assert result.status_code == 409, result.json()
+    assert response.status_code == 409, response.text
 
 
 async def test_anon_user_cannot_delete_queue(
@@ -154,17 +154,17 @@ async def test_anon_user_cannot_delete_queue(
     session: AsyncSession,
     group_queue: Queue,
 ):
-    result = await client.delete(
+    response = await client.delete(
         f"v1/queues/{group_queue.id}",
     )
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "unauthorized",
             "message": "Not authenticated",
             "details": None,
         },
     }
-    assert result.status_code == 401, result.json()
+    assert response.status_code == 401, response.text
 
 
 async def test_maintainer_plus_cannot_delete_unknown_queue_error(
@@ -175,11 +175,11 @@ async def test_maintainer_plus_cannot_delete_unknown_queue_error(
 ):
     user = mock_group.get_member_of_role(UserTestRoles.Owner)
 
-    result = await client.delete(
+    response = await client.delete(
         "v1/queues/-1",
         headers={"Authorization": f"Bearer {user.token}"},
     )
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Queue not found",
@@ -195,12 +195,12 @@ async def test_superuser_cannot_delete_unknown_queue_error(
     mock_group: MockGroup,
     superuser: MockUser,
 ):
-    result = await client.delete(
+    response = await client.delete(
         "v1/queues/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Queue not found",

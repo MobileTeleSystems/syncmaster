@@ -46,14 +46,14 @@ async def test_developer_plus_can_update_samba_connection(
         "port": None,
     }
 
-    result = await client.put(
+    response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={**connection_json, "type": "samba", "connection_data": new_connection_data},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "id": group_connection.id,
         "name": group_connection.connection.name,
         "description": group_connection.description,

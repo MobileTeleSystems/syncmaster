@@ -8,9 +8,9 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 
 async def test_unauthorized_user_cannot_read_connection_types(client: AsyncClient):
-    result = await client.get("v1/connections/known_types")
-    assert result.status_code == 401, result.json()
-    assert result.json() == {
+    response = await client.get("v1/connections/known_types")
+    assert response.status_code == 401, response.text
+    assert response.json() == {
         "error": {
             "code": "unauthorized",
             "message": "Not authenticated",
@@ -20,9 +20,9 @@ async def test_unauthorized_user_cannot_read_connection_types(client: AsyncClien
 
 
 async def test_groupless_user_can_read_connection_types(client: AsyncClient, simple_user: MockUser):
-    result = await client.get(
+    response = await client.get(
         "v1/connections/known_types",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
-    assert result.status_code == 200, result.json()
-    assert set(result.json()) == set(CONNECTION_TYPES)
+    assert response.status_code == 200, response.text
+    assert set(response.json()) == set(CONNECTION_TYPES)

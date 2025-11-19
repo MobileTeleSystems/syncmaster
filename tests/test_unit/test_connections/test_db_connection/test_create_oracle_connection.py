@@ -20,7 +20,7 @@ async def test_developer_plus_can_create_oracle_connection_with_service_name(
 ):
     user = group.get_member_of_role(role_developer_plus)
 
-    result = await client.post(
+    response = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -40,6 +40,8 @@ async def test_developer_plus_can_create_oracle_connection_with_service_name(
             },
         },
     )
+    assert response.status_code == 200, response.text
+
     connection = (
         await session.scalars(
             select(Connection).filter_by(
@@ -57,8 +59,7 @@ async def test_developer_plus_can_create_oracle_connection_with_service_name(
     ).one()
 
     decrypted = decrypt_auth_data(creds.value, settings=settings)
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.json() == {
         "id": connection.id,
         "name": connection.name,
         "description": connection.description,
@@ -87,7 +88,7 @@ async def test_developer_plus_can_create_oracle_connection_with_sid(
 ):
     user = group.get_member_of_role(role_developer_plus)
 
-    result = await client.post(
+    response = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -107,6 +108,8 @@ async def test_developer_plus_can_create_oracle_connection_with_sid(
             },
         },
     )
+    assert response.status_code == 200, response.text
+
     connection = (
         await session.scalars(
             select(Connection).filter_by(
@@ -124,8 +127,7 @@ async def test_developer_plus_can_create_oracle_connection_with_sid(
     ).one()
 
     decrypted = decrypt_auth_data(creds.value, settings=settings)
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.json() == {
         "id": connection.id,
         "name": connection.name,
         "description": connection.description,
@@ -153,7 +155,7 @@ async def test_developer_plus_create_oracle_connection_with_sid_and_service_name
 ):
     user = group.get_member_of_role(role_developer_plus)
 
-    result = await client.post(
+    response = await client.post(
         "v1/connections",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -175,8 +177,8 @@ async def test_developer_plus_create_oracle_connection_with_sid_and_service_name
         },
     )
 
-    assert result.status_code == 422, result.json()
-    assert result.json() == {
+    assert response.status_code == 422, response.text
+    assert response.json() == {
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",

@@ -20,13 +20,13 @@ async def test_group_member_can_read_queues(
     role_guest_plus: UserTestRoles,
 ):
     user = mock_group.get_member_of_role(role_guest_plus)
-    result = await client.get(
+    response = await client.get(
         f"v1/queues?group_id={mock_group.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"group_id": mock_group.id},
     )
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "items": [
             {
                 "id": group_queue.id,
@@ -57,13 +57,13 @@ async def test_superuser_can_read_queues(
     superuser: MockUser,
     group_transfer: MockTransfer,  # another group with queue
 ):
-    result = await client.get(
+    response = await client.get(
         "v1/queues",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"group_id": mock_group.id},
     )
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "items": [
             {
                 "id": group_queue.id,
@@ -95,14 +95,14 @@ async def test_other_group_member_cannot_read_queues(
     role_guest_plus: UserTestRoles,
 ):
     user = group.get_member_of_role(role_guest_plus)
-    result = await client.get(
+    response = await client.get(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"group_id": mock_group.id},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
@@ -120,13 +120,13 @@ async def test_group_member_cannot_read__unknown_group_queues_error(
     role_guest_plus: UserTestRoles,
 ):
     user = mock_group.get_member_of_role(role_guest_plus)
-    result = await client.get(
+    response = await client.get(
         "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"group_id": -1},
     )
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
@@ -143,13 +143,13 @@ async def test_superuser_cannot_read_unknown_group_queues_error(
     superuser: MockUser,
     group_transfer: MockTransfer,  # another group with queue
 ):
-    result = await client.get(
+    response = await client.get(
         "v1/queues",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"group_id": -1},
     )
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Group not found",
@@ -182,7 +182,7 @@ async def test_search_queues_with_query(
 ):
     search_query = search_value_extractor(group_queue)
 
-    result = await client.get(
+    response = await client.get(
         "v1/queues",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={
@@ -191,8 +191,8 @@ async def test_search_queues_with_query(
         },
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "meta": {
             "page": 1,
             "pages": 1,
@@ -222,7 +222,7 @@ async def test_search_queues_with_nonexistent_query(
 ):
     random_search_query = "".join(random.choices(string.ascii_lowercase + string.digits, k=12))
 
-    result = await client.get(
+    response = await client.get(
         "v1/queues",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={
@@ -231,5 +231,5 @@ async def test_search_queues_with_nonexistent_query(
         },
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json()["items"] == []
+    assert response.status_code == 200, response.text
+    assert response.json()["items"] == []

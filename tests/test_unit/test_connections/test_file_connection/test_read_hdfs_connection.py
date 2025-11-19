@@ -34,13 +34,13 @@ async def test_guest_plus_can_read_hdfs_connection(
 ):
     user = group_connection.owner_group.get_member_of_role(role_guest_plus)
 
-    result = await client.get(
+    response = await client.get(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "id": group_connection.id,
         "description": group_connection.description,
         "group_id": group_connection.group_id,

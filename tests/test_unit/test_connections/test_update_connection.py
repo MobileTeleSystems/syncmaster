@@ -15,14 +15,14 @@ async def test_developer_plus_can_update_connection(
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
     connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={**connection_json, "name": "New connection name", "type": group_connection.type},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "id": group_connection.id,
         "name": "New connection name",
         "description": group_connection.description,
@@ -69,7 +69,7 @@ async def test_developer_plus_can_update_oracle_connection(
     group_connection.connection.group.id
     connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -88,8 +88,8 @@ async def test_developer_plus_can_update_oracle_connection(
         },
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "id": group_connection.id,
         "name": group_connection.name,
         "description": group_connection.description,
@@ -132,13 +132,13 @@ async def test_groupless_user_cannot_update_connection(
         },
     }
 
-    result = await client.put(
+    response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
         json=connection_json,
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Connection not found",
@@ -184,13 +184,13 @@ async def test_check_name_field_validation_on_update_connection(
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
     connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={**connection_json, "name": name, "description": name},
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",
@@ -224,13 +224,13 @@ async def test_group_member_cannot_update_other_group_connection(
         },
     }
 
-    result = await client.put(
+    response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json=connection_json,
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Connection not found",
@@ -246,14 +246,14 @@ async def test_superuser_can_update_connection(
 ):
     connection_json = await fetch_connection_json(client, superuser.token, group_connection)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={**connection_json, "type": "postgres", "name": "New connection name"},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "id": group_connection.id,
         "name": "New connection name",
         "description": group_connection.description,
@@ -280,14 +280,14 @@ async def test_update_connection_data_fields(
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
     connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={**connection_json, "connection_data": {"host": "localhost", "port": 5432, "database_name": "db"}},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "id": group_connection.id,
         "name": group_connection.name,
         "description": group_connection.description,
@@ -314,7 +314,7 @@ async def test_update_connection_auth_data(
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
     connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -324,8 +324,8 @@ async def test_update_connection_auth_data(
         },
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "id": group_connection.id,
         "name": group_connection.name,
         "description": group_connection.description,
@@ -351,7 +351,7 @@ async def test_superuser_cannot_update_connection_auth_data_type_without_secret(
 ):
     connection_json = await fetch_connection_json(client, superuser.token, group_connection)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={
@@ -366,33 +366,33 @@ async def test_superuser_cannot_update_connection_auth_data_type_without_secret(
         },
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "conflict",
             "message": "You cannot update the connection auth type without providing a new secret value.",
             "details": None,
         },
     }
-    assert result.status_code == 409, result.json()
+    assert response.status_code == 409, response.text
 
 
 async def test_unauthorized_user_cannot_update_connection(
     client: AsyncClient,
     group_connection: MockConnection,
 ):
-    result = await client.put(
+    response = await client.put(
         f"v1/connections/{group_connection.id}",
         json={"name": "New connection name"},
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "unauthorized",
             "message": "Not authenticated",
             "details": None,
         },
     }
-    assert result.status_code == 401, result.json()
+    assert response.status_code == 401, response.text
 
 
 async def test_developer_plus_cannot_update_unknown_connection_error(
@@ -403,13 +403,13 @@ async def test_developer_plus_cannot_update_unknown_connection_error(
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
     connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    result = await client.put(
+    response = await client.put(
         "v1/connections/-1",
         headers={"Authorization": f"Bearer {user.token}"},
         json={**connection_json, "type": "postgres", "name": "New connection name"},
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Connection not found",
@@ -425,13 +425,13 @@ async def test_superuser_cannot_update_unknown_connection_error(
 ):
     connection_json = await fetch_connection_json(client, superuser.token, group_connection)
 
-    result = await client.put(
+    response = await client.put(
         "v1/connections/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
         json={**connection_json, "type": "postgres", "name": "New connection name"},
     )
 
-    assert result.json() == {
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Connection not found",
@@ -467,7 +467,7 @@ async def test_developer_plus_update_oracle_connection_both_sid_and_service_name
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
     group_id = group_connection.connection.group.id
 
-    result = await client.put(
+    response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -489,8 +489,8 @@ async def test_developer_plus_update_oracle_connection_both_sid_and_service_name
         },
     )
 
-    assert result.status_code == 422, result.json()
-    assert result.json() == {
+    assert response.status_code == 422, response.text
+    assert response.json() == {
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",
@@ -520,7 +520,7 @@ async def test_maintainer_plus_cannot_update_connection_type_with_linked_transfe
     user = group_transfer.owner_group.get_member_of_role(role_maintainer_plus)
     connection_json = await fetch_connection_json(client, user.token, group_transfer.source_connection)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/connections/{group_transfer.source_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -530,8 +530,8 @@ async def test_maintainer_plus_cannot_update_connection_type_with_linked_transfe
         },
     )
 
-    assert result.status_code == 409, result.json()
-    assert result.json() == {
+    assert response.status_code == 409, response.text
+    assert response.json() == {
         "error": {
             "code": "conflict",
             "message": "You cannot update the connection type of a connection already associated with a transfer.",
@@ -547,14 +547,14 @@ async def test_guest_cannot_update_connection_error(
     user = group_connection.owner_group.get_member_of_role(UserTestRoles.Guest)
     connection_json = await fetch_connection_json(client, user.token, group_connection)
 
-    result = await client.put(
+    response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
         json={**connection_json, "type": "postgres", "name": "New connection name"},
     )
 
-    assert result.status_code == 403, result.json()
-    assert result.json() == {
+    assert response.status_code == 403, response.text
+    assert response.json() == {
         "error": {
             "code": "forbidden",
             "message": "You have no power here",

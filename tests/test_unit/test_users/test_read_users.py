@@ -12,7 +12,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 async def test_get_users_unauthorized(client: AsyncClient):
     response = await client.get("v1/users")
 
-    assert response.status_code == 401, response.json()
+    assert response.status_code == 401, response.text
     assert response.json() == {
         "error": {
             "code": "unauthorized",
@@ -28,20 +28,20 @@ async def test_get_users_authorized(client: AsyncClient, simple_user: MockUser):
 
     response = await client.get("v1/users", headers=headers)
 
-    assert response.status_code == 200, response.json()
-    result = response.json()
-    assert result["items"][0].keys() == {"id", "is_superuser", "username"}
-    assert result["meta"] == {
+    assert response.status_code == 200, response.text
+    response = response.json()
+    assert response["items"][0].keys() == {"id", "is_superuser", "username"}
+    assert response["meta"] == {
         "page": 1,
         "pages": 1,
-        "total": len(result["items"]),
+        "total": len(response["items"]),
         "page_size": 20,
         "has_next": False,
         "has_previous": False,
         "next_page": None,
         "previous_page": None,
     }
-    for user_data in result["items"]:
+    for user_data in response["items"]:
         assert user_data.keys() == {"id", "is_superuser", "username"}
         if user_data["id"] == user.id:
             assert user_data == {
@@ -56,7 +56,7 @@ async def test_get_users_inactive(client: AsyncClient, inactive_user: MockUser):
 
     response = await client.get("v1/users", headers=headers)
 
-    assert response.status_code == 403, response.json()
+    assert response.status_code == 403, response.text
     assert response.json() == {
         "error": {
             "code": "forbidden",
@@ -90,14 +90,14 @@ async def test_search_users_with_query(
     user = simple_user
     search_query = search_value_extractor(user)
 
-    result = await client.get(
+    response = await client.get(
         "v1/users",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"search_query": search_query},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.status_code == 200, response.text
+    assert response.json() == {
         "meta": {
             "page": 1,
             "pages": 1,
@@ -124,11 +124,11 @@ async def test_search_users_with_nonexistent_query(
 ):
     random_search_query = "".join(random.choices(string.ascii_lowercase + string.digits, k=12))
 
-    result = await client.get(
+    response = await client.get(
         "v1/users",
         headers={"Authorization": f"Bearer {superuser.token}"},
         params={"search_query": random_search_query},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json()["items"] == []
+    assert response.status_code == 200, response.text
+    assert response.json()["items"] == []

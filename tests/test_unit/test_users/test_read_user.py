@@ -8,7 +8,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 async def test_get_user_unauthorized(client: AsyncClient):
     response = await client.get("/v1/users/some_user_id")
-    assert response.status_code == 401, response.json()
+    assert response.status_code == 401, response.text
     assert response.json() == {
         "error": {
             "code": "unauthorized",
@@ -23,7 +23,7 @@ async def test_get_user_authorized(client: AsyncClient, simple_user: MockUser):
         f"/v1/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
-    assert response.status_code == 200, response.json()
+    assert response.status_code == 200, response.text
     assert response.json() == {
         "id": simple_user.id,
         "is_superuser": simple_user.is_superuser,
@@ -36,7 +36,7 @@ async def test_get_user_inactive(client: AsyncClient, simple_user: MockUser, ina
         f"/v1/users/{simple_user.id}",
         headers={"Authorization": f"Bearer {inactive_user.token}"},
     )
-    assert response.status_code == 403, response.json()
+    assert response.status_code == 403, response.text
     assert response.json() == {
         "error": {
             "code": "forbidden",
@@ -48,7 +48,7 @@ async def test_get_user_inactive(client: AsyncClient, simple_user: MockUser, ina
 
 async def test_get_current_user_unauthorized(client: AsyncClient):
     response = await client.get("/v1/users/me")
-    assert response.status_code == 401, response.json()
+    assert response.status_code == 401, response.text
     assert response.json() == {
         "error": {
             "code": "unauthorized",
@@ -63,7 +63,7 @@ async def test_get_current_user_authorized(client: AsyncClient, simple_user: Moc
         "/v1/users/me",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
-    assert response.status_code == 200, response.json()
+    assert response.status_code == 200, response.text
     assert response.json() == {
         "id": simple_user.id,
         "is_superuser": simple_user.is_superuser,
@@ -76,7 +76,7 @@ async def test_get_current_user_inactive(client: AsyncClient, inactive_user: Moc
         "/v1/users/me",
         headers={"Authorization": f"Bearer {inactive_user.token}"},
     )
-    assert response.status_code == 403, response.json()
+    assert response.status_code == 403, response.text
     assert response.json() == {
         "error": {
             "code": "forbidden",

@@ -14,13 +14,13 @@ async def test_guest_plus_can_read_transfer(
 ):
     user = group_transfer.owner_group.get_member_of_role(role_guest_plus)
 
-    result = await client.get(
+    response = await client.get(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == build_transfer_json(group_transfer)
+    assert response.status_code == 200, response.text
+    assert response.json() == build_transfer_json(group_transfer)
 
 
 async def test_groupless_user_cannot_read_transfer(
@@ -28,13 +28,13 @@ async def test_groupless_user_cannot_read_transfer(
     group_transfer: MockTransfer,
     simple_user: MockUser,
 ):
-    result = await client.get(
+    response = await client.get(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {simple_user.token}"},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",
@@ -51,13 +51,13 @@ async def test_group_member_cannot_read_transfer_of_other_group(
 ):
     user = group.get_member_of_role(role_guest_plus)
 
-    result = await client.get(
+    response = await client.get(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",
@@ -71,23 +71,23 @@ async def test_superuser_can_read_transfer(
     superuser: MockUser,
     group_transfer: MockTransfer,
 ):
-    result = await client.get(
+    response = await client.get(
         f"v1/transfers/{group_transfer.id}",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == build_transfer_json(group_transfer)
+    assert response.status_code == 200, response.text
+    assert response.json() == build_transfer_json(group_transfer)
 
 
 async def test_unauthorized_user_cannot_read_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
 ):
-    result = await client.get(f"v1/transfers/{group_transfer.id}")
+    response = await client.get(f"v1/transfers/{group_transfer.id}")
 
-    assert result.status_code == 401, result.json()
-    assert result.json() == {
+    assert response.status_code == 401, response.text
+    assert response.json() == {
         "error": {
             "code": "unauthorized",
             "message": "Not authenticated",
@@ -101,12 +101,12 @@ async def test_superuser_read_not_exist_transfer_error(
     superuser: MockUser,
     group_transfer: MockTransfer,
 ):
-    result = await client.get(
+    response = await client.get(
         "v1/transfers/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",
@@ -122,13 +122,13 @@ async def test_group_member_cannot_read_unknown_transfer_error(
 ):
     user = group_transfer.owner_group.get_member_of_role(role_guest_plus)
 
-    result = await client.get(
+    response = await client.get(
         "v1/transfers/-1",
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
-    assert result.status_code == 404, result.json()
-    assert result.json() == {
+    assert response.status_code == 404, response.text
+    assert response.json() == {
         "error": {
             "code": "not_found",
             "message": "Transfer not found",

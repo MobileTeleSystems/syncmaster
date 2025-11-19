@@ -126,7 +126,7 @@ async def test_developer_plus_can_create_s3_transfer(
     first_connection, second_connection = two_group_connections
     user = mock_group.get_member_of_role(role_developer_plus)
 
-    result = await client.post(
+    response = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -139,8 +139,8 @@ async def test_developer_plus_can_create_s3_transfer(
             "queue_id": group_queue.id,
         },
     )
+    assert response.status_code == 200, response.text
 
-    # Pre-Assert
     transfer = (
         await session.scalars(
             select(Transfer).filter_by(
@@ -149,8 +149,7 @@ async def test_developer_plus_can_create_s3_transfer(
             ),
         )
     ).one()
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.json() == {
         "id": transfer.id,
         "group_id": transfer.group_id,
         "name": transfer.name,
@@ -300,7 +299,7 @@ async def test_developer_plus_can_create_hdfs_transfer(
     first_connection, second_connection = two_group_connections
     user = mock_group.get_member_of_role(role_developer_plus)
 
-    result = await client.post(
+    response = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -313,8 +312,8 @@ async def test_developer_plus_can_create_hdfs_transfer(
             "queue_id": group_queue.id,
         },
     )
+    assert response.status_code == 200, response.text
 
-    # Pre-Assert
     transfer = (
         await session.scalars(
             select(Transfer).filter_by(
@@ -324,8 +323,7 @@ async def test_developer_plus_can_create_hdfs_transfer(
         )
     ).one()
 
-    assert result.status_code == 200, result.json()
-    assert result.json() == {
+    assert response.json() == {
         "id": transfer.id,
         "group_id": transfer.group_id,
         "name": transfer.name,
@@ -446,7 +444,7 @@ async def test_cannot_create_file_transfer_with_relative_path(
     first_connection, second_connection = two_group_connections
     user = mock_group.get_member_of_role(UserTestRoles.Developer)
 
-    result = await client.post(
+    response = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -460,8 +458,8 @@ async def test_cannot_create_file_transfer_with_relative_path(
         },
     )
 
-    assert result.status_code == 422, result.json()
-    assert result.json() == {
+    assert response.status_code == 422, response.text
+    assert response.json() == {
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",
@@ -608,7 +606,7 @@ async def test_file_name_template_validation(
     first_connection, second_connection = two_group_connections
     user = mock_group.get_member_of_role(UserTestRoles.Developer)
 
-    result = await client.post(
+    response = await client.post(
         "v1/transfers",
         headers={"Authorization": f"Bearer {user.token}"},
         json={
@@ -622,8 +620,8 @@ async def test_file_name_template_validation(
         },
     )
 
-    assert result.status_code == 422, result.json()
-    assert result.json() == {
+    assert response.status_code == 422, response.text
+    assert response.json() == {
         "error": {
             "code": "invalid_request",
             "message": "Invalid request",
