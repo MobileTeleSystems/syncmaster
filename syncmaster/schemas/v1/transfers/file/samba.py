@@ -11,17 +11,17 @@ from syncmaster.schemas.v1.transfers.file.base import (
 )
 
 
-class SambaReadTransferSource(ReadFileTransferSource):
+class ReadSambaTransferSource(ReadFileTransferSource):
     type: SAMBA_TYPE
 
 
-class SambaReadTransferTarget(ReadFileTransferTarget):
+class ReadSambaTransferTarget(ReadFileTransferTarget):
     type: SAMBA_TYPE
 
 
-class SambaCreateTransferSource(CreateFileTransferSource):
+class CreateSambaTransferSource(CreateFileTransferSource):
     type: SAMBA_TYPE
 
 
-class SambaCreateTransferTarget(CreateFileTransferTarget):
+class CreateSambaTransferTarget(CreateFileTransferTarget):
     type: SAMBA_TYPE

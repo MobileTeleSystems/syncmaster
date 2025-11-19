@@ -11,17 +11,17 @@ from syncmaster.schemas.v1.transfers.file.base import (
 )
 
 
-class FTPSReadTransferSource(ReadFileTransferSource):
+class ReadFTPSTransferSource(ReadFileTransferSource):
     type: FTPS_TYPE
 
 
-class FTPSReadTransferTarget(ReadFileTransferTarget):
+class ReadFTPSTransferTarget(ReadFileTransferTarget):
     type: FTPS_TYPE
 
 
-class FTPSCreateTransferSource(CreateFileTransferSource):
+class CreateFTPSTransferSource(CreateFileTransferSource):
     type: FTPS_TYPE
 
 
-class FTPSCreateTransferTarget(CreateFileTransferTarget):
+class CreateFTPSTransferTarget(CreateFileTransferTarget):
     type: FTPS_TYPE

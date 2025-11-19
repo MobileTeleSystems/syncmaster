@@ -11,17 +11,17 @@ from syncmaster.schemas.v1.transfers.file.base import (
 )
 
 
-class SFTPReadTransferSource(ReadFileTransferSource):
+class ReadSFTPTransferSource(ReadFileTransferSource):
     type: SFTP_TYPE
 
 
-class SFTPReadTransferTarget(ReadFileTransferTarget):
+class ReadSFTPTransferTarget(ReadFileTransferTarget):
     type: SFTP_TYPE
 
 
-class SFTPCreateTransferSource(CreateFileTransferSource):
+class CreateSFTPTransferSource(CreateFileTransferSource):
     type: SFTP_TYPE
 
 
-class SFTPCreateTransferTarget(CreateFileTransferTarget):
+class CreateSFTPTransferTarget(CreateFileTransferTarget):
     type: SFTP_TYPE

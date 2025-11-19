@@ -11,17 +11,17 @@ from syncmaster.schemas.v1.transfers.file.base import (
 )
 
 
-class S3ReadTransferSource(ReadFileTransferSource):
+class ReadS3TransferSource(ReadFileTransferSource):
     type: S3_TYPE
 
 
-class S3ReadTransferTarget(ReadFileTransferTarget):
+class ReadS3TransferTarget(ReadFileTransferTarget):
     type: S3_TYPE
 
 
-class S3CreateTransferSource(CreateFileTransferSource):
+class CreateS3TransferSource(CreateFileTransferSource):
     type: S3_TYPE
 
 
-class S3CreateTransferTarget(CreateFileTransferTarget):
+class CreateS3TransferTarget(CreateFileTransferTarget):
     type: S3_TYPE

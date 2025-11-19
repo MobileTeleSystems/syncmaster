@@ -18,20 +18,37 @@ WEBDAV_TYPE = Literal["webdav"]
 SAMBA_TYPE = Literal["samba"]
 
 CONNECTION_TYPES = [
-    "oracle",
-    "postgres",
     "clickhouse",
     "hive",
     "iceberg_rest_s3",
     "mssql",
     "mysql",
-    "s3",
-    "hdfs",
-    "sftp",
+    "oracle",
+    "postgres",
     "ftp",
     "ftps",
-    "webdav",
+    "hdfs",
+    "s3",
     "samba",
+    "sftp",
+    "webdav",
 ]
-FILE_CONNECTION_TYPES = ["s3", "hdfs", "sftp", "ftp", "ftps", "webdav", "samba"]
-DB_CONNECTION_TYPES = ["oracle", "postgres", "clickhouse", "hive", "iceberg_rest_s3", "mssql", "mysql"]
+FILE_CONNECTION_TYPES = [
+    "ftp",
+    "ftps",
+    "hdfs",
+    "s3",
+    "samba",
+    "sftp",
+    "webdav",
+]
+DB_CONNECTION_TYPES = [
+    "clickhouse",
+    "hive",
+    "iceberg_rest_s3",
+    "mssql",
+    "mysql",
+    "oracle",
+    "postgres",
+]
+CONNECTION_TYPES = [*DB_CONNECTION_TYPES, *FILE_CONNECTION_TYPES]

@@ -11,17 +11,17 @@ from syncmaster.schemas.v1.transfers.file.base import (
 )
 
 
-class HDFSReadTransferSource(ReadFileTransferSource):
+class ReadHDFSTransferSource(ReadFileTransferSource):
     type: HDFS_TYPE
 
 
-class HDFSReadTransferTarget(ReadFileTransferTarget):
+class ReadHDFSTransferTarget(ReadFileTransferTarget):
     type: HDFS_TYPE
 
 
-class HDFSCreateTransferSource(CreateFileTransferSource):
+class CreateHDFSTransferSource(CreateFileTransferSource):
     type: HDFS_TYPE
 
 
-class HDFSCreateTransferTarget(CreateFileTransferTarget):
+class CreateHDFSTransferTarget(CreateFileTransferTarget):
     type: HDFS_TYPE

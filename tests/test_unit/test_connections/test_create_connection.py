@@ -210,9 +210,11 @@ async def test_check_name_field_validation_on_create_connection(
     )
 
     assert result.status_code == 422, result.json()
-    assert (
-        result.json()["error"]["details"][0]["message"]
-        == "Input tag 'POSTGRESQL' found using 'type' does not match any of the expected tags: 'oracle', 'postgres', 'mysql', 'mssql', 'clickhouse', 'hive', 'iceberg_rest_s3', 'hdfs', 's3', 'sftp', 'ftp', 'ftps', 'webdav', 'samba'"
+    message = result.json()["error"]["details"][0]["message"]
+    assert message == (
+        "Input tag 'POSTGRESQL' found using 'type' does not match any of the expected tags: "
+        "'clickhouse', 'hive', 'iceberg_rest_s3', 'mssql', 'mysql', 'oracle', 'postgres', "
+        "'ftp', 'ftps', 'hdfs', 's3', 'samba', 'sftp', 'webdav'"
     )
 
 

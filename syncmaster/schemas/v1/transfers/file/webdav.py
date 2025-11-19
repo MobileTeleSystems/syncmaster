@@ -11,17 +11,17 @@ from syncmaster.schemas.v1.transfers.file.base import (
 )
 
 
-class WebDAVReadTransferSource(ReadFileTransferSource):
+class ReadWebDAVTransferSource(ReadFileTransferSource):
     type: WEBDAV_TYPE
 
 
-class WebDAVReadTransferTarget(ReadFileTransferTarget):
+class ReadWebDAVTransferTarget(ReadFileTransferTarget):
     type: WEBDAV_TYPE
 
 
-class WebDAVCreateTransferSource(CreateFileTransferSource):
+class CreateWebDAVTransferSource(CreateFileTransferSource):
     type: WEBDAV_TYPE
 
 
-class WebDAVCreateTransferTarget(CreateFileTransferTarget):
+class CreateWebDAVTransferTarget(CreateFileTransferTarget):
     type: WEBDAV_TYPE

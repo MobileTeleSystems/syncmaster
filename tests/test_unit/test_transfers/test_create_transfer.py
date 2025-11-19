@@ -448,7 +448,8 @@ async def test_superuser_can_create_transfer(
                         {
                             "location": ["body"],
                             "message": (
-                                "Value error, Field 'increment_by' must be equal to 'file_modified_since' or 'file_name' for file source types"
+                                "Value error, Field 'increment_by' must be equal to "
+                                "'file_modified_since' or 'file_name' for file source types"
                             ),
                             "code": "value_error",
                             "context": {},
@@ -502,12 +503,17 @@ async def test_superuser_can_create_transfer(
                             "location": ["body", "source_params"],
                             "message": (
                                 "Input tag 'new some connection type' found using 'type' "
-                                "does not match any of the expected tags: 'postgres', 'hive', 'oracle', 'clickhouse', 'mssql', 'mysql', 'hdfs', 's3', 'sftp', 'ftp', 'ftps', 'webdav', 'samba'"
+                                "does not match any of the expected tags: 'clickhouse', 'hive', "
+                                "'iceberg_rest_s3', 'mssql', 'mysql', 'oracle', 'postgres', "
+                                "'hdfs', 's3', 'sftp', 'ftp', 'ftps', 'webdav', 'samba'"
                             ),
                             "code": "union_tag_invalid",
                             "context": {
                                 "discriminator": "'type'",
-                                "expected_tags": "'postgres', 'hive', 'oracle', 'clickhouse', 'mssql', 'mysql', 'hdfs', 's3', 'sftp', 'ftp', 'ftps', 'webdav', 'samba'",
+                                "expected_tags": (
+                                    "'clickhouse', 'hive', 'iceberg_rest_s3', 'mssql', 'mysql', 'oracle', 'postgres', "
+                                    "'hdfs', 's3', 'sftp', 'ftp', 'ftps', 'webdav', 'samba'"
+                                ),
                                 "tag": "new some connection type",
                             },
                             "input": {
@@ -543,12 +549,15 @@ async def test_superuser_can_create_transfer(
                             "location": ["body", "transformations", 0],
                             "message": (
                                 "Input tag 'some unknown transformation type' found using 'type' "
-                                "does not match any of the expected tags: 'dataframe_rows_filter', 'dataframe_columns_filter', 'file_metadata_filter'"
+                                "does not match any of the expected tags: 'dataframe_rows_filter', "
+                                "'dataframe_columns_filter', 'file_metadata_filter'"
                             ),
                             "code": "union_tag_invalid",
                             "context": {
                                 "discriminator": "'type'",
-                                "expected_tags": "'dataframe_rows_filter', 'dataframe_columns_filter', 'file_metadata_filter'",
+                                "expected_tags": (
+                                    "'dataframe_rows_filter', 'dataframe_columns_filter', 'file_metadata_filter'"
+                                ),
                                 "tag": "some unknown transformation type",
                             },
                             "input": {
@@ -589,14 +598,19 @@ async def test_superuser_can_create_transfer(
                         {
                             "location": ["body", "transformations", 0, "dataframe_rows_filter", "filters", 0],
                             "message": (
-                                "Input tag 'equals_today' found using 'type' does not match any of the expected tags: 'is_null', 'is_not_null', 'equal', 'not_equal', "
-                                "'greater_than', 'greater_or_equal', 'less_than', 'less_or_equal', 'like', 'ilike', 'not_like', 'not_ilike', 'regexp'"
+                                "Input tag 'equals_today' found using 'type' does not match any of the expected tags: "
+                                "'is_null', 'is_not_null', 'equal', 'not_equal', 'greater_than', 'greater_or_equal', "
+                                "'less_than', 'less_or_equal', 'like', 'ilike', 'not_like', 'not_ilike', 'regexp'"
                             ),
                             "code": "union_tag_invalid",
                             "context": {
                                 "discriminator": "'type'",
                                 "tag": "equals_today",
-                                "expected_tags": "'is_null', 'is_not_null', 'equal', 'not_equal', 'greater_than', 'greater_or_equal', 'less_than', 'less_or_equal', 'like', 'ilike', 'not_like', 'not_ilike', 'regexp'",
+                                "expected_tags": (
+                                    "'is_null', 'is_not_null', 'equal', 'not_equal', 'greater_than', "
+                                    "'greater_or_equal', 'less_than', 'less_or_equal', 'like', 'ilike', "
+                                    "'not_like', 'not_ilike', 'regexp'"
+                                ),
                             },
                             "input": {
                                 "type": "equals_today",
@@ -631,7 +645,8 @@ async def test_superuser_can_create_transfer(
                         {
                             "location": ["body", "transformations", 0, "dataframe_columns_filter", "filters", 0],
                             "message": (
-                                "Input tag 'convert' found using 'type' does not match any of the expected tags: 'include', 'rename', 'cast'"
+                                "Input tag 'convert' found using 'type' does not match any of the expected tags: "
+                                "'include', 'rename', 'cast'"
                             ),
                             "code": "union_tag_invalid",
                             "context": {
@@ -671,7 +686,8 @@ async def test_superuser_can_create_transfer(
                         {
                             "location": ["body", "transformations", 0, "file_metadata_filter", "filters", 0],
                             "message": (
-                                "Input tag 'glob' found using 'type' does not match any of the expected tags: 'name_glob', 'name_regexp', 'file_size_min', 'file_size_max'"
+                                "Input tag 'glob' found using 'type' does not match any of the expected tags: "
+                                "'name_glob', 'name_regexp', 'file_size_min', 'file_size_max'"
                             ),
                             "code": "union_tag_invalid",
                             "context": {
@@ -1041,7 +1057,10 @@ async def test_developer_plus_cannot_create_transfer_with_target_format_json(
                     },
                     "input": {"type": "json", "lineSep": "\n", "encoding": "utf-8"},
                     "location": ["body", "target_params", "s3", "file_format"],
-                    "message": "Input tag 'json' found using 'type' does not match any of the expected tags: 'csv', 'jsonline', 'excel', 'xml', 'orc', 'parquet'",
+                    "message": (
+                        "Input tag 'json' found using 'type' does not match any of the expected tags: "
+                        "'csv', 'jsonline', 'excel', 'xml', 'orc', 'parquet'"
+                    ),
                     "code": "union_tag_invalid",
                 },
             ],

@@ -79,54 +79,54 @@ from syncmaster.schemas.v1.page import PageSchema
 from syncmaster.schemas.v1.types import NameConstr
 
 CreateConnectionSchema = Annotated[
-    CreateOracleConnectionSchema
-    | CreatePostgresConnectionSchema
-    | CreateMySQLConnectionSchema
-    | CreateMSSQLConnectionSchema
-    | CreateClickhouseConnectionSchema
+    CreateClickhouseConnectionSchema
     | CreateHiveConnectionSchema
     | CreateIcebergConnectionSchema
-    | CreateHDFSConnectionSchema
-    | CreateS3ConnectionSchema
-    | CreateSFTPConnectionSchema
+    | CreateMSSQLConnectionSchema
+    | CreateMySQLConnectionSchema
+    | CreateOracleConnectionSchema
+    | CreatePostgresConnectionSchema
     | CreateFTPConnectionSchema
     | CreateFTPSConnectionSchema
-    | CreateWebDAVConnectionSchema
-    | CreateSambaConnectionSchema,
+    | CreateHDFSConnectionSchema
+    | CreateS3ConnectionSchema
+    | CreateSambaConnectionSchema
+    | CreateSFTPConnectionSchema
+    | CreateWebDAVConnectionSchema,
     Field(discriminator="type"),
 ]
 ReadConnectionSchema = Annotated[
-    ReadOracleConnectionSchema
-    | ReadPostgresConnectionSchema
-    | ReadMySQLConnectionSchema
-    | ReadMSSQLConnectionSchema
-    | ReadClickhouseConnectionSchema
+    ReadClickhouseConnectionSchema
     | ReadHiveConnectionSchema
     | ReadIcebergConnectionSchema
-    | ReadHDFSConnectionSchema
-    | ReadS3ConnectionSchema
-    | ReadSFTPConnectionSchema
+    | ReadMSSQLConnectionSchema
+    | ReadMySQLConnectionSchema
+    | ReadOracleConnectionSchema
+    | ReadPostgresConnectionSchema
     | ReadFTPConnectionSchema
     | ReadFTPSConnectionSchema
-    | ReadWebDAVConnectionSchema
-    | ReadSambaConnectionSchema,
+    | ReadHDFSConnectionSchema
+    | ReadS3ConnectionSchema
+    | ReadSambaConnectionSchema
+    | ReadSFTPConnectionSchema
+    | ReadWebDAVConnectionSchema,
     Field(discriminator="type"),
 ]
 UpdateConnectionSchema = Annotated[
-    UpdateOracleConnectionSchema
-    | UpdatePostgresConnectionSchema
-    | UpdateMySQLConnectionSchema
-    | UpdateMSSQLConnectionSchema
-    | UpdateClickhouseConnectionSchema
+    UpdateClickhouseConnectionSchema
     | UpdateHiveConnectionSchema
     | UpdateIcebergConnectionSchema
-    | UpdateHDFSConnectionSchema
-    | UpdateS3ConnectionSchema
-    | UpdateSFTPConnectionSchema
+    | UpdateMSSQLConnectionSchema
+    | UpdateMySQLConnectionSchema
+    | UpdateOracleConnectionSchema
+    | UpdatePostgresConnectionSchema
     | UpdateFTPConnectionSchema
     | UpdateFTPSConnectionSchema
-    | UpdateWebDAVConnectionSchema
-    | UpdateSambaConnectionSchema,
+    | UpdateHDFSConnectionSchema
+    | UpdateS3ConnectionSchema
+    | UpdateSambaConnectionSchema
+    | UpdateSFTPConnectionSchema
+    | UpdateWebDAVConnectionSchema,
     Field(discriminator="type"),
 ]
 

@@ -29,12 +29,6 @@ from syncmaster.schemas.v1.transfers import (
     ReadTransferSchema,
     TransferPageSchema,
 )
-from syncmaster.schemas.v1.transfers.db import (
-    HiveReadTransferSourceAndTarget,
-    OracleReadTransferSourceAndTarget,
-    PostgresReadTransferSourceAndTarget,
-    ReadDBTransfer,
-)
 from syncmaster.schemas.v1.transfers.file_format import (
     CSV,
     JSON,
@@ -87,10 +81,6 @@ __all__ = [
     "ShortRunSchema",
     "FullStrategy",
     "IncrementalStrategy",
-    "ReadDBTransfer",
-    "HiveReadTransferSourceAndTarget",
-    "OracleReadTransferSourceAndTarget",
-    "PostgresReadTransferSourceAndTarget",
     "CSV",
     "JSON",
     "ORC",
