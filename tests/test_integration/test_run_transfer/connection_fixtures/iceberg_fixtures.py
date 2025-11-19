@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 )
 def iceberg_rest_s3_for_conftest(test_settings: TestSettings) -> IcebergRESTCatalogS3ConnectionDTO:
     return IcebergRESTCatalogS3ConnectionDTO(
-        metastore_url=test_settings.TEST_ICEBERG_METASTORE_URL_FOR_CONFTEST,
+        rest_catalog_url=test_settings.TEST_ICEBERG_REST_CATALOG_URL_FOR_CONFTEST,
         s3_warehouse_path=test_settings.TEST_ICEBERG_S3_WAREHOUSE_PATH,
         s3_host=test_settings.TEST_S3_HOST_FOR_CONFTEST,
         s3_port=test_settings.TEST_S3_PORT_FOR_CONFTEST,
@@ -34,8 +34,8 @@ def iceberg_rest_s3_for_conftest(test_settings: TestSettings) -> IcebergRESTCata
         s3_access_key=test_settings.TEST_S3_ACCESS_KEY,
         s3_secret_key=test_settings.TEST_S3_SECRET_KEY,
         s3_additional_params=test_settings.TEST_ICEBERG_S3_ADDITIONAL_PARAMS,
-        metastore_username=test_settings.TEST_ICEBERG_METASTORE_USERNAME,
-        metastore_password=test_settings.TEST_ICEBERG_METASTORE_PASSWORD,
+        rest_catalog_username=test_settings.TEST_ICEBERG_REST_CATALOG_USERNAME,
+        rest_catalog_password=test_settings.TEST_ICEBERG_REST_CATALOG_PASSWORD,
     )
 
 
@@ -45,7 +45,7 @@ def iceberg_rest_s3_for_conftest(test_settings: TestSettings) -> IcebergRESTCata
 )
 def iceberg_rest_s3_for_worker(test_settings: TestSettings) -> IcebergRESTCatalogS3ConnectionDTO:
     return IcebergRESTCatalogS3ConnectionDTO(
-        metastore_url=test_settings.TEST_ICEBERG_METASTORE_URL_FOR_WORKER,
+        rest_catalog_url=test_settings.TEST_ICEBERG_REST_CATALOG_URL_FOR_WORKER,
         s3_warehouse_path=test_settings.TEST_ICEBERG_S3_WAREHOUSE_PATH,
         s3_host=test_settings.TEST_S3_HOST_FOR_WORKER,
         s3_port=test_settings.TEST_S3_PORT_FOR_WORKER,
@@ -56,8 +56,8 @@ def iceberg_rest_s3_for_worker(test_settings: TestSettings) -> IcebergRESTCatalo
         s3_access_key=test_settings.TEST_S3_ACCESS_KEY,
         s3_secret_key=test_settings.TEST_S3_SECRET_KEY,
         s3_additional_params=test_settings.TEST_ICEBERG_S3_ADDITIONAL_PARAMS,
-        metastore_username=test_settings.TEST_ICEBERG_METASTORE_USERNAME,
-        metastore_password=test_settings.TEST_ICEBERG_METASTORE_PASSWORD,
+        rest_catalog_username=test_settings.TEST_ICEBERG_REST_CATALOG_USERNAME,
+        rest_catalog_password=test_settings.TEST_ICEBERG_REST_CATALOG_PASSWORD,
     )
 
 
@@ -77,10 +77,10 @@ def prepare_iceberg_rest_s3(
         spark=spark,
         catalog_name=catalog_name,
         catalog=Iceberg.RESTCatalog(
-            uri=iceberg.metastore_url,
+            uri=iceberg.rest_catalog_url,
             auth=Iceberg.RESTCatalog.BasicAuth(
-                user=iceberg.metastore_username,
-                password=iceberg.metastore_password,
+                user=iceberg.rest_catalog_username,
+                password=iceberg.rest_catalog_password,
             ),
         ),
         warehouse=Iceberg.S3Warehouse(
@@ -129,7 +129,7 @@ async def iceberg_rest_s3_connection(
         name=secrets.token_hex(5),
         type=iceberg.type,
         data=dict(
-            metastore_url=iceberg.metastore_url,
+            rest_catalog_url=iceberg.rest_catalog_url,
             s3_warehouse_path=iceberg.s3_warehouse_path,
             s3_host=iceberg.s3_host,
             s3_port=iceberg.s3_port,
@@ -150,8 +150,8 @@ async def iceberg_rest_s3_connection(
             type="iceberg_rest_basic_s3_basic",
             s3_access_key=iceberg.s3_access_key,
             s3_secret_key=iceberg.s3_secret_key,
-            metastore_username=iceberg.metastore_username,
-            metastore_password=iceberg.metastore_password,
+            rest_catalog_username=iceberg.rest_catalog_username,
+            rest_catalog_password=iceberg.rest_catalog_password,
         ),
     )
 

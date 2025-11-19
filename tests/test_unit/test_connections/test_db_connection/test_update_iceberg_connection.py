@@ -13,7 +13,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.iceberg]
         (
             "iceberg_rest_s3",
             {
-                "metastore_url": "http://domain.com:8000",
+                "rest_catalog_url": "http://domain.com:8000",
                 "s3_warehouse_path": "/some/warehouse",
                 "s3_protocol": "http",
                 "s3_host": "localhost",
@@ -24,8 +24,8 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.iceberg]
             },
             {
                 "type": "iceberg_rest_basic_s3_basic",
-                "metastore_username": "user",
-                "metastore_password": "secret",
+                "rest_catalog_username": "user",
+                "rest_catalog_password": "secret",
                 "s3_access_key": "access_key",
                 "s3_secret_key": "secret_key",
             },
@@ -48,7 +48,7 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection(
             **connection_json,
             "type": group_connection.type,
             "connection_data": {
-                "metastore_url": "http://rest.domain.com:8000",
+                "rest_catalog_url": "http://rest.domain.com:8000",
                 "s3_warehouse_path": "/some/new/warehouse",
                 "s3_protocol": "https",
                 "s3_host": "s3.domain.com",
@@ -58,8 +58,8 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection(
             },
             "auth_data": {
                 "type": "iceberg_rest_basic_s3_basic",
-                "metastore_username": "new_user",
-                "metastore_password": "new_password",
+                "rest_catalog_username": "new_user",
+                "rest_catalog_password": "new_password",
                 "s3_access_key": "new_access_key",
             },
         },
@@ -73,7 +73,7 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection(
         "group_id": group_connection.group_id,
         "type": group_connection.type,
         "connection_data": {
-            "metastore_url": "http://rest.domain.com:8000",
+            "rest_catalog_url": "http://rest.domain.com:8000",
             "s3_warehouse_path": "/some/new/warehouse",
             "s3_protocol": "https",
             "s3_host": "s3.domain.com",
@@ -85,7 +85,7 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection(
         },
         "auth_data": {
             "type": group_connection.credentials.value["type"],
-            "metastore_username": "new_user",
+            "rest_catalog_username": "new_user",
             "s3_access_key": "new_access_key",
         },
     }
@@ -97,7 +97,7 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection(
         (
             "iceberg_rest_s3",
             {
-                "metastore_url": "http://domain.com:8000",
+                "rest_catalog_url": "http://domain.com:8000",
                 "s3_warehouse_path": "/some/warehouse",
                 "s3_protocol": "http",
                 "s3_host": "localhost",
@@ -108,12 +108,12 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection(
             },
             {
                 "type": "iceberg_rest_oauth2_client_credentials_s3_basic",
-                "metastore_oauth2_client_id": "my_client_id",
-                "metastore_oauth2_client_secret": "my_client_secret",
-                "metastore_oauth2_scopes": ["catalog:read"],
-                "metastore_oauth2_audience": "iceberg-catalog",
-                "metastore_oauth2_resource": None,
-                "metastore_oauth2_server_uri": "https://oauth.example.com/token",
+                "rest_catalog_oauth2_client_id": "my_client_id",
+                "rest_catalog_oauth2_client_secret": "my_client_secret",
+                "rest_catalog_oauth2_scopes": ["catalog:read"],
+                "rest_catalog_oauth2_audience": "iceberg-catalog",
+                "rest_catalog_oauth2_resource": None,
+                "rest_catalog_oauth2_server_uri": "https://oauth.example.com/token",
                 "s3_access_key": "access_key",
                 "s3_secret_key": "secret_key",
             },
@@ -136,7 +136,7 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection_with_oauth2_
             **connection_json,
             "type": group_connection.type,
             "connection_data": {
-                "metastore_url": "http://rest.domain.com:8000",
+                "rest_catalog_url": "http://rest.domain.com:8000",
                 "s3_warehouse_path": "/some/new/warehouse",
                 "s3_protocol": "https",
                 "s3_host": "s3.domain.com",
@@ -146,12 +146,12 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection_with_oauth2_
             },
             "auth_data": {
                 "type": "iceberg_rest_oauth2_client_credentials_s3_basic",
-                "metastore_oauth2_client_id": "my_new_client_id",
-                "metastore_oauth2_client_secret": "my_new_client_secret",
-                "metastore_oauth2_scopes": ["catalog:write"],
-                "metastore_oauth2_audience": "iceberg-new-catalog",
-                "metastore_oauth2_resource": "iceberg-new-resource",
-                "metastore_oauth2_server_uri": "https://oauth.new.example.com/token",
+                "rest_catalog_oauth2_client_id": "my_new_client_id",
+                "rest_catalog_oauth2_client_secret": "my_new_client_secret",
+                "rest_catalog_oauth2_scopes": ["catalog:write"],
+                "rest_catalog_oauth2_audience": "iceberg-new-catalog",
+                "rest_catalog_oauth2_resource": "iceberg-new-resource",
+                "rest_catalog_oauth2_server_uri": "https://oauth.new.example.com/token",
                 "s3_access_key": "new_access_key",
                 "s3_secret_key": "new_secret_key",
             },
@@ -166,7 +166,7 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection_with_oauth2_
         "group_id": group_connection.group_id,
         "type": group_connection.type,
         "connection_data": {
-            "metastore_url": "http://rest.domain.com:8000",
+            "rest_catalog_url": "http://rest.domain.com:8000",
             "s3_warehouse_path": "/some/new/warehouse",
             "s3_protocol": "https",
             "s3_host": "s3.domain.com",
@@ -178,11 +178,11 @@ async def test_developer_plus_can_update_iceberg_rest_s3_connection_with_oauth2_
         },
         "auth_data": {
             "type": group_connection.credentials.value["type"],
-            "metastore_oauth2_client_id": "my_new_client_id",
-            "metastore_oauth2_scopes": ["catalog:write"],
-            "metastore_oauth2_audience": "iceberg-new-catalog",
-            "metastore_oauth2_resource": "iceberg-new-resource",
-            "metastore_oauth2_server_uri": "https://oauth.new.example.com/token",
+            "rest_catalog_oauth2_client_id": "my_new_client_id",
+            "rest_catalog_oauth2_scopes": ["catalog:write"],
+            "rest_catalog_oauth2_audience": "iceberg-new-catalog",
+            "rest_catalog_oauth2_resource": "iceberg-new-resource",
+            "rest_catalog_oauth2_server_uri": "https://oauth.new.example.com/token",
             "s3_access_key": "new_access_key",
         },
     }

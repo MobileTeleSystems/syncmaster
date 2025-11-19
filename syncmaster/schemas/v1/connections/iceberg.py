@@ -19,7 +19,7 @@ from syncmaster.schemas.v1.types import URL
 
 
 class IcebergRESTCatalogS3ConnectionDataSchema(BaseModel):
-    metastore_url: URL
+    rest_catalog_url: URL
     s3_warehouse_path: str
     s3_host: str
     s3_port: int | None = Field(default=None, gt=0, le=65535)  # noqa: WPS432

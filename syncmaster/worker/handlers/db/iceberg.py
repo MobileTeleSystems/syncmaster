@@ -32,7 +32,7 @@ class IcebergRESTCatalogS3Handler(DBHandler):
             spark=spark,
             catalog_name=self.transfer_dto.catalog_name,
             catalog=Iceberg.RESTCatalog(
-                uri=self.connection_dto.metastore_url,
+                uri=self.connection_dto.rest_catalog_url,
                 auth=self._make_auth(),
             ),
             warehouse=Iceberg.S3Warehouse(
@@ -90,16 +90,16 @@ class IcebergRESTCatalogS3Handler(DBHandler):
         return f"`{field}`"
 
     def _make_auth(self):
-        if self.connection_dto.metastore_auth_type == "oauth2":
+        if self.connection_dto.rest_catalog_auth_type == "oauth2":
             return Iceberg.RESTCatalog.OAuth2ClientCredentials(
-                client_id=self.connection_dto.metastore_oauth2_client_id,
-                client_secret=self.connection_dto.metastore_oauth2_client_secret,
-                scopes=self.connection_dto.metastore_oauth2_scopes,
-                resource=self.connection_dto.metastore_oauth2_resource,
-                audience=self.connection_dto.metastore_oauth2_audience,
-                server_uri=self.connection_dto.metastore_oauth2_server_uri,
+                client_id=self.connection_dto.rest_catalog_oauth2_client_id,
+                client_secret=self.connection_dto.rest_catalog_oauth2_client_secret,
+                scopes=self.connection_dto.rest_catalog_oauth2_scopes,
+                resource=self.connection_dto.rest_catalog_oauth2_resource,
+                audience=self.connection_dto.rest_catalog_oauth2_audience,
+                server_uri=self.connection_dto.rest_catalog_oauth2_server_uri,
             )
         return Iceberg.RESTCatalog.BasicAuth(
-            user=self.connection_dto.metastore_username,
-            password=self.connection_dto.metastore_password,
+            user=self.connection_dto.rest_catalog_username,
+            password=self.connection_dto.rest_catalog_password,
         )

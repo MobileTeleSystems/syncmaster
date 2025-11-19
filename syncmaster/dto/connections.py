@@ -75,7 +75,7 @@ class HiveConnectionDTO(ConnectionDTO):
 
 @dataclass
 class IcebergRESTCatalogS3ConnectionBaseDTO(ConnectionDTO):
-    metastore_url: str
+    rest_catalog_url: str
     s3_warehouse_path: str
     s3_host: str
     s3_bucket: str
@@ -91,26 +91,26 @@ class IcebergRESTCatalogS3ConnectionBaseDTO(ConnectionDTO):
 
 @dataclass(kw_only=True)
 class IcebergRESTCatalogBasicAuthS3DTO(IcebergRESTCatalogS3ConnectionBaseDTO):
-    metastore_username: str
-    metastore_password: str
-    metastore_auth_type: Literal["basic"] = "basic"
+    rest_catalog_username: str
+    rest_catalog_password: str
+    rest_catalog_auth_type: Literal["basic"] = "basic"
 
 
 @dataclass(kw_only=True)
 class IcebergRESTCatalogOAuth2ClientCredentialsS3DTO(IcebergRESTCatalogS3ConnectionBaseDTO):
-    metastore_oauth2_client_id: str
-    metastore_oauth2_client_secret: str
-    metastore_oauth2_scopes: list[str]
-    metastore_oauth2_resource: str | None = None
-    metastore_oauth2_audience: str | None = None
-    metastore_oauth2_server_uri: str | None = None
-    metastore_auth_type: Literal["oauth2"] = "oauth2"
+    rest_catalog_oauth2_client_id: str
+    rest_catalog_oauth2_client_secret: str
+    rest_catalog_oauth2_scopes: list[str]
+    rest_catalog_oauth2_resource: str | None = None
+    rest_catalog_oauth2_audience: str | None = None
+    rest_catalog_oauth2_server_uri: str | None = None
+    rest_catalog_auth_type: Literal["oauth2"] = "oauth2"
 
 
 # TODO: should be refactored
 class IcebergRESTCatalogS3ConnectionDTO:
     def __new__(cls, **data):
-        if "metastore_oauth2_client_id" in data:
+        if "rest_catalog_oauth2_client_id" in data:
             return IcebergRESTCatalogOAuth2ClientCredentialsS3DTO(**data)
 
         return IcebergRESTCatalogBasicAuthS3DTO(**data)

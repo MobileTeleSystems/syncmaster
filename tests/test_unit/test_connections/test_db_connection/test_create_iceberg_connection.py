@@ -29,7 +29,7 @@ async def test_developer_plus_can_create_iceberg_rest_s3_connection(
             "description": "",
             "type": "iceberg_rest_s3",
             "connection_data": {
-                "metastore_url": "https://rest.domain.com",
+                "rest_catalog_url": "https://rest.domain.com",
                 "s3_warehouse_path": "/some/warehouse",
                 "s3_protocol": "http",
                 "s3_host": "localhost",
@@ -40,8 +40,8 @@ async def test_developer_plus_can_create_iceberg_rest_s3_connection(
             },
             "auth_data": {
                 "type": "iceberg_rest_basic_s3_basic",
-                "metastore_username": "user",
-                "metastore_password": "secret",
+                "rest_catalog_username": "user",
+                "rest_catalog_password": "secret",
                 "s3_access_key": "access_key",
                 "s3_secret_key": "secret_key",
             },
@@ -72,7 +72,7 @@ async def test_developer_plus_can_create_iceberg_rest_s3_connection(
         "description": connection.description,
         "type": connection.type,
         "connection_data": {
-            "metastore_url": connection.data["metastore_url"],
+            "rest_catalog_url": connection.data["rest_catalog_url"],
             "s3_warehouse_path": connection.data["s3_warehouse_path"],
             "s3_protocol": connection.data["s3_protocol"],
             "s3_host": connection.data["s3_host"],
@@ -84,7 +84,7 @@ async def test_developer_plus_can_create_iceberg_rest_s3_connection(
         },
         "auth_data": {
             "type": decrypted["type"],
-            "metastore_username": decrypted["metastore_username"],
+            "rest_catalog_username": decrypted["rest_catalog_username"],
             "s3_access_key": decrypted["s3_access_key"],
         },
     }
@@ -108,7 +108,7 @@ async def test_developer_plus_can_create_iceberg_rest_s3_connection_with_oauth2_
             "description": "",
             "type": "iceberg_rest_s3",
             "connection_data": {
-                "metastore_url": "https://rest.domain.com",
+                "rest_catalog_url": "https://rest.domain.com",
                 "s3_warehouse_path": "/some/warehouse",
                 "s3_protocol": "http",
                 "s3_host": "localhost",
@@ -119,11 +119,11 @@ async def test_developer_plus_can_create_iceberg_rest_s3_connection_with_oauth2_
             },
             "auth_data": {
                 "type": "iceberg_rest_oauth2_client_credentials_s3_basic",
-                "metastore_oauth2_client_id": "my_client_id",
-                "metastore_oauth2_client_secret": "my_client_secret",
-                "metastore_oauth2_scopes": ["catalog:read"],
-                "metastore_oauth2_audience": "iceberg-catalog",
-                "metastore_oauth2_server_uri": "https://oauth.example.com/token",
+                "rest_catalog_oauth2_client_id": "my_client_id",
+                "rest_catalog_oauth2_client_secret": "my_client_secret",
+                "rest_catalog_oauth2_scopes": ["catalog:read"],
+                "rest_catalog_oauth2_audience": "iceberg-catalog",
+                "rest_catalog_oauth2_server_uri": "https://oauth.example.com/token",
                 "s3_access_key": "access_key",
                 "s3_secret_key": "secret_key",
             },
@@ -154,7 +154,7 @@ async def test_developer_plus_can_create_iceberg_rest_s3_connection_with_oauth2_
         "description": connection.description,
         "type": connection.type,
         "connection_data": {
-            "metastore_url": connection.data["metastore_url"],
+            "rest_catalog_url": connection.data["rest_catalog_url"],
             "s3_warehouse_path": connection.data["s3_warehouse_path"],
             "s3_protocol": connection.data["s3_protocol"],
             "s3_host": connection.data["s3_host"],
@@ -166,11 +166,11 @@ async def test_developer_plus_can_create_iceberg_rest_s3_connection_with_oauth2_
         },
         "auth_data": {
             "type": decrypted["type"],
-            "metastore_oauth2_client_id": decrypted["metastore_oauth2_client_id"],
-            "metastore_oauth2_scopes": decrypted["metastore_oauth2_scopes"],
-            "metastore_oauth2_audience": decrypted["metastore_oauth2_audience"],
-            "metastore_oauth2_resource": decrypted["metastore_oauth2_resource"],
-            "metastore_oauth2_server_uri": decrypted["metastore_oauth2_server_uri"],
+            "rest_catalog_oauth2_client_id": decrypted["rest_catalog_oauth2_client_id"],
+            "rest_catalog_oauth2_scopes": decrypted["rest_catalog_oauth2_scopes"],
+            "rest_catalog_oauth2_audience": decrypted["rest_catalog_oauth2_audience"],
+            "rest_catalog_oauth2_resource": decrypted["rest_catalog_oauth2_resource"],
+            "rest_catalog_oauth2_server_uri": decrypted["rest_catalog_oauth2_server_uri"],
             "s3_access_key": decrypted["s3_access_key"],
         },
     }

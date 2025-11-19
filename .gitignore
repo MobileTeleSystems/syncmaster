@@ -155,7 +155,7 @@ cython_debug/
 .idea/
 .vscode/
 
-**/metastore_db/
+**/rest_catalog_db/
 **/spark-warehouse/
 cached_jars/
 

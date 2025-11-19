@@ -34,7 +34,7 @@ async def group_connections(
         elif conn_type == ConnectionType.ICEBERG_REST_S3:
             new_data.update(
                 {
-                    "metastore_url": "https://rest.domain.com",
+                    "rest_catalog_url": "https://rest.domain.com",
                     "s3_warehouse_path": "/some/warehouse",
                     "s3_host": "s3.domain.com",
                     "s3_bucket": "bucket",
