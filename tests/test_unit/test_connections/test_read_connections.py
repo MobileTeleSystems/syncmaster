@@ -298,7 +298,7 @@ async def test_search_connections_with_nonexistent_query(
                 "type": [
                     "postgres",
                     "hive",
-                    "iceberg_rest_s3",
+                    "iceberg",
                     "oracle",
                     "clickhouse",
                     "mssql",

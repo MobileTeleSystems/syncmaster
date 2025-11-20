@@ -18,7 +18,7 @@ from syncmaster.db.models.group import Group
 class ConnectionType(StrEnum):
     POSTGRES = "postgres"
     HIVE = "hive"
-    ICEBERG_REST_S3 = "iceberg_rest_s3"
+    ICEBERG = "iceberg"
     ORACLE = "oracle"
     CLICKHOUSE = "clickhouse"
     MSSQL = "mssql"
@@ -62,7 +62,7 @@ class Connection(Base, ResourceMixin, TimestampMixin):
                 'simple',
                 translate(coalesce(data->>'host', ''), './-_:\\', '      ')
             )
-            """,
+            """,  # noqa: WPS342
             persisted=True,
         ),
         nullable=False,

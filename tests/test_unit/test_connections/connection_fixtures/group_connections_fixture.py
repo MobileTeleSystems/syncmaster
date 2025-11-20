@@ -31,9 +31,10 @@ async def group_connections(
                     "cluster": "cluster",
                 },
             )
-        elif conn_type == ConnectionType.ICEBERG_REST_S3:
+        elif conn_type == ConnectionType.ICEBERG:
             new_data.update(
                 {
+                    "type": "iceberg_rest_s3_direct",
                     "rest_catalog_url": "https://rest.domain.com",
                     "s3_warehouse_path": "/some/warehouse",
                     "s3_host": "s3.domain.com",

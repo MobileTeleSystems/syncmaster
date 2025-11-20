@@ -74,8 +74,14 @@ class HiveConnectionDTO(ConnectionDTO):
 
 
 @dataclass
-class IcebergRESTCatalogS3ConnectionBaseDTO(ConnectionDTO):
+class IcebergConnectionBaseDTO(ConnectionDTO):
     rest_catalog_url: str
+    flavor: ClassVar[str]
+    type: ClassVar[str] = "iceberg"
+
+
+@dataclass
+class IcebergRESTCatalogS3DirectConnectionBaseDTO(IcebergConnectionBaseDTO):
     s3_warehouse_path: str
     s3_host: str
     s3_bucket: str
@@ -86,18 +92,43 @@ class IcebergRESTCatalogS3ConnectionBaseDTO(ConnectionDTO):
     s3_port: int | None
     s3_protocol: str
     s3_additional_params: dict
-    type: ClassVar[str] = "iceberg_rest_s3"
+    implementation: ClassVar[str] = "iceberg_rest_s3_direct"
 
 
 @dataclass(kw_only=True)
-class IcebergRESTCatalogBasicAuthS3DTO(IcebergRESTCatalogS3ConnectionBaseDTO):
+class IcebergRESTCatalogBasicAuthS3BasicDTO(IcebergRESTCatalogS3DirectConnectionBaseDTO):
     rest_catalog_username: str
     rest_catalog_password: str
     rest_catalog_auth_type: Literal["basic"] = "basic"
 
 
 @dataclass(kw_only=True)
-class IcebergRESTCatalogOAuth2ClientCredentialsS3DTO(IcebergRESTCatalogS3ConnectionBaseDTO):
+class IcebergRESTCatalogOAuth2ClientCredentialsS3BasicDTO(IcebergRESTCatalogS3DirectConnectionBaseDTO):
+    rest_catalog_oauth2_client_id: str
+    rest_catalog_oauth2_client_secret: str
+    rest_catalog_oauth2_scopes: list[str]
+    rest_catalog_oauth2_resource: str | None = None
+    rest_catalog_oauth2_audience: str | None = None
+    rest_catalog_oauth2_token_endpoint: str | None = None
+    rest_catalog_auth_type: Literal["oauth2"] = "oauth2"
+
+
+@dataclass
+class IcebergRESTCatalogS3DelegatedConnectionBaseDTO(IcebergConnectionBaseDTO):
+    s3_warehouse_name: str | None = None
+    s3_access_delegation: Literal["vended-credentials", "remote-signing"] = "vended-credentials"
+    implementation: ClassVar[str] = "iceberg_rest_s3_delegated"
+
+
+@dataclass(kw_only=True)
+class IcebergRESTCatalogBasicAuthS3DelegatedDTO(IcebergRESTCatalogS3DelegatedConnectionBaseDTO):
+    rest_catalog_username: str
+    rest_catalog_password: str
+    rest_catalog_auth_type: Literal["basic"] = "basic"
+
+
+@dataclass(kw_only=True)
+class IcebergRESTCatalogOAuth2ClientCredentialsS3DelegatedDTO(IcebergRESTCatalogS3DelegatedConnectionBaseDTO):
     rest_catalog_oauth2_client_id: str
     rest_catalog_oauth2_client_secret: str
     rest_catalog_oauth2_scopes: list[str]
@@ -108,12 +139,26 @@ class IcebergRESTCatalogOAuth2ClientCredentialsS3DTO(IcebergRESTCatalogS3Connect
 
 
 # TODO: should be refactored
-class IcebergRESTCatalogS3ConnectionDTO:
-    def __new__(cls, **data):
-        if "rest_catalog_oauth2_client_id" in data:
-            return IcebergRESTCatalogOAuth2ClientCredentialsS3DTO(**data)
+def get_iceberg_rest_catalog_s3_direct_connection_dto(
+    **data,
+) -> IcebergRESTCatalogBasicAuthS3BasicDTO | IcebergRESTCatalogOAuth2ClientCredentialsS3BasicDTO:
+    if "rest_catalog_oauth2_client_id" in data:
+        return IcebergRESTCatalogOAuth2ClientCredentialsS3BasicDTO(**data)
+    return IcebergRESTCatalogBasicAuthS3BasicDTO(**data)
 
-        return IcebergRESTCatalogBasicAuthS3DTO(**data)
+
+def get_iceberg_rest_catalog_s3_delegated_connection_dto(
+    **data,
+) -> IcebergRESTCatalogBasicAuthS3DelegatedDTO | IcebergRESTCatalogOAuth2ClientCredentialsS3DelegatedDTO:
+    if "rest_catalog_oauth2_client_id" in data:
+        return IcebergRESTCatalogOAuth2ClientCredentialsS3DelegatedDTO(**data)
+    return IcebergRESTCatalogBasicAuthS3DelegatedDTO(**data)
+
+
+def get_iceberg_connection_dto(**data) -> IcebergConnectionBaseDTO:
+    if "s3_warehouse_path" in data:
+        return get_iceberg_rest_catalog_s3_direct_connection_dto(**data)
+    return get_iceberg_rest_catalog_s3_delegated_connection_dto(**data)
 
 
 @dataclass

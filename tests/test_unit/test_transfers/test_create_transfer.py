@@ -500,14 +500,14 @@ async def test_superuser_can_create_transfer(
                             "message": (
                                 "Input tag 'new some connection type' found using 'type' "
                                 "does not match any of the expected tags: 'clickhouse', 'hive', "
-                                "'iceberg_rest_s3', 'mssql', 'mysql', 'oracle', 'postgres', "
+                                "'iceberg', 'mssql', 'mysql', 'oracle', 'postgres', "
                                 "'hdfs', 's3', 'sftp', 'ftp', 'ftps', 'webdav', 'samba'"
                             ),
                             "code": "union_tag_invalid",
                             "context": {
                                 "discriminator": "'type'",
                                 "expected_tags": (
-                                    "'clickhouse', 'hive', 'iceberg_rest_s3', 'mssql', 'mysql', 'oracle', 'postgres', "
+                                    "'clickhouse', 'hive', 'iceberg', 'mssql', 'mysql', 'oracle', 'postgres', "
                                     "'hdfs', 's3', 'sftp', 'ftp', 'ftps', 'webdav', 'samba'"
                                 ),
                                 "tag": "new some connection type",

@@ -9,7 +9,7 @@ from pyspark.sql import DataFrame, SparkSession
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Group
-from syncmaster.dto.connections import IcebergRESTCatalogS3ConnectionDTO
+from syncmaster.dto.connections import IcebergRESTCatalogBasicAuthS3BasicDTO
 from syncmaster.server.settings import ServerAppSettings as Settings
 from tests.settings import TestSettings
 from tests.test_unit.utils import create_connection, create_credentials
@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
     scope="session",
     params=[pytest.param("iceberg", marks=[pytest.mark.iceberg])],
 )
-def iceberg_rest_s3_for_conftest(test_settings: TestSettings) -> IcebergRESTCatalogS3ConnectionDTO:
-    return IcebergRESTCatalogS3ConnectionDTO(
+def iceberg_rest_s3_for_conftest(test_settings: TestSettings) -> IcebergRESTCatalogBasicAuthS3BasicDTO:
+    return IcebergRESTCatalogBasicAuthS3BasicDTO(
         rest_catalog_url=test_settings.TEST_ICEBERG_REST_CATALOG_URL_FOR_CONFTEST,
         s3_warehouse_path=test_settings.TEST_ICEBERG_S3_WAREHOUSE_PATH,
         s3_host=test_settings.TEST_S3_HOST_FOR_CONFTEST,
@@ -43,8 +43,8 @@ def iceberg_rest_s3_for_conftest(test_settings: TestSettings) -> IcebergRESTCata
     scope="session",
     params=[pytest.param("iceberg", marks=[pytest.mark.iceberg])],
 )
-def iceberg_rest_s3_for_worker(test_settings: TestSettings) -> IcebergRESTCatalogS3ConnectionDTO:
-    return IcebergRESTCatalogS3ConnectionDTO(
+def iceberg_rest_s3_for_worker(test_settings: TestSettings) -> IcebergRESTCatalogBasicAuthS3BasicDTO:
+    return IcebergRESTCatalogBasicAuthS3BasicDTO(
         rest_catalog_url=test_settings.TEST_ICEBERG_REST_CATALOG_URL_FOR_WORKER,
         s3_warehouse_path=test_settings.TEST_ICEBERG_S3_WAREHOUSE_PATH,
         s3_host=test_settings.TEST_S3_HOST_FOR_WORKER,
@@ -64,7 +64,7 @@ def iceberg_rest_s3_for_worker(test_settings: TestSettings) -> IcebergRESTCatalo
 @pytest.fixture
 def prepare_iceberg_rest_s3(
     spark: SparkSession,
-    iceberg_rest_s3_for_conftest: IcebergRESTCatalogS3ConnectionDTO,
+    iceberg_rest_s3_for_conftest: IcebergRESTCatalogBasicAuthS3BasicDTO,
     s3_file_connection: S3,
 ):
     iceberg = iceberg_rest_s3_for_conftest
@@ -118,7 +118,7 @@ def prepare_iceberg_rest_s3(
 
 @pytest_asyncio.fixture
 async def iceberg_rest_s3_connection(
-    iceberg_rest_s3_for_worker: IcebergRESTCatalogS3ConnectionDTO,
+    iceberg_rest_s3_for_worker: IcebergRESTCatalogBasicAuthS3BasicDTO,
     settings: Settings,
     session: AsyncSession,
     group: Group,

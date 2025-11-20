@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from syncmaster.schemas.v1.connection_types import (
     CLICKHOUSE_TYPE,
     HIVE_TYPE,
-    ICEBERG_REST_S3_TYPE,
+    ICEBERG_TYPE,
     MSSQL_TYPE,
     MYSQL_TYPE,
     ORACLE_TYPE,
@@ -43,14 +43,14 @@ class MySQLTransferSourceOrTarget(DBTransfer):
     type: MYSQL_TYPE
 
 
-class IcebergRESTCatalogS3TransferSourceOrTarget(DBTransfer):
-    type: ICEBERG_REST_S3_TYPE
+class IcebergTransferSourceOrTarget(DBTransfer):
+    type: ICEBERG_TYPE
 
 
 DBTransferSourceOrTarget = (
     ClickhouseTransferSourceOrTarget
     | HiveTransferSourceOrTarget
-    | IcebergRESTCatalogS3TransferSourceOrTarget
+    | IcebergTransferSourceOrTarget
     | MSSQLTransferSourceOrTarget
     | MySQLTransferSourceOrTarget
     | OracleTransferSourceOrTarget

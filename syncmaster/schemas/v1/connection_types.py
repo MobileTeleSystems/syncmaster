@@ -3,7 +3,7 @@
 from typing import Literal
 
 HIVE_TYPE = Literal["hive"]
-ICEBERG_REST_S3_TYPE = Literal["iceberg_rest_s3"]
+ICEBERG_TYPE = Literal["iceberg"]
 ORACLE_TYPE = Literal["oracle"]
 POSTGRES_TYPE = Literal["postgres"]
 CLICKHOUSE_TYPE = Literal["clickhouse"]
@@ -20,7 +20,7 @@ SAMBA_TYPE = Literal["samba"]
 CONNECTION_TYPES = [
     "clickhouse",
     "hive",
-    "iceberg_rest_s3",
+    "iceberg",
     "mssql",
     "mysql",
     "oracle",
@@ -45,7 +45,7 @@ FILE_CONNECTION_TYPES = [
 DB_CONNECTION_TYPES = [
     "clickhouse",
     "hive",
-    "iceberg_rest_s3",
+    "iceberg",
     "mssql",
     "mysql",
     "oracle",

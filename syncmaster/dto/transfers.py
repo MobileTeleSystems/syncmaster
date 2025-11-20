@@ -128,9 +128,9 @@ class HiveTransferDTO(DBTransferDTO):
 
 
 @dataclass
-class IcebergRESTCatalogS3TransferDTO(DBTransferDTO):
-    type: ClassVar[str] = "iceberg_rest_s3"
-    catalog_name: str = field(default_factory=lambda: f"iceberg_rest_s3_{uuid4().hex[:8]}")  # noqa: WPS237
+class IcebergTransferDTO(DBTransferDTO):
+    type: ClassVar[str] = "iceberg"
+    catalog_name: str = field(default_factory=lambda: f"iceberg_{uuid4().hex[:8]}")  # noqa: WPS237
 
     def __post_init__(self):
         super().__post_init__()

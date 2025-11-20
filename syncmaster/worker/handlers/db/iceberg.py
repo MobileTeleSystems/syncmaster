@@ -8,8 +8,15 @@ from typing import TYPE_CHECKING
 from onetl.connection import Iceberg
 from onetl.hooks import slot, support_hooks
 
-from syncmaster.dto.connections import IcebergRESTCatalogS3ConnectionBaseDTO
-from syncmaster.dto.transfers import IcebergRESTCatalogS3TransferDTO
+from syncmaster.dto.connections import (
+    IcebergRESTCatalogBasicAuthS3BasicDTO,
+    IcebergRESTCatalogBasicAuthS3DelegatedDTO,
+    IcebergRESTCatalogOAuth2ClientCredentialsS3BasicDTO,
+    IcebergRESTCatalogOAuth2ClientCredentialsS3DelegatedDTO,
+    IcebergRESTCatalogS3DelegatedConnectionBaseDTO,
+    IcebergRESTCatalogS3DirectConnectionBaseDTO,
+)
+from syncmaster.dto.transfers import IcebergTransferDTO
 from syncmaster.worker.handlers.db.base import DBHandler
 
 if TYPE_CHECKING:
@@ -20,33 +27,47 @@ if TYPE_CHECKING:
 @support_hooks
 class IcebergRESTCatalogS3Handler(DBHandler):
     connection: Iceberg
-    connection_dto: IcebergRESTCatalogS3ConnectionBaseDTO
-    transfer_dto: IcebergRESTCatalogS3TransferDTO
+    connection_dto: IcebergRESTCatalogS3DirectConnectionBaseDTO | IcebergRESTCatalogS3DelegatedConnectionBaseDTO
+    transfer_dto: IcebergTransferDTO
     _operators = {
         "regexp": "RLIKE",
         **DBHandler._operators,
     }
 
     def connect(self, spark: SparkSession):
-        self.connection = Iceberg(
-            spark=spark,
-            catalog_name=self.transfer_dto.catalog_name,
-            catalog=Iceberg.RESTCatalog(
-                uri=self.connection_dto.rest_catalog_url,
-                auth=self._make_auth(),
-            ),
-            warehouse=Iceberg.S3Warehouse(
-                path=self.connection_dto.s3_warehouse_path,
-                host=self.connection_dto.s3_host,
-                port=self.connection_dto.s3_port,
-                protocol=self.connection_dto.s3_protocol,
-                bucket=self.connection_dto.s3_bucket,
-                path_style_access=self.connection_dto.s3_bucket_style == "path",
-                region=self.connection_dto.s3_region,
-                access_key=self.connection_dto.s3_access_key,
-                secret_key=self.connection_dto.s3_secret_key,
-            ),
-        ).check()
+        if isinstance(self.connection_dto, IcebergRESTCatalogS3DirectConnectionBaseDTO):
+            self.connection = Iceberg(
+                spark=spark,
+                catalog_name=self.transfer_dto.catalog_name,
+                catalog=Iceberg.RESTCatalog(
+                    uri=self.connection_dto.rest_catalog_url,
+                    auth=self._make_auth(),
+                ),
+                warehouse=Iceberg.S3Warehouse(
+                    path=self.connection_dto.s3_warehouse_path,
+                    host=self.connection_dto.s3_host,
+                    port=self.connection_dto.s3_port,
+                    protocol=self.connection_dto.s3_protocol,
+                    bucket=self.connection_dto.s3_bucket,
+                    path_style_access=self.connection_dto.s3_bucket_style == "path",
+                    region=self.connection_dto.s3_region,
+                    access_key=self.connection_dto.s3_access_key,
+                    secret_key=self.connection_dto.s3_secret_key,
+                ),
+            ).check()
+        else:
+            self.connection = Iceberg(
+                spark=spark,
+                catalog_name=self.transfer_dto.catalog_name,
+                catalog=Iceberg.RESTCatalog(
+                    uri=self.connection_dto.rest_catalog_url,
+                    auth=self._make_auth(),
+                ),
+                warehouse=Iceberg.DelegatedWarehouse(
+                    name=self.connection_dto.s3_warehouse_name,
+                    access_delegation=self.connection_dto.s3_access_delegation,
+                ),
+            ).check()
 
     @slot
     def read(self) -> DataFrame:
@@ -90,7 +111,11 @@ class IcebergRESTCatalogS3Handler(DBHandler):
         return f"`{field}`"
 
     def _make_auth(self):
-        if self.connection_dto.rest_catalog_auth_type == "oauth2":
+        if isinstance(
+            self.connection_dto,
+            IcebergRESTCatalogOAuth2ClientCredentialsS3BasicDTO
+            | IcebergRESTCatalogOAuth2ClientCredentialsS3DelegatedDTO,
+        ):
             return Iceberg.RESTCatalog.OAuth2ClientCredentials(
                 client_id=self.connection_dto.rest_catalog_oauth2_client_id,
                 client_secret=self.connection_dto.rest_catalog_oauth2_client_secret,
@@ -99,7 +124,12 @@ class IcebergRESTCatalogS3Handler(DBHandler):
                 audience=self.connection_dto.rest_catalog_oauth2_audience,
                 oauth2_token_endpoint=self.connection_dto.rest_catalog_oauth2_token_endpoint,
             )
-        return Iceberg.RESTCatalog.BasicAuth(
-            user=self.connection_dto.rest_catalog_username,
-            password=self.connection_dto.rest_catalog_password,
-        )
+        if isinstance(
+            self.connection_dto,
+            IcebergRESTCatalogBasicAuthS3DelegatedDTO | IcebergRESTCatalogBasicAuthS3BasicDTO,
+        ):
+            return Iceberg.RESTCatalog.BasicAuth(
+                user=self.connection_dto.rest_catalog_username,
+                password=self.connection_dto.rest_catalog_password,
+            )
+        return None
