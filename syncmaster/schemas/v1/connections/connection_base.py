@@ -7,11 +7,13 @@ from syncmaster.schemas.v1.auth import (
     ReadS3AuthSchema,
     ReadSambaAuthSchema,
 )
-from syncmaster.schemas.v1.auth.iceberg.basic import (
+from syncmaster.schemas.v1.auth.iceberg_rest_s3_delegated import (
     ReadIcebergRESTCatalogBasicAuthSchema,
-)
-from syncmaster.schemas.v1.auth.iceberg.oauth2_client_credentials import (
     ReadIcebergRESTCatalogOAuth2ClientCredentialsAuthSchema,
+)
+from syncmaster.schemas.v1.auth.iceberg_rest_s3_direct import (
+    ReadIcebergRESTCatalogBasicS3BasicAuthSchema,
+    ReadIcebergRESTCatalogOAuth2ClientCredentialsS3BasicAuthSchema,
 )
 from syncmaster.schemas.v1.types import NameConstr
 
@@ -19,6 +21,8 @@ ReadConnectionAuthDataSchema = (
     ReadBasicAuthSchema
     | ReadS3AuthSchema
     | ReadSambaAuthSchema
+    | ReadIcebergRESTCatalogBasicS3BasicAuthSchema
+    | ReadIcebergRESTCatalogOAuth2ClientCredentialsS3BasicAuthSchema
     | ReadIcebergRESTCatalogBasicAuthSchema
     | ReadIcebergRESTCatalogOAuth2ClientCredentialsAuthSchema
 )

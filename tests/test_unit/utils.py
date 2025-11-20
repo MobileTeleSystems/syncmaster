@@ -268,22 +268,24 @@ async def fetch_connection_json(client: AsyncClient, user_token: str, mock_conne
         f"v1/connections/{mock_connection.id}",
         headers={"Authorization": f"Bearer {user_token}"},
     )
+    assert connection.status_code == 200, connection.text
     connection_json = connection.json()
 
     auth_data = connection_json["auth_data"]
-    if auth_data["type"] in ("basic", "samba"):
-        auth_data["password"] = mock_connection.credentials.value["password"]
-    elif auth_data["type"] == "s3":
-        auth_data["secret_key"] = mock_connection.credentials.value["secret_key"]
-    elif auth_data["type"] == "iceberg_rest_basic_s3_basic":
-        auth_data["rest_catalog_password"] = mock_connection.credentials.value["rest_catalog_password"]
-        auth_data["s3_secret_key"] = mock_connection.credentials.value["s3_secret_key"]
-    elif auth_data["type"] == "iceberg_rest_oauth2_client_credentials_s3_basic":
-        auth_data["rest_catalog_oauth2_client_secret"] = mock_connection.credentials.value[
-            "rest_catalog_oauth2_client_secret"
-        ]
-        auth_data["s3_secret_key"] = mock_connection.credentials.value["s3_secret_key"]
-
+    auth_data_secret_fields = {
+        "basic": ["password"],
+        "samba": ["password"],
+        "s3": ["secret_key"],
+        "iceberg_rest_basic": ["rest_catalog_password"],
+        "iceberg_rest_basic_s3_basic": ["rest_catalog_password", "s3_secret_key"],
+        "iceberg_rest_oauth2_client_credentials": ["rest_catalog_oauth2_client_secret"],
+        "iceberg_rest_oauth2_client_credentials_s3_basic": [
+            "rest_catalog_oauth2_client_secret",
+            "s3_secret_key",
+        ],
+    }
+    for field in auth_data_secret_fields[auth_data["type"]]:
+        auth_data[field] = mock_connection.credentials.value[field]
     return connection_json
 
 

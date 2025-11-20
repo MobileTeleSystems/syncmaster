@@ -41,7 +41,7 @@ async def postgres_to_iceberg_rest_s3(
             "table_name": "public.source_table",
         },
         target_params={
-            "type": "iceberg_rest_s3",
+            "type": "iceberg",
             "table_name": "default.target_table",
             "catalog_name": "iceberg_rest_s3",
         },
@@ -71,7 +71,7 @@ async def iceberg_rest_s3_to_postgres(
         source_connection_id=iceberg_rest_s3_connection.id,
         target_connection_id=postgres_connection.id,
         source_params={
-            "type": "iceberg_rest_s3",
+            "type": "iceberg",
             "table_name": "default.source_table",
             "catalog_name": "iceberg_rest_s3",
         },

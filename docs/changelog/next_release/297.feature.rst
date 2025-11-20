@@ -1,0 +1,1 @@
+Added support for fetching S3 params & credentials from Iceberg REST Catalog (delegation).

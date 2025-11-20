@@ -89,7 +89,7 @@ def get_packages(connection_types: set[str]) -> list[str]:  # noqa: WPS212
     if connection_types & {"s3", "all"}:
         result.extend(SparkS3.get_packages(spark_version=spark_version))
 
-    if connection_types & {"iceberg_rest_s3", "all"}:
+    if connection_types & {"iceberg", "all"}:
         result.extend(
             [
                 *Iceberg.get_packages(package_version="1.10.0", spark_version=spark_version),

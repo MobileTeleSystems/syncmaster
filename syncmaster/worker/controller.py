@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import logging
+from collections.abc import Callable
 from tempfile import TemporaryDirectory
 from typing import Any
 
@@ -13,11 +14,11 @@ from onetl.strategy import IncrementalStrategy
 from syncmaster.db.models import Connection, Run
 from syncmaster.dto.connections import (
     ClickhouseConnectionDTO,
+    ConnectionDTO,
     FTPConnectionDTO,
     FTPSConnectionDTO,
     HDFSConnectionDTO,
     HiveConnectionDTO,
-    IcebergRESTCatalogS3ConnectionDTO,
     MSSQLConnectionDTO,
     MySQLConnectionDTO,
     OracleConnectionDTO,
@@ -26,6 +27,7 @@ from syncmaster.dto.connections import (
     SambaConnectionDTO,
     SFTPConnectionDTO,
     WebDAVConnectionDTO,
+    get_iceberg_connection_dto,
 )
 from syncmaster.dto.runs import RunDTO
 from syncmaster.dto.transfers import (
@@ -34,7 +36,7 @@ from syncmaster.dto.transfers import (
     FTPTransferDTO,
     HDFSTransferDTO,
     HiveTransferDTO,
-    IcebergRESTCatalogS3TransferDTO,
+    IcebergTransferDTO,
     MSSQLTransferDTO,
     MySQLTransferDTO,
     OracleTransferDTO,
@@ -42,6 +44,7 @@ from syncmaster.dto.transfers import (
     S3TransferDTO,
     SambaTransferDTO,
     SFTPTransferDTO,
+    TransferDTO,
     WebDAVTransferDTO,
 )
 from syncmaster.dto.transfers_resources import Resources
@@ -70,17 +73,26 @@ from syncmaster.worker.settings import WorkerAppSettings
 logger = logging.getLogger(__name__)
 
 
-connection_handler_proxy = {
+HANDLERS_MAPPING = dict[
+    str,
+    tuple[
+        type[Handler],
+        Callable[..., ConnectionDTO],
+        type[TransferDTO],
+        type[RunDTO],
+    ],
+]
+connection_handler_proxy: HANDLERS_MAPPING = {
     "hive": (
         HiveHandler,
         HiveConnectionDTO,
         HiveTransferDTO,
         RunDTO,
     ),
-    "iceberg_rest_s3": (
+    "iceberg": (
         IcebergRESTCatalogS3Handler,
-        IcebergRESTCatalogS3ConnectionDTO,
-        IcebergRESTCatalogS3TransferDTO,
+        get_iceberg_connection_dto,
+        IcebergTransferDTO,
         RunDTO,
     ),
     "oracle": (
