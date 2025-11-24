@@ -9,7 +9,7 @@ from pyspark.sql import DataFrame, SparkSession
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Group
-from syncmaster.dto.connections import IcebergRESTCatalogBasicAuthS3BasicDTO
+from syncmaster.dto.connections import IcebergRESTCatalogBearerAuthS3BasicDTO
 from syncmaster.server.settings import ServerAppSettings as Settings
 from tests.settings import TestSettings
 from tests.test_unit.utils import create_connection, create_credentials
@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
     scope="session",
     params=[pytest.param("iceberg", marks=[pytest.mark.iceberg])],
 )
-def iceberg_rest_s3_for_conftest(test_settings: TestSettings) -> IcebergRESTCatalogBasicAuthS3BasicDTO:
-    return IcebergRESTCatalogBasicAuthS3BasicDTO(
+def iceberg_rest_s3_for_conftest(test_settings: TestSettings) -> IcebergRESTCatalogBearerAuthS3BasicDTO:
+    return IcebergRESTCatalogBearerAuthS3BasicDTO(
         rest_catalog_url=test_settings.TEST_ICEBERG_REST_CATALOG_URL_FOR_CONFTEST,
         s3_warehouse_path=test_settings.TEST_ICEBERG_S3_WAREHOUSE_PATH,
         s3_host=test_settings.TEST_S3_HOST_FOR_CONFTEST,
@@ -34,8 +34,7 @@ def iceberg_rest_s3_for_conftest(test_settings: TestSettings) -> IcebergRESTCata
         s3_access_key=test_settings.TEST_S3_ACCESS_KEY,
         s3_secret_key=test_settings.TEST_S3_SECRET_KEY,
         s3_additional_params=test_settings.TEST_ICEBERG_S3_ADDITIONAL_PARAMS,
-        rest_catalog_username=test_settings.TEST_ICEBERG_REST_CATALOG_USERNAME,
-        rest_catalog_password=test_settings.TEST_ICEBERG_REST_CATALOG_PASSWORD,
+        rest_catalog_token="",
     )
 
 
@@ -43,8 +42,8 @@ def iceberg_rest_s3_for_conftest(test_settings: TestSettings) -> IcebergRESTCata
     scope="session",
     params=[pytest.param("iceberg", marks=[pytest.mark.iceberg])],
 )
-def iceberg_rest_s3_for_worker(test_settings: TestSettings) -> IcebergRESTCatalogBasicAuthS3BasicDTO:
-    return IcebergRESTCatalogBasicAuthS3BasicDTO(
+def iceberg_rest_s3_for_worker(test_settings: TestSettings) -> IcebergRESTCatalogBearerAuthS3BasicDTO:
+    return IcebergRESTCatalogBearerAuthS3BasicDTO(
         rest_catalog_url=test_settings.TEST_ICEBERG_REST_CATALOG_URL_FOR_WORKER,
         s3_warehouse_path=test_settings.TEST_ICEBERG_S3_WAREHOUSE_PATH,
         s3_host=test_settings.TEST_S3_HOST_FOR_WORKER,
@@ -56,15 +55,14 @@ def iceberg_rest_s3_for_worker(test_settings: TestSettings) -> IcebergRESTCatalo
         s3_access_key=test_settings.TEST_S3_ACCESS_KEY,
         s3_secret_key=test_settings.TEST_S3_SECRET_KEY,
         s3_additional_params=test_settings.TEST_ICEBERG_S3_ADDITIONAL_PARAMS,
-        rest_catalog_username=test_settings.TEST_ICEBERG_REST_CATALOG_USERNAME,
-        rest_catalog_password=test_settings.TEST_ICEBERG_REST_CATALOG_PASSWORD,
+        rest_catalog_token="",
     )
 
 
 @pytest.fixture
 def prepare_iceberg_rest_s3(
     spark: SparkSession,
-    iceberg_rest_s3_for_conftest: IcebergRESTCatalogBasicAuthS3BasicDTO,
+    iceberg_rest_s3_for_conftest: IcebergRESTCatalogBearerAuthS3BasicDTO,
     s3_file_connection: S3,
 ):
     iceberg = iceberg_rest_s3_for_conftest
@@ -76,13 +74,7 @@ def prepare_iceberg_rest_s3(
     connection = Iceberg(
         spark=spark,
         catalog_name=catalog_name,
-        catalog=Iceberg.RESTCatalog(
-            url=iceberg.rest_catalog_url,
-            auth=Iceberg.RESTCatalog.BasicAuth(
-                user=iceberg.rest_catalog_username,
-                password=iceberg.rest_catalog_password,
-            ),
-        ),
+        catalog=Iceberg.RESTCatalog(url=iceberg.rest_catalog_url),
         warehouse=Iceberg.S3Warehouse(
             path=iceberg.s3_warehouse_path,
             host=iceberg.s3_host,
@@ -118,7 +110,7 @@ def prepare_iceberg_rest_s3(
 
 @pytest_asyncio.fixture
 async def iceberg_rest_s3_connection(
-    iceberg_rest_s3_for_worker: IcebergRESTCatalogBasicAuthS3BasicDTO,
+    iceberg_rest_s3_for_worker: IcebergRESTCatalogBearerAuthS3BasicDTO,
     settings: Settings,
     session: AsyncSession,
     group: Group,
@@ -147,11 +139,10 @@ async def iceberg_rest_s3_connection(
         settings=settings,
         connection_id=result.id,
         auth_data=dict(
-            type="iceberg_rest_basic_s3_basic",
+            type="iceberg_rest_bearer_s3_basic",
             s3_access_key=iceberg.s3_access_key,
             s3_secret_key=iceberg.s3_secret_key,
-            rest_catalog_username=iceberg.rest_catalog_username,
-            rest_catalog_password=iceberg.rest_catalog_password,
+            rest_catalog_token=iceberg.rest_catalog_token,
         ),
     )
 

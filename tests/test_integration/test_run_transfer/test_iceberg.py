@@ -115,7 +115,7 @@ async def test_run_transfer_postgres_to_iceberg_rest_s3_with_full_strategy(
         client,
         group_owner,
         postgres_to_iceberg_rest_s3.id,
-        target_auth="iceberg_rest_basic_s3_basic",
+        target_auth="iceberg_rest_bearer_s3_basic",
     )
 
     reader = DBReader(
@@ -155,7 +155,7 @@ async def test_run_transfer_postgres_to_iceberg_rest_s3_mixed_naming_with_full_s
         client,
         group_owner,
         postgres_to_iceberg_rest_s3.id,
-        target_auth="iceberg_rest_basic_s3_basic",
+        target_auth="iceberg_rest_bearer_s3_basic",
     )
 
     reader = DBReader(
@@ -200,7 +200,7 @@ async def test_run_transfer_postgres_to_iceberg_rest_s3_with_incremental_strateg
         client,
         group_owner,
         postgres_to_iceberg_rest_s3.id,
-        target_auth="iceberg_rest_basic_s3_basic",
+        target_auth="iceberg_rest_bearer_s3_basic",
     )
 
     reader = DBReader(
@@ -217,7 +217,7 @@ async def test_run_transfer_postgres_to_iceberg_rest_s3_with_incremental_strateg
         client,
         group_owner,
         postgres_to_iceberg_rest_s3.id,
-        target_auth="iceberg_rest_basic_s3_basic",
+        target_auth="iceberg_rest_bearer_s3_basic",
     )
 
     spark.catalog.refreshTable("iceberg_rest_s3.default.target_table")
@@ -264,7 +264,7 @@ async def test_run_transfer_iceberg_rest_s3_to_postgres_with_full_strategy(
         client,
         group_owner,
         iceberg_rest_s3_to_postgres.id,
-        source_auth="iceberg_rest_basic_s3_basic",
+        source_auth="iceberg_rest_bearer_s3_basic",
     )
 
     reader = DBReader(
@@ -304,7 +304,7 @@ async def test_run_transfer_iceberg_rest_s3_to_postgres_mixes_naming_with_full_s
         client,
         group_owner,
         iceberg_rest_s3_to_postgres.id,
-        source_auth="iceberg_rest_basic_s3_basic",
+        source_auth="iceberg_rest_bearer_s3_basic",
     )
 
     reader = DBReader(
@@ -348,7 +348,7 @@ async def test_run_transfer_iceberg_rest_s3_to_postgres_with_incremental_strateg
         client,
         group_owner,
         iceberg_rest_s3_to_postgres.id,
-        source_auth="iceberg_rest_basic_s3_basic",
+        source_auth="iceberg_rest_bearer_s3_basic",
     )
 
     reader = DBReader(
@@ -365,7 +365,7 @@ async def test_run_transfer_iceberg_rest_s3_to_postgres_with_incremental_strateg
         client,
         group_owner,
         iceberg_rest_s3_to_postgres.id,
-        source_auth="iceberg_rest_basic_s3_basic",
+        source_auth="iceberg_rest_bearer_s3_basic",
     )
 
     df_with_increment = reader.run()

@@ -140,14 +140,12 @@ def verify_transfer_auth_data(run_data: dict[str, Any], source_auth: str, target
         if auth_type == "s3":
             assert auth_data["access_key"]
             assert "secret_key" not in auth_data
-        elif auth_type == "iceberg_rest_basic":
-            assert auth_data["rest_catalog_username"]
-            assert "rest_catalog_password" not in auth_data
-        elif auth_type == "iceberg_rest_basic_s3_basic":
+        elif auth_type == "iceberg_rest_bearer":
+            assert "rest_catalog_token" not in auth_data
+        elif auth_type == "iceberg_rest_bearer_s3_basic":
             assert auth_data["s3_access_key"]
-            assert auth_data["rest_catalog_username"]
             assert "s3_secret_key" not in auth_data
-            assert "rest_catalog_password" not in auth_data
+            assert "rest_catalog_token" not in auth_data
         elif auth_type == "iceberg_rest_oauth2_client_credentials":
             assert auth_data["rest_catalog_oauth2_client_id"]
             assert "rest_catalog_oauth2_client_secret" not in auth_data
