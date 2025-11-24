@@ -40,9 +40,8 @@ async def test_developer_plus_can_create_iceberg_rest_s3_direct_connection(
                 "s3_bucket_style": "path",
             },
             "auth_data": {
-                "type": "iceberg_rest_basic_s3_basic",
-                "rest_catalog_username": "user",
-                "rest_catalog_password": "secret",
+                "type": "iceberg_rest_bearer_s3_basic",
+                "rest_catalog_token": "token",
                 "s3_access_key": "access_key",
                 "s3_secret_key": "secret_key",
             },
@@ -87,7 +86,6 @@ async def test_developer_plus_can_create_iceberg_rest_s3_direct_connection(
         },
         "auth_data": {
             "type": decrypted["type"],
-            "rest_catalog_username": decrypted["rest_catalog_username"],
             "s3_access_key": decrypted["s3_access_key"],
         },
     }
@@ -116,9 +114,8 @@ async def test_developer_plus_can_create_iceberg_rest_s3_delegated_connection(
                 "s3_access_delegation": "vended-credentials",
             },
             "auth_data": {
-                "type": "iceberg_rest_basic",
-                "rest_catalog_username": "user",
-                "rest_catalog_password": "secret",
+                "type": "iceberg_rest_bearer",
+                "rest_catalog_token": "token",
             },
         },
     )
@@ -155,7 +152,6 @@ async def test_developer_plus_can_create_iceberg_rest_s3_delegated_connection(
         },
         "auth_data": {
             "type": decrypted["type"],
-            "rest_catalog_username": decrypted["rest_catalog_username"],
         },
     }
 
@@ -328,9 +324,8 @@ async def test_developer_plus_can_create_iceberg_rest_s3_delegated_connection_wi
     [
         pytest.param(
             {
-                "type": "iceberg_rest_basic",
-                "rest_catalog_username": "user",
-                "rest_catalog_password": "secret",
+                "type": "iceberg_rest_bearer",
+                "rest_catalog_token": "token",
             },
             id="with_basic_auth",
         ),
@@ -403,9 +398,8 @@ async def test_developer_plus_can_create_iceberg_rest_s3_direct_connection_witho
     [
         pytest.param(
             {
-                "type": "iceberg_rest_basic_s3_basic",
-                "rest_catalog_username": "user",
-                "rest_catalog_password": "secret",
+                "type": "iceberg_rest_bearer_s3_basic",
+                "rest_catalog_token": "token",
                 "s3_access_key": "access_key",
                 "s3_secret_key": "secret_key",
             },

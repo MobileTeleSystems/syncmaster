@@ -4,10 +4,10 @@ from typing import Annotated
 
 from pydantic import Field
 
-from syncmaster.schemas.v1.auth.iceberg_rest_s3_delegated.basic import (
-    CreateIcebergRESTCatalogBasicAuthSchema,
-    ReadIcebergRESTCatalogBasicAuthSchema,
-    UpdateIcebergRESTCatalogBasicAuthSchema,
+from syncmaster.schemas.v1.auth.iceberg_rest_s3_delegated.bearer import (
+    CreateIcebergRESTCatalogBearerAuthSchema,
+    ReadIcebergRESTCatalogBearerAuthSchema,
+    UpdateIcebergRESTCatalogBearerAuthSchema,
 )
 from syncmaster.schemas.v1.auth.iceberg_rest_s3_delegated.oauth2_client_credentials import (
     CreateIcebergRESTCatalogOAuth2ClientCredentialsAuthSchema,
@@ -16,16 +16,16 @@ from syncmaster.schemas.v1.auth.iceberg_rest_s3_delegated.oauth2_client_credenti
 )
 
 CreateIcebergRESTCatalogS3DelegatedConnectionAuthDataSchema = Annotated[
-    CreateIcebergRESTCatalogBasicAuthSchema | CreateIcebergRESTCatalogOAuth2ClientCredentialsAuthSchema,
+    CreateIcebergRESTCatalogBearerAuthSchema | CreateIcebergRESTCatalogOAuth2ClientCredentialsAuthSchema,
     Field(discriminator="type"),
 ]
 
 ReadIcebergRESTCatalogS3DelegatedConnectionAuthDataSchema = Annotated[
-    ReadIcebergRESTCatalogBasicAuthSchema | ReadIcebergRESTCatalogOAuth2ClientCredentialsAuthSchema,
+    ReadIcebergRESTCatalogBearerAuthSchema | ReadIcebergRESTCatalogOAuth2ClientCredentialsAuthSchema,
     Field(discriminator="type"),
 ]
 
 UpdateIcebergRESTCatalogS3DelegatedConnectionAuthDataSchema = Annotated[
-    UpdateIcebergRESTCatalogBasicAuthSchema | UpdateIcebergRESTCatalogOAuth2ClientCredentialsAuthSchema,
+    UpdateIcebergRESTCatalogBearerAuthSchema | UpdateIcebergRESTCatalogOAuth2ClientCredentialsAuthSchema,
     Field(discriminator="type"),
 ]

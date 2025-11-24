@@ -96,10 +96,9 @@ class IcebergRESTCatalogS3DirectConnectionBaseDTO(IcebergConnectionBaseDTO):
 
 
 @dataclass(kw_only=True)
-class IcebergRESTCatalogBasicAuthS3BasicDTO(IcebergRESTCatalogS3DirectConnectionBaseDTO):
-    rest_catalog_username: str
-    rest_catalog_password: str
-    rest_catalog_auth_type: Literal["basic"] = "basic"
+class IcebergRESTCatalogBearerAuthS3BasicDTO(IcebergRESTCatalogS3DirectConnectionBaseDTO):
+    rest_catalog_token: str
+    rest_catalog_auth_type: Literal["bearer"] = "bearer"
 
 
 @dataclass(kw_only=True)
@@ -121,10 +120,9 @@ class IcebergRESTCatalogS3DelegatedConnectionBaseDTO(IcebergConnectionBaseDTO):
 
 
 @dataclass(kw_only=True)
-class IcebergRESTCatalogBasicAuthS3DelegatedDTO(IcebergRESTCatalogS3DelegatedConnectionBaseDTO):
-    rest_catalog_username: str
-    rest_catalog_password: str
-    rest_catalog_auth_type: Literal["basic"] = "basic"
+class IcebergRESTCatalogBearerAuthS3DelegatedDTO(IcebergRESTCatalogS3DelegatedConnectionBaseDTO):
+    rest_catalog_token: str
+    rest_catalog_auth_type: Literal["bearer"] = "bearer"
 
 
 @dataclass(kw_only=True)
@@ -141,18 +139,18 @@ class IcebergRESTCatalogOAuth2ClientCredentialsS3DelegatedDTO(IcebergRESTCatalog
 # TODO: should be refactored
 def get_iceberg_rest_catalog_s3_direct_connection_dto(
     **data,
-) -> IcebergRESTCatalogBasicAuthS3BasicDTO | IcebergRESTCatalogOAuth2ClientCredentialsS3BasicDTO:
+) -> IcebergRESTCatalogBearerAuthS3BasicDTO | IcebergRESTCatalogOAuth2ClientCredentialsS3BasicDTO:
     if "rest_catalog_oauth2_client_id" in data:
         return IcebergRESTCatalogOAuth2ClientCredentialsS3BasicDTO(**data)
-    return IcebergRESTCatalogBasicAuthS3BasicDTO(**data)
+    return IcebergRESTCatalogBearerAuthS3BasicDTO(**data)
 
 
 def get_iceberg_rest_catalog_s3_delegated_connection_dto(
     **data,
-) -> IcebergRESTCatalogBasicAuthS3DelegatedDTO | IcebergRESTCatalogOAuth2ClientCredentialsS3DelegatedDTO:
+) -> IcebergRESTCatalogBearerAuthS3DelegatedDTO | IcebergRESTCatalogOAuth2ClientCredentialsS3DelegatedDTO:
     if "rest_catalog_oauth2_client_id" in data:
         return IcebergRESTCatalogOAuth2ClientCredentialsS3DelegatedDTO(**data)
-    return IcebergRESTCatalogBasicAuthS3DelegatedDTO(**data)
+    return IcebergRESTCatalogBearerAuthS3DelegatedDTO(**data)
 
 
 def get_iceberg_connection_dto(**data) -> IcebergConnectionBaseDTO:

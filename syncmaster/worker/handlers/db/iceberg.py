@@ -9,8 +9,8 @@ from onetl.connection import Iceberg
 from onetl.hooks import slot, support_hooks
 
 from syncmaster.dto.connections import (
-    IcebergRESTCatalogBasicAuthS3BasicDTO,
-    IcebergRESTCatalogBasicAuthS3DelegatedDTO,
+    IcebergRESTCatalogBearerAuthS3BasicDTO,
+    IcebergRESTCatalogBearerAuthS3DelegatedDTO,
     IcebergRESTCatalogOAuth2ClientCredentialsS3BasicDTO,
     IcebergRESTCatalogOAuth2ClientCredentialsS3DelegatedDTO,
     IcebergRESTCatalogS3DelegatedConnectionBaseDTO,
@@ -126,10 +126,9 @@ class IcebergRESTCatalogS3Handler(DBHandler):
             )
         if isinstance(
             self.connection_dto,
-            IcebergRESTCatalogBasicAuthS3DelegatedDTO | IcebergRESTCatalogBasicAuthS3BasicDTO,
+            IcebergRESTCatalogBearerAuthS3DelegatedDTO | IcebergRESTCatalogBearerAuthS3BasicDTO,
         ):
-            return Iceberg.RESTCatalog.BasicAuth(
-                user=self.connection_dto.rest_catalog_username,
-                password=self.connection_dto.rest_catalog_password,
+            return Iceberg.RESTCatalog.BearerAuth(
+                access_token=self.connection_dto.rest_catalog_token,
             )
         return None

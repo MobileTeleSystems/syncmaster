@@ -24,9 +24,8 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.iceberg]
                 "s3_bucket_style": "path",
             },
             {
-                "type": "iceberg_rest_basic_s3_basic",
-                "rest_catalog_username": "user",
-                "rest_catalog_password": "secret",
+                "type": "iceberg_rest_bearer_s3_basic",
+                "rest_catalog_token": "token",
                 "s3_access_key": "access_key",
                 "s3_secret_key": "secret_key",
             },
@@ -59,9 +58,8 @@ async def test_developer_plus_can_update_iceberg_rest_s3_direct_connection(
                 "s3_bucket_style": "domain",
             },
             "auth_data": {
-                "type": "iceberg_rest_basic_s3_basic",
-                "rest_catalog_username": "new_user",
-                "rest_catalog_password": "new_password",
+                "type": "iceberg_rest_bearer_s3_basic",
+                "rest_catalog_token": "new_token",
                 "s3_access_key": "new_access_key",
             },
         },
@@ -88,7 +86,6 @@ async def test_developer_plus_can_update_iceberg_rest_s3_direct_connection(
         },
         "auth_data": {
             "type": group_connection.credentials.value["type"],
-            "rest_catalog_username": "new_user",
             "s3_access_key": "new_access_key",
         },
     }
@@ -106,9 +103,8 @@ async def test_developer_plus_can_update_iceberg_rest_s3_direct_connection(
                 "s3_access_delegation": "vended-credentials",
             },
             {
-                "type": "iceberg_rest_basic",
-                "rest_catalog_username": "user",
-                "rest_catalog_password": "secret",
+                "type": "iceberg_rest_bearer",
+                "rest_catalog_token": "token",
             },
         ),
     ],
@@ -135,9 +131,8 @@ async def test_developer_plus_can_update_iceberg_rest_s3_delegated_connection(
                 "s3_access_delegation": "remote-signing",
             },
             "auth_data": {
-                "type": "iceberg_rest_basic",
-                "rest_catalog_username": "new_user",
-                "rest_catalog_password": "new_password",
+                "type": "iceberg_rest_bearer",
+                "rest_catalog_token": "new_token",
             },
         },
     )
@@ -156,8 +151,7 @@ async def test_developer_plus_can_update_iceberg_rest_s3_delegated_connection(
             "s3_access_delegation": "remote-signing",
         },
         "auth_data": {
-            "type": "iceberg_rest_basic",
-            "rest_catalog_username": "new_user",
+            "type": "iceberg_rest_bearer",
         },
     }
 

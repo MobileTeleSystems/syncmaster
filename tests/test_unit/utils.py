@@ -276,8 +276,8 @@ async def fetch_connection_json(client: AsyncClient, user_token: str, mock_conne
         "basic": ["password"],
         "samba": ["password"],
         "s3": ["secret_key"],
-        "iceberg_rest_basic": ["rest_catalog_password"],
-        "iceberg_rest_basic_s3_basic": ["rest_catalog_password", "s3_secret_key"],
+        "iceberg_rest_bearer": ["rest_catalog_token"],
+        "iceberg_rest_bearer_s3_basic": ["rest_catalog_token", "s3_secret_key"],
         "iceberg_rest_oauth2_client_credentials": ["rest_catalog_oauth2_client_secret"],
         "iceberg_rest_oauth2_client_credentials_s3_basic": [
             "rest_catalog_oauth2_client_secret",
