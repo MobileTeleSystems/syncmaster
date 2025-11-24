@@ -45,24 +45,24 @@ exclude = [
 [tool.poetry.dependencies]
 python = "^3.11"
 pydantic = "^2.12.4"
-pydantic-settings = "^2.8.1"
+pydantic-settings = "^2.12.0"
 pydantic-settings-logging = "^0.1.1"
-sqlalchemy = "^2.0.40"
+sqlalchemy = "^2.0.44"
 sqlalchemy-utils = "^0.42.0"
 pyyaml = "^6.0.3"
 coloredlogs = "^15.0.1"
 python-json-logger = "^4.0.0"
-celery = "^5.5.0"
+celery = "^5.5.3"
 asgi-correlation-id = "^4.3.4"
 uuid6 = "^2025.0.1"
-fastapi = { version = "^0.121.1", optional = true}
+fastapi = { version = "^0.121.3", optional = true}
 uvicorn = { version = "^0.38.0", optional = true }
 alembic = { version = "^1.17.1", optional = true }
 pyjwt = { version = "^2.10.1", optional = true }
 jinja2 = { version = "^3.1.6", optional = true }
 python-multipart = { version = "^0.0.20", optional = true }
-onetl = { git = "https://github.com/MobileTeleSystems/onetl.git", branch = "develop", extras = ["all"], optional = true }
 # TODO: revert before next syncmaster release
+onetl = { git = "https://github.com/MobileTeleSystems/onetl.git", branch = "develop", extras = ["all"], optional = true }
 pyspark = { version = "<4.0.0", optional = true }
 psycopg2-binary = { version = "^2.9.11", optional = true }
 asyncpg = { version = "^0.30.0", optional = true }
@@ -102,38 +102,38 @@ scheduler = [
 ]
 
 [tool.poetry.group.test.dependencies]
-pytest = "^8.3.5"
+pytest = "^8.4.2"
 httpx = "^0.28.1"
 pytest-asyncio = ">=0.26.0,<1.0"
-pytest-randomly = ">=3.15,<5.0"
-pytest-rerunfailures = ">=15,<17"
-pytest-deadfixtures = ">=2.2.1,<4.0.0"
-pytest-mock = "^3.14.0"
-pytest-lazy-fixtures = "^1.1.1"
-faker = "^37.4.0"
-coverage = "^7.9.1"
-gevent = ">=24.11.1,<26.0.0"
+pytest-randomly = "^4.0.1"
+pytest-rerunfailures = "^16.1"
+pytest-deadfixtures = "^3.0.0"
+pytest-mock = "^3.15.1"
+pytest-lazy-fixtures = "^1.4.0"
+faker = "^38.2.0"
+coverage = "^7.12.0"
+gevent = "^25.9.1"
 respx = "^0.22.0"
-dirty-equals = ">=0.9,<0.11"
+dirty-equals = "^0.11.0"
 
 [tool.poetry.group.dev.dependencies]
-mypy = "^1.15.0"
-pre-commit = "^4.2.0"
-black = "^25.1.0"
-flake8 = "^7.2.0"
+mypy = "^1.18.2"
+pre-commit = "^4.5.0"
+black = "^25.11.0"
+flake8 = "^7.3.0"
 flake8-pyproject = "^1.2.3"
-sqlalchemy = {extras = ["mypy"], version = "^2.0.40"}
+sqlalchemy = {extras = ["mypy"], version = "^2.0.44"}
 types-jwcrypto = "^1.5.0"
 
 [tool.poetry.group.docs.dependencies]
 autodoc-pydantic = "^2.2.0"
-numpydoc = "^1.8.0"
+numpydoc = "^1.9.0"
 sphinx = "^8.2.3"
-furo = ">=2024.8.6,<2026.0.0"
+furo = "^2025.9.25"
 sphinx-copybutton = "^0.5.2"
 sphinxcontrib-towncrier = "^0.5.0a0"
 towncrier = "^24.8.0"
-sphinx-issues = "^5.0.0"
+sphinx-issues = "^5.0.1"
 sphinx-design = "^0.6.1"
 sphinx-favicon = "^1.0.1"
 sphinx-argparse = "^0.5.2"
