@@ -77,7 +77,7 @@ def prepare_iceberg_rest_s3(
         spark=spark,
         catalog_name=catalog_name,
         catalog=Iceberg.RESTCatalog(
-            uri=iceberg.rest_catalog_url,
+            url=iceberg.rest_catalog_url,
             auth=Iceberg.RESTCatalog.BasicAuth(
                 user=iceberg.rest_catalog_username,
                 password=iceberg.rest_catalog_password,

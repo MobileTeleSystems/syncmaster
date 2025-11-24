@@ -40,7 +40,7 @@ class IcebergRESTCatalogS3Handler(DBHandler):
                 spark=spark,
                 catalog_name=self.transfer_dto.catalog_name,
                 catalog=Iceberg.RESTCatalog(
-                    uri=self.connection_dto.rest_catalog_url,
+                    url=self.connection_dto.rest_catalog_url,
                     auth=self._make_auth(),
                 ),
                 warehouse=Iceberg.S3Warehouse(
@@ -60,7 +60,7 @@ class IcebergRESTCatalogS3Handler(DBHandler):
                 spark=spark,
                 catalog_name=self.transfer_dto.catalog_name,
                 catalog=Iceberg.RESTCatalog(
-                    uri=self.connection_dto.rest_catalog_url,
+                    url=self.connection_dto.rest_catalog_url,
                     auth=self._make_auth(),
                 ),
                 warehouse=Iceberg.DelegatedWarehouse(
