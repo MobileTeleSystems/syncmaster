@@ -110,11 +110,11 @@ pytest-rerunfailures = ">=15,<17"
 pytest-deadfixtures = ">=2.2.1,<4.0.0"
 pytest-mock = "^3.14.0"
 pytest-lazy-fixtures = "^1.1.1"
-faker = "^37.4.0"
+faker = ">=37.4,<39.0"
 coverage = "^7.9.1"
 gevent = ">=24.11.1,<26.0.0"
 respx = "^0.22.0"
-dirty-equals = ">=0.9,<0.11"
+dirty-equals = ">=0.9,<0.12"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.15.0"
