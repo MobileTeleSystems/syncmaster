@@ -18,13 +18,14 @@ auth:
 
   # Keycloak Auth
   # provider: syncmaster.server.providers.auth.keycloak_provider.KeycloakAuthProvider
-  # server_url: http://localhost:8080
-  # realm_name: manually_created
-  # client_id: manually_created
-  # client_secret: generated_by_keycloak
-  # redirect_uri: http://localhost:3000/auth/callback
-  # scope: email
-  # verify_ssl: False
+  # keycloak:
+  #   server_url: http://localhost:8080
+  #   realm_name: manually_created
+  #   client_id: manually_created
+  #   client_secret: generated_by_keycloak
+  #   redirect_uri: http://localhost:3000/auth/callback
+  #   scope: email
+  #   verify_ssl: False
 
 
 ui:
