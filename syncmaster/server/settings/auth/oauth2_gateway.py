@@ -16,13 +16,14 @@ class OAuth2GatewayProviderSettings(BaseModel):
 
         auth:
             provider: syncmaster.server.providers.auth.oauth2_gateway_provider.OAuth2GatewayProvider
-            server_url: http://localhost:8080/auth
-            client_id: my_keycloak_client
-            client_secret: keycloak_client_secret
-            realm_name: my_realm
-            redirect_uri: http://localhost:8000/auth/realms/my_realm/protocol/openid-connect/auth
-            verify_ssl: false
-            scope: openid
+            keycloak:
+                server_url: http://localhost:8080/auth
+                client_id: my_keycloak_client
+                client_secret: keycloak_client_secret
+                realm_name: my_realm
+                redirect_uri: http://localhost:8000/auth/realms/my_realm/protocol/openid-connect/auth
+                verify_ssl: false
+                scope: openid
     """
 
     keycloak: KeycloakSettings = Field(
