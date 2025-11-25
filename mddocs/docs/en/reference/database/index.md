@@ -285,7 +285,7 @@ Other containers (server, scheduler, worker) should be stopped while running mig
   This is a thin wrapper around [alembic cli](https://alembic.sqlalchemy.org/en/latest/tutorial.html#running-our-first-migration),
   options and commands are just the same.
 
-> **This command should be executed after each upgrade to new Data.Rentgen version.**
+> **This command should be executed after each upgrade to new Data.SyncMaster version.**
 
 ## See also
 

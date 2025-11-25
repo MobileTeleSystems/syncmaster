@@ -285,7 +285,7 @@
   Это тонкая оболочка вокруг [alembic cli](https://alembic.sqlalchemy.org/en/latest/tutorial.html#running-our-first-migration),
   опции и команды точно такие же.
 
-> **Эта команда должна выполняться после каждого обновления до новой версии Data.Rentgen.**
+> **Эта команда должна выполняться после каждого обновления до новой версии Data.SyncMaster.**
 
 ## Смотрите также
 
