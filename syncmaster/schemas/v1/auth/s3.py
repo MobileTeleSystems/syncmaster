@@ -2,10 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 from typing import Literal
 
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import Field, SecretStr
+
+from syncmaster.schemas.v1.auth.mixins import SecretDumpMixin
 
 
-class ReadS3AuthSchema(BaseModel):
+class ReadS3AuthSchema(SecretDumpMixin):
     type: Literal["s3"] = Field(description="Auth type")
     access_key: str
 

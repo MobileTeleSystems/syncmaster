@@ -6,7 +6,6 @@ import json
 from typing import TYPE_CHECKING
 
 from cryptography.fernet import Fernet
-from pydantic import SecretStr
 
 if TYPE_CHECKING:
     from syncmaster.scheduler.settings import SchedulerAppSettings
@@ -23,11 +22,6 @@ def decrypt_auth_data(
     return json.loads(decrypted)
 
 
-def _json_default(value):
-    if isinstance(value, SecretStr):
-        return value.get_secret_value()
-
-
 def encrypt_auth_data(
     value: dict,
     settings: WorkerAppSettings | SchedulerAppSettings | ServerAppSettings,
@@ -37,7 +31,6 @@ def encrypt_auth_data(
         value,
         ensure_ascii=False,
         sort_keys=True,
-        default=_json_default,
     )
     encrypted = encryptor.encrypt(serialized.encode("utf-8"))
     return encrypted.decode("utf-8")
