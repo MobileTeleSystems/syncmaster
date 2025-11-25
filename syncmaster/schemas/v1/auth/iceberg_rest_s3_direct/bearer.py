@@ -2,10 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 from typing import Literal
 
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import Field, SecretStr
+
+from syncmaster.schemas.v1.auth.mixins import SecretDumpMixin
 
 
-class ReadIcebergRESTCatalogBearerS3BasicAuthSchema(BaseModel):
+class ReadIcebergRESTCatalogBearerS3BasicAuthSchema(SecretDumpMixin):
     type: Literal["iceberg_rest_bearer_s3_basic"] = Field(description="Auth type")
     s3_access_key: str
 

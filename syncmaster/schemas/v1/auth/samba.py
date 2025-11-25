@@ -2,10 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 from typing import Literal
 
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import Field, SecretStr
+
+from syncmaster.schemas.v1.auth.mixins import SecretDumpMixin
 
 
-class ReadSambaAuthSchema(BaseModel):
+class ReadSambaAuthSchema(SecretDumpMixin):
     type: Literal["samba"] = Field(description="Auth type")
     user: str
     auth_type: Literal["NTLMv1", "NTLMv2"] = "NTLMv2"
