@@ -148,10 +148,10 @@ async def test_filter_groups_by_role(
     expected_total: int,
     expected_roles: set,
 ):
-    role_query = f"?role={role}" if role else ""
     response = await client.get(
-        f"v1/groups{role_query}",
+        "v1/groups",
         headers={"Authorization": f"Bearer {user_with_many_roles.token}"},
+        params={"role": role} if role else None,
     )
 
     assert response.status_code == 200, response.text
@@ -181,10 +181,10 @@ async def test_filter_groups_not_applied_to_superuser(
     role: str,
     expected_total: int,
 ):
-    role_query = f"?role={role}" if role else ""
     response = await client.get(
-        f"v1/groups{role_query}",
+        "v1/groups",
         headers={"Authorization": f"Bearer {superuser.token}"},
+        params={"role": role} if role else None,
     )
 
     assert response.status_code == 200, response.text
