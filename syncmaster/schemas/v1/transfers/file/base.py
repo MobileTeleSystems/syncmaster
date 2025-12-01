@@ -51,7 +51,7 @@ class FileTransferTarget(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    FILE_NAME_PATTERN: ClassVar[re.Pattern] = re.compile(r"^[a-zA-Z0-9_.{}-]+$")
+    FILE_NAME_PATTERN: ClassVar[re.Pattern] = re.compile(r"^[\w.{}-]+$")
 
     @field_validator("directory_path", mode="before")
     @classmethod
