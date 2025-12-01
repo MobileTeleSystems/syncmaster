@@ -50,7 +50,7 @@ class TestSettings(BaseSettings):
     TEST_MYSQL_PORT_FOR_WORKER: int
     TEST_MYSQL_USER: str
     TEST_MYSQL_PASSWORD: str
-    TEST_MYSQL_DB: str
+    TEST_MYSQL_DB: str | None = None
     TEST_MYSQL_ADDITIONAL_PARAMS: dict = {}
 
     TEST_HIVE_CLUSTER: str

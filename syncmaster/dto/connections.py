@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2023-2024 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import ClassVar, Literal
 
 
@@ -15,8 +15,8 @@ class PostgresConnectionDTO(ConnectionDTO):
     port: int
     user: str
     password: str
-    additional_params: dict
     database_name: str
+    additional_params: dict = field(default_factory=dict)
     type: ClassVar[str] = "postgres"
 
 
@@ -26,8 +26,8 @@ class ClickhouseConnectionDTO(ConnectionDTO):
     port: int
     user: str
     password: str
-    database_name: str
-    additional_params: dict
+    database_name: str | None = None
+    additional_params: dict = field(default_factory=dict)
     type: ClassVar[str] = "clickhouse"
 
 
@@ -38,7 +38,7 @@ class MSSQLConnectionDTO(ConnectionDTO):
     user: str
     password: str
     database_name: str
-    additional_params: dict
+    additional_params: dict = field(default_factory=dict)
     type: ClassVar[str] = "mssql"
 
 
@@ -48,8 +48,8 @@ class MySQLConnectionDTO(ConnectionDTO):
     port: int
     user: str
     password: str
-    database_name: str
-    additional_params: dict
+    database_name: str | None = None
+    additional_params: dict = field(default_factory=dict)
     type: ClassVar[str] = "mysql"
 
 
@@ -59,7 +59,7 @@ class OracleConnectionDTO(ConnectionDTO):
     port: int
     user: str
     password: str
-    additional_params: dict
+    additional_params: dict = field(default_factory=dict)
     sid: str | None = None
     service_name: str | None = None
     type: ClassVar[str] = "oracle"
@@ -91,7 +91,7 @@ class IcebergRESTCatalogS3DirectConnectionBaseDTO(IcebergConnectionBaseDTO):
     s3_secret_key: str
     s3_port: int | None
     s3_protocol: str
-    s3_additional_params: dict
+    s3_additional_params: dict = field(default_factory=dict)
     implementation: ClassVar[str] = "iceberg_rest_s3_direct"
 
 
@@ -175,7 +175,7 @@ class S3ConnectionDTO(ConnectionDTO):
     secret_key: str
     bucket: str
     bucket_style: Literal["domain", "path"]
-    additional_params: dict
+    additional_params: dict = field(default_factory=dict)
     region: str | None = None
     protocol: str = "https"
     type: ClassVar[str] = "s3"
@@ -212,9 +212,9 @@ class FTPSConnectionDTO(ConnectionDTO):
 class SambaConnectionDTO(ConnectionDTO):
     host: str
     share: str
-    protocol: Literal["SMB", "NetBIOS"]
     user: str
     password: str
+    protocol: Literal["SMB", "NetBIOS"] = "SMB"
     auth_type: Literal["NTLMv1", "NTLMv2"] = "NTLMv2"
     domain: str = ""
     port: int | None = None
