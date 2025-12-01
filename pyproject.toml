@@ -55,7 +55,7 @@ python-json-logger = "^4.0.0"
 celery = "^5.5.3"
 asgi-correlation-id = "^4.3.4"
 uuid6 = "^2025.0.1"
-fastapi = { version = "^0.121.3", optional = true}
+fastapi = { version = ">=0.121.3,<0.124.0", optional = true}
 uvicorn = { version = "^0.38.0", optional = true }
 alembic = { version = "^1.17.1", optional = true }
 pyjwt = { version = "^2.10.1", optional = true }
@@ -65,7 +65,7 @@ python-multipart = { version = "^0.0.20", optional = true }
 onetl = { git = "https://github.com/MobileTeleSystems/onetl.git", branch = "develop", extras = ["all"], optional = true }
 pyspark = { version = "<4.0.0", optional = true }
 psycopg2-binary = { version = "^2.9.11", optional = true }
-asyncpg = { version = "^0.30.0", optional = true }
+asyncpg = { version = ">=0.30,<0.32", optional = true }
 apscheduler = { version = "^3.11.1", optional = true }
 starlette-exporter = { version = "^0.23.0", optional = true }
 python-keycloak = { version = "^5.8.1", optional = true }
