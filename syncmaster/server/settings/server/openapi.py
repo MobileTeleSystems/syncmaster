@@ -3,7 +3,7 @@
 import textwrap
 from typing import Any
 
-from pydantic import AnyHttpUrl, BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 
 class SwaggerSettings(BaseModel):
@@ -104,7 +104,7 @@ class LogoSettings(BaseModel):
         default="Syncmaster logo",
         description="Alternative text for ``<img>`` tag",
     )
-    href: AnyHttpUrl | None = Field(  # type: ignore[assignment]
+    href: HttpUrl | None = Field(  # type: ignore[assignment]
         default="https://github.com/MobileTeleSystems/syncmaster",
         description="Clicking on logo will redirect to this URL",
     )

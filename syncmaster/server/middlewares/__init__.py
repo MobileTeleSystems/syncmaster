@@ -9,7 +9,6 @@ from syncmaster.server.middlewares.monitoring.metrics import (
 )
 from syncmaster.server.middlewares.openapi import apply_openapi_middleware
 from syncmaster.server.middlewares.request_id import apply_request_id_middleware
-from syncmaster.server.middlewares.session import apply_session_middleware
 from syncmaster.server.middlewares.static_files import apply_static_files
 from syncmaster.server.settings import ServerAppSettings as Settings
 
@@ -25,6 +24,5 @@ def apply_middlewares(
     apply_request_id_middleware(application, settings.server.request_id)
     apply_openapi_middleware(application, settings.server.openapi)
     apply_static_files(application, settings.server.static_files)
-    apply_session_middleware(application, settings.server.session)
 
     return application

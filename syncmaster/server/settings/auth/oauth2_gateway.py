@@ -1,8 +1,14 @@
 # SPDX-FileCopyrightText: 2023-2025 MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl, SecretStr
 
-from syncmaster.server.settings.auth.keycloak import KeycloakSettings
+
+class OAuth2GatewayKeycloakSettings(BaseModel):
+    api_url: HttpUrl = Field(description="Keycloak API URL")
+    client_id: str = Field(description="Keycloak client ID")
+    client_secret: SecretStr = Field(description="Keycloak client secret")
+    realm_name: str = Field(description="Keycloak realm name")
+    verify_ssl: bool = Field(default=True, description="Verify SSL certificates")
 
 
 class OAuth2GatewayProviderSettings(BaseModel):
@@ -17,15 +23,13 @@ class OAuth2GatewayProviderSettings(BaseModel):
         auth:
             provider: syncmaster.server.providers.auth.oauth2_gateway_provider.OAuth2GatewayProvider
             keycloak:
-                server_url: http://localhost:8080/auth
+                api_url: http://localhost:8080/auth
                 client_id: my_keycloak_client
                 client_secret: keycloak_client_secret
                 realm_name: my_realm
-                redirect_uri: http://localhost:8000/auth/realms/my_realm/protocol/openid-connect/auth
                 verify_ssl: false
-                scope: openid
     """
 
-    keycloak: KeycloakSettings = Field(
+    keycloak: OAuth2GatewayKeycloakSettings = Field(
         description="Keycloak settings",
     )

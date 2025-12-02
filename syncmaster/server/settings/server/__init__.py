@@ -9,7 +9,6 @@ from syncmaster.server.settings.server.cors import CORSSettings
 from syncmaster.server.settings.server.monitoring import MonitoringSettings
 from syncmaster.server.settings.server.openapi import OpenAPISettings
 from syncmaster.server.settings.server.request_id import RequestIDSettings
-from syncmaster.server.settings.server.session import SessionSettings
 from syncmaster.server.settings.server.static_files import StaticFilesSettings
 
 
@@ -26,8 +25,6 @@ class ServerSettings(BaseModel):
             debug: true
             request_id:
                 enabled: true
-            session:
-                secret_key: super-secret-key
             cors:
                 enabled: true
             monitoring:
@@ -49,10 +46,6 @@ class ServerSettings(BaseModel):
     )
     request_id: RequestIDSettings = Field(
         default_factory=RequestIDSettings,
-    )
-    session: SessionSettings = Field(
-        default_factory=SessionSettings,  # type: ignore[arg-type]
-        description=":ref:`Session settings <server-configuration-session>`",
     )
     cors: CORSSettings = Field(
         default_factory=CORSSettings,

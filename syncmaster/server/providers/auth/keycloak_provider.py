@@ -6,6 +6,7 @@ from typing import Annotated, Any, NoReturn
 from fastapi import Depends, FastAPI, Request
 from jwcrypto.common import JWException
 from keycloak import KeycloakOpenID, KeycloakOperationError
+from starlette.middleware.sessions import SessionMiddleware
 
 from syncmaster.db.models.user import User
 from syncmaster.exceptions import EntityNotFoundError
@@ -28,7 +29,7 @@ class KeycloakAuthProvider(AuthProvider):
         self.settings = settings
         self._uow = unit_of_work
         self.keycloak_openid = KeycloakOpenID(
-            server_url=self.settings.keycloak.server_url,
+            server_url=str(self.settings.keycloak.api_url).rstrip("/") + "/",  # noqa: WPS336
             client_id=self.settings.keycloak.client_id,
             realm_name=self.settings.keycloak.realm_name,
             client_secret_key=self.settings.keycloak.client_secret.get_secret_value(),
@@ -41,6 +42,17 @@ class KeycloakAuthProvider(AuthProvider):
         log.info("Using %s provider with settings:\n%s", cls.__name__, settings)
         app.dependency_overrides[AuthProvider] = cls
         app.dependency_overrides[KeycloakAuthProviderSettings] = lambda: settings
+
+        app.add_middleware(
+            SessionMiddleware,
+            secret_key=settings.cookie.secret_key.get_secret_value(),
+            session_cookie=settings.cookie.name,
+            max_age=settings.cookie.max_age,
+            path=settings.cookie.path,
+            same_site=settings.cookie.same_site,
+            https_only=settings.cookie.https_only,
+            domain=settings.cookie.domain,
+        )
         return app
 
     async def get_token_password_grant(
@@ -67,7 +79,7 @@ class KeycloakAuthProvider(AuthProvider):
             return await self.keycloak_openid.a_token(
                 grant_type="authorization_code",
                 code=code,
-                redirect_uri=self.settings.keycloak.redirect_uri,
+                redirect_uri=self.settings.keycloak.ui_callback_url,
             )
         except KeycloakOperationError as e:
             raise AuthorizationError("Failed to get token") from e
@@ -135,7 +147,7 @@ class KeycloakAuthProvider(AuthProvider):
 
     async def redirect_to_auth(self) -> NoReturn:
         auth_url = await self.keycloak_openid.a_auth_url(
-            redirect_uri=self.settings.keycloak.redirect_uri,
+            redirect_uri=self.settings.keycloak.ui_callback_url,
             scope=self.settings.keycloak.scope,
         )
         raise RedirectException(redirect_url=auth_url)

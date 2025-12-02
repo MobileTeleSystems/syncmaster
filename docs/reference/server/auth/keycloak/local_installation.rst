@@ -76,7 +76,7 @@ Configure Redirect URI
 
 Set URI to redirect from Keycloak login page for exchanging the code for an access token:
 
-.. image:: images/keycloak-client-redirect_uri.png
+.. image:: images/keycloak-client-ui_callback_url.png
    :width: 400px
    :align: center
 
@@ -86,7 +86,7 @@ Set URI to redirect from Keycloak login page for exchanging the code for an acce
     auth:
         keycloak:
             # Set here URL of SyncMaster UI page handling callback redirects
-            redirect_uri: http://localhost:3000/auth/callback
+            ui_callback_url: http://localhost:3000/auth/callback
             # ...
 
 Configure the client secret
@@ -108,17 +108,17 @@ Now go to **Credentials** tab and generate a client secret:
 
 Now you can use create users in this realm, check `Keycloak documentation <https://www.keycloak.org/docs/latest/server_admin/#assembly-managing-users_server_administration_guide>`_ on how to manage users creation.
 
-Enable session middleware
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Cookie encryption secret
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-Enable :ref:`SesionMiddleware <server-configuration-session>`, and generate random string to use for cookie encryption.
+Keycloak access & refresh tokens are stored in cookie with server-side encryption.
+So we need to generate random string to use as encryption key:
 
 .. code-block:: yaml
     :caption: config.yml
 
-    server:
-        session:
-            enabled: true
+    auth:
+        cookie:
             secret_key: secret_key_for_session_cookie
 
 Replace login page with Keycloak redirect button
@@ -132,8 +132,7 @@ Replace login page with Keycloak redirect button
     :caption: config.yml
 
     ui:
-        # required by KeycloakAuthProvider
-        auth_provider: keycloakAuth
+        auth_provider: keycloakAuthProvider
 
 Final configuration
 ~~~~~~~~~~~~~~~~~~~
@@ -147,23 +146,18 @@ After this you can use ``KeycloakAuthProvider`` in your application:
         provider: syncmaster.server.providers.auth.keycloak_provider.KeycloakAuthProvider
         keycloak:
             # Keycloak URL accessible from both SyncMaster server and from browser
-            server_url: http://keycloak:8080
+            api_url: http://keycloak:8080
             # Set here URL of SyncMaster UI page handling callback redirects
-            redirect_uri: http://localhost:3000/auth/callback
+            ui_callback_url: http://localhost:3000/auth/callback
             realm_name: fastapi_realm
             client_id: fastapi_client
             client_secret: 6x6gn8uJdWSBmP8FqbNRSoGdvaoaFeez
             scope: email
             verify_ssl: false
-
-    server:
-        session:
-            # required by KeycloakAuthProvider
-            enabled: true
+        cookie:
             secret_key: secret_key_for_session_cookie
 
     ui:
-        # required by KeycloakAuthProvider
-        auth_provider: keycloakAuth
+        auth_provider: keycloakAuthProvider
         # SyncMaster API URL, accessible from browser
         api_browser_url: http://localhost:8000

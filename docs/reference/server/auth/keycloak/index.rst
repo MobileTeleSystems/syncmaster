@@ -79,7 +79,7 @@ Basic configuration
 
 .. autopydantic_model:: syncmaster.server.settings.auth.keycloak.KeycloakAuthProviderSettings
 .. autopydantic_model:: syncmaster.server.settings.auth.keycloak.KeycloakSettings
-.. autopydantic_model:: syncmaster.server.settings.auth.jwt.JWTSettings
+.. autopydantic_model:: syncmaster.server.settings.auth.keycloak.KeycloakCookieSettings
 
 
 OAuth2 Gateway Provider
@@ -95,9 +95,10 @@ This provider ensures integration with OAuth2 Gateway and maintains the standard
 
 **Configuration**
 
-OAuth2GatewayProvider uses the same configuration models as KeycloakAuthProvider — namely:
+OAuth2GatewayProvider uses almost the same configuration models as KeycloakAuthProvider — namely:
 
 .. autopydantic_model:: syncmaster.server.settings.auth.oauth2_gateway.OAuth2GatewayProviderSettings
+.. autopydantic_model:: syncmaster.server.settings.auth.oauth2_gateway.OAuth2GatewayKeycloakSettings
 
 .. toctree::
     :maxdepth: 1
