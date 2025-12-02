@@ -10,12 +10,10 @@ OAUTH2GATEWAY_AUTH_SETTINGS = {
     "auth": {
         "provider": "syncmaster.server.providers.auth.oauth2_gateway_provider.OAuth2GatewayProvider",
         "keycloak": {
-            "server_url": "http://localhost:8080",
+            "api_url": "http://localhost:8080/auth",
             "realm_name": "manually_created",
             "client_id": "manually_created",
             "client_secret": "generated_by_keycloak",
-            "redirect_uri": "http://localhost:3000/auth/callback",
-            "scope": "email",
             "verify_ssl": False,
         },
     },

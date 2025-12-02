@@ -4,29 +4,34 @@ import logging
 from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, Request
+from keycloak import KeycloakOpenID, KeycloakOperationError
 
 from syncmaster.db.models import User
 from syncmaster.exceptions import EntityNotFoundError
 from syncmaster.exceptions.auth import AuthorizationError
 from syncmaster.server.dependencies import Stub
 from syncmaster.server.providers.auth.base_provider import AuthProvider
-from syncmaster.server.providers.auth.keycloak_provider import (
-    KeycloakAuthProvider,
-    KeycloakOperationError,
-)
 from syncmaster.server.services.unit_of_work import UnitOfWork
 from syncmaster.server.settings.auth.oauth2_gateway import OAuth2GatewayProviderSettings
 
 log = logging.getLogger(__name__)
 
 
-class OAuth2GatewayProvider(KeycloakAuthProvider):
+class OAuth2GatewayProvider(AuthProvider):
     def __init__(  # noqa: WPS612
         self,
         settings: Annotated[OAuth2GatewayProviderSettings, Depends(Stub(OAuth2GatewayProviderSettings))],
         unit_of_work: Annotated[UnitOfWork, Depends()],
     ) -> None:
-        super().__init__(settings, unit_of_work)  # type: ignore[arg-type]
+        self.settings = settings
+        self._uow = unit_of_work
+        self.keycloak_openid = KeycloakOpenID(
+            server_url=str(self.settings.keycloak.api_url).rstrip("/") + "/",  # noqa: WPS336
+            client_id=self.settings.keycloak.client_id,
+            realm_name=self.settings.keycloak.realm_name,
+            client_secret_key=self.settings.keycloak.client_secret.get_secret_value(),
+            verify=self.settings.keycloak.verify_ssl,
+        )
 
     @classmethod
     def setup(cls, app: FastAPI) -> FastAPI:
@@ -80,6 +85,19 @@ class OAuth2GatewayProvider(KeycloakAuthProvider):
                     last_name=last_name,
                 )
         return user
+
+    async def get_token_password_grant(
+        self,
+        grant_type: str | None = None,
+        login: str | None = None,
+        password: str | None = None,
+        scopes: list[str] | None = None,
+        client_id: str | None = None,
+        client_secret: str | None = None,
+    ) -> dict[str, Any]:
+        raise NotImplementedError(
+            f"Password grant is not supported by {self.__class__.__name__}.",  # noqa: WPS237
+        )
 
     async def get_token_authorization_code_grant(
         self,

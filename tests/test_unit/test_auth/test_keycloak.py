@@ -13,13 +13,17 @@ KEYCLOAK_AUTH_SETTINGS = {
     "auth": {
         "provider": "syncmaster.server.providers.auth.keycloak_provider.KeycloakAuthProvider",
         "keycloak": {
-            "server_url": "http://localhost:8080",
+            "api_url": "http://localhost:8080/auth",
             "realm_name": "manually_created",
             "client_id": "manually_created",
             "client_secret": "generated_by_keycloak",
-            "redirect_uri": "http://localhost:3000/auth/callback",
+            "ui_callback_url": "http://localhost:3000/auth/callback",
             "scope": "email",
             "verify_ssl": False,
+        },
+        "cookie": {
+            "secret_key": "generate_some_random_string",
+            "max_age": 86400,
         },
     },
 }

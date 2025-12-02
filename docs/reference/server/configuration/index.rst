@@ -12,7 +12,6 @@ Configuration
     broker
     credentials
     logging
-    session
     cors
     debug
     monitoring
