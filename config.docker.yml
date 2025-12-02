@@ -30,8 +30,8 @@ auth:
 
 ui:
   api_browser_url: http://localhost:8000
-  auth_provider: dummyAuth
-  # auth_provider: keycloakAuth
+  auth_provider: dummyAuthProvider
+  # auth_provider: keycloakAuthProvider
 
 
 server:

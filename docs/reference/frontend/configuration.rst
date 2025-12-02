@@ -37,5 +37,5 @@ To show a login page for :ref:`keycloak-auth-provider`, you should set config op
     :caption: config.yml
 
     ui:
-        api_browser_url: keycloakAuthProvider
-        # api_browser_url: dummyAuth
+        auth_provider: keycloakAuthProvider
+        # auth_provider: dummyAuthProvider
