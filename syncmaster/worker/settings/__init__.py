@@ -40,6 +40,7 @@ class WorkerSettings(BaseModel):
     create_spark_session_function: ImportString = Field(
         "syncmaster.worker.spark.get_worker_spark_session",
         description="Function to create Spark session for worker",
+        validate_default=True,
     )
     spark_session_default_config: dict[str, Any] = Field(
         default_factory=dict,
