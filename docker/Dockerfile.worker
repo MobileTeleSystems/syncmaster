@@ -14,6 +14,10 @@ ENV PYTHONPATH=/app \
     POETRY_VIRTUALENVS_IN_PROJECT=1 \
     POETRY_VIRTUALENVS_CREATE=1
 
+COPY ./docker/entrypoint_worker.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
+
 
 FROM base AS builder
 
@@ -72,11 +76,6 @@ COPY --from=maven_packages --chown=syncmaster:syncmaster /root/.ivy2/ /home/sync
 
 COPY ./syncmaster/ /app/syncmaster/
 RUN python -m compileall syncmaster
-
-COPY ./docker/entrypoint_worker.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-ENTRYPOINT ["/app/entrypoint.sh"]
-
 USER syncmaster
 
 
@@ -94,11 +93,8 @@ RUN --mount=type=cache,target=/root/.cache/pypoetry \
 
 ENV SYNCMASTER__WORKER__CREATE_SPARK_SESSION_FUNCTION=tests.spark.get_worker_spark_session
 
-COPY ./docker/entrypoint_worker.sh /app/entryp
-ENTRYPOINT ["/app/entrypoint.sh"]
 # Collect coverage from worker
-RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.shoint.sh
-RUN chmod +x /app/entrypoint.sh
+RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
 
 # Replace kinit binary with dummy, to skip Kerberos interaction in tests
 RUN mkdir -p /app/.local/bin && \
