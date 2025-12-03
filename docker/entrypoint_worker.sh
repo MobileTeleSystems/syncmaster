@@ -13,11 +13,12 @@ fi
 
 SPARK_CLASSPATH="$SPARK_CLASSPATH:${SPARK_HOME}/jars/*"
 
-env | grep SPARK_JAVA_OPT_ | sort -t_ -k4 -n | sed 's/[^=]*=\(.*\)/\1/g' > java_opts.txt
+JAVA_OPTS_FILE=$(mktemp)
+env | grep SPARK_JAVA_OPT_ | sort -t_ -k4 -n | sed 's/[^=]*=\(.*\)/\1/g' > $JAVA_OPTS_FILE
 if [ "$(command -v readarray)" ]; then
-  readarray -t SPARK_EXECUTOR_JAVA_OPTS < java_opts.txt
+  readarray -t SPARK_EXECUTOR_JAVA_OPTS < $JAVA_OPTS_FILE
 else
-  SPARK_EXECUTOR_JAVA_OPTS=("${(@f)$(< java_opts.txt)}")
+  SPARK_EXECUTOR_JAVA_OPTS=("${(@f)$(< $JAVA_OPTS_FILE)}")
 fi
 
 if [ -n "$SPARK_EXTRA_CLASSPATH" ]; then
