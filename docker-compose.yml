@@ -81,7 +81,7 @@ services:
       dockerfile: docker/Dockerfile.worker
       context: .
       target: prod
-    command: -E -Q 123-test_queue  # Queue.slug
+    command: worker --events --queues 123-test_queue  # Queue.slug
     volumes:
       - ./config.docker.yml:/app/config.yml
     depends_on:

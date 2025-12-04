@@ -104,7 +104,7 @@ services:
       dockerfile: docker/Dockerfile.worker
       context: .
       target: test
-    command: --loglevel=info -Q 123-test_queue
+    command: --queues 123-test_queue  # Queue slug
     entrypoint: [coverage, run, -m, celery, -A, tests.test_integration.celery_test, worker, --max-tasks-per-child=1]
     env_file: .env.docker.test
     environment:

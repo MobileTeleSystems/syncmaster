@@ -1,0 +1,3 @@
+Allow using SyncMaster worker image as ``spark.kubernetes.container.image``.
+
+Worker container command should be changed from ``--queues 123-myqueue`` to ``worker --queues 123-myqueue``.

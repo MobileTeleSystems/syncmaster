@@ -11,8 +11,10 @@ executes them and updates status & log url in :ref:`database`. Implemented using
     Each worker process is bound to one ot more Queues. You have to created it before starting a worker.
     This can be done via :ref:`frontend` or via :ref:`server` REST API.
 
-    Queue field ``slug`` value is then should be passed to Celery argument ``-Q``.
-    For example, for slug ``123-test_queue`` this should be ``-Q 123-test_queue``.
+    Queue field ``slug`` value is then should be passed to Celery worker argument ``--queues``.
+    For example, for slug ``123-test_queue`` this should be ``--queues 123-test_queue``.
+
+    Worker can listen multiple queues at the same time, you can pass a list with ``,`` as delimiter.
 
 Install & run
 -------------
@@ -25,6 +27,7 @@ With docker
 * Go to `frontend <http://localhost:3000>`
 * Create new Group
 * Create Queue in this group, and then get **Queue.slug** (e.g. ``123-test_queue``)
+* Pass queue slug as ``--queues $slug`` into ```worker:command`` section of ``docker-compose.yml`` (see below)
 * Run the following command:
 
   .. code:: console
@@ -79,19 +82,19 @@ Without docker
 
   .. code-block:: console
 
-    $ python -m celery -A syncmaster.worker.celery worker -Q 123-test_queue --max-tasks-per-child=1
+    $ python -m celery -A syncmaster.worker.celery worker --queues 123-test_queue --max-tasks-per-child=1
 
   You can specify options like concurrency and queues by adding additional flags:
 
   .. code-block:: bash
 
-    $ python -m celery -A syncmaster.worker.celery worker -Q 123-test_queue --max-tasks-per-child=1 --concurrency=4 --loglevel=info
+    $ python -m celery -A syncmaster.worker.celery worker --queues 123-test_queue --max-tasks-per-child=1 --concurrency=4
 
   Refer to the `Celery <https://docs.celeryq.dev/en/stable/>`_ documentation for more advanced start options.
 
   .. note::
 
-    ``--max-tasks-per-child=1`` flag is important!
+    ``--max-tasks-per-child=1`` flag is important for Spark to properly work!
 
 See also
 --------
