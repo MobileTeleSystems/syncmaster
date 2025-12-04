@@ -29,7 +29,6 @@ jobs:
           file: docker/Dockerfile.worker
           load: true
           cache-from: type=gha,scope=test
-          cache-to: type=gha,scope=test,mode=max
 
       - name: Docker compose up
         run: |
