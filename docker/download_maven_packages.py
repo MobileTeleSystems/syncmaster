@@ -8,7 +8,7 @@ import logging
 import sys
 from typing import TYPE_CHECKING
 
-from syncmaster.worker.spark import get_excluded_packages, get_packages
+from syncmaster.worker.ivy2 import get_excluded_packages, get_packages
 
 if TYPE_CHECKING:
     from pyspark.sql import SparkSession

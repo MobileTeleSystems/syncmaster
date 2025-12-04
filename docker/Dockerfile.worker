@@ -43,7 +43,7 @@ RUN --mount=type=cache,target=/root/.cache/pypoetry \
 
 FROM builder AS maven_packages
 
-RUN --mount=type=bind,source=./syncmaster/,target=/app/syncmaster/ \
+RUN --mount=type=bind,source=./syncmaster/worker/ivy2.py,target=/app/syncmaster/worker/ivy2.py \
     --mount=type=bind,source=./docker/download_maven_packages.py,target=/app/docker/download_maven_packages.py \
     mkdir /root/.ivy2 && \
     # Try to download all dependencies at once.
