@@ -60,7 +60,7 @@ RUN --mount=type=bind,source=./syncmaster/worker/ivy2.py,target=/app/syncmaster/
     python /app/docker/download_ivy2_packages.py mssql && \
     python /app/docker/download_ivy2_packages.py mysql && \
     mkdir -p /home/syncmaster/.ivy2/  && \
-    cp --recursive /root/.ivy2/* /home/syncmaster/.ivy2/ && \
+    cp --recursive /root/.ivy2/* /home/syncmaster/.ivy2/
     # if someone uses custom worker image, they should download jars on their own
 
 
