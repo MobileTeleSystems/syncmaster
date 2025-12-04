@@ -31,7 +31,10 @@ For example, to use SyncMaster on Spark + Kubernetes, you can use worker image f
     worker:
         spark_session_default_config:
             spark.master: k8s://https://kubernetes.default.svc
+            spark.driver.host: service-for-spark-driver
             spark.driver.bindAddress: 0.0.0.0
+            spark.driver.port: 10000
+            spark.blockManager.port: 10001
             spark.kubernetes.authenticate.driver.serviceAccountName: spark
             spark.sql.pyspark.jvmStacktrace.enabled: true
             spark.kubernetes.container.image: mtsrus/syncmaster-worker:{TAG}
