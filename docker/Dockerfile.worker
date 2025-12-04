@@ -45,7 +45,7 @@ FROM builder AS ivy2_packages
 
 RUN --mount=type=bind,source=./syncmaster/worker/ivy2.py,target=/app/syncmaster/worker/ivy2.py \
     --mount=type=bind,source=./docker/download_ivy2_packages.py,target=/app/docker/download_ivy2_packages.py \
-    --mount=type=cache,target=/root/.ivy2 \
+    --mount=type=cache,target=/root/.ivy2/ \
     # Try to download all dependencies at once.
     # If multiple packages depends on the same transitive dependency, Spark uses maximum version of this dependency.
     python /app/docker/download_ivy2_packages.py all && \
@@ -58,7 +58,7 @@ RUN --mount=type=bind,source=./syncmaster/worker/ivy2.py,target=/app/syncmaster/
     python /app/docker/download_ivy2_packages.py oracle && \
     python /app/docker/download_ivy2_packages.py mssql && \
     python /app/docker/download_ivy2_packages.py mysql && \
-    mkdir -p /home/syncmaster/.ivy2 && \
+    mkdir -p /home/syncmaster/.ivy2/ && \
     cp --recursive /root/.ivy2/ /home/syncmaster/.ivy2/
     # if someone uses custom worker image, they should download jars on their own
 
@@ -76,7 +76,7 @@ COPY --from=builder /app/.venv/ /app/.venv/
 # custom Spark session function may download different jars, so syncmaster have to own them
 COPY --from=ivy2_packages --chown=syncmaster:syncmaster /home/syncmaster/.ivy2/ /home/syncmaster/.ivy2/
 # If someone needs to use worker image with root user, use the same jars
-RUN ln -s /home/syncmaster/.ivy2 /root/.ivy2
+RUN ln -s /home/syncmaster/.ivy2/ /root/.ivy2/
 
 COPY ./syncmaster/ /app/syncmaster/
 RUN python -m compileall syncmaster
