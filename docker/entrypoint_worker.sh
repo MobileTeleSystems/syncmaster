@@ -58,12 +58,11 @@ else
   CURRENT_DIR=$(mktemp -d)
 fi
 
-# current dir should always be writable
-cd "${CURRENT_DIR}"
-
 case "$1" in
   driver)
     shift 1
+    # current dir should always be writable
+    cd "${CURRENT_DIR}"
     CMD=(
       "$SPARK_HOME/bin/spark-submit"
       --conf "spark.driver.bindAddress=$SPARK_DRIVER_BIND_ADDRESS"
@@ -74,6 +73,8 @@ case "$1" in
     ;;
   executor)
     shift 1
+    # current dir should always be writable
+    cd "${CURRENT_DIR}"
     CMD=(
       ${JAVA_HOME}/bin/java
       "${SPARK_EXECUTOR_JAVA_OPTS[@]}"
