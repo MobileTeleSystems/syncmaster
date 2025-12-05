@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024-2025 MTS PJSC
+# SPDX-FileCopyrightText: 2025-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from collections.abc import Sequence
 from enum import IntFlag
@@ -38,16 +38,12 @@ def ts_rank(search_vector: InstrumentedAttribute, ts_query: ColumnElement) -> Co
 
 def make_tsquery(user_input: str) -> ColumnElement:
     """Convert user input to tsquery.
-
     - wraps tokens with `:*` for prefix matching,
     - combines unstemmed 'simple' query with stemmed 'russian' via OR.
     """
     simple_query = func.to_tsquery("simple", build_tsquery(user_input))
-
     stemmed_query = func.plainto_tsquery("russian", user_input)
-
     combined_query = simple_query.op("||")(stemmed_query)
-
     return combined_query
 
 
