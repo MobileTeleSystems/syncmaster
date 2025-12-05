@@ -51,6 +51,16 @@ fi
 # SPARK-43540: add current working directory into executor classpath
 SPARK_CLASSPATH="$SPARK_CLASSPATH:$PWD"
 
+if ! [ -n ${SPARK_LOCAL_DIRS} ]; then
+  CURRENT_DIR=$(mktemp -d)
+else
+  # /var/data/spark-local-123,/var/data/spark-local-234 -> /var/data/spark-local-123
+  CURRENT_DIR=${SPARK_LOCAL_DIRS%%,*}
+fi
+
+# current dir should always be writable
+cd "${CURRENT_DIR}"
+
 case "$1" in
   driver)
     shift 1
