@@ -6,6 +6,18 @@ reports, improving documentation, submitting feature requests, reviewing
 new submissions, or contributing code that can be incorporated into the
 project.
 
+Review process
+--------------
+
+For any **significant** changes please create a new GitHub issue and
+enhancements that you wish to make. Describe the feature you would like
+to see, why you need it, and how it will work. Discuss your ideas
+transparently and get community feedback before proceeding.
+
+Small changes can directly be crafted and submitted to the GitHub
+Repository as a Pull Request. This requires creating a **repo fork** using
+`instruction <https://docs.github.com/en/get-started/quickstart/fork-a-repo>`_.
+
 Initial setup for local development
 -----------------------------------
 
@@ -14,21 +26,14 @@ Install Git
 
 Please follow `instruction <https://docs.github.com/en/get-started/quickstart/set-up-git>`_.
 
-Create a fork
-~~~~~~~~~~~~~
-
-If you are not a member of a development team building Data.SyncMaster, you should create a fork before making any changes.
-
-Please follow `instruction <https://docs.github.com/en/get-started/quickstart/fork-a-repo>`_.
-
 Clone the repo
 ~~~~~~~~~~~~~~
 
-Open terminal and run these commands:
+Open terminal and run these commands to clone a **forked** repo:
 
 .. code:: bash
 
-    git clone https://github.com/MobileTeleSystems/syncmaster -b develop
+    git clone git@github.com:myuser/syncmaster.git -b develop
 
     cd syncmaster
 
@@ -87,7 +92,7 @@ How to
 Run development instance locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Start DB container:
+Start DB & RabbitMQ containers:
 
 .. code:: bash
 
@@ -237,24 +242,8 @@ If documentation should be build cleanly instead of reusing existing build resul
 
     make docs-fresh
 
-
-Review process
---------------
-
-Please create a new GitHub issue for any significant changes and
-enhancements that you wish to make. Provide the feature you would like
-to see, why you need it, and how it will work. Discuss your ideas
-transparently and get community feedback before proceeding.
-
-Significant Changes that you wish to contribute to the project should be
-discussed first in a GitHub issue that clearly outlines the changes and
-benefits of the feature.
-
-Small Changes can directly be crafted and submitted to the GitHub
-Repository as a Pull Request.
-
 Create pull request
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 Commit your changes:
 
@@ -271,7 +260,7 @@ After pull request is created, it get a corresponding number, e.g. 123 (``pr_num
 Write release notes
 ~~~~~~~~~~~~~~~~~~~
 
-Data.SyncMaster uses `towncrier <https://pypi.org/project/towncrier/>`_
+``Data.SyncMaster`` uses `towncrier <https://pypi.org/project/towncrier/>`_
 for changelog management.
 
 To submit a change note about your PR, add a text file into the
@@ -286,6 +275,7 @@ combined with others, it will be a part of the "news digest"
 telling the readers **what changed** in a specific version of
 the library *since the previous version*.
 
+You should also use
 reStructuredText syntax for highlighting code (inline or block),
 linking parts of the docs or external sites.
 If you wish to sign your change, feel free to add ``-- by
@@ -308,11 +298,10 @@ where the categories are:
 - ``bugfix``: A bug fix.
 - ``improvement``: An improvement. Improving functionality that already existed.
 - ``doc``: A change to the documentation.
-- ``dependency``: Dependency-related changes.
+- ``dependency``: Indicates that there have been changes in dependencies.
 - ``misc``: Changes internal to the repo like CI, test and build changes.
 - ``breaking``: introduces a breaking API change.
 - ``significant``: Indicates that significant changes have been made to the code.
-- ``dependency``: Indicates that there have been changes in dependencies.
 
 A pull request may have more than one of these components, for example
 a code change may introduce a new feature that deprecates an old
@@ -353,7 +342,11 @@ How to skip change notes check?
 Just add ``ci:skip-changelog`` label to pull request.
 
 Release Process
-^^^^^^^^^^^^^^^
+---------------
+
+.. note::
+
+    This is for repo maintainers only
 
 Before making a release from the ``develop`` branch, follow these steps:
 
