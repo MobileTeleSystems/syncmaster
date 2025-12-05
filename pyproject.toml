@@ -7,7 +7,7 @@ name = "data-syncmaster"
 version = "0.3.0"
 license = "Apache-2.0"
 description = "Syncmaster REST API + Worker"
-authors = ["DataOps.ETL <onetools@mts.ru>"]
+authors = ["MWS Data Bridge <onetools@mts.ru>"]
 readme = "README.rst"
 classifiers = [
     "Development Status :: 3 - Alpha",
