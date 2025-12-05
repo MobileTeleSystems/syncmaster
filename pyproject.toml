@@ -437,8 +437,10 @@ ignore = [
 per-file-ignores = [
 # WPS102 Found incorrect module name pattern
 # WPS432 Found magic number: 256
-  "*migrations/*.py:WPS102,WPS432",
-  "*db/models/*.py:WPS102,WPS432",
+# WPS226 Found string literal over-use: value > 15
+# WPS342 Found implicit raw string
+  "*migrations/*.py:WPS102,WPS432,WPS226,WPS342",
+  "*db/models/*.py:WPS102,WPS432,WPS342",
   "*db/mixins/*.py:WPS102,WPS432",
 # WPS432 Found magic number: 180
   "*settings/*.py:WPS432",

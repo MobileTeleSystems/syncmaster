@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
+# SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 # Configuration file for the Sphinx documentation builder.
 #
@@ -26,7 +26,7 @@ sys.path.insert(0, os.fspath(PROJECT_ROOT_DIR))
 # -- Project information -----------------------------------------------------
 
 project = "syncmaster"
-copyright = "2023-2024 MTS PJSC"
+copyright = "2023-2025 MTS PJSC"
 author = "DataOps.ETL"
 
 # The version info for the project you're documenting, acts as replacement for

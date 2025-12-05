@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
+# SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import re
 from typing import Annotated

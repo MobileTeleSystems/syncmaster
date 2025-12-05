@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
+# SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
@@ -107,7 +107,9 @@ class DummyAuthProvider(AuthProvider):  # noqa: WPS338
         client_id: str | None = None,
         client_secret: str | None = None,
     ) -> dict[str, Any]:
-        raise NotImplementedError(f"Authorization code grant is not supported by {self.__class__.__name__}.")
+        raise NotImplementedError(
+            f"Authorization code grant is not supported by {self.__class__.__name__}.",  # noqa: WPS237
+        )
 
     async def logout(self, user: User, refresh_token: str | None) -> None:
-        raise NotImplementedError(f"Logout is not supported by {self.__class__.__name__}.")
+        raise NotImplementedError(f"Logout is not supported by {self.__class__.__name__}.")  # noqa: WPS237

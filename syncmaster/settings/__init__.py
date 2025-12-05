@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
+# SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from syncmaster.settings.base import BaseSettings
 from syncmaster.settings.broker import RabbitMQSettings

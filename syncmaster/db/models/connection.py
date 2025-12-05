@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
+# SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
@@ -62,7 +62,7 @@ class Connection(Base, ResourceMixin, TimestampMixin):
                 'simple',
                 translate(coalesce(data->>'host', ''), './-_:\\', '      ')
             )
-            """,  # noqa: WPS342
+            """,
             persisted=True,
         ),
         nullable=False,

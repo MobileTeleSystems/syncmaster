@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-2024 MTS PJSC
+# SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from sqlalchemy import Float, Index, LargeBinary, String
 from sqlalchemy.orm import Mapped, mapped_column
