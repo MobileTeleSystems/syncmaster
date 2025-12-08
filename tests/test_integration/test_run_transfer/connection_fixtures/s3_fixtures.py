@@ -168,6 +168,7 @@ async def s3_connection(
             port=s3.port,
             bucket=s3.bucket,
             bucket_style=s3.bucket_style,
+            region=s3.region,
             protocol=s3.protocol,
             additional_params=s3.additional_params,
         ),
