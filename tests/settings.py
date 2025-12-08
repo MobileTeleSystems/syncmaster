@@ -74,6 +74,7 @@ class TestSettings(BaseSettings):
     TEST_S3_PORT_FOR_WORKER: int
     TEST_S3_BUCKET: str
     TEST_S3_BUCKET_STYLE: Literal["domain", "path"] = "path"
+    TEST_S3_REGION: str
     TEST_S3_ACCESS_KEY: str
     TEST_S3_SECRET_KEY: str
     TEST_S3_PROTOCOL: str = "http"

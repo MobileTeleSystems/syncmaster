@@ -46,6 +46,7 @@ async def group_connections(
             new_data.update(
                 {
                     "bucket": "bucket",
+                    "region": "us-east-1",
                 },
             )
         elif conn_type == ConnectionType.SAMBA:
