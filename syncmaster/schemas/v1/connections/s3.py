@@ -20,8 +20,8 @@ class ReadS3ConnectionDataSchema(BaseModel):
     host: str
     bucket: str
     protocol: Literal["http", "https"] = "https"
+    region: str
     port: int | None = Field(default=None, gt=0, le=65535, validate_default=True)  # noqa: WPS432
-    region: str | None = None
     bucket_style: Literal["domain", "path"] = "path"
     additional_params: dict = Field(default_factory=dict)
 

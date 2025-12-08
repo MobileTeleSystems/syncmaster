@@ -175,8 +175,8 @@ class S3ConnectionDTO(ConnectionDTO):
     secret_key: str
     bucket: str
     bucket_style: Literal["domain", "path"]
+    region: str
     additional_params: dict = field(default_factory=dict)
-    region: str | None = None
     protocol: str = "https"
     type: ClassVar[str] = "s3"
 
