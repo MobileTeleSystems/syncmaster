@@ -360,6 +360,7 @@ async def test_superuser_cannot_update_connection_auth_data_type_without_secret(
                 "host": "localhost",
                 "port": 9000,
                 "bucket": "new_bucket",
+                "region": "new_region",
             },
             "type": "s3",
             "auth_data": {"type": "s3", "access_key": "s3_key"},

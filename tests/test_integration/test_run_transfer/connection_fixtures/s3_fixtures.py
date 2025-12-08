@@ -57,7 +57,7 @@ def s3_for_worker(test_settings: TestSettings) -> S3ConnectionDTO:
 def s3_server(s3_for_conftest):
     S3Server = namedtuple(
         "S3Server",
-        ["host", "port", "bucket", "bucket_style", "access_key", "secret_key", "protocol"],
+        ["host", "port", "bucket", "bucket_style", "region", "access_key", "secret_key", "protocol"],
     )
 
     return S3Server(
@@ -65,6 +65,7 @@ def s3_server(s3_for_conftest):
         port=s3_for_conftest.port,
         bucket=s3_for_conftest.bucket,
         bucket_style=s3_for_conftest.bucket_style,
+        region=s3_for_conftest.region,
         access_key=s3_for_conftest.access_key,
         secret_key=s3_for_conftest.secret_key,
         protocol=s3_for_conftest.protocol,
@@ -79,6 +80,7 @@ def s3_file_connection(s3_server):
         host=s3_server.host,
         port=s3_server.port,
         bucket=s3_server.bucket,
+        region=s3_server.region,
         access_key=s3_server.access_key,
         secret_key=s3_server.secret_key,
         protocol=s3_server.protocol,
@@ -121,10 +123,11 @@ def s3_file_df_connection(s3_file_connection, spark, s3_server):
         host=s3_server.host,
         port=s3_server.port,
         bucket=s3_server.bucket,
-        access_key=s3_server.access_key,
-        secret_key=s3_server.secret_key,
         protocol=s3_server.protocol,
         path_style_access=s3_server.bucket_style == "path",
+        region=s3_server.region,
+        access_key=s3_server.access_key,
+        secret_key=s3_server.secret_key,
         spark=spark,
     )
 
