@@ -2508,8 +2508,10 @@ optional = true
 python-versions = ">=3.7"
 groups = ["main"]
 markers = "extra == \"worker\""
-files = []
-develop = false
+files = [
+    {file = "onetl-0.15.0-py3-none-any.whl", hash = "sha256:86ffcc414a611359274249c58bf4a16a4bfe94bfbc88accf12b3adc85df8682f"},
+    {file = "onetl-0.15.0.tar.gz", hash = "sha256:ce66b1218f18b7545f5b54e338e95b34263d519632654f040eeeaf67d1bcb389"},
+]
 
 [package.dependencies]
 etl-entities = ">=2.5,<2.7"
@@ -2543,12 +2545,6 @@ samba = ["pysmb"]
 sftp = ["paramiko"]
 spark = ["pyspark"]
 webdav = ["webdavclient3"]
-
-[package.source]
-type = "git"
-url = "https://github.com/MobileTeleSystems/onetl.git"
-reference = "develop"
-resolved_reference = "b30cb34aa9cf835e0fd417a7c87b158b37f40f71"
 
 [[package]]
 name = "ordered-set"
@@ -4499,4 +4495,4 @@ worker = ["horizon-hwm-store", "jinja2", "onetl", "psycopg2-binary", "pyspark"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "088d367392221f4db4d989926017b75e5c0d29e0521f6a697062ad565f5d9a57"
+content-hash = "e6de2bb942f6c9df79fbeb9ff8637357a28c1ad6661c87232ad2bbb9ceec4d14"
