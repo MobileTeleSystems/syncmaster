@@ -14,11 +14,13 @@ from syncmaster.dto.transfers_strategy import FullStrategy, IncrementalStrategy
 @dataclass
 class TransferDTO:
     type: ClassVar[str]
+    id: int
+    name: str
+    group_name: str
 
 
 @dataclass
 class DBTransferDTO(TransferDTO):
-    id: int
     table_name: str
     strategy: FullStrategy | IncrementalStrategy
     resources: Resources
@@ -33,7 +35,6 @@ class DBTransferDTO(TransferDTO):
 
 @dataclass
 class FileTransferDTO(TransferDTO):
-    id: int
     directory_path: str
     file_format: CSV | JSONLine | JSON | Excel | XML | ORC | Parquet
     strategy: FullStrategy | IncrementalStrategy

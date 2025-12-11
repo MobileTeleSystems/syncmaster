@@ -1,0 +1,1 @@
+Gave worker access to transfer and group names
