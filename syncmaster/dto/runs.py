@@ -6,5 +6,5 @@ from datetime import datetime
 
 @dataclass
 class RunDTO:
-    id: str
+    id: int
     created_at: datetime
