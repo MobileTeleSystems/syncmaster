@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import math
+import socket
 from typing import TYPE_CHECKING
 
 from onetl.connection.kerberos_helpers import kinit_password
@@ -84,6 +85,9 @@ def get_spark_session_conf(
     config["spark.default.parallelism"] = tasks * cores_per_task
     config["spark.dynamicAllocation.maxExecutors"] = tasks  # yarn
     config["spark.kubernetes.executor.limit.cores"] = cores_per_task  # k8s
+
+    # https://spark.apache.org/docs/latest/running-on-kubernetes.html#client-mode-executor-pod-garbage-collection
+    config["spark.kubernetes.driver.pod.name"] = socket.gethostname()
 
     if maven_packages:
         log.debug("Include Maven packages: %s", maven_packages)
