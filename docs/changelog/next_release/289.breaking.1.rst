@@ -1,2 +1,0 @@
-Introduce ``config.yml`` file which is used to store settings of all components (server, scheduler, worker, frontend).
-This is the main way to configure application now. It's still possible to use environment variables, but it is not recommended for security reasons.

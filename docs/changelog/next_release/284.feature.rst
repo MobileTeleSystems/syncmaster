@@ -1,1 +1,0 @@
-Added support for Iceberg with REST catalog and S3 warehouse

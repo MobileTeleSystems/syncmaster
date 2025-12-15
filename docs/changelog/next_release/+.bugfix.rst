@@ -1,5 +1,0 @@
-Fix some file format options were ignored by SyncMaster worker:
-  * ``XML(root_tag, row_tag)``
-  * ``Excel(start_cell, include_header)``
-  * ``CSV(include_header, line_sep)``
-  * ``JSON(line_sep)``, ``JSONLine(line_sep)``

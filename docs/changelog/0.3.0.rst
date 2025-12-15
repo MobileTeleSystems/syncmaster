@@ -1,0 +1,99 @@
+0.3.0 (2025-12-15)
+==================
+
+Release of Data.SyncMaster 0.3.0 brings up Iceberg support and Spark-on-K8s support,
+as well as some UX improvements.
+
+Breaking Changes
+----------------
+
+- Allow using SyncMaster worker image as ``spark.kubernetes.container.image``. (:issue:`295`)
+
+  Worker container command should be changed from ``--queues 123-myqueue`` to ``worker --queues 123-myqueue``.
+
+- Introduce ``config.yml`` file which is used to store settings of all components - server, scheduler, worker, frontend  (:issue:`289`).
+
+  This is the main way to configure application now. It's still possible to use environment variables, but it is not recommended for security reasons.
+
+  This also implies:
+    * Environment variable ``SYNCMASTER__ENTRYPOINT__SUPERUSERS`` is renamed to ``SYNCMASTER__SUPERUSERS``.
+    * Logging format is configured explicitly via ``config.yml`` instead of having a set of preset configuration files.
+
+- Move ``server.session`` middleware settings to ``auth`` block.
+  Also rename some fields in ``auth.keycloak`` settings block.
+
+  Before:
+
+  .. code:: yaml
+
+      auth:
+          provider: ...
+          keycloak:
+              server_url: ...
+              redirect_url: ...
+
+      server:
+          session:
+              enabled: true
+              secret_key: ...
+
+  Now:
+
+  .. code:: yaml
+
+      auth:
+          provider:
+          keycloak:
+              api_url: ...
+              ui_callback_url: ...
+          cookie:
+              secret_key: (:issue:`304`)
+
+- Make S3 connection ``region`` a mandatory option.
+
+
+Features
+--------
+
+- Added Iceberg support (:issue:`282`, :issue:`284`, :issue:`294`, :issue:`297`).
+
+  Iceberg connection currently supports only Iceberg REST Catalog with S3 warehouse.
+
+- Allow passing default Spark session config via worker settings:
+
+  .. code-block:: yaml
+      :caption: config.yml
+
+      worker:
+          spark_session_default_config:
+              spark.master: local
+              spark.driver.host: 127.0.0.1
+              spark.driver.bindAddress: 0.0.0.0
+              spark.sql.pyspark.jvmStacktrace.enabled: true
+              spark.ui.enabled: false (:issue:`291`)
+
+- Added OAuth2GatewayProvider (:issue:`283`).
+
+  This allows using Data.SyncMaster under OAuth2 Gateway. Implementation is similar to DummyAuthProvider.
+
+- Allow disabling ``SessionMiddleware``, as it only required by ``KeycloakAuthProvider``.
+
+- Add hooks support to worker classes (TransferController, Handler) (:issue:`279`).
+- Add transfer name and group name to TransferController (:issue:`308`).
+
+Improvements
+------------
+
+- Hide ``database_name`` from Clickhouse and MySQL connection pages.
+- Add placeholders to connection params, like host, port and so on.
+- Sync frontend and backend checks for some field patterns, e.g. table name should be in format ``schema.table``.
+- Improve OpenAPI schema fields description.
+
+Bug Fixes
+---------
+
+Fix some file format options were ignored by SyncMaster worker:
+    * ``XML(root_tag, row_tag)``
+    * ``Excel(start_cell, include_header)``
+    * ``CSV(include_header, line_sep)``
+    * ``JSON(line_sep)``, ``JSONLine(line_sep)``

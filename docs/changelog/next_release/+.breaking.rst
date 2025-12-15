@@ -1,1 +1,0 @@
-Make S3 connection ``region`` a mandatory option.

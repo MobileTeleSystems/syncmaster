@@ -1,2 +1,0 @@
-Added slots for data-rentgen plugin integration
--- by :github:user:`marashka`

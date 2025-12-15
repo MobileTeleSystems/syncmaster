@@ -1,2 +1,0 @@
-Added OAuth2GatewayProvide
--- by :github:user:`marashka`
