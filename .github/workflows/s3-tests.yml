@@ -55,14 +55,14 @@ jobs:
           docker compose -f docker-compose.test.yml down -v --remove-orphans
 
       - name: Upload worker logs
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: worker-logs-s3
           path: logs/*
 
       - name: Upload coverage results
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-s3
           path: reports/*
