@@ -1,55 +1,52 @@
 0.3.0 (2025-12-15)
 ==================
 
-Release of Data.SyncMaster 0.3.0 brings up Iceberg support and Spark-on-K8s support,
-as well as some UX improvements.
+Release of Data.SyncMaster 0.3.0 brings up support for Iceberg and Spark-on-K8s.
 
 Breaking Changes
 ----------------
 
-- Allow using SyncMaster worker image as ``spark.kubernetes.container.image``. (:issue:`295`)
+- Worker container command should be changed from ``--queues 123-myqueue`` to ``worker --queues 123-myqueue`` (:issue:`295`).
 
-  Worker container command should be changed from ``--queues 123-myqueue`` to ``worker --queues 123-myqueue``.
+- Application should be configured via ``config.yml`` file (:issue:`289`).
 
-- Introduce ``config.yml`` file which is used to store settings of all components - server, scheduler, worker, frontend  (:issue:`289`).
+  It's still possible to use environment variables instead. But it is not recommended for security reasons, as docker/k8s envs can be read by other users.
 
-  This is the main way to configure application now. It's still possible to use environment variables, but it is not recommended for security reasons.
-
-  This also implies:
+  Other notable changes:
     * Environment variable ``SYNCMASTER__ENTRYPOINT__SUPERUSERS`` is renamed to ``SYNCMASTER__SUPERUSERS``.
-    * Logging format is configured explicitly via ``config.yml`` instead of having a set of preset configuration files.
+    * Logging format is configured explicitly via ``config.yml`` instead of having few predefined configuration files.
 
-- Move ``server.session`` middleware settings to ``auth`` block.
+- Moved ``server.session`` middleware settings to ``auth`` block (:issue:`304`).
   Also rename some fields in ``auth.keycloak`` settings block.
 
-  Before:
+  .. dropdown:: Before vs after
 
-  .. code:: yaml
+    Before:
 
-      auth:
-          provider: ...
-          keycloak:
-              server_url: ...
-              redirect_url: ...
+    .. code:: yaml
 
-      server:
-          session:
-              enabled: true
-              secret_key: ...
+        auth:
+            provider: ...
+            keycloak:
+                server_url: ...
+                redirect_url: ...
 
-  Now:
+        server:
+            session:
+                enabled: true
+                secret_key: ...
 
-  .. code:: yaml
+    Now:
 
-      auth:
-          provider:
-          keycloak:
-              api_url: ...
-              ui_callback_url: ...
-          cookie:
-              secret_key: (:issue:`304`)
+    .. code:: yaml
 
-- Make S3 connection ``region`` a mandatory option.
+        auth:
+            provider:
+            keycloak:
+                api_url: ...
+                ui_callback_url: ...
+            cookie:
+                secret_key: ...
 
 
 Features
@@ -59,18 +56,22 @@ Features
 
   Iceberg connection currently supports only Iceberg REST Catalog with S3 warehouse.
 
-- Allow passing default Spark session config via worker settings:
+- Allow using SyncMaster worker image as ``spark.kubernetes.container.image``. (:issue:`295`)
 
-  .. code-block:: yaml
-      :caption: config.yml
+- Allow passing default Spark session config via worker settings (:issue:`291`):
 
-      worker:
-          spark_session_default_config:
-              spark.master: local
-              spark.driver.host: 127.0.0.1
-              spark.driver.bindAddress: 0.0.0.0
-              spark.sql.pyspark.jvmStacktrace.enabled: true
-              spark.ui.enabled: false (:issue:`291`)
+  .. dropdown:: Example
+
+    .. code-block:: yaml
+        :caption: config.yml
+
+        worker:
+            spark_session_default_config:
+                spark.master: local
+                spark.driver.host: 127.0.0.1
+                spark.driver.bindAddress: 0.0.0.0
+                spark.sql.pyspark.jvmStacktrace.enabled: true
+                spark.ui.enabled: false
 
 - Added OAuth2GatewayProvider (:issue:`283`).
 
@@ -84,8 +85,9 @@ Features
 Improvements
 ------------
 
+- Make S3 connection ``region`` a mandatory option, to prevent possible errors.
 - Hide ``database_name`` from Clickhouse and MySQL connection pages.
-- Add placeholders to connection params, like host, port and so on.
+- Frontend: add placeholders to connection params, like host, port and so on.
 - Sync frontend and backend checks for some field patterns, e.g. table name should be in format ``schema.table``.
 - Improve OpenAPI schema fields description.
 

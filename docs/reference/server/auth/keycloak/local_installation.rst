@@ -76,7 +76,7 @@ Configure Redirect URI
 
 Set URI to redirect from Keycloak login page for exchanging the code for an access token:
 
-.. image:: images/keycloak-client-ui_callback_url.png
+.. image:: images/keycloak-client-redirect_uri.png
    :width: 400px
    :align: center
 
