@@ -26,7 +26,6 @@ Data.SyncMaster
 .. |pre-commit.ci| image:: https://results.pre-commit.ci/badge/github/MobileTeleSystems/syncmaster/develop.svg
     :target: https://results.pre-commit.ci/latest/github/MobileTeleSystems/syncmaster/develop
 
-
 What is Data.SyncMaster?
 ------------------------
 
@@ -49,8 +48,6 @@ List of currently supported connections:
 * WebDAV
 
 Based on `onETL <https://onetl.readthedocs.io/>`_ and `Apache Spark <https://spark.apache.org/>`_.
-
-**Note**: service is under active development.
 
 Goals
 -----
