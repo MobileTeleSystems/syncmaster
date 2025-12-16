@@ -34,17 +34,17 @@ List of currently supported connections:
 
 * Apache Hive
 * Clickhouse
-* Postgres
 * Iceberg (REST Catalog + S3)
-* Oracle
 * MSSQL
 * MySQL
-* HDFS
-* S3
+* Oracle
+* Postgres
 * FTP
 * FTPS
-* SFTP
+* HDFS
+* S3
 * Samba
+* SFTP
 * WebDAV
 
 Based on `onETL <https://onetl.readthedocs.io/>`_ and `Apache Spark <https://spark.apache.org/>`_.
