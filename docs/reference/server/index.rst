@@ -33,7 +33,7 @@ With docker
   .. dropdown:: ``config.yml``
 
     .. literalinclude:: ../../../config.yml
-        :emphasize-lines: 7-27, 36-50, 71-72
+        :emphasize-lines: 1-31, 40-49, 70-71
 
 * After server is started and ready, open http://localhost:8000/docs.
 

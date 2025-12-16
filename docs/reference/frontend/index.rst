@@ -33,7 +33,7 @@ With Docker
   .. dropdown:: ``config.yml``
 
       .. literalinclude:: ../../../config.yml
-          :emphasize-lines: 30-33
+          :emphasize-lines: 34-37
 
 * After frontend is started and ready, open http://localhost:3000.
 
