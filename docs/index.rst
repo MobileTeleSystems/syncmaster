@@ -1,5 +1,9 @@
-.. include:: ../README.rst
-    :end-before: documentation
+.. toctree::
+    :maxdepth: 2
+    :caption: Data.SyncMaster
+    :hidden:
+
+    self
 
 .. toctree::
     :maxdepth: 2
@@ -30,3 +34,15 @@
     changelog
     contributing
     security
+
+.. include:: ../README.rst
+    :end-before: |Logo|
+
+.. image:: _static/logo_wide.svg
+    :alt: Data.SyncMaster logo
+    :target: https://github.com/MobileTeleSystems/data-syncmaster
+    :class: readme-wide-logo
+
+.. include:: ../README.rst
+    :start-after: |Logo|
+    :end-before: documentation

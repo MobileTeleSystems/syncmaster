@@ -14,7 +14,7 @@ ENV PYTHONPATH=/app \
     POETRY_VIRTUALENVS_CREATE=1
 
 # add this when logo will be ready
-# COPY ./docs/_static/*.svg ./syncmaster/server/static/
+COPY ./docs/_static/*.svg ./syncmaster/server/static/
 
 # Swagger UI
 ADD https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui-bundle.js https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui.css \
