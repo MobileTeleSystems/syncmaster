@@ -80,7 +80,7 @@ Features
 - Allow disabling ``SessionMiddleware``, as it only required by ``KeycloakAuthProvider``.
 
 - Add hooks support to worker classes (TransferController, Handler) (:issue:`279`).
-- Add transfer name and group name to TransferController (:issue:`308`).
+- Pass transfer name and group name to Handlers (:issue:`308`).
 
 Improvements
 ------------
@@ -95,7 +95,7 @@ Bug Fixes
 ---------
 
 Fix some file format options were ignored by SyncMaster worker:
-    * ``XML(root_tag, row_tag)``
-    * ``Excel(start_cell, include_header)``
-    * ``CSV(include_header, line_sep)``
-    * ``JSON(line_sep)``, ``JSONLine(line_sep)``
+    * XML: ``root_tag``, ``row_tag``
+    * Excel ``start_cell``, ``include_header``
+    * CSV ``include_header``, ``line_sep``
+    * JSON, JSONLine: ``line_sep``
