@@ -1,3 +1,19 @@
-.logo {
-  width: 200px !important;
+@media not print {
+    @media (prefers-color-scheme: dark) {
+        body:not([data-theme="light"]) img.sidebar-logo {
+            content: url(logo_red_text.svg);
+        }
+
+        body:not([data-theme="light"]) img.readme-wide-logo {
+            content: url(logo_wide_red_text.svg);
+        }
+    }
+
+    body[data-theme="dark"] img.sidebar-logo {
+        content: url(logo_red_text.svg);
+    }
+
+    body[data-theme="dark"] img.readme-wide-logo {
+        content: url(logo_wide_red_text.svg);
+    }
 }

@@ -1,7 +1,10 @@
 .. _readme:
 
-Data.SyncMaster
-===============
+|Logo|
+
+.. |Logo| image:: docs/_static/logo_wide_red_text.svg
+    :alt: Data.SyncMaster logo
+    :target: https://github.com/MobileTeleSystems/data-syncmaster
 
 |Repo Status| |Docker image| |PyPI| |PyPI License| |PyPI Python Version| |Documentation|
 |Build Status| |Coverage| |pre-commit.ci|
