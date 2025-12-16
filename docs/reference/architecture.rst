@@ -18,4 +18,4 @@ SyncMaster contains the following components:
 Architecture diagram
 --------------------
 
-.. image:: ../_static/architecture.png
+.. image:: ./architecture.png
