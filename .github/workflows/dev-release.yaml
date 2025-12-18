@@ -47,6 +47,7 @@ jobs:
       - name: Fix logo in Readme
         run: |
           sed -i "s#image:: docs/#image:: https://raw.githubusercontent.com/MobileTeleSystems/syncmaster/$GITHUB_SHA/docs/#g" README.rst
+          sed -i "s#logo_wide_red_text.svg#logo_wide.svg#g" README.rst
 
       - name: Build package
         run: poetry build
