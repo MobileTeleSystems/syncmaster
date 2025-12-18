@@ -1,4 +1,10 @@
 @media not print {
+    @media (min-width: 1552px) {
+        img.readme-wide-logo {
+            padding-top: 3em;
+        }
+    }
+
     @media (prefers-color-scheme: dark) {
         body:not([data-theme="light"]) img.sidebar-logo {
             content: url(logo_red_text.svg);
