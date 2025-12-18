@@ -1,4 +1,4 @@
-0.3.0 (2025-12-16)
+0.3.0 (2025-12-18)
 ==================
 
 Release of Data.SyncMaster 0.3.0 brings up support for Iceberg, Spark-on-K8s and Spark-on-Yarn.

@@ -5,7 +5,7 @@ Configuring Spark session
 
 SyncMaster Worker creates `SparkSession <https://spark.apache.org/docs/latest/sql-getting-started.html#starting-point-sparksession>`_ for each Run.
 
-By default, SparkSession is created with ``master=local``, including all required .jar packages for DB/FileSystem types, and limited by transfer resources.
+By default, SparkSession is created with ``spark.master: local``, including all required .jar packages for DB/FileSystem types, and limited by transfer resources.
 
 Custom Spark session configuration
 ----------------------------------
@@ -23,7 +23,7 @@ It is possible to alter default `Spark Session configuration <https://spark.apac
             spark.sql.pyspark.jvmStacktrace.enabled: true
             spark.ui.enabled: false
 
-For example, to use SyncMaster on Spark + Kubernetes, you can use worker image for Spark executor containers:
+For example, to use SyncMaster on Spark-on-K8s, you can use worker image for Spark executor containers:
 
 .. code-block:: yaml
     :caption: config.yml
@@ -39,6 +39,10 @@ For example, to use SyncMaster on Spark + Kubernetes, you can use worker image f
             spark.sql.pyspark.jvmStacktrace.enabled: true
             spark.kubernetes.container.image: mtsrus/syncmaster-worker:{TAG}
 
+.. note::
+
+    Currently Spark-on-K8s and Spark-on-Yarn do not support interaction FTP, FTPS, SFTP, Samba and WebDAV.
+    This requires  ``sparm.master: local``.
 
 Custom Spark session factory
 ----------------------------
@@ -71,7 +75,3 @@ Here is a function example:
         return SparkSession.builde.config(...).getOrCreate()
 
 Module with custom function should be placed into the same Docker image or Python virtual environment used by SyncMaster worker.
-
-.. note::
-
-    For now, SyncMaster haven't been tested with ``master=k8s`` and ``master=yarn``, so there can be some caveats.
