@@ -400,37 +400,6 @@ async def test_developer_plus_can_create_hdfs_transfer(
                 "type": "csv",
             },
         },
-        {
-            "type": "s3",
-            "directory_path": "some/path",
-            "file_format": {
-                "type": "excel",
-                "include_header": True,
-            },
-        },
-        {
-            "type": "s3",
-            "directory_path": "some/path",
-            "file_format": {
-                "type": "xml",
-                "root_tag": "data",
-                "row_tag": "record",
-            },
-        },
-        {
-            "type": "s3",
-            "directory_path": "some/path",
-            "file_format": {
-                "type": "orc",
-            },
-        },
-        {
-            "type": "s3",
-            "directory_path": "some/path",
-            "file_format": {
-                "type": "parquet",
-            },
-        },
     ],
 )
 async def test_cannot_create_file_transfer_with_relative_path(

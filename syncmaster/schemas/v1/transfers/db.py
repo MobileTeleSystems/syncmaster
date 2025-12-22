@@ -2,7 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
-from pydantic import BaseModel
+import re
+from typing import ClassVar
+
+from pydantic import BaseModel, Field, field_validator
 
 from syncmaster.schemas.v1.connection_types import (
     CLICKHOUSE_TYPE,
@@ -16,7 +19,16 @@ from syncmaster.schemas.v1.connection_types import (
 
 
 class DBTransfer(BaseModel):
-    table_name: str
+    TABLE_NAME_PATTERN: ClassVar[str] = r"^[\w\d]+\.[\w\d]+$"
+    table_name: str = Field(description="Table name", json_schema_extra={"pattern": TABLE_NAME_PATTERN})
+
+    # make error message more user friendly
+    @field_validator("table_name", mode="before")
+    @classmethod
+    def _table_name_is_qualified(cls, value):
+        if not re.match(cls.TABLE_NAME_PATTERN, value):
+            raise ValueError("Table name should be in format myschema.mytable")
+        return value
 
 
 class HiveTransferSourceOrTarget(DBTransfer):
@@ -45,6 +57,17 @@ class MySQLTransferSourceOrTarget(DBTransfer):
 
 class IcebergTransferSourceOrTarget(DBTransfer):
     type: ICEBERG_TYPE
+
+    TABLE_NAME_PATTERN: ClassVar[str] = r"^[\w\d]+(\.[\w\d]+)+$"
+    table_name: str = Field(description="Table name", json_schema_extra={"pattern": TABLE_NAME_PATTERN})
+
+    # make error message more user friendly
+    @field_validator("table_name", mode="before")
+    @classmethod
+    def _table_name_is_qualified(cls, value):
+        if not re.match(cls.TABLE_NAME_PATTERN, value):
+            raise ValueError("Table name should be in format myschema.mytable")
+        return value
 
 
 DBTransferSourceOrTarget = (

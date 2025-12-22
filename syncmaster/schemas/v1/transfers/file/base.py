@@ -26,7 +26,10 @@ SOURCE_FILE_FORMAT = TARGET_FILE_FORMAT | JSON
 # At the moment the CreateTransferSourceParams and CreateTransferTargetParams
 # classes are identical but may change in the future
 class FileTransferSource(BaseModel):
-    directory_path: str
+    directory_path: str = Field(
+        description="Absolute path to directory",
+        json_schema_extra={"pattern": r"^/[\w\d ]+(/[\w\d ]+)*$"},
+    )
     file_format: SOURCE_FILE_FORMAT = Field(discriminator="type")
     options: dict[str, Any] = Field(default_factory=dict)
 
@@ -41,17 +44,21 @@ class FileTransferSource(BaseModel):
 
 
 class FileTransferTarget(BaseModel):
-    directory_path: str
+    FILE_NAME_PATTERN: ClassVar[str] = r"^[\w.{}-]+$"
+
+    directory_path: str = Field(
+        description="Absolute path to directory",
+        json_schema_extra={"pattern": r"^/[\w\d ]+(/[\w\d ]+)*$"},
+    )
     file_format: TARGET_FILE_FORMAT = Field(discriminator="type")
     file_name_template: str = Field(
         default="{run_created_at}-{index}.{extension}",
         description="Template for file naming with required placeholders 'index' and 'extension'",
+        json_schema_extra={"pattern": FILE_NAME_PATTERN},
     )
     options: dict[str, Any] = Field(default_factory=dict)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    FILE_NAME_PATTERN: ClassVar[re.Pattern] = re.compile(r"^[\w.{}-]+$")
 
     @field_validator("directory_path", mode="before")
     @classmethod
@@ -63,7 +70,8 @@ class FileTransferTarget(BaseModel):
     @field_validator("file_name_template")
     @classmethod
     def _validate_file_name_template(cls, value: str) -> str:  # noqa: WPS238
-        if not cls.FILE_NAME_PATTERN.match(value):
+        # make error message more user friendly
+        if not re.match(cls.FILE_NAME_PATTERN, value):
             raise ValueError("Template contains invalid characters. Allowed: letters, numbers, '.', '_', '-', '{', '}'")
 
         required_keys = {"index", "extension"}

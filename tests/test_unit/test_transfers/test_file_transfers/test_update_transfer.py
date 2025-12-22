@@ -143,7 +143,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
     ],
     indirect=["create_connection_data"],
 )
-async def test_developer_plus_can_update_s3_transfer(
+async def test_developer_plus_can_update_ftp_transfer(
     client: AsyncClient,
     group_transfer: MockTransfer,
     role_developer_plus: UserTestRoles,
