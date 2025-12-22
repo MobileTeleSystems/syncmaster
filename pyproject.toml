@@ -55,12 +55,12 @@ python-json-logger = "^4.0.0"
 celery = "^5.5.3"
 asgi-correlation-id = "^4.3.4"
 uuid6 = "^2025.0.1"
-fastapi = {version = "^0.124.0", optional = true}
-uvicorn = { version = "^0.38.0", optional = true }
+fastapi = {version = ">=0.124,<0.128", optional = true}
+uvicorn = { version = ">=0.38,<0.41", optional = true }
 alembic = { version = "^1.17.1", optional = true }
 pyjwt = { version = "^2.10.1", optional = true }
 jinja2 = { version = "^3.1.6", optional = true }
-python-multipart = { version = "^0.0.20", optional = true }
+python-multipart = { version = ">=0.0.20,<0.0.22", optional = true }
 onetl = { version = "^0.15.0", extras = ["all"], optional = true }
 pyspark = { version = "<4.0.0", optional = true }
 psycopg2-binary = { version = "^2.9.11", optional = true }
@@ -109,7 +109,7 @@ pytest-rerunfailures = "^16.1"
 pytest-deadfixtures = "^3.0.0"
 pytest-mock = "^3.15.1"
 pytest-lazy-fixtures = "^1.4.0"
-faker = "^38.2.0"
+faker = ">=38.2,<40.0"
 coverage = "^7.12.0"
 gevent = "^25.9.1"
 respx = "^0.22.0"
