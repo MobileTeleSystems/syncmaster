@@ -87,8 +87,8 @@ async def group_transfers(
             ConnectionType.MSSQL,
             ConnectionType.MYSQL,
         ]:
-            source_params["table_name"] = "source_table"
-            target_params["table_name"] = "target_table"
+            source_params["table_name"] = "schema.source_table"
+            target_params["table_name"] = "schema.target_table"
 
         transfer = await create_transfer(
             session=session,

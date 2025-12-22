@@ -168,7 +168,7 @@ async def test_check_connection_types_and_its_params_transfer(
         "name": "New transfer name",
         "source_params": {
             "type": "oracle",
-            "table_name": "New table name",
+            "table_name": "schema.table",
         },
     }
 

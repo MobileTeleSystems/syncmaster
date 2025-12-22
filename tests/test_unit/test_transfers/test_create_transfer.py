@@ -151,8 +151,8 @@ async def test_guest_cannot_create_transfer(
             "name": "new test transfer",
             "source_connection_id": first_connection.id,
             "target_connection_id": second_connection.id,
-            "source_params": {"type": "postgres", "table_name": "source_table"},
-            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "source_params": {"type": "postgres", "table_name": "schema.source_table"},
+            "target_params": {"type": "postgres", "table_name": "schema.target_table"},
             "queue_id": group_queue.id,
         },
     )
@@ -182,8 +182,8 @@ async def test_groupless_user_cannot_create_transfer(
             "name": "new test transfer",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
-            "source_params": {"type": "postgres", "table_name": "source_table"},
-            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "source_params": {"type": "postgres", "table_name": "schema.source_table"},
+            "target_params": {"type": "postgres", "table_name": "schema.target_table"},
             "queue_id": group_queue.id,
         },
     )
@@ -216,8 +216,8 @@ async def test_other_group_user_plus_cannot_create_group_transfer(
             "name": "new test group transfer",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
-            "source_params": {"type": "postgres", "table_name": "source_table"},
-            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "source_params": {"type": "postgres", "table_name": "schema.source_table"},
+            "target_params": {"type": "postgres", "table_name": "schema.target_table"},
             "queue_id": group_queue.id,
         },
     )
@@ -249,8 +249,8 @@ async def test_superuser_can_create_transfer(
             "name": "new test group transfer",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
-            "source_params": {"type": "postgres", "table_name": "source_table"},
-            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "source_params": {"type": "postgres", "table_name": "schema.source_table"},
+            "target_params": {"type": "postgres", "table_name": "schema.target_table"},
             "transformations": [
                 {
                     "type": "dataframe_rows_filter",
@@ -487,7 +487,7 @@ async def test_superuser_can_create_transfer(
             {
                 "source_params": {
                     "type": "new some connection type",
-                    "table_name": "source_table",
+                    "table_name": "schema.source_table",
                 },
             },
             {
@@ -513,7 +513,7 @@ async def test_superuser_can_create_transfer(
                                 "tag": "new some connection type",
                             },
                             "input": {
-                                "table_name": "source_table",
+                                "table_name": "schema.source_table",
                                 "type": "new some connection type",
                             },
                         },
@@ -835,8 +835,8 @@ async def test_check_fields_validation_on_create_transfer(
         "group_id": mock_group.id,
         "source_connection_id": first_conn.id,
         "target_connection_id": second_conn.id,
-        "source_params": {"type": "postgres", "table_name": "source_table"},
-        "target_params": {"type": "postgres", "table_name": "target_table"},
+        "source_params": {"type": "postgres", "table_name": "schema.source_table"},
+        "target_params": {"type": "postgres", "table_name": "schema.target_table"},
         "queue_id": group_queue.id,
     }
     transfer_data.update(new_data)
@@ -868,8 +868,8 @@ async def test_check_connection_types_and_its_params_on_create_transfer(
             "group_id": mock_group.id,
             "source_connection_id": first_conn.connection.id,
             "target_connection_id": second_conn.id,
-            "source_params": {"type": "postgres", "table_name": "source_table"},
-            "target_params": {"type": "oracle", "table_name": "target_table"},
+            "source_params": {"type": "postgres", "table_name": "schema.source_table"},
+            "target_params": {"type": "oracle", "table_name": "schema.target_table"},
             "queue_id": group_queue.id,
         },
     )
@@ -903,8 +903,8 @@ async def test_check_different_connections_owner_group_on_create_transfer(
             "group_id": mock_group.id,
             "source_connection_id": first_conn.connection.id,
             "target_connection_id": group_connection.connection.id,
-            "source_params": {"type": "postgres", "table_name": "source_table"},
-            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "source_params": {"type": "postgres", "table_name": "schema.source_table"},
+            "target_params": {"type": "postgres", "table_name": "schema.target_table"},
             "queue_id": group_queue.id,
         },
     )
@@ -931,8 +931,8 @@ async def test_unauthorized_user_cannot_create_transfer(
             "name": "New transfer name",
             "source_connection_id": group_transfer.source_connection_id,
             "target_connection_id": group_transfer.target_connection_id,
-            "source_params": {"type": "postgres", "table_name": "test"},
-            "target_params": {"type": "postgres", "table_name": "test1"},
+            "source_params": {"type": "postgres", "table_name": "schema.test"},
+            "target_params": {"type": "postgres", "table_name": "schema.test1"},
             "queue_id": group_queue.id,
         },
     )
@@ -964,8 +964,8 @@ async def test_developer_plus_cannot_create_transfer_with_other_group_queue(
             "name": "new test transfer",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
-            "source_params": {"type": "postgres", "table_name": "source_table"},
-            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "source_params": {"type": "postgres", "table_name": "schema.source_table"},
+            "target_params": {"type": "postgres", "table_name": "schema.target_table"},
             "queue_id": group_transfer.transfer.queue_id,
         },
     )
@@ -998,7 +998,7 @@ async def test_developer_plus_cannot_create_transfer_with_target_format_json(
             "name": "new test transfer",
             "source_connection_id": first_connection.id,
             "target_connection_id": second_connection.id,
-            "source_params": {"type": "postgres", "table_name": "source_table"},
+            "source_params": {"type": "postgres", "table_name": "schema.source_table"},
             "target_params": {
                 "type": "s3",
                 "directory_path": "/some/dir",
@@ -1055,8 +1055,8 @@ async def test_superuser_cannot_create_transfer_with_other_group_queue(
             "name": "new test transfer",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
-            "source_params": {"type": "postgres", "table_name": "source_table"},
-            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "source_params": {"type": "postgres", "table_name": "schema.source_table"},
+            "target_params": {"type": "postgres", "table_name": "schema.target_table"},
             "queue_id": group_transfer.transfer.queue_id,
         },
     )
@@ -1090,8 +1090,8 @@ async def test_group_member_cannot_create_transfer_with_unknown_connection_error
             "name": "new test transfer",
             "source_connection_id": first_conn.id if iter_conn_id[0] else -1,
             "target_connection_id": second_conn.id if iter_conn_id[1] else -1,
-            "source_params": {"type": "postgres", "table_name": "source_table"},
-            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "source_params": {"type": "postgres", "table_name": "schema.source_table"},
+            "target_params": {"type": "postgres", "table_name": "schema.target_table"},
             "queue_id": group_queue.id,
         },
     )
@@ -1123,8 +1123,8 @@ async def test_developer_plus_cannot_create_transfer_with_unknown_group_error(
             "name": "new test transfer",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
-            "source_params": {"type": "postgres", "table_name": "source_table"},
-            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "source_params": {"type": "postgres", "table_name": "schema.source_table"},
+            "target_params": {"type": "postgres", "table_name": "schema.target_table"},
             "queue_id": group_queue.id,
         },
     )
@@ -1157,8 +1157,8 @@ async def test_superuser_cannot_create_transfer_with_unknown_connection_error(
             "name": "new test transfer",
             "source_connection_id": first_conn.id if conn_id[0] else -1,
             "target_connection_id": second_conn.id if conn_id[1] else -1,
-            "source_params": {"type": "postgres", "table_name": "source_table"},
-            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "source_params": {"type": "postgres", "table_name": "schema.source_table"},
+            "target_params": {"type": "postgres", "table_name": "schema.target_table"},
             "queue_id": group_queue.id,
         },
     )
@@ -1189,8 +1189,8 @@ async def test_developer_plus_cannot_create_transfer_with_unknown_queue_error(
             "name": "new test transfer",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
-            "source_params": {"type": "postgres", "table_name": "source_table"},
-            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "source_params": {"type": "postgres", "table_name": "schema.source_table"},
+            "target_params": {"type": "postgres", "table_name": "schema.target_table"},
             "queue_id": -1,
         },
     )
@@ -1221,8 +1221,8 @@ async def test_superuser_cannot_create_transfer_with_unknown_group_error(
             "name": "new test transfer",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
-            "source_params": {"type": "postgres", "table_name": "source_table"},
-            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "source_params": {"type": "postgres", "table_name": "schema.source_table"},
+            "target_params": {"type": "postgres", "table_name": "schema.target_table"},
             "queue_id": group_queue.id,
         },
     )
@@ -1252,8 +1252,8 @@ async def test_superuser_cannot_create_transfer_with_unknown_queue_error(
             "name": "new test transfer",
             "source_connection_id": first_conn.id,
             "target_connection_id": second_conn.id,
-            "source_params": {"type": "postgres", "table_name": "source_table"},
-            "target_params": {"type": "postgres", "table_name": "target_table"},
+            "source_params": {"type": "postgres", "table_name": "schema.source_table"},
+            "target_params": {"type": "postgres", "table_name": "schema.target_table"},
             "queue_id": -1,
         },
     )
