@@ -47,28 +47,19 @@ jobs:
             libkrb5-dev \
             curl
 
-      - name: Install poetry
-        uses: snok/install-poetry@v1
-
-      - name: Cache poetry
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/pypoetry
-          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-codeql-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-codeql-${{ hashFiles('**/poetry.lock') }}
-            ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-codeql-
-            ${{ runner.os }}-python-
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
 
       - name: Install dependencies
         run: |
-          poetry install --no-root --all-extras --with dev --without test
+          export UV=$(which uv)
+          make venv-install
 
       - name: Run flake8
-        run: poetry run flake8 syncmaster/
+        run: uv run flake8 syncmaster/
 
       - name: Run mypy
-        run: poetry run mypy --config-file ./pyproject.toml ./syncmaster/server
+        run: uv run mypy --config-file ./pyproject.toml ./syncmaster/server
 
   codeql:
     name: CodeQL

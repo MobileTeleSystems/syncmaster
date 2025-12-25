@@ -54,7 +54,7 @@ If you already have venv, but need to install dependencies required for developm
 
     make venv-install
 
-We are using `poetry <https://python-poetry.org/docs/managing-dependencies/>`_ for managing dependencies and building the package.
+We are using `uv https://docs.astral.sh/uv/`_ for managing dependencies and building the package.
 It allows to keep development environment the same for all developers due to using lock file with fixed dependency versions.
 
 There are *extra* dependencies (included into package as optional):
@@ -367,7 +367,7 @@ Before making a release from the ``develop`` branch, follow these steps:
 
 .. code:: bash
 
-    VERSION=$(poetry version -s)
+    VERSION=$(cat syncmaster/VERSION)
     towncrier build "--version=${VERSION}" --yes
 
 3. Change file with changelog to release version number
@@ -425,7 +425,7 @@ Before making a release from the ``develop`` branch, follow these steps:
     git checkout develop
 
     NEXT_VERSION=$(echo "$VERSION" | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)
-    poetry version "$NEXT_VERSION"
+    echo $NEXT_VERSION > syncmaster/VERSION
 
     git add .
     git commit -m "Bump version"

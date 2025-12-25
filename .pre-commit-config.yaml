@@ -124,15 +124,10 @@ repos:
       - id: pretty-format-yaml
         args: [--autofix, --indent, '2', --offset, '2']
 
-  - repo: https://github.com/sbrunner/hooks
-    rev: 1.6.1
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.9.18
     hooks:
-      - id: poetry-check
-        additional_dependencies:
-          - poetry
-      - id: poetry-lock
-        additional_dependencies:
-          - poetry
+      - id: uv-lock
 
   - repo: meta
     hooks:
