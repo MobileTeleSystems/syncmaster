@@ -112,17 +112,13 @@ jobs:
         with:
           python-version: ${{ env.DEFAULT_PYTHON }}
 
-      - name: Cache pip
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-coverage
-
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip setuptools wheel
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
 
       - name: Install dependencies
-        run: pip install -I coverage pytest
+        run: |
+          export UV=$(which uv)
+          make venv-install
 
       - name: Download all coverage reports
         uses: actions/download-artifact@v7
@@ -133,8 +129,8 @@ jobs:
 
       - name: Generate coverage reports
         run: |
-          coverage combine
-          coverage xml -o reports/coverage.xml -i
+          uv run coverage combine
+          uv run coverage xml -o reports/coverage.xml -i
 
       - name: Coverage comment
         id: coverage

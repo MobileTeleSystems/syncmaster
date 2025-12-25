@@ -11,8 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 ENV PYTHONPATH=/app \
     PATH="/app/.venv/bin:$PATH" \
-    POETRY_VIRTUALENVS_IN_PROJECT=1 \
-    POETRY_VIRTUALENVS_CREATE=1
+    PYTHONUNBUFFERED=1
 
 COPY ./docker/entrypoint_worker.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
@@ -29,15 +28,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libkrb5-dev \
     && rm -rf /var/lib/apt/lists/* /var/cache/*
 
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install poetry
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/bin/uv
 
-COPY ./pyproject.toml ./poetry.lock ./
-RUN --mount=type=cache,target=/root/.cache/pypoetry \
-    poetry install \
-        --no-root \
-        --extras "worker" \
-        --without test,docs,dev \
+COPY ./pyproject.toml ./uv.lock ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync \
+        --frozen \
+        --no-install-project \
+        --extra "worker" \
+        --extra "kerberos" \
     && python -m compileall -j 4 .venv
 
 
@@ -72,7 +71,6 @@ RUN useradd syncmaster && \
     mkdir -p /home/syncmaster /home/syncmaster/.ivy2 && \
     chown -R syncmaster:syncmaster /home/syncmaster
 
-# We don't need poetry and compilers in final image
 COPY --from=builder /app/.venv/ /app/.venv/
 # custom Spark session function may download different jars, so syncmaster have to own them
 COPY --from=ivy2_packages --chown=syncmaster:syncmaster /home/syncmaster/.ivy2/ /home/syncmaster/.ivy2/
@@ -87,14 +85,14 @@ USER syncmaster
 
 FROM builder AS test
 
-RUN --mount=type=cache,target=/root/.cache/pypoetry \
-    poetry install \
-        --no-root \
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync \
+        --frozen \
+        --no-install-project \
         # CI runs tests in the worker container,
         # so we need server & scheduler dependencies too
         --all-extras \
-        --with test \
-        --without docs,dev \
+        --group "test" \
     && python -m compileall -j 4 .venv
 
 ENV SYNCMASTER__WORKER__CREATE_SPARK_SESSION_FUNCTION=tests.spark.get_worker_spark_session

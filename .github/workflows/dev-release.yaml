@@ -34,23 +34,20 @@ jobs:
         with:
           python-version: ${{ env.DEFAULT_PYTHON }}
 
-      - name: Install poetry
-        uses: snok/install-poetry@v1
-
-      - name: Generate unique version and update test version
-        run: |
-          poetry self add poetry-bumpversion
-          poetry self install
-          version=$(poetry version -s)
-          poetry version "${version}.dev${GITHUB_RUN_ID}"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
 
       - name: Fix logo in Readme
         run: |
           sed -i "s#image:: docs/#image:: https://raw.githubusercontent.com/MobileTeleSystems/syncmaster/$GITHUB_SHA/docs/#g" README.rst
           sed -i "s#logo_wide_red_text.svg#logo_wide.svg#g" README.rst
 
+      - name: Patch version template
+        # Due to change above, git stage area is dirty, so we need to patch the template
+        run: sed -i 's#dirty_template = ".*"#dirty_template = "{tag}.dev{env:GITHUB_RUN_ID:{ccount}}"#' pyproject.toml
+
       - name: Build package
-        run: poetry build
+        run: uv build
 
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1

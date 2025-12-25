@@ -10,8 +10,7 @@ RUN apt-get update \
 WORKDIR /app
 ENV PYTHONPATH=/app \
     PATH="/app/.venv/bin:$PATH" \
-    POETRY_VIRTUALENVS_IN_PROJECT=1 \
-    POETRY_VIRTUALENVS_CREATE=1
+    PYTHONUNBUFFERED=1
 
 # add this when logo will be ready
 COPY ./docs/_static/*.svg ./syncmaster/server/static/
@@ -38,21 +37,19 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD ["curl
 
 FROM base AS builder
 
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install poetry
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/bin/uv
 
-COPY ./pyproject.toml ./poetry.lock* ./
-RUN --mount=type=cache,target=/root/.cache/pypoetry \
-    poetry install \
-        --no-root \
-        --extras "server" \
-        --without test,docs,dev \
+COPY ./pyproject.toml ./uv.lock ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync \
+        --frozen \
+        --no-install-project \
+        --extra "server" \
     && python -m compileall -j 4 .venv
 
 
 FROM base AS prod
 
-# We don't need poetry in final image
 COPY --from=builder /app/.venv/ /app/.venv/
 COPY ./syncmaster/ /app/syncmaster/
 RUN python -m compileall -b syncmaster
@@ -65,12 +62,12 @@ USER syncmaster
 
 FROM builder AS test
 
-RUN --mount=type=cache,target=/root/.cache/pypoetry \
-    poetry install \
-        --no-root \
-        --extras "server" \
-        --with test \
-        --without docs,dev \
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync \
+        --frozen \
+        --no-install-project \
+        --extra "server" \
+        --group "test" \
     && python -m compileall -j 4 .venv
 
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh

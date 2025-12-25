@@ -4,20 +4,17 @@ build:
   os: ubuntu-22.04
   apt_packages:
     - make
-    - libkrb5-dev
   tools:
     python: '3.13'
   jobs:
     post_checkout:
       - git fetch --unshallow || true
     post_create_environment:
-      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH python -m pip install poetry
-      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH python -m pip install --no-deps sphinx-plantuml # remove after https://github.com/zqmillet/sphinx-plantuml/pull/4
-      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH python -m poetry config virtualenvs.create false
-      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH python -m poetry debug info
+      - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH python -m pip install uv
     post_install:
-      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH python -m poetry install --no-root --all-extras --with docs --without dev,test
-      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH python -m poetry show -v
+      # avoid instaling worker dependencies
+      - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH uv sync --no-install-project --extra server --extra scheduler --group docs
+      - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH uv pip install --no-deps sphinx-plantuml # remove after https://github.com/zqmillet/sphinx-plantuml/pull/4
       - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH python -m pip list -v
       - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH make docs-openapi
 
