@@ -18,15 +18,15 @@ from syncmaster.schemas.v1.auth.samba import (
 from syncmaster.schemas.v1.auth.token import AuthTokenSchema, TokenPayloadSchema
 
 __all__ = [
-    "CreateBasicAuthSchema",
-    "ReadBasicAuthSchema",
-    "UpdateBasicAuthSchema",
-    "CreateS3AuthSchema",
-    "ReadS3AuthSchema",
-    "UpdateS3AuthSchema",
-    "CreateSambaAuthSchema",
-    "ReadSambaAuthSchema",
-    "UpdateSambaAuthSchema",
     "AuthTokenSchema",
+    "CreateBasicAuthSchema",
+    "CreateS3AuthSchema",
+    "CreateSambaAuthSchema",
+    "ReadBasicAuthSchema",
+    "ReadS3AuthSchema",
+    "ReadSambaAuthSchema",
     "TokenPayloadSchema",
+    "UpdateBasicAuthSchema",
+    "UpdateS3AuthSchema",
+    "UpdateSambaAuthSchema",
 ]

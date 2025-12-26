@@ -5,7 +5,7 @@ from syncmaster.errors.schemas.invalid_request import InvalidRequestSchema
 from syncmaster.errors.schemas.not_authorized import NotAuthorizedSchema
 
 __all__ = [
-    "InvalidRequestSchema",
     "BadRequestSchema",
+    "InvalidRequestSchema",
     "NotAuthorizedSchema",
 ]

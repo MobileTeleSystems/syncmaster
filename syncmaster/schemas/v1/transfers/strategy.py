@@ -17,7 +17,7 @@ class IncrementalStrategy(BaseModel):
 Strategy = Annotated[FullStrategy | IncrementalStrategy, Field(discriminator="type")]
 
 __all__ = [
-    "Strategy",
     "FullStrategy",
     "IncrementalStrategy",
+    "Strategy",
 ]

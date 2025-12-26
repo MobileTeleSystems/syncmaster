@@ -7,10 +7,10 @@ from syncmaster.settings.database import DatabaseSettings
 from syncmaster.settings.logging import DEFAULT_LOGGING_SETTINGS, LoggingSettings
 
 __all__ = [
+    "DEFAULT_LOGGING_SETTINGS",
     "BaseSettings",
     "CredentialsEncryptionSettings",
     "DatabaseSettings",
     "LoggingSettings",
-    "DEFAULT_LOGGING_SETTINGS",
     "RabbitMQSettings",
 ]

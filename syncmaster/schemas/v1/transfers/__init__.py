@@ -43,7 +43,11 @@ class TransferSchema(BaseModel):
     transformations: list[TransformationSchema] = Field(default_factory=list, description="List of transformations")
     resources: Resources = Field(default_factory=Resources, description="Transfer resources")
     is_scheduled: bool = Field(default=False, description="Is the transfer on schedule")
-    schedule: str | None = Field(default=None, description="Execution schedule in cron format", validate_default=True)
+    schedule: str | None = Field(
+        default=None,
+        description="Execution schedule in cron format",
+        validate_default=True,
+    )
 
 
 class CreateTransferSchema(TransferSchema):

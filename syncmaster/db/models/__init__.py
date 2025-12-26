@@ -11,18 +11,18 @@ from syncmaster.db.models.transfer import Transfer
 from syncmaster.db.models.user import User
 
 __all__ = [
+    "APSchedulerJob",
+    "AuthData",
     "Base",
-    "User",
-    "Group",
-    "UserGroup",
-    "GroupMemberRole",
     "Connection",
     "ConnectionType",
-    "Transfer",
+    "Group",
+    "GroupMemberRole",
     "Queue",
     "Run",
     "RunType",
     "Status",
-    "AuthData",
-    "APSchedulerJob",
+    "Transfer",
+    "User",
+    "UserGroup",
 ]
