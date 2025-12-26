@@ -39,7 +39,8 @@ class CredentialsRepository(Repository[AuthData]):
             result: ScalarResult[AuthData] = await self._session.scalars(query)
             return decrypt_auth_data(result.one().value, settings=self._settings)
         except NoResultFound as e:
-            raise AuthDataNotFoundError(f"Connection id = {connection_id}") from e
+            msg = f"Connection id = {connection_id}"
+            raise AuthDataNotFoundError(msg) from e
 
     async def read_bulk(
         self,

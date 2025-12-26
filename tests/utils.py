@@ -1,9 +1,8 @@
 import asyncio
 import logging
 from datetime import UTC, datetime
-from pathlib import Path, PurePath, PurePosixPath
+from pathlib import Path
 from typing import Any
-from collections.abc import Sequence
 
 from alembic.autogenerate import compare_metadata
 from alembic.config import Config

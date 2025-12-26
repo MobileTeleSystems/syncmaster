@@ -63,9 +63,10 @@ class RunRepository(Repository[Run]):
         try:
             self._session.add(run)
             await self._session.flush()
-            return run
         except IntegrityError as e:
             self._raise_error(e)
+        else:
+            return run
 
     async def update(self, run_id: int, **kwargs: Any) -> Run:
         try:

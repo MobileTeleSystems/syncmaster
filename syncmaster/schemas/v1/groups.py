@@ -32,9 +32,7 @@ class AddUserSchema(BaseModel):
 
         if role and not GroupMemberRole.is_public_role(role):
             msg = f"Input should be one of: {GroupMemberRole.public_roles_str()}"
-            raise ValueError(
-                msg,
-            )
+            raise ValueError(msg)
         return values
 
 

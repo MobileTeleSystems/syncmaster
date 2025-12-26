@@ -123,6 +123,7 @@ class TestSettings(BaseSettings):
     TEST_WEBDAV_PASSWORD: str
 
     @model_validator(mode="before")
+    @classmethod
     def check_sid_and_service_name(cls, values):
         sid = values.get("TEST_ORACLE_SID")
         service_name = values.get("TEST_ORACLE_SERVICE_NAME")
