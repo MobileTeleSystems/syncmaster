@@ -70,7 +70,7 @@ class Connection(Base, ResourceMixin, TimestampMixin):
     )
 
     def __repr__(self):
-        return f"<Connection " f"name={self.name} " f"description={self.description} " f"group_id={self.group_id}>"
+        return f"<Connection name={self.name} description={self.description} group_id={self.group_id}>"
 
     @declared_attr
     def __table_args__(cls) -> tuple:

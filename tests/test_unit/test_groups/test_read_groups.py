@@ -220,7 +220,6 @@ async def test_search_groups_with_query(
     search_value: str,
     expected_total: int,
 ):
-
     response = await client.get(
         "v1/groups",
         headers={"Authorization": f"Bearer {user_with_many_roles.token}"},

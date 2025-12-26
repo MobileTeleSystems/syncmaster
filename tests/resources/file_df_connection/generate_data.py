@@ -39,14 +39,9 @@ def calculate_intravals(elements: int, parts: int):
 
 
 def generate_data_file(elements: int, parts: int):
-    from black import FileMode, format_str
-
     data = create_data(elements)
     with open("test_data.py", "w") as f:
-        data_to_write = format_str(
-            f"import datetime\nintervals={calculate_intravals(elements, parts)}\ndata={data}",
-            mode=FileMode(line_length=120),
-        )
+        data_to_write = f"import datetime\nintervals={calculate_intravals(elements, parts)}\ndata={data}"
         f.write(data_to_write)
 
 

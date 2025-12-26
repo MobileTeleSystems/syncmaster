@@ -59,26 +59,6 @@ repos:
       - id: pyupgrade
         args: [--py311-plus, --keep-runtime-typing]
 
-  - repo: https://github.com/asottile/add-trailing-comma
-    rev: v4.0.0
-    hooks:
-      - id: add-trailing-comma
-
-  - repo: https://github.com/pycqa/autoflake
-    rev: v2.3.1
-    hooks:
-      - id: autoflake
-        args:
-          - --in-place
-          - --remove-all-unused-imports
-          - --remove-unused-variables
-          - --ignore-init-module-imports
-
-  - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 25.12.0
-    hooks:
-      - id: black
-
   - repo: https://github.com/pycqa/bandit
     rev: 1.9.2
     hooks:
@@ -89,11 +69,10 @@ repos:
           - -ll
         require_serial: true
 
-  - repo: https://github.com/pycqa/isort
-    rev: 7.0.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.10
     hooks:
-      - id: isort
-        name: isort (python)
+      - id: ruff-format
 
   - repo: local
     hooks:

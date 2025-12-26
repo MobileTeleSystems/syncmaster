@@ -108,7 +108,6 @@ test = [
 dev = [
     "mypy~=1.19.1",
     "pre-commit~=4.5.0",
-    "black~=25.12.0",
     "flake8~=7.3.0",
     "flake8-pyproject~=1.2.3",
     "sqlalchemy[mypy]~=2.0.44",
@@ -133,13 +132,10 @@ docs = [
   # sphinx-plantuml~=1.0.0",
 ]
 
-[tool.black]
+[tool.ruff]
+target-version = "py311"
 line-length = 120
-
-[tool.isort]
-profile = "black"
-py_version = "311"
-known_first_party = ["app"]
+extend-exclude = ["docs/", "Makefile"]
 
 [tool.mypy]
 python_version = "3.11"

@@ -187,7 +187,6 @@ async def run_transfer_and_verify(
 
 
 def cast_dataframe_types(df: DataFrame, init_df: DataFrame) -> tuple[DataFrame, DataFrame]:
-
     for field in init_df.schema:
         df = df.withColumn(field.name, df[field.name].cast(field.dataType))
 

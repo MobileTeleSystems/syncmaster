@@ -274,20 +274,23 @@ async def two_group_connections(
         connection_id=connection2.id,
     )
 
-    yield MockConnection(
-        credentials=MockCredentials(
-            value=decrypt_auth_data(credentials1.value, settings=settings),
-            connection_id=connection1.id,
+    yield (
+        MockConnection(
+            credentials=MockCredentials(
+                value=decrypt_auth_data(credentials1.value, settings=settings),
+                connection_id=connection1.id,
+            ),
+            connection=connection1,
+            owner_group=mock_group,
         ),
-        connection=connection1,
-        owner_group=mock_group,
-    ), MockConnection(
-        credentials=MockCredentials(
-            value=decrypt_auth_data(credentials2.value, settings=settings),
-            connection_id=connection2.id,
+        MockConnection(
+            credentials=MockCredentials(
+                value=decrypt_auth_data(credentials2.value, settings=settings),
+                connection_id=connection2.id,
+            ),
+            connection=connection2,
+            owner_group=mock_group,
         ),
-        connection=connection2,
-        owner_group=mock_group,
     )
     await session.delete(connection1)
     await session.delete(connection2)

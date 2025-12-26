@@ -7,7 +7,6 @@ from syncmaster.worker.settings import WorkerAppSettings as Settings
 
 
 class WorkerTask(Task):
-
     def __init__(self) -> None:
         self.settings = Settings()
         self.engine = create_engine(

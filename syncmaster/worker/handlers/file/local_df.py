@@ -17,15 +17,12 @@ if TYPE_CHECKING:
 
 
 class LocalDFFileHandler(FileHandler):
-
     def read(self) -> DataFrame:
         from pyspark.sql.types import StructType
 
         downloader_params = {}
         if self.transfer_dto.strategy.type == "incremental":
-            hwm_name = (
-                f"{self.transfer_dto.id}_{self.connection_dto.type}_{self.transfer_dto.directory_path}"  # noqa: WPS237
-            )
+            hwm_name = f"{self.transfer_dto.id}_{self.connection_dto.type}_{self.transfer_dto.directory_path}"  # noqa: WPS237
             if self.transfer_dto.strategy.increment_by == "file_modified_since":
                 downloader_params["hwm"] = FileModifiedTimeHWM(name=hwm_name)
             elif self.transfer_dto.strategy.increment_by == "file_name":
@@ -60,7 +57,6 @@ class LocalDFFileHandler(FileHandler):
         return df
 
     def write(self, df: DataFrame) -> None:
-
         writer = FileDFWriter(
             connection=self.local_df_connection,
             format=self.transfer_dto.file_format,

@@ -27,7 +27,6 @@ async def test_get_keycloak_token_active(
     settings: Settings,
     mock_keycloak_introspect_token,
 ):
-
     mock_keycloak_introspect_token(simple_user)
 
     headers = {

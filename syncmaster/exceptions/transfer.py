@@ -34,6 +34,4 @@ class DifferentTypeConnectionsAndParamsError(SyncmasterError):
 
     @property
     def message(self) -> str:
-        return (
-            f"{self.conn} connection has type `{self.connection_type}` " f"but its params has `{self.params_type}` type"
-        )
+        return f"{self.conn} connection has type `{self.connection_type}` but its params has `{self.params_type}` type"

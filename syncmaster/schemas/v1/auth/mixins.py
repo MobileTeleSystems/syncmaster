@@ -4,7 +4,6 @@ from pydantic import BaseModel, SecretStr, field_serializer
 
 
 class SecretDumpMixin(BaseModel):
-
     @field_serializer("*", when_used="json")
     def dump_secrets(self, value):
         if isinstance(value, SecretStr):

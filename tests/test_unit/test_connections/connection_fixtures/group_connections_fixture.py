@@ -20,7 +20,6 @@ async def group_connections(
 
     # since group_connection already created a connection, we start from index 1
     for conn_type in connection_types[1:]:
-
         new_data = {
             **connection.data,
         }

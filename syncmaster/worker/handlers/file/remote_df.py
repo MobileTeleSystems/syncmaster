@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 
 
 class RemoteDFFileHandler(FileHandler):
-
     def read(self) -> DataFrame:
         from pyspark.sql.types import StructType
 

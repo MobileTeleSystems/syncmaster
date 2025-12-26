@@ -23,7 +23,7 @@ class RabbitMQSettings(BaseModel):
 
     url: str = Field(
         description=(
-            "RabbitMQ connection URL.\n\n" "See the `RabbitMQ documentation <https://www.rabbitmq.com/uri-spec.html>`_ "
+            "RabbitMQ connection URL.\n\nSee the `RabbitMQ documentation <https://www.rabbitmq.com/uri-spec.html>`_ "
         ),
     )
 
