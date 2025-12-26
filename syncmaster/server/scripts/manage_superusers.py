@@ -21,6 +21,8 @@ from syncmaster.server.settings import (
 )
 from syncmaster.settings.logging import setup_logging
 
+logger = logging.getLogger(__name__)
+
 
 class SuperuserAppSettings(BaseSettings):
     database: DatabaseSettings = Field(
@@ -38,52 +40,52 @@ class SuperuserAppSettings(BaseSettings):
 
 
 async def add_superusers(session: AsyncSession, usernames: list[str]) -> None:
-    logging.info("Adding superusers:")
+    logger.info("Adding superusers:")
     result = await session.execute(select(User).where(User.username.in_(usernames)).order_by(User.username))
     users = result.scalars().all()
 
     not_found = set(usernames)
     for user in users:
         user.is_superuser = True
-        logging.info("    %r", user.username)
+        logger.info("    %r", user.username)
         not_found.discard(user.username)
 
     if not_found:
         for username in not_found:
             session.add(User(username=username, is_superuser=True))
-            logging.info("    %r (new user)", username)
+            logger.info("    %r (new user)", username)
 
     await session.commit()
-    logging.info("Done.")
+    logger.info("Done.")
 
 
 async def remove_superusers(session: AsyncSession, usernames: list[str]) -> None:
-    logging.info("Removing superusers:")
+    logger.info("Removing superusers:")
     result = await session.execute(select(User).where(User.username.in_(usernames)).order_by(User.username))
     users = result.scalars().all()
 
     not_found = set(usernames)
     for user in users:
-        logging.info("    %r", user.username)
+        logger.info("    %r", user.username)
         user.is_superuser = False
         not_found.discard(user.username)
 
     if not_found:
-        logging.info("Not found:")
+        logger.info("Not found:")
         for username in not_found:
-            logging.info("    %r", username)
+            logger.info("    %r", username)
 
     await session.commit()
-    logging.info("Done.")
+    logger.info("Done.")
 
 
 async def list_superusers(session: AsyncSession) -> None:
     result = await session.execute(select(User).filter_by(is_superuser=True).order_by(User.username))
     superusers = result.scalars().all()
-    logging.info("Listing users with SUPERUSER role:")
+    logger.info("Listing users with SUPERUSER role:")
     for superuser in superusers:
-        logging.info("    %r", superuser.username)
-    logging.info("Done.")
+        logger.info("    %r", superuser.username)
+    logger.info("Done.")
 
 
 def create_parser() -> argparse.ArgumentParser:

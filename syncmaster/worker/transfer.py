@@ -82,7 +82,7 @@ def run_transfer(run_id: int, engine: Engine, settings: WorkerAppSettings):
         controller.perform_transfer()
     except Exception as e:
         status = Status.FAILED
-        logger.error("Run %r failed", run_id)
+        logger.exception("Run %r failed", run_id)
         exception = e
     else:
         status = Status.FINISHED
