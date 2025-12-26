@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import enum
-from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, Computed, ForeignKey, PrimaryKeyConstraint, String
 from sqlalchemy.dialects.postgresql import TSVECTOR
@@ -13,9 +12,6 @@ from sqlalchemy_utils import ChoiceType
 from syncmaster.db.mixins import TimestampMixin
 from syncmaster.db.models.base import Base
 from syncmaster.db.models.user import User
-
-if TYPE_CHECKING:
-    from syncmaster.db.models.queue import Queue
 
 
 class GroupMemberRole(enum.StrEnum):
@@ -76,7 +72,6 @@ class Group(Base, TimestampMixin):
     owner_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
 
     owner: Mapped[User] = relationship(User)
-    queue: Mapped[Queue] = relationship(back_populates="group", cascade="all, delete-orphan")
     search_vector: Mapped[str] = mapped_column(
         TSVECTOR,
         Computed(

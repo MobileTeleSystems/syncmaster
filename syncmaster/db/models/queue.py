@@ -21,7 +21,7 @@ class Queue(Base, ResourceMixin, TimestampMixin):
     slug: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
 
     transfers: Mapped[list[Transfer]] = relationship(back_populates="queue")
-    group: Mapped[Group] = relationship(back_populates="queue")
+    group: Mapped[Group] = relationship()
 
     search_vector: Mapped[str] = mapped_column(
         TSVECTOR,
