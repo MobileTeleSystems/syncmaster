@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-import os
+from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
 from syncmaster.worker.handlers.base import Handler
@@ -55,13 +55,13 @@ class FileHandler(Handler):
         "orc": "orc",
     }
 
-    def _rename_files(self, tmp_path: str) -> None:
+    def _rename_files(self, tmp_path: Path) -> None:
         files = self.file_connection.list_dir(tmp_path)
 
         for index, old_path in enumerate(files):
             extension = self._get_file_extension()
             new_name = self._get_file_name(index, extension)
-            new_path = os.path.join(tmp_path, new_name)
+            new_path = Path(tmp_path, new_name)
             self.file_connection.rename_file(old_path, new_path)
 
     def _get_file_name(self, index: int, extension: str) -> str:

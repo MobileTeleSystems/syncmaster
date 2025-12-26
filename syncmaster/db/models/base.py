@@ -23,6 +23,6 @@ class Base(DeclarativeBase):
     metadata = model_metadata
 
     @declared_attr
-    def __tablename__(cls) -> str:
+    def __tablename__(cls) -> str:  # noqa: N805
         name_list = re.findall(r"[A-Z][a-z\d]*", cls.__name__)
         return "_".join(name_list).lower()

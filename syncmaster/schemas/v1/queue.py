@@ -12,7 +12,7 @@ RESTRICTED_PATTERN = re.compile(r"[^a-zA-Z0-9]+")
 
 QueueName = Annotated[
     str,
-    StringConstraints(min_length=3, max_length=128, pattern=ALLOWED_PATTERN),  # noqa: WPS432
+    StringConstraints(min_length=3, max_length=128, pattern=ALLOWED_PATTERN),
 ]
 
 

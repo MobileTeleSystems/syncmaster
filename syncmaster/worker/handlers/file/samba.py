@@ -20,7 +20,7 @@ class SambaHandler(LocalDFFileHandler):
     connection_dto: SambaConnectionDTO
 
     def connect(self, spark: SparkSession) -> None:
-        from onetl.connection import Samba, SparkLocalFS
+        from onetl.connection import Samba, SparkLocalFS  # noqa: PLC0415
 
         self.file_connection = Samba(
             host=self.connection_dto.host,

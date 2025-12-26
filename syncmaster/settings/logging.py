@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import logging
-import logging.config  # noqa: WPS301, WPS458
+import logging.config
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 from pydantic_settings_logging import (
@@ -9,12 +9,10 @@ from pydantic_settings_logging import (
     FormatterConfig,
     HandlerConfig,
     LoggerConfig,
-)
-from pydantic_settings_logging import LoggingSettings as BaseLoggingSettings
-from pydantic_settings_logging import (
     RootLoggerConfig,
     StreamHandlerConfig,
 )
+from pydantic_settings_logging import LoggingSettings as BaseLoggingSettings
 
 
 # https://github.com/vduseev/pydantic-settings-logging/pull/1

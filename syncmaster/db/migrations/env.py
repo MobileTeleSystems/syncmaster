@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import asyncio
-import os
 from logging.config import fileConfig
+from pathlib import Path
 
 from alembic import context
 from alembic.script import ScriptDirectory
@@ -46,13 +46,11 @@ def get_next_revision_id():
     script_directory = ScriptDirectory.from_config(context.config)
     versions_path = script_directory.versions
 
-    existing_filenames = os.listdir(versions_path)
     existing_ids = []
-
-    for filename in existing_filenames:
+    for file in Path(versions_path).iterdir():
         # Assuming filename format: YYYY-MM-DD_XXXX_slug.py
-        parts = filename.split("_")
-        if len(parts) >= 2:
+        parts = file.name.split("_")
+        if len(parts) > 1:
             id_part = parts[1]
             try:
                 id_num = int(id_part)
@@ -60,7 +58,7 @@ def get_next_revision_id():
             except ValueError:
                 pass
 
-    if existing_ids:
+    if existing_ids:  # noqa: SIM108
         next_id = max(existing_ids) + 1
     else:
         next_id = 1

@@ -28,7 +28,7 @@ class IcebergRESTCatalogS3DirectConnectionDataSchema(BaseModel):
     rest_catalog_url: URL
     s3_warehouse_path: str
     s3_host: str
-    s3_port: int | None = Field(default=None, gt=0, le=65535)  # noqa: WPS432
+    s3_port: int | None = Field(default=None, gt=0, le=65535)
     s3_protocol: Literal["http", "https"] = "https"
     s3_bucket: str
     s3_region: str
@@ -81,9 +81,11 @@ class CreateIcebergConnectionSchema(CreateConnectionBaseSchema):
         if not self.auth_data:
             return self
         if self.data.type == "iceberg_rest_s3_direct" and "s3" not in self.auth_data.type:
-            raise ValueError("Cannot create direct S3 connection without S3 credentials")
+            msg = "Cannot create direct S3 connection without S3 credentials"
+            raise ValueError(msg)
         if self.data.type == "iceberg_rest_s3_delegated" and "s3" in self.auth_data.type:
-            raise ValueError("Cannot create delegated S3 connection with S3 credentials")
+            msg = "Cannot create delegated S3 connection with S3 credentials"
+            raise ValueError(msg)
         return self
 
 

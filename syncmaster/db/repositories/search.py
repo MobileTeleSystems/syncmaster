@@ -44,7 +44,7 @@ def make_tsquery(user_input: str) -> ColumnElement:
     simple_query = func.to_tsquery("simple", build_tsquery(user_input))
     stemmed_query = func.plainto_tsquery("russian", user_input)
     combined_query = simple_query.op("||")(stemmed_query)
-    return combined_query
+    return combined_query  # noqa: RET504
 
 
 def ts_match(search_vector: InstrumentedAttribute, ts_query: ColumnElement) -> ColumnElement:

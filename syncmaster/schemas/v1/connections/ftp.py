@@ -17,7 +17,7 @@ from syncmaster.schemas.v1.connections.connection_base import (
 
 class FTPConnectionDataSchema(BaseModel):
     host: str
-    port: int = Field(default=21, gt=0, le=65535)  # noqa: WPS432
+    port: int = Field(default=21, gt=0, le=65535)
 
 
 class CreateFTPConnectionSchema(CreateConnectionBaseSchema):

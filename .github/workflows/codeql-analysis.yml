@@ -14,7 +14,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # flake8-commas is failing on Python 3.12
   DEFAULT_PYTHON: '3.13'
 
 jobs:
@@ -54,9 +53,6 @@ jobs:
         run: |
           export UV=$(which uv)
           make venv-install
-
-      - name: Run flake8
-        run: uv run flake8 syncmaster/
 
       - name: Run mypy
         run: uv run mypy --config-file ./pyproject.toml ./syncmaster/server

@@ -86,7 +86,7 @@ def create_session_cookie(rsa_keys, settings):
 
 
 @pytest_asyncio.fixture
-async def mock_keycloak_api(settings):  # noqa: F811
+async def mock_keycloak_api(settings):
     keycloak_settings = settings.auth.model_dump()["keycloak"]
     api_url = keycloak_settings["api_url"]
 

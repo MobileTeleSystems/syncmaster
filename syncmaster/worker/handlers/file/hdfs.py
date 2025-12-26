@@ -20,7 +20,7 @@ class HDFSHandler(RemoteDFFileHandler):
     connection_dto: HDFSConnectionDTO
 
     def connect(self, spark: SparkSession):
-        from onetl.connection import HDFS, SparkHDFS
+        from onetl.connection import HDFS, SparkHDFS  # noqa: PLC0415
 
         self.df_connection = SparkHDFS(
             cluster=self.connection_dto.cluster,

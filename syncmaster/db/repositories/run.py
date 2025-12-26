@@ -98,7 +98,7 @@ class RunRepository(Repository[Run]):
         )
         transfer = transfer.one()
 
-        return dict(
+        return dict(  # noqa: C408
             id=transfer.id,
             name=transfer.name,
             group_id=transfer.group_id,
@@ -111,7 +111,7 @@ class RunRepository(Repository[Run]):
             source_params=transfer.source_params,
             target_params=transfer.target_params,
             strategy_params=transfer.strategy_params,
-            source_connection=dict(
+            source_connection=dict(  # noqa: C408
                 id=transfer.source_connection.id,
                 group_id=transfer.source_connection.group_id,
                 name=transfer.source_connection.name,
@@ -119,7 +119,7 @@ class RunRepository(Repository[Run]):
                 data=transfer.source_connection.data,
                 auth_data=source_creds["auth_data"],
             ),
-            target_connection=dict(
+            target_connection=dict(  # noqa: C408
                 id=transfer.target_connection.id,
                 group_id=transfer.target_connection.group_id,
                 name=transfer.target_connection.name,

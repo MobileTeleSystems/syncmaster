@@ -5,36 +5,11 @@ from coverage import Coverage
 from onetl.connection import HDFS, SparkHDFS
 from onetl.hooks import hook
 
-from syncmaster.worker.spark import get_worker_spark_session
-
 # this is just to automatically import hooks
-get_worker_spark_session = get_worker_spark_session
+from syncmaster.worker.spark import get_worker_spark_session  # noqa: F401
 
 
 @SparkHDFS.Slots.get_cluster_namenodes.bind
-@hook
-def get_cluster_namenodes(cluster: str) -> set[str] | None:
-    if cluster == "test-hive":
-        return {"test-hive"}
-    return None
-
-
-@SparkHDFS.Slots.is_namenode_active.bind
-@hook
-def is_namenode_active(host: str, cluster: str) -> bool:
-    if cluster == "test-hive":
-        return True
-    return False
-
-
-@SparkHDFS.Slots.get_ipc_port.bind
-@hook
-def get_ipc_port(cluster: str) -> int | None:
-    if cluster == "test-hive":
-        return 9820
-    return None
-
-
 @HDFS.Slots.get_cluster_namenodes.bind
 @hook
 def get_cluster_namenodes(cluster: str) -> set[str] | None:
@@ -44,11 +19,18 @@ def get_cluster_namenodes(cluster: str) -> set[str] | None:
 
 
 @HDFS.Slots.is_namenode_active.bind
+@SparkHDFS.Slots.is_namenode_active.bind
 @hook
 def is_namenode_active(host: str, cluster: str) -> bool:
+    return cluster == "test-hive"
+
+
+@SparkHDFS.Slots.get_ipc_port.bind
+@hook
+def get_ipc_port(cluster: str) -> int | None:
     if cluster == "test-hive":
-        return True
-    return False
+        return 9820
+    return None
 
 
 @HDFS.Slots.get_webhdfs_port.bind
@@ -66,7 +48,7 @@ COV = None
 
 @worker_process_init.connect
 def start_coverage(**kwargs):
-    global COV
+    global COV  # noqa: PLW0603
 
     COV = Coverage(data_suffix=True)
     COV.start()

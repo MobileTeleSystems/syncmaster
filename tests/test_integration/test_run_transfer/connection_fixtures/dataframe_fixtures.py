@@ -59,7 +59,7 @@ def init_df_with_mixed_column_naming(spark: SparkSession) -> DataFrame:
                 "Mordor",
                 1,
                 datetime.date(year=2023, month=3, day=11),
-                datetime.datetime.now(),
+                datetime.datetime.now(),  # noqa: DTZ005
                 1234.2343,
             ),
             (
@@ -68,7 +68,7 @@ def init_df_with_mixed_column_naming(spark: SparkSession) -> DataFrame:
                 "Gondor",
                 2,
                 datetime.date(2022, 6, 19),
-                datetime.datetime.now(),
+                datetime.datetime.now(),  # noqa: DTZ005
                 2345.5678,
             ),
             (
@@ -77,7 +77,7 @@ def init_df_with_mixed_column_naming(spark: SparkSession) -> DataFrame:
                 "Rohan",
                 3,
                 datetime.date(2021, 11, 5),
-                datetime.datetime.now(),
+                datetime.datetime.now(),  # noqa: DTZ005
                 3456.7890,
             ),
             (
@@ -86,7 +86,7 @@ def init_df_with_mixed_column_naming(spark: SparkSession) -> DataFrame:
                 "Shire",
                 4,
                 datetime.date(2020, 1, 30),
-                datetime.datetime.now(),
+                datetime.datetime.now(),  # noqa: DTZ005
                 4567.8901,
             ),
             (
@@ -95,7 +95,7 @@ def init_df_with_mixed_column_naming(spark: SparkSession) -> DataFrame:
                 "Isengard",
                 5,
                 datetime.date(2023, 8, 15),
-                datetime.datetime.now(),
+                datetime.datetime.now(),  # noqa: DTZ005
                 5678.9012,
             ),
         ],

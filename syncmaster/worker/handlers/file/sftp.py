@@ -20,7 +20,7 @@ class SFTPHandler(LocalDFFileHandler):
     connection_dto: SFTPConnectionDTO
 
     def connect(self, spark: SparkSession) -> None:
-        from onetl.connection import SFTP, SparkLocalFS
+        from onetl.connection import SFTP, SparkLocalFS  # noqa: PLC0415
 
         self.file_connection = SFTP(
             host=self.connection_dto.host,

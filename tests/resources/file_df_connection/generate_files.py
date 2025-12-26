@@ -6,6 +6,7 @@ import csv
 import gzip
 import io
 import json
+import logging
 import random
 import shutil
 import sys
@@ -27,26 +28,27 @@ if TYPE_CHECKING:
     from pyarrow import Table as ArrowTable
 
 SEED = 42
+logger = logging.getLogger(__name__)
 
 
 def get_data() -> list:
     try:
         from test_data import data
-
+    except Exception:
+        logger.exception("File test_data.py does not exists, run 'generate_data.py'.")
+        sys.exit(1)
+    else:
         return data
-    except Exception as e:
-        print("File test_data.py does not exists, run 'generate_data.py'.", e)
-        exit(1)
 
 
 def get_intervals() -> list:
     try:
         from test_data import intervals
-
+    except Exception:
+        logger.exception("File test_data.py does not exists, run 'generate_data.py'.")
+        sys.exit(1)
+    else:
         return intervals
-    except Exception as e:
-        print("File test_data.py does not exists, run 'generate_data.py'.", e)
-        exit(1)
 
 
 def get_pandas_dataframe(data: list[dict]) -> PandasDataFrame:
@@ -91,7 +93,10 @@ def get_avro_schema() -> AvroSchema:
             {"name": "REGION", "type": "string"},
             {"name": "NUMBER", "type": "int"},
             {"name": "BIRTH_DATE", "type": {"type": "int", "logicalType": "date"}},
-            {"name": "REGISTERED_AT", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+            {
+                "name": "REGISTERED_AT",
+                "type": {"type": "long", "logicalType": "timestamp-millis"},
+            },
             {"name": "ACCOUNT_BALANCE", "type": "double"},
         ],
     }
@@ -117,19 +122,19 @@ def _write_csv(data: list[dict], file: TextIO, include_header: bool = False, **k
 
 def save_as_csv_without_header(data: list[dict], path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
-    with open(path / "file.csv", "w", newline="") as file:
+    with path.joinpath("file.csv").open("w", newline="") as file:
         _write_csv(data, file)
 
 
 def save_as_csv_with_header(data: list[dict], path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
-    with open(path / "file.csv", "w", newline="") as file:
+    with path.joinpath("file.csv").open("w", newline="") as file:
         _write_csv(data, file, include_header=True)
 
 
 def save_as_csv_with_delimiter(data: list[dict], path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
-    with open(path / "file.csv", "w", newline="") as file:
+    with path.joinpath("file.csv").open("w", newline="") as file:
         _write_csv(data, file, delimiter=";")
 
 
@@ -140,9 +145,11 @@ def save_as_csv_gz(data: list[dict], path: Path) -> None:
     # Instead of just writing data to file we write it to a buffer, and then compress with fixed mtime
     buffer = io.StringIO()
     _write_csv(data, buffer)
-    with open(path / "file.csv.gz", "wb") as file:
-        with gzip.GzipFile(fileobj=file, mode="w", mtime=0) as gzfile:
-            gzfile.write(buffer.getvalue().encode("utf-8"))
+    with (
+        path.joinpath("file.csv.gz").open("wb") as file,
+        gzip.GzipFile(fileobj=file, mode="w", mtime=0) as gzfile,
+    ):
+        gzfile.write(buffer.getvalue().encode("utf-8"))
 
 
 def save_as_csv_nested(data: list[dict], path: Path) -> None:
@@ -150,22 +157,18 @@ def save_as_csv_nested(data: list[dict], path: Path) -> None:
     path.joinpath("some/path/more").mkdir(parents=True, exist_ok=True)
     path.joinpath("some/path/more/even_more").mkdir(parents=True, exist_ok=True)
 
-    counter = 0
-
     for num, interval in enumerate(get_intervals()):
-        if counter <= 2:
-            with open(path / f"some/path/for_val{num}.csv", "w", newline="") as file:
+        if num <= 2:
+            with path.joinpath(f"some/path/for_val{num}.csv").open("w", newline="") as file:
                 _write_csv([row for row in data if row["NUMBER"] in interval], file)
 
-        if counter in (3, 4, 5):
-            with open(path / f"some/path/more/for_val{num}.csv", "w", newline="") as file:
+        if num in (3, 4, 5):
+            with path.joinpath(f"some/path/more/for_val{num}.csv").open("w", newline="") as file:
                 _write_csv([row for row in data if row["NUMBER"] in interval], file)
 
-        if counter >= 6:
-            with open(path / f"some/path/more/even_more/for_val{num}.csv", "w", newline="") as file:
+        if num >= 6:
+            with path.joinpath(f"some/path/more/even_more/for_val{num}.csv").open("w", newline="") as file:
                 _write_csv([row for row in data if row["NUMBER"] in interval], file)
-
-        counter += 1
 
 
 def save_as_csv_partitioned(data: list[dict], path: Path) -> None:
@@ -185,7 +188,7 @@ def save_as_csv_partitioned(data: list[dict], path: Path) -> None:
     columns.remove("NUMBER")
 
     for num, interval in enumerate(get_intervals()):
-        with open(path / f"NUMBER={num}/file.csv", "w", newline="") as file:
+        with path.joinpath(f"NUMBER={num}/file.csv").open("w", newline="") as file:
             data_for_val = filter_and_drop(data, "NUMBER", interval)
             _write_csv(data_for_val, file)
 
@@ -211,9 +214,11 @@ def save_as_json_gz(data: list[dict], path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
     buffer = io.StringIO()
     json.dump(data, buffer, default=_to_string)
-    with open(path / "file.json.gz", "wb") as file:
-        with gzip.GzipFile(fileobj=file, mode="w", mtime=0) as gzfile:
-            gzfile.write(buffer.getvalue().encode("utf-8"))
+    with (
+        path.joinpath("file.json.gz").open("wb") as file,
+        gzip.GzipFile(fileobj=file, mode="w", mtime=0) as gzfile,
+    ):
+        gzfile.write(buffer.getvalue().encode("utf-8"))
 
 
 def save_as_json(data: list[dict], path: Path) -> None:
@@ -226,7 +231,7 @@ def save_as_json(data: list[dict], path: Path) -> None:
 
 def save_as_jsonline_plain(data: list[dict], path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
-    with open(path / "file.jsonl", "w") as file:
+    with path.joinpath("file.jsonl").open("w") as file:
         for row in data:
             row_str = json.dumps(row, default=_to_string)
             file.write(row_str + "\n")
@@ -240,9 +245,11 @@ def save_as_jsonline_gz(data: list[dict], path: Path) -> None:
         row_str = json.dumps(row, default=_to_string)
         buffer.write(row_str + "\n")
 
-    with open(path / "file.jsonl.gz", "wb") as file:
-        with gzip.GzipFile(fileobj=file, mode="w", mtime=0) as gzfile:
-            gzfile.write(buffer.getvalue().encode("utf-8"))
+    with (
+        path.joinpath("file.jsonl.gz").open("wb") as file,
+        gzip.GzipFile(fileobj=file, mode="w", mtime=0) as gzfile,
+    ):
+        gzfile.write(buffer.getvalue().encode("utf-8"))
 
 
 def save_as_jsonline(data: list[dict], path: Path) -> None:
@@ -307,7 +314,7 @@ def save_as_parquet(data: list[dict], path: Path) -> None:
 def temporary_set_seed(seed: int) -> Iterator[int]:
     """Set random.seed to expected value, and return previous value after exit"""
     state = random.getstate()
-    try:  # noqa: WPS501
+    try:
         random.seed(seed)
         yield seed
     finally:
@@ -320,13 +327,16 @@ def save_as_avro_plain(data: list[dict], path: Path) -> None:
 
     path.mkdir(parents=True, exist_ok=True)
     schema = get_avro_schema()
-    with open(path / "file.avro", "wb") as file:
-        # DataFileDFWriter.sync_marker is initialized with randbytes
-        # temporary set seed to avoid generating files with different hashes
-        with temporary_set_seed(SEED):
-            with DataFileWriter(file, DatumWriter(), schema) as writer:
-                for row in data:
-                    writer.append(row)
+
+    # DataFileDFWriter.sync_marker is initialized with randbytes
+    # temporary set seed to avoid generating files with different hashes
+    with (
+        temporary_set_seed(SEED),
+        path.joinpath("file.avro").open("wb") as file,
+        DataFileWriter(file, DatumWriter(), schema) as writer,
+    ):
+        for row in data:
+            writer.append(row)
 
 
 def save_as_avro_snappy(data: list[dict], path: Path) -> None:
@@ -335,13 +345,16 @@ def save_as_avro_snappy(data: list[dict], path: Path) -> None:
 
     path.mkdir(parents=True, exist_ok=True)
     schema = get_avro_schema()
-    with open(path / "file.snappy.avro", "wb") as file:
-        # DataFileDFWriter.sync_marker is initialized with randbytes
-        # temporary set seed to avoid generating files with different hashes
-        with temporary_set_seed(SEED):
-            with DataFileWriter(file, DatumWriter(), schema, codec="snappy") as writer:
-                for row in data:
-                    writer.append(row)
+
+    # DataFileDFWriter.sync_marker is initialized with randbytes
+    # temporary set seed to avoid generating files with different hashes
+    with (
+        temporary_set_seed(SEED),
+        path.joinpath("file.snappy.avro").open("wb") as file,
+        DataFileWriter(file, DatumWriter(), schema, codec="snappy") as writer,
+    ):
+        for row in data:
+            writer.append(row)
 
 
 def save_as_avro(data: list[dict], path: Path) -> None:
@@ -359,7 +372,6 @@ def save_as_xls_with_options(
     **kwargs,
 ) -> None:
     # required to register xlwt writer which supports generating .xls files
-    pass
 
     path.mkdir(parents=True, exist_ok=True)
     file = path / "file.xls"
@@ -373,15 +385,14 @@ def make_zip_deterministic(path: Path) -> None:
     temp_dir = gettempdir()
     file_copy = Path(shutil.copy(path, temp_dir))
 
-    with ZipFile(file_copy, "r") as original_file:
-        with ZipFile(path, "w") as new_file:
-            for item in original_file.infolist():
-                if item.filename == "docProps/core.xml":
-                    # this file contains modification time, which produces files with different hashes
-                    continue
-                # reset modification time of all files
-                item.date_time = (1980, 1, 1, 0, 0, 0)
-                new_file.writestr(item, original_file.read(item.filename))
+    with ZipFile(file_copy, "r") as original_file, ZipFile(path, "w") as new_file:
+        for item in original_file.infolist():
+            if item.filename == "docProps/core.xml":
+                # this file contains modification time, which produces files with different hashes
+                continue
+            # reset modification time of all files
+            item.date_time = (1980, 1, 1, 0, 0, 0)
+            new_file.writestr(item, original_file.read(item.filename))
 
 
 def save_as_xlsx_with_options(
@@ -525,9 +536,10 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv or sys.argv[1:])
 
     if args.format not in format_mapping and args.format != "all":
-        raise ValueError(f"Format {args.format} is not supported")
+        msg = f"Format {args.format} is not supported"
+        raise ValueError(msg)
 
-    if args.format == "all":
+    if args.format == "all":  # noqa: SIM108
         save_functions = list(format_mapping.values())
     else:
         save_functions = [format_mapping[args.format]]

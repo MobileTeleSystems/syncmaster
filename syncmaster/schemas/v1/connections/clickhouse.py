@@ -16,7 +16,7 @@ from syncmaster.schemas.v1.connections.connection_base import (
 
 class ClickhouseConnectionDataSchema(BaseModel):
     host: str
-    port: int = Field(default=8123, gt=0, le=65535)  # noqa: WPS432
+    port: int = Field(default=8123, gt=0, le=65535)
     database_name: str | None = None
     additional_params: dict = Field(default_factory=dict)
 
