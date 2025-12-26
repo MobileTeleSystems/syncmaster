@@ -21,7 +21,7 @@ class Pagination:
         self.has_next = previous_items + len(items) < total
         if self.has_next:
             self.next_page = page + 1
-        self.pages = int(math.ceil(total / float(page_size))) or 1
+        self.pages = math.ceil(total / float(page_size)) or 1
 
 
 class Permission(IntEnum):

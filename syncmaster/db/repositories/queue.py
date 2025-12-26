@@ -129,8 +129,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
             # If the user is not in the group, then he is either a superuser or does not have any rights
             if not user.is_superuser:
                 return Permission.NONE
-            else:
-                return Permission.DELETE
+            return Permission.DELETE
 
         group_role = user_group.role
 
@@ -139,7 +138,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
 
         return Permission.DELETE
 
-    async def get_resource_permission(self, user: User, resource_id: int) -> Permission:  # noqa: WPS212
+    async def get_resource_permission(self, user: User, resource_id: int) -> Permission:
         """
         Method for determining CRUD rights in a repository (self.model) for a resource
         'DEVELOPER' does not have WRITE permission in the QUEUE repository

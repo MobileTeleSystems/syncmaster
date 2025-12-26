@@ -1,5 +1,5 @@
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy.orm import Session
 
@@ -16,13 +16,13 @@ def tick(self: WorkerTask, run_id: int) -> None:
         if run is None:
             raise RunNotFoundError
 
-        run.started_at = datetime.now(tz=timezone.utc)
+        run.started_at = datetime.now(tz=UTC)
         run.status = Status.STARTED
         session.add(run)
         session.commit()
 
         time.sleep(2)  # to make sure that previous status is handled in test
         run.status = Status.FINISHED
-        run.ended_at = datetime.now(tz=timezone.utc)
+        run.ended_at = datetime.now(tz=UTC)
         session.add(run)
         session.commit()

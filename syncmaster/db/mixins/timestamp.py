@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from functools import partial
 
 from sqlalchemy import DateTime, func
@@ -12,6 +12,6 @@ class TimestampMixin:
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
-        onupdate=partial(datetime.now, tz=timezone.utc),
+        onupdate=partial(datetime.now, tz=UTC),
         nullable=False,
     )

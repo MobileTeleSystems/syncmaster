@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from asgi_correlation_id import correlation_id
 from asgi_correlation_id.extensions.celery import load_correlation_ids
@@ -63,7 +63,7 @@ def run_transfer(run_id: int, engine: Engine, settings: WorkerAppSettings):
 
             logger.info("Starting run %r", run_id)
             run.status = Status.STARTED
-            run.started_at = datetime.now(tz=timezone.utc)
+            run.started_at = datetime.now(tz=UTC)
             run.log_url = Template(settings.worker.log_url_template).render(
                 run=run,
                 correlation_id=correlation_id.get(),
@@ -94,7 +94,7 @@ def run_transfer(run_id: int, engine: Engine, settings: WorkerAppSettings):
         if run:
             logger.info("Updating run %r status in DB", run_id)
             run.status = status
-            run.ended_at = datetime.now(tz=timezone.utc)
+            run.ended_at = datetime.now(tz=UTC)
             session.commit()
 
     if exception is not None:

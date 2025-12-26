@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import sys
 from argparse import ArgumentParser
-from datetime import timezone
+from datetime import UTC
 
 from faker import Faker
 
@@ -19,7 +19,7 @@ def create_data(elements: int) -> list[dict]:
             "REGION": fake.city(),
             "NUMBER": i + 1,
             "BIRTH_DATE": fake.date_object(),
-            "REGISTERED_AT": fake.date_time(tzinfo=timezone.utc),
+            "REGISTERED_AT": fake.date_time(tzinfo=UTC),
             "ACCOUNT_BALANCE": fake.random_int() + (fake.random_int() / 10000),
         }
         for i in range(elements)
