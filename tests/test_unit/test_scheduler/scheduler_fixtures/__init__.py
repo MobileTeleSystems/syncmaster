@@ -4,3 +4,8 @@ from tests.test_unit.test_scheduler.scheduler_fixtures.transfer_fetcher_fixture 
 from tests.test_unit.test_scheduler.scheduler_fixtures.transfer_job_manager_fixture import (
     transfer_job_manager,
 )
+
+__all__ = [
+    "transfer_fetcher",
+    "transfer_job_manager",
+]
