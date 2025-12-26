@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from http.client import NO_CONTENT
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
 
@@ -26,17 +27,19 @@ router = APIRouter(tags=["Groups"], responses=get_error_responses())
 
 
 @router.get("/groups")
-async def read_groups(
-    page: int = Query(gt=0, default=1),
-    page_size: int = Query(gt=0, le=50, default=20),  # noqa: WPS432
-    role: str | None = Query(default=None),
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
-    search_query: str | None = Query(
-        None,
-        title="Search Query",
-        description="full-text search for groups",
-    ),
+async def read_groups(  # noqa: PLR0913
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
+    page: Annotated[int, Query(gt=0)] = 20,
+    page_size: Annotated[int, Query(gt=0, le=50)] = 20,
+    role: Annotated[str | None, Query()] = None,
+    search_query: Annotated[
+        str | None,
+        Query(
+            title="Search Query",
+            description="full-text search for groups",
+        ),
+    ] = None,
 ) -> GroupPageSchema:
     if current_user.is_superuser:
         pagination = await unit_of_work.group.paginate_all(
@@ -58,8 +61,8 @@ async def read_groups(
 @router.post("/groups")
 async def create_group(
     group_data: CreateGroupSchema,
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
-    current_user: User = Depends(get_user()),
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
+    current_user: Annotated[User, Depends(get_user())],
 ) -> ReadGroupSchema:
     async with unit_of_work:
         group = await unit_of_work.group.create(
@@ -73,8 +76,8 @@ async def create_group(
 @router.get("/groups/{group_id}")
 async def read_group(
     group_id: int,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ) -> GroupWithUserRoleSchema:
     resource_role = await unit_of_work.group.get_group_permission(
         user=current_user,
@@ -93,11 +96,11 @@ async def read_group(
 
 
 @router.put("/groups/{group_id}")
-async def update_group(  # noqa: WPS217
+async def update_group(
     group_id: int,
     group_data: UpdateGroupSchema,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ) -> ReadGroupSchema:
     resource_rule = await unit_of_work.group.get_group_permission(
         user=current_user,
@@ -143,7 +146,7 @@ async def update_group(  # noqa: WPS217
 )
 async def delete_group(
     group_id: int,
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ):
     async with unit_of_work:
         await unit_of_work.group.delete(group_id=group_id)
@@ -152,10 +155,10 @@ async def delete_group(
 @router.get("/groups/{group_id}/users")
 async def read_group_users(
     group_id: int,
-    page: int = Query(gt=0, default=1),
-    page_size: int = Query(gt=0, le=50, default=20),  # noqa: WPS432
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
+    page: Annotated[int, Query(gt=0)] = 20,
+    page_size: Annotated[int, Query(gt=0, le=50)] = 20,
 ) -> UserPageSchemaAsGroupMember:
     resource_role = await unit_of_work.group.get_group_permission(
         user=current_user,
@@ -178,8 +181,8 @@ async def update_user_role_group(
     group_id: int,
     user_id: int,
     update_user_data: AddUserSchema,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ) -> AddUserSchema:
     resource_rule = await unit_of_work.group.get_group_permission(
         user=current_user,
@@ -207,8 +210,8 @@ async def add_user_to_group(
     group_id: int,
     user_id: int,
     add_user_data: AddUserSchema,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ):
     resource_rule = await unit_of_work.group.get_group_permission(
         user=current_user,
@@ -237,8 +240,8 @@ async def add_user_to_group(
 async def delete_user_from_group(
     group_id: int,
     user_id: int,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ):
     resource_rule = await unit_of_work.group.get_group_permission(
         user=current_user,
@@ -249,9 +252,8 @@ async def delete_user_from_group(
         raise GroupNotFoundError
 
     # User can delete himself from the group
-    if user_id != current_user.id:
-        if resource_rule < Permission.DELETE:
-            raise ActionNotAllowedError
+    if user_id != current_user.id and resource_rule < Permission.DELETE:
+        raise ActionNotAllowedError
 
     async with unit_of_work:
         await unit_of_work.group.delete_user(

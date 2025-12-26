@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
-from collections.abc import Sequence
 from http.client import NO_CONTENT
+from typing import TYPE_CHECKING, Annotated
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import TypeAdapter
@@ -30,22 +30,27 @@ from syncmaster.schemas.v1.page import MetaPageSchema
 from syncmaster.server.services.get_user import get_user
 from syncmaster.server.services.unit_of_work import UnitOfWork
 
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
 router = APIRouter(tags=["Connections"], responses=get_error_responses())
 
 
 @router.get("/connections")
-async def read_connections(
+async def read_connections(  # noqa: PLR0913
     group_id: int,
-    page: int = Query(gt=0, default=1),
-    page_size: int = Query(gt=0, le=50, default=20),  # noqa: WPS432
-    type: list[ConnectionType] | None = Query(None),
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
-    search_query: str | None = Query(
-        None,
-        title="Search Query",
-        description="full-text search for connections",
-    ),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
+    page: Annotated[int, Query(gt=0)] = 20,
+    page_size: Annotated[int, Query(gt=0, le=50)] = 20,
+    type: Annotated[list[ConnectionType] | None, Query()] = None,
+    search_query: Annotated[
+        str | None,
+        Query(
+            title="Search Query",
+            description="full-text search for connections",
+        ),
+    ] = None,
 ) -> ConnectionPageSchema:
     """Return connections in page format"""
     resource_role = await unit_of_work.connection.get_group_permission(
@@ -102,8 +107,8 @@ async def read_connections(
 @router.post("/connections")
 async def create_connection(
     connection_data: CreateConnectionSchema,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ) -> ReadConnectionSchema:
     """Create new connection"""
     group_permission = await unit_of_work.connection.get_group_permission(
@@ -152,8 +157,8 @@ async def read_connection_types() -> list[str]:
 @router.get("/connections/{connection_id}")
 async def read_connection(
     connection_id: int,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ) -> ReadConnectionSchema:
     resource_role = await unit_of_work.connection.get_resource_permission(
         user=current_user,
@@ -183,11 +188,11 @@ async def read_connection(
 
 
 @router.put("/connections/{connection_id}")
-async def update_connection(  # noqa: WPS217, WPS238
+async def update_connection(
     connection_id: int,
     connection_data: UpdateConnectionSchema,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ) -> ReadConnectionSchema:
     resource_role = await unit_of_work.connection.get_resource_permission(
         user=current_user,
@@ -246,8 +251,8 @@ async def update_connection(  # noqa: WPS217, WPS238
 @router.delete("/connections/{connection_id}", status_code=NO_CONTENT)
 async def delete_connection(
     connection_id: int,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ):
     resource_role = await unit_of_work.connection.get_resource_permission(
         user=current_user,
@@ -262,8 +267,9 @@ async def delete_connection(
     connection = await unit_of_work.connection.read_by_id(connection_id)
     transfers = await unit_of_work.transfer.list_by_connection_id(connection.id)
     if transfers:
+        msg = f"The connection has an associated transfers. Number of the connected transfers: {len(transfers)}"
         raise ConnectionDeleteError(
-            f"The connection has an associated transfers. Number of the connected transfers: {len(transfers)}",
+            msg,
         )
 
     async with unit_of_work:
@@ -271,11 +277,11 @@ async def delete_connection(
 
 
 @router.post("/connections/{connection_id}/copy_connection")
-async def copy_connection(  # noqa: WPS238
+async def copy_connection(
     connection_id: int,
     copy_connection_data: ConnectionCopySchema,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ) -> ReadConnectionSchema:
     resource_role = await unit_of_work.connection.get_resource_permission(
         user=current_user,

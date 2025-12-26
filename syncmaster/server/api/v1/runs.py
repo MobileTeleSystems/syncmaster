@@ -28,15 +28,15 @@ router = APIRouter(tags=["Runs"], responses=get_error_responses())
 
 
 @router.get("/runs")
-async def read_runs(
+async def read_runs(  # noqa: PLR0913
     transfer_id: int,
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
-    page: int = Query(gt=0, default=1),
-    page_size: int = Query(gt=0, le=50, default=20),  # noqa: WPS432
-    status: list[Status] | None = Query(default=None),
-    started_at_since: datetime | None = Query(default=None),
-    started_at_until: datetime | None = Query(default=None),
-    current_user: User = Depends(get_user()),
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
+    current_user: Annotated[User, Depends(get_user())],
+    page: Annotated[int, Query(gt=0)] = 20,
+    page_size: Annotated[int, Query(gt=0, le=50)] = 20,
+    status: Annotated[list[Status] | None, Query()] = None,
+    started_at_since: Annotated[datetime | None, Query()] = None,
+    started_at_until: Annotated[datetime | None, Query()] = None,
 ) -> RunPageSchema:
     """Return runs of transfer with pagination"""
     resource_rule = await unit_of_work.transfer.get_resource_permission(
@@ -62,8 +62,8 @@ async def read_runs(
 @router.get("/runs/{run_id}")
 async def read_run(
     run_id: int,
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
-    current_user: User = Depends(get_user()),
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
+    current_user: Annotated[User, Depends(get_user())],
 ) -> ReadRunSchema:
     run = await unit_of_work.run.read_by_id(run_id=run_id)
 
@@ -79,11 +79,11 @@ async def read_run(
 
 
 @router.post("/runs")
-async def start_run(  # noqa: WPS217
+async def start_run(
     create_run_data: CreateRunSchema,
     celery: Annotated[Celery, Depends(Stub(Celery))],
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
-    current_user: User = Depends(get_user()),
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
+    current_user: Annotated[User, Depends(get_user())],
 ) -> ReadRunSchema:
     # Check: user can start transfer
     resource_rule = await unit_of_work.transfer.get_resource_permission(
@@ -98,9 +98,10 @@ async def start_run(  # noqa: WPS217
         raise ActionNotAllowedError
 
     transfer = await unit_of_work.transfer.read_by_id(transfer_id=create_run_data.transfer_id)
+    queue = await unit_of_work.queue.read_by_id(transfer.queue_id)
 
     # The credentials.read method is used rather than credentials.read_bulk deliberately
-    # it’s more convenient to transfer credits in this place
+    # it's more convenient to transfer credits in this place
     credentials_source = await unit_of_work.credentials.read(
         transfer.source_connection_id,
     )
@@ -123,7 +124,7 @@ async def start_run(  # noqa: WPS217
             celery.send_task,
             "run_transfer_task",
             kwargs={"run_id": run.id},
-            queue=transfer.queue.slug,
+            queue=queue.slug,
         )
     except KombuError as e:
         async with unit_of_work:
@@ -138,8 +139,8 @@ async def start_run(  # noqa: WPS217
 @router.post("/runs/{run_id}/stop")
 async def stop_run(
     run_id: int,
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
-    current_user: User = Depends(get_user()),
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
+    current_user: Annotated[User, Depends(get_user())],
 ) -> ReadRunSchema:
     run = await unit_of_work.run.read_by_id(run_id=run_id)
 

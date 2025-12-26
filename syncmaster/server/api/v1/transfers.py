@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from http.client import NO_CONTENT
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
 
@@ -30,23 +31,25 @@ router = APIRouter(tags=["Transfers"], responses=get_error_responses())
 
 
 @router.get("/transfers")
-async def read_transfers(
+async def read_transfers(  # noqa: PLR0913
     group_id: int,
-    page: int = Query(gt=0, default=1),
-    page_size: int = Query(gt=0, le=50, default=20),  # noqa: WPS432
-    search_query: str | None = Query(
-        None,
-        title="Search Query",
-        description="full-text search for transfer",
-    ),
-    source_connection_id: int | None = Query(None),
-    target_connection_id: int | None = Query(None),
-    queue_id: int | None = Query(None),
-    source_connection_type: list[ConnectionType] | None = Query(None),
-    target_connection_type: list[ConnectionType] | None = Query(None),
-    is_scheduled: bool | None = Query(None),
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
+    page: Annotated[int, Query(gt=0)] = 20,
+    page_size: Annotated[int, Query(gt=0, le=50)] = 20,
+    search_query: Annotated[
+        str | None,
+        Query(
+            title="Search Query",
+            description="full-text search for transfers",
+        ),
+    ] = None,
+    source_connection_id: Annotated[int | None, Query()] = None,
+    target_connection_id: Annotated[int | None, Query()] = None,
+    queue_id: Annotated[int | None, Query()] = None,
+    source_connection_type: Annotated[list[ConnectionType] | None, Query()] = None,
+    target_connection_type: Annotated[list[ConnectionType] | None, Query()] = None,
+    is_scheduled: Annotated[bool | None, Query()] = None,
 ) -> TransferPageSchema:
     """Return transfers in page format"""
     resource_role = await unit_of_work.transfer.get_group_permission(
@@ -77,10 +80,10 @@ async def read_transfers(
 
 
 @router.post("/transfers")
-async def create_transfer(  # noqa: WPS217, WPS238
+async def create_transfer(
     transfer_data: CreateTransferSchema,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ) -> ReadTransferSchema:
     group_permission = await unit_of_work.transfer.get_group_permission(
         user=current_user,
@@ -139,8 +142,8 @@ async def create_transfer(  # noqa: WPS217, WPS238
 @router.get("/transfers/{transfer_id}")
 async def read_transfer(
     transfer_id: int,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ) -> ReadTransferSchema:
     """Return transfer data by transfer ID"""
     resource_role = await unit_of_work.transfer.get_resource_permission(
@@ -156,11 +159,11 @@ async def read_transfer(
 
 
 @router.post("/transfers/{transfer_id}/copy_transfer")
-async def copy_transfer(  # noqa: WPS217, WPS238
+async def copy_transfer(
     transfer_id: int,
     transfer_data: CopyTransferSchema,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ) -> ReadTransferSchema:
     resource_role = await unit_of_work.transfer.get_resource_permission(
         user=current_user,
@@ -236,11 +239,11 @@ async def copy_transfer(  # noqa: WPS217, WPS238
 
 
 @router.put("/transfers/{transfer_id}")
-async def update_transfer(  # noqa: WPS217, WPS238
+async def update_transfer(
     transfer_id: int,
     transfer_data: CreateTransferSchema,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ) -> ReadTransferSchema:
     # Check: user can update transfer
     resource_role = await unit_of_work.transfer.get_resource_permission(
@@ -269,7 +272,10 @@ async def update_transfer(  # noqa: WPS217, WPS238
         resource_id=source_connection.id,
     )
 
-    if source_connection_resource_role == Permission.NONE or target_connection_resource_role == Permission.NONE:
+    if Permission.NONE in {
+        source_connection_resource_role,
+        target_connection_resource_role,
+    }:
         raise ConnectionNotFoundError
 
     if (
@@ -318,8 +324,8 @@ async def update_transfer(  # noqa: WPS217, WPS238
 @router.delete("/transfers/{transfer_id}", status_code=NO_CONTENT)
 async def delete_transfer(
     transfer_id: int,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ):
     resource_role = await unit_of_work.transfer.get_resource_permission(
         user=current_user,

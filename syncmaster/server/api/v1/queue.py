@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from http.client import NO_CONTENT
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
 
@@ -23,17 +24,19 @@ router = APIRouter(tags=["Queues"], responses=get_error_responses())
 
 
 @router.get("/queues", description="Queues in page format")
-async def read_queues(
+async def read_queues(  # noqa: PLR0913
     group_id: int,
-    page: int = Query(gt=0, default=1),
-    page_size: int = Query(gt=0, le=50, default=20),  # noqa: WPS432
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
-    search_query: str | None = Query(
-        None,
-        title="Search Query",
-        description="full-text search for queues",
-    ),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
+    page: Annotated[int, Query(gt=0)] = 20,
+    page_size: Annotated[int, Query(gt=0, le=50)] = 20,
+    search_query: Annotated[
+        str | None,
+        Query(
+            title="Search Query",
+            description="full-text search for queues",
+        ),
+    ] = None,
 ) -> QueuePageSchema:
     resource_role = await unit_of_work.queue.get_group_permission(
         user=current_user,
@@ -55,8 +58,8 @@ async def read_queues(
 @router.get("/queues/{queue_id}", description="Read queue by id")
 async def read_queue(
     queue_id: int,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ) -> ReadQueueSchema:
     resource_role = await unit_of_work.queue.get_resource_permission(
         user=current_user,
@@ -75,8 +78,8 @@ async def read_queue(
 @router.post("/queues", description="Create new queue")
 async def create_queue(
     queue_data: CreateQueueSchema,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ) -> ReadQueueSchema:
     group_permission = await unit_of_work.queue.get_group_permission(
         user=current_user,
@@ -98,8 +101,8 @@ async def create_queue(
 async def update_queue(
     queue_id: int,
     queue_data: UpdateQueueSchema,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ) -> ReadQueueSchema:
     resource_role = await unit_of_work.queue.get_resource_permission(
         user=current_user,
@@ -123,8 +126,8 @@ async def update_queue(
 @router.delete("/queues/{queue_id}", description="Delete queue by id", status_code=NO_CONTENT)
 async def delete_queue(
     queue_id: int,
-    current_user: User = Depends(get_user()),
-    unit_of_work: UnitOfWork = Depends(UnitOfWork),
+    current_user: Annotated[User, Depends(get_user())],
+    unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
 ):
     resource_role = await unit_of_work.queue.get_resource_permission(
         user=current_user,
@@ -139,11 +142,11 @@ async def delete_queue(
 
     queue = await unit_of_work.queue.read_by_id(queue_id=queue_id)
 
-    transfers = queue.transfers
-
-    if transfers:
+    transfers = await unit_of_work.transfer.paginate(queue_id=queue.id, page=1, page_size=1)
+    if transfers.total:
+        msg = f"The queue has an associated transfers(s). Number of the linked transfers: {transfers.total}"
         raise QueueDeleteError(
-            f"The queue has an associated transfers(s). Number of the linked transfers: {len(transfers)}",
+            msg,
         )
 
     async with unit_of_work:

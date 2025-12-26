@@ -29,7 +29,7 @@ router = APIRouter(
 @router.post("/token")
 async def token(
     auth_provider: Annotated[DummyAuthProvider, Depends(Stub(AuthProvider))],
-    form_data: OAuth2PasswordRequestForm = Depends(),
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> AuthTokenSchema:
     token = await auth_provider.get_token_password_grant(
         grant_type=form_data.grant_type,
