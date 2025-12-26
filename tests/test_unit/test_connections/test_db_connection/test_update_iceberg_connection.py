@@ -8,7 +8,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.iceberg]
 
 
 @pytest.mark.parametrize(
-    "connection_type,create_connection_data,create_connection_auth_data",
+    ["connection_type", "create_connection_data", "create_connection_auth_data"],
     [
         (
             "iceberg",
@@ -92,7 +92,7 @@ async def test_developer_plus_can_update_iceberg_rest_s3_direct_connection(
 
 
 @pytest.mark.parametrize(
-    "connection_type,create_connection_data,create_connection_auth_data",
+    ["connection_type", "create_connection_data", "create_connection_auth_data"],
     [
         (
             "iceberg",
@@ -157,7 +157,7 @@ async def test_developer_plus_can_update_iceberg_rest_s3_delegated_connection(
 
 
 @pytest.mark.parametrize(
-    "connection_type,create_connection_data,create_connection_auth_data",
+    ["connection_type", "create_connection_data", "create_connection_auth_data"],
     [
         (
             "iceberg",
@@ -257,7 +257,7 @@ async def test_developer_plus_can_update_iceberg_rest_s3_direct_connection_with_
 
 
 @pytest.mark.parametrize(
-    "connection_type,create_connection_data,create_connection_auth_data",
+    ["connection_type", "create_connection_data", "create_connection_auth_data"],
     [
         (
             "iceberg",

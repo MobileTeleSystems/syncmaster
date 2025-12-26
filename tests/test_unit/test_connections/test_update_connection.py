@@ -18,7 +18,11 @@ async def test_developer_plus_can_update_connection(
     response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={**connection_json, "name": "New connection name", "type": group_connection.type},
+        json={
+            **connection_json,
+            "name": "New connection name",
+            "type": group_connection.type,
+        },
     )
 
     assert response.status_code == 200, response.text
@@ -42,7 +46,7 @@ async def test_developer_plus_can_update_connection(
 
 
 @pytest.mark.parametrize(
-    "connection_type,create_connection_data,create_connection_auth_data",
+    ["connection_type", "create_connection_data", "create_connection_auth_data"],
     [
         (
             "oracle",
@@ -66,7 +70,6 @@ async def test_developer_plus_can_update_oracle_connection(
     role_developer_plus: UserTestRoles,
 ):
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
-    group_connection.connection.group.id
     connection_json = await fetch_connection_json(client, user.token, group_connection)
 
     response = await client.put(
@@ -148,7 +151,7 @@ async def test_groupless_user_cannot_update_connection(
 
 
 @pytest.mark.parametrize(
-    ("name", "error"),
+    ["name", "error"],
     [
         pytest.param(
             "aa",
@@ -283,7 +286,14 @@ async def test_update_connection_data_fields(
     response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={**connection_json, "connection_data": {"host": "localhost", "port": 5432, "database_name": "db"}},
+        json={
+            **connection_json,
+            "connection_data": {
+                "host": "localhost",
+                "port": 5432,
+                "database_name": "db",
+            },
+        },
     )
 
     assert response.status_code == 200, response.text
@@ -320,7 +330,11 @@ async def test_update_connection_auth_data(
         json={
             **connection_json,
             "type": "postgres",
-            "auth_data": {"type": "basic", "user": "new_user", "password": "new_password"},
+            "auth_data": {
+                "type": "basic",
+                "user": "new_user",
+                "password": "new_password",
+            },
         },
     )
 
@@ -442,7 +456,7 @@ async def test_superuser_cannot_update_unknown_connection_error(
 
 
 @pytest.mark.parametrize(
-    "connection_type,create_connection_data,create_connection_auth_data",
+    ["connection_type", "create_connection_data", "create_connection_auth_data"],
     [
         (
             "oracle",

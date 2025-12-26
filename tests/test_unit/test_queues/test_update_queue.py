@@ -219,7 +219,7 @@ async def test_superuser_cannot_update_unknown_queue_error(
 
 
 @pytest.mark.parametrize(
-    "name_value,error",
+    ["name_value", "error"],
     [
         (
             "очередь",

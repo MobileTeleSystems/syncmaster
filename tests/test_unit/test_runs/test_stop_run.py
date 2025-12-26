@@ -109,7 +109,7 @@ async def test_superuser_can_stop_run(
     }
 
 
-@pytest.mark.parametrize("status", (Status.SEND_STOP_SIGNAL, Status.FINISHED, Status.FAILED, Status.STOPPED))
+@pytest.mark.parametrize("status", [Status.SEND_STOP_SIGNAL, Status.FINISHED, Status.FAILED, Status.STOPPED])
 async def test_developer_plus_cannot_stop_run_in_status_except_started_or_created(
     status: Status,
     client: AsyncClient,

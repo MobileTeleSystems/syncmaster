@@ -114,7 +114,7 @@ async def postgres_to_ftp(
 
 
 @pytest.mark.parametrize(
-    "source_file_format, file_format_flavor, strategy",
+    ["source_file_format", "file_format_flavor", "strategy"],
     [
         pytest.param(
             ("csv", {}),
@@ -190,7 +190,7 @@ async def test_run_transfer_ftp_to_postgres_with_full_strategy(
 
 
 @pytest.mark.parametrize(
-    "source_file_format, file_format_flavor, strategy",
+    ["source_file_format", "file_format_flavor", "strategy"],
     [
         pytest.param(
             ("csv", {}),
@@ -241,7 +241,7 @@ async def test_run_transfer_ftp_to_postgres_with_incremental_strategy(
 
 
 @pytest.mark.parametrize(
-    "source_file_format, file_format_flavor, strategy",
+    ["source_file_format", "file_format_flavor", "strategy"],
     [
         pytest.param(
             ("csv", {}),
@@ -298,7 +298,7 @@ async def test_run_transfer_ftp_to_postgres_with_different_strategies(
 
 
 @pytest.mark.parametrize(
-    "target_file_format, file_format_flavor, expected_extension, strategy",
+    ["target_file_format", "file_format_flavor", "expected_extension", "strategy"],
     [
         pytest.param(
             ("csv", {"compression": "lz4"}),
@@ -373,7 +373,7 @@ async def test_run_transfer_postgres_to_ftp_with_full_strategy(
     )
     downloader.run()
 
-    verify_file_name_template(os.listdir(tmp_path), expected_extension)
+    verify_file_name_template(list(Path.iterdir(tmp_path)), expected_extension)
 
     reader = FileDFReader(
         connection=ftp_file_df_connection,
@@ -391,7 +391,7 @@ async def test_run_transfer_postgres_to_ftp_with_full_strategy(
 
 
 @pytest.mark.parametrize(
-    "target_file_format, file_format_flavor, expected_extension, strategy",
+    ["target_file_format", "file_format_flavor", "expected_extension", "strategy"],
     [
         pytest.param(
             ("csv", {"compression": "lz4"}),
@@ -433,7 +433,7 @@ async def test_run_transfer_postgres_to_ftp_with_incremental_strategy(
     )
     downloader.run()
 
-    verify_file_name_template(os.listdir(tmp_path), expected_extension)
+    verify_file_name_template(list(Path.iterdir(tmp_path)), expected_extension)
 
     reader = FileDFReader(
         connection=ftp_file_df_connection,
@@ -450,7 +450,7 @@ async def test_run_transfer_postgres_to_ftp_with_incremental_strategy(
     await run_transfer_and_verify(client, group_owner, postgres_to_ftp.id)
 
     downloader.run()
-    verify_file_name_template(os.listdir(tmp_path), expected_extension)
+    verify_file_name_template(list(Path.iterdir(tmp_path)), expected_extension)
 
     df_with_increment = reader.run()
     df_with_increment, second_transfer_df = cast_dataframe_types(df_with_increment, second_transfer_df)

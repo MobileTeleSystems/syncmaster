@@ -414,7 +414,7 @@ async def test_maintainer_plus_can_not_copy_transfer_with_same_name_in_new_group
 
 
 @pytest.mark.parametrize(
-    ("name", "error"),
+    ["name", "error"],
     [
         pytest.param(
             "aa",

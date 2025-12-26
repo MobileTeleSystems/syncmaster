@@ -131,7 +131,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
     ],
 )
 @pytest.mark.parametrize(
-    "connection_type,create_connection_data",
+    ["connection_type", "create_connection_data"],
     [
         (
             "ftp",

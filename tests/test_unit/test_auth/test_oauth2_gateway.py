@@ -64,4 +64,10 @@ async def test_get_keycloak_token_inactive(
         headers=headers,
     )
     assert response.status_code == 401, response.text
-    assert response.json() == {"error": {"code": "unauthorized", "details": None, "message": "Not authenticated"}}
+    assert response.json() == {
+        "error": {
+            "code": "unauthorized",
+            "details": None,
+            "message": "Not authenticated",
+        },
+    }

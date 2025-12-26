@@ -262,7 +262,7 @@ async def test_maintainer_plus_cannot_copy_connection_with_same_name_in_new_grou
 
 
 @pytest.mark.parametrize(
-    ("name", "error"),
+    ["name", "error"],
     [
         pytest.param(
             "aa",

@@ -199,9 +199,12 @@ async def test_superuser_cannot_read_runs_of_unknown_transfer_error(
 
 
 @pytest.mark.parametrize(
-    "filter_params, expected_total",
+    ["filter_params", "expected_total"],
     [
-        ({}, 6),  # No filters applied, expecting all runs (one run without started_at, ended_at)
+        (
+            {},
+            6,
+        ),  # No filters applied, expecting all runs (one run without started_at, ended_at)
         ({"status": [Status.CREATED.value]}, 1),
         ({"status": [Status.STARTED.value, Status.FAILED.value]}, 2),
         ({"started_at_since": PAST_DATE}, 5),
@@ -255,7 +258,7 @@ async def test_filter_runs(
     assert len(response.json()["items"]) == expected_total
 
     # check that the statuses match
-    if "status" in params and params["status"]:
+    if params.get("status"):
         status_filter = params["status"]
         returned_statuses = [run["status"] for run in response.json()["items"]]
         assert all(status in status_filter for status in returned_statuses)

@@ -124,7 +124,7 @@ async def test_unauthorized_user_cannot_create_connection(
 
 
 @pytest.mark.parametrize(
-    ("name", "error"),
+    ["name", "error"],
     [
         pytest.param(
             "aa",

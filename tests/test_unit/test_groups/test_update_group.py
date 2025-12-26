@@ -111,7 +111,7 @@ async def test_superuser_can_update_group(
 
 
 @pytest.mark.parametrize(
-    ("name", "error"),
+    ["name", "error"],
     [
         pytest.param(
             "aa",

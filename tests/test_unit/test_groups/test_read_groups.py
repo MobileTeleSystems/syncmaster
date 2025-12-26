@@ -131,7 +131,7 @@ async def test_unauthorized_user_cannot_read_groups(
 
 
 @pytest.mark.parametrize(
-    "role,expected_total,expected_roles",
+    ["role", "expected_total", "expected_roles"],
     [
         (None, 4, {"Guest", "Developer", "Maintainer", "Owner"}),  # No role filter
         ("Guest", 4, {"Guest", "Developer", "Maintainer", "Owner"}),
@@ -164,7 +164,7 @@ async def test_filter_groups_by_role(
 
 
 @pytest.mark.parametrize(
-    "role,expected_total",
+    ["role", "expected_total"],
     [
         (None, 4),  # No role filter
         ("Guest", 4),
@@ -198,7 +198,7 @@ async def test_filter_groups_not_applied_to_superuser(
 
 
 @pytest.mark.parametrize(
-    "search_value, expected_total",
+    ["search_value", "expected_total"],
     [
         ("group_for", 4),
         ("group_for_Owner", 1),

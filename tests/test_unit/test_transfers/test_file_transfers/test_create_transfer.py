@@ -11,7 +11,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
 # TODO: refactor test fixtures to decrease amount of annotations
 @pytest.mark.parametrize(
-    "connection_type, create_connection_data",
+    ["connection_type", "create_connection_data"],
     [
         (
             "s3",
@@ -24,7 +24,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server]
     indirect=["create_connection_data"],
 )
 @pytest.mark.parametrize(
-    "target_source_params, target_params",
+    ["target_source_params", "target_params"],
     [
         (
             {
@@ -206,7 +206,7 @@ async def test_developer_plus_can_create_s3_transfer(
 
 
 @pytest.mark.parametrize(
-    "connection_type,create_connection_data",
+    ["connection_type", "create_connection_data"],
     [
         (
             "hdfs",
@@ -218,7 +218,7 @@ async def test_developer_plus_can_create_s3_transfer(
     indirect=["create_connection_data"],
 )
 @pytest.mark.parametrize(
-    "target_source_params, target_params",
+    ["target_source_params", "target_params"],
     [
         (
             {
@@ -464,7 +464,7 @@ async def test_cannot_create_file_transfer_with_relative_path(
     indirect=True,
 )
 @pytest.mark.parametrize(
-    "target_source_params, target_params, expected_errors",
+    ["target_source_params", "target_params", "expected_errors"],
     [
         pytest.param(
             {

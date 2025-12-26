@@ -90,7 +90,7 @@ async def oracle_to_postgres(
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("full_strategy"),
@@ -125,7 +125,7 @@ async def test_run_transfer_postgres_to_oracle_with_full_strategy(
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("full_strategy"),
@@ -163,7 +163,7 @@ async def test_run_transfer_postgres_to_oracle_mixed_naming_with_full_strategy(
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("incremental_strategy_by_number_column"),
@@ -206,7 +206,7 @@ async def test_run_transfer_postgres_to_oracle_with_incremental_strategy(
 
 
 @pytest.mark.parametrize(
-    "source_type, strategy, transformations, expected_filter",
+    ["source_type", "strategy", "transformations", "expected_filter"],
     [
         (
             "oracle",
@@ -252,7 +252,7 @@ async def test_run_transfer_oracle_to_postgres_with_full_strategy(
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("full_strategy"),
@@ -290,7 +290,7 @@ async def test_run_transfer_oracle_to_postgres_mixed_naming_with_full_strategy(
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("incremental_strategy_by_number_column"),

@@ -84,7 +84,7 @@ async def test_developer_plus_can_create_s3_connection(
     }
 
 
-@pytest.mark.parametrize("port,protocol", [(80, "http"), (443, "https")])
+@pytest.mark.parametrize(["port", "protocol"], [(80, "http"), (443, "https")])
 async def test_developer_plus_can_create_s3_connection_auto_generate_port(
     client: AsyncClient,
     group: MockGroup,

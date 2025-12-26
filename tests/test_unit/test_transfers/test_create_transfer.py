@@ -43,7 +43,10 @@ async def test_developer_plus_can_create_transfer(
                     "type": "csv",
                 },
             },
-            "strategy_params": {"type": "incremental", "increment_by": "file_modified_since"},
+            "strategy_params": {
+                "type": "incremental",
+                "increment_by": "file_modified_since",
+            },
             "transformations": [
                 {
                     "type": "dataframe_rows_filter",
@@ -306,7 +309,7 @@ async def test_superuser_can_create_transfer(
 
 # TODO: refactor annotations & fixtures
 @pytest.mark.parametrize(
-    ("new_data", "error_json"),
+    ["new_data", "error_json"],
     [
         pytest.param(
             {"name": "aa"},
@@ -594,7 +597,14 @@ async def test_superuser_can_create_transfer(
                     "message": "Invalid request",
                     "details": [
                         {
-                            "location": ["body", "transformations", 0, "dataframe_rows_filter", "filters", 0],
+                            "location": [
+                                "body",
+                                "transformations",
+                                0,
+                                "dataframe_rows_filter",
+                                "filters",
+                                0,
+                            ],
                             "message": (
                                 "Input tag 'equals_today' found using 'type' does not match any of the expected tags: "
                                 "'is_null', 'is_not_null', 'equal', 'not_equal', 'greater_than', 'greater_or_equal', "
@@ -642,7 +652,14 @@ async def test_superuser_can_create_transfer(
                     "message": "Invalid request",
                     "details": [
                         {
-                            "location": ["body", "transformations", 0, "dataframe_columns_filter", "filters", 0],
+                            "location": [
+                                "body",
+                                "transformations",
+                                0,
+                                "dataframe_columns_filter",
+                                "filters",
+                                0,
+                            ],
                             "message": (
                                 "Input tag 'convert' found using 'type' does not match any of the expected tags: "
                                 "'include', 'rename', 'cast'"
@@ -684,7 +701,14 @@ async def test_superuser_can_create_transfer(
                     "message": "Invalid request",
                     "details": [
                         {
-                            "location": ["body", "transformations", 0, "file_metadata_filter", "filters", 0],
+                            "location": [
+                                "body",
+                                "transformations",
+                                0,
+                                "file_metadata_filter",
+                                "filters",
+                                0,
+                            ],
                             "message": (
                                 "Input tag 'glob' found using 'type' does not match any of the expected tags: "
                                 "'name_glob', 'name_regexp', 'file_size_min', 'file_size_max'"

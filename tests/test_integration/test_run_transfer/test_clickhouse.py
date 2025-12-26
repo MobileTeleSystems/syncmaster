@@ -97,7 +97,7 @@ async def clickhouse_to_postgres(
 
 
 @pytest.mark.parametrize(
-    "source_type, strategy, transformations, expected_filter",
+    ["source_type", "strategy", "transformations", "expected_filter"],
     [
         (
             "postgres",
@@ -143,7 +143,7 @@ async def test_run_transfer_postgres_to_clickhouse_with_full_strategy(
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("incremental_strategy_by_number_column"),
@@ -193,7 +193,7 @@ async def test_run_transfer_postgres_to_clickhouse_with_different_strategies(
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("full_strategy"),
@@ -231,7 +231,7 @@ async def test_run_transfer_postgres_to_clickhouse_mixed_naming_with_full_strate
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("incremental_strategy_by_number_column"),
@@ -274,7 +274,7 @@ async def test_run_transfer_postgres_to_clickhouse_with_incremental_strategy(
 
 
 @pytest.mark.parametrize(
-    "source_type, strategy, transformations, expected_filter",
+    ["source_type", "strategy", "transformations", "expected_filter"],
     [
         (
             "clickhouse",
@@ -320,7 +320,7 @@ async def test_run_transfer_clickhouse_to_postgres_with_full_strategy(
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("full_strategy"),
@@ -358,7 +358,7 @@ async def test_run_transfer_clickhouse_to_postgres_mixed_naming_with_full_strate
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("incremental_strategy_by_number_column"),

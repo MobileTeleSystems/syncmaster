@@ -21,7 +21,7 @@ async def test_group_member_can_read_queues(
 ):
     user = mock_group.get_member_of_role(role_guest_plus)
     response = await client.get(
-        f"v1/queues",
+        "v1/queues",
         headers={"Authorization": f"Bearer {user.token}"},
         params={"group_id": mock_group.id},
     )

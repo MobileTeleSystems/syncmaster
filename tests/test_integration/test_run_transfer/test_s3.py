@@ -114,7 +114,13 @@ async def postgres_to_s3(
 
 
 @pytest.mark.parametrize(
-    "source_file_format, file_format_flavor, source_type, transformations, expected_filter",
+    [
+        "source_file_format",
+        "file_format_flavor",
+        "source_type",
+        "transformations",
+        "expected_filter",
+    ],
     [
         pytest.param(
             ("csv", {}),
@@ -208,7 +214,13 @@ async def test_run_transfer_s3_to_postgres_with_full_strategy(
 
 
 @pytest.mark.parametrize(
-    "target_file_format, file_format_flavor, strategy, transformations, expected_extension",
+    [
+        "target_file_format",
+        "file_format_flavor",
+        "strategy",
+        "transformations",
+        "expected_extension",
+    ],
     [
         pytest.param(
             ("csv", {"compression": "lz4"}),
@@ -303,7 +315,13 @@ async def test_run_transfer_postgres_to_s3_with_full_strategy(
 
 
 @pytest.mark.parametrize(
-    "target_file_format, file_format_flavor, strategy, transformations, expected_extension",
+    [
+        "target_file_format",
+        "file_format_flavor",
+        "strategy",
+        "transformations",
+        "expected_extension",
+    ],
     [
         pytest.param(
             ("csv", {"compression": "lz4"}),

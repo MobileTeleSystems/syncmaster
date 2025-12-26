@@ -233,7 +233,10 @@ async def test_search_connections_with_query(
     response = await client.get(
         "v1/connections",
         headers={"Authorization": f"Bearer {superuser.token}"},
-        params={"group_id": group_connection.connection.group_id, "search_query": search_query},
+        params={
+            "group_id": group_connection.connection.group_id,
+            "search_query": search_query,
+        },
     )
 
     assert response.status_code == 200, response.text
@@ -280,7 +283,10 @@ async def test_search_connections_with_nonexistent_query(
     response = await client.get(
         "v1/connections",
         headers={"Authorization": f"Bearer {superuser.token}"},
-        params={"group_id": group_connection.connection.group_id, "search_query": random_search_query},
+        params={
+            "group_id": group_connection.connection.group_id,
+            "search_query": random_search_query,
+        },
     )
 
     assert response.status_code == 200, response.text
@@ -288,7 +294,7 @@ async def test_search_connections_with_nonexistent_query(
 
 
 @pytest.mark.parametrize(
-    "filter_params, expected_total",
+    ["filter_params", "expected_total"],
     [
         ({}, 14),  # No filters applied, expecting all connections
         ({"type": ["oracle"]}, 1),
@@ -342,7 +348,7 @@ async def test_filter_connections(
     assert len(response.json()["items"]) == expected_total
 
     # check that the types match
-    if "type" in params and params["type"]:
+    if params.get("type"):
         returned_types = [conn["type"] for conn in response.json()["items"]]
         assert all(type in params["type"] for type in returned_types)
 

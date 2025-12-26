@@ -105,7 +105,7 @@ async def test_other_group_member_cannot_update_transfer(
 
 
 @pytest.mark.parametrize(
-    ("name", "error"),
+    ["name", "error"],
     [
         pytest.param(
             "aa",

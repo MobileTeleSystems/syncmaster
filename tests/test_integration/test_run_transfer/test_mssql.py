@@ -92,7 +92,7 @@ async def mssql_to_postgres(
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("full_strategy"),
@@ -128,7 +128,7 @@ async def test_run_transfer_postgres_to_mssql_with_full_strategy(
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("full_strategy"),
@@ -154,7 +154,7 @@ async def test_run_transfer_postgres_to_mssql_mixed_naming_with_full_strategy(
 
     reader = DBReader(
         connection=mssql,
-        table=f"dbo.target_table",
+        table="dbo.target_table",
     )
     df = reader.run()
 
@@ -175,7 +175,7 @@ async def test_run_transfer_postgres_to_mssql_mixed_naming_with_full_strategy(
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("incremental_strategy_by_number_column"),
@@ -220,7 +220,7 @@ async def test_run_transfer_postgres_to_mssql_with_incremental_strategy(
 
 
 @pytest.mark.parametrize(
-    "source_type, strategy, transformations, expected_filter",
+    ["source_type", "strategy", "transformations", "expected_filter"],
     [
         (
             "mssql",
@@ -267,7 +267,7 @@ async def test_run_transfer_mssql_to_postgres_with_full_strategy(
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("full_strategy"),
@@ -314,7 +314,7 @@ async def test_run_transfer_mssql_to_postgres_mixed_naming_with_full_strategy(
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("incremental_strategy_by_number_column"),

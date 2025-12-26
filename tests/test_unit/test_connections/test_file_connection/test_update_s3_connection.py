@@ -8,7 +8,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.s3]
 
 
 @pytest.mark.parametrize(
-    "connection_type,create_connection_data,create_connection_auth_data",
+    ["connection_type", "create_connection_data", "create_connection_auth_data"],
     [
         (
             "s3",

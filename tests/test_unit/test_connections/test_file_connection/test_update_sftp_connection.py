@@ -8,7 +8,7 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.server, pytest.mark.sftp]
 
 
 @pytest.mark.parametrize(
-    "connection_type,create_connection_data,create_connection_auth_data",
+    ["connection_type", "create_connection_data", "create_connection_auth_data"],
     [
         (
             "sftp",
@@ -39,7 +39,11 @@ async def test_developer_plus_can_update_sftp_connection(
     response = await client.put(
         f"v1/connections/{group_connection.id}",
         headers={"Authorization": f"Bearer {user.token}"},
-        json={**connection_json, "type": "sftp", "connection_data": new_connection_data},
+        json={
+            **connection_json,
+            "type": "sftp",
+            "connection_data": new_connection_data,
+        },
     )
 
     assert response.status_code == 200, response.text

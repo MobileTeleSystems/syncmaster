@@ -110,7 +110,7 @@ async def postgres_to_hdfs(
 
 
 @pytest.mark.parametrize(
-    "source_file_format, file_format_flavor",
+    ["source_file_format", "file_format_flavor"],
     [
         pytest.param(
             ("csv", {}),
@@ -179,7 +179,7 @@ async def test_run_transfer_hdfs_to_postgres_with_full_strategy(
 
 @pytest.mark.flaky
 @pytest.mark.parametrize(
-    "target_file_format, file_format_flavor, strategy, expected_extension",
+    ["target_file_format", "file_format_flavor", "strategy", "expected_extension"],
     [
         pytest.param(
             ("csv", {"compression": "lz4"}),
@@ -269,7 +269,7 @@ async def test_run_transfer_postgres_to_hdfs_with_full_strategy(
 
 
 @pytest.mark.parametrize(
-    "target_file_format, file_format_flavor, strategy, expected_extension",
+    ["target_file_format", "file_format_flavor", "strategy", "expected_extension"],
     [
         pytest.param(
             ("csv", {"compression": "lz4"}),

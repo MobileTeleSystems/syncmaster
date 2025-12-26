@@ -100,7 +100,13 @@ async def test_superuser_can_read_transfers(
         lambda transfer: transfer.source_params.get("directory_path"),
         lambda transfer: transfer.target_params.get("directory_path"),
     ],
-    ids=["name", "source_table_name", "target_table_name", "source_directory_path", "target_directory_path"],
+    ids=[
+        "name",
+        "source_table_name",
+        "target_table_name",
+        "source_directory_path",
+        "target_directory_path",
+    ],
 )
 async def test_search_transfers_with_query(
     client: AsyncClient,
@@ -145,7 +151,10 @@ async def test_search_transfers_with_nonexistent_query(
     response = await client.get(
         "v1/transfers",
         headers={"Authorization": f"Bearer {superuser.token}"},
-        params={"group_id": group_transfer.group_id, "search_query": random_search_query},
+        params={
+            "group_id": group_transfer.group_id,
+            "search_query": random_search_query,
+        },
     )
 
     assert response.status_code == 200, response.text
@@ -153,7 +162,7 @@ async def test_search_transfers_with_nonexistent_query(
 
 
 @pytest.mark.parametrize(
-    "filter_param, get_filter_value",
+    ["filter_param", "get_filter_value"],
     [
         ("source_connection_id", lambda t: t.source_connection_id),
         ("target_connection_id", lambda t: t.target_connection_id),
@@ -202,7 +211,7 @@ async def test_filter_transfers(
 
 
 @pytest.mark.parametrize(
-    "filter_param, get_non_matching_value",
+    ["filter_param", "get_non_matching_value"],
     [
         ("source_connection_id", lambda t: -1),
         ("target_connection_id", lambda t: -1),
@@ -238,7 +247,7 @@ async def test_filter_transfers_no_responses(
 
 
 @pytest.mark.parametrize(
-    "filter_param, connection_type",
+    ["filter_param", "connection_type"],
     [
         ("source_connection_type", "postgres"),
         ("target_connection_type", "oracle"),

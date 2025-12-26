@@ -89,7 +89,7 @@ async def iceberg_rest_s3_to_postgres(
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("full_strategy"),
@@ -129,7 +129,7 @@ async def test_run_transfer_postgres_to_iceberg_rest_s3_with_full_strategy(
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("full_strategy"),
@@ -172,7 +172,7 @@ async def test_run_transfer_postgres_to_iceberg_rest_s3_mixed_naming_with_full_s
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("incremental_strategy_by_number_column"),
@@ -227,7 +227,7 @@ async def test_run_transfer_postgres_to_iceberg_rest_s3_with_incremental_strateg
 
 
 @pytest.mark.parametrize(
-    "source_type, strategy, transformations, expected_filter",
+    ["source_type", "strategy", "transformations", "expected_filter"],
     [
         (
             "iceberg_rest_s3",
@@ -278,7 +278,7 @@ async def test_run_transfer_iceberg_rest_s3_to_postgres_with_full_strategy(
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("full_strategy"),
@@ -321,7 +321,7 @@ async def test_run_transfer_iceberg_rest_s3_to_postgres_mixes_naming_with_full_s
 
 
 @pytest.mark.parametrize(
-    "strategy, transformations",
+    ["strategy", "transformations"],
     [
         (
             lf("incremental_strategy_by_number_column"),

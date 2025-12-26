@@ -212,7 +212,7 @@ async def test_superuser_cannot_create_queue_with_unknown_group_error(
 
 
 @pytest.mark.parametrize(
-    "name_value,error",
+    ["name_value", "error"],
     [
         (
             "очередь",
