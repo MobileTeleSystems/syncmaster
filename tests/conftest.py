@@ -3,6 +3,7 @@ import logging
 import os
 import time
 from collections.abc import AsyncGenerator, Callable
+from contextlib import suppress
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock
 
@@ -104,10 +105,9 @@ def alembic_config(settings: Settings) -> AlembicConfig:
 @pytest_asyncio.fixture(scope="session")
 async def async_engine(settings: Settings, alembic_config: AlembicConfig):
     await prepare_new_database(settings=settings)
-    try:
+    with suppress(Exception):
         await run_async_migrations(alembic_config, Base.metadata, "-1", "down")
-    except Exception:
-        pass
+
     await run_async_migrations(alembic_config, Base.metadata, "head")
     engine = create_async_engine(settings.database.url)
     yield engine
