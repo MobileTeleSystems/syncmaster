@@ -295,8 +295,8 @@ async def test_run_transfer_postgres_to_s3_with_full_strategy(
 
     await run_transfer_and_verify(client, group_owner, postgres_to_s3.id, target_auth="s3")
 
-    files = [file for file in s3_file_connection.list_dir(target_path) if file.is_file()]
-    verify_file_name_template(files, expected_extension)
+    file_names = [file.name for file in s3_file_connection.list_dir(target_path) if file.is_file()]
+    verify_file_name_template(file_names, expected_extension)
 
     reader = FileDFReader(
         connection=s3_file_df_connection,
@@ -357,8 +357,8 @@ async def test_run_transfer_postgres_to_s3_with_incremental_strategy(
     fill_with_data(first_transfer_df)
     await run_transfer_and_verify(client, group_owner, postgres_to_s3.id, target_auth="s3")
 
-    files = [file for file in s3_file_connection.list_dir(target_path)]
-    verify_file_name_template(files, expected_extension)
+    file_names = [file.name for file in s3_file_connection.list_dir(target_path)]
+    verify_file_name_template(file_names, expected_extension)
 
     reader = FileDFReader(
         connection=s3_file_df_connection,
@@ -375,8 +375,8 @@ async def test_run_transfer_postgres_to_s3_with_incremental_strategy(
     fill_with_data(second_transfer_df)
     await run_transfer_and_verify(client, group_owner, postgres_to_s3.id, target_auth="s3")
 
-    files = [file.name for file in s3_file_connection.list_dir(target_path) if file.is_file()]
-    verify_file_name_template(files, expected_extension)
+    file_names = [file.name for file in s3_file_connection.list_dir(target_path) if file.is_file()]
+    verify_file_name_template(file_names, expected_extension)
 
     df_with_increment = reader.run()
     df_with_increment, init_df = cast_dataframe_types(df_with_increment, init_df)
