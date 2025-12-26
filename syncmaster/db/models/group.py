@@ -71,7 +71,7 @@ class Group(Base, TimestampMixin):
     description: Mapped[str] = mapped_column(String(512), nullable=False, default="")
     owner_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
 
-    owner: Mapped[User] = relationship(User)
+    owner: Mapped[User] = relationship(viewonly=True)
     search_vector: Mapped[str] = mapped_column(
         TSVECTOR,
         Computed(

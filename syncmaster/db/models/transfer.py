@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from sqlalchemy import (
     JSON,
@@ -19,11 +19,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from syncmaster.db.mixins import ResourceMixin, TimestampMixin
 from syncmaster.db.models.base import Base
+from syncmaster.db.models.connection import Connection
 from syncmaster.db.models.group import Group
-
-if TYPE_CHECKING:
-    from syncmaster.db.models.connection import Connection
-    from syncmaster.db.models.queue import Queue
+from syncmaster.db.models.queue import Queue
 
 
 class Transfer(
@@ -61,10 +59,10 @@ class Transfer(
         nullable=False,
     )
 
-    group: Mapped[Group] = relationship(Group)
-    source_connection: Mapped[Connection] = relationship(foreign_keys=source_connection_id)
-    target_connection: Mapped[Connection] = relationship(foreign_keys=target_connection_id)
-    queue: Mapped[Queue] = relationship(Queue)
+    group: Mapped[Group] = relationship(viewonly=True)
+    source_connection: Mapped[Connection] = relationship(foreign_keys=source_connection_id, viewonly=True)
+    target_connection: Mapped[Connection] = relationship(foreign_keys=target_connection_id, viewonly=True)
+    queue: Mapped[Queue] = relationship(viewonly=True)
 
     search_vector: Mapped[str] = mapped_column(
         TSVECTOR,

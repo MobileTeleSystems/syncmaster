@@ -12,7 +12,6 @@ from sqlalchemy_utils import ChoiceType
 
 from syncmaster.db.mixins import TimestampMixin
 from syncmaster.db.models.base import Base
-from syncmaster.db.models.group import Group
 from syncmaster.db.models.transfer import Transfer
 
 
@@ -66,8 +65,7 @@ class Run(Base, TimestampMixin):
     log_url: Mapped[str] = mapped_column(String(512), nullable=True)
     transfer_dump: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
 
-    transfer: Mapped[Transfer] = relationship(Transfer)
-    group: Mapped[Group] = relationship(Group)
+    transfer: Mapped[Transfer] = relationship(viewonly=True)
 
     def __repr__(self):
         return (
