@@ -316,7 +316,8 @@ async def test_run_transfer_postgres_to_webdav_with_incremental_strategy(
     await run_transfer_and_verify(client, group_owner, postgres_to_webdav.id)
 
     downloader.run()
-    verify_file_name_template(list(Path.iterdir(tmp_path)), expected_extension)
+    file_names = [f.name for f in Path.iterdir(tmp_path) if f.is_file()]
+    verify_file_name_template(file_names, expected_extension)
 
     df_with_increment = reader.run()
     df_with_increment, second_transfer_df = cast_dataframe_types(
