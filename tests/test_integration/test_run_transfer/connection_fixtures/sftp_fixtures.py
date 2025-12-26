@@ -88,23 +88,20 @@ def sftp_file_connection(sftp_for_conftest):
     )
 
 
-@pytest.fixture()
-def sftp_file_connection_with_path(request, sftp_file_connection):
+@pytest.fixture
+def sftp_file_connection_with_path(sftp_file_connection):
     connection = sftp_file_connection
     source = PurePosixPath("/config/data")
     target = PurePosixPath("/config/target")
-
-    def finalizer():
-        connection.remove_dir(source, recursive=True)
-        connection.remove_dir(target, recursive=True)
-
-    request.addfinalizer(finalizer)
 
     connection.remove_dir(source, recursive=True)
     connection.remove_dir(target, recursive=True)
     connection.create_dir(source)
 
-    return connection, source
+    yield connection, source
+
+    connection.remove_dir(source, recursive=True)
+    connection.remove_dir(target, recursive=True)
 
 
 @pytest.fixture(scope="session")
@@ -114,13 +111,13 @@ def sftp_file_df_connection(spark):
     return SparkLocalFS(spark=spark)
 
 
-@pytest.fixture()
+@pytest.fixture
 def sftp_file_df_connection_with_path(sftp_file_connection_with_path, sftp_file_df_connection):
     _, source = sftp_file_connection_with_path
     return sftp_file_df_connection, source
 
 
-@pytest.fixture()
+@pytest.fixture
 def prepare_sftp(
     sftp_file_df_connection_with_path,
     sftp_file_connection,

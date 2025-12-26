@@ -1,5 +1,6 @@
 import logging
 import secrets
+from contextlib import suppress
 
 import pytest
 import pytest_asyncio
@@ -64,14 +65,12 @@ def prepare_oracle(
         service_name=oracle.service_name,
         spark=spark,
     ).check()
-    try:
+
+    with suppress(Exception):
         onetl_conn.execute(f"DROP TABLE {oracle.user}.source_table")
-    except Exception:
-        pass
-    try:
+
+    with suppress(Exception):
         onetl_conn.execute(f"DROP TABLE {oracle.user}.target_table")
-    except Exception:
-        pass
 
     def fill_with_data(df: DataFrame):
         logger.info("START PREPARE ORACLE")
@@ -85,14 +84,11 @@ def prepare_oracle(
 
     yield onetl_conn, fill_with_data
 
-    try:
+    with suppress(Exception):
         onetl_conn.execute(f"DROP TABLE {oracle.user}.source_table")
-    except Exception:
-        pass
-    try:
+
+    with suppress(Exception):
         onetl_conn.execute(f"DROP TABLE {oracle.user}.target_table")
-    except Exception:
-        pass
 
 
 @pytest_asyncio.fixture

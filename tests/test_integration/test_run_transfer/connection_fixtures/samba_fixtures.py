@@ -103,23 +103,20 @@ def samba_file_connection(samba_for_conftest):
     )
 
 
-@pytest.fixture()
-def samba_file_connection_with_path(request, samba_file_connection):
+@pytest.fixture
+def samba_file_connection_with_path(samba_file_connection):
     connection = samba_file_connection
     source = PurePosixPath("/data")
     target = PurePosixPath("/target")
-
-    def finalizer():
-        connection.remove_dir(source, recursive=True)
-        connection.remove_dir(target, recursive=True)
-
-    request.addfinalizer(finalizer)
 
     connection.remove_dir(source, recursive=True)
     connection.remove_dir(target, recursive=True)
     connection.create_dir(source)
 
-    return connection, source
+    yield connection, source
+
+    connection.remove_dir(source, recursive=True)
+    connection.remove_dir(target, recursive=True)
 
 
 @pytest.fixture(scope="session")
@@ -129,13 +126,13 @@ def samba_file_df_connection(spark):
     return SparkLocalFS(spark=spark)
 
 
-@pytest.fixture()
+@pytest.fixture
 def samba_file_df_connection_with_path(samba_file_connection_with_path, samba_file_df_connection):
     _, source = samba_file_connection_with_path
     return samba_file_df_connection, source
 
 
-@pytest.fixture()
+@pytest.fixture
 def prepare_samba(
     samba_file_df_connection_with_path,
     samba_file_connection,

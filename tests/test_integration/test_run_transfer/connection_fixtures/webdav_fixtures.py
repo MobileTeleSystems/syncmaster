@@ -92,23 +92,20 @@ def webdav_file_connection(webdav_for_conftest):
     )
 
 
-@pytest.fixture()
-def webdav_file_connection_with_path(request, webdav_file_connection):
+@pytest.fixture
+def webdav_file_connection_with_path(webdav_file_connection):
     connection = webdav_file_connection
     source = PurePosixPath("/data")
     target = PurePosixPath("/target")
-
-    def finalizer():
-        connection.remove_dir(source, recursive=True)
-        connection.remove_dir(target, recursive=True)
-
-    request.addfinalizer(finalizer)
 
     connection.remove_dir(source, recursive=True)
     connection.remove_dir(target, recursive=True)
     connection.create_dir(source)
 
-    return connection, source
+    yield connection, source
+
+    connection.remove_dir(source, recursive=True)
+    connection.remove_dir(target, recursive=True)
 
 
 @pytest.fixture(scope="session")
@@ -118,13 +115,13 @@ def webdav_file_df_connection(spark):
     return SparkLocalFS(spark=spark)
 
 
-@pytest.fixture()
+@pytest.fixture
 def webdav_file_df_connection_with_path(webdav_file_connection_with_path, webdav_file_df_connection):
     _, source = webdav_file_connection_with_path
     return webdav_file_df_connection, source
 
 
-@pytest.fixture()
+@pytest.fixture
 def prepare_webdav(
     webdav_file_df_connection_with_path,
     webdav_file_connection,

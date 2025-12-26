@@ -87,23 +87,20 @@ def ftp_file_connection(ftp_for_conftest):
     )
 
 
-@pytest.fixture()
-def ftp_file_connection_with_path(request, ftp_file_connection):
+@pytest.fixture
+def ftp_file_connection_with_path(ftp_file_connection):
     connection = ftp_file_connection
     source = PurePosixPath("/data")
     target = PurePosixPath("/target")
-
-    def finalizer():
-        connection.remove_dir(source, recursive=True)
-        connection.remove_dir(target, recursive=True)
-
-    request.addfinalizer(finalizer)
 
     connection.remove_dir(source, recursive=True)
     connection.remove_dir(target, recursive=True)
     connection.create_dir(source)
 
-    return connection, source
+    yield connection, source
+
+    connection.remove_dir(source, recursive=True)
+    connection.remove_dir(target, recursive=True)
 
 
 @pytest.fixture(scope="session")
@@ -113,13 +110,13 @@ def ftp_file_df_connection(spark):
     return SparkLocalFS(spark=spark)
 
 
-@pytest.fixture()
+@pytest.fixture
 def ftp_file_df_connection_with_path(ftp_file_connection_with_path, ftp_file_df_connection):
     _, source = ftp_file_connection_with_path
     return ftp_file_df_connection, source
 
 
-@pytest.fixture()
+@pytest.fixture
 def prepare_ftp(
     ftp_file_df_connection_with_path,
     ftp_file_connection,

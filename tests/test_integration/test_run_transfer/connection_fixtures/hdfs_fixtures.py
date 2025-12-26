@@ -1,8 +1,8 @@
 import logging
 import os
 import secrets
-from collections import namedtuple
 from pathlib import PurePosixPath
+from typing import NamedTuple
 
 import pytest
 import pytest_asyncio
@@ -31,7 +31,11 @@ def hdfs(test_settings: TestSettings) -> HDFSConnectionDTO:
 
 @pytest.fixture(scope="session")
 def hdfs_server():
-    HDFSServer = namedtuple("HDFSServer", ["host", "webhdfs_port", "ipc_port"])
+    class HDFSServer(NamedTuple):
+        host: str
+        webhdfs_port: str
+        ipc_port: str
+
     return HDFSServer(
         host=os.getenv("TEST_HDFS_HOST"),
         webhdfs_port=os.getenv("TEST_HDFS_WEBHDFS_PORT"),
@@ -55,35 +59,36 @@ def hdfs_file_df_connection(spark, hdfs_server):
 def hdfs_file_connection(hdfs_server):
     from onetl.connection import HDFS
 
-    return HDFS(cluster="test-hive", host=hdfs_server.host, webhdfs_port=hdfs_server.webhdfs_port)
+    return HDFS(
+        cluster="test-hive",
+        host=hdfs_server.host,
+        webhdfs_port=hdfs_server.webhdfs_port,
+    )
 
 
-@pytest.fixture()
+@pytest.fixture
 def hdfs_file_connection_with_path(request, hdfs_file_connection):
     connection = hdfs_file_connection
     source = PurePosixPath("/data")
     target = PurePosixPath("/target")
 
-    def finalizer():
-        connection.remove_dir(source, recursive=True)
-        connection.remove_dir(target, recursive=True)
-
-    request.addfinalizer(finalizer)
-
     connection.remove_dir(source, recursive=True)
     connection.remove_dir(target, recursive=True)
     connection.create_dir(source)
 
-    return connection, source
+    yield connection, source
+
+    connection.remove_dir(source, recursive=True)
+    connection.remove_dir(target, recursive=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def hdfs_file_df_connection_with_path(hdfs_file_connection_with_path, hdfs_file_df_connection):
     _, source = hdfs_file_connection_with_path
     return hdfs_file_df_connection, source
 
 
-@pytest.fixture()
+@pytest.fixture
 def prepare_hdfs(
     hdfs_file_df_connection_with_path,
     hdfs_file_connection,

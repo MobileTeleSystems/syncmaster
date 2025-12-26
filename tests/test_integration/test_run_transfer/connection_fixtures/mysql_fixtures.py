@@ -1,5 +1,6 @@
 import logging
 import secrets
+from contextlib import suppress
 
 import pytest
 import pytest_asyncio
@@ -61,14 +62,12 @@ def prepare_mysql(
         database=mysql.database_name,
         spark=spark,
     ).check()
-    try:
+
+    with suppress(Exception):
         onetl_conn.execute(f"DROP TABLE IF EXISTS {mysql.database_name}.source_table")
-    except Exception:
-        pass
-    try:
+
+    with suppress(Exception):
         onetl_conn.execute(f"DROP TABLE IF EXISTS {mysql.database_name}.target_table")
-    except Exception:
-        pass
 
     def fill_with_data(df: DataFrame):
         logger.info("START PREPARE MYSQL")
@@ -81,14 +80,11 @@ def prepare_mysql(
 
     yield onetl_conn, fill_with_data
 
-    try:
+    with suppress(Exception):
         onetl_conn.execute(f"DROP TABLE IF EXISTS {mysql.database_name}.source_table")
-    except Exception:
-        pass
-    try:
+
+    with suppress(Exception):
         onetl_conn.execute(f"DROP TABLE IF EXISTS {mysql.database_name}.target_table")
-    except Exception:
-        pass
 
 
 @pytest_asyncio.fixture

@@ -1,5 +1,6 @@
 import logging
 import secrets
+from contextlib import suppress
 
 import pytest
 import pytest_asyncio
@@ -52,7 +53,7 @@ def prepare_clickhouse(
     clickhouse_for_conftest: ClickhouseConnectionDTO,
     spark: SparkSession,
 ):
-    ClickhouseDialectRegistry = (
+    ClickhouseDialectRegistry = (  # noqa: N806
         spark._jvm.io.github.mtsongithub.doetl.sparkdialectextensions.clickhouse.ClickhouseDialectRegistry
     )
     ClickhouseDialectRegistry.register()
@@ -65,14 +66,11 @@ def prepare_clickhouse(
         password=clickhouse.password,
         spark=spark,
     ).check()
-    try:
+    with suppress(Exception):
         onetl_conn.execute(f"DROP TABLE {clickhouse.user}.source_table")
-    except Exception:
-        pass
-    try:
+
+    with suppress(Exception):
         onetl_conn.execute(f"DROP TABLE {clickhouse.user}.target_table")
-    except Exception:
-        pass
 
     def fill_with_data(df: DataFrame):
         logger.info("START PREPARE CLICKHOUSE")
@@ -86,14 +84,11 @@ def prepare_clickhouse(
 
     yield onetl_conn, fill_with_data
 
-    try:
+    with suppress(Exception):
         onetl_conn.execute(f"DROP TABLE {clickhouse.user}.source_table")
-    except Exception:
-        pass
-    try:
+
+    with suppress(Exception):
         onetl_conn.execute(f"DROP TABLE {clickhouse.user}.target_table")
-    except Exception:
-        pass
 
 
 @pytest_asyncio.fixture

@@ -1,5 +1,6 @@
 import logging
 import secrets
+from contextlib import suppress
 
 import pytest
 import pytest_asyncio
@@ -62,14 +63,11 @@ def prepare_mssql(
         extra={"trustServerCertificate": "true"},
         spark=spark,
     ).check()
-    try:
-        onetl_conn.execute(f"DROP TABLE dbo.source_table")
-    except Exception:
-        pass
-    try:
-        onetl_conn.execute(f"DROP TABLE dbo.target_table")
-    except Exception:
-        pass
+    with suppress(Exception):
+        onetl_conn.execute("DROP TABLE dbo.source_table")
+
+    with suppress(Exception):
+        onetl_conn.execute("DROP TABLE dbo.target_table")
 
     def fill_with_data(df: DataFrame):
         logger.info("START PREPARE MSSQL")
@@ -82,14 +80,11 @@ def prepare_mssql(
 
     yield onetl_conn, fill_with_data
 
-    try:
-        onetl_conn.execute(f"DROP TABLE dbo.source_table")
-    except Exception:
-        pass
-    try:
-        onetl_conn.execute(f"DROP TABLE dbo.target_table")
-    except Exception:
-        pass
+    with suppress(Exception):
+        onetl_conn.execute("DROP TABLE dbo.source_table")
+
+    with suppress(Exception):
+        onetl_conn.execute("DROP TABLE dbo.target_table")
 
 
 @pytest_asyncio.fixture

@@ -1,7 +1,7 @@
 import logging
 import secrets
-from collections import namedtuple
 from pathlib import PosixPath, PurePosixPath
+from typing import NamedTuple
 
 import pytest
 import pytest_asyncio
@@ -55,10 +55,15 @@ def s3_for_worker(test_settings: TestSettings) -> S3ConnectionDTO:
 
 @pytest.fixture(scope="session")
 def s3_server(s3_for_conftest):
-    S3Server = namedtuple(
-        "S3Server",
-        ["host", "port", "bucket", "bucket_style", "region", "access_key", "secret_key", "protocol"],
-    )
+    class S3Server(NamedTuple):
+        host: str
+        port: int
+        bucket: str
+        bucket_style: str
+        region: str
+        access_key: str
+        secret_key: str
+        protocol: str
 
     return S3Server(
         host=s3_for_conftest.host,
@@ -93,20 +98,18 @@ def s3_file_connection(s3_server):
 
 
 @pytest.fixture
-def s3_file_connection_with_path(request, s3_file_connection):
+def s3_file_connection_with_path(s3_file_connection):
     connection = s3_file_connection
     source = PurePosixPath("/data")
     target = PurePosixPath("/target")
 
-    def finalizer():
-        connection.remove_dir(source, recursive=True)
-        connection.remove_dir(target, recursive=True)
-
-    request.addfinalizer(finalizer)
     connection.remove_dir(source, recursive=True)
     connection.remove_dir(target, recursive=True)
 
-    return connection, source
+    yield connection, source
+
+    connection.remove_dir(source, recursive=True)
+    connection.remove_dir(target, recursive=True)
 
 
 @pytest.fixture
