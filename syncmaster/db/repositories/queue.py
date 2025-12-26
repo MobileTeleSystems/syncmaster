@@ -15,9 +15,6 @@ from syncmaster.exceptions import EntityNotFoundError, SyncmasterError
 from syncmaster.exceptions.group import GroupNotFoundError
 from syncmaster.exceptions.queue import DuplicatedQueueNameError, QueueNotFoundError
 
-# TODO: remove HTTP response schemes from repositories, these are different layers
-from syncmaster.schemas.v1.queue import UpdateQueueSchema
-
 
 class QueueRepository(RepositoryWithOwner[Queue]):
     def __init__(self, session: AsyncSession):
@@ -69,16 +66,12 @@ class QueueRepository(RepositoryWithOwner[Queue]):
             page_size=page_size,
         )
 
-    async def update(
-        self,
-        queue_id: int,
-        queue_data: UpdateQueueSchema,
-    ) -> Queue:
+    async def update(self, queue_id: int, name: str, description: str) -> Queue:
         try:
             return await self._update(
                 Queue.id == queue_id,
-                name=queue_data.name,
-                description=queue_data.description,
+                name=name,
+                description=description,
             )
         except IntegrityError as e:
             self._raise_error(e)

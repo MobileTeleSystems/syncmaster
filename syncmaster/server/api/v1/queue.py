@@ -118,7 +118,8 @@ async def update_queue(
     async with unit_of_work:
         queue = await unit_of_work.queue.update(
             queue_id=queue_id,
-            queue_data=queue_data,
+            name=queue_data.name,
+            description=queue_data.description,
         )
     return ReadQueueSchema.model_validate(queue, from_attributes=True)
 
