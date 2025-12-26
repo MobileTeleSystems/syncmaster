@@ -37,7 +37,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
         --no-install-project \
         --extra "worker" \
         --extra "kerberos" \
-    && python -m compileall -j 4 .venv
+        --no-default-groups \
+        --compile-bytecode
 
 
 FROM builder AS ivy2_packages
@@ -93,7 +94,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
         # so we need server & scheduler dependencies too
         --all-extras \
         --group "test" \
-    && python -m compileall -j 4 .venv
+        --no-default-groups \
+        --compile-bytecode
 
 ENV SYNCMASTER__WORKER__CREATE_SPARK_SESSION_FUNCTION=tests.spark.get_worker_spark_session
 

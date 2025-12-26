@@ -45,7 +45,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
         --frozen \
         --no-install-project \
         --extra "server" \
-    && python -m compileall -j 4 .venv
+        --no-default-groups \
+        --compile-bytecode
 
 
 FROM base AS prod
@@ -68,6 +69,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
         --no-install-project \
         --extra "server" \
         --group "test" \
-    && python -m compileall -j 4 .venv
+        --no-default-groups \
+        --compile-bytecode
 
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
