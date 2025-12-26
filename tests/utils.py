@@ -89,14 +89,13 @@ def get_diff_db_metadata(connection: AlchConnection, metadata: MetaData):
 
 async def database_exists(connection: AsyncConnection, db_name: str) -> bool:
     query = f"SELECT 1 from pg_database where datname='{db_name}'"
-    if await connection.scalar(text(query)):
-        return True
-    return False
+    return await connection.scalar(text(query))
 
 
 async def create_database(connection: AsyncConnection, db_name: str) -> None:
     await connection.execute(text("commit"))
-    query = "CREATE DATABASE {} ENCODING {} TEMPLATE {}".format(db_name, "utf8", "template1")
+    query_template = "CREATE DATABASE {db} ENCODING {encoding} TEMPLATE {template}"
+    query = query_template.format(db=db_name, encoding="utf8", template="template1")
     await connection.execute(text(query))
 
 

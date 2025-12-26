@@ -22,8 +22,10 @@ def decode_jwt(token: str, secret_key: str, security_algorithm: str) -> dict:
             algorithms=[security_algorithm],
         )
         if "exp" not in result:
-            raise jwt.ExpiredSignatureError("Missing expiration time in token")
-
-        return result
+            msg = "Missing expiration time in token"
+            raise jwt.ExpiredSignatureError(msg)
     except jwt.PyJWTError as e:
-        raise AuthorizationError("Invalid token") from e
+        msg = "Invalid token"
+        raise AuthorizationError(msg) from e
+    else:
+        return result

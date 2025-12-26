@@ -7,13 +7,12 @@ from syncmaster.worker.settings import WorkerAppSettings
 
 
 def celery_factory(settings: WorkerAppSettings) -> Celery:
-    app = Celery(
+    return Celery(
         __name__,
         broker=settings.broker.url,
-        backend="db+" + settings.database.sync_url,  # noqa: WPS336
+        backend="db+" + settings.database.sync_url,
         task_cls=WorkerTask,
         imports=[
             "syncmaster.worker.transfer",
         ],
     )
-    return app

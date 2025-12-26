@@ -84,14 +84,15 @@ class FileTransferDTO(TransferDTO):
             self._rewrite_option_name(file_format, "line_sep", "lineSep")
             self._rewrite_option_name(file_format, "include_header", "header")
 
-        if file_type == "json" or file_type == "jsonline":
+        if file_type in {"json", "jsonline"}:
             self._rewrite_option_name(file_format, "line_sep", "lineSep")
 
         parser_class = self._format_parsers.get(file_type)
         if parser_class is not None:
             return parser_class.parse_obj(file_format)
 
-        raise ValueError(f"Unknown file type: {file_type}")
+        msg = f"Unknown file type: {file_type}"
+        raise ValueError(msg)
 
 
 @dataclass

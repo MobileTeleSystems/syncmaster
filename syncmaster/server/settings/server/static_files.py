@@ -34,7 +34,9 @@ class StaticFilesSettings(BaseModel):
         if not info.data.get("enabled"):
             return value
         if not value.exists():
-            raise ValueError(f"Directory '{value}' does not exist")
+            msg = f"Directory '{value}' does not exist"
+            raise ValueError(msg)
         if not value.is_dir():
-            raise ValueError(f"Path '{value}' is not a directory")
+            msg = f"Path '{value}' is not a directory"
+            raise ValueError(msg)
         return value

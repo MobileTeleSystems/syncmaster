@@ -39,11 +39,11 @@ class DummyAuthProvider(AuthProvider):  # noqa: WPS338
 
     async def get_current_user(self, access_token: str | None, *args, **kwargs) -> User:
         if not access_token:
-            raise AuthorizationError("Missing auth credentials")
+            msg = "Missing auth credentials"
+            raise AuthorizationError(msg)
 
         user_id = self._get_user_id_from_token(access_token)
-        user = await self._uow.user.read_by_id(user_id)
-        return user
+        return await self._uow.user.read_by_id(user_id)
 
     async def get_token_password_grant(
         self,
@@ -55,7 +55,8 @@ class DummyAuthProvider(AuthProvider):  # noqa: WPS338
         client_secret: str | None = None,
     ) -> dict[str, Any]:
         if not login or not password:
-            raise AuthorizationError("Missing auth credentials")
+            msg = "Missing auth credentials"
+            raise AuthorizationError(msg)
 
         log.info("Get/create user %r in database", login)
         async with self._uow:
@@ -66,7 +67,8 @@ class DummyAuthProvider(AuthProvider):  # noqa: WPS338
 
         log.info("User with id %r found", user.id)
         if not user.is_active:
-            raise AuthorizationError(f"User {user.username!r} is disabled")
+            msg = f"User {user.username!r} is disabled"
+            raise AuthorizationError(msg)
 
         log.info("Generate access token for user id %r", user.id)
         access_token, expires_at = self._generate_access_token(user_id=user.id)
@@ -98,7 +100,8 @@ class DummyAuthProvider(AuthProvider):  # noqa: WPS338
             )
             return int(payload["user_id"])
         except (KeyError, TypeError, ValueError) as e:
-            raise AuthorizationError("Invalid token") from e
+            msg = "Invalid token"
+            raise AuthorizationError(msg) from e
 
     async def get_token_authorization_code_grant(
         self,
@@ -107,9 +110,9 @@ class DummyAuthProvider(AuthProvider):  # noqa: WPS338
         client_id: str | None = None,
         client_secret: str | None = None,
     ) -> dict[str, Any]:
-        raise NotImplementedError(
-            f"Authorization code grant is not supported by {self.__class__.__name__}.",  # noqa: WPS237
-        )
+        msg = f"Authorization code grant is not supported by {self.__class__.__name__}."
+        raise NotImplementedError(msg)
 
     async def logout(self, user: User, refresh_token: str | None) -> None:
-        raise NotImplementedError(f"Logout is not supported by {self.__class__.__name__}.")  # noqa: WPS237
+        msg = f"Logout is not supported by {self.__class__.__name__}."
+        raise NotImplementedError(msg)

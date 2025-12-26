@@ -39,7 +39,8 @@ class FileTransferSource(BaseModel):
     @classmethod
     def _directory_path_is_valid_path(cls, value):
         if not PurePosixPath(value).is_absolute():
-            raise ValueError("Directory path must be absolute")
+            msg = "Directory path must be absolute"
+            raise ValueError(msg)
         return value
 
 
@@ -64,15 +65,17 @@ class FileTransferTarget(BaseModel):
     @classmethod
     def _directory_path_is_valid_path(cls, value):
         if not PurePosixPath(value).is_absolute():
-            raise ValueError("Directory path must be absolute")
+            msg = "Directory path must be absolute"
+            raise ValueError(msg)
         return value
 
     @field_validator("file_name_template")
     @classmethod
-    def _validate_file_name_template(cls, value: str) -> str:  # noqa: WPS238
+    def _validate_file_name_template(cls, value: str) -> str:
         # make error message more user friendly
         if not re.match(cls.FILE_NAME_PATTERN, value):
-            raise ValueError("Template contains invalid characters. Allowed: letters, numbers, '.', '_', '-', '{', '}'")
+            msg = "Template contains invalid characters. Allowed: letters, numbers, '.', '_', '-', '{', '}'"
+            raise ValueError(msg)
 
         required_keys = {"index", "extension"}
         placeholders = {key for key in required_keys if f"{{{key}}}" in value}
@@ -80,14 +83,17 @@ class FileTransferTarget(BaseModel):
         missing_keys = sorted(required_keys - placeholders)
         if missing_keys:
             missing_keys_str = ", ".join(missing_keys)
-            raise ValueError(f"Missing required placeholders: {missing_keys_str}")
+            msg = f"Missing required placeholders: {missing_keys_str}"
+            raise ValueError(msg)
 
         if "{run_id}" not in value and "{run_created_at}" not in value:
-            raise ValueError("At least one of placeholders must be present: {run_id} or {run_created_at}")
+            msg = "At least one of placeholders must be present: {run_id} or {run_created_at}"
+            raise ValueError(msg)
 
         try:
             value.format(index="", extension="", run_created_at="", run_id="")
         except KeyError as e:
-            raise ValueError(f"Invalid placeholder: {e}")
+            msg = f"Invalid placeholder: {e}"
+            raise ValueError(msg) from e
 
         return value

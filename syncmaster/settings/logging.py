@@ -243,7 +243,8 @@ DEFAULT_LOGGING_SETTINGS = LoggingSettings(
         "colored": FormatterConfig(
             class_="coloredlogs.ColoredFormatter",
             format=(
-                "%(asctime)s.%(msecs)03d %(processName)s:%(process)d %(name)s:%(lineno)d [%(levelname)s] %(correlation_id)s %(message)s"
+                "%(asctime)s.%(msecs)03d %(processName)s:%(process)d %(name)s:%(lineno)d "
+                "[%(levelname)s] %(correlation_id)s %(message)s"
             ),
             datefmt="%Y-%m-%d %H:%M:%S",
         ),

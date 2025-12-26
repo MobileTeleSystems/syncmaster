@@ -49,7 +49,16 @@ def get_packages(connection_types: set[str]) -> list[str]:  # noqa: WPS212
             ],
         )
 
-    if connection_types & {"s3", "hdfs", "sftp", "ftp", "ftps", "samba", "webdav", "all"}:
+    if connection_types & {
+        "s3",
+        "hdfs",
+        "sftp",
+        "ftp",
+        "ftps",
+        "samba",
+        "webdav",
+        "all",
+    }:
         result.extend(file_formats_spark_packages)
 
     return result

@@ -64,9 +64,8 @@ class KeycloakAuthProvider(AuthProvider):
         client_id: str | None = None,
         client_secret: str | None = None,
     ) -> dict[str, Any]:
-        raise NotImplementedError(
-            f"Password grant is not supported by {self.__class__.__name__}.",  # noqa: WPS237
-        )
+        msg = f"Password grant is not supported by {self.__class__.__name__}."
+        raise NotImplementedError(msg)
 
     async def get_token_authorization_code_grant(
         self,
@@ -82,7 +81,8 @@ class KeycloakAuthProvider(AuthProvider):
                 redirect_uri=self.settings.keycloak.ui_callback_url,
             )
         except KeycloakOperationError as e:
-            raise AuthorizationError("Failed to get token") from e
+            msg = "Failed to get token"
+            raise AuthorizationError(msg) from e
 
     async def get_current_user(self, access_token: str | None, request: Request) -> User:  # noqa: WPS231, WPS217
         if not access_token:
@@ -118,14 +118,16 @@ class KeycloakAuthProvider(AuthProvider):
                 await self.redirect_to_auth()
 
         if not token_info:
-            raise AuthorizationError("Invalid token payload")
+            msg = "Invalid token payload"
+            raise AuthorizationError(msg)
 
         # these names are hardcoded in keycloak:
         # https://github.com/keycloak/keycloak/blob/3ca3a4ad349b4d457f6829eaf2ae05f1e01408be/core/src/main/java/org/keycloak/representations/IDToken.java
         # TODO: make sure which fields are guaranteed
         login = token_info.get("preferred_username")
         if not login:
-            raise AuthorizationError("Invalid token")
+            msg = "Invalid token"
+            raise AuthorizationError(msg)
 
         email = token_info.get("email")
         first_name = token_info.get("given_name")

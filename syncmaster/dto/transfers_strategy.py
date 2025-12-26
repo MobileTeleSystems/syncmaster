@@ -18,7 +18,8 @@ class Strategy:
 
         strategy_type = data.get("type")
         if strategy_type not in strategy_classes:
-            raise ValueError(f"Unknown strategy type: {strategy_type}")
+            msg = f"Unknown strategy type: {strategy_type}"
+            raise ValueError(msg)
 
         return strategy_classes[strategy_type](**data)
 

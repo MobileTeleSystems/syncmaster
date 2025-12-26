@@ -27,7 +27,8 @@ class DBTransfer(BaseModel):
     @classmethod
     def _table_name_is_qualified(cls, value):
         if not re.match(cls.TABLE_NAME_PATTERN, value):
-            raise ValueError("Table name should be in format myschema.mytable")
+            msg = "Table name should be in format myschema.mytable"
+            raise ValueError(msg)
         return value
 
 
@@ -66,7 +67,8 @@ class IcebergTransferSourceOrTarget(DBTransfer):
     @classmethod
     def _table_name_is_qualified(cls, value):
         if not re.match(cls.TABLE_NAME_PATTERN, value):
-            raise ValueError("Table name should be in format myschema.mytable")
+            msg = "Table name should be in format myschema.mytable"
+            raise ValueError(msg)
         return value
 
 

@@ -30,12 +30,11 @@ __all__ = ["application_factory", "get_application"]
 
 
 def celery_factory(settings: Settings) -> Celery:
-    app = Celery(
+    return Celery(
         __name__,
         broker=settings.broker.url,
-        backend="db+" + settings.database.sync_url,  # noqa: WPS336
+        backend="db+" + settings.database.sync_url,
     )
-    return app
 
 
 def application_factory(settings: Settings) -> FastAPI:

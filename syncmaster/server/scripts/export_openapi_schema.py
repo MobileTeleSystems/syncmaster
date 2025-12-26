@@ -4,6 +4,7 @@
 
 import json
 import sys
+from pathlib import Path
 
 from fastapi import FastAPI
 
@@ -19,6 +20,7 @@ if __name__ == "__main__":
     schema = get_openapi_schema(app)
     file_path = sys.argv[1]
     if not file_path:
-        raise ValueError("File path not sent")
-    with open(file_path, "w") as file:
+        msg = "File path not sent"
+        raise ValueError(msg)
+    with Path(file_path).open("w") as file:
         json.dump(schema, file)

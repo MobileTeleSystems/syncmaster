@@ -121,13 +121,11 @@ class ConnectionRepository(RepositoryWithOwner[Connection]):
         new_name: str | None,
     ) -> Connection:
         try:
-            kwargs_for_copy = dict(group_id=new_group_id, name=new_name)
-            new_connection = await self._copy(
+            kwargs_for_copy = dict(group_id=new_group_id, name=new_name)  # noqa: C408
+            return await self._copy(
                 Connection.id == connection_id,
                 **kwargs_for_copy,
             )
-
-            return new_connection
 
         except IntegrityError as integrity_error:
             self._raise_error(integrity_error)

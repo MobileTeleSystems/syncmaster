@@ -56,7 +56,8 @@ class CreateTransferSchema(TransferSchema):
     def validate_scheduling(cls, value: str | None, info: ValidationInfo):
         if not value and info.data.get("is_scheduled"):
             # TODO make checking cron string
-            raise ValueError("If transfer must be scheduled then set schedule")
+            msg = "If transfer must be scheduled then set schedule"
+            raise ValueError(msg)
         return value or None
 
     @field_validator("strategy_params", mode="after")
@@ -64,13 +65,16 @@ class CreateTransferSchema(TransferSchema):
     def validate_strategy(cls, value: Strategy, info: ValidationInfo):
         if isinstance(value, IncrementalStrategy):
             if info.data["source_params"].type in ("s3", "hdfs"):
-                raise ValueError("S3 and HDFS sources do not support incremental strategy for now")
+                msg = "S3 and HDFS sources do not support incremental strategy for now"
+                raise ValueError(msg)
 
             source_type = info.data["source_params"].type
-            if source_type in FILE_CONNECTION_TYPES and value.increment_by not in ("file_modified_since", "file_name"):
-                raise ValueError(
-                    "Field 'increment_by' must be equal to 'file_modified_since' or 'file_name' for file source types",
-                )
+            if source_type in FILE_CONNECTION_TYPES and value.increment_by not in (
+                "file_modified_since",
+                "file_name",
+            ):
+                msg = "Field 'increment_by' must be equal to 'file_modified_since' or 'file_name' for file source types"
+                raise ValueError(msg)
         return value
 
 

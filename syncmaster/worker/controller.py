@@ -282,21 +282,23 @@ class TransferController:
     def _get_hwm_store(self) -> BaseHWMStore:
         return HorizonHWMStore(
             api_url=self.settings.hwm_store.url,
-            auth=LoginPassword(login=self.settings.hwm_store.user, password=self.settings.hwm_store.password),
+            auth=LoginPassword(
+                login=self.settings.hwm_store.user,
+                password=self.settings.hwm_store.password,
+            ),
             namespace=self.settings.hwm_store.namespace,
         ).force_create_namespace()
 
     def _perform_incremental_transfer(self) -> None:
-        with self._get_hwm_store() as hwm_store:
-            with IncrementalStrategy():
-                hwm_name = self._get_transfer_hwm_name()
-                hwm = hwm_store.get_hwm(hwm_name)
+        with self._get_hwm_store() as hwm_store, IncrementalStrategy():
+            hwm_name = self._get_transfer_hwm_name()
+            hwm = hwm_store.get_hwm(hwm_name)
 
-                self.source_handler.hwm = hwm
-                self.target_handler.hwm = hwm
+            self.source_handler.hwm = hwm
+            self.target_handler.hwm = hwm
 
-                df = self.source_handler.read()
-                self.target_handler.write(df)
+            df = self.source_handler.read()
+            self.target_handler.write(df)
 
     def _get_transfer_hwm_name(self) -> str:
         if self.source_handler.connection_dto.type in FILE_CONNECTION_TYPES:

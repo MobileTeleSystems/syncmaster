@@ -20,10 +20,9 @@ async def custom_openapi(request: Request) -> JSONResponse:
     root_path = request.scope.get("root_path", "").rstrip("/")
     server_urls = set(filter(None, (server_data.get("url") for server_data in app.servers)))
 
-    if root_path not in server_urls:
-        if root_path and app.root_path_in_servers:
-            app.servers.insert(0, {"url": root_path})
-            server_urls.add(root_path)
+    if root_path and app.root_path_in_servers and root_path not in server_urls:
+        app.servers.insert(0, {"url": root_path})
+        server_urls.add(root_path)
 
     return JSONResponse(app.openapi())
 
@@ -102,7 +101,11 @@ def apply_openapi_middleware(app: FastAPI, settings: OpenAPISettings) -> FastAPI
         app.docs_url = "/docs"
         app.swagger_ui_oauth2_redirect_url = "/docs/oauth2-redirect"
         app.add_route(app.docs_url, custom_swagger_ui_html, include_in_schema=False)
-        app.add_route(app.swagger_ui_oauth2_redirect_url, custom_swagger_ui_redirect, include_in_schema=False)
+        app.add_route(
+            app.swagger_ui_oauth2_redirect_url,
+            custom_swagger_ui_redirect,
+            include_in_schema=False,
+        )
 
     if settings.redoc.enabled:
         app.redoc_url = "/redoc"

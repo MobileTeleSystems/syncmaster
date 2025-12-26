@@ -50,7 +50,8 @@ class MockGroup:
         if role_name == UserTestRoles.Owner:
             return self._owner
 
-        raise ValueError(f"Unknown role name: {role_name}.")
+        msg = f"Unknown role name: {role_name}."
+        raise ValueError(msg)
 
     def __getattr__(self, attr: str) -> Any:
         return getattr(self.group, attr)

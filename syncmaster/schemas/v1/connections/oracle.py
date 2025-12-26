@@ -23,10 +23,12 @@ class OracleConnectionDataSchema(BaseModel):
     additional_params: dict = Field(default_factory=dict)
 
     @model_validator(mode="before")
+    @classmethod
     def validate_connection_identifiers(cls, values):
         sid, service_name = values.get("sid"), values.get("service_name")
         if sid and service_name:
-            raise ValueError("You must specify either sid or service_name but not both")
+            msg = "You must specify either sid or service_name but not both"
+            raise ValueError(msg)
         return values
 
 

@@ -38,7 +38,8 @@ async def create_group_member(
     elif role_name == "guest":
         role = UserTestRoles.Guest
     else:
-        raise ValueError(f"Unknown role {role_name}.")
+        msg = f"Unknown role {role_name}."
+        raise ValueError(msg)
 
     user = await create_user(
         session,

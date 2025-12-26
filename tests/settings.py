@@ -127,5 +127,6 @@ class TestSettings(BaseSettings):
         sid = values.get("TEST_ORACLE_SID")
         service_name = values.get("TEST_ORACLE_SERVICE_NAME")
         if (sid is None) == (service_name is None):
-            raise ValueError("Connection must have one param: sid or service name")
+            msg = "Connection must have one param: sid or service name"
+            raise ValueError(msg)
         return values

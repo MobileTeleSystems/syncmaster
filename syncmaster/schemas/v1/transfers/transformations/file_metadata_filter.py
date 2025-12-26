@@ -12,9 +12,11 @@ class NameGlobFilter(BaseModel):
     value: str
 
     @field_validator("value", mode="before")
+    @classmethod
     def _validate_pattern(cls, value: str) -> str:
         if not glob.has_magic(value):
-            raise ValueError(f"Invalid glob: {value!r}")
+            msg = f"Invalid glob: {value!r}"
+            raise ValueError(msg)
 
         return value
 
@@ -24,11 +26,13 @@ class NameRegexpFilter(BaseModel):
     value: str
 
     @field_validator("value", mode="before")
+    @classmethod
     def _validate_pattern(cls, value: str) -> str:
         try:
             re.compile(value)
         except re.error as e:
-            raise ValueError(f"Invalid regexp: {value!r}") from e
+            msg = f"Invalid regexp: {value!r}"
+            raise ValueError(msg) from e
 
         return value
 
