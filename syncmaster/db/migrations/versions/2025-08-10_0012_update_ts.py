@@ -20,10 +20,18 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.drop_index(op.f("idx_connection_search_vector"), table_name="connection", postgresql_using="gin")
+    op.drop_index(
+        op.f("idx_connection_search_vector"),
+        table_name="connection",
+        postgresql_using="gin",
+    )
     op.drop_column("connection", "search_vector")
     op.drop_column("group", "search_vector")
-    op.drop_index(op.f("idx_transfer_search_vector"), table_name="transfer", postgresql_using="gin")
+    op.drop_index(
+        op.f("idx_transfer_search_vector"),
+        table_name="transfer",
+        postgresql_using="gin",
+    )
     op.drop_column("transfer", "search_vector")
     op.drop_column("queue", "search_vector")
 
@@ -170,7 +178,13 @@ def upgrade() -> None:
             nullable=False,
         ),
     )
-    op.create_index("idx_transfer_search_vector", "transfer", ["search_vector"], unique=False, postgresql_using="gin")
+    op.create_index(
+        "idx_transfer_search_vector",
+        "transfer",
+        ["search_vector"],
+        unique=False,
+        postgresql_using="gin",
+    )
 
 
 def downgrade() -> None:
@@ -187,7 +201,17 @@ def downgrade() -> None:
             "search_vector",
             postgresql.TSVECTOR(),
             sa.Computed(
-                "to_tsvector('english'::regconfig, (((((((((((((((((((name)::text || ' '::text) || COALESCE(json_extract_path_text(source_params, VARIADIC ARRAY['table_name'::text]), ''::text)) || ' '::text) || COALESCE(json_extract_path_text(target_params, VARIADIC ARRAY['table_name'::text]), ''::text)) || ' '::text) || COALESCE(json_extract_path_text(source_params, VARIADIC ARRAY['directory_path'::text]), ''::text)) || ' '::text) || COALESCE(json_extract_path_text(target_params, VARIADIC ARRAY['directory_path'::text]), ''::text)) || ' '::text) || translate((name)::text, './'::text, '  '::text)) || ' '::text) || COALESCE(translate(json_extract_path_text(source_params, VARIADIC ARRAY['table_name'::text]), './'::text, '  '::text), ''::text)) || ' '::text) || COALESCE(translate(json_extract_path_text(target_params, VARIADIC ARRAY['table_name'::text]), './'::text, '  '::text), ''::text)) || ' '::text) || COALESCE(translate(json_extract_path_text(source_params, VARIADIC ARRAY['directory_path'::text]), './'::text, '  '::text), ''::text)) || ' '::text) || COALESCE(translate(json_extract_path_text(target_params, VARIADIC ARRAY['directory_path'::text]), './'::text, '  '::text), ''::text)))",
+                "to_tsvector('english'::regconfig, "
+                "name || ' ') || "
+                "COALESCE(json_extract_path_text(source_params, VARIADIC ARRAY['table_name']), '') || ' ' || "
+                "COALESCE(json_extract_path_text(target_params, VARIADIC ARRAY['table_name']), '') || ' ' || "
+                "COALESCE(json_extract_path_text(source_params, VARIADIC ARRAY['directory_path']), '') || ' ' || "
+                "COALESCE(json_extract_path_text(target_params, VARIADIC ARRAY['directory_path']), '') || ' ' || "
+                "translate(name, './', '  ') || ' ' || "
+                "COALESCE(translate(json_extract_path_text(source_params, VARIADIC ARRAY['table_name']), './', '  '), '') || ' ' || "
+                "COALESCE(translate(json_extract_path_text(target_params, VARIADIC ARRAY['table_name']), './', '  '), '') || ' ' || "
+                "COALESCE(translate(json_extract_path_text(source_params, VARIADIC ARRAY['directory_path']), './', '  '), '') || ' ' || "
+                "COALESCE(translate(json_extract_path_text(target_params, VARIADIC ARRAY['directory_path']), './', '  '), ''))",
                 persisted=True,
             ),
             autoincrement=False,
@@ -206,7 +230,7 @@ def downgrade() -> None:
         sa.Column(
             "search_vector",
             postgresql.TSVECTOR(),
-            sa.Computed("to_tsvector('english'::regconfig, (name)::text)", persisted=True),
+            sa.Computed("to_tsvector('english'::regconfig, name)", persisted=True),
             autoincrement=False,
             nullable=False,
         ),
@@ -217,7 +241,10 @@ def downgrade() -> None:
             "search_vector",
             postgresql.TSVECTOR(),
             sa.Computed(
-                "to_tsvector('english'::regconfig, (((((name)::text || ' '::text) || COALESCE(json_extract_path_text(data, VARIADIC ARRAY['host'::text]), ''::text)) || ' '::text) || COALESCE(translate(json_extract_path_text(data, VARIADIC ARRAY['host'::text]), '.'::text, ' '::text), ''::text)))",
+                "to_tsvector('english'::regconfig, "
+                "name || ' ' || "
+                "COALESCE(json_extract_path_text(data, VARIADIC ARRAY['host']), '') || ' ' || "
+                "COALESCE(translate(json_extract_path_text(data, VARIADIC ARRAY['host']), '.', ' '), ''))",
                 persisted=True,
             ),
             autoincrement=False,
@@ -236,7 +263,7 @@ def downgrade() -> None:
         sa.Column(
             "search_vector",
             postgresql.TSVECTOR(),
-            sa.Computed("to_tsvector('english'::regconfig, (name)::text)", persisted=True),
+            sa.Computed("to_tsvector('english'::regconfig, name)", persisted=True),
             autoincrement=False,
             nullable=False,
         ),

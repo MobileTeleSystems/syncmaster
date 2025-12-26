@@ -37,7 +37,12 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name="apscheduler_jobs_pkey"),
     )
 
-    op.create_index("ix_apscheduler_jobs_next_run_time", "apscheduler_jobs", ["next_run_time"], unique=False)
+    op.create_index(
+        "ix_apscheduler_jobs_next_run_time",
+        "apscheduler_jobs",
+        ["next_run_time"],
+        unique=False,
+    )
 
 
 def downgrade() -> None:
