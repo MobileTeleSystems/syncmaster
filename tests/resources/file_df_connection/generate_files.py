@@ -10,16 +10,17 @@ import random
 import shutil
 import sys
 from argparse import ArgumentParser
-from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import date, datetime
 from pathlib import Path
 from tempfile import gettempdir
 from typing import TYPE_CHECKING, Any, TextIO
-from xml.etree import ElementTree  # noqa: S405
+from xml.etree import ElementTree as ET
 from zipfile import ZipFile
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from avro.schema import Schema as AvroSchema
     from pandas import DataFrame as PandasDataFrame
     from pyarrow import Schema as ArrowSchema
@@ -434,56 +435,56 @@ def save_as_xls(data: list[dict], path: Path) -> None:
 
 def save_as_xml_plain(data: list[dict], path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
-    root = ElementTree.Element("root")
+    root = ET.Element("root")
 
     for record in data:
-        item = ElementTree.SubElement(root, "item")
+        item = ET.SubElement(root, "item")
         for key, value in record.items():
-            child = ElementTree.SubElement(item, key)
+            child = ET.SubElement(item, key)
             if isinstance(value, datetime):
                 child.text = value.isoformat()
             else:
                 child.text = str(value)
 
-    tree = ElementTree.ElementTree(root)
+    tree = ET.ElementTree(root)
     tree.write(path / "file.xml")
 
 
 def save_as_xml_with_attributes(data: list[dict], path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
-    root = ElementTree.Element("root")
+    root = ET.Element("root")
 
     for record in data:
         str_attributes = {
             key: value.isoformat() if isinstance(value, datetime) else str(value) for key, value in record.items()
         }
-        item = ElementTree.SubElement(root, "item", attrib=str_attributes)
+        item = ET.SubElement(root, "item", attrib=str_attributes)
         for key, value in record.items():
-            child = ElementTree.SubElement(item, key)
+            child = ET.SubElement(item, key)
             if isinstance(value, datetime):
                 child.text = value.isoformat()
             else:
                 child.text = str(value)
 
-    tree = ElementTree.ElementTree(root)
+    tree = ET.ElementTree(root)
     tree.write(str(path / "file_with_attributes.xml"))
 
 
 def save_as_xml_gz(data: list[dict], path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
-    root = ElementTree.Element("root")
+    root = ET.Element("root")
 
     for record in data:
-        item = ElementTree.SubElement(root, "item")
+        item = ET.SubElement(root, "item")
         for key, value in record.items():
-            child = ElementTree.SubElement(item, key)
+            child = ET.SubElement(item, key)
             if isinstance(value, datetime):
                 child.text = value.isoformat()
             else:
                 child.text = str(value)
 
-    ElementTree.ElementTree(root)
-    xml_string = ElementTree.tostring(root, encoding="utf-8")
+    ET.ElementTree(root)
+    xml_string = ET.tostring(root, encoding="utf-8")
 
     with gzip.open(path / "file.xml.gz", "wb", compresslevel=9) as f:
         f.write(xml_string)

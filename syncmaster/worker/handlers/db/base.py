@@ -4,23 +4,24 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
-from onetl.base import BaseDBConnection
 from onetl.db import DBReader, DBWriter
 
-from syncmaster.dto.transfers import DBTransferDTO
 from syncmaster.worker.handlers.base import Handler
 
 if TYPE_CHECKING:
+    from onetl.base import BaseDBConnection
     from pyspark.sql.dataframe import DataFrame
+
+    from syncmaster.dto.transfers import DBTransferDTO
 
 
 class DBHandler(Handler):
     connection: BaseDBConnection
     transfer_dto: DBTransferDTO
 
-    _operators = {
+    _operators: ClassVar[dict[str, str]] = {
         "is_null": "IS NULL",
         "is_not_null": "IS NOT NULL",
         "equal": "=",
@@ -39,7 +40,7 @@ class DBHandler(Handler):
         reader_params = {}
         if self.transfer_dto.strategy.type == "incremental":
             self.transfer_dto.strategy.increment_by = self._quote_field(self.transfer_dto.strategy.increment_by)
-            hwm_name = f"{self.transfer_dto.id}_{self.connection_dto.type}_{self.transfer_dto.table_name}"  # noqa: WPS237
+            hwm_name = f"{self.transfer_dto.id}_{self.connection_dto.type}_{self.transfer_dto.table_name}"
             reader_params["hwm"] = DBReader.AutoDetectHWM(
                 name=hwm_name,
                 expression=self.transfer_dto.strategy.increment_by,
@@ -75,17 +76,17 @@ class DBHandler(Handler):
 
     def _make_columns_filter_expressions(self, filters: list[dict]) -> list[str] | None:
         expressions = []
-        for filter in filters:
-            filter_type = filter["type"]
-            field = self._quote_field(filter["field"])
+        for filter_ in filters:
+            filter_type = filter_["type"]
+            field = self._quote_field(filter_["field"])
 
             if filter_type == "include":
                 expressions.append(field)
             elif filter_type == "rename":
-                new_name = self._quote_field(filter["to"])
+                new_name = self._quote_field(filter_["to"])
                 expressions.append(f"{field} AS {new_name}")
             elif filter_type == "cast":
-                cast_type = filter["as_type"]
+                cast_type = filter_["as_type"]
                 expressions.append(f"CAST({field} AS {cast_type}) AS {field}")
 
         return expressions or None
@@ -109,7 +110,7 @@ class DBHandler(Handler):
     def _get_reading_options(self) -> dict:
         options = {}
 
-        if self.transfer_dto.resources.max_parallel_tasks < 2:
+        if self.transfer_dto.resources.max_parallel_tasks == 1:
             return options
 
         if self.transfer_dto.strategy.type == "incremental":

@@ -4,18 +4,18 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING
 
-from etl_entities.hwm import HWM
-
-from syncmaster.dto.connections import ConnectionDTO
-from syncmaster.dto.runs import RunDTO
-from syncmaster.dto.transfers import TransferDTO
-
 if TYPE_CHECKING:
+    from tempfile import TemporaryDirectory
+
+    from etl_entities.hwm import HWM
     from pyspark.sql import SparkSession
     from pyspark.sql.dataframe import DataFrame
+
+    from syncmaster.dto.connections import ConnectionDTO
+    from syncmaster.dto.runs import RunDTO
+    from syncmaster.dto.transfers import TransferDTO
 
 
 class Handler(ABC):

@@ -1,7 +1,7 @@
 from collections.abc import AsyncGenerator, Callable
 
+import pytest
 import pytest_asyncio
-from pytest import FixtureRequest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.mocks import MockUser, UserTestRoles
@@ -33,7 +33,7 @@ async def simple_user(session: AsyncSession, access_token_factory) -> AsyncGener
 
 @pytest_asyncio.fixture(params=[5])
 async def simple_users(
-    request: FixtureRequest,
+    request: pytest.FixtureRequest,
     session: AsyncSession,
     access_token_factory: Callable[[int], str],
 ) -> AsyncGenerator[list[MockUser], None]:

@@ -4,21 +4,25 @@
 from __future__ import annotations
 
 import os
+from typing import TYPE_CHECKING, ClassVar
 
-from onetl.base.base_file_df_connection import BaseFileDFConnection
-
-from syncmaster.dto.connections import ConnectionDTO
-from syncmaster.dto.transfers import FileTransferDTO
 from syncmaster.worker.handlers.base import Handler
+
+if TYPE_CHECKING:
+    from onetl.base import BaseFileConnection, BaseFileDFConnection
+
+    from syncmaster.dto.connections import ConnectionDTO
+    from syncmaster.dto.transfers import FileTransferDTO
 
 COLUMN_FORMATS = ("parquet", "orc")
 
 
 class FileHandler(Handler):
     df_connection: BaseFileDFConnection
+    file_connection: BaseFileConnection
     connection_dto: ConnectionDTO
     transfer_dto: FileTransferDTO
-    _operators = {
+    _operators: ClassVar[dict[str, str]] = {
         "is_null": "IS NULL",
         "is_not_null": "IS NOT NULL",
         "equal": "=",
@@ -33,7 +37,7 @@ class FileHandler(Handler):
         "not_ilike": "NOT ILIKE",
         "regexp": "RLIKE",
     }
-    _compression_to_file_suffix = {
+    _compression_to_file_suffix: ClassVar[dict[str, str]] = {
         "gzip": "gz",
         "snappy": "snappy",
         "zlib": "zlib",
@@ -41,7 +45,7 @@ class FileHandler(Handler):
         "bzip2": "bz2",
         "deflate": "deflate",
     }
-    _file_format_to_file_suffix = {
+    _file_format_to_file_suffix: ClassVar[dict[str, str]] = {
         "json": "json",
         "jsonline": "jsonl",
         "csv": "csv",
@@ -89,10 +93,10 @@ class FileHandler(Handler):
 
     def _make_rows_filter_expression(self, filters: list[dict]) -> str | None:
         expressions = []
-        for filter in filters:
-            field = filter["field"]
-            op = self._operators[filter["type"]]
-            value = filter.get("value")
+        for filter_ in filters:
+            field = filter_["field"]
+            op = self._operators[filter_["type"]]
+            value = filter_.get("value")
 
             expressions.append(f"{field} {op} '{value}'" if value is not None else f"{field} {op}")
 
@@ -101,17 +105,17 @@ class FileHandler(Handler):
     def _make_columns_filter_expressions(self, filters: list[dict]) -> list[str] | None:
         # TODO: another approach is to use df.select(col("col1"), col("col2").alias("new_col2"), ...)
         expressions = []
-        for filter in filters:
-            filter_type = filter["type"]
-            field = filter["field"]
+        for filter_ in filters:
+            filter_type = filter_["type"]
+            field = filter_["field"]
 
             if filter_type == "include":
                 expressions.append(field)
             elif filter_type == "rename":
-                new_name = filter["to"]
+                new_name = filter_["to"]
                 expressions.append(f"{field} AS {new_name}")
             elif filter_type == "cast":
-                cast_type = filter["as_type"]
+                cast_type = filter_["as_type"]
                 expressions.append(f"CAST({field} AS {cast_type}) AS {field}")
 
         return expressions or None

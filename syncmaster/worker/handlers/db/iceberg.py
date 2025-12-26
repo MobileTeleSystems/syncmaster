@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from onetl.connection import Iceberg
 from onetl.hooks import slot, support_hooks
@@ -16,12 +16,13 @@ from syncmaster.dto.connections import (
     IcebergRESTCatalogS3DelegatedConnectionBaseDTO,
     IcebergRESTCatalogS3DirectConnectionBaseDTO,
 )
-from syncmaster.dto.transfers import IcebergTransferDTO
 from syncmaster.worker.handlers.db.base import DBHandler
 
 if TYPE_CHECKING:
     from pyspark.sql import SparkSession
     from pyspark.sql.dataframe import DataFrame
+
+    from syncmaster.dto.transfers import IcebergTransferDTO
 
 
 @support_hooks
@@ -29,9 +30,9 @@ class IcebergRESTCatalogS3Handler(DBHandler):
     connection: Iceberg
     connection_dto: IcebergRESTCatalogS3DirectConnectionBaseDTO | IcebergRESTCatalogS3DelegatedConnectionBaseDTO
     transfer_dto: IcebergTransferDTO
-    _operators = {
+    _operators: ClassVar[dict[str, str]] = {
         "regexp": "RLIKE",
-        **DBHandler._operators,
+        **DBHandler._operators,  # noqa: SLF001
     }
 
     def connect(self, spark: SparkSession):
@@ -71,7 +72,7 @@ class IcebergRESTCatalogS3Handler(DBHandler):
 
     @slot
     def read(self) -> DataFrame:
-        table = ".".join([self.transfer_dto.catalog_name, self.transfer_dto.table_name])
+        table = f"{self.transfer_dto.catalog_name}.{self.transfer_dto.table_name}"
         self.connection.spark.catalog.refreshTable(table)
         return super().read()
 
@@ -86,10 +87,10 @@ class IcebergRESTCatalogS3Handler(DBHandler):
 
     def _make_rows_filter_expression(self, filters: list[dict]) -> str | None:
         expressions = []
-        for filter in filters:
-            op = self._operators[filter["type"]]
-            field = self._quote_field(filter["field"])
-            value = filter.get("value")
+        for filter_ in filters:
+            op = self._operators[filter_["type"]]
+            field = self._quote_field(filter_["field"])
+            value = filter_.get("value")
 
             if value is None:
                 expressions.append(f"{field} {op}")

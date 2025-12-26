@@ -1,7 +1,7 @@
 import secrets
 
+import pytest
 import pytest_asyncio
-from pytest import FixtureRequest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Group
@@ -46,7 +46,7 @@ async def group(
 
 @pytest_asyncio.fixture(params=["123-test_queue"])
 async def queue(
-    request: FixtureRequest,
+    request: pytest.FixtureRequest,
     session: AsyncSession,
     group: Group,
 ):

@@ -1,15 +1,10 @@
 from __future__ import annotations
 
 import os
-from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from httpx import AsyncClient
-from onetl.connection import FileConnection
 from onetl.impl import LocalPath, RemotePath
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from syncmaster.db.models import (
@@ -24,8 +19,17 @@ from syncmaster.db.models import (
 )
 from syncmaster.db.repositories.utils import encrypt_auth_data
 from syncmaster.schemas.v1.transfers import ReadFullTransferSchema
-from syncmaster.server.settings import ServerAppSettings as Settings
-from tests.mocks import MockConnection, MockTransfer
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
+    from datetime import datetime
+
+    from httpx import AsyncClient
+    from onetl.connection import FileConnection
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    from syncmaster.server.settings import ServerAppSettings as Settings
+    from tests.mocks import MockConnection, MockTransfer
 
 
 @asynccontextmanager
@@ -194,7 +198,12 @@ async def create_transfer(
         target_connection_id=target_connection_id,
         target_params=target_params or {"type": "postgres", "table_name": "schema.table2"},
         transformations=transformations or [],
-        resources=resources or {"max_parallel_tasks": 1, "cpu_cores_per_task": 1, "ram_bytes_per_task": 1024**3},
+        resources=resources
+        or {
+            "max_parallel_tasks": 1,
+            "cpu_cores_per_task": 1,
+            "ram_bytes_per_task": 1024**3,
+        },
         is_scheduled=is_scheduled,
         schedule=schedule,
         strategy_params=strategy_params or {"type": "full"},

@@ -7,11 +7,12 @@ from typing import TYPE_CHECKING
 
 from onetl.hooks import slot, support_hooks
 
-from syncmaster.dto.connections import FTPConnectionDTO
 from syncmaster.worker.handlers.file.local_df import LocalDFFileHandler
 
 if TYPE_CHECKING:
     from pyspark.sql import DataFrame, SparkSession
+
+    from syncmaster.dto.connections import FTPConnectionDTO
 
 
 @support_hooks

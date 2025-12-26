@@ -9,17 +9,18 @@ from typing import TYPE_CHECKING
 
 from onetl.connection.kerberos_helpers import kinit_password
 
-from syncmaster.db.models import Run
 from syncmaster.dto.connections import (
     ConnectionDTO,
     HDFSConnectionDTO,
     HiveConnectionDTO,
 )
 from syncmaster.worker.ivy2 import get_excluded_packages, get_packages
-from syncmaster.worker.settings import WorkerSettings
 
 if TYPE_CHECKING:
     from pyspark.sql import SparkSession
+
+    from syncmaster.db.models import Run
+    from syncmaster.worker.settings import WorkerSettings
 
 log = logging.getLogger(__name__)
 

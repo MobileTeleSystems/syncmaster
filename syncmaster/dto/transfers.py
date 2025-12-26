@@ -44,7 +44,7 @@ class FileTransferDTO(TransferDTO):
     df_schema: dict | None = None
     transformations: list[dict] | None = None
 
-    _format_parsers = {
+    _format_parsers: ClassVar[dict] = {
         "csv": CSV,
         "jsonline": JSONLine,
         "json": JSON,

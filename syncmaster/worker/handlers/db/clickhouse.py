@@ -3,19 +3,20 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from onetl.connection import Clickhouse
 from onetl.db import DBWriter
 from onetl.hooks import slot, support_hooks
 
-from syncmaster.dto.connections import ClickhouseConnectionDTO
-from syncmaster.dto.transfers import ClickhouseTransferDTO
 from syncmaster.worker.handlers.db.base import DBHandler
 
 if TYPE_CHECKING:
     from pyspark.sql import SparkSession
     from pyspark.sql.dataframe import DataFrame
+
+    from syncmaster.dto.connections import ClickhouseConnectionDTO
+    from syncmaster.dto.transfers import ClickhouseTransferDTO
 
 
 @support_hooks
@@ -23,14 +24,14 @@ class ClickhouseHandler(DBHandler):
     connection: Clickhouse
     connection_dto: ClickhouseConnectionDTO
     transfer_dto: ClickhouseTransferDTO
-    _operators = {
+    _operators: ClassVar[dict[str, str]] = {
         "regexp": "REGEXP",
-        **DBHandler._operators,
+        **DBHandler._operators,  # noqa: SLF001
     }
 
     def connect(self, spark: SparkSession):
-        ClickhouseDialectRegistry = (
-            spark._jvm.io.github.mtsongithub.doetl.sparkdialectextensions.clickhouse.ClickhouseDialectRegistry  # noqa: WPS219
+        ClickhouseDialectRegistry = (  # noqa: N806
+            spark._jvm.io.github.mtsongithub.doetl.sparkdialectextensions.clickhouse.ClickhouseDialectRegistry  # noqa: SLF001
         )
         ClickhouseDialectRegistry.register()
         self.connection = Clickhouse(
@@ -74,10 +75,10 @@ class ClickhouseHandler(DBHandler):
 
     def _make_rows_filter_expression(self, filters: list[dict]) -> str | None:
         expressions = []
-        for filter in filters:
-            field = self._quote_field(filter["field"])
-            op = self._operators[filter["type"]]
-            value = filter.get("value")
+        for filter_ in filters:
+            field = self._quote_field(filter_["field"])
+            op = self._operators[filter_["type"]]
+            value = filter_.get("value")
 
             expressions.append(f"{field} {op} '{value}'" if value is not None else f"{field} {op}")
 

@@ -2,10 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
-import http
-from typing import Any, NamedTuple
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 from syncmaster.errors.base import APIErrorSchema, BaseErrorSchema
+
+if TYPE_CHECKING:
+    import http
 
 
 class APIErrorResponse(NamedTuple):
@@ -30,7 +32,9 @@ def register_error_response(exception: type[Exception], status: http.HTTPStatus)
     return wrapper
 
 
-def get_response_for_exception(exception_type: type[Exception]) -> APIErrorResponse | None:
+def get_response_for_exception(
+    exception_type: type[Exception],
+) -> APIErrorResponse | None:
     """Get mapping between exception type and JSON body schema (for serialization)."""
     for exception in exception_type.mro():
         if exception in _responses_by_exception:
@@ -40,7 +44,7 @@ def get_response_for_exception(exception_type: type[Exception]) -> APIErrorRespo
 
 def get_response_for_status_code(status_code: int) -> APIErrorResponse | None:
     """Get mapping between status code and JSON body schema (for deserialization)."""
-    return _responses_by_status_code.get(status_code, None)
+    return _responses_by_status_code.get(status_code)
 
 
 def get_error_responses(

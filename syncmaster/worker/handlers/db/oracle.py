@@ -3,18 +3,19 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from onetl.connection import Oracle
 from onetl.hooks import slot, support_hooks
 
-from syncmaster.dto.connections import OracleConnectionDTO
-from syncmaster.dto.transfers import OracleTransferDTO
 from syncmaster.worker.handlers.db.base import DBHandler
 
 if TYPE_CHECKING:
     from pyspark.sql import SparkSession
     from pyspark.sql.dataframe import DataFrame
+
+    from syncmaster.dto.connections import OracleConnectionDTO
+    from syncmaster.dto.transfers import OracleTransferDTO
 
 
 @support_hooks
@@ -22,9 +23,9 @@ class OracleHandler(DBHandler):
     connection: Oracle
     connection_dto: OracleConnectionDTO
     transfer_dto: OracleTransferDTO
-    _operators = {
+    _operators: ClassVar[dict[str, str]] = {
         "regexp": "REGEXP_LIKE",
-        **DBHandler._operators,
+        **DBHandler._operators,  # noqa: SLF001
     }
 
     def connect(self, spark: SparkSession):
@@ -54,10 +55,10 @@ class OracleHandler(DBHandler):
 
     def _make_rows_filter_expression(self, filters: list[dict]) -> str | None:
         expressions = []
-        for filter in filters:
-            field = self._quote_field(filter["field"])
-            op = self._operators[filter["type"]]
-            value = filter.get("value")
+        for filter_ in filters:
+            field = self._quote_field(filter_["field"])
+            op = self._operators[filter_["type"]]
+            value = filter_.get("value")
 
             if value is None:
                 expressions.append(f"{field} {op}")

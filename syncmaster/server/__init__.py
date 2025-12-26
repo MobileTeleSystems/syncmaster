@@ -1,5 +1,7 @@
 # SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
+from typing import TYPE_CHECKING
+
 from celery import Celery
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
@@ -17,12 +19,14 @@ from syncmaster.server.handler import (
     validation_exception_handler,
 )
 from syncmaster.server.middlewares import apply_middlewares
-from syncmaster.server.providers.auth import AuthProvider
 from syncmaster.server.services.unit_of_work import UnitOfWork
 from syncmaster.server.settings import ServerAppSettings as Settings
 from syncmaster.settings.logging import setup_logging
 
-__all__ = ["get_application", "application_factory"]
+if TYPE_CHECKING:
+    from syncmaster.server.providers.auth import AuthProvider
+
+__all__ = ["application_factory", "get_application"]
 
 
 def celery_factory(settings: Settings) -> Celery:

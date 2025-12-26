@@ -8,11 +8,12 @@ from typing import TYPE_CHECKING
 from onetl.file import FileDFReader
 from onetl.hooks import slot, support_hooks
 
-from syncmaster.dto.connections import S3ConnectionDTO
 from syncmaster.worker.handlers.file.remote_df import RemoteDFFileHandler
 
 if TYPE_CHECKING:
     from pyspark.sql import DataFrame, SparkSession
+
+    from syncmaster.dto.connections import S3ConnectionDTO
 
 
 @support_hooks

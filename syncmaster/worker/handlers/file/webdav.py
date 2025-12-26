@@ -8,11 +8,12 @@ from typing import TYPE_CHECKING
 from onetl.connection import SparkLocalFS, WebDAV
 from onetl.hooks import slot, support_hooks
 
-from syncmaster.dto.connections import WebDAVConnectionDTO
 from syncmaster.worker.handlers.file.local_df import LocalDFFileHandler
 
 if TYPE_CHECKING:
     from pyspark.sql import DataFrame, SparkSession
+
+    from syncmaster.dto.connections import WebDAVConnectionDTO
 
 
 @support_hooks

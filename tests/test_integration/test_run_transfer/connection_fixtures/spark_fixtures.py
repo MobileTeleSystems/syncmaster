@@ -13,7 +13,6 @@ from onetl.connection import (
 )
 from onetl.file.format import XML, Excel
 from pyspark.sql import SparkSession
-from pytest import FixtureRequest
 
 from syncmaster.server.settings import ServerAppSettings as Settings
 
@@ -21,7 +20,10 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope="session")
-def spark(settings: Settings, request: FixtureRequest) -> SparkSession:
+def spark(  # noqa: C901
+    settings: Settings,
+    request: pytest.FixtureRequest,
+) -> SparkSession:
     logger.info("START GET SPARK SESSION")
 
     # get markers from all downstream tests

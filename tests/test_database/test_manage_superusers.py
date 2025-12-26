@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
 import pytest
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models.user import User
 from syncmaster.server.scripts.manage_superusers import (
@@ -12,7 +12,11 @@ from syncmaster.server.scripts.manage_superusers import (
     list_superusers,
     remove_superusers,
 )
-from tests.mocks import MockUser
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    from tests.mocks import MockUser
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.server]
 
