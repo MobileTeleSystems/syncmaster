@@ -64,7 +64,7 @@ class Transfer(
     group: Mapped[Group] = relationship(Group)
     source_connection: Mapped[Connection] = relationship(foreign_keys=source_connection_id)
     target_connection: Mapped[Connection] = relationship(foreign_keys=target_connection_id)
-    queue: Mapped[Queue] = relationship(back_populates="transfers")
+    queue: Mapped[Queue] = relationship(Queue)
 
     search_vector: Mapped[str] = mapped_column(
         TSVECTOR,

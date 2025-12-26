@@ -4,15 +4,18 @@ from __future__ import annotations
 
 from sqlalchemy import Computed, String
 from sqlalchemy.dialects.postgresql import TSVECTOR
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from syncmaster.db.mixins import ResourceMixin, TimestampMixin
 from syncmaster.db.models.base import Base
+from syncmaster.db.models.group import Group
 
 
 class Queue(Base, ResourceMixin, TimestampMixin):
     name: Mapped[str] = mapped_column(String(128), nullable=False)
     slug: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
+
+    group: Mapped[Group] = relationship(Group)
 
     search_vector: Mapped[str] = mapped_column(
         TSVECTOR,
