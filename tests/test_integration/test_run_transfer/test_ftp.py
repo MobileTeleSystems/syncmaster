@@ -373,7 +373,8 @@ async def test_run_transfer_postgres_to_ftp_with_full_strategy(
     )
     downloader.run()
 
-    verify_file_name_template(list(Path.iterdir(tmp_path)), expected_extension)
+    file_names = [f.name for f in Path.iterdir(tmp_path) if f.is_file()]
+    verify_file_name_template(file_names, expected_extension)
 
     reader = FileDFReader(
         connection=ftp_file_df_connection,
@@ -433,7 +434,8 @@ async def test_run_transfer_postgres_to_ftp_with_incremental_strategy(
     )
     downloader.run()
 
-    verify_file_name_template(list(Path.iterdir(tmp_path)), expected_extension)
+    file_names = [f.name for f in Path.iterdir(tmp_path) if f.is_file()]
+    verify_file_name_template(file_names, expected_extension)
 
     reader = FileDFReader(
         connection=ftp_file_df_connection,

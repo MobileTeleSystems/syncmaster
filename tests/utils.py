@@ -1,8 +1,9 @@
 import asyncio
 import logging
 from datetime import UTC, datetime
-from pathlib import Path
+from pathlib import Path, PurePath, PurePosixPath
 from typing import Any
+from collections.abc import Sequence
 
 from alembic.autogenerate import compare_metadata
 from alembic.config import Config
@@ -247,9 +248,9 @@ def add_increment_to_files_and_upload(file_connection: FileConnection, remote_pa
     uploader.run()
 
 
-def verify_file_name_template(files: list[str], expected_extension: str) -> None:
-    for file in files:
-        run_created_at, index_and_extension = file.split("-")
+def verify_file_name_template(file_names: list[str], expected_extension: str) -> None:
+    for file_name in file_names:
+        run_created_at, index_and_extension = file_name.split("-")
         assert len(run_created_at.split("_")) == 6, f"Got wrong {run_created_at=}"
         assert index_and_extension.split(".", 1)[1] == expected_extension
 
