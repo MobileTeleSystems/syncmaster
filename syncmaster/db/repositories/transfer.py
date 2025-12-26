@@ -39,7 +39,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         queue_id: int | None = None,
         source_connection_type: list[str] | None = None,
         target_connection_type: list[str] | None = None,
-        is_scheduled: bool | None = None,
+        is_scheduled: bool | None = None,  # noqa: FBT001
     ) -> Pagination:
         stmt = select(Transfer).where(
             Transfer.group_id == group_id,
@@ -61,8 +61,8 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         if is_scheduled is not None:
             stmt = stmt.where(Transfer.is_scheduled == is_scheduled)
 
-        SourceConnection = aliased(Connection)
-        TargetConnection = aliased(Connection)
+        SourceConnection = aliased(Connection)  # noqa: N806
+        TargetConnection = aliased(Connection)  # noqa: N806
 
         if source_connection_type is not None:
             stmt = stmt.join(
@@ -118,7 +118,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         transformations: list[dict[str, Any]],
         resources: dict[str, Any],
         queue_id: int,
-        is_scheduled: bool,
+        is_scheduled: bool,  # noqa: FBT001
         schedule: str | None,
     ) -> Transfer:
         query = (
@@ -160,7 +160,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         strategy_params: dict[str, Any],
         transformations: list[dict[str, Any]],
         resources: dict[str, Any],
-        is_scheduled: bool,
+        is_scheduled: bool,  # noqa: FBT001
         schedule: str | None,
         queue_id: int,
     ) -> Transfer:
@@ -202,16 +202,15 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         new_name: str | None,
     ) -> Transfer:
         try:
-            kwargs = dict(
+            kwargs = dict(  # noqa: C408
                 group_id=new_group_id,
                 source_connection_id=new_source_connection,
                 target_connection_id=new_target_connection,
                 queue_id=new_queue_id,
                 name=new_name,
             )
-            new_transfer = await self._copy(Transfer.id == transfer_id, **kwargs)
 
-            return new_transfer
+            return await self._copy(Transfer.id == transfer_id, **kwargs)
         except IntegrityError as integrity_error:
             self._raise_error(integrity_error)
 
@@ -225,7 +224,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         result = await self._session.scalars(query)
         return result.fetchall()
 
-    def _raise_error(self, err: DBAPIError) -> NoReturn:  # noqa: WPS238
+    def _raise_error(self, err: DBAPIError) -> NoReturn:
         constraint = err.__cause__.__cause__.constraint_name
         if constraint == "fk__transfer__group_id__group":
             raise GroupNotFoundError from err

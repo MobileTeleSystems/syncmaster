@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 from argparse import ArgumentParser
 from datetime import UTC
+from pathlib import Path
 
 from faker import Faker
 
@@ -40,7 +41,7 @@ def calculate_intravals(elements: int, parts: int):
 
 def generate_data_file(elements: int, parts: int):
     data = create_data(elements)
-    with open("test_data.py", "w") as f:
+    with Path("test_data.py").open("w") as f:
         data_to_write = f"import datetime\nintervals={calculate_intravals(elements, parts)}\ndata={data}"
         f.write(data_to_write)
 

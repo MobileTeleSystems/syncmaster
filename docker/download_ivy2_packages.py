@@ -39,7 +39,7 @@ def get_worker_spark_session_for_docker(connection_types: set[str]) -> SparkSess
     Construct dummy Spark session with all .jars included.
     Designed to be used in Dockerfile.worker to populate the image.
     """
-    from pyspark.sql import SparkSession
+    from pyspark.sql import SparkSession  # noqa: PLC0415
 
     spark_builder = SparkSession.builder.appName("syncmaster_jar_downloader").master("local[1]")
 

@@ -26,9 +26,12 @@ oauth_schema = OAuth2PasswordBearer(
 )
 
 
-def get_user(  # noqa: WPS231
-    is_superuser: bool = False,
-) -> Callable[[Request, AuthProvider, str | None, HTTPAuthorizationCredentials | None], Coroutine[Any, Any, User]]:
+def get_user(
+    is_superuser: bool = False,  # noqa: FBT001, FBT002
+) -> Callable[
+    [Request, AuthProvider, str | None, HTTPAuthorizationCredentials | None],
+    Coroutine[Any, Any, User],
+]:
     async def wrapper(
         request: Request,
         auth_provider: Annotated[AuthProvider, Depends(Stub(AuthProvider))],
@@ -51,11 +54,14 @@ def get_user(  # noqa: WPS231
             request=request,
         )
         if user is None:
-            raise EntityNotFoundError("User not found")
+            msg = "User not found"
+            raise EntityNotFoundError(msg)
         if not user.is_active:
-            raise ActionNotAllowedError("Inactive user")
+            msg = "Inactive user"
+            raise ActionNotAllowedError(msg)
         if is_superuser and not user.is_superuser:
-            raise ActionNotAllowedError("You have no power here")
+            msg = "You have no power here"
+            raise ActionNotAllowedError(msg)
         return user
 
     return wrapper

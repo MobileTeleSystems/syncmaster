@@ -176,7 +176,7 @@ class TransferController:
     source_handler: Handler
     target_handler: Handler
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         settings: WorkerAppSettings,
         run: Run,
@@ -241,7 +241,7 @@ class TransferController:
         finally:
             self.temp_dir.cleanup()
 
-    def get_handler(
+    def get_handler(  # noqa: PLR0913
         self,
         connection_data: dict[str, Any],
         connection_auth_data: dict,
@@ -312,7 +312,7 @@ class TransferController:
                 hwm_name_suffix,
             ],
         )
-        return hwm_name
+        return hwm_name  # noqa: RET504
 
     def _reset_transfer_hwm(self) -> None:
         with self._get_hwm_store() as hwm_store:

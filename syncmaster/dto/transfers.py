@@ -63,7 +63,7 @@ class FileTransferDTO(TransferDTO):
         self.options.setdefault("if_exists", "replace_overlapping_partitions")
 
     @staticmethod
-    def _rewrite_option_name(file_format: dict, from_name: str, to_name: str):  # noqa: WPS602
+    def _rewrite_option_name(file_format: dict, from_name: str, to_name: str):
         if from_name in file_format:
             file_format[to_name] = file_format.pop(from_name)
 
@@ -132,7 +132,7 @@ class HiveTransferDTO(DBTransferDTO):
 @dataclass
 class IcebergTransferDTO(DBTransferDTO):
     type: ClassVar[str] = "iceberg"
-    catalog_name: str = field(default_factory=lambda: f"iceberg_{uuid4().hex[:8]}")  # noqa: WPS237
+    catalog_name: str = field(default_factory=lambda: f"iceberg_{uuid4().hex[:8]}")
 
     def __post_init__(self):
         super().__post_init__()

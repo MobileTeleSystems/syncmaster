@@ -11,7 +11,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from syncmaster.db.models.user import User
 from syncmaster.exceptions import EntityNotFoundError
 from syncmaster.exceptions.auth import AuthorizationError, LogoutError
-from syncmaster.exceptions.redirect import RedirectException
+from syncmaster.exceptions.redirect import RedirectError
 from syncmaster.server.dependencies import Stub
 from syncmaster.server.providers.auth.base_provider import AuthProvider
 from syncmaster.server.services.unit_of_work import UnitOfWork
@@ -29,7 +29,7 @@ class KeycloakAuthProvider(AuthProvider):
         self.settings = settings
         self._uow = unit_of_work
         self.keycloak_openid = KeycloakOpenID(
-            server_url=str(self.settings.keycloak.api_url).rstrip("/") + "/",  # noqa: WPS336
+            server_url=str(self.settings.keycloak.api_url).rstrip("/") + "/",
             client_id=self.settings.keycloak.client_id,
             realm_name=self.settings.keycloak.realm_name,
             client_secret_key=self.settings.keycloak.client_secret.get_secret_value(),
@@ -55,7 +55,7 @@ class KeycloakAuthProvider(AuthProvider):
         )
         return app
 
-    async def get_token_password_grant(
+    async def get_token_password_grant(  # noqa: PLR0913
         self,
         grant_type: str | None = None,
         login: str | None = None,
@@ -84,7 +84,7 @@ class KeycloakAuthProvider(AuthProvider):
             msg = "Failed to get token"
             raise AuthorizationError(msg) from e
 
-    async def get_current_user(self, access_token: str | None, request: Request) -> User:  # noqa: WPS231, WPS217
+    async def get_current_user(self, access_token: str | None, request: Request) -> User:
         if not access_token:
             log.debug("No access token found in session")
             await self.redirect_to_auth()
@@ -152,7 +152,7 @@ class KeycloakAuthProvider(AuthProvider):
             redirect_uri=self.settings.keycloak.ui_callback_url,
             scope=self.settings.keycloak.scope,
         )
-        raise RedirectException(redirect_url=auth_url)
+        raise RedirectError(redirect_url=auth_url)
 
     async def logout(self, user: User, refresh_token: str | None) -> None:
         if not refresh_token:

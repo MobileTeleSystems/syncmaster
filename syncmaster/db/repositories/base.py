@@ -23,7 +23,7 @@ from syncmaster.exceptions import EntityNotFoundError
 Model = TypeVar("Model", bound=Base)
 
 
-class Repository(Generic[Model], ABC):
+class Repository(ABC, Generic[Model]):
     def __init__(self, model: type[Model], session: AsyncSession):
         self._model = model
         self._session = session
@@ -108,9 +108,8 @@ class Repository(Generic[Model], ABC):
         )
 
     def _construct_vector_search(self, query: Select, ts_query: ColumnElement) -> Select:
-        query = (
+        return (
             query.where(self._model.search_vector.op("@@")(ts_query))
             .add_columns(func.ts_rank(self._model.search_vector, ts_query).label("rank"))
             .order_by(func.ts_rank(self._model.search_vector, ts_query).desc())
         )
-        return query

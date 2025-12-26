@@ -35,7 +35,7 @@ class WorkerSettings(BaseModel):
                 spark.driver.bindAddress: 0.0.0.0
                 spark.sql.pyspark.jvmStacktrace.enabled: true
                 spark.ui.enabled: false
-    """
+    """  # noqa: E501
 
     create_spark_session_function: ImportString = Field(
         "syncmaster.worker.spark.get_worker_spark_session",

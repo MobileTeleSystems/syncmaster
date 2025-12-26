@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 
 class OAuth2GatewayProvider(AuthProvider):
-    def __init__(  # noqa: WPS612
+    def __init__(
         self,
         settings: Annotated[OAuth2GatewayProviderSettings, Depends(Stub(OAuth2GatewayProviderSettings))],
         unit_of_work: Annotated[UnitOfWork, Depends()],
@@ -26,7 +26,7 @@ class OAuth2GatewayProvider(AuthProvider):
         self.settings = settings
         self._uow = unit_of_work
         self.keycloak_openid = KeycloakOpenID(
-            server_url=str(self.settings.keycloak.api_url).rstrip("/") + "/",  # noqa: WPS336
+            server_url=str(self.settings.keycloak.api_url).rstrip("/") + "/",
             client_id=self.settings.keycloak.client_id,
             realm_name=self.settings.keycloak.realm_name,
             client_secret_key=self.settings.keycloak.client_secret.get_secret_value(),
@@ -43,30 +43,34 @@ class OAuth2GatewayProvider(AuthProvider):
         app.dependency_overrides[OAuth2GatewayProviderSettings] = lambda: settings
         return app
 
-    async def get_current_user(  # noqa: WPS231, WPS217, WPS238
+    async def get_current_user(
         self,
         access_token: str | None,
         request: Request,
     ) -> User:
         if not access_token:
             log.debug("No access token found in request")
-            raise AuthorizationError("Missing auth credentials")
+            msg = "Missing auth credentials"
+            raise AuthorizationError(msg)
 
         try:
             token_info = await self.keycloak_openid.a_introspect(access_token)
         except KeycloakOperationError as e:
             log.info("Failed to introspect token: %s", e)
-            raise AuthorizationError("Invalid token payload")
+            msg = "Invalid token payload"
+            raise AuthorizationError(msg) from e
 
         if token_info["active"] is False:
-            raise AuthorizationError("Token is not active")
+            msg = "Token is not active"
+            raise AuthorizationError(msg)
 
         # these names are hardcoded in keycloak:
         # https://github.com/keycloak/keycloak/blob/3ca3a4ad349b4d457f6829eaf2ae05f1e01408be/core/src/main/java/org/keycloak/representations/IDToken.java
         # TODO: make sure which fields are guaranteed
         login = token_info.get("preferred_username")
         if not login:
-            raise AuthorizationError("Invalid token")
+            msg = "Invalid token"
+            raise AuthorizationError(msg)
 
         email = token_info.get("email")
         first_name = token_info.get("given_name")
@@ -86,7 +90,7 @@ class OAuth2GatewayProvider(AuthProvider):
                 )
         return user
 
-    async def get_token_password_grant(
+    async def get_token_password_grant(  # noqa: PLR0913
         self,
         grant_type: str | None = None,
         login: str | None = None,
@@ -95,8 +99,9 @@ class OAuth2GatewayProvider(AuthProvider):
         client_id: str | None = None,
         client_secret: str | None = None,
     ) -> dict[str, Any]:
+        msg = f"Password grant is not supported by {self.__class__.__name__}."
         raise NotImplementedError(
-            f"Password grant is not supported by {self.__class__.__name__}.",  # noqa: WPS237
+            msg,
         )
 
     async def get_token_authorization_code_grant(
@@ -106,11 +111,13 @@ class OAuth2GatewayProvider(AuthProvider):
         client_id: str | None = None,
         client_secret: str | None = None,
     ) -> dict[str, Any]:
+        msg = f"Authorization code grant is not supported by {self.__class__.__name__}."
         raise NotImplementedError(
-            f"Authorization code grant is not supported by {self.__class__.__name__}.",  # noqa: WPS237
+            msg,
         )
 
     async def logout(self, user: User, refresh_token: str | None) -> None:
+        msg = f"Logout is not supported by {self.__class__.__name__}."
         raise NotImplementedError(
-            f"Logout is not supported by {self.__class__.__name__}.",  # noqa: WPS237
+            msg,
         )

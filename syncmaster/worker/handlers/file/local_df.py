@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-import os
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from etl_entities.hwm import FileListHWM, FileModifiedTimeHWM
@@ -18,11 +18,11 @@ if TYPE_CHECKING:
 
 class LocalDFFileHandler(FileHandler):
     def read(self) -> DataFrame:
-        from pyspark.sql.types import StructType
+        from pyspark.sql.types import StructType  # noqa: PLC0415
 
         downloader_params = {}
         if self.transfer_dto.strategy.type == "incremental":
-            hwm_name = f"{self.transfer_dto.id}_{self.connection_dto.type}_{self.transfer_dto.directory_path}"  # noqa: WPS237
+            hwm_name = f"{self.transfer_dto.id}_{self.connection_dto.type}_{self.transfer_dto.directory_path}"
             if self.transfer_dto.strategy.increment_by == "file_modified_since":
                 downloader_params["hwm"] = FileModifiedTimeHWM(name=hwm_name)
             elif self.transfer_dto.strategy.increment_by == "file_name":
@@ -42,7 +42,7 @@ class LocalDFFileHandler(FileHandler):
             connection=self.local_df_connection,
             format=self.transfer_dto.file_format,
             source_path=self.temp_dir.name,
-            df_schema=StructType.fromJson(self.transfer_dto.df_schema) if self.transfer_dto.df_schema else None,
+            df_schema=(StructType.fromJson(self.transfer_dto.df_schema) if self.transfer_dto.df_schema else None),
         )
         df = reader.run()
 
@@ -66,9 +66,9 @@ class LocalDFFileHandler(FileHandler):
         writer.run(df=df)
 
         # working with spark generated .crc files may lead to exceptions
-        crc_files = [f for f in os.listdir(self.temp_dir.name) if f.endswith(".crc")]
+        crc_files = [f for f in Path(self.temp_dir.name).iterdir() if f.name.endswith(".crc")]
         for file in crc_files:
-            os.remove(os.path.join(self.temp_dir.name, file))
+            file.unlink()
 
         self._rename_files()
 
@@ -80,20 +80,19 @@ class LocalDFFileHandler(FileHandler):
         uploader.run()
 
     def _rename_files(self):
-        files = os.listdir(self.temp_dir.name)
-
-        for index, file_name in enumerate(files):
+        tmp_dir = Path(self.temp_dir.name)
+        for index, file_name in enumerate(tmp_dir.iterdir()):
             extension = self._get_file_extension()
-            new_name = self._get_file_name(str(index), extension)
-            old_path = os.path.join(self.temp_dir.name, file_name)
-            new_path = os.path.join(self.temp_dir.name, new_name)
-            os.rename(old_path, new_path)
+            new_name = self._get_file_name(index, extension)
+            old_path = Path(self.temp_dir.name, file_name)
+            new_path = Path(self.temp_dir.name, new_name)
+            old_path.rename(new_path)
 
     def _make_file_metadata_filters(self, filters: list[dict]) -> list[Glob | Regexp | FileSizeRange]:
         processed_filters = []
-        for filter in filters:
-            filter_type = filter["type"]
-            value = filter["value"]
+        for filter_ in filters:
+            filter_type = filter_["type"]
+            value = filter_["value"]
 
             if filter_type == "name_glob":
                 processed_filters.append(Glob(value))

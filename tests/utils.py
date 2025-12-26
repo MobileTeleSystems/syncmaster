@@ -29,6 +29,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from syncmaster.db.models import Status
+from syncmaster.exceptions.base import EntityNotFoundError
 from syncmaster.server.settings import ServerAppSettings as Settings
 from tests.mocks import MockUser
 
@@ -109,7 +110,7 @@ async def get_run_on_end(
     client: AsyncClient,
     run_id: int,
     token: str,
-    timeout: int = 120,
+    timeout: int = 120,  # noqa: ASYNC109
 ) -> dict[str, Any]:
     end_time = datetime.now(tz=UTC).timestamp() + timeout
     while True:
@@ -119,7 +120,7 @@ async def get_run_on_end(
             headers={"Authorization": f"Bearer {token}"},
         )
         if response.status_code != 200:
-            raise Exception("Run not found")
+            raise EntityNotFoundError
 
         data = response.json()
         if data["status"] in [Status.FINISHED, Status.FAILED]:

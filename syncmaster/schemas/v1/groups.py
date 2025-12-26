@@ -24,7 +24,7 @@ class AddUserSchema(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def validate_role(cls, values):
-        if isinstance(values, dict):
+        if isinstance(values, dict):  # noqa: SIM108
             role = values.get("role")
         else:
             # access 'role' directly if 'values' is an object

@@ -17,7 +17,7 @@ from syncmaster.schemas.v1.connections.connection_base import (
 
 class PostgresConnectionDataSchema(BaseModel):
     host: str
-    port: int = Field(default=5432, gt=0, le=65535)  # noqa: WPS432
+    port: int = Field(default=5432, gt=0, le=65535)
     database_name: str
     additional_params: dict = Field(default_factory=dict)
 

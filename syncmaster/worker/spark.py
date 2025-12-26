@@ -32,9 +32,9 @@ def get_worker_spark_session(
     settings: WorkerSettings,
 ) -> SparkSession:
     """Construct Spark Session using run parameters and application settings"""
-    from pyspark.sql import SparkSession
+    from pyspark.sql import SparkSession  # noqa: PLC0415
 
-    name = run.transfer.group.name + "_" + run.transfer.name  # noqa: WPS336
+    name = run.transfer.group.name + "_" + run.transfer.name
     spark_builder = SparkSession.builder.appName(f"SyncMaster__{name}")
 
     master = settings.spark_session_default_config.get("spark.master")
@@ -98,7 +98,7 @@ def get_spark_session_conf(
         log.debug("Exclude Maven packages: %s", excluded_packages)
         config["spark.jars.excludes"] = ",".join(excluded_packages)
 
-    if target.type == "s3":  # type: ignore
+    if target.type == "s3":
         config.update(
             {
                 "spark.hadoop.fs.s3a.committer.magic.enabled": "true",

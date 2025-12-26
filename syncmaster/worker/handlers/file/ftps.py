@@ -20,7 +20,7 @@ class FTPSHandler(LocalDFFileHandler):
     connection_dto: FTPSConnectionDTO
 
     def connect(self, spark: SparkSession) -> None:
-        from onetl.connection import FTPS, SparkLocalFS
+        from onetl.connection import FTPS, SparkLocalFS  # noqa: PLC0415
 
         self.file_connection = FTPS(
             host=self.connection_dto.host,

@@ -363,7 +363,7 @@ class GroupRepository(Repository[Group]):
         await self._session.delete(user_group)
         await self._session.flush()
 
-    def _raise_error(self, err: DBAPIError) -> NoReturn:  # noqa: WPS238
+    def _raise_error(self, err: DBAPIError) -> NoReturn:
         constraint = err.__cause__.__cause__.constraint_name
 
         if constraint == "fk__group__owner_id__user":

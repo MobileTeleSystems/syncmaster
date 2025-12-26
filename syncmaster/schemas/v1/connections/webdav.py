@@ -19,7 +19,7 @@ from syncmaster.schemas.v1.connections.connection_base import (
 
 class WebDAVConnectionDataSchema(BaseModel):
     host: str
-    port: int | None = Field(default=None, gt=0, le=65535)  # noqa: WPS432
+    port: int | None = Field(default=None, gt=0, le=65535)
     protocol: Literal["http", "https"] = "https"
 
 

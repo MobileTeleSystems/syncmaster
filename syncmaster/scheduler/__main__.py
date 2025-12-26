@@ -19,7 +19,7 @@ async def main():
     transfer_job_manager = TransferJobManager(settings)
     transfer_job_manager.scheduler.start()
 
-    while True:  # noqa: WPS457
+    while True:
         logger.info("Looking at the transfer table...")
 
         await transfer_job_manager.remove_orphan_jobs()

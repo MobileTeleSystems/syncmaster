@@ -50,7 +50,7 @@ def custom_openapi_schema(app: FastAPI, settings: OpenAPISettings) -> dict:
     openapi_schema["info"]["x-logo"] = {
         "url": str(settings.logo.url),
         "altText": str(settings.logo.alt_text),
-        "backgroundColor": f"#{settings.logo.background_color}",  # noqa: WPS237
+        "backgroundColor": f"#{settings.logo.background_color}",
         "href": str(settings.logo.href),
     }
     app.openapi_schema = openapi_schema

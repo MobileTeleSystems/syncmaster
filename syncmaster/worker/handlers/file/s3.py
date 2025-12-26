@@ -21,7 +21,7 @@ class S3Handler(RemoteDFFileHandler):
     connection_dto: S3ConnectionDTO
 
     def connect(self, spark: SparkSession):
-        from onetl.connection import S3, SparkS3
+        from onetl.connection import S3, SparkS3  # noqa: PLC0415
 
         self.df_connection = SparkS3(
             host=self.connection_dto.host,
@@ -48,7 +48,7 @@ class S3Handler(RemoteDFFileHandler):
 
     @slot
     def read(self) -> DataFrame:
-        from pyspark.sql.types import StructType
+        from pyspark.sql.types import StructType  # noqa: PLC0415
 
         options = {}
         if self.transfer_dto.file_format.__class__.__name__ in ("Excel", "XML"):
@@ -58,7 +58,7 @@ class S3Handler(RemoteDFFileHandler):
             connection=self.df_connection,
             format=self.transfer_dto.file_format,
             source_path=self.transfer_dto.directory_path,
-            df_schema=StructType.fromJson(self.transfer_dto.df_schema) if self.transfer_dto.df_schema else None,
+            df_schema=(StructType.fromJson(self.transfer_dto.df_schema) if self.transfer_dto.df_schema else None),
             options={**options, **self.transfer_dto.options},
         )
         df = reader.run()

@@ -20,7 +20,7 @@ from syncmaster.server.utils.jwt import decode_jwt, sign_jwt
 log = logging.getLogger(__name__)
 
 
-class DummyAuthProvider(AuthProvider):  # noqa: WPS338
+class DummyAuthProvider(AuthProvider):
     def __init__(
         self,
         settings: Annotated[DummyAuthProviderSettings, Depends(Stub(DummyAuthProviderSettings))],
@@ -45,7 +45,7 @@ class DummyAuthProvider(AuthProvider):  # noqa: WPS338
         user_id = self._get_user_id_from_token(access_token)
         return await self._uow.user.read_by_id(user_id)
 
-    async def get_token_password_grant(
+    async def get_token_password_grant(  # noqa: PLR0913
         self,
         grant_type: str | None = None,
         login: str | None = None,

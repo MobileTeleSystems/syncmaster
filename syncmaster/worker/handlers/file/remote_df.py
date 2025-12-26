@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
-import os
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from onetl.file import FileDFReader, FileDFWriter, FileMover
@@ -16,13 +16,13 @@ if TYPE_CHECKING:
 
 class RemoteDFFileHandler(FileHandler):
     def read(self) -> DataFrame:
-        from pyspark.sql.types import StructType
+        from pyspark.sql.types import StructType  # noqa: PLC0415
 
         reader = FileDFReader(
             connection=self.df_connection,
             format=self.transfer_dto.file_format,
             source_path=self.transfer_dto.directory_path,
-            df_schema=StructType.fromJson(self.transfer_dto.df_schema) if self.transfer_dto.df_schema else None,
+            df_schema=(StructType.fromJson(self.transfer_dto.df_schema) if self.transfer_dto.df_schema else None),
             options=self.transfer_dto.options,
         )
         df = reader.run()
@@ -38,7 +38,7 @@ class RemoteDFFileHandler(FileHandler):
         return df
 
     def write(self, df: DataFrame) -> None:
-        tmp_path = os.path.join(self.transfer_dto.directory_path, ".tmp", str(self.run_dto.id))
+        tmp_path = Path(self.transfer_dto.directory_path) / ".tmp" / str(self.run_dto.id)
         try:
             writer = FileDFWriter(
                 connection=self.df_connection,

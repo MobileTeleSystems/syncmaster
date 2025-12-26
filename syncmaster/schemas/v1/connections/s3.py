@@ -21,7 +21,7 @@ class ReadS3ConnectionDataSchema(BaseModel):
     bucket: str
     protocol: Literal["http", "https"] = "https"
     region: str
-    port: int | None = Field(default=None, gt=0, le=65535, validate_default=True)  # noqa: WPS432
+    port: int | None = Field(default=None, gt=0, le=65535, validate_default=True)
     bucket_style: Literal["domain", "path"] = "path"
     additional_params: dict = Field(default_factory=dict)
 
@@ -32,7 +32,7 @@ class CreateS3ConnectionDataSchema(ReadS3ConnectionDataSchema):
     def validate_port(cls, port: int | None, info: ValidationInfo) -> int:
         protocol = info.data.get("protocol")
         if port is None:
-            return 443 if protocol == "https" else 80  # noqa: WPS432
+            return 443 if protocol == "https" else 80
         return port
 
 

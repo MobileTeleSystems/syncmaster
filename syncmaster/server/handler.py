@@ -33,7 +33,7 @@ from syncmaster.exceptions.queue import (
     QueueDeleteError,
     QueueNotFoundError,
 )
-from syncmaster.exceptions.redirect import RedirectException
+from syncmaster.exceptions.redirect import RedirectError
 from syncmaster.exceptions.run import (
     CannotConnectToTaskQueueError,
     CannotStopRunError,
@@ -106,7 +106,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
-async def syncmsater_exception_handler(request: Request, exc: SyncmasterError):  # noqa: WPS231, WPS212
+# TODO: refactor exception handling
+async def syncmsater_exception_handler(  # noqa: C901, PLR0911, PLR0912, PLR0915
+    request: Request,
+    exc: SyncmasterError,
+):
     response = get_response_for_exception(SyncmasterError)
     if not response:
         return unknown_exception_handler(request, exc)
@@ -122,7 +126,7 @@ async def syncmsater_exception_handler(request: Request, exc: SyncmasterError): 
             content=content,
         )
 
-    if isinstance(exc, RedirectException):
+    if isinstance(exc, RedirectError):
         content.code = "unauthorized"
         content.message = "Please authorize using provided URL"
         content.details = exc.redirect_url

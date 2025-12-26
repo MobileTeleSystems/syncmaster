@@ -13,7 +13,7 @@ Model = TypeVar("Model", bound=Base)
 
 
 class RepositoryWithOwner(Repository, Generic[Model]):
-    async def get_resource_permission(self, user: User, resource_id: int) -> Permission:  # noqa: WPS212
+    async def get_resource_permission(self, user: User, resource_id: int) -> Permission:  # noqa: PLR0911
         """Method for determining CRUD rights in a repository (self.model) for a resource"""
         is_exists = await self._session.get(self._model, resource_id)
 
@@ -68,7 +68,7 @@ class RepositoryWithOwner(Repository, Generic[Model]):
 
         return Permission.DELETE  # Maintainer
 
-    async def get_group_permission(self, user: User, group_id: int) -> Permission:  # noqa: WPS212
+    async def get_group_permission(self, user: User, group_id: int) -> Permission:
         """Method for determining CRUD permissions in the specified group"""
         owner_query = (
             (
@@ -101,8 +101,7 @@ class RepositoryWithOwner(Repository, Generic[Model]):
             # If the user is not in the group, then he is either a superuser or does not have any rights
             if not user.is_superuser:
                 return Permission.NONE
-            else:
-                return Permission.DELETE
+            return Permission.DELETE
 
         group_role = user_group.role
 

@@ -15,8 +15,8 @@ from onetl.connection import (
 from onetl.file.format import XML, Excel
 
 
-def get_packages(connection_types: set[str]) -> list[str]:  # noqa: WPS212
-    import pyspark
+def get_packages(connection_types: set[str]) -> list[str]:
+    import pyspark  # noqa: PLC0415
 
     spark_version = pyspark.__version__
     # excel version is hardcoded due to https://github.com/nightscape/spark-excel/issues/902

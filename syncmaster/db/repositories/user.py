@@ -21,7 +21,7 @@ class UserRepository(Repository[User]):
         self,
         page: int,
         page_size: int,
-        is_superuser: bool,
+        is_superuser: bool,  # noqa: FBT001
         search_query: str | None = None,
     ) -> Pagination:
         stmt = select(User)
@@ -62,7 +62,7 @@ class UserRepository(Repository[User]):
         first_name: str | None = None,
         middle_name: str | None = None,
         last_name: str | None = None,
-        is_superuser: bool = False,
+        is_superuser: bool = False,  # noqa: FBT001, FBT002
     ) -> User:
         query = (
             insert(User)
