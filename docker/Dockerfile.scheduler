@@ -23,7 +23,6 @@ RUN --mount=type=cache,target=/root/.cache/uv \
         # TODO: make scheduler independent from server
         --extra "server" \
         --extra "scheduler" \
-        --no-default-groups \
         --compile-bytecode
 
 
@@ -48,7 +47,6 @@ RUN --mount=type=cache,target=/root/.cache/uv \
         --extra "server" \
         --extra "scheduler" \
         --group "test" \
-        --no-default-groups \
         --compile-bytecode
 
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh

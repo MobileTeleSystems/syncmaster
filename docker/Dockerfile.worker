@@ -37,7 +37,6 @@ RUN --mount=type=cache,target=/root/.cache/uv \
         --no-install-project \
         --extra "worker" \
         --extra "kerberos" \
-        --no-default-groups \
         --compile-bytecode
 
 
@@ -94,7 +93,6 @@ RUN --mount=type=cache,target=/root/.cache/uv \
         # so we need server & scheduler dependencies too
         --all-extras \
         --group "test" \
-        --no-default-groups \
         --compile-bytecode
 
 ENV SYNCMASTER__WORKER__CREATE_SPARK_SESSION_FUNCTION=tests.spark.get_worker_spark_session

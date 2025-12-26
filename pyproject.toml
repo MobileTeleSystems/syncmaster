@@ -130,6 +130,9 @@ docs = [
   # sphinx-plantuml~=1.0.0",
 ]
 
+[tool.uv]
+default-groups = []
+
 [tool.ruff]
 target-version = "py311"
 line-length = 120
