@@ -135,7 +135,6 @@ async def test_run_transfer_samba_to_postgres_with_full_strategy(
     strategy: dict,
 ):
     postgres, _ = prepare_postgres
-    _file_format, _ = source_file_format
 
     await run_transfer_and_verify(client, group_owner, samba_to_postgres.id)
 

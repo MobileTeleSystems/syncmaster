@@ -1,4 +1,3 @@
-import logging
 import secrets
 from pathlib import PosixPath, PurePosixPath
 from typing import NamedTuple
@@ -13,8 +12,6 @@ from syncmaster.dto.connections import S3ConnectionDTO
 from syncmaster.server.settings import ServerAppSettings as Settings
 from tests.settings import TestSettings
 from tests.test_unit.utils import create_connection, create_credentials, upload_files
-
-logger = logging.getLogger(__name__)
 
 
 @pytest.fixture(
@@ -141,7 +138,6 @@ def prepare_s3(
     s3_file_connection: S3,
     s3_file_df_connection_with_path: tuple[SparkS3, PurePosixPath],
 ):
-    logger.info("START PREPARE S3")
     connection, remote_path = s3_file_df_connection_with_path
 
     s3_file_connection.remove_dir(remote_path, recursive=True)
@@ -149,9 +145,7 @@ def prepare_s3(
 
     yield connection, remote_path, files
 
-    logger.info("START POST-CLEANUP S3")
     s3_file_connection.remove_dir(remote_path, recursive=True)
-    logger.info("END POST-CLEANUP S3")
 
 
 @pytest_asyncio.fixture

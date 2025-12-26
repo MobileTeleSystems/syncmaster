@@ -41,7 +41,7 @@ async def read_connections(  # noqa: PLR0913
     group_id: int,
     current_user: Annotated[User, Depends(get_user())],
     unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
-    page: Annotated[int, Query(gt=0)] = 20,
+    page: Annotated[int, Query(gt=0)] = 1,
     page_size: Annotated[int, Query(gt=0, le=50)] = 20,
     type: Annotated[list[ConnectionType] | None, Query()] = None,
     search_query: Annotated[

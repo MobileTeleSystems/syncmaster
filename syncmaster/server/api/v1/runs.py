@@ -32,7 +32,7 @@ async def read_runs(  # noqa: PLR0913
     transfer_id: int,
     unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
     current_user: Annotated[User, Depends(get_user())],
-    page: Annotated[int, Query(gt=0)] = 20,
+    page: Annotated[int, Query(gt=0)] = 1,
     page_size: Annotated[int, Query(gt=0, le=50)] = 20,
     status: Annotated[list[Status] | None, Query()] = None,
     started_at_since: Annotated[datetime | None, Query()] = None,

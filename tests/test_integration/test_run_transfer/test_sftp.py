@@ -139,7 +139,6 @@ async def test_run_transfer_sftp_to_postgres_with_full_strategy(
     transformations: list[dict],
 ):
     postgres, _ = prepare_postgres
-    _file_format, _ = source_file_format
 
     await run_transfer_and_verify(client, group_owner, sftp_to_postgres.id)
 

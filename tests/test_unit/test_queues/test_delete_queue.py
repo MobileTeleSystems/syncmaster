@@ -119,6 +119,7 @@ async def test_maintainer_plus_cannot_delete_queue_with_linked_transfer(
         headers={"Authorization": f"Bearer {user.token}"},
     )
 
+    assert response.status_code == 409, response.text
     assert response.json() == {
         "error": {
             "code": "conflict",
@@ -126,7 +127,6 @@ async def test_maintainer_plus_cannot_delete_queue_with_linked_transfer(
             "details": None,
         },
     }
-    assert response.status_code == 409, response.text
 
 
 async def test_superuser_cannot_delete_queue_with_linked_transfer(
@@ -139,6 +139,7 @@ async def test_superuser_cannot_delete_queue_with_linked_transfer(
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
 
+    assert response.status_code == 409, response.text
     assert response.json() == {
         "error": {
             "code": "conflict",
@@ -146,7 +147,6 @@ async def test_superuser_cannot_delete_queue_with_linked_transfer(
             "details": None,
         },
     }
-    assert response.status_code == 409, response.text
 
 
 async def test_anon_user_cannot_delete_queue(
@@ -157,6 +157,8 @@ async def test_anon_user_cannot_delete_queue(
     response = await client.delete(
         f"v1/queues/{group_queue.id}",
     )
+
+    assert response.status_code == 401, response.text
     assert response.json() == {
         "error": {
             "code": "unauthorized",
@@ -164,7 +166,6 @@ async def test_anon_user_cannot_delete_queue(
             "details": None,
         },
     }
-    assert response.status_code == 401, response.text
 
 
 async def test_maintainer_plus_cannot_delete_unknown_queue_error(
@@ -179,6 +180,8 @@ async def test_maintainer_plus_cannot_delete_unknown_queue_error(
         "v1/queues/-1",
         headers={"Authorization": f"Bearer {user.token}"},
     )
+
+    assert response.status_code == 404, response.text
     assert response.json() == {
         "error": {
             "code": "not_found",
@@ -190,15 +193,13 @@ async def test_maintainer_plus_cannot_delete_unknown_queue_error(
 
 async def test_superuser_cannot_delete_unknown_queue_error(
     client: AsyncClient,
-    session: AsyncSession,
-    group_queue: Queue,
-    mock_group: MockGroup,
     superuser: MockUser,
 ):
     response = await client.delete(
         "v1/queues/-1",
         headers={"Authorization": f"Bearer {superuser.token}"},
     )
+
     assert response.status_code == 404, response.text
     assert response.json() == {
         "error": {

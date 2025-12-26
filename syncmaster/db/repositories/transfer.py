@@ -32,7 +32,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         self,
         page: int,
         page_size: int,
-        group_id: int | None = None,
+        group_id: int,
         search_query: str | None = None,
         source_connection_id: int | None = None,
         target_connection_id: int | None = None,

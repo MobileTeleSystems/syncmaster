@@ -28,7 +28,7 @@ async def read_queues(  # noqa: PLR0913
     group_id: int,
     current_user: Annotated[User, Depends(get_user())],
     unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
-    page: Annotated[int, Query(gt=0)] = 20,
+    page: Annotated[int, Query(gt=0)] = 1,
     page_size: Annotated[int, Query(gt=0, le=50)] = 20,
     search_query: Annotated[
         str | None,
@@ -141,13 +141,10 @@ async def delete_queue(
         raise ActionNotAllowedError
 
     queue = await unit_of_work.queue.read_by_id(queue_id=queue_id)
-
-    transfers = await unit_of_work.transfer.paginate(queue_id=queue.id, page=1, page_size=1)
-    if transfers.total:
+    transfers = await unit_of_work.transfer.paginate(group_id=queue.group_id, queue_id=queue.id, page=1, page_size=1)
+    if transfers.items:
         msg = f"The queue has an associated transfers(s). Number of the linked transfers: {transfers.total}"
-        raise QueueDeleteError(
-            msg,
-        )
+        raise QueueDeleteError(msg)
 
     async with unit_of_work:
         await unit_of_work.queue.delete(queue_id=queue_id)
