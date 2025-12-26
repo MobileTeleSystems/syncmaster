@@ -309,7 +309,7 @@ async def test_maintainer_plus_can_not_create_queue_with_duplicate_name_error(
         json={
             "name": group_queue.name,  # duplicated name
             "description": "Some interesting description",
-            "group_id": group_queue.group.id,
+            "group_id": group_queue.group_id,
         },
     )
 

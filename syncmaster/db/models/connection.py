@@ -7,7 +7,7 @@ from typing import Any
 
 from sqlalchemy import JSON, Computed, Index, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import TSVECTOR
-from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy_utils import ChoiceType
 
 from syncmaster.db.mixins import ResourceMixin, TimestampMixin
@@ -33,6 +33,11 @@ class ConnectionType(StrEnum):
 
 
 class Connection(Base, ResourceMixin, TimestampMixin):
+    __table_args__ = (
+        UniqueConstraint("name", "group_id"),
+        Index("idx_connection_search_vector", "search_vector", postgresql_using="gin"),
+    )
+
     type: Mapped[ConnectionType] = mapped_column(ChoiceType(ConnectionType, impl=String(32)), nullable=False)
     data: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default={})
 
@@ -71,10 +76,3 @@ class Connection(Base, ResourceMixin, TimestampMixin):
 
     def __repr__(self):
         return f"<Connection name={self.name} description={self.description} group_id={self.group_id}>"
-
-    @declared_attr
-    def __table_args__(cls) -> tuple:
-        return (
-            UniqueConstraint("name", "group_id"),
-            Index("idx_connection_search_vector", "search_vector", postgresql_using="gin"),
-        )

@@ -5,7 +5,6 @@ from typing import NoReturn
 from sqlalchemy import ScalarResult, insert, select
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from syncmaster.db.models import Group, GroupMemberRole, Queue, User, UserGroup
 from syncmaster.db.repositories.repository_with_owner import RepositoryWithOwner
@@ -34,12 +33,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         self,
         queue_id: int,
     ) -> Queue:
-        stmt = (
-            select(Queue)
-            .where(Queue.id == queue_id)
-            .options(selectinload(Queue.transfers))
-            .options(selectinload(Queue.group))
-        )
+        stmt = select(Queue).where(Queue.id == queue_id)
         try:
             result: ScalarResult[Queue] = await self._session.scalars(stmt)
             return result.one()

@@ -480,7 +480,7 @@ async def test_developer_plus_update_oracle_connection_both_sid_and_service_name
     role_developer_plus: UserTestRoles,
 ):
     user = group_connection.owner_group.get_member_of_role(role_developer_plus)
-    group_id = group_connection.connection.group.id
+    group_id = group_connection.connection.group_id
 
     response = await client.put(
         f"v1/connections/{group_connection.id}",

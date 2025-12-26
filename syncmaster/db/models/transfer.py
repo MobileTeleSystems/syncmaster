@@ -15,7 +15,7 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import TSVECTOR
-from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from syncmaster.db.mixins import ResourceMixin, TimestampMixin
 from syncmaster.db.models.base import Base
@@ -31,6 +31,11 @@ class Transfer(
     ResourceMixin,
     TimestampMixin,
 ):
+    __table_args__ = (
+        UniqueConstraint("name", "group_id"),
+        Index("idx_transfer_search_vector", "search_vector", postgresql_using="gin"),
+    )
+
     source_connection_id: Mapped[int] = mapped_column(
         BigInteger,
         ForeignKey("connection.id", ondelete="CASCADE"),
@@ -110,10 +115,3 @@ class Transfer(
         nullable=False,
         deferred=True,
     )
-
-    @declared_attr
-    def __table_args__(cls) -> tuple:
-        return (
-            UniqueConstraint("name", "group_id"),
-            Index("idx_transfer_search_vector", "search_vector", postgresql_using="gin"),
-        )
