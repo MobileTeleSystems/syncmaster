@@ -73,6 +73,30 @@ jobs:
             echo "PLATFORMS=linux/amd64,linux/arm64/v8" >> $GITHUB_ENV
           fi
 
+      # https://github.com/docker/buildx/discussions/1283#discussioncomment-5447590
+      - name: Docker mount cache
+        uses: actions/cache@v5
+        id: docker-mount-cache
+        with:
+          key: docker-cache-worker-${{ hashFiles('docker/Dockerfile.worker', 'pyproject.toml', 'uv.lock', 'docker/download_ivy2_packages.py', 'syncmaster/worker/ivy2.py') }}
+          path: |
+            docker-cache-uv
+            docker-cache-ivy2
+          restore-keys: |
+            docker-cache-worker-${{ hashFiles('docker/Dockerfile.worker', 'pyproject.toml', 'uv.lock', 'docker/download_ivy2_packages.py', 'syncmaster/worker/ivy2.py') }}
+            docker-cache-worker-
+
+      - name: Restore Docker cache mounts
+        uses: reproducible-containers/buildkit-cache-dance@v3
+        with:
+          builder: ${{ steps.setup-buildx.outputs.name }}
+          cache-map: |
+            {
+              "docker-cache-uv": "/root/.cache/uv",
+              "docker-cache-ivy2": "/root/.ivy2"
+            }
+          skip-extraction: ${{ steps.docker-mount-cache.outputs.cache-hit }}
+
       - name: Build worker image
         uses: docker/build-push-action@v6
         with:

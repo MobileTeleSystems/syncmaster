@@ -73,6 +73,27 @@ jobs:
             echo "PLATFORMS=linux/amd64,linux/arm64/v8" >> $GITHUB_ENV
           fi
 
+      # https://github.com/docker/buildx/discussions/1283#discussioncomment-5447590
+      - name: Docker mount cache
+        uses: actions/cache@v5
+        id: docker-mount-cache
+        with:
+          key: docker-cache-scheduler-${{ hashFiles('docker/Dockerfile.worker', 'pyproject.toml', 'uv.lock') }}
+          path: docker-cache-uv
+          restore-keys: |
+            docker-cache-scheduler-${{ hashFiles('docker/Dockerfile.worker', 'pyproject.toml', 'uv.lock') }}
+            docker-cache-scheduler-
+
+      - name: Restore Docker cache mounts
+        uses: reproducible-containers/buildkit-cache-dance@v3
+        with:
+          builder: ${{ steps.setup-buildx.outputs.name }}
+          cache-map: |
+            {
+              "docker-cache-uv": "/root/.cache/uv"
+            }
+          skip-extraction: ${{ steps.docker-mount-cache.outputs.cache-hit }}
+
       - name: Build scheduler image
         uses: docker/build-push-action@v6
         with:
