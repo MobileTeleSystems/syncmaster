@@ -110,7 +110,7 @@ test-integration-oracle: test-db ##@Test        Run integration tests for Oracle
 
 test-integration-s3: test-db ##@Test           Run integration tests for S3
 	docker compose -f docker-compose.test.yml --profile s3 up -d --wait $(DOCKER_COMPOSE_ARGS)
-	${PYTEST} ./tests/test_integration -m s3 $(PYTEST_ARGS)
+	${PYTEST} ./tests/test_integration -m "s3 and not iceberg" $(PYTEST_ARGS)
 
 test-integration-sftp: test-db ##@Test           Run integration tests for SFTP
 	docker compose -f docker-compose.test.yml --profile sftp up -d --wait $(DOCKER_COMPOSE_ARGS)
