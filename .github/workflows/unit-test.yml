@@ -58,7 +58,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --frozen --extra "server" --group test
+          uv sync --frozen --extra "server" --extra "scheduler" --group test
 
       - name: Wait for db
         run: |
