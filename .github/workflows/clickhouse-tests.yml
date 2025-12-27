@@ -14,6 +14,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Start Clickhouse
+        run: |
+          docker compose -f docker-compose.test.yml --profile all down -v --remove-orphans
+          docker compose -f docker-compose.test.yml --profile clickhouse up -d db rabbitmq test-clickhouse
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -31,9 +36,8 @@ jobs:
           cache-from: type=gha,scope=test
           cache-to: type=gha,scope=test,mode=max
 
-      - name: Docker compose up
+      - name: Start worker
         run: |
-          docker compose -f docker-compose.test.yml --profile all down -v --remove-orphans
           docker compose -f docker-compose.test.yml --profile clickhouse up -d --wait --wait-timeout 200
         env:
           WORKER_IMAGE_TAG: ${{ github.sha }}

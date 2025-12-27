@@ -14,6 +14,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Start db
+        run: |
+          docker compose -f docker-compose.test.yml --profile all down -v --remove-orphans
+          docker compose -f docker-compose.test.yml up -d db
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -44,10 +49,9 @@ jobs:
           export UV=$(which uv)
           make venv-install
 
-      - name: Start docker compose
+      - name: Wait for db
         run: |
-          docker compose -f docker-compose.test.yml down -v --remove-orphans
-          docker compose -f docker-compose.test.yml up -d db --wait --wait-timeout 200
+          docker compose -f docker-compose.test.yml up -d db migrations --wait --wait-timeout 200
 
       - name: Run Unit Tests
         run: |

@@ -14,6 +14,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Start Samba
+        run: |
+          docker compose -f docker-compose.test.yml --profile all down -v --remove-orphans
+          docker compose -f docker-compose.test.yml --profile samba up -d db rabbitmq test-samba
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -30,12 +35,8 @@ jobs:
           load: true
           cache-from: type=gha,scope=test
 
-      - name: Make custom entrypoint script executable
-        run: chmod +x ./docker/samba/custom_entrypoint.sh
-
-      - name: Docker compose up
+      - name: Start worker
         run: |
-          docker compose -f docker-compose.test.yml --profile all down -v --remove-orphans
           docker compose -f docker-compose.test.yml --profile samba up -d --wait --wait-timeout 200
         env:
           WORKER_IMAGE_TAG: ${{ github.sha }}
