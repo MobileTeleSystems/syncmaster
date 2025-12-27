@@ -43,7 +43,7 @@ jobs:
 
       - name: Run Iceberg Tests
         run: |
-          docker compose -f ./docker-compose.test.yml --profile iceberg exec -T worker coverage run -m pytest -vvv -s -m "worker and iceberg"
+          docker compose -f ./docker-compose.test.yml --profile iceberg exec -T worker coverage run -m pytest -vvv -s ./tests/test_integration -m iceberg
 
       - name: Dump worker logs on failure
         if: failure()

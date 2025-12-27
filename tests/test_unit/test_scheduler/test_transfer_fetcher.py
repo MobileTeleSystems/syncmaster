@@ -1,7 +1,6 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.scheduler.transfer_fetcher import TransferFetcher
 from tests.mocks import MockTransfer
@@ -10,7 +9,6 @@ pytestmark = [pytest.mark.asyncio, pytest.mark.scheduler]
 
 
 async def test_fetch_jobs_without_last_updated_at(
-    session: AsyncSession,
     transfer_fetcher: TransferFetcher,
     group_transfers: list[MockTransfer],
 ):
@@ -23,7 +21,6 @@ async def test_fetch_jobs_without_last_updated_at(
 
 
 async def test_fetch_jobs_with_outdated_last_updated_at(
-    session: AsyncSession,
     transfer_fetcher: TransferFetcher,
     group_transfers: list[MockTransfer],
 ):
@@ -37,7 +34,6 @@ async def test_fetch_jobs_with_outdated_last_updated_at(
 
 
 async def test_fetch_jobs_with_up_to_date_last_updated_at(
-    session: AsyncSession,
     transfer_fetcher: TransferFetcher,
     group_transfers: list[MockTransfer],
 ):

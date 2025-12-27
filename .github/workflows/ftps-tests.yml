@@ -43,7 +43,7 @@ jobs:
 
       - name: Run FTPS Tests
         run: |
-          docker compose -f ./docker-compose.test.yml --profile ftps exec -T worker coverage run -m pytest -vvv -s -m "worker and ftps"
+          docker compose -f ./docker-compose.test.yml --profile ftps exec -T worker coverage run -m pytest -vvv -s ./tests/test_integration -m ftps
 
       - name: Dump worker logs on failure
         if: failure()
