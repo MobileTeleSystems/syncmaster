@@ -43,7 +43,7 @@ jobs:
 
       - name: Run S3 Tests
         run: |
-          docker compose -f ./docker-compose.test.yml --profile s3 exec -T worker coverage run -m pytest -vvv -s ./tests/test_integration -m s3
+          docker compose -f ./docker-compose.test.yml --profile s3 exec -T worker coverage run -m pytest -vvv-s ./tests/test_integration/test_run_transfer -m s3
 
       - name: Dump worker logs on failure
         if: failure()

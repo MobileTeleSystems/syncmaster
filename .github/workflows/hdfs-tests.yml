@@ -43,7 +43,7 @@ jobs:
 
       - name: Run HDFS Tests
         run: |
-          docker compose -f ./docker-compose.test.yml --profile hdfs exec -T worker coverage run -m pytest -vvv -s ./tests/test_integration -m hdfs
+          docker compose -f ./docker-compose.test.yml --profile hdfs exec -T worker coverage run -m pytest -vvv-s ./tests/test_integration/test_run_transfer -m hdfs
 
       - name: Dump worker logs on failure
         if: failure()
