@@ -31,7 +31,7 @@ class ClickhouseHandler(DBHandler):
 
     def connect(self, spark: SparkSession):
         ClickhouseDialectRegistry = (  # noqa: N806
-            spark._jvm.io.github.mtsongithub.doetl.sparkdialectextensions.clickhouse.ClickhouseDialectRegistry  # noqa: SLF001
+            spark._jvm.io.github.mtsongithub.doetl.sparkdialectextensions.clickhouse.ClickhouseDialectRegistry  # type: ignore[union-attr] # noqa: SLF001
         )
         ClickhouseDialectRegistry.register()
         self.connection = Clickhouse(

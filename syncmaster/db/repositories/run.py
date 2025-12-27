@@ -88,7 +88,7 @@ class RunRepository(Repository[Run]):
         source_creds: dict,
         target_creds: dict,
     ) -> dict[str, Any]:
-        transfer = await self._session.scalars(
+        scalars = await self._session.scalars(
             select(Transfer)
             .where(Transfer.id == transfer_id)
             .options(
@@ -96,7 +96,7 @@ class RunRepository(Repository[Run]):
                 selectinload(Transfer.target_connection),
             ),
         )
-        transfer = transfer.one()
+        transfer = scalars.one()
 
         return dict(  # noqa: C408
             id=transfer.id,
@@ -130,7 +130,7 @@ class RunRepository(Repository[Run]):
         )
 
     def _raise_error(self, e: DBAPIError) -> NoReturn:
-        constraint = e.__cause__.__cause__.constraint_name
+        constraint = e.__cause__.__cause__.constraint_name  # type: ignore[arg-type, union-attr]
         if constraint == "fk__run__transfer_id__transfer":
             raise TransferNotFoundError from e
         raise SyncmasterError from e

@@ -4,13 +4,16 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
+from onetl.base import ContainsGetDFSchemaMethod
 from onetl.db import DBReader, DBWriter
 
+from syncmaster.dto.transfers_strategy import IncrementalStrategy
 from syncmaster.worker.handlers.base import Handler
 
 if TYPE_CHECKING:
+    from etl_entities.hwm import ColumnHWM
     from onetl.base import BaseDBConnection
     from pyspark.sql.dataframe import DataFrame
 
@@ -37,8 +40,8 @@ class DBHandler(Handler):
     }
 
     def read(self) -> DataFrame:
-        reader_params = {}
-        if self.transfer_dto.strategy.type == "incremental":
+        reader_params: dict[str, ColumnHWM] = {}
+        if isinstance(self.transfer_dto.strategy, IncrementalStrategy):
             self.transfer_dto.strategy.increment_by = self._quote_field(self.transfer_dto.strategy.increment_by)
             hwm_name = f"{self.transfer_dto.id}_{self.connection_dto.type}_{self.transfer_dto.table_name}"
             reader_params["hwm"] = DBReader.AutoDetectHWM(
@@ -108,12 +111,12 @@ class DBHandler(Handler):
         return self._make_columns_filter_expressions(expressions)
 
     def _get_reading_options(self) -> dict:
-        options = {}
+        options: dict[str, Any] = {}
 
         if self.transfer_dto.resources.max_parallel_tasks == 1:
             return options
 
-        if self.transfer_dto.strategy.type == "incremental":
+        if isinstance(self.transfer_dto.strategy, IncrementalStrategy):
             # using "range" partitioning if HWM is available for efficient min/max lookup,
             # since the incremental column is usually an indexed primary key
             options["options"] = {
@@ -122,7 +125,7 @@ class DBHandler(Handler):
                 "partitioning_mode": "range" if self.hwm and self.hwm.value else "hash",
             }
 
-        elif self.transfer_dto.strategy.type == "full":
+        elif isinstance(self.connection, ContainsGetDFSchemaMethod):
             schema = self.connection.get_df_schema(
                 source=self.transfer_dto.table_name,
                 columns=self._get_columns_filter_expressions(),

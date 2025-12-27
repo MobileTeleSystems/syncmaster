@@ -25,7 +25,7 @@ class QueueSchema(BaseModel):
 
 
 class CreateQueueSchema(QueueSchema):
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def slug(self) -> str:
         short_name = RESTRICTED_PATTERN.sub("_", self.name.lower()).strip("_")

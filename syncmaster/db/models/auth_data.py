@@ -10,6 +10,8 @@ from syncmaster.db.models.base import Base
 
 
 class AuthData(Base, TimestampMixin):
+    __table_name__ = "auth_data"
+
     connection_id: Mapped[int] = mapped_column(
         BigInteger,
         ForeignKey("connection.id", ondelete="CASCADE"),

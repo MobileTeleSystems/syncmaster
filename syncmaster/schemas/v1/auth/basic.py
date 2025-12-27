@@ -16,8 +16,8 @@ class CreateBasicAuthSchema(ReadBasicAuthSchema):
     password: SecretStr
 
 
-class UpdateBasicAuthSchema(ReadBasicAuthSchema):
-    password: SecretStr | None = None
+class UpdateBasicAuthSchema(CreateBasicAuthSchema):
+    password: SecretStr | None = None  # type: ignore[assignment]
 
     def get_secret_fields(self) -> tuple[str, ...]:
         return ("password",)

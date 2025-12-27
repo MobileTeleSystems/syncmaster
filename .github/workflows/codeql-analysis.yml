@@ -55,7 +55,7 @@ jobs:
           make venv-install
 
       - name: Run mypy
-        run: uv run mypy --config-file ./pyproject.toml ./syncmaster/server
+        run: uv run mypy syncmaster
 
   codeql:
     name: CodeQL

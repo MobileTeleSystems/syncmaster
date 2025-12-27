@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import asyncio
+from collections.abc import Sequence
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -23,7 +24,7 @@ class TransferJobManager:
         self.scheduler.add_jobstore("sqlalchemy", url=settings.database.sync_url)
         self.settings = settings
 
-    def update_jobs(self, transfers: list[Transfer]) -> None:
+    def update_jobs(self, transfers: Sequence[Transfer]) -> None:
         for transfer in transfers:
             job_id = str(transfer.id)
             existing_job = self.scheduler.get_job(job_id)

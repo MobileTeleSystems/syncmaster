@@ -181,7 +181,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         return Permission.DELETE
 
     def _raise_error(self, err: DBAPIError) -> NoReturn:
-        constraint = err.__cause__.__cause__.constraint_name
+        constraint = err.__cause__.__cause__.constraint_name  # type: ignore[arg-type, union-attr]
         if constraint == "uq__queue__slug":
             raise DuplicatedQueueNameError
 

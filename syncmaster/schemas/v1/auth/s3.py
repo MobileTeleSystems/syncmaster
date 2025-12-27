@@ -16,8 +16,8 @@ class CreateS3AuthSchema(ReadS3AuthSchema):
     secret_key: SecretStr
 
 
-class UpdateS3AuthSchema(ReadS3AuthSchema):
-    secret_key: SecretStr | None = None
+class UpdateS3AuthSchema(CreateS3AuthSchema):
+    secret_key: SecretStr | None = None  # type: ignore[assignment]
 
     def get_secret_fields(self) -> tuple[str, ...]:
         return ("secret_key",)

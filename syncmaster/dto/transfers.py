@@ -8,24 +8,24 @@ from uuid import uuid4
 from onetl.file.format import CSV, JSON, ORC, XML, Excel, JSONLine, Parquet
 
 from syncmaster.dto.transfers_resources import Resources
-from syncmaster.dto.transfers_strategy import FullStrategy, IncrementalStrategy
+from syncmaster.dto.transfers_strategy import Strategy
 
 
-@dataclass
+@dataclass(kw_only=True)
 class TransferDTO:
     type: ClassVar[str]
     id: int
     name: str
     group_name: str
+    strategy: Strategy
+    resources: Resources
+    transformations: list[dict] = field(default_factory=list)
+    options: dict = field(default_factory=dict)
 
 
-@dataclass
+@dataclass(kw_only=True)
 class DBTransferDTO(TransferDTO):
     table_name: str
-    strategy: FullStrategy | IncrementalStrategy
-    resources: Resources
-    transformations: list[dict] | None = None
-    options: dict | None = None
 
     def __post_init__(self):
         if self.options is None:
@@ -33,16 +33,12 @@ class DBTransferDTO(TransferDTO):
         self.options.setdefault("if_exists", "replace_entire_table")
 
 
-@dataclass
+@dataclass(kw_only=True)
 class FileTransferDTO(TransferDTO):
     directory_path: str
     file_format: CSV | JSONLine | JSON | Excel | XML | ORC | Parquet
-    strategy: FullStrategy | IncrementalStrategy
-    resources: Resources
-    options: dict
     file_name_template: str | None = None
     df_schema: dict | None = None
-    transformations: list[dict] | None = None
 
     _format_parsers: ClassVar[dict] = {
         "csv": CSV,

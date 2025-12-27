@@ -84,12 +84,12 @@ class WorkerAppSettings(BaseSettings):
         hwm_store: {}
     """
 
-    database: DatabaseSettings = Field(default_factory=DatabaseSettings, description="Database settings")
-    broker: RabbitMQSettings = Field(default_factory=RabbitMQSettings, description="Broker settings")
+    database: DatabaseSettings = Field(default_factory=DatabaseSettings, description="Database settings")  # type: ignore[arg-type]
+    broker: RabbitMQSettings = Field(default_factory=RabbitMQSettings, description="Broker settings")  # type: ignore[arg-type]
     logging: LoggingSettings = Field(default=DEFAULT_LOGGING_SETTINGS, description="Logging settings")
     worker: WorkerSettings = Field(description="Worker-specific settings")
     encryption: CredentialsEncryptionSettings = Field(
-        default_factory=CredentialsEncryptionSettings,
+        default_factory=CredentialsEncryptionSettings,  # type: ignore[arg-type]
         description="Settings for encrypting credential data",
     )
     hwm_store: HWMStoreSettings = Field(default_factory=HWMStoreSettings, description="HWM Store settings")

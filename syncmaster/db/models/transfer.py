@@ -29,6 +29,7 @@ class Transfer(
     ResourceMixin,
     TimestampMixin,
 ):
+    __table_name__ = "transfer"
     __table_args__ = (
         UniqueConstraint("name", "group_id"),
         Index("idx_transfer_search_vector", "search_vector", postgresql_using="gin"),

@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
     from syncmaster.dto.connections import ConnectionDTO
     from syncmaster.dto.runs import RunDTO
-    from syncmaster.dto.transfers import TransferDTO
+    from syncmaster.dto.transfers import DBTransferDTO, FileTransferDTO
 
 
 class Handler(ABC):
@@ -24,7 +24,7 @@ class Handler(ABC):
     def __init__(
         self,
         connection_dto: ConnectionDTO,
-        transfer_dto: TransferDTO,
+        transfer_dto: DBTransferDTO | FileTransferDTO,
         run_dto: RunDTO,
         temp_dir: TemporaryDirectory,
     ):

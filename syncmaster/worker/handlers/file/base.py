@@ -65,7 +65,7 @@ class FileHandler(Handler):
             self.file_connection.rename_file(old_path, new_path)
 
     def _get_file_name(self, index: int, extension: str) -> str:
-        return self.transfer_dto.file_name_template.format(
+        return self.transfer_dto.file_name_template.format(  # type: ignore[union-attr]
             index=index,
             extension=extension,
             run_id=self.run_dto.id,

@@ -12,7 +12,9 @@ from pydantic_settings_logging import (
     RootLoggerConfig,
     StreamHandlerConfig,
 )
-from pydantic_settings_logging import LoggingSettings as BaseLoggingSettings
+from pydantic_settings_logging import (
+    LoggingSettings as BaseLoggingSettings,
+)
 
 
 # https://github.com/vduseev/pydantic-settings-logging/pull/1

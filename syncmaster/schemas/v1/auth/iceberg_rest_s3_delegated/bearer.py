@@ -15,8 +15,8 @@ class CreateIcebergRESTCatalogBearerAuthSchema(ReadIcebergRESTCatalogBearerAuthS
     rest_catalog_token: SecretStr
 
 
-class UpdateIcebergRESTCatalogBearerAuthSchema(ReadIcebergRESTCatalogBearerAuthSchema):
-    rest_catalog_token: SecretStr | None = None
+class UpdateIcebergRESTCatalogBearerAuthSchema(CreateIcebergRESTCatalogBearerAuthSchema):
+    rest_catalog_token: SecretStr | None = None  # type: ignore[assignment]
 
     def get_secret_fields(self) -> tuple[str, ...]:
         return ("rest_catalog_token",)

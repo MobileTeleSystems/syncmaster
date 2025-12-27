@@ -17,8 +17,8 @@ class CreateSambaAuthSchema(ReadSambaAuthSchema):
     password: SecretStr
 
 
-class UpdateSambaAuthSchema(ReadSambaAuthSchema):
-    password: SecretStr | None = None
+class UpdateSambaAuthSchema(CreateSambaAuthSchema):
+    password: SecretStr | None = None  # type: ignore[assignment]
 
     def get_secret_fields(self) -> tuple[str, ...]:
         return ("password",)

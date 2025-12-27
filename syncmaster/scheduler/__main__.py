@@ -4,7 +4,7 @@
 import asyncio
 import logging
 
-from syncmaster.scheduler.settings import SchedulerAppSettings as Settings
+from syncmaster.scheduler.settings import SchedulerAppSettings
 from syncmaster.scheduler.transfer_fetcher import TransferFetcher
 from syncmaster.scheduler.transfer_job_manager import TransferJobManager
 from syncmaster.settings.logging import setup_logging
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 async def main():
-    settings = Settings()
+    settings = SchedulerAppSettings()
     setup_logging(settings.logging)
     transfer_fetcher = TransferFetcher(settings)
     transfer_job_manager = TransferJobManager(settings)

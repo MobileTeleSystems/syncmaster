@@ -25,10 +25,10 @@ class CreateIcebergRESTCatalogOAuth2ClientCredentialsS3BasicAuthSchema(
 
 
 class UpdateIcebergRESTCatalogOAuth2ClientCredentialsS3BasicAuthSchema(
-    ReadIcebergRESTCatalogOAuth2ClientCredentialsS3BasicAuthSchema,
+    CreateIcebergRESTCatalogOAuth2ClientCredentialsS3BasicAuthSchema,
 ):
-    rest_catalog_oauth2_client_secret: SecretStr | None = None
-    s3_secret_key: SecretStr | None = None
+    rest_catalog_oauth2_client_secret: SecretStr | None = None  # type: ignore[assignment]
+    s3_secret_key: SecretStr | None = None  # type: ignore[assignment]
 
     def get_secret_fields(self) -> tuple[str, ...]:
         return ("rest_catalog_oauth2_client_secret", "s3_secret_key")

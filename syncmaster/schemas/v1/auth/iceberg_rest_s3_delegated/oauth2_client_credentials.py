@@ -24,9 +24,9 @@ class CreateIcebergRESTCatalogOAuth2ClientCredentialsAuthSchema(
 
 
 class UpdateIcebergRESTCatalogOAuth2ClientCredentialsAuthSchema(
-    ReadIcebergRESTCatalogOAuth2ClientCredentialsAuthSchema,
+    CreateIcebergRESTCatalogOAuth2ClientCredentialsAuthSchema,
 ):
-    rest_catalog_oauth2_client_secret: SecretStr | None = None
+    rest_catalog_oauth2_client_secret: SecretStr | None = None  # type: ignore[assignment]
 
     def get_secret_fields(self) -> tuple[str, ...]:
         return ("rest_catalog_oauth2_client_secret",)

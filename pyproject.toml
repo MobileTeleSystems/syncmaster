@@ -202,10 +202,6 @@ module = "celery.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "fastapi.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
 module = "kombu.*"
 ignore_missing_imports = true
 
@@ -214,19 +210,15 @@ module = "onetl.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "pyspark.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
 module = "sqlalchemy_utils.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "starlette.*"
+module = "apscheduler.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "uvicorn.*"
+module = "pydantic_settings_logging"
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

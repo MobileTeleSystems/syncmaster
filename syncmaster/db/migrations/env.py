@@ -24,7 +24,7 @@ config = context.config
 
 
 class MigrationAppSettings(BaseSettings):
-    database: DatabaseSettings = Field(default_factory=DatabaseSettings, description="Database settings")
+    database: DatabaseSettings = Field(default_factory=DatabaseSettings, description="Database settings")  # type: ignore[arg-type]
     logging: LoggingSettings = Field(default=DEFAULT_LOGGING_SETTINGS, description="Logging settings")
 
 

@@ -12,6 +12,8 @@ from syncmaster.db.models.group import Group
 
 
 class Queue(Base, ResourceMixin, TimestampMixin):
+    __table_name__ = "queue"
+
     name: Mapped[str] = mapped_column(String(128), nullable=False)
     slug: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
 

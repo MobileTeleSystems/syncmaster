@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 from abc import ABC
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, TypeVar, cast
 
 from sqlalchemy import (
     ColumnElement,
@@ -13,8 +13,10 @@ from sqlalchemy import (
     select,
     update,
 )
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Mapped
 
 from syncmaster.db.models import Base
 from syncmaster.db.utils import Pagination
@@ -83,7 +85,7 @@ class Repository(ABC, Generic[Model]):
 
     async def _paginate_raw_result(self, query: Select, page: int, page_size: int) -> Pagination:
         items_result = await self._session.execute(query.limit(page_size).offset((page - 1) * page_size))
-        total: int = await self._session.scalar(select(func.count()).select_from(query.subquery()))
+        total: int = await self._session.scalar(select(func.count()).select_from(query.subquery())) or 0
         return Pagination(
             items=items_result.all(),
             total=total,
@@ -99,7 +101,7 @@ class Repository(ABC, Generic[Model]):
         items_result: ScalarResult[Model] = await self._session.scalars(
             query.limit(page_size).offset((page - 1) * page_size),
         )
-        total: int = await self._session.scalar(select(func.count()).select_from(query.subquery()))
+        total: int = await self._session.scalar(select(func.count()).select_from(query.subquery())) or 0
         return Pagination(
             items=items_result.all(),
             total=total,
@@ -108,8 +110,9 @@ class Repository(ABC, Generic[Model]):
         )
 
     def _construct_vector_search(self, query: Select, ts_query: ColumnElement) -> Select:
+        search_vector = cast("Mapped[TSVECTOR]", self._model.search_vector)  # type: ignore[attr-defined]
         return (
-            query.where(self._model.search_vector.op("@@")(ts_query))
-            .add_columns(func.ts_rank(self._model.search_vector, ts_query).label("rank"))
-            .order_by(func.ts_rank(self._model.search_vector, ts_query).desc())
+            query.where(search_vector.op("@@")(ts_query))
+            .add_columns(func.ts_rank(search_vector, ts_query).label("rank"))
+            .order_by(func.ts_rank(search_vector, ts_query).desc())
         )

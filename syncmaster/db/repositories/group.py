@@ -364,7 +364,7 @@ class GroupRepository(Repository[Group]):
         await self._session.flush()
 
     def _raise_error(self, err: DBAPIError) -> NoReturn:
-        constraint = err.__cause__.__cause__.constraint_name
+        constraint = err.__cause__.__cause__.constraint_name  # type: ignore[arg-type, union-attr]
 
         if constraint == "fk__group__owner_id__user":
             raise UserNotFoundError from err
@@ -376,13 +376,13 @@ class GroupRepository(Repository[Group]):
             raise AlreadyIsGroupMemberError from err
 
         if constraint == "fk__user_group__group_id__group":
-            detail = err.__cause__.__cause__.detail
+            detail = err.__cause__.__cause__.detail  # type: ignore[arg-type, union-attr]
             pattern = r'Key \(group_id\)=\(-?\d+\) is not present in table "group".'
             if re.match(pattern, detail):
                 raise GroupNotFoundError from err
 
         if constraint == "fk__user_group__user_id__user":
-            detail = err.__cause__.__cause__.detail
+            detail = err.__cause__.__cause__.detail  # type: ignore[arg-type, union-attr]
             pattern = r'Key \(user_id\)=\(-?\d+\) is not present in table "user".'
             if re.match(pattern, detail):
                 raise UserNotFoundError from err

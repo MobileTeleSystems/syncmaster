@@ -6,22 +6,26 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from etl_entities.hwm import FileListHWM, FileModifiedTimeHWM
+from etl_entities.hwm import FileHWM, FileListHWM, FileModifiedTimeHWM
 from onetl.file import FileDFReader, FileDFWriter, FileDownloader, FileUploader
 from onetl.file.filter import FileSizeRange, Glob, Regexp
 
+from syncmaster.dto.transfers_strategy import IncrementalStrategy
 from syncmaster.worker.handlers.file.base import FileHandler
 
 if TYPE_CHECKING:
+    from onetl.connection import SparkLocalFS
     from pyspark.sql import DataFrame
 
 
 class LocalDFFileHandler(FileHandler):
+    local_df_connection: SparkLocalFS
+
     def read(self) -> DataFrame:
         from pyspark.sql.types import StructType  # noqa: PLC0415
 
-        downloader_params = {}
-        if self.transfer_dto.strategy.type == "incremental":
+        downloader_params: dict[str, FileHWM] = {}
+        if isinstance(self.transfer_dto.strategy, IncrementalStrategy):
             hwm_name = f"{self.transfer_dto.id}_{self.connection_dto.type}_{self.transfer_dto.directory_path}"
             if self.transfer_dto.strategy.increment_by == "file_modified_since":
                 downloader_params["hwm"] = FileModifiedTimeHWM(name=hwm_name)

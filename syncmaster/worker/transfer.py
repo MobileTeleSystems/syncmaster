@@ -32,6 +32,7 @@ def run_transfer_task(self: WorkerTask, run_id: int) -> None:
 
 
 def run_transfer(run_id: int, engine: Engine, settings: WorkerAppSettings):
+    exception: Exception | None = None
     try:
         with Session(engine, expire_on_commit=False) as session:
             run = session.scalar(
@@ -53,12 +54,12 @@ def run_transfer(run_id: int, engine: Engine, settings: WorkerAppSettings):
 
             source_connection = run.transfer.source_connection
             source_auth_data_query = select(AuthData).where(AuthData.connection_id == run.transfer.source_connection.id)
-            source_auth_data_encrypted = session.scalar(source_auth_data_query)
+            source_auth_data_encrypted = session.scalars(source_auth_data_query).one()
             source_auth_data = decrypt_auth_data(source_auth_data_encrypted.value, settings)
 
             target_connection = run.transfer.target_connection
             target_auth_data_query = select(AuthData).where(AuthData.connection_id == run.transfer.target_connection.id)
-            target_auth_data_encrypted = session.scalar(target_auth_data_query)
+            target_auth_data_encrypted = session.scalars(target_auth_data_query).one()
             target_auth_data = decrypt_auth_data(target_auth_data_encrypted.value, settings)
 
             logger.info("Starting run %r", run_id)
@@ -87,7 +88,6 @@ def run_transfer(run_id: int, engine: Engine, settings: WorkerAppSettings):
     else:
         status = Status.FINISHED
         logger.info("Run %r was successful", run_id)
-        exception = None
 
     with Session(engine) as session:
         run = session.get(Run, run_id)

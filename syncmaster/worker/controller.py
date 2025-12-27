@@ -32,6 +32,8 @@ from syncmaster.dto.connections import (
 from syncmaster.dto.runs import RunDTO
 from syncmaster.dto.transfers import (
     ClickhouseTransferDTO,
+    DBTransferDTO,
+    FileTransferDTO,
     FTPSTransferDTO,
     FTPTransferDTO,
     HDFSTransferDTO,
@@ -44,15 +46,11 @@ from syncmaster.dto.transfers import (
     S3TransferDTO,
     SambaTransferDTO,
     SFTPTransferDTO,
-    TransferDTO,
     WebDAVTransferDTO,
 )
 from syncmaster.dto.transfers_resources import Resources
 from syncmaster.dto.transfers_strategy import Strategy
 from syncmaster.exceptions.connection import ConnectionTypeNotRecognizedError
-from syncmaster.schemas.v1.connection_types import (
-    FILE_CONNECTION_TYPES,
-)
 from syncmaster.worker.handlers.base import Handler
 from syncmaster.worker.handlers.db.clickhouse import ClickhouseHandler
 from syncmaster.worker.handlers.db.hive import HiveHandler
@@ -78,7 +76,7 @@ HANDLERS_MAPPING = dict[
     tuple[
         type[Handler],
         Callable[..., ConnectionDTO],
-        type[TransferDTO],
+        type[DBTransferDTO] | type[FileTransferDTO],
         type[RunDTO],
     ],
 ]
@@ -281,12 +279,12 @@ class TransferController:
 
     def _get_hwm_store(self) -> BaseHWMStore:
         return HorizonHWMStore(
-            api_url=self.settings.hwm_store.url,
+            api_url=self.settings.hwm_store.url,  # type: ignore[arg-type]
             auth=LoginPassword(
-                login=self.settings.hwm_store.user,
-                password=self.settings.hwm_store.password,
+                login=self.settings.hwm_store.user,  # type: ignore[arg-type]
+                password=self.settings.hwm_store.password,  # type: ignore[arg-type]
             ),
-            namespace=self.settings.hwm_store.namespace,
+            namespace=self.settings.hwm_store.namespace,  # type: ignore[arg-type]
         ).force_create_namespace()
 
     def _perform_incremental_transfer(self) -> None:
@@ -301,7 +299,7 @@ class TransferController:
             self.target_handler.write(df)
 
     def _get_transfer_hwm_name(self) -> str:
-        if self.source_handler.connection_dto.type in FILE_CONNECTION_TYPES:
+        if isinstance(self.source_handler.transfer_dto, FileTransferDTO):
             hwm_name_suffix = self.source_handler.transfer_dto.directory_path
         else:
             hwm_name_suffix = self.source_handler.transfer_dto.table_name

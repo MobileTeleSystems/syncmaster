@@ -33,6 +33,7 @@ class ConnectionType(StrEnum):
 
 
 class Connection(Base, ResourceMixin, TimestampMixin):
+    __table_name__ = "connection"
     __table_args__ = (
         UniqueConstraint("name", "group_id"),
         Index("idx_connection_search_vector", "search_vector", postgresql_using="gin"),

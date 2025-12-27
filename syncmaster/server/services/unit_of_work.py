@@ -15,14 +15,18 @@ from syncmaster.db.repositories import (
     TransferRepository,
     UserRepository,
 )
+from syncmaster.scheduler.settings import SchedulerAppSettings
 from syncmaster.server.dependencies import Stub
-from syncmaster.server.settings import ServerAppSettings as Settings
+from syncmaster.server.settings import ServerAppSettings
+from syncmaster.worker.settings import WorkerAppSettings
 
 
 class UnitOfWork:
     def __init__(
         self,
-        settings: Annotated[Settings, Depends(Stub(Settings))],
+        settings: Annotated[
+            SchedulerAppSettings | ServerAppSettings | WorkerAppSettings, Depends(Stub(ServerAppSettings))
+        ],
         session: Annotated[AsyncSession, Depends(Stub(AsyncSession))],
     ):
         self._session = session

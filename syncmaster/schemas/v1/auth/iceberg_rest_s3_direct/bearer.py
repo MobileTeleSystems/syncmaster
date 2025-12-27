@@ -17,9 +17,9 @@ class CreateIcebergRESTCatalogBearerS3BasicAuthSchema(ReadIcebergRESTCatalogBear
     s3_secret_key: SecretStr
 
 
-class UpdateIcebergRESTCatalogBearerS3BasicAuthSchema(ReadIcebergRESTCatalogBearerS3BasicAuthSchema):
-    rest_catalog_token: SecretStr | None = None
-    s3_secret_key: SecretStr | None = None
+class UpdateIcebergRESTCatalogBearerS3BasicAuthSchema(CreateIcebergRESTCatalogBearerS3BasicAuthSchema):
+    rest_catalog_token: SecretStr | None = None  # type: ignore[assignment]
+    s3_secret_key: SecretStr | None = None  # type: ignore[assignment]
 
     def get_secret_fields(self) -> tuple[str, ...]:
         return ("rest_catalog_token", "s3_secret_key")
