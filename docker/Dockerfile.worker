@@ -20,6 +20,9 @@ WORKDIR /app
 ENV PYTHONPATH=/app \
     PATH="/app/.venv/bin:$PATH"
 
+COPY --chmod=755 ./docker/entrypoint_worker.sh /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
+
 
 FROM base AS builder
 
@@ -94,12 +97,10 @@ COPY --link --from=builder /app/.venv/ /app/.venv/
 # using --link to make ~/.ivy2 a separated layer in docker image, not based on previous layers
 COPY --link --from=ivy2_packages /home/syncmaster/.ivy2/ /home/syncmaster/.ivy2/
 # If someone needs to use worker image with root user, use the same jars
-RUN mkdir -p /root && ln -s /home/syncmaster/.ivy2 /root/.ivy2
+RUN mkdir -p /root && ln -s /home/syncmaster/.ivy2 /root/.ivy2_packages
 
-COPY --chmod=755 ./docker/entrypoint_worker.sh /app/entrypoint.sh
 COPY ./syncmaster/ /app/syncmaster/
 RUN python -m compileall /app/syncmaster
-ENTRYPOINT ["/app/entrypoint.sh"]
 # Do not run production as root, to improve security.
 # Also user does not own anything inside the image, including venv and source code.
 USER syncmaster
@@ -119,9 +120,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
         --group "test" \
         --compile-bytecode
 
-COPY --chmod=755 ./docker/entrypoint_worker.sh /app/entrypoint.sh
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
-ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Replace kinit binary with dummy, to skip Kerberos interaction in tests
 RUN mkdir -p /app/.local/bin && \

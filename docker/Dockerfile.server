@@ -9,13 +9,28 @@ RUN apt-get update \
         curl \
     && rm -rf /var/lib/apt/lists/* /var/cache/*
 
-RUN useradd syncmaster --create-home && \
-    mkdir -p /home/syncmaster && \
-    chown -R syncmaster:syncmaster /home/syncmaster
-
 WORKDIR /app
 ENV PYTHONPATH=/app \
     PATH="/app/.venv/bin:$PATH"
+
+COPY ./docs/_static/*.svg /app/syncmaster/server/static/
+
+# Swagger UI
+ADD --chmod=644 https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui-bundle.js https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui.css \
+    /app/syncmaster/server/static/swagger/
+
+# Redoc
+ADD --chmod=644 https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js /app/syncmaster/server/static/redoc/redoc.standalone.js
+
+ENV SYNCMASTER__SERVER__OPENAPI__SWAGGER__JS_URL=/static/swagger/swagger-ui-bundle.js \
+    SYNCMASTER__SERVER__OPENAPI__SWAGGER__CSS_URL=/static/swagger/swagger-ui.css \
+    SYNCMASTER__SERVER__OPENAPI__REDOC__JS_URL=/static/redoc/redoc.standalone.js \
+    SYNCMASTER__SERVER__STATIC_FILES__DIRECTORY=/app/syncmaster/server/static
+
+COPY --chmod=755 ./docker/entrypoint_server.sh /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD ["curl", "-f", "http://localhost:8000/monitoring/ping"]
 
 
 FROM base AS builder
@@ -36,30 +51,12 @@ FROM base AS prod
 
 COPY --link --from=builder /app/.venv/ /app/.venv/
 
-COPY ./docs/_static/*.svg /app/syncmaster/server/static/
-
-# Swagger UI
-ADD https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui-bundle.js https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui.css \
-    /app/syncmaster/server/static/swagger/
-
-# Redoc
-ADD https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js /app/syncmaster/server/static/redoc/redoc.standalone.js
-
-ENV SYNCMASTER__SERVER__OPENAPI__SWAGGER__JS_URL=/static/swagger/swagger-ui-bundle.js \
-    SYNCMASTER__SERVER__OPENAPI__SWAGGER__CSS_URL=/static/swagger/swagger-ui.css \
-    SYNCMASTER__SERVER__OPENAPI__REDOC__JS_URL=/static/redoc/redoc.standalone.js \
-    SYNCMASTER__SERVER__STATIC_FILES__DIRECTORY=/app/syncmaster/server/static
-
 COPY ./syncmaster/ /app/syncmaster/
 RUN python -m compileall -b /app/syncmaster
-COPY ./pyproject.toml ./uv.lock /app/syncmaster/
 
-COPY --chmod=755 ./docker/entrypoint_scheduler.sh /app/entrypoint.sh
-ENTRYPOINT ["/app/entrypoint.sh"]
-EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD ["curl", "-f", "http://localhost:8000/monitoring/ping"]
 # Do not run production as root, to improve security.
 # Also user does not own anything inside the image, including venv and source code.
+RUN useradd syncmaster
 USER syncmaster
 
 
@@ -74,8 +71,4 @@ RUN --mount=type=cache,target=/root/.cache/uv \
         --group "test" \
         --compile-bytecode
 
-COPY --chmod=755 ./docker/entrypoint_server.sh /app/entrypoint.sh
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
-ENTRYPOINT ["/app/entrypoint.sh"]
-EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD ["curl", "-f", "http://localhost:8000/monitoring/ping"]
