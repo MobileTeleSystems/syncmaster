@@ -17,7 +17,7 @@ jobs:
       - name: Start HDFS
         run: |
           docker compose -f docker-compose.test.yml --profile all down -v --remove-orphans
-          docker compose -f docker-compose.test.yml --profile hdfs up -d db rabbitmq test-hdfs
+          docker compose -f docker-compose.test.yml --profile hdfs up -d db rabbitmq test-hive
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
