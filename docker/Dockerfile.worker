@@ -57,7 +57,9 @@ RUN --mount=type=bind,source=./syncmaster/worker/ivy2.py,target=/app/syncmaster/
     python /app/docker/download_ivy2_packages.py postgres && \
     python /app/docker/download_ivy2_packages.py oracle && \
     python /app/docker/download_ivy2_packages.py mssql && \
-    python /app/docker/download_ivy2_packages.py mysql
+    python /app/docker/download_ivy2_packages.py mysql && \
+    mkdir -p /home/syncmaster/.ivy2/  && \
+    cp --recursive /root/.ivy2/* /home/syncmaster/.ivy2/
     # if someone uses custom worker image, they should download jars on their own
 
 
@@ -71,7 +73,7 @@ RUN useradd syncmaster && \
 
 COPY --from=builder /app/.venv/ /app/.venv/
 # custom Spark session function may download different jars, so syncmaster have to own them
-COPY --from=ivy2_packages --chown=syncmaster:syncmaster /root/.ivy2/ /home/syncmaster/.ivy2/
+COPY --from=ivy2_packages --chown=syncmaster:syncmaster /home/syncmaster/.ivy2/ /home/syncmaster/.ivy2/
 # If someone needs to use worker image with root user, use the same jars
 RUN mkdir -p /root && \
     ln -s /home/syncmaster/.ivy2 /root/.ivy2
@@ -82,6 +84,9 @@ USER syncmaster
 
 
 FROM ivy2_packages AS test
+
+RUN mkdir -p /root && \
+    ln -s /home/syncmaster/.ivy2 /root/.ivy2
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync \
