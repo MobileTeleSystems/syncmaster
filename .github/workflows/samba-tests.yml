@@ -43,7 +43,7 @@ jobs:
 
       - name: Run Samba Tests
         run: |
-          docker compose -f ./docker-compose.test.yml --profile samba exec -T worker coverage run -m pytest -vvv-s ./tests/test_integration/test_run_transfer -m samba
+          docker compose -f ./docker-compose.test.yml --profile samba exec -T worker coverage run -m pytest -vvv -s ./tests/test_integration/test_run_transfer -m samba
 
       - name: Dump worker logs on failure
         if: failure()

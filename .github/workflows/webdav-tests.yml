@@ -43,7 +43,7 @@ jobs:
 
       - name: Run WebDAV Tests
         run: |
-          docker compose -f ./docker-compose.test.yml --profile webdav exec -T worker coverage run -m pytest -vvv-s ./tests/test_integration/test_run_transfer -m webdav
+          docker compose -f ./docker-compose.test.yml --profile webdav exec -T worker coverage run -m pytest -vvv -s ./tests/test_integration/test_run_transfer -m webdav
 
       - name: Dump worker logs on failure
         if: failure()
