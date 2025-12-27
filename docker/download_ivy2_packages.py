@@ -24,7 +24,7 @@ def get_spark_session_conf_for_docker_image(connection_types: set[str]) -> dict:
         "spark.jars.packages": ",".join(maven_packages),
         "spark.jars.excludes": ",".join(excluded_packages),
         "spark.sql.pyspark.jvmStacktrace.enabled": "true",
-        # use only minimal available resoures
+        # use only minimal available resources
         "spark.driver.cores": "1",
         "spark.driver.memory": "512M",
         "spark.executor.cores": "1",

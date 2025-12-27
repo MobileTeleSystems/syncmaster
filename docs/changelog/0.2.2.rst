@@ -18,6 +18,6 @@ Improvements
 Bug fixes
 ---------
 
-- Call ``kinit`` before starting Spark session conecting to ``Hive`` cluster. (:issue:`225`)
+- Call ``kinit`` before starting Spark session connecting to ``Hive`` cluster. (:issue:`225`)
 - Fix ``HDFS`` connection was trying to use anonymous auth instead of user/password. (:issue:`225`)
 - Fix updating queue ignored name and didn't reset description.

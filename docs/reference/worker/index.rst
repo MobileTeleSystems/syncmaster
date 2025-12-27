@@ -8,7 +8,7 @@ executes them and updates status & log url in :ref:`database`. Implemented using
 
 .. note::
 
-    Each worker process is bound to one ot more Queues. You have to created it before starting a worker.
+    Each worker process is bound to one or more Queues. You have to created it before starting a worker.
     This can be done via :ref:`frontend` or via :ref:`server` REST API.
 
     Queue field ``slug`` value is then should be passed to Celery worker argument ``--queues``.

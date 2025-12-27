@@ -64,7 +64,6 @@ async def test_other_group_member_cannot_stop_run_of_other_group_transfer(
     role_guest_plus: UserTestRoles,
     session: AsyncSession,
 ) -> None:
-    # Arrenge
     user = group.get_member_of_role(role_guest_plus)
 
     response = await client.post(

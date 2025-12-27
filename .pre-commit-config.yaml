@@ -43,6 +43,12 @@ repos:
       - id: text-unicode-replacement-char
         priority: 0
 
+  - repo: https://github.com/IamTheFij/docker-pre-commit
+    rev: v3.0.1
+    hooks:
+      - id: docker-compose-check
+        priority: 0
+
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
@@ -74,14 +80,37 @@ repos:
           - --no-extra-eol
         priority: 7
 
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.15.0
+    hooks:
+      - id: pretty-format-yaml
+        args: [--autofix, --indent, '2', --offset, '2']
+        priority: 8
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+        args: [-w]
+        additional_dependencies:
+          - tomli
+        exclude: .*\.svg
+        priority: 9
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.9.18
+    hooks:
+      - id: uv-lock
+        priority: 10
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.10
     hooks:
       - id: ruff-format
-        priority: 8
+        priority: 10
       - id: ruff-check
         args: [--fix]
-        priority: 9
+        priority: 11
 
   - repo: local
     hooks:
@@ -91,27 +120,7 @@ repos:
         language: python
         require_serial: true
         pass_filenames: false
-        priority: 10
-
-
-  - repo: https://github.com/IamTheFij/docker-pre-commit
-    rev: v3.0.1
-    hooks:
-      - id: docker-compose-check
-        priority: 0
-
-  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.15.0
-    hooks:
-      - id: pretty-format-yaml
-        args: [--autofix, --indent, '2', --offset, '2']
-        priority: 8
-
-  - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.9.18
-    hooks:
-      - id: uv-lock
-        priority: 8
+        priority: 11
 
   - repo: meta
     hooks:

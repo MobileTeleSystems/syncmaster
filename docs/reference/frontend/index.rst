@@ -4,7 +4,7 @@ Frontend
 ========
 
 SyncMaster provides a `Frontend (UI) <https://github.com/MobileTeleSystems/syncmaster-ui>`_ based on `React <https://react.dev/>`_,
-providing users the ability to create, update, delete entitities.
+providing users the ability to create, update, delete entities.
 
 Install & run
 -------------

@@ -33,7 +33,7 @@ services:
       retries: 3
 
   # Using worker image here to skip building server image build in CI.
-  # Worker test image already has all neccessary dependencies
+  # Worker test image already has all necessary dependencies
   migrations:
     image: mtsrus/syncmaster-worker:${WORKER_IMAGE_TAG:-test}
     restart: no

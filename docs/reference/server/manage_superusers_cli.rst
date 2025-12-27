@@ -19,7 +19,7 @@ There are two ways to manage users:
         - user1
         - user2
 
-  Or via enviroment variable:
+  Or via environment variable:
 
   .. code-block:: bash
 

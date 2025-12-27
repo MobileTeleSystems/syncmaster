@@ -21,7 +21,7 @@ Groups are independent from each other, and have globally unique name.
 .. image:: ./group_info.png
 
 Group can be created by any user, which automatically get ``OWNER`` role.
-This role allows adding members to the group, and assign them speficic roles:
+This role allows adding members to the group, and assign them specific roles:
 
 .. image:: ./group_add_member.png
 

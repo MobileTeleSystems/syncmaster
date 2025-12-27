@@ -6,7 +6,7 @@ TL;DR
 
 - Completely new UI.
 - Add support for FileSystem connections.
-- Add support for simple tranformations within transfer - filter files, filter rows, change columns.
+- Add support for simple transformations within transfer - filter files, filter rows, change columns.
 - Add support for incremental read strategy.
 - Add support for running transfers by schedule.
 - Add support for changing SparkSession resource limits.
@@ -66,7 +66,7 @@ Improvements
 Bug Fixes
 ---------
 
-- Use Hadoop AWS ``magic`` commiter only if transfer *target* is S3. (:issue:`46`)
+- Use Hadoop AWS ``magic`` committer only if transfer *target* is S3. (:issue:`46`)
 - Check that ``service_name`` and ``sid`` are mutually exclusive when editing Oracle connection. (:issue:`52`)
 - Queue name is unique within a group, new field ``slug`` is globally-unique. (:issue:`54`, :issue:`119`)
 - Prohibit updating connection type it if there is a transfer associated with this connection. (:issue:`55`)
