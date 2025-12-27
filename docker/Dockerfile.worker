@@ -30,11 +30,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libkrb5-dev \
     && rm -rf /var/lib/apt/lists/* /var/cache/*
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/bin/uv
+COPY --link --from=ghcr.io/astral-sh/uv:latest /uv /usr/bin/uv
 
-RUN --mount=type=bind,source=./pyproject.toml,target=/app/pyproject.toml \
-    --mount=type=bind,source=./uv.lock,target=/app/uv.lock \
-    --mount=type=cache,target=/root/.cache/uv \
+COPY ./pyproject.toml ./uv.lock /app/
+RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync \
         --frozen \
         --no-install-project \
@@ -44,6 +43,8 @@ RUN --mount=type=bind,source=./pyproject.toml,target=/app/pyproject.toml \
         --compile-bytecode
 
 
+# This layer contains .jar and .xml files of spark.jars.packages
+# The same list of packages should produce the same file content & metadata (modification times, ownership)
 FROM builder AS ivy2_packages
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -66,9 +67,9 @@ RUN --mount=type=bind,source=./syncmaster/worker/ivy2.py,target=/app/syncmaster/
     python /app/docker/download_ivy2_packages.py oracle && \
     python /app/docker/download_ivy2_packages.py mssql && \
     python /app/docker/download_ivy2_packages.py mysql && \
-    mkdir -p /home/syncmaster/.ivy2/cache/ && \
     rsync \
         --archive \
+        # ivy2 keeps file mtime as it was uploaded to Maven
         --times \
         --omit-dir-times \
         # ivydata-$version.properties contains download time, avoid copying it to prevent layer cache invalidation
@@ -77,10 +78,10 @@ RUN --mount=type=bind,source=./syncmaster/worker/ivy2.py,target=/app/syncmaster/
         --exclude 'ivyreport*' \
         # do not copy ~/.ivy2/jars/$group.$artifact.jar, as these are the same files as in ~/.ivy2/cache/$group/$artifact/jars/
         /root/.ivy2/cache/ /home/syncmaster/.ivy2/cache/ && \
-    # reset directory timestamps
-    find /home/syncmaster/.ivy2/cache/ -type d -exec touch @0 {} \; && \
     # # custom Spark session function may download additional jars, so user have to own them, but not jars
-    find /home/syncmaster/.ivy2/ -type d -exec chmod 777 {} \;
+    find /home/syncmaster/.ivy2/ -type d -exec chmod 777 {} \; && \
+    # reset directory timestamps
+    find /home/syncmaster/.ivy2/ -type d -exec touch -d @0 {} \;
 
 RUN mkdir -p /root && ln -s /home/syncmaster/.ivy2 /root/.ivy2
 
@@ -88,14 +89,13 @@ RUN mkdir -p /root && ln -s /home/syncmaster/.ivy2 /root/.ivy2
 FROM base AS prod
 
 # place python dependencies after .ivy2 because the latter are twice as heavy
-COPY --from=builder /app/.venv/ /app/.venv/
+COPY --link --from=builder /app/.venv/ /app/.venv/
 
 # using --link to make ~/.ivy2 a separated layer in docker image, not based on previous layers
 COPY --link --from=ivy2_packages /home/syncmaster/.ivy2/cache/ /home/syncmaster/.ivy2/cache/
 # If someone needs to use worker image with root user, use the same jars
 RUN mkdir -p /root && ln -s /home/syncmaster/.ivy2 /root/.ivy2
 
-COPY ./pyproject.toml ./uv.lock /app/syncmaster/
 COPY --chmod=755 ./docker/entrypoint_worker.sh /app/entrypoint.sh
 COPY ./syncmaster/ /app/syncmaster/
 RUN python -m compileall /app/syncmaster
@@ -107,9 +107,7 @@ USER syncmaster
 
 FROM ivy2_packages AS test
 
-RUN --mount=type=bind,source=./pyproject.toml,target=/app/pyproject.toml \
-    --mount=type=bind,source=./uv.lock,target=/app/uv.lock \
-    --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync \
         --frozen \
         --no-install-project \
@@ -120,7 +118,6 @@ RUN --mount=type=bind,source=./pyproject.toml,target=/app/pyproject.toml \
         --group "test" \
         --compile-bytecode
 
-COPY ./pyproject.toml ./uv.lock /app/syncmaster/
 COPY --chmod=755 ./docker/entrypoint_worker.sh /app/entrypoint.sh
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
