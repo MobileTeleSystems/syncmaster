@@ -87,7 +87,6 @@ jobs:
             {
               "docker-cache-uv": "/root/.cache/uv"
             }
-          skip-extraction: ${{ steps.docker-mount-cache.outputs.cache-hit }}
 
       - name: Build Server image
         uses: docker/build-push-action@v6
