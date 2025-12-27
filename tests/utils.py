@@ -1,25 +1,14 @@
+from __future__ import annotations
+
 import asyncio
 import logging
 from datetime import UTC, datetime
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from alembic.autogenerate import compare_metadata
-from alembic.config import Config
 from alembic.runtime.environment import EnvironmentContext
 from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
-from httpx import AsyncClient
-from onetl.connection import FileConnection
-from onetl.file import FileDownloader, FileUploader
-from pyspark.sql import DataFrame
-from pyspark.sql.functions import (
-    col,
-    date_format,
-    date_trunc,
-    from_unixtime,
-    to_timestamp,
-)
 from sqlalchemy import Connection as AlchConnection
 from sqlalchemy import MetaData, pool, text
 from sqlalchemy.ext.asyncio import (
@@ -30,8 +19,17 @@ from sqlalchemy.ext.asyncio import (
 
 from syncmaster.db.models import Status
 from syncmaster.exceptions.base import EntityNotFoundError
-from syncmaster.server.settings import ServerAppSettings as Settings
-from tests.mocks import MockUser
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from alembic.config import Config
+    from httpx import AsyncClient
+    from onetl.connection import FileConnection
+    from pyspark.sql import DataFrame
+
+    from syncmaster.server.settings import ServerAppSettings as Settings
+    from tests.mocks import MockUser
 
 logger = logging.getLogger(__name__)
 
@@ -198,6 +196,13 @@ def truncate_datetime_to_seconds(
     init_df: DataFrame,
     transfer_direction: str | None = None,
 ) -> tuple[DataFrame, DataFrame]:
+    from pyspark.sql.functions import (
+        col,
+        date_format,
+        date_trunc,
+        to_timestamp,
+    )
+
     # Excel does not support datetime values with precision greater than milliseconds
     # Spark rounds datetime to nearest 3.33 milliseconds when writing to MSSQL: https://onetl.readthedocs.io/en/latest/connection/db_connection/mssql/types.html#id5
     if transfer_direction == "file_to_db" or transfer_direction is None:
@@ -212,6 +217,11 @@ def truncate_datetime_to_seconds(
 
 
 def round_datetime_to_seconds(df: DataFrame, init_df: DataFrame) -> tuple[DataFrame, DataFrame]:
+    from pyspark.sql.functions import (
+        col,
+        from_unixtime,
+    )
+
     # Spark rounds milliseconds to seconds while writing to MySQL: https://onetl.readthedocs.io/en/latest/connection/db_connection/mysql/types.html#id5
     df = df.withColumn(
         "REGISTERED_AT",
@@ -225,6 +235,8 @@ def round_datetime_to_seconds(df: DataFrame, init_df: DataFrame) -> tuple[DataFr
 
 
 def add_increment_to_files_and_upload(file_connection: FileConnection, remote_path: str, tmp_path: Path) -> None:
+    from onetl.file import FileDownloader, FileUploader
+
     downloader = FileDownloader(
         connection=file_connection,
         source_path=remote_path,

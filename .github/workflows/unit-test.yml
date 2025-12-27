@@ -67,7 +67,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           source .env.local.test
-          uv run coverage run -m pytest -vvv -s -k "test_unit or test_database"
+          uv run coverage run -m pytest -vvv -s tests/test_unit tests/test_database
 
       - name: Dump worker logs on failure
         if: failure()

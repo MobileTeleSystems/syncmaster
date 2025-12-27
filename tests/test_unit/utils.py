@@ -4,7 +4,6 @@ import os
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, Any
 
-from onetl.impl import LocalPath, RemotePath
 from sqlalchemy.orm import joinedload
 
 from syncmaster.db.models import (
@@ -26,6 +25,7 @@ if TYPE_CHECKING:
 
     from httpx import AsyncClient
     from onetl.connection import FileConnection
+    from onetl.impl import RemotePath
     from sqlalchemy.ext.asyncio import AsyncSession
 
     from syncmaster.server.settings import ServerAppSettings as Settings
@@ -249,6 +249,8 @@ def upload_files(
     remote_path: os.PathLike | str,
     file_connection: FileConnection,
 ) -> list[RemotePath]:
+    from onetl.impl import LocalPath, RemotePath
+
     remote_files = []
 
     local_path = LocalPath(source_path)
