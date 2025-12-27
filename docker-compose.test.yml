@@ -335,7 +335,8 @@ services:
       HIVE_METASTORE_DB_DRIVER: org.postgresql.Driver
       HIVE_METASTORE_DB_USER: test_hive
       HIVE_METASTORE_DB_PASSWORD: test_hive
-    profiles: [hive, hdfs, all]
+    # writing spark dataframe to xml file fails if fs.defaultFS is not accessible
+    profiles: [hive, hdfs, s3, ftp, all]
 
   test-sftp:
     image: ${SFTP_IMAGE:-linuxserver/openssh-server}
