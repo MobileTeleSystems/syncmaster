@@ -67,7 +67,7 @@ def hdfs_file_connection(hdfs_server):
 
 
 @pytest.fixture
-def hdfs_file_connection_with_path(request, hdfs_file_connection):
+def hdfs_file_connection_with_path(hdfs_file_connection):
     connection = hdfs_file_connection
     source = PurePosixPath("/data")
     target = PurePosixPath("/target")
