@@ -107,7 +107,7 @@ test = [
 ]
 dev = [
     "mypy~=1.19.1",
-    "pre-commit~=4.5.0",
+    "prek~=0.2.25",
     "sqlalchemy[mypy]~=2.0.44",
     "types-jwcrypto~=1.5.0",
 ]

@@ -6,44 +6,63 @@ repos:
     rev: v6.0.0
     hooks:
       - id: check-added-large-files
+        priority: 0
       - id: check-ast
+        priority: 0
       - id: check-merge-conflict
+        priority: 0
       - id: debug-statements
+        priority: 0
       - id: detect-private-key
+        priority: 0
       - id: end-of-file-fixer
         types: [python]
       - id: fix-byte-order-marker
+        priority: 1
       - id: mixed-line-ending
         args: [--fix=lf]
         types: [python]
+        priority: 2
       - id: trailing-whitespace
+        priority: 3
 
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
     hooks:
       - id: python-check-blanket-noqa
+        priority: 0
       - id: python-check-mock-methods
+        priority: 0
       - id: python-no-eval
+        priority: 0
       - id: python-no-log-warn
+        priority: 0
       - id: python-use-type-annotations
+        priority: 0
       - id: text-unicode-replacement-char
+        priority: 0
 
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
       - id: forbid-tabs
+        priority: 0
       - id: remove-tabs
         args: [--whitespaces-count, '2']
+        priority: 4
       - id: chmod
         args: ['644']
         exclude_types: [shell]
         exclude: ^(.*__main__\.py|syncmaster/server/scripts/.*\.py|docker/.*\.py|tests/resources/file_df_connection/generate.*.py)$
+        priority: 5
       - id: chmod
         args: ['755']
         types: [shell]
+        priority: 5
       - id: chmod
         args: ['755']
         files: ^(.*__main__\.py|syncmaster/server/scripts/.*\.py|docker/.*\.py|tests/resources/file_df_connection/generate.*.py)$
+        priority: 5
       - id: insert-license
         types: [python]
         exclude: ^(syncmaster/server/dependencies/stub.py|docs/.*\.py|tests/.*\.py)$
@@ -52,13 +71,16 @@ repos:
           - .spdx-license-header.txt
           - --allow-past-years
           - --no-extra-eol
+        priority: 6
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.10
     hooks:
       - id: ruff-format
+        priority: 7
       - id: ruff-check
         args: [--fix]
+        priority: 8
 
   - repo: local
     hooks:
@@ -68,28 +90,34 @@ repos:
         language: python
         require_serial: true
         pass_filenames: false
+        priority: 9
 
 
   - repo: https://github.com/IamTheFij/docker-pre-commit
     rev: v3.0.1
     hooks:
       - id: docker-compose-check
+        priority: 0
 
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
     rev: v2.15.0
     hooks:
       - id: pretty-format-yaml
         args: [--autofix, --indent, '2', --offset, '2']
+        priority: 5
 
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.9.18
     hooks:
       - id: uv-lock
+        priority: 5
 
   - repo: meta
     hooks:
       - id: check-hooks-apply
+        priority: 0
       - id: check-useless-excludes
+        priority: 0
 
 ci:
   skip:
