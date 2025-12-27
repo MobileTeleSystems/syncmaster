@@ -95,6 +95,7 @@ jobs:
               "docker-cache-uv": "/root/.cache/uv",
               "docker-cache-ivy2": "/root/.ivy2"
             }
+          skip-extraction: ${{ steps.cache-primes.outputs.cache-hit }}
 
       - name: Build worker image
         uses: docker/build-push-action@v6

@@ -20,8 +20,8 @@ COPY ./pyproject.toml ./uv.lock /app/
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync \
         --frozen \
-        --no-install-project \
         --link-mode copy \
+        --no-install-project \
         # TODO: make scheduler independent from server
         --extra "server" \
         --extra "scheduler" \
@@ -47,8 +47,8 @@ FROM builder AS test
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync \
         --frozen \
-        --no-install-project \
         --link-mode copy \
+        --no-install-project \
         --extra "server" \
         --extra "scheduler" \
         --group "test" \

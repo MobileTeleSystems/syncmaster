@@ -92,6 +92,7 @@ jobs:
             {
               "docker-cache-uv": "/root/.cache/uv"
             }
+          skip-extraction: ${{ steps.cache-primes.outputs.cache-hit }}
 
       - name: Build scheduler image
         uses: docker/build-push-action@v6
