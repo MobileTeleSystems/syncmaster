@@ -10,7 +10,7 @@ from syncmaster.db.models.base import Base
 
 
 class User(Base, TimestampMixin):
-    __table_name__ = "user"
+    __tablename__ = "user"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     username: Mapped[str] = mapped_column(String(256), nullable=False, unique=True, index=True)

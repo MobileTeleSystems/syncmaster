@@ -30,7 +30,7 @@ class RunType(enum.StrEnum):
 
 
 class Run(Base, TimestampMixin):
-    __table_name__ = "run"
+    __tablename__ = "run"
 
     id: Mapped[int] = mapped_column(
         BigInteger,

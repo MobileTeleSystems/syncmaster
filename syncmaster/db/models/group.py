@@ -66,7 +66,7 @@ class GroupMemberRole(enum.StrEnum):
 
 
 class Group(Base, TimestampMixin):
-    __table_name__ = "group"
+    __tablename__ = "group"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     name: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
@@ -101,7 +101,7 @@ class Group(Base, TimestampMixin):
 
 
 class UserGroup(Base):
-    __table_name__ = "user_group"
+    __tablename__ = "user_group"
     __table_args__ = (PrimaryKeyConstraint("user_id", "group_id"),)
 
     user_id: Mapped[int] = mapped_column(
