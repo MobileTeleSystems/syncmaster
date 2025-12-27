@@ -38,11 +38,8 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
-
-      - name: Install dependencies
-        run: |
-          export UV=$(which uv)
-          make venv-install
+        with:
+          enable-cache: 'false'
 
       - name: Generate OpenAPI Schema
         run: |
