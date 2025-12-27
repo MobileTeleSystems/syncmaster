@@ -37,17 +37,6 @@ PROJECT_PATH = Path(__file__).parent.parent.resolve()
 
 logger = logging.getLogger(__name__)
 
-pytest_plugins = [
-    "tests.test_unit.test_transfers.transfer_fixtures",
-    "tests.test_unit.test_auth.auth_fixtures",
-    "tests.test_unit.test_users.user_fixtures",
-    "tests.test_unit.test_runs.run_fixtures",
-    "tests.test_unit.test_connections.connection_fixtures",
-    "tests.test_unit.test_scheduler.scheduler_fixtures",
-    "tests.test_integration.test_scheduler.scheduler_fixtures",
-    "tests.test_integration.test_run_transfer.connection_fixtures",
-]
-
 
 @pytest.fixture
 def access_token_settings(settings: Settings) -> JWTSettings:

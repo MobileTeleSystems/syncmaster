@@ -22,6 +22,15 @@ from tests.test_unit.utils import (
     create_user,
 )
 
+pytest_plugins = [
+    "tests.test_unit.test_transfers.transfer_fixtures",
+    "tests.test_unit.test_auth.auth_fixtures",
+    "tests.test_unit.test_users.user_fixtures",
+    "tests.test_unit.test_runs.run_fixtures",
+    "tests.test_unit.test_connections.connection_fixtures",
+    "tests.test_unit.test_scheduler.scheduler_fixtures",
+]
+
 
 async def create_group_member(
     username: str,
