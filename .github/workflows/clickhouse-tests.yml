@@ -17,7 +17,7 @@ jobs:
       - name: Start Clickhouse
         run: |
           docker compose -f docker-compose.test.yml --profile all down -v --remove-orphans
-          docker compose -f docker-compose.test.yml --profile clickhouse up -d db rabbitmq test-clickhouse
+          docker compose -f docker-compose.test.yml --profile clickhouse up -d db rabbitmq horizon test-clickhouse
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3

@@ -17,7 +17,7 @@ jobs:
       - name: Start Iceberg
         run: |
           docker compose -f docker-compose.test.yml --profile all down -v --remove-orphans
-          docker compose -f docker-compose.test.yml --profile iceberg up -d db rabbitmq test-iceberg-rest
+          docker compose -f docker-compose.test.yml --profile iceberg up -d db rabbitmq horizon test-iceberg-rest
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3

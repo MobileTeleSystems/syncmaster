@@ -17,7 +17,7 @@ jobs:
       - name: Start Oracle
         run: |
           docker compose -f docker-compose.test.yml --profile all down -v --remove-orphans
-          docker compose -f docker-compose.test.yml --profile oracle up -d db rabbitmq test-oracle
+          docker compose -f docker-compose.test.yml --profile oracle up -d db rabbitmq horizon test-oracle
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
