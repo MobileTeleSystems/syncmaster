@@ -51,7 +51,7 @@ jobs:
 
       - name: Wait for db
         run: |
-          docker compose -f docker-compose.test.yml up -d db migrations --wait --wait-timeout 200
+          docker compose -f docker-compose.test.yml up -d db --wait --wait-timeout 200
 
       - name: Run Unit Tests
         run: |
