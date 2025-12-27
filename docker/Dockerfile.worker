@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 ARG PYTHON_VERSION=3.13
 FROM python:$PYTHON_VERSION-slim-bookworm AS base
 
@@ -8,14 +10,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         krb5-user \
     && rm -rf /var/lib/apt/lists/* /var/cache/*
 
+RUN useradd syncmaster --create-home && \
+    mkdir -p /home/syncmaster/.ivy2/cache && \
+    mkdir -p /home/syncmaster/.ivy2/jars && \
+    chown -R syncmaster:syncmaster /home/syncmaster
+
 WORKDIR /app
 ENV PYTHONPATH=/app \
-    PATH="/app/.venv/bin:$PATH" \
-    PYTHONUNBUFFERED=1
-
-COPY ./docker/entrypoint_worker.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-ENTRYPOINT ["/app/entrypoint.sh"]
+    PATH="/app/.venv/bin:$PATH"
 
 
 FROM base AS builder
@@ -30,11 +32,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/bin/uv
 
-COPY ./pyproject.toml ./uv.lock ./
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=bind,source=./pyproject.toml,target=/app/pyproject.toml \
+    --mount=type=bind,source=./uv.lock,target=/app/uv.lock \
+    --mount=type=cache,target=/root/.cache/uv \
     uv sync \
         --frozen \
         --no-install-project \
+        --link-mode copy \
         --extra "worker" \
         --extra "kerberos" \
         --compile-bytecode
@@ -42,9 +46,13 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 FROM builder AS ivy2_packages
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        rsync \
+    && rm -rf /var/lib/apt/lists/* /var/cache/*
+
 RUN --mount=type=bind,source=./syncmaster/worker/ivy2.py,target=/app/syncmaster/worker/ivy2.py \
     --mount=type=bind,source=./docker/download_ivy2_packages.py,target=/app/docker/download_ivy2_packages.py \
-    --mount=type=cache,target=/root/.ivy2/ \
+    --mount=type=cache,target=/root/.ivy2 \
     # Try to download all dependencies at once.
     # If multiple packages depends on the same transitive dependency, Spark uses maximum version of this dependency.
     python /app/docker/download_ivy2_packages.py all && \
@@ -58,53 +66,70 @@ RUN --mount=type=bind,source=./syncmaster/worker/ivy2.py,target=/app/syncmaster/
     python /app/docker/download_ivy2_packages.py oracle && \
     python /app/docker/download_ivy2_packages.py mssql && \
     python /app/docker/download_ivy2_packages.py mysql && \
-    mkdir -p /home/syncmaster/.ivy2/  && \
-    cp --recursive /root/.ivy2/* /home/syncmaster/.ivy2/
-    # if someone uses custom worker image, they should download jars on their own
+    mkdir -p /home/syncmaster/.ivy2/cache/ && \
+    rsync \
+        --archive \
+        --times \
+        --omit-dir-times \
+        # ivydata-$version.properties contains download time, avoid copying it to prevent layer cache invalidation
+        --exclude 'ivydata*.properties' \
+        # ignored by Spark
+        --exclude 'ivyreport*' \
+        # do not copy ~/.ivy2/jars/$group.$artifact.jar, as these are the same files as in ~/.ivy2/cache/$group/$artifact/jars/
+        /root/.ivy2/cache/ /home/syncmaster/.ivy2/cache/ && \
+    # reset directory timestamps
+    find /home/syncmaster/.ivy2/cache/ -type d -exec touch @0 {} \; && \
+    # # custom Spark session function may download additional jars, so user have to own them, but not jars
+    find /home/syncmaster/.ivy2/ -type d -exec chmod 777 {} \;
+
+RUN mkdir -p /root && ln -s /home/syncmaster/.ivy2 /root/.ivy2
 
 
 FROM base AS prod
 
+# place python dependencies after .ivy2 because the latter are twice as heavy
+COPY --from=builder /app/.venv/ /app/.venv/
+
+# using --link to make ~/.ivy2 a separated layer in docker image, not based on previous layers
+COPY --link --from=ivy2_packages /home/syncmaster/.ivy2/cache/ /home/syncmaster/.ivy2/cache/
+# If someone needs to use worker image with root user, use the same jars
+RUN mkdir -p /root && ln -s /home/syncmaster/.ivy2 /root/.ivy2
+
+COPY ./pyproject.toml ./uv.lock /app/syncmaster/
+COPY --chmod=755 ./docker/entrypoint_worker.sh /app/entrypoint.sh
+COPY ./syncmaster/ /app/syncmaster/
+RUN python -m compileall /app/syncmaster
+ENTRYPOINT ["/app/entrypoint.sh"]
 # Do not run production as root, to improve security.
 # Also user does not own anything inside the image, including venv and source code.
-RUN useradd syncmaster && \
-    mkdir -p /home/syncmaster /home/syncmaster/.ivy2 && \
-    chown -R syncmaster:syncmaster /home/syncmaster
-
-COPY --from=builder /app/.venv/ /app/.venv/
-# custom Spark session function may download different jars, so syncmaster have to own them
-COPY --from=ivy2_packages --chown=syncmaster:syncmaster /home/syncmaster/.ivy2/ /home/syncmaster/.ivy2/
-# If someone needs to use worker image with root user, use the same jars
-RUN mkdir -p /root && \
-    ln -s /home/syncmaster/.ivy2 /root/.ivy2
-
-COPY ./syncmaster/ /app/syncmaster/
-RUN python -m compileall syncmaster
 USER syncmaster
 
 
 FROM ivy2_packages AS test
 
-RUN mkdir -p /root && \
-    ln -s /home/syncmaster/.ivy2 /root/.ivy2
-
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=bind,source=./pyproject.toml,target=/app/pyproject.toml \
+    --mount=type=bind,source=./uv.lock,target=/app/uv.lock \
+    --mount=type=cache,target=/root/.cache/uv \
     uv sync \
         --frozen \
         --no-install-project \
+        --link-mode copy \
         # CI runs tests in the worker container,
         # so we need server & scheduler dependencies too
         --all-extras \
         --group "test" \
         --compile-bytecode
 
-ENV SYNCMASTER__WORKER__CREATE_SPARK_SESSION_FUNCTION=tests.spark.get_worker_spark_session
-
-# Collect coverage from worker
+COPY ./pyproject.toml ./uv.lock /app/syncmaster/
+COPY --chmod=755 ./docker/entrypoint_worker.sh /app/entrypoint.sh
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Replace kinit binary with dummy, to skip Kerberos interaction in tests
 RUN mkdir -p /app/.local/bin && \
     echo "#!/bin/bash" > /app/.local/bin/kinit \
     && chmod +x /app/.local/bin/kinit
 ENV PATH="/app/.local/bin:$PATH"
+
+# use custom Spark session factory
+ENV SYNCMASTER__WORKER__CREATE_SPARK_SESSION_FUNCTION=tests.spark.get_worker_spark_session

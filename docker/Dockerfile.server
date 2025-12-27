@@ -7,13 +7,35 @@ RUN apt-get update \
         curl \
     && rm -rf /var/lib/apt/lists/* /var/cache/*
 
+RUN useradd syncmaster --create-home && \
+    mkdir -p /home/syncmaster && \
+    chown -R syncmaster:syncmaster /home/syncmaster
+
 WORKDIR /app
 ENV PYTHONPATH=/app \
-    PATH="/app/.venv/bin:$PATH" \
-    PYTHONUNBUFFERED=1
+    PATH="/app/.venv/bin:$PATH"
 
-# add this when logo will be ready
-COPY ./docs/_static/*.svg ./syncmaster/server/static/
+
+FROM base AS builder
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/bin/uv
+
+RUN --mount=type=bind,source=./pyproject.toml,target=/app/pyproject.toml \
+    --mount=type=bind,source=./uv.lock,target=/app/uv.lock \
+    --mount=type=cache,target=/root/.cache/uv \
+    uv sync \
+        --frozen \
+        --no-install-project \
+        --link-mode copy \
+        --extra "server" \
+        --compile-bytecode
+
+
+FROM base AS prod
+
+COPY --from=builder /app/.venv/ /app/.venv/
+
+COPY ./docs/_static/*.svg /app/syncmaster/server/static/
 
 # Swagger UI
 ADD https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui-bundle.js https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui.css \
@@ -27,47 +49,35 @@ ENV SYNCMASTER__SERVER__OPENAPI__SWAGGER__JS_URL=/static/swagger/swagger-ui-bund
     SYNCMASTER__SERVER__OPENAPI__REDOC__JS_URL=/static/redoc/redoc.standalone.js \
     SYNCMASTER__SERVER__STATIC_FILES__DIRECTORY=/app/syncmaster/server/static
 
-COPY ./docker/entrypoint_server.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh \
-    && chmod +r -R /app/syncmaster/server/static
+COPY ./syncmaster/ /app/syncmaster/
+RUN python -m compileall -b /app/syncmaster
+COPY ./pyproject.toml ./uv.lock /app/syncmaster/
+
+COPY --chmod=755 ./docker/entrypoint_scheduler.sh /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD ["curl", "-f", "http://localhost:8000/monitoring/ping"]
-
-
-FROM base AS builder
-
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/bin/uv
-
-COPY ./pyproject.toml ./uv.lock ./
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync \
-        --frozen \
-        --no-install-project \
-        --extra "server" \
-        --compile-bytecode
-
-
-FROM base AS prod
-
-COPY --from=builder /app/.venv/ /app/.venv/
-COPY ./syncmaster/ /app/syncmaster/
-RUN python -m compileall -b syncmaster
-
 # Do not run production as root, to improve security.
 # Also user does not own anything inside the image, including venv and source code.
-RUN useradd syncmaster
 USER syncmaster
 
 
 FROM builder AS test
 
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=bind,source=./pyproject.toml,target=/app/pyproject.toml \
+    --mount=type=bind,source=./uv.lock,target=/app/uv.lock \
+    --mount=type=cache,target=/root/.cache/uv \
     uv sync \
         --frozen \
         --no-install-project \
+        --link-mode copy \
         --extra "server" \
         --group "test" \
         --compile-bytecode
 
+COPY ./pyproject.toml ./uv.lock /app/syncmaster/
+COPY --chmod=755 ./docker/entrypoint_server.sh /app/entrypoint.sh
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD ["curl", "-f", "http://localhost:8000/monitoring/ping"]

@@ -1,25 +1,26 @@
 ARG PYTHON_VERSION=3.13
 FROM python:$PYTHON_VERSION-slim-bookworm AS base
 
+RUN useradd syncmaster --create-home && \
+    mkdir -p /home/syncmaster && \
+    chown -R syncmaster:syncmaster /home/syncmaster
+
 WORKDIR /app
 ENV PYTHONPATH=/app \
-    PATH="/app/.venv/bin:$PATH" \
-    PYTHONUNBUFFERED=1
-
-COPY ./docker/entrypoint_scheduler.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-ENTRYPOINT ["/app/entrypoint.sh"]
+    PATH="/app/.venv/bin:$PATH"
 
 
 FROM base AS builder
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/bin/uv
 
-COPY ./pyproject.toml ./uv.lock ./
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=bind,source=./pyproject.toml,target=/app/pyproject.toml \
+    --mount=type=bind,source=./uv.lock,target=/app/uv.lock \
+    --mount=type=cache,target=/root/.cache/uv \
     uv sync \
         --frozen \
         --no-install-project \
+        --link-mode copy \
         # TODO: make scheduler independent from server
         --extra "server" \
         --extra "scheduler" \
@@ -30,23 +31,31 @@ FROM base AS prod
 
 COPY --from=builder /app/.venv/ /app/.venv/
 COPY ./syncmaster/ /app/syncmaster/
-RUN python -m compileall -b syncmaster
+RUN python -m compileall -b /app/syncmaster
+COPY ./pyproject.toml ./uv.lock /app/syncmaster/
 
+COPY --chmod=755 ./docker/entrypoint_scheduler.sh /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
 # Do not run production as root, to improve security.
 # Also user does not own anything inside the image, including venv and source code.
-RUN useradd syncmaster
 USER syncmaster
 
 
 FROM builder AS test
 
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=bind,source=./pyproject.toml,target=/app/pyproject.toml \
+    --mount=type=bind,source=./uv.lock,target=/app/uv.lock \
+    --mount=type=cache,target=/root/.cache/uv \
     uv sync \
         --frozen \
         --no-install-project \
+        --link-mode copy \
         --extra "server" \
         --extra "scheduler" \
         --group "test" \
         --compile-bytecode
 
+COPY ./pyproject.toml ./uv.lock /app/syncmaster/
+COPY --chmod=755 ./docker/entrypoint_scheduler.sh /app/entrypoint.sh
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
