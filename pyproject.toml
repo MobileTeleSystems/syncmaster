@@ -241,10 +241,8 @@ markers = [
     "webdav: tests for WebDAV",
 ]
 
-[tool.coverage.paths]
-source = ["syncmaster"]
-
 [tool.coverage.run]
+source_pkgs = ["syncmaster"]
 branch = true
 parallel = true
 relative_files = true

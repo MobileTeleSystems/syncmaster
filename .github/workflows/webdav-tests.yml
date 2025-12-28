@@ -75,6 +75,7 @@ jobs:
           path: logs/*
 
       - name: Upload coverage results
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: coverage-webdav

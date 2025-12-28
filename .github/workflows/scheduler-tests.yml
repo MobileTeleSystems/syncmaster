@@ -52,7 +52,7 @@ jobs:
 
       - name: Run Scheduler Tests
         run: |
-          docker compose -f ./docker-compose.test.yml --profile worker exec -T worker coverage run -m pytest "tests/test_integration/test_scheduler" -vvv -s
+          docker compose -f ./docker-compose.test.yml --profile worker exec -T worker coverage run -m pytest "tests/test_integration/test_scheduler" -vvv -s --junitxml=/app/reports/junit/${GITHUB_RUN_ID}.xml
 
       - name: Dump worker logs on failure
         if: failure()
@@ -75,6 +75,7 @@ jobs:
           path: logs/*
 
       - name: Upload coverage results
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: coverage-scheduler

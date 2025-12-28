@@ -52,7 +52,7 @@ jobs:
 
       - name: Run Iceberg Tests
         run: |
-          docker compose -f ./docker-compose.test.yml --profile iceberg exec -T worker coverage run -m pytest -vvv -s ./tests/test_integration/test_run_transfer -m iceberg
+          docker compose -f ./docker-compose.test.yml --profile iceberg exec -T worker coverage run -m pytest -vvv -s ./tests/test_integration/test_run_transfer -m iceberg --junitxml=/app/reports/junit/${GITHUB_RUN_ID}.xml
 
       - name: Dump worker logs on failure
         if: failure()
@@ -75,6 +75,7 @@ jobs:
           path: logs/*
 
       - name: Upload coverage results
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: coverage-iceberg

@@ -85,6 +85,7 @@ jobs:
   all_done:
     name: Tests done
     runs-on: ubuntu-latest
+    if: always()
 
     needs:
       - unit_tests
@@ -107,6 +108,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Download all coverage reports
+        uses: actions/download-artifact@v7
+        with:
+          path: reports/
+          pattern: coverage-*
+          merge-multiple: true
+
+      - name: Show test results
+        uses: mikepenz/action-junit-report@v5
+        if: success() || failure() # always run even if the previous step fails
+        with:
+          report_paths: reports/junit/*.xml
+
       - name: Set up Python ${{ env.DEFAULT_PYTHON }}
         uses: actions/setup-python@v6
         with:
@@ -120,13 +134,6 @@ jobs:
       - name: Install dependencies
         run: |
           uv sync --frozen --group test
-
-      - name: Download all coverage reports
-        uses: actions/download-artifact@v7
-        with:
-          path: reports/
-          pattern: coverage-*
-          merge-multiple: true
 
       - name: Generate coverage reports
         run: |

@@ -67,7 +67,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           source .env.local.test
-          uv run coverage run -m pytest -vvv -s tests/test_unit tests/test_database
+          uv run coverage run -m pytest -vvv -s tests/test_unit tests/test_database --junitxml=reports/junit/${GITHUB_RUN_ID}.xml
 
       - name: Dump worker logs on failure
         if: failure()
@@ -89,6 +89,7 @@ jobs:
           path: logs/*
 
       - name: Upload coverage results
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: coverage-unit
