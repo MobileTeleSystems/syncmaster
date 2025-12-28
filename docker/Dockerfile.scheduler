@@ -30,7 +30,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 FROM base AS prod
 
 COPY --link --from=builder /app/.venv/ /app/.venv/
-COPY ./syncmaster/ /app/syncmaster/
+COPY --chmod=755 ./syncmaster/ /app/syncmaster/
 RUN python -m compileall -b /app/syncmaster
 
 # Do not run production as root, to improve security.

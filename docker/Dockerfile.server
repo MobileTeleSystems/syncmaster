@@ -16,11 +16,11 @@ ENV PYTHONPATH=/app \
 COPY ./docs/_static/*.svg /app/syncmaster/server/static/
 
 # Swagger UI
-ADD --chmod=644 https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui-bundle.js https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui.css \
+ADD --chmod=755 https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui-bundle.js https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui.css \
     /app/syncmaster/server/static/swagger/
 
 # Redoc
-ADD --chmod=644 https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js /app/syncmaster/server/static/redoc/redoc.standalone.js
+ADD --chmod=755 https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js /app/syncmaster/server/static/redoc/redoc.standalone.js
 
 ENV SYNCMASTER__SERVER__OPENAPI__SWAGGER__JS_URL=/static/swagger/swagger-ui-bundle.js \
     SYNCMASTER__SERVER__OPENAPI__SWAGGER__CSS_URL=/static/swagger/swagger-ui.css \
@@ -51,7 +51,7 @@ FROM base AS prod
 
 COPY --link --from=builder /app/.venv/ /app/.venv/
 
-COPY ./syncmaster/ /app/syncmaster/
+COPY --chmod=755 ./syncmaster/ /app/syncmaster/
 RUN python -m compileall -b /app/syncmaster
 
 # Do not run production as root, to improve security.

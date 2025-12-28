@@ -99,7 +99,7 @@ COPY --link --from=ivy2_packages /home/syncmaster/.ivy2/ /home/syncmaster/.ivy2/
 # If someone needs to use worker image with root user, use the same jars
 RUN mkdir -p /root && ln -s /home/syncmaster/.ivy2 /root/.ivy2_packages
 
-COPY ./syncmaster/ /app/syncmaster/
+COPY --chmod=755 ./syncmaster/ /app/syncmaster/
 RUN python -m compileall /app/syncmaster
 # Do not run production as root, to improve security.
 # Also user does not own anything inside the image, including venv and source code.
