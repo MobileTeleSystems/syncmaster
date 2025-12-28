@@ -75,7 +75,7 @@ jobs:
           path: logs/*
 
       - name: Upload coverage results
-        if: always()
+        if: success() || failure()
         uses: actions/upload-artifact@v6
         with:
           name: coverage-ftps

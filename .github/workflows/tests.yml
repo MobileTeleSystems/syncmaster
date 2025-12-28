@@ -85,8 +85,13 @@ jobs:
   all_done:
     name: Tests done
     runs-on: ubuntu-latest
-    if: always()
 
+    permissions:
+      contents: write
+      checks: write
+      pull-requests: write
+
+    if: success() || failure()
     needs:
       - unit_tests
       - scheduler_tests
@@ -117,7 +122,6 @@ jobs:
 
       - name: Show test results
         uses: mikepenz/action-junit-report@v5
-        if: success() || failure() # always run even if the previous step fails
         with:
           report_paths: reports/junit/*.xml
 
