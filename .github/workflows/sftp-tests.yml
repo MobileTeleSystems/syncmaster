@@ -52,7 +52,7 @@ jobs:
 
       - name: Run SFTP Tests
         run: |
-          docker compose -f ./docker-compose.test.yml --profile sftp exec -T worker coverage run -m pytest -vvv -s ./tests/test_integration/test_run_transfer -m sftp --junitxml=/app/reports/junit/${GITHUB_RUN_ID}.xml
+          docker compose -f ./docker-compose.test.yml --profile sftp exec -T worker coverage run -m pytest -vvv -s ./tests/test_integration/test_run_transfer -m sftp --junitxml=/app/reports/junit/${RANDOM}.xml
 
       - name: Dump worker logs on failure
         if: failure()

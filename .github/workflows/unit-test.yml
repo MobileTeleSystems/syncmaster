@@ -67,7 +67,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           source .env.local.test
-          uv run coverage run -m pytest -vvv -s tests/test_unit tests/test_database --junitxml=reports/junit/${GITHUB_RUN_ID}.xml
+          uv run coverage run -m pytest -vvv -s tests/test_unit tests/test_database --junitxml=reports/junit/${RANDOM}.xml
 
       - name: Dump worker logs on failure
         if: failure()

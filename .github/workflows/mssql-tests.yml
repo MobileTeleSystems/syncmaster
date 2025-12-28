@@ -52,7 +52,7 @@ jobs:
 
       - name: Run MSSQL Tests
         run: |
-          docker compose -f ./docker-compose.test.yml --profile mssql exec -T worker coverage run -m pytest -vvv -s ./tests/test_integration/test_run_transfer -m mssql --junitxml=/app/reports/junit/${GITHUB_RUN_ID}.xml
+          docker compose -f ./docker-compose.test.yml --profile mssql exec -T worker coverage run -m pytest -vvv -s ./tests/test_integration/test_run_transfer -m mssql --junitxml=/app/reports/junit/${RANDOM}.xml
 
       - name: Dump worker logs on failure
         if: failure()
