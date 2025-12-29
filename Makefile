@@ -2,7 +2,6 @@
 
 include .env.local.test
 
-VERSION = develop
 VIRTUAL_ENV ?= .venv
 PYTHON = ${VIRTUAL_ENV}/bin/python
 PIP = ${VIRTUAL_ENV}/bin/pip

@@ -118,6 +118,7 @@ repos:
         name: mypy
         entry: mypy syncmaster
         language: python
+        types: [python]
         require_serial: true
         pass_filenames: false
         priority: 10
