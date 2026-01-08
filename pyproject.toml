@@ -72,7 +72,7 @@ server = [
     "alembic~=1.17.1",
     "pyjwt~=2.10.1",
     "asyncpg~=0.31",
-    "python-keycloak~=6.0.0",
+    "python-keycloak~=7.0.1",
     "itsdangerous~=2.2.0",
 ]
 scheduler = [
