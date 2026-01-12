@@ -25,15 +25,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # https://docs.docker.com/build/ci/github-actions/cache/#local-cache
-      - name: Cache Docker layers
-        uses: actions/cache/restore@v5
-        with:
-          path: ${{ runner.temp }}/.buildx-cache
-          key: ${{ runner.os }}-buildx-worker-${{ hashFiles('docker/Dockerfile.worker', 'pyproject.toml', 'uv.lock', 'docker/download_ivy2_packages.py', 'syncmaster/worker/ivy2.py') }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-worker-
-
       - name: Build Worker Image
         uses: docker/build-push-action@v6
         with:
@@ -42,7 +33,7 @@ jobs:
           file: docker/Dockerfile.worker
           target: test
           load: true
-          cache-from: type=local,src=${{ runner.temp }}/.buildx-cache
+          cache-from: type=gha,scope=test
 
       - name: Start worker
         run: |
