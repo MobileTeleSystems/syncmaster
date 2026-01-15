@@ -46,6 +46,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
         --extra "worker" \
         --extra "kerberos" \
         --compile-bytecode \
+    && uv pip install pip \
     && uv cache prune --ci \
     && uv cache clean pyspark
 
@@ -120,7 +121,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
         # so we need server & scheduler dependencies too
         --all-extras \
         --group "test" \
-        --compile-bytecode
+        --compile-bytecode \
+    && uv cache prune --ci \
+    && uv cache clean pyspark
 
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
 
