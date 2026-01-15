@@ -10,7 +10,7 @@ dev_template = "{tag}.dev{env:GITHUB_RUN_ID:{ccount}}+git.{sha}"
 dirty_template = "{tag}.dev{env:GITHUB_RUN_ID:{ccount}}+git.{sha}.dirty"
 
 [project]
-name = "syncmaster"
+name = "data-syncmaster"
 license = "Apache-2.0"
 description = "Syncmaster REST API + scheduler + Worker"
 authors = [{name= "MWS Data Bridge", email = "onetools@mts.ru"}]

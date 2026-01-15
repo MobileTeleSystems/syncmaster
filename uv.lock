@@ -757,6 +757,159 @@ client-sync = [
 ]
 
 [[package]]
+name = "data-syncmaster"
+source = { editable = "." }
+dependencies = [
+    { name = "asgi-correlation-id" },
+    { name = "celery" },
+    { name = "coloredlogs" },
+    { name = "psycopg2-binary" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "pydantic-settings-logging" },
+    { name = "python-json-logger" },
+    { name = "pyyaml" },
+    { name = "sqlalchemy" },
+    { name = "sqlalchemy-utils" },
+    { name = "uuid6" },
+]
+
+[package.optional-dependencies]
+kerberos = [
+    { name = "onetl", extra = ["kerberos"] },
+]
+scheduler = [
+    { name = "apscheduler" },
+    { name = "asyncpg" },
+]
+server = [
+    { name = "alembic" },
+    { name = "asyncpg" },
+    { name = "fastapi" },
+    { name = "itsdangerous" },
+    { name = "pyjwt" },
+    { name = "python-keycloak" },
+    { name = "python-multipart" },
+    { name = "starlette-exporter" },
+    { name = "uvicorn" },
+]
+worker = [
+    { name = "horizon-hwm-store" },
+    { name = "jinja2" },
+    { name = "onetl", extra = ["files"] },
+    { name = "pyspark" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "prek" },
+    { name = "sqlalchemy", extra = ["mypy"] },
+    { name = "types-jwcrypto" },
+]
+docs = [
+    { name = "autodoc-pydantic" },
+    { name = "furo" },
+    { name = "numpydoc" },
+    { name = "setuptools-git-versioning" },
+    { name = "sphinx" },
+    { name = "sphinx-argparse" },
+    { name = "sphinx-copybutton" },
+    { name = "sphinx-design" },
+    { name = "sphinx-favicon" },
+    { name = "sphinx-issues" },
+    { name = "sphinx-last-updated-by-git" },
+    { name = "sphinxcontrib-towncrier" },
+    { name = "towncrier" },
+]
+test = [
+    { name = "coverage" },
+    { name = "dirty-equals" },
+    { name = "faker" },
+    { name = "gevent" },
+    { name = "httpx" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-deadfixtures" },
+    { name = "pytest-lazy-fixtures" },
+    { name = "pytest-mock" },
+    { name = "pytest-randomly" },
+    { name = "pytest-rerunfailures" },
+    { name = "respx" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "alembic", marker = "extra == 'server'", specifier = "~=1.18.1" },
+    { name = "apscheduler", marker = "extra == 'scheduler'", specifier = "~=3.11.1" },
+    { name = "asgi-correlation-id", specifier = "~=4.3.4" },
+    { name = "asyncpg", marker = "extra == 'scheduler'", specifier = "~=0.31" },
+    { name = "asyncpg", marker = "extra == 'server'", specifier = "~=0.31" },
+    { name = "celery", specifier = "~=5.6.0" },
+    { name = "coloredlogs", specifier = "~=15.0.1" },
+    { name = "fastapi", marker = "extra == 'server'", specifier = "~=0.128.0" },
+    { name = "horizon-hwm-store", marker = "extra == 'worker'", specifier = "~=1.1.4" },
+    { name = "itsdangerous", marker = "extra == 'server'", specifier = "~=2.2.0" },
+    { name = "jinja2", marker = "extra == 'worker'", specifier = "~=3.1.6" },
+    { name = "onetl", extras = ["files"], marker = "extra == 'worker'", specifier = "~=0.15.0" },
+    { name = "onetl", extras = ["kerberos"], marker = "extra == 'kerberos'", specifier = "~=0.15.0" },
+    { name = "psycopg2-binary", specifier = "~=2.9.11" },
+    { name = "pydantic", specifier = "~=2.12.5" },
+    { name = "pydantic-settings", specifier = "~=2.12.0" },
+    { name = "pydantic-settings-logging", specifier = "~=0.1.1" },
+    { name = "pyjwt", marker = "extra == 'server'", specifier = "~=2.10.1" },
+    { name = "pyspark", marker = "extra == 'worker'", specifier = "<4.0.0" },
+    { name = "python-json-logger", specifier = "~=4.0.0" },
+    { name = "python-keycloak", marker = "extra == 'server'", specifier = "~=7.0.1" },
+    { name = "python-multipart", marker = "extra == 'server'", specifier = "~=0.0.21" },
+    { name = "pyyaml", specifier = "~=6.0.3" },
+    { name = "sqlalchemy", specifier = "~=2.0.44" },
+    { name = "sqlalchemy-utils", specifier = "~=0.42.0" },
+    { name = "starlette-exporter", marker = "extra == 'server'", specifier = "~=0.23.0" },
+    { name = "uuid6", specifier = "~=2025.0.1" },
+    { name = "uvicorn", marker = "extra == 'server'", specifier = "~=0.40.0" },
+]
+provides-extras = ["server", "scheduler", "worker", "kerberos"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy", specifier = "~=1.19.1" },
+    { name = "prek", specifier = "~=0.2.25" },
+    { name = "sqlalchemy", extras = ["mypy"], specifier = "~=2.0.44" },
+    { name = "types-jwcrypto", specifier = "~=1.5.0" },
+]
+docs = [
+    { name = "autodoc-pydantic", specifier = "~=2.2.0" },
+    { name = "furo", specifier = "~=2025.12.19" },
+    { name = "numpydoc", specifier = "~=1.10.0" },
+    { name = "setuptools-git-versioning", specifier = "~=2.1.0" },
+    { name = "sphinx", specifier = "~=8.2.3" },
+    { name = "sphinx-argparse", specifier = "~=0.5.2" },
+    { name = "sphinx-copybutton", specifier = "~=0.5.2" },
+    { name = "sphinx-design", specifier = "~=0.6.1" },
+    { name = "sphinx-favicon", specifier = "~=1.0.1" },
+    { name = "sphinx-issues", specifier = "~=5.0.1" },
+    { name = "sphinx-last-updated-by-git", specifier = "~=0.3.8" },
+    { name = "sphinxcontrib-towncrier", specifier = "~=0.5.0a0" },
+    { name = "towncrier", specifier = "~=25.8.0" },
+]
+test = [
+    { name = "coverage", specifier = "~=7.13.0" },
+    { name = "dirty-equals", specifier = "~=0.11.0" },
+    { name = "faker", specifier = "~=40.1" },
+    { name = "gevent", specifier = "~=25.9.1" },
+    { name = "httpx", specifier = "~=0.28.1" },
+    { name = "pytest", specifier = "~=8.4.2" },
+    { name = "pytest-asyncio", specifier = ">=0.26.0,<1.0" },
+    { name = "pytest-deadfixtures", specifier = "~=3.0.0" },
+    { name = "pytest-lazy-fixtures", specifier = "~=1.4.0" },
+    { name = "pytest-mock", specifier = "~=3.15.1" },
+    { name = "pytest-randomly", specifier = "~=4.0.1" },
+    { name = "pytest-rerunfailures", specifier = "~=16.1" },
+    { name = "respx", specifier = "~=0.22.0" },
+]
+
+[[package]]
 name = "decorator"
 version = "5.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2632,159 +2785,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/b9/74/173c13e7257a358f275938b767bb8c4ac6a750f199095e1b09e4e7468555/starlette_exporter-0.23.0.tar.gz", hash = "sha256:f80998db2d4a3462808a9bce56950046b113d3fab6ec6c20cb6de4431d974969", size = 22383, upload-time = "2024-06-26T04:05:28.55Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a8/70/935e2ae3ca22a90aec8c935570115bf978cfb58c90110c179d79762d699c/starlette_exporter-0.23.0-py3-none-any.whl", hash = "sha256:ea1a27f2aae48122931e2384a361a03e00261efbb4a665ce1ae2e46f29123d5e", size = 16034, upload-time = "2024-06-26T04:05:26.423Z" },
-]
-
-[[package]]
-name = "syncmaster"
-source = { editable = "." }
-dependencies = [
-    { name = "asgi-correlation-id" },
-    { name = "celery" },
-    { name = "coloredlogs" },
-    { name = "psycopg2-binary" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "pydantic-settings-logging" },
-    { name = "python-json-logger" },
-    { name = "pyyaml" },
-    { name = "sqlalchemy" },
-    { name = "sqlalchemy-utils" },
-    { name = "uuid6" },
-]
-
-[package.optional-dependencies]
-kerberos = [
-    { name = "onetl", extra = ["kerberos"] },
-]
-scheduler = [
-    { name = "apscheduler" },
-    { name = "asyncpg" },
-]
-server = [
-    { name = "alembic" },
-    { name = "asyncpg" },
-    { name = "fastapi" },
-    { name = "itsdangerous" },
-    { name = "pyjwt" },
-    { name = "python-keycloak" },
-    { name = "python-multipart" },
-    { name = "starlette-exporter" },
-    { name = "uvicorn" },
-]
-worker = [
-    { name = "horizon-hwm-store" },
-    { name = "jinja2" },
-    { name = "onetl", extra = ["files"] },
-    { name = "pyspark" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "mypy" },
-    { name = "prek" },
-    { name = "sqlalchemy", extra = ["mypy"] },
-    { name = "types-jwcrypto" },
-]
-docs = [
-    { name = "autodoc-pydantic" },
-    { name = "furo" },
-    { name = "numpydoc" },
-    { name = "setuptools-git-versioning" },
-    { name = "sphinx" },
-    { name = "sphinx-argparse" },
-    { name = "sphinx-copybutton" },
-    { name = "sphinx-design" },
-    { name = "sphinx-favicon" },
-    { name = "sphinx-issues" },
-    { name = "sphinx-last-updated-by-git" },
-    { name = "sphinxcontrib-towncrier" },
-    { name = "towncrier" },
-]
-test = [
-    { name = "coverage" },
-    { name = "dirty-equals" },
-    { name = "faker" },
-    { name = "gevent" },
-    { name = "httpx" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-deadfixtures" },
-    { name = "pytest-lazy-fixtures" },
-    { name = "pytest-mock" },
-    { name = "pytest-randomly" },
-    { name = "pytest-rerunfailures" },
-    { name = "respx" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "alembic", marker = "extra == 'server'", specifier = "~=1.18.1" },
-    { name = "apscheduler", marker = "extra == 'scheduler'", specifier = "~=3.11.1" },
-    { name = "asgi-correlation-id", specifier = "~=4.3.4" },
-    { name = "asyncpg", marker = "extra == 'scheduler'", specifier = "~=0.31" },
-    { name = "asyncpg", marker = "extra == 'server'", specifier = "~=0.31" },
-    { name = "celery", specifier = "~=5.6.0" },
-    { name = "coloredlogs", specifier = "~=15.0.1" },
-    { name = "fastapi", marker = "extra == 'server'", specifier = "~=0.128.0" },
-    { name = "horizon-hwm-store", marker = "extra == 'worker'", specifier = "~=1.1.4" },
-    { name = "itsdangerous", marker = "extra == 'server'", specifier = "~=2.2.0" },
-    { name = "jinja2", marker = "extra == 'worker'", specifier = "~=3.1.6" },
-    { name = "onetl", extras = ["files"], marker = "extra == 'worker'", specifier = "~=0.15.0" },
-    { name = "onetl", extras = ["kerberos"], marker = "extra == 'kerberos'", specifier = "~=0.15.0" },
-    { name = "psycopg2-binary", specifier = "~=2.9.11" },
-    { name = "pydantic", specifier = "~=2.12.5" },
-    { name = "pydantic-settings", specifier = "~=2.12.0" },
-    { name = "pydantic-settings-logging", specifier = "~=0.1.1" },
-    { name = "pyjwt", marker = "extra == 'server'", specifier = "~=2.10.1" },
-    { name = "pyspark", marker = "extra == 'worker'", specifier = "<4.0.0" },
-    { name = "python-json-logger", specifier = "~=4.0.0" },
-    { name = "python-keycloak", marker = "extra == 'server'", specifier = "~=7.0.1" },
-    { name = "python-multipart", marker = "extra == 'server'", specifier = "~=0.0.21" },
-    { name = "pyyaml", specifier = "~=6.0.3" },
-    { name = "sqlalchemy", specifier = "~=2.0.44" },
-    { name = "sqlalchemy-utils", specifier = "~=0.42.0" },
-    { name = "starlette-exporter", marker = "extra == 'server'", specifier = "~=0.23.0" },
-    { name = "uuid6", specifier = "~=2025.0.1" },
-    { name = "uvicorn", marker = "extra == 'server'", specifier = "~=0.40.0" },
-]
-provides-extras = ["server", "scheduler", "worker", "kerberos"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "mypy", specifier = "~=1.19.1" },
-    { name = "prek", specifier = "~=0.2.25" },
-    { name = "sqlalchemy", extras = ["mypy"], specifier = "~=2.0.44" },
-    { name = "types-jwcrypto", specifier = "~=1.5.0" },
-]
-docs = [
-    { name = "autodoc-pydantic", specifier = "~=2.2.0" },
-    { name = "furo", specifier = "~=2025.12.19" },
-    { name = "numpydoc", specifier = "~=1.10.0" },
-    { name = "setuptools-git-versioning", specifier = "~=2.1.0" },
-    { name = "sphinx", specifier = "~=8.2.3" },
-    { name = "sphinx-argparse", specifier = "~=0.5.2" },
-    { name = "sphinx-copybutton", specifier = "~=0.5.2" },
-    { name = "sphinx-design", specifier = "~=0.6.1" },
-    { name = "sphinx-favicon", specifier = "~=1.0.1" },
-    { name = "sphinx-issues", specifier = "~=5.0.1" },
-    { name = "sphinx-last-updated-by-git", specifier = "~=0.3.8" },
-    { name = "sphinxcontrib-towncrier", specifier = "~=0.5.0a0" },
-    { name = "towncrier", specifier = "~=25.8.0" },
-]
-test = [
-    { name = "coverage", specifier = "~=7.13.0" },
-    { name = "dirty-equals", specifier = "~=0.11.0" },
-    { name = "faker", specifier = "~=40.1" },
-    { name = "gevent", specifier = "~=25.9.1" },
-    { name = "httpx", specifier = "~=0.28.1" },
-    { name = "pytest", specifier = "~=8.4.2" },
-    { name = "pytest-asyncio", specifier = ">=0.26.0,<1.0" },
-    { name = "pytest-deadfixtures", specifier = "~=3.0.0" },
-    { name = "pytest-lazy-fixtures", specifier = "~=1.4.0" },
-    { name = "pytest-mock", specifier = "~=3.15.1" },
-    { name = "pytest-randomly", specifier = "~=4.0.1" },
-    { name = "pytest-rerunfailures", specifier = "~=16.1" },
-    { name = "respx", specifier = "~=0.22.0" },
 ]
 
 [[package]]
