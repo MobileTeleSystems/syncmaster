@@ -44,7 +44,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
         --link-mode copy \
         --no-install-project \
         --extra "server" \
-        --compile-bytecode
+        --compile-bytecode \
+    && uv cache prune --ci
 
 
 FROM base AS prod
@@ -69,6 +70,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
         --no-install-project \
         --extra "server" \
         --group "test" \
-        --compile-bytecode
+        --compile-bytecode \
+    && uv cache prune --ci
 
 RUN sed -i 's/python -m/coverage run -m/g' /app/entrypoint.sh
