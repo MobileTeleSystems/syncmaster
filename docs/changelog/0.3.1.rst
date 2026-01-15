@@ -5,7 +5,7 @@ Improvements
 ------------
 
 - Added table name validation - must be in format ``schema.table`` or ``namespace1.namespace2.table``.
-- Reduce worker image size by removing copies of ``.jar`` files.
+- Cut 400MB of worker images size by removing copies of ``.jar`` files.
 - Explicitly log transfer exception instead of ``raised unexpected: UnpickleableExceptionWrapper`` by celery.
 
 Misc
