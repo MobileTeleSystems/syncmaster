@@ -36,6 +36,8 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: 'false'
 
       - name: Fix logo in Readme
         run: |

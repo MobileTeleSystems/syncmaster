@@ -43,6 +43,7 @@ jobs:
 
       - name: Generate OpenAPI Schema
         run: |
+          uv sync --frozen --extra server
           make docs-openapi
 
       - name: Fix logo in Readme
