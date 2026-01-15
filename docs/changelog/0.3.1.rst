@@ -1,0 +1,17 @@
+0.3.1 (2026-01-15)
+==================
+
+Improvements
+------------
+
+- Added table name validation - must be in format ``schema.table`` or ``namespace1.namespace2.table``.
+- Reduce worker image size by removing copies of ``.jar`` files.
+- Explicitly log transfer exception to avoid
+
+Misc
+----
+
+- Switch from ``poetry`` to ``uv`` for dependency management.
+- Reformat code using ``ruff format``.
+- Fix issues noted by ``ruff check``.
+- Dependency updates.

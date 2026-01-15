@@ -54,7 +54,7 @@ If you already have venv, but need to install dependencies required for developm
 
     make venv-install
 
-We are using `uv https://docs.astral.sh/uv/`_ for managing dependencies and building the package.
+We are using `uv <https://docs.astral.sh/uv/>`_ for managing dependencies and building the package.
 It allows to keep development environment the same for all developers due to using lock file with fixed dependency versions.
 
 There are *extra* dependencies (included into package as optional):
