@@ -6,12 +6,12 @@ Improvements
 
 - Added table name validation - must be in format ``schema.table`` or ``namespace1.namespace2.table``.
 - Reduce worker image size by removing copies of ``.jar`` files.
-- Explicitly log transfer exception to avoid
+- Explicitly log transfer exception instead of ``raised unexpected: UnpickleableExceptionWrapper`` by celery.
 
 Misc
 ----
 
 - Switch from ``poetry`` to ``uv`` for dependency management.
-- Reformat code using ``ruff format``.
-- Fix issues noted by ``ruff check``.
+- Switch from ``black`` to ``ruff format``.
+- Switch from ``flake8+wemake-python-styleguide`` to ``ruff check``, and fix found code smells.
 - Dependency updates.
