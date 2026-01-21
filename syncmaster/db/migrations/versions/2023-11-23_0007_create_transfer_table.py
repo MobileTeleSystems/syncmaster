@@ -20,8 +20,7 @@ depends_on = None
 
 def upgrade():
     sql_expression = (
-        "to_tsvector('english'::regconfig, "
-        "name || ' ' || "
+        "to_tsvector('english'::regconfig, name || ' ' || "
         "COALESCE(json_extract_path_text(source_params, 'table_name'), '') || ' ' || "
         "COALESCE(json_extract_path_text(target_params, 'table_name'), '') || ' ' || "
         "COALESCE(json_extract_path_text(source_params, 'directory_path'), '') || ' ' || "
@@ -30,8 +29,7 @@ def upgrade():
         "COALESCE(translate(json_extract_path_text(source_params, 'table_name'), './', '  '), '') || ' ' || "
         "COALESCE(translate(json_extract_path_text(target_params, 'table_name'), './', '  '), '') || ' ' || "
         "COALESCE(translate(json_extract_path_text(source_params, 'directory_path'), './', '  '), '') || ' ' || "
-        "COALESCE(translate(json_extract_path_text(target_params, 'directory_path'), './', '  '), '')"
-        ")"
+        "COALESCE(translate(json_extract_path_text(target_params, 'directory_path'), './', '  '), ''))"
     )
     op.create_table(
         "transfer",
