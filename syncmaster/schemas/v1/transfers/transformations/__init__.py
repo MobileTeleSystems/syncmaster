@@ -14,9 +14,12 @@ from syncmaster.schemas.v1.transfers.transformations.dataframe_rows_filter impor
 from syncmaster.schemas.v1.transfers.transformations.file_metadata_filter import (
     FileMetadataFilter,
 )
+from syncmaster.schemas.v1.transfers.transformations.sql import (
+    Sql,
+)
 
 TransformationSchema = Annotated[
-    DataframeRowsFilter | DataframeColumnsFilter | FileMetadataFilter,
+    DataframeRowsFilter | DataframeColumnsFilter | FileMetadataFilter | Sql,
     Field(discriminator="type"),
 ]
 
