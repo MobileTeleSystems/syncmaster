@@ -550,13 +550,13 @@ async def test_superuser_can_create_transfer(
                             "message": (
                                 "Input tag 'some unknown transformation type' found using 'type' "
                                 "does not match any of the expected tags: 'dataframe_rows_filter', "
-                                "'dataframe_columns_filter', 'file_metadata_filter'"
+                                "'dataframe_columns_filter', 'file_metadata_filter', 'sql'"
                             ),
                             "code": "union_tag_invalid",
                             "context": {
                                 "discriminator": "'type'",
                                 "expected_tags": (
-                                    "'dataframe_rows_filter', 'dataframe_columns_filter', 'file_metadata_filter'"
+                                    "'dataframe_rows_filter', 'dataframe_columns_filter', 'file_metadata_filter', 'sql'"
                                 ),
                                 "tag": "some unknown transformation type",
                             },
@@ -808,6 +808,72 @@ async def test_superuser_can_create_transfer(
                 },
             },
             id="invalid_name_regexp",
+        ),
+        pytest.param(
+            {
+                "transformations": [
+                    {
+                        "type": "sql",
+                        "query": "INSERT INTO table1 VALUES (1, 2)",
+                        "dialect": "spark",
+                    },
+                ],
+            },
+            {
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "location": [
+                                "body",
+                                "transformations",
+                                0,
+                                "sql",
+                                "query",
+                            ],
+                            "message": "Value error, Query must be a SELECT statement, got 'INSERT INTO table1 VALUES (1, 2)'",
+                            "code": "value_error",
+                            "context": {},
+                            "input": "INSERT INTO table1 VALUES (1, 2)",
+                        },
+                    ],
+                },
+            },
+            id="sql_non_select_query",
+        ),
+        pytest.param(
+            {
+                "transformations": [
+                    {
+                        "type": "sql",
+                        "query": None,
+                        "dialect": "spark",
+                    },
+                ],
+            },
+            {
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Invalid request",
+                    "details": [
+                        {
+                            "location": [
+                                "body",
+                                "transformations",
+                                0,
+                                "sql",
+                                "query",
+                            ],
+                            "message": "Input should be a valid string",
+                            "code": "string_type",
+                            "context": {},
+                            "input": None,
+                        },
+                    ],
+                },
+            },
+            id="sql_non_string_query",
         ),
         pytest.param(
             {
@@ -1290,3 +1356,106 @@ async def test_superuser_cannot_create_transfer_with_unknown_queue_error(
             "details": None,
         },
     }
+
+
+async def test_developer_plus_can_create_transfer_with_sql_transformation(
+    client: AsyncClient,
+    two_group_connections: tuple[MockConnection, MockConnection],
+    session: AsyncSession,
+    role_developer_plus: UserTestRoles,
+    group_queue: Queue,
+    mock_group: MockGroup,
+):
+    first_connection, second_connection = two_group_connections
+    user = mock_group.get_member_of_role(role_developer_plus)
+
+    response = await client.post(
+        "v1/transfers",
+        headers={"Authorization": f"Bearer {user.token}"},
+        json={
+            "group_id": mock_group.group.id,
+            "name": "new test transfer with sql",
+            "source_connection_id": first_connection.id,
+            "target_connection_id": second_connection.id,
+            "source_params": {"type": "postgres", "table_name": "schema.source_table"},
+            "target_params": {"type": "postgres", "table_name": "schema.target_table"},
+            "transformations": [
+                {
+                    "type": "sql",
+                    "query": "SELECT * FROM table",
+                    "dialect": "spark",
+                },
+            ],
+            "queue_id": group_queue.id,
+        },
+    )
+    assert response.status_code == 200, response.text
+
+    transfer = (
+        await session.scalars(
+            select(Transfer).filter_by(
+                name="new test transfer with sql",
+                group_id=mock_group.group.id,
+            ),
+        )
+    ).one()
+
+    assert response.json() == {
+        "id": transfer.id,
+        "group_id": transfer.group_id,
+        "name": transfer.name,
+        "description": transfer.description,
+        "schedule": transfer.schedule,
+        "is_scheduled": transfer.is_scheduled,
+        "source_connection_id": transfer.source_connection_id,
+        "target_connection_id": transfer.target_connection_id,
+        "source_params": transfer.source_params,
+        "target_params": transfer.target_params,
+        "strategy_params": transfer.strategy_params,
+        "transformations": transfer.transformations,
+        "resources": transfer.resources,
+        "queue_id": transfer.queue_id,
+    }
+
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        "SELECT col1, col2 FROM table1 WHERE col1 > 100;",
+        "select col1 from table1",
+        "   SELECT   col1   FROM   table1  ",
+        " WITH some AS (SELECT col1 FROM table1) SELECT * FROM some;",
+    ],
+)
+async def test_sql_transformation_with_valid_select_queries(
+    client: AsyncClient,
+    two_group_connections: tuple[MockConnection, MockConnection],
+    session: AsyncSession,
+    superuser: MockUser,
+    group_queue: Queue,
+    mock_group: MockGroup,
+    query: str,
+):
+    first_conn, second_conn = two_group_connections
+
+    response = await client.post(
+        "v1/transfers",
+        headers={"Authorization": f"Bearer {superuser.token}"},
+        json={
+            "group_id": mock_group.id,
+            "name": f"test transfer sql {query}",
+            "source_connection_id": first_conn.id,
+            "target_connection_id": second_conn.id,
+            "source_params": {"type": "postgres", "table_name": "schema.source_table"},
+            "target_params": {"type": "postgres", "table_name": "schema.target_table"},
+            "transformations": [
+                {
+                    "type": "sql",
+                    "query": query,
+                    "dialect": "spark",
+                },
+            ],
+            "queue_id": group_queue.id,
+        },
+    )
+    assert response.status_code == 200, response.text
