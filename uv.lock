@@ -918,8 +918,8 @@ requires-dist = [
     { name = "horizon-hwm-store", marker = "extra == 'worker'", specifier = "~=1.1.4" },
     { name = "itsdangerous", marker = "extra == 'server'", specifier = "~=2.2.0" },
     { name = "jinja2", marker = "extra == 'worker'", specifier = "~=3.1.6" },
-    { name = "onetl", extras = ["files"], marker = "extra == 'worker'", specifier = "~=0.15.0" },
-    { name = "onetl", extras = ["kerberos"], marker = "extra == 'kerberos'", specifier = "~=0.15.0" },
+    { name = "onetl", extras = ["files"], marker = "extra == 'worker'", specifier = "~=0.16.0" },
+    { name = "onetl", extras = ["kerberos"], marker = "extra == 'kerberos'", specifier = "~=0.16.0" },
     { name = "psycopg2-binary", specifier = "~=2.9.11" },
     { name = "pydantic", specifier = "~=2.13.0" },
     { name = "pydantic-settings", specifier = ">=2.13.1,<2.15.0" },
@@ -1782,7 +1782,7 @@ wheels = [
 
 [[package]]
 name = "onetl"
-version = "0.15.1"
+version = "0.16.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "etl-entities" },
@@ -1796,9 +1796,9 @@ dependencies = [
     { name = "pyyaml" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7d/5d/4216a654c9ce5518bf2169a8c45da1b4597d3507563b55006c868d50541d/onetl-0.15.1.tar.gz", hash = "sha256:0937ee5a23042f2c34ce65584c3c2c4c107491e340a6c53137df88a981d86349", size = 253322, upload-time = "2026-04-15T09:38:45.378Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a4/4d/a4472b171dcb9761f94cc395188365785ff7b2d3a316b063d8875d5a4efd/onetl-0.16.0.tar.gz", hash = "sha256:d21d081a601b10915206bd9dcf7c6b83ad87fd68dbc94801cf34eb22c5768226", size = 257805, upload-time = "2026-05-12T13:38:24.309Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/92/c0/1c7b93e376dcf4fc212a5f319e444d03a302ee053942e369f89048bcfee9/onetl-0.15.1-py3-none-any.whl", hash = "sha256:cd3ffa08a1fe83c4456f24933574d71d234766437c79f1d15c39208650f2da85", size = 379701, upload-time = "2026-04-15T09:38:43.414Z" },
+    { url = "https://files.pythonhosted.org/packages/7a/c7/4ce83ec7bd95c3c2910d6f0fab368229114924987c2678c357882160098b/onetl-0.16.0-py3-none-any.whl", hash = "sha256:faa48c8491591f5a9fb7783f89036205f7185d60305deb2629cf7b7a43d9cc4c", size = 385917, upload-time = "2026-05-12T13:38:22.422Z" },
 ]
 
 [package.optional-dependencies]
