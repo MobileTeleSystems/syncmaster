@@ -54,7 +54,7 @@ Without docker
 
   .. code-block:: console
 
-      $ pip install syncmaster[server]
+      $ pip install data-syncmaster[server]
 
 * Run server process
 

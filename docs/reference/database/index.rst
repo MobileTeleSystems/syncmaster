@@ -71,7 +71,7 @@ Without Docker
 
   .. code-block:: console
 
-      $ pip install syncmaster[postgres]
+      $ pip install data-syncmaster[postgres]
 
 * Configure :ref:`Database connection <configuration-database>` by creating config file:
 

@@ -76,7 +76,7 @@ config.yml:1:10,57:67
 - Install `syncmaster` package with following *extra* dependencies:
 
   ```console
-  $ pip install syncmaster[server,worker]
+  $ pip install data-syncmaster[server,worker]
   ...
   ```
 

@@ -68,7 +68,7 @@ config.yml:1:2
 - Install `syncmaster` package with following *extra* dependencies:
 
   ```console
-  $ pip install syncmaster[postgres]
+  $ pip install data-syncmaster[postgres]
   ...
   ```
 

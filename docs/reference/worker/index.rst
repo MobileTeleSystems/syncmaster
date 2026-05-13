@@ -73,7 +73,7 @@ Without docker
 
   .. code-block:: console
 
-      $ pip install syncmaster[server,worker]
+      $ pip install data-syncmaster[server,worker]
 
 * Start :ref:`server` and :ref:`frontend`
 * Create new Group

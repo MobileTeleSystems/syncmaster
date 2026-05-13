@@ -53,7 +53,7 @@ Without docker
 
   .. code-block:: console
 
-      $ pip install syncmaster[scheduler]
+      $ pip install data-syncmaster[scheduler]
 
 * Run scheduler process:
 

@@ -55,7 +55,7 @@ config.yml:1:10,57:58
 - Install `syncmaster` package with following *extra* dependencies:
 
   ```console
-  $ pip install syncmaster[scheduler]
+  $ pip install data-syncmaster[scheduler]
   ...
   ```
 

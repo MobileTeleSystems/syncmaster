@@ -55,7 +55,7 @@ config.yml:1:31,40:49,70:71
 - Install `syncmaster` package with following *extra* dependencies:
 
   ```console
-  $ pip install syncmaster[server]
+  $ pip install data-syncmaster[server]
   ...
   ```
 
