@@ -1,0 +1,1 @@
+Updated ClickHouse ``spark-dialect-extension`` to 0.0.4.
