@@ -31,7 +31,7 @@ def get_packages(connection_types: set[str]) -> list[str]:
     if connection_types & {"oracle", "all"}:
         result.extend(Oracle.get_packages())
     if connection_types & {"clickhouse", "all"}:
-        result.append("io.github.mtsongithub.doetl:spark-dialect-extension_2.12:0.0.2")
+        result.append("io.github.mtsongithub.doetl:spark-dialect-extension_2.12:0.0.4")
         result.extend(Clickhouse.get_packages())
     if connection_types & {"mssql", "all"}:
         result.extend(MSSQL.get_packages())
