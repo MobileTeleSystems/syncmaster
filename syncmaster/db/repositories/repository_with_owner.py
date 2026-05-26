@@ -53,15 +53,16 @@ class RepositoryWithOwner(Repository, Generic[Model]):
         )
 
         user_group = await self._session.scalar(group_role_query)
-        match user_group:
-            case None:
-                return Permission.NONE
-            case GroupMemberRole.Maintainer:
-                return Permission.DELETE
-            case GroupMemberRole.Developer:
-                return Permission.WRITE
-            case _:
-                return Permission.READ
+        if not user_group:
+            return Permission.NONE
+
+        if user_group == GroupMemberRole.Maintainer:
+            return Permission.DELETE
+
+        if user_group == GroupMemberRole.Developer:
+            return Permission.WRITE
+
+        return Permission.READ
 
     async def get_group_permission(self, user: User, group_id: int) -> Permission:
         """Method for determining CRUD permissions in the specified group"""
@@ -92,12 +93,13 @@ class RepositoryWithOwner(Repository, Generic[Model]):
         )
 
         user_group = await self._session.scalar(group_role_query)
-        match user_group:
-            case None:
-                return Permission.NONE
-            case GroupMemberRole.Maintainer:
-                return Permission.DELETE
-            case GroupMemberRole.Developer:
-                return Permission.WRITE
-            case _:
-                return Permission.READ
+        if not user_group:
+            return Permission.NONE
+
+        if user_group == GroupMemberRole.Maintainer:
+            return Permission.DELETE
+
+        if user_group == GroupMemberRole.Developer:
+            return Permission.WRITE
+
+        return Permission.READ

@@ -111,13 +111,13 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         )
 
         user_group = await self._session.scalar(group_role_query)
-        match user_group:
-            case None:
-                return Permission.NONE
-            case GroupMemberRole.Maintainer:
-                return Permission.DELETE
-            case _:
-                return Permission.READ
+        if not user_group:
+            return Permission.NONE
+
+        if user_group == GroupMemberRole.Maintainer:
+            return Permission.DELETE
+
+        return Permission.READ
 
     async def get_resource_permission(self, user: User, resource_id: int) -> Permission:
         """
@@ -162,13 +162,13 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         )
 
         user_group = await self._session.scalar(group_role_query)
-        match user_group:
-            case None:
-                return Permission.NONE
-            case GroupMemberRole.Maintainer:
-                return Permission.DELETE
-            case _:
-                return Permission.READ
+        if not user_group:
+            return Permission.NONE
+
+        if user_group == GroupMemberRole.Maintainer:
+            return Permission.DELETE
+
+        return Permission.READ
 
     def _raise_error(self, err: DBAPIError) -> NoReturn:
         constraint = err.__cause__.__cause__.constraint_name  # type: ignore[arg-type, union-attr]
