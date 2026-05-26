@@ -114,7 +114,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         if not user_group:
             return Permission.NONE
 
-        if user_group == GroupMemberRole.Maintainer:
+        if user_group.role == GroupMemberRole.Maintainer:
             return Permission.DELETE
 
         return Permission.READ
@@ -165,7 +165,7 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         if not user_group:
             return Permission.NONE
 
-        if user_group == GroupMemberRole.Maintainer:
+        if user_group.role == GroupMemberRole.Maintainer:
             return Permission.DELETE
 
         return Permission.READ

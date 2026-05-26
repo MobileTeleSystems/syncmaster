@@ -56,10 +56,10 @@ class RepositoryWithOwner(Repository, Generic[Model]):
         if not user_group:
             return Permission.NONE
 
-        if user_group == GroupMemberRole.Maintainer:
+        if user_group.role == GroupMemberRole.Maintainer:
             return Permission.DELETE
 
-        if user_group == GroupMemberRole.Developer:
+        if user_group.role == GroupMemberRole.Developer:
             return Permission.WRITE
 
         return Permission.READ
@@ -96,10 +96,10 @@ class RepositoryWithOwner(Repository, Generic[Model]):
         if not user_group:
             return Permission.NONE
 
-        if user_group == GroupMemberRole.Maintainer:
+        if user_group.role == GroupMemberRole.Maintainer:
             return Permission.DELETE
 
-        if user_group == GroupMemberRole.Developer:
+        if user_group.role == GroupMemberRole.Developer:
             return Permission.WRITE
 
         return Permission.READ
