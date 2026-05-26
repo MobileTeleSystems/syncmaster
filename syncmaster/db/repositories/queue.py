@@ -84,6 +84,11 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         Method for determining CRUD permissions in the specified group
         'DEVELOPER' does not have WRITE permission in the QUEUE repository
         """
+        if not await self._session.get(Group, group_id):
+            raise GroupNotFoundError
+
+        if user.is_superuser:
+            return Permission.DELETE
 
         owner_query = (
             (
@@ -97,7 +102,6 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         )
 
         is_owner = await self._session.scalar(owner_query)
-
         if is_owner:
             return Permission.DELETE
 
@@ -107,23 +111,13 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         )
 
         user_group = await self._session.scalar(group_role_query)
-
         if not user_group:
-            # Check: group exists
-            if not await self._session.get(Group, group_id):
-                raise GroupNotFoundError
+            return Permission.NONE
 
-            # If the user is not in the group, then he is either a superuser or does not have any rights
-            if not user.is_superuser:
-                return Permission.NONE
+        if user_group.role == GroupMemberRole.Maintainer:
             return Permission.DELETE
 
-        group_role = user_group.role
-
-        if group_role in (GroupMemberRole.Guest, GroupMemberRole.Developer):
-            return Permission.READ
-
-        return Permission.DELETE
+        return Permission.READ
 
     async def get_resource_permission(self, user: User, resource_id: int) -> Permission:
         """
@@ -155,7 +149,6 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         )
 
         is_owner = await self._session.scalar(owner_query)
-
         if is_owner:
             return Permission.DELETE
 
@@ -173,12 +166,10 @@ class QueueRepository(RepositoryWithOwner[Queue]):
         if not user_group:
             return Permission.NONE
 
-        group_role = user_group.role
+        if user_group.role == GroupMemberRole.Maintainer:
+            return Permission.DELETE
 
-        if group_role in (GroupMemberRole.Guest, GroupMemberRole.Developer):
-            return Permission.READ
-
-        return Permission.DELETE
+        return Permission.READ
 
     def _raise_error(self, err: DBAPIError) -> NoReturn:
         constraint = err.__cause__.__cause__.constraint_name  # type: ignore[arg-type, union-attr]

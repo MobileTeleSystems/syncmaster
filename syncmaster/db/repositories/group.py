@@ -26,7 +26,7 @@ class GroupRepository(Repository[Group]):
     def __init__(self, session: AsyncSession):
         super().__init__(model=Group, session=session)
 
-    async def paginate_all(
+    async def paginate_for_superuser(
         self,
         page: int,
         page_size: int,
@@ -200,29 +200,18 @@ class GroupRepository(Repository[Group]):
         except IntegrityError as e:
             self._raise_error(e)
 
-    async def get_member_role(self, group_id: int, user_id: int) -> GroupMemberRole:
+    async def get_member_role(self, user: User, group_id: int) -> GroupMemberRole:
+        if user.is_superuser:
+            return GroupMemberRole.Superuser
+
         user_group = await self._session.get(
             UserGroup,
             {
                 "group_id": group_id,
-                "user_id": user_id,
+                "user_id": user.id,
             },
         )
-        if user_group is None:  # then it's either the owner or a superuser because permission exists
-            owner_query = (
-                (
-                    select(Group).where(
-                        Group.owner_id == user_id,
-                        Group.id == group_id,
-                    )
-                )
-                .exists()
-                .select()
-            )
-            is_owner = await self._session.scalar(owner_query)
-            return GroupMemberRole.Owner if is_owner else GroupMemberRole.Superuser
-
-        return user_group.role
+        return user_group.role if user_group else GroupMemberRole.Owner
 
     async def update_member_role(
         self,
@@ -309,6 +298,9 @@ class GroupRepository(Repository[Group]):
         if not await self._session.get(Group, group_id):
             raise GroupNotFoundError
 
+        if user.is_superuser:
+            return Permission.DELETE
+
         owner_query = (
             (
                 select(Group).where(
@@ -321,8 +313,7 @@ class GroupRepository(Repository[Group]):
         )
 
         is_owner = await self._session.scalar(owner_query)
-
-        if is_owner or user.is_superuser:
+        if is_owner:
             return Permission.DELETE
 
         group_role_query = select(UserGroup).where(
@@ -331,11 +322,7 @@ class GroupRepository(Repository[Group]):
         )
 
         user_group = await self._session.scalar(group_role_query)
-
-        if not user_group:
-            return Permission.NONE
-
-        return Permission.READ
+        return Permission.READ if user_group else Permission.NONE
 
     async def get_user_group(self, group_id: int, user_id: int) -> UserGroup | None:
         return await self._session.get(

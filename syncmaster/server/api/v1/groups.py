@@ -42,7 +42,7 @@ async def read_groups(  # noqa: PLR0913
     ] = None,
 ) -> GroupPageSchema:
     if current_user.is_superuser:
-        pagination = await unit_of_work.group.paginate_all(
+        pagination = await unit_of_work.group.paginate_for_superuser(
             page=page,
             page_size=page_size,
             search_query=search_query,
@@ -88,7 +88,7 @@ async def read_group(
         raise GroupNotFoundError
 
     group = await unit_of_work.group.read_by_id(group_id=group_id)
-    user_role = await unit_of_work.group.get_member_role(group_id=group_id, user_id=current_user.id)
+    user_role = await unit_of_work.group.get_member_role(user=current_user, group_id=group_id)
     return GroupWithUserRoleSchema(
         data=ReadGroupSchema.model_validate(group, from_attributes=True),
         role=GroupMemberRole(user_role),

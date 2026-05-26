@@ -40,7 +40,6 @@ class RepositoryWithOwner(Repository, Generic[Model]):
         )
 
         is_owner = await self._session.scalar(owner_query)
-
         if is_owner:
             return Permission.DELETE
 
@@ -58,18 +57,22 @@ class RepositoryWithOwner(Repository, Generic[Model]):
         if not user_group:
             return Permission.NONE
 
-        group_role = user_group.role
-
-        if group_role == GroupMemberRole.Guest:
+        if user_group.role == GroupMemberRole.Guest:
             return Permission.READ
 
-        if group_role == GroupMemberRole.Developer:
+        if user_group.role == GroupMemberRole.Developer:
             return Permission.WRITE
 
         return Permission.DELETE  # Maintainer
 
     async def get_group_permission(self, user: User, group_id: int) -> Permission:
         """Method for determining CRUD permissions in the specified group"""
+        if not await self._session.get(Group, group_id):
+            raise GroupNotFoundError
+
+        if user.is_superuser:
+            return Permission.DELETE
+
         owner_query = (
             (
                 select(Group).where(
@@ -82,7 +85,6 @@ class RepositoryWithOwner(Repository, Generic[Model]):
         )
 
         is_owner = await self._session.scalar(owner_query)
-
         if is_owner:
             return Permission.DELETE
 
@@ -92,23 +94,13 @@ class RepositoryWithOwner(Repository, Generic[Model]):
         )
 
         user_group = await self._session.scalar(group_role_query)
-
         if not user_group:
-            # Check: group exists
-            if not await self._session.get(Group, group_id):
-                raise GroupNotFoundError
+            return Permission.NONE
 
-            # If the user is not in the group, then he is either a superuser or does not have any rights
-            if not user.is_superuser:
-                return Permission.NONE
+        if user_group.role == GroupMemberRole.Maintainer:
             return Permission.DELETE
 
-        group_role = user_group.role
-
-        if group_role == GroupMemberRole.Guest:
-            return Permission.READ
-
-        if group_role == GroupMemberRole.Developer:
+        if user_group.role == GroupMemberRole.Developer:
             return Permission.WRITE
 
-        return Permission.DELETE  # Maintainer
+        return Permission.READ

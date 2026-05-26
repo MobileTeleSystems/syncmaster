@@ -46,7 +46,7 @@ async def test_group_member_can_read_groups(
     }
 
 
-async def test_groupless_user_cannot_get_any_groups(
+async def test_groupless_user_cannot_read_groups(
     client: AsyncClient,
     simple_user: MockUser,
     group: MockGroup,  # do not delete this group, it is not used but is needed to show that the group is not read
