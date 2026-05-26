@@ -30,8 +30,8 @@ class BaseSettings(PydanticBaseSettings):
         yaml_settings = YamlConfigSettingsSource(settings_cls, yaml_file=yaml_file_path)
         return (
             init_settings,
+            yaml_settings,
             env_settings,
             dotenv_settings,
             file_secret_settings,
-            yaml_settings,
         )
