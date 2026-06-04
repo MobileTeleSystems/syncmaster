@@ -115,7 +115,6 @@ dev = [
     "types-jwcrypto~=1.5.0",
 ]
 docs = [
-  "setuptools-git-versioning~=3.1.0",
   "autodoc-pydantic~=2.2.0",
   "numpydoc~=1.10.0",
   "sphinx~=9.0.4",
