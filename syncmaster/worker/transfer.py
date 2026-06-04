@@ -3,12 +3,12 @@
 from datetime import UTC, datetime
 
 from asgi_correlation_id import correlation_id
-from asgi_correlation_id.extensions.celery import load_correlation_ids
-from celery.signals import after_setup_task_logger
+from celery.signals import after_setup_task_logger, before_task_publish, task_postrun, task_prerun
 from celery.utils.log import get_task_logger
 from jinja2 import Template
 from sqlalchemy import Engine, select
 from sqlalchemy.orm import Session, selectinload
+from uuid6 import uuid7
 
 from syncmaster.db.models import AuthData, Run, Status, Transfer
 from syncmaster.db.repositories.utils import decrypt_auth_data
@@ -19,7 +19,32 @@ from syncmaster.worker.controller import TransferController
 from syncmaster.worker.settings import WorkerAppSettings
 
 logger = get_task_logger(__name__)
-load_correlation_ids()
+
+CORRELATION_ID_HEADER = "CORRELATION_ID"
+
+
+@before_task_publish.connect(weak=False)
+def transfer_correlation_id(headers: dict[str, str], **kwargs) -> None:
+    """Transfer correlation ID from the request to the Celery task headers."""
+    cid = correlation_id.get()
+    if cid:
+        headers[CORRELATION_ID_HEADER] = cid
+
+
+@task_prerun.connect(weak=False)
+def load_correlation_id(task, **kwargs) -> None:
+    """Load correlation ID from task headers, or generate a new one."""
+    id_value = task.request.get(CORRELATION_ID_HEADER)
+    if id_value:
+        correlation_id.set(id_value)
+    else:
+        correlation_id.set(uuid7().hex)
+
+
+@task_postrun.connect(weak=False)
+def cleanup_correlation_id(**kwargs) -> None:
+    """Clear the correlation ID after the task completes."""
+    correlation_id.set(None)
 
 
 @celery.task(name="run_transfer_task", bind=True, track_started=True)
