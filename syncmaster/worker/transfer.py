@@ -8,7 +8,7 @@ from celery.utils.log import get_task_logger
 from jinja2 import Template
 from sqlalchemy import Engine, select
 from sqlalchemy.orm import Session, selectinload
-from uuid6 import uuid7
+from uuid6 import uuid8
 
 from syncmaster.db.models import AuthData, Run, Status, Transfer
 from syncmaster.db.repositories.utils import decrypt_auth_data
@@ -38,7 +38,7 @@ def load_correlation_id(task, **kwargs) -> None:
     if id_value:
         correlation_id.set(id_value)
     else:
-        correlation_id.set(uuid7().hex)
+        correlation_id.set(uuid8().hex)
 
 
 @task_postrun.connect(weak=False)
