@@ -12,14 +12,13 @@ class AuthSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: yaml
-        :caption: config.yml
-
-        auth:
-            provider: syncmaster.server.providers.auth.dummy_provider.DummyAuthProvider
-            # other options passed to AuthProviderSettings, e.g. DummyAuthProviderSettings
-            access_key:
-                secret_key: jwt_secret
+    ```yaml title="config.yml"
+    auth:
+        provider: syncmaster.server.providers.auth.dummy_provider.DummyAuthProvider
+        # other options passed to AuthProviderSettings, e.g. DummyAuthProviderSettings
+        access_key:
+            secret_key: jwt_secret
+    ```
     """
 
     provider: ImportString = Field(  # type: ignore[assignment]

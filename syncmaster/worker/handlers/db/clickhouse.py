@@ -96,9 +96,9 @@ class ClickhouseHandler(DBHandler):
         return df
 
     def _normalize_column_to_non_nullable(self, df: DataFrame, column: str) -> DataFrame:
-        """Rewrite ``column`` with ``coalesce`` so Spark marks it non-nullable.
+        """Rewrite `column` with `coalesce` so Spark marks it non-nullable.
 
-        TODO: remove this workaround if Spark infers ``nullable=false`` without a dummy literal:
+        TODO: remove this workaround if Spark infers `nullable=false` without a dummy literal:
         https://issues.apache.org/jira/browse/SPARK-54302
         """
         field = df.schema[column]

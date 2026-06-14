@@ -8,21 +8,20 @@ from pydantic import BaseModel, Field, ValidationInfo, field_validator
 class StaticFilesSettings(BaseModel):
     """Static files serving settings.
 
-    Files are served at ``/static`` endpoint.
+    Files are served at `/static` endpoint.
 
     Examples
     --------
 
-    .. code-block:: yaml
-        :caption: config.yml
-
-        server:
-            static_files:
-                enabled: True
-                directory: /app/syncmaster/server/static
+    ```yaml title="config.yml"
+    server:
+        static_files:
+            enabled: True
+            directory: /app/syncmaster/server/static
+    ```
     """
 
-    enabled: bool = Field(default=True, description="Set to ``True`` to enable static file serving")
+    enabled: bool = Field(default=True, description="Set to `True` to enable static file serving")
     directory: Path = Field(
         default=Path("docs/_static"),
         description="Directory containing static files",

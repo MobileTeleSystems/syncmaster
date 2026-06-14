@@ -22,19 +22,18 @@ class WorkerSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: yaml
-        :caption: config.yml
+    ```yaml title="config.yml"
+    worker:
+        log_url_template: "https://logs.location.example.com/syncmaster-worker?correlation_id={{ correlation_id }}&run_id={{ run.id }}"
 
-        worker:
-            log_url_template: "https://logs.location.example.com/syncmaster-worker?correlation_id={{ correlation_id }}&run_id={{ run.id }}"
-
-            create_spark_session_function: custom_syncmaster.spark.get_worker_spark_session
-            spark_session_default_config:
-                spark.master: local
-                spark.driver.host: 127.0.0.1
-                spark.driver.bindAddress: 0.0.0.0
-                spark.sql.pyspark.jvmStacktrace.enabled: true
-                spark.ui.enabled: false
+        create_spark_session_function: custom_syncmaster.spark.get_worker_spark_session
+        spark_session_default_config:
+            spark.master: local
+            spark.driver.host: 127.0.0.1
+            spark.driver.bindAddress: 0.0.0.0
+            spark.sql.pyspark.jvmStacktrace.enabled: true
+            spark.ui.enabled: false
+    ```
     """  # noqa: E501
 
     create_spark_session_function: ImportString = Field(
@@ -48,7 +47,7 @@ class WorkerSettings(BaseModel):
     )
     log_url_template: str = Field(
         "",
-        description=":ref:`URL template to access worker logs <worker-log-url>`",
+        description="[URL template to access worker logs][worker-log-url]",
     )
 
 
@@ -59,29 +58,28 @@ class WorkerAppSettings(BaseSettings):
     This class is used to configure various settings for the worker application.
     The settings can be passed in several ways:
 
-    1. By storing settings in a configuration file ``config.yml`` (preferred).
-    2. By setting environment variables matching specific keys (``SYNCMASTER__DATABASE__URL`` == ``database.url``).
+    1. By storing settings in a configuration file `config.yml` (preferred).
+    2. By setting environment variables matching specific keys (`SYNCMASTER__DATABASE__URL` == `database.url`).
     3. By explicitly passing a settings object as an argument of application factory function.
 
     More details can be found in
-    `Pydantic documentation <https://docs.pydantic.dev/latest/concepts/pydantic_settings/>`_.
+    [Pydantic documentation](https://docs.pydantic.dev/latest/concepts/pydantic_settings/).
 
     Examples
     --------
 
-    .. code-block:: yaml
-        :caption: config.yml
+    ```yaml title="config.yml"
+    database:
+        url: postgresql+asyncpg://postgres:postgres@localhost:5432/syncmaster
 
-        database:
-            url: postgresql+asyncpg://postgres:postgres@localhost:5432/syncmaster
+    broker:
+        url: amqp://user:password@localhost:5672/
 
-        broker:
-            url: amqp://user:password@localhost:5672/
-
-        logging: {}
-        encryption: {}
-        worker: {}
-        hwm_store: {}
+    logging: {}
+    encryption: {}
+    worker: {}
+    hwm_store: {}
+    ```
     """
 
     database: DatabaseSettings = Field(default_factory=DatabaseSettings, description="Database settings")  # type: ignore[arg-type]

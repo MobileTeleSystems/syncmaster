@@ -9,23 +9,22 @@ from pydantic import BaseModel, ConfigDict, Field
 class DatabaseSettings(BaseModel):
     """Database connection settings.
 
-    .. note::
+    !!! note
 
         You can pass here any extra option supported by
-        `SQLAlchemy Engine class <https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.create_engine>`_,
+        [SQLAlchemy Engine class](https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.create_engine),
         even if it is not mentioned in documentation.
 
     Examples
     --------
 
-    .. code-block:: yaml
-        :caption: config.yml
+    ```yaml title="config.yml"
+    database:
+        url: postgresql+asyncpg://postgres:postgres@localhost:5432/syncmaster
 
-        database:
-            url: postgresql+asyncpg://postgres:postgres@localhost:5432/syncmaster
-
-            # custom option passed directly to SQLAlchemy Engine
-            pool_pre_ping: True
+        # custom option passed directly to SQLAlchemy Engine
+        pool_pre_ping: True
+    ```
     """
 
     url: str = Field(
@@ -33,11 +32,11 @@ class DatabaseSettings(BaseModel):
             """
             Database connection URL.
 
-            See `SQLAlchemy documentation <https://docs.sqlalchemy.org/en/20/core/engines.html#server-specific-urls>`_
+            See [SQLAlchemy documentation](https://docs.sqlalchemy.org/en/20/core/engines.html#server-specific-urls)
 
-            .. warning:
+            !!! warning
 
-                Only async drivers are supported, e.g. ``asyncpg``
+                Only async drivers are supported, e.g. `asyncpg`
             """,
         ),
     )

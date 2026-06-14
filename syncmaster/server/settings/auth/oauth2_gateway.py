@@ -17,17 +17,16 @@ class OAuth2GatewayProviderSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: yaml
-        :caption: config.yml
-
-        auth:
-            provider: syncmaster.server.providers.auth.oauth2_gateway_provider.OAuth2GatewayProvider
-            keycloak:
-                api_url: http://localhost:8080/auth
-                client_id: my_keycloak_client
-                client_secret: keycloak_client_secret
-                realm_name: my_realm
-                verify_ssl: false
+    ```yaml title="config.yml"
+    auth:
+        provider: syncmaster.server.providers.auth.oauth2_gateway_provider.OAuth2GatewayProvider
+        keycloak:
+            api_url: http://localhost:8080/auth
+            client_id: my_keycloak_client
+            client_secret: keycloak_client_secret
+            realm_name: my_realm
+            verify_ssl: false
+    ```
     """
 
     keycloak: OAuth2GatewayKeycloakSettings = Field(

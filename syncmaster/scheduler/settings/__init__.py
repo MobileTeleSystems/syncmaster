@@ -18,12 +18,11 @@ class SchedulerSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: yaml
-        :caption: config.yml
-
-        scheduler:
-            transfer_fetching_timeout_seconds: 200
-            misfire_grace_time_seconds: 300
+    ```yaml title="config.yml"
+    scheduler:
+        transfer_fetching_timeout_seconds: 200
+        misfire_grace_time_seconds: 300
+    ```
     """
 
     TRANSFER_FETCHING_TIMEOUT_SECONDS: int = Field(
@@ -42,28 +41,27 @@ class SchedulerAppSettings(BaseSettings):
 
     The settings can be passed in several ways:
 
-    1. By storing settings in a configuration file ``config.yml`` (preferred).
-    2. By setting environment variables matching specific keys (``SYNCMASTER__DATABASE__URL`` == ``database.url``).
+    1. By storing settings in a configuration file `config.yml` (preferred).
+    2. By setting environment variables matching specific keys (`SYNCMASTER__DATABASE__URL` == `database.url`).
     3. By explicitly passing a settings object as an argument of application factory function.
 
     More details can be found in
-    `Pydantic documentation <https://docs.pydantic.dev/latest/concepts/pydantic_settings/>`_.
+    [Pydantic documentation](https://docs.pydantic.dev/latest/concepts/pydantic_settings/).
 
     Examples
     --------
 
-    .. code-block:: yaml
-        :caption: config.yml
+    ```yaml title="config.yml"
+    database:
+        url: postgresql+asyncpg://postgres:postgres@localhost:5432/syncmaster
 
-        database:
-            url: postgresql+asyncpg://postgres:postgres@localhost:5432/syncmaster
+    broker:
+        url: amqp://user:password@localhost:5672/
 
-        broker:
-            url: amqp://user:password@localhost:5672/
-
-        logging: {}
-        encryption: {}
-        scheduler: {}
+    logging: {}
+    encryption: {}
+    scheduler: {}
+    ```
     """
 
     database: DatabaseSettings = Field(default_factory=DatabaseSettings, description="Database settings")  # type: ignore[arg-type]

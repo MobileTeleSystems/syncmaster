@@ -19,50 +19,49 @@ class ServerAppSettings(BaseSettings):
 
     The settings can be passed in several ways:
 
-    1. By storing settings in a configuration file ``config.yml`` (preferred).
-    2. By setting environment variables matching specific keys (``SYNCMASTER__DATABASE__URL`` == ``database.url``).
+    1. By storing settings in a configuration file `config.yml` (preferred).
+    2. By setting environment variables matching specific keys (`SYNCMASTER__DATABASE__URL` == `database.url`).
     3. By explicitly passing a settings object as an argument of application factory function.
 
     More details can be found in
-    `Pydantic documentation <https://docs.pydantic.dev/latest/concepts/pydantic_settings/>`_.
+    [Pydantic documentation](https://docs.pydantic.dev/latest/concepts/pydantic_settings/).
 
     Examples
     --------
 
-    .. code-block:: yaml
-        :caption: config.yml
+    ```yaml title="config.yml"
+    database:
+        url: postgresql+asyncpg://postgres:postgres@localhost:5432/syncmaster
 
-        database:
-            url: postgresql+asyncpg://postgres:postgres@localhost:5432/syncmaster
+    broker:
+        url: amqp://user:password@localhost:5672/
 
-        broker:
-            url: amqp://user:password@localhost:5672/
-
-        logging: {}
-        encryption: {}
-        server: {}
-        auth: {}
+    logging: {}
+    encryption: {}
+    server: {}
+    auth: {}
+    ```
     """
 
     database: DatabaseSettings = Field(
         default_factory=DatabaseSettings,  # type: ignore[arg-type]
-        description=":ref:`Database settings <server-configuration-database>`",
+        description="[Database settings][server-configuration-database]",
     )
     broker: RabbitMQSettings = Field(
         default_factory=RabbitMQSettings,  # type: ignore[arg-type]
-        description=":ref:`Broker settings <server-configuration-broker>`",
+        description="[Broker settings][server-configuration-broker]",
     )
     logging: LoggingSettings = Field(
         default=DEFAULT_LOGGING_SETTINGS,
-        description=":ref:`Logging settings <server-configuration-logging>`",
+        description="[Logging settings][server-configuration-logging]",
     )
     server: ServerSettings = Field(
         default_factory=ServerSettings,
-        description=":ref:`Server settings <server-configuration>`",
+        description="[Server settings][server-configuration]",
     )
     auth: AuthSettings = Field(
         default_factory=AuthSettings,
-        description=":ref:`Auth provider settings <server-auth-providers>`",
+        description="[Auth provider settings][server-auth-providers]",
     )
     encryption: CredentialsEncryptionSettings = Field(
         default_factory=CredentialsEncryptionSettings,  # type: ignore[arg-type]

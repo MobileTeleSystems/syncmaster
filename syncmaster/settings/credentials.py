@@ -9,23 +9,24 @@ class CredentialsEncryptionSettings(BaseModel):
     """Settings for encrypting & decrypting credential data stored in database.
 
     Connecting to source and target databases, file systems and so on requires credentials to be passed.
-    For now, SyncMaster stores all credentials in database table ``credentials``, in encrypted form.
-    This is done by symmetric algorithm `Fernet <https://cryptography.io/en/latest/fernet/>`_.
+    For now, SyncMaster stores all credentials in database table `credentials`, in encrypted form.
+    This is done by symmetric algorithm [Fernet](https://cryptography.io/en/latest/fernet/).
 
     Before starting SyncMaster, generate a new key using the following example:
 
+    ```python
     >>> from cryptography.fernet import Fernet
     >>> Fernet.generate_key().decode('utf-8')
     UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94=
+    ```
 
     Examples
     --------
 
-    .. code-block:: yaml
-        :caption: config.yml
-
-        encryption:
-            secret_key: UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94=
+    ```yaml title="config.yml"
+    encryption:
+        secret_key: UBgPTioFrtH2unlC4XFDiGf5sYfzbdSf_VgiUSaQc94=
+    ```
     """
 
     secret_key: str = Field(

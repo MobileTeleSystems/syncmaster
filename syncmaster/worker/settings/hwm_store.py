@@ -8,26 +8,25 @@ from pydantic import BaseModel, Field, model_validator
 class HWMStoreSettings(BaseModel):
     """HWM Store settings.
 
-    HWM Store is used for incremental strategy. See `etl-entities documentation <https://etl-entities.readthedocs.io/en/stable/hwm_store/base_hwm_store.html>`_.
+    HWM Store is used for incremental strategy. See [etl-entities documentation](https://etl-entities.readthedocs.io/en/stable/hwm_store/base_hwm_store.html).
 
-    .. note::
+    !!! note
 
-        For now, the only supported HWMStore type for now is `Horizon <https://data-horizon.readthedocs.io/>`_.
+        For now, the only supported HWMStore type for now is [Horizon](https://data-horizon.readthedocs.io/).
 
     Examples
     --------
 
-    .. code-block:: yaml
-        :caption: config.yml
-
-        hwm_store:
-            # Set the HWM Store connection URL
-            enabled: true
-            type: horizon
-            url: http://horizon:8000
-            user: some_user
-            password: changeme
-            namespace: syncmaster_internal
+    ```yaml title="config.yml"
+    hwm_store:
+        # Set the HWM Store connection URL
+        enabled: true
+        type: horizon
+        url: http://horizon:8000
+        user: some_user
+        password: changeme
+        namespace: syncmaster_internal
+    ```
     """
 
     enabled: bool = Field(
