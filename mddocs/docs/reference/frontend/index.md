@@ -26,7 +26,7 @@ providing users the ability to create, update, delete entities.
 
 ```yaml
 --8<--
-docker-compose.yml:118:130
+docker-compose.yml:120:132
 --8<--
 ```
 
