@@ -11,13 +11,12 @@ class DummyAuthProviderSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: yaml
-        :caption: config.yml
-
-        auth:
-            provider: syncmaster.server.providers.auth.dummy_provider.DummyAuthProvider
-            access_key:
-                secret_key: jwt_secret
+    ```yaml title="config.yml"
+    auth:
+        provider: syncmaster.server.providers.auth.dummy_provider.DummyAuthProvider
+        access_key:
+            secret_key: jwt_secret
+    ```
     """
 
     access_token: JWTSettings = Field(description="Access-token related settings")

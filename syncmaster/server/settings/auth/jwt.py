@@ -12,13 +12,12 @@ class JWTSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: yaml
-        :caption: config.yml
-
-        auth:
-            access_key:
-                secret_key: jwt_secret
-                expire_seconds: 3600  # 1 hour
+    ```yaml title="config.yml"
+    auth:
+        access_key:
+            secret_key: jwt_secret
+            expire_seconds: 3600  # 1 hour
+    ```
     """
 
     secret_key: SecretStr = Field(
@@ -28,9 +27,9 @@ class JWTSettings(BaseModel):
 
             Can be any string. It is recommended to generate random value for every application instance, e.g.:
 
-            .. code:: shell
-
-                pwgen 32 1
+            ```shell
+            pwgen 32 1
+            ```
             """,
         ),
     )
@@ -40,7 +39,7 @@ class JWTSettings(BaseModel):
             """
             Algorithm used for signing JWT tokens.
 
-            See `pyjwt <https://pyjwt.readthedocs.io/en/latest/algorithms.html>`_
+            See [pyjwt](https://pyjwt.readthedocs.io/en/latest/algorithms.html)
             documentation.
             """,
         ),

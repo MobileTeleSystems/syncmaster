@@ -11,10 +11,12 @@ class AuthorizationError(SyncmasterError):
     Examples
     --------
 
+    ```python
     >>> from syncmaster.exceptions import AuthorizationError
     >>> raise AuthorizationError("User 'test' is disabled")
     Traceback (most recent call last):
     syncmaster.exceptions.auth.AuthorizationError: User 'test' is disabled
+    ```
     """
 
     def __init__(self, message: str, details: Any = None) -> None:

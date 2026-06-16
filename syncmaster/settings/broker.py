@@ -11,19 +11,18 @@ class RabbitMQSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: yaml
-        :caption: config.yml
+    ```yaml title="config.yml"
+    broker:
+        url: amqp://guest:guest@rabbitmq:5672/
 
-        broker:
-            url: amqp://guest:guest@rabbitmq:5672/
-
-            # custom option passed directly to RabbitMQ client
-            connection_timeout: 30
+        # custom option passed directly to RabbitMQ client
+        connection_timeout: 30
+    ```
     """
 
     url: str = Field(
         description=(
-            "RabbitMQ connection URL.\n\nSee the `RabbitMQ documentation <https://www.rabbitmq.com/uri-spec.html>`_ "
+            "RabbitMQ connection URL.\n\nSee the [RabbitMQ documentation](https://www.rabbitmq.com/uri-spec.html) "
         ),
     )
 

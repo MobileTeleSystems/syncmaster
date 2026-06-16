@@ -25,11 +25,11 @@ class KeycloakSettings(BaseModel):
 class KeycloakCookieSettings(BaseModel):
     """Keycloak cookie Middleware Settings.
 
-    See `SessionMiddleware <https://www.starlette.io/middleware/#sessionmiddleware>`_ documentation.
+    See [SessionMiddleware](https://www.starlette.io/middleware/#sessionmiddleware) documentation.
 
-    .. note::
+    !!! note
 
-        You can pass here any extra option supported by ``SessionMiddleware``,
+        You can pass here any extra option supported by `SessionMiddleware`,
         even if it is not mentioned in documentation.
 
     Examples
@@ -37,36 +37,32 @@ class KeycloakCookieSettings(BaseModel):
 
     For development environment:
 
-    .. code-block:: yaml
-        :caption: config.yml
-
-        auth:
-            provider: syncmaster.server.providers.auth.keycloak_provider.KeycloakAuthProvider
-            keycloak: ...
-            cookie:
-                secret_key: cookie_secret
-                name: custom_name
-                max_age: null
-                same_site: lax
-                https_only: false
-                domain: localhost
-
+    ```yaml title="config.yml"
+    auth:
+        provider: syncmaster.server.providers.auth.keycloak_provider.KeycloakAuthProvider
+        keycloak: ...
+        cookie:
+            secret_key: cookie_secret
+            name: custom_name
+            max_age: null
+            same_site: lax
+            https_only: false
+            domain: localhost
+    ```
     For production environment:
 
-    .. code-block:: yaml
-        :caption: config.yml
-
-        auth:
-            provider: syncmaster.server.providers.auth.keycloak_provider.KeycloakAuthProvider
-            keycloak: ...
-            cookie:
-                secret_key: cookie_secret
-                name: custom_name
-                max_age: 2678400  # 31 days
-                same_site: strict
-                https_only: true
-                domain: example.com
-
+    ```yaml title="config.yml"
+    auth:
+        provider: syncmaster.server.providers.auth.keycloak_provider.KeycloakAuthProvider
+        keycloak: ...
+        cookie:
+            secret_key: cookie_secret
+            name: custom_name
+            max_age: 2678400  # 31 days
+            same_site: strict
+            https_only: true
+            domain: example.com
+    ```
     """
 
     secret_key: SecretStr = Field(
@@ -76,9 +72,9 @@ class KeycloakCookieSettings(BaseModel):
 
             Can be any string. It is recommended to generate random value for every application instance, e.g.:
 
-            .. code:: shell
-
-                pwgen 32 1
+            ```shell
+            pwgen 32 1
+            ```
             """,
         ),
     )
@@ -110,21 +106,20 @@ class KeycloakAuthProviderSettings(BaseModel):
     Examples
     --------
 
-    .. code-block:: yaml
-        :caption: config.yml
-
-        auth:
-            provider: syncmaster.server.providers.auth.keycloak_provider.KeycloakAuthProvider
-            keycloak:
-                api_url: http://localhost:8080/auth
-                client_id: my_keycloak_client
-                client_secret: keycloak_client_secret
-                realm_name: my_realm
-                ui_callback_url: http://localhost:8000/auth/realms/my_realm/protocol/openid-connect/auth
-                verify_ssl: false
-                scope: openid
-            cookie:
-                secret_key: cookie_secret
+    ```yaml title="config.yml"
+    auth:
+        provider: syncmaster.server.providers.auth.keycloak_provider.KeycloakAuthProvider
+        keycloak:
+            api_url: http://localhost:8080/auth
+            client_id: my_keycloak_client
+            client_secret: keycloak_client_secret
+            realm_name: my_realm
+            ui_callback_url: http://localhost:8000/auth/realms/my_realm/protocol/openid-connect/auth
+            verify_ssl: false
+            scope: openid
+        cookie:
+            secret_key: cookie_secret
+    ```
     """
 
     keycloak: KeycloakSettings = Field(
