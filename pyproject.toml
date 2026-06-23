@@ -34,7 +34,7 @@ keywords = ["Syncmaster", "REST", "API", "Worker", "Spark", "Transfer", "ETL"]
 requires-python = ">=3.11"
 dependencies = [
     "pydantic~=2.13.4",
-    "pydantic-settings~=2.14.1",
+    "pydantic-settings~=2.14.2",
     "pydantic-settings-logging~=0.1.1",
     "sqlalchemy~=2.0.50",
     "sqlalchemy-utils~=0.42.0",
@@ -65,7 +65,7 @@ exclude = ["docs", "tests"]
 
 [project.optional-dependencies]
 server = [
-    "fastapi>=0.136.3,<0.138.0",
+    "fastapi~=0.138.0",
     # starlette 1.0.0 break cookies
     "starlette<1.0",
     "starlette-exporter~=0.23.0",
@@ -102,15 +102,15 @@ test = [
     "pytest-mock~=3.15.1",
     "pytest-lazy-fixtures~=1.4.0",
     "faker~=40.13",
-    "coverage~=7.14.0",
+    "coverage~=7.14.3",
     "gevent~=26.5.0",
     "respx~=0.23.1",
     "dirty-equals~=0.11.0",
 ]
 dev = [
-    "ruff~=0.15.15",
+    "ruff~=0.15.18",
     "mypy~=2.1.0",
-    "prek~=0.4.4",
+    "prek~=0.4.5",
     "sqlalchemy[mypy]~=2.0.50",
     "types-jwcrypto~=1.5.0",
 ]
