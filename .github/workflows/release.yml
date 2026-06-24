@@ -3,16 +3,16 @@ name: PyPI release
 on:
   push:
     tags:
-      - '[0-9]+.[0-9]+.[0-9]+'
+      - "[0-9]+.[0-9]+.[0-9]+"
 
 env:
-  DEFAULT_PYTHON: '3.13'
+  DEFAULT_PYTHON: "3.13"
 
 jobs:
   release:
     name: Release package
     runs-on: ubuntu-latest
-    if: github.repository == 'MTSWebServices/syncmaster'  # prevent running on forks
+    if: github.repository == 'MTSWebServices/syncmaster' # prevent running on forks
 
     environment:
       name: pypi
@@ -35,7 +35,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
-          enable-cache: 'false'
+          enable-cache: "false"
 
       - name: Generate OpenAPI Schema
         run: |
@@ -119,5 +119,5 @@ jobs:
           files: |
             dist/*.tar.gz
             dist/*.whl
-            docs/_static/openapi.json
+            mddocs/docs/_static/openapi.json
             sbom.cyclonedx.json

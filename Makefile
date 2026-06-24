@@ -186,7 +186,7 @@ docs-cleanup: ##@Docs Cleanup docs
 docs-fresh: docs-cleanup docs-build ##@Docs Cleanup & build docs
 
 docs-openapi: ##@Docs Generate OpenAPI schema
-	${PYTHON} -m syncmaster.server.scripts.export_openapi_schema docs/_static/openapi.json
+	${PYTHON} -m syncmaster.server.scripts.export_openapi_schema mddocs/docs/_static/openapi.json
 
 mddocs-build: mddocs-openapi ##@Docs Generate mkdocs documentation
 	PYTHONPATH=. DISABLE_MKDOCS_2_WARNING=true ${VIRTUAL_ENV}/bin/mkdocs build --strict --config-file mddocs/mkdocs.yml
