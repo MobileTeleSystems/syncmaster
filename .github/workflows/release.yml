@@ -3,10 +3,10 @@ name: PyPI release
 on:
   push:
     tags:
-      - "[0-9]+.[0-9]+.[0-9]+"
+      - '[0-9]+.[0-9]+.[0-9]+'
 
 env:
-  DEFAULT_PYTHON: "3.13"
+  DEFAULT_PYTHON: '3.13'
 
 jobs:
   release:
@@ -35,7 +35,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
-          enable-cache: "false"
+          enable-cache: 'false'
 
       - name: Generate OpenAPI Schema
         run: |
