@@ -6,13 +6,14 @@ mkdocs:
 build:
   os: ubuntu-24.04
   tools:
-    python: '3.11'
+    python: "3.11"
   jobs:
     post_create_environment:
       - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH python -m pip install uv
     post_install:
       - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH uv sync --no-install-project --group mddocs
       - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH python -m pip list -v
+      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH make docs-openapi
     pre_build:
       - python mddocs/scripts/fix_refs.py
       - python mddocs/scripts/links2anchors.py
