@@ -12,7 +12,7 @@ services:
     volumes:
       - postgres_test_data:/var/lib/postgresql/data
     healthcheck:
-      test: [CMD-SHELL, "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      test: [CMD-SHELL, 'pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}']
       start_period: 5s
       interval: 30s
       timeout: 5s
@@ -124,25 +124,7 @@ services:
         condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
-    profiles:
-      [
-        worker,
-        scheduler,
-        s3,
-        hdfs,
-        hive,
-        iceberg,
-        oracle,
-        clickhouse,
-        mysql,
-        mssql,
-        sftp,
-        ftp,
-        ftps,
-        samba,
-        webdav,
-        all,
-      ]
+    profiles: [worker, scheduler, s3, hdfs, hive, iceberg, oracle, clickhouse, mysql, mssql, sftp, ftp, ftps, samba, webdav, all]
 
   horizon:
     image: mtsrus/horizon-backend:develop
@@ -180,7 +162,7 @@ services:
     volumes:
       - horizon_test_data:/var/lib/postgresql/data
     healthcheck:
-      test: [CMD-SHELL, "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      test: [CMD-SHELL, 'pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}']
       start_period: 5s
       interval: 30s
       timeout: 5s
@@ -198,7 +180,7 @@ services:
       POSTGRES_USER: syncmaster
       POSTGRES_PASSWORD: 123UsedForTestOnly@!
     healthcheck:
-      test: [CMD-SHELL, "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      test: [CMD-SHELL, 'pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}']
       start_period: 5s
       interval: 30s
       timeout: 5s
@@ -309,7 +291,7 @@ services:
     ports:
       - 5440:5432
     healthcheck:
-      test: [CMD-SHELL, "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      test: [CMD-SHELL, 'pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}']
       start_period: 5s
       interval: 30s
       timeout: 5s
@@ -349,7 +331,7 @@ services:
       - 9864:9864 # Datanode UI
     environment:
       TZ: UTC
-      WITH_HIVE_SERVER: "false" # We leave only the metastore server, we don’t need Hive itself, we don’t waste resources on it
+      WITH_HIVE_SERVER: 'false' # We leave only the metastore server, we don’t need Hive itself, we don’t waste resources on it
       HIVE_METASTORE_DB_URL: jdbc:postgresql://metastore-hive:5432/metastore
       HIVE_METASTORE_DB_DRIVER: org.postgresql.Driver
       HIVE_METASTORE_DB_USER: test_hive
@@ -367,8 +349,8 @@ services:
       PUID: 1000
       PGID: 1000
       USER_NAME: syncmaster
-      PASSWORD_ACCESS: "true"
-      SUDO_ACCESS: "true"
+      PASSWORD_ACCESS: 'true'
+      SUDO_ACCESS: 'true'
       USER_PASSWORD: 123UsedForTestOnly@!
     profiles: [sftp, all]
 
@@ -377,7 +359,7 @@ services:
     restart: unless-stopped
     environment:
       TZ: UTC
-      USE_SSL: "false"
+      USE_SSL: 'false'
       PASSV_MIN_PORT: 30000
       PASSV_MAX_PORT: 30010
       APP_USER_NAME: syncmaster
@@ -396,7 +378,7 @@ services:
     restart: unless-stopped
     environment:
       TZ: UTC
-      USE_SSL: "true"
+      USE_SSL: 'true'
       PASSV_MIN_PORT: 30020
       PASSV_MAX_PORT: 30030
       APP_USER_NAME: syncmaster
