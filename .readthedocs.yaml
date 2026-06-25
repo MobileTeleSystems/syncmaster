@@ -11,7 +11,7 @@ build:
     post_create_environment:
       - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH python -m pip install uv
     post_install:
-      - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH uv sync --no-install-project --group mddocs
+      - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH uv sync --no-install-project --extra server --group mddocs
       - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH python -m pip list -v
       - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH make docs-openapi
     pre_build:
