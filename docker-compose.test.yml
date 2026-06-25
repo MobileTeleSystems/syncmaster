@@ -63,7 +63,7 @@ services:
     volumes:
       - ./config.docker.yml:/app/config.yml
       - ./syncmaster:/app/syncmaster
-      - ./mddocs/docs/_static:/app/docs/_static
+      - ./mddocs/docs/_static:/app/mddocs/docs/_static
       - ./reports:/app/reports
       - ./tests:/app/tests
       - ./pyproject.toml:/app/pyproject.toml
