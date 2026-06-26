@@ -1,6 +1,6 @@
 # Changelog { #changelog }
 
-* [0.3.5 [UNRELEASED]][DRAFT]
+* [Next release](./NEXT_RELEASE)
 * [0.3.4 (2026-05-26)][0.3.4]
 * [0.3.3 (2026-05-26)][0.3.3]
 * [0.3.2 (2026-03-05)][0.3.2]

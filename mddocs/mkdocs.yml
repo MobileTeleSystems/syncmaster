@@ -34,6 +34,7 @@ extra_javascript:
   - _static/javascripts/mermaid_zoom.js
 
 plugins:
+  - towncrier
   - autorefs:
       resolve_closest: true
   - literate-nav:

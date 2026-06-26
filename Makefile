@@ -37,7 +37,6 @@ venv-cleanup: ##@Env Cleanup venv
 
 venv-install: ##@Env Install requirements to venv
 	${UV} sync --inexact --frozen --extra "server" --extra "scheduler" --extra "worker" --all-groups $(ARGS)
-	${UV} pip install --no-deps sphinx-plantuml
 
 
 
@@ -175,21 +174,27 @@ prod-cleanup: ##@Application Stop production containers
 docs: docs-build docs-open ##@Docs Generate & open docs
 
 docs-build: ##@Docs Generate docs
-	${UV} run $(MAKE) -C docs html
+	PYTHONPATH=. DISABLE_MKDOCS_2_WARNING=true ${VIRTUAL_ENV}/bin/mkdocs build --config-file mddocs/mkdocs.yml
 
 docs-open: ##@Docs Open docs
-	xdg-open docs/_build/html/index.html
+	xdg-open mddocs/generated/index.html
 
 docs-cleanup: ##@Docs Cleanup docs
-	$(MAKE) -C docs clean
+	rm -rf mddocs/generated/
 
 docs-fresh: docs-cleanup docs-build ##@Docs Cleanup & build docs
 
+docs-serve: ##@Docs Run docs server
+	PYTHONPATH=. DISABLE_MKDOCS_2_WARNING=true ${VIRTUAL_ENV}/bin/mkdocs serve --config-file mddocs/mkdocs.yml
+
+docs-generate-changelog: ##@Docs Generate changelog
+	cp "mddocs/docs/changelog/RELEASE_TEMPLATE.md" "mddocs/docs/changelog/temp_RELEASE_TEMPLATE.md"
+	${UV} run towncrier build "--version=$(shell cat syncmaster/VERSION)" --yes
+	mv "mddocs/docs/changelog/RELEASE_TEMPLATE.md" "mddocs/docs/changelog/$(shell cat syncmaster/VERSION).md"
+	mv "mddocs/docs/changelog/temp_RELEASE_TEMPLATE.md" "mddocs/docs/changelog/RELEASE_TEMPLATE.md"
+	awk '/##/,0' "mddocs/docs/changelog/$(shell cat syncmaster/VERSION).md" > temp && mv temp "mddocs/docs/changelog/$(shell cat syncmaster/VERSION).md"
+	sed "s#\(.*NEXT_RELEASE.*\)#\1\n- [$(shell cat syncmaster/VERSION) ($(shell date --rfc-3339=date))][$(shell cat syncmaster/VERSION | tr '.' '-')]#" "mddocs/docs/changelog/index.md" > temp && mv temp "mddocs/docs/changelog/index.md"
+	sed "s#\(.*NEXT_RELEASE.*\)#\1\n    * [$(shell cat syncmaster/VERSION)](changelog/$(shell cat syncmaster/VERSION).md)#" "mddocs/docs/nav.md" > temp && mv temp "mddocs/docs/nav.md"
+
 docs-openapi: ##@Docs Generate OpenAPI schema
-	${PYTHON} -m syncmaster.server.scripts.export_openapi_schema mddocs/docs/_static/openapi.json
-
-mddocs-build: mddocs-openapi ##@Docs Generate mkdocs documentation
-	PYTHONPATH=. DISABLE_MKDOCS_2_WARNING=true ${VIRTUAL_ENV}/bin/mkdocs build --strict --config-file mddocs/mkdocs.yml
-
-mddocs-openapi: ##@Docs Generate OpenAPI schema for mkdocs documentation
 	${PYTHON} -m syncmaster.server.scripts.export_openapi_schema mddocs/docs/_static/openapi.json
