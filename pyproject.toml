@@ -65,7 +65,7 @@ exclude = ["docs", "tests"]
 
 [project.optional-dependencies]
 server = [
-    "fastapi~=0.138.0",
+    "fastapi>=0.138,<0.140",
     # starlette 1.0.0 break cookies
     "starlette<1.0",
     "starlette-exporter~=0.23.0",
@@ -125,7 +125,7 @@ docs = [
   "sphinx-issues~=6.0.0",
   "sphinx-design~=0.7.0",
   "sphinx-favicon~=1.1.0",
-  "sphinx-argparse~=0.5.2",
+  "sphinx-argparse>=0.5.2,<0.7.0",
   # https://github.com/mgeier/sphinx-last-updated-by-git/pull/77
   "sphinx-last-updated-by-git~=0.3.8",
   # uncomment after https://github.com/zqmillet/sphinx-plantuml/pull/4
