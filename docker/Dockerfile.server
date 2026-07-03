@@ -13,7 +13,7 @@ WORKDIR /app
 ENV PYTHONPATH=/app \
     PATH="/app/.venv/bin:$PATH"
 
-COPY ./docs/_static/*.svg /app/syncmaster/server/static/
+COPY ./mddocs/docs/_static/*.svg /app/syncmaster/server/static/
 
 # Swagger UI
 ADD --chmod=755 https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui-bundle.js https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest/swagger-ui.css \

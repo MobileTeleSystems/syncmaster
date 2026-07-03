@@ -43,7 +43,7 @@ If you already have venv, but need to install dependencies required for developm
 make venv-install
 ```
 
-We are using [poetry](https://python-poetry.org/docs/managing-dependencies/) for managing dependencies and building the package.
+We are using [uv](https://docs.astral.sh/uv/) for managing dependencies and building the package.
 It allows to keep development environment the same for all developers due to using lock file with fixed dependency versions.
 
 There are *extra* dependencies (included into package as optional):
@@ -55,7 +55,7 @@ And *groups* (not included into package, used locally and in CI):
 
 * `test` - for running tests
 * `dev` - for development, like linters, formatters, mypy, pre-commit and so on
-* `docs` - for building documentation
+* `mddocs` - for building documentation
 
 ### Enable pre-commit hooks
 
@@ -208,17 +208,13 @@ Settings are stored in `.env.docker` file.
 
 ### Build documentation
 
-Build documentation using Sphinx & open it:
+Build documentation using mkdocs:
 
 ```bash
-make docs
+make docs-serve
 ```
 
-If documentation should be build cleanly instead of reusing existing build result:
-
-```bash
-make docs-fresh
-```
+Then open in browser http://localhost:8000/
 
 ## Review process
 
@@ -254,7 +250,7 @@ Data.SyncMaster uses [towncrier](https://pypi.org/project/towncrier/)
 for changelog management.
 
 To submit a change note about your PR, add a text file into the
-`docs/changelog/next_release` folder. It should contain an
+`mddocs/docs/changelog/next_release` folder. It should contain an
 explanation of what applying this PR will change in the way
 end-users interact with the project. One sentence is usually
 enough but feel free to add as many details as you feel necessary
@@ -265,21 +261,15 @@ combined with others, it will be a part of the “news digest”
 telling the readers **what changed** in a specific version of
 the library *since the previous version*.
 
-reStructuredText syntax for highlighting code (inline or block),
-linking parts of the docs or external sites.
-If you wish to sign your change, feel free to add `-- by
-:user:`github-username`` at the end (replace `github-username`
-with your own!).
-
 Finally, name your file following the convention that Towncrier
 understands: it should start with the number of an issue or a
 PR followed by a dot, then add a patch type, like `feature`,
-`doc`, `misc` etc., and add `.rst` as a suffix. If you
+`doc`, `misc` etc., and add `.md` as a suffix. If you
 need to add more than one fragment, you may add an optional
 sequence number (delimited with another period) between the type
 and the suffix.
 
-In general the name will follow `<pr_number>.<category>.rst` pattern,
+In general the name will follow `<pr_number>.<category>.md` pattern,
 where the categories are:
 
 * `feature`: Any new feature. Adding new functionality that has not yet existed.
@@ -301,17 +291,12 @@ changes accompanying the relevant code changes.
 
 #### Examples for adding changelog entries to your Pull Requests
 
-```rst
-Added a ``:github:user:`` role to Sphinx config -- by :github:user:`someuser`
+```markdown title="mddocs/docs/changelog/next_release/2345.bugfix.md"
+Fixed behavior of `server`
 ```
 
-```rst
-Fixed behavior of ``server`` -- by :github:user:`someuser`
-```
-
-```rst
-Added support of ``timeout`` in ``LDAP``
--- by :github:user:`someuser`, :github:user:`anotheruser` and :github:user:`otheruser`
+```markdown title="mddocs/docs/changelog/next_release/3456.feature.md"
+Added support of `timeout` in `LDAP`
 ```
 
 #### How to skip change notes check?
@@ -329,44 +314,19 @@ Before making a release from the `develop` branch, follow these steps:
     git pull -p
     ```
 
-2. Backup `NEXT_RELEASE.rst`
+2. Get current release version
 
     ```bash
-    cp "docs/changelog/NEXT_RELEASE.rst" "docs/changelog/temp_NEXT_RELEASE.rst"
+    VERSION=$(cat syncmaster/VERSION)
     ```
 
-3. Build the Release notes with Towncrier
+3. Build changelog for current release
 
     ```bash
-    VERSION=$(poetry version -s)
-    towncrier build "--version=${VERSION}" --yes
+    make docs-generate-changelog
     ```
 
-4. Change file with changelog to release version number
-
-    ```bash
-    mv docs/changelog/NEXT_RELEASE.rst "docs/changelog/${VERSION}.rst"
-    ```
-
-5. Remove content above the version number heading in the `${VERSION}.rst` file
-
-    ```bash
-    awk '!/^.*towncrier release notes start/' "docs/changelog/${VERSION}.rst" > temp && mv temp "docs/changelog/${VERSION}.rst"
-    ```
-
-6. Update Changelog Index
-
-    ```bash
-    awk -v version=${VERSION} '/DRAFT/{print;print "    " version;next}1' docs/changelog/index.rst > temp && mv temp docs/changelog/index.rst
-    ```
-
-7. Restore `NEXT_RELEASE.rst` file from backup
-
-    ```bash
-    mv "docs/changelog/temp_NEXT_RELEASE.rst" "docs/changelog/NEXT_RELEASE.rst"
-    ```
-
-8. Commit and push changes to `develop` branch
+4. Commit and push changes to `develop` branch
 
     ```bash
     git add .
@@ -374,7 +334,7 @@ Before making a release from the `develop` branch, follow these steps:
     git push
     ```
 
-9. Merge `develop` branch to `master`, **WITHOUT** squashing
+5. Merge `develop` branch to `master`, **WITHOUT** squashing
 
     ```bash
     git checkout master
@@ -383,20 +343,20 @@ Before making a release from the `develop` branch, follow these steps:
     git push
     ```
 
-10. Add git tag to the latest commit in `master` branch
+6. Add git tag to the latest commit in `master` branch
 
     ```bash
     git tag "$VERSION"
     git push origin "$VERSION"
     ```
 
-11. Update version in `develop` branch **after release**:
+7. Update version in `develop` branch **after release**:
 
     ```bash
     git checkout develop
 
     NEXT_VERSION=$(echo "$VERSION" | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)
-    poetry version "$NEXT_VERSION"
+    echo $NEXT_VERSION > syncmaster/VERSION
 
     git add .
     git commit -m "Bump version"

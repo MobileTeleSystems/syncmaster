@@ -12,7 +12,7 @@ jobs:
   release:
     name: Release package
     runs-on: ubuntu-latest
-    if: github.repository == 'MTSWebServices/syncmaster'  # prevent running on forks
+    if: github.repository == 'MTSWebServices/syncmaster' # prevent running on forks
 
     environment:
       name: pypi
@@ -44,7 +44,7 @@ jobs:
 
       - name: Fix logo in Readme
         run: |
-          sed -i "s#image:: docs/#image:: https://raw.githubusercontent.com/MTSWebServices/syncmaster/$GITHUB_SHA/docs/#g" README.rst
+          sed -i "s#image:: mddocs/docs/#image:: https://raw.githubusercontent.com/MTSWebServices/syncmaster/$GITHUB_SHA/mddocs/docs/#g" README.rst
           sed -i "s#logo_wide_red_text.svg#logo_wide.svg#g" README.rst
 
       - name: Patch version template
@@ -62,48 +62,16 @@ jobs:
           uv pip install cyclonedx-bom
           uv export --all-extras --format requirements.txt | uv run cyclonedx-py requirements - > sbom.cyclonedx.json
 
-      - name: Get changelog
-        run: |
-          cat docs/changelog/$GITHUB_REF_NAME.rst > changelog.rst
-
-      - name: Prepare rST syntax for conversion to Markdown
-        run: |
-          # Replace Github links from Sphinx syntax with Markdown
-          sed -i -E 's/:github:issue:`(.*)`/#\1/g' changelog.rst
-          sed -i -E 's/:github:pull:`(.*)`/#\1/g' changelog.rst
-          sed -i -E 's/:github:user:`(.*)`/@\1/g' changelog.rst
-          sed -i -E 's/:github:org:`(.*)`/@\1/g' changelog.rst
-
-      - name: Convert rST to Markdown
-        uses: docker://pandoc/core:2.9
-        with:
-          args: >-
-            --output=changelog.md
-            --from=rst
-            --to=gfm
-            --wrap=none
-            changelog.rst
-
-      - name: Fixing Markdown syntax after conversion
-        run: |
-          # Replace ``` {.python caption="abc"} with ```python caption="abc"
-          sed -i -E 's/``` \{\.(.*)\}/```\1/g' changelog.md
-
-          # Replace ``` python with ```python
-          sed -i -E 's/``` (\w+)/```\1/g' changelog.md
-
-          # Replace \# with #
-          sed -i -E 's/\\#/#/g' changelog.md
-
-      - name: Get release name
+      - name: Prepare changelog
         id: release-name
         run: |
-          # Release name looks like: 0.7.0 (2023-05-15)
+          cat mddocs/docs/changelog/${GITHUB_REF_NAME}.md > changelog.md
+          # Remove anchors like "{ #syncmaster-changelog-0-3-4 }"
+          sed -i -E 's/\{.*\}//g' changelog.md
+          # Header looks like "## [0.3.4](...) - 2026-05-26"
+          # Release name looks like "0.3.4 - 2026-05-26"
           echo -n name= > "$GITHUB_OUTPUT"
           cat changelog.md | head -1 | sed -E "s/#+\s*//g" >> "$GITHUB_OUTPUT"
-
-      - name: Fix headers
-        run: |
           # Remove header with release name
           sed -i -e '1,2d' changelog.md
 
@@ -119,5 +87,5 @@ jobs:
           files: |
             dist/*.tar.gz
             dist/*.whl
-            docs/_static/openapi.json
+            mddocs/docs/_static/openapi.json
             sbom.cyclonedx.json

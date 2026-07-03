@@ -2,7 +2,7 @@
 
 |Logo|
 
-.. |Logo| image:: docs/_static/logo_wide_red_text.svg
+.. |Logo| image:: mddocs/docs/_static/logo_wide_red_text.svg
     :alt: Data.SyncMaster logo
     :target: https://github.com/MTSWebServices/data-syncmaster
 

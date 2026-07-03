@@ -23,7 +23,7 @@ class StaticFilesSettings(BaseModel):
 
     enabled: bool = Field(default=True, description="Set to `True` to enable static file serving")
     directory: Path = Field(
-        default=Path("docs/_static"),
+        default=Path("mddocs/docs/_static"),
         description="Directory containing static files",
     )
 
