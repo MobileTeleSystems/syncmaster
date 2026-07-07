@@ -1,4 +1,4 @@
-# Data.SyncMaster
+#
 
 [![Data.SyncMaster logo](_static/logo_wide.svg)](https://github.com/MTSWebServices/data-syncmaster)
 
@@ -38,24 +38,3 @@ Based on [onETL](https://onetl.readthedocs.io/) and [Apache Spark](https://spark
 
 * This is not a backup system
 * Only batch, no streaming
-
-High-level design
-
-* [Entities][entities]
-* [Permissions][role-permissions]
-
-Reference
-
-* [Architecture][reference-architecture]
-* [Database][database]
-* [Broker][message-broker]
-* [Server][server]
-* [Frontend][frontend]
-* [Worker][worker]
-* [Scheduler][scheduler]
-
-Development
-
-* [Changelog][changelog]
-* [Contributing][contributing]
-* [Security][security]
