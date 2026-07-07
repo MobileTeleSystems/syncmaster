@@ -1,3 +1,11 @@
-.logo {
-  width: 200px !important;
+.md-header__topic .md-ellipsis {
+  display: none;
+}
+
+.md-header__button.md-logo img, .md-header__button.md-logo svg {
+    height: 3rem;
+}
+
+:root  > * {
+  --md-primary-fg-color: #1890ff;
 }
