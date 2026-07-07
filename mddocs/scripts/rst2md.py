@@ -143,17 +143,6 @@ def _apply_inline(text: str) -> tuple[str, list[str]]:
         changes.append("etl-entities: :etl-entities:`D <path>` → [D](url)")
         text = new
 
-    # 5. RST substitutions → inline badge
-    # |support_hooks| is defined in docs/conf.py as a shields.io badge image.
-    # Inlined directly because mkdocstrings renders docstrings independently
-    # of the mkdocs-macros plugin, so {{ support_hooks }} would not be expanded.
-    text = sub(
-        r"\|support_hooks\|",
-        _SUPPORT_HOOKS_BADGE,
-        text,
-        "substitution: |support_hooks| → badge",
-    )
-
     return text, changes
 
 

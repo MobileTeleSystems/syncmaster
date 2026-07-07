@@ -22,7 +22,6 @@ class WorkerSettings(BaseModel):
     Examples
     --------
 
-    {% raw %}
     ```yaml title="config.yml"
     worker:
         log_url_template: "https://logs.location.example.com/syncmaster-worker?correlation_id={{ correlation_id }}&run_id={{ run.id }}"
@@ -35,7 +34,6 @@ class WorkerSettings(BaseModel):
             spark.sql.pyspark.jvmStacktrace.enabled: true
             spark.ui.enabled: false
     ```
-    {% endraw %}
     """  # noqa: E501
 
     create_spark_session_function: ImportString = Field(
