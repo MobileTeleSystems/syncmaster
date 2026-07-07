@@ -10,6 +10,7 @@ exclude_docs: |
 theme:
   name: material
   language: en
+  custom_dir: overrides
   features:
     - navigation.indexes
     - content.tabs.link
@@ -32,6 +33,7 @@ extra_css:
 
 extra_javascript:
   - _static/javascripts/mermaid_zoom.js
+  - _static/javascripts/readthedocs.js
 
 plugins:
   - search
@@ -62,6 +64,7 @@ plugins:
             docstring_section_style: list
             inherited_members: true
             show_if_no_docstring: true
+  - macros
   - towncrier
 
 markdown_extensions:
