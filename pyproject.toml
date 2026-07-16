@@ -111,7 +111,7 @@ test = [
 ]
 dev = [
     "ruff~=0.15.18",
-    "mypy>=2.1,<2.3",
+    "mypy>=2.1,<2.4",
     "prek~=0.4.5",
     "sqlalchemy[mypy]~=2.0.50",
     "types-jwcrypto~=1.5.0",
