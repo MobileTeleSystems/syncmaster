@@ -5,10 +5,10 @@
 set -ex
 
 if [ -z "$JAVA_HOME" ]; then
-  JAVA_HOME=$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')
+  export JAVA_HOME=$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')
 fi
 if [ -z "$SPARK_HOME" ]; then
-  SPARK_HOME=$(python -c 'import pyspark; import pathlib; print(pathlib.Path(pyspark.__file__).parent.resolve())')
+  export SPARK_HOME=$(python -c 'import pyspark; import pathlib; print(pathlib.Path(pyspark.__file__).parent.resolve())')
 fi
 
 SPARK_CLASSPATH="$SPARK_CLASSPATH:${SPARK_HOME}/jars/*"
