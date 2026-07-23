@@ -105,7 +105,7 @@ test = [
     "pytest-lazy-fixtures~=1.4.0",
     "faker~=40.13",
     "coverage>=7.14.3,<7.16.0",
-    "gevent~=26.5.0",
+    "gevent>=26.5,<26.8",
     "respx~=0.23.1",
     "dirty-equals~=0.11.0",
 ]
