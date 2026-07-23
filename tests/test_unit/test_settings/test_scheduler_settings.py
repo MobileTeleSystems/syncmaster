@@ -5,6 +5,8 @@ import pytest
 
 from syncmaster.scheduler.settings import SchedulerAppSettings
 
+pytestmark = [pytest.mark.scheduler]
+
 
 def _clear_settings_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     for variable_name in tuple(os.environ):

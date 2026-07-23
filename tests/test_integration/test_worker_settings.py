@@ -5,6 +5,8 @@ import pytest
 
 from syncmaster.worker.settings import WorkerAppSettings
 
+pytestmark = [pytest.mark.worker]
+
 
 def _clear_settings_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     for variable_name in tuple(os.environ):

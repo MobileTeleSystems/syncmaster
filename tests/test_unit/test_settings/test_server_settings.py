@@ -5,6 +5,8 @@ import pytest
 
 from syncmaster.server.settings import ServerAppSettings
 
+pytestmark = [pytest.mark.server]
+
 
 def _clear_settings_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     for variable_name in tuple(os.environ):
