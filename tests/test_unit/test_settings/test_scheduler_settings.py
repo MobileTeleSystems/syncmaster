@@ -1,0 +1,110 @@
+import os
+from textwrap import dedent
+
+import pytest
+
+from syncmaster.scheduler.settings import SchedulerAppSettings
+
+
+def _clear_settings_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    for variable_name in tuple(os.environ):
+        if variable_name.startswith("SYNCMASTER__"):
+            monkeypatch.delenv(variable_name)
+
+
+def test_scheduler_settings_are_loaded_from_default_yaml_file(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_settings_environment(monkeypatch)
+    monkeypatch.delenv("SYNCMASTER_CONFIG_FILE", raising=False)
+    monkeypatch.chdir(tmp_path)
+    config_path = tmp_path / "config.yml"
+    config_path.write_text(
+        dedent(
+            """\
+            database:
+              url: "postgresql+asyncpg://user:password'#[value]@localhost:5432/syncmaster"
+            broker:
+              url: amqp://user:password@localhost:5672/
+            encryption:
+              secret_key: "secret_key"
+            scheduler:
+              transfer_fetching_timeout_seconds: 200
+            """,
+        ),
+        encoding="utf-8",
+    )
+
+    settings = SchedulerAppSettings()
+
+    assert settings.database.url == "postgresql+asyncpg://user:password'#[value]@localhost:5432/syncmaster"
+    assert settings.broker.url == "amqp://user:password@localhost:5672/"
+    assert settings.encryption.secret_key == "secret_key"
+    assert settings.scheduler.transfer_fetching_timeout_seconds == 200
+
+
+def test_scheduler_settings_yaml_file_overrides_environment(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_settings_environment(monkeypatch)
+    config_path = tmp_path / "custom.yml"
+    config_path.write_text(
+        dedent(
+            """\
+            database:
+              url: postgresql+asyncpg://yaml@localhost:5432/syncmaster
+            broker:
+              url: amqp://yaml@localhost:5672/
+            encryption:
+              secret_key: "yaml_secret_key"
+            scheduler:
+              transfer_fetching_timeout_seconds: 200
+            """,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("SYNCMASTER_CONFIG_FILE", str(config_path))
+    monkeypatch.setenv(
+        "SYNCMASTER__DATABASE__URL",
+        "postgresql+asyncpg://env@localhost:5432/syncmaster",
+    )
+    monkeypatch.setenv(
+        "SYNCMASTER__BROKER__URL",
+        "amqp://env@localhost:5672/",
+    )
+    monkeypatch.setenv("SYNCMASTER__ENCRYPTION__SECRET_KEY", "env_secret_key")
+    monkeypatch.setenv("SYNCMASTER__SCHEDULER__transfer_fetching_timeout_seconds", "300")
+
+    settings = SchedulerAppSettings()
+
+    assert settings.database.url == "postgresql+asyncpg://yaml@localhost:5432/syncmaster"
+    assert settings.broker.url == "amqp://yaml@localhost:5672/"
+    assert settings.encryption.secret_key == "yaml_secret_key"
+    assert settings.scheduler.transfer_fetching_timeout_seconds == 200
+
+
+def test_scheduler_settings_can_be_loaded_from_environment_without_yaml_file(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_settings_environment(monkeypatch)
+    monkeypatch.setenv("SYNCMASTER_CONFIG_FILE", str(tmp_path / "missing.yml"))
+    monkeypatch.setenv(
+        "SYNCMASTER__DATABASE__URL",
+        "postgresql+asyncpg://env@localhost:5432/syncmaster",
+    )
+    monkeypatch.setenv(
+        "SYNCMASTER__BROKER__URL",
+        "amqp://env@localhost:5672/",
+    )
+    monkeypatch.setenv("SYNCMASTER__ENCRYPTION__SECRET_KEY", "env_secret_key")
+    monkeypatch.setenv("SYNCMASTER__SCHEDULER__transfer_fetching_timeout_seconds", "300")
+
+    settings = SchedulerAppSettings()
+
+    assert settings.database.url == "postgresql+asyncpg://env@localhost:5432/syncmaster"
+    assert settings.broker.url == "amqp://env@localhost:5672/"
+    assert settings.encryption.secret_key == "env_secret_key"
+    assert settings.scheduler.transfer_fetching_timeout_seconds == 300

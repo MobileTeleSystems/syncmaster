@@ -39,7 +39,7 @@ async def main():
                 transfer_fetcher.last_updated_at,
             )
 
-        await asyncio.sleep(settings.scheduler.TRANSFER_FETCHING_TIMEOUT_SECONDS)
+        await asyncio.sleep(settings.scheduler.transfer_fetching_timeout_seconds)
 
 
 if __name__ == "__main__":

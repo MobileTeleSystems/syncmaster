@@ -38,7 +38,7 @@ class TransferJobManager:
                 self.scheduler.modify_job(
                     job_id=job_id,
                     trigger=CronTrigger.from_crontab(transfer.schedule),
-                    misfire_grace_time=self.settings.scheduler.MISFIRE_GRACE_TIME_SECONDS,
+                    misfire_grace_time=self.settings.scheduler.misfire_grace_time_seconds,
                     args=(transfer.id,),
                 )
             else:
@@ -46,7 +46,7 @@ class TransferJobManager:
                     func=TransferJobManager.send_job_to_celery,
                     id=job_id,
                     trigger=CronTrigger.from_crontab(transfer.schedule),
-                    misfire_grace_time=self.settings.scheduler.MISFIRE_GRACE_TIME_SECONDS,
+                    misfire_grace_time=self.settings.scheduler.misfire_grace_time_seconds,
                     args=(transfer.id,),
                 )
 

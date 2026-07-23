@@ -25,11 +25,11 @@ class SchedulerSettings(BaseModel):
     ```
     """
 
-    TRANSFER_FETCHING_TIMEOUT_SECONDS: int = Field(
+    transfer_fetching_timeout_seconds: int = Field(
         180,
         description="Timeout for fetching transfers in seconds",
     )
-    MISFIRE_GRACE_TIME_SECONDS: int = Field(
+    misfire_grace_time_seconds: int = Field(
         300,
         description="Grace time for misfired jobs in seconds",
     )
