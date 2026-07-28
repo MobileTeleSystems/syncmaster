@@ -33,8 +33,12 @@ class DummyAuthProvider(AuthProvider):
     def setup(cls, app: FastAPI) -> FastAPI:
         settings = DummyAuthProviderSettings.model_validate(app.state.settings.auth.model_dump(exclude={"provider"}))
         log.info("Using %s provider with settings:\n%s", cls.__name__, pformat(settings))
+
+        async def get_settings():
+            return settings
+
         app.dependency_overrides[AuthProvider] = cls
-        app.dependency_overrides[DummyAuthProviderSettings] = lambda: settings
+        app.dependency_overrides[DummyAuthProviderSettings] = get_settings
         return app
 
     async def get_current_user(self, access_token: str | None, *args, **kwargs) -> User:

@@ -40,8 +40,12 @@ class KeycloakAuthProvider(AuthProvider):
     def setup(cls, app: FastAPI) -> FastAPI:
         settings = KeycloakAuthProviderSettings.model_validate(app.state.settings.auth.model_dump(exclude={"provider"}))
         log.info("Using %s provider with settings:\n%s", cls.__name__, settings)
+
+        async def get_settings():
+            return settings
+
         app.dependency_overrides[AuthProvider] = cls
-        app.dependency_overrides[KeycloakAuthProviderSettings] = lambda: settings
+        app.dependency_overrides[KeycloakAuthProviderSettings] = get_settings
 
         app.add_middleware(
             SessionMiddleware,

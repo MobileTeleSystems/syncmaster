@@ -59,11 +59,17 @@ def application_factory(settings: Settings) -> FastAPI:
     engine = async_engine_from_config(settings.database.model_dump(), prefix="")
     session_factory = create_session_factory(engine=engine)
 
+    async def get_settings():
+        return settings
+
+    async def get_celery():
+        return application.state.celery
+
     application.dependency_overrides.update(
         {
-            Settings: lambda: settings,
+            Settings: get_settings,
             UnitOfWork: get_uow(session_factory, settings=settings),
-            Celery: lambda: application.state.celery,
+            Celery: get_celery,
         },
     )
 

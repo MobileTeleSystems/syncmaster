@@ -39,8 +39,12 @@ class OAuth2GatewayProvider(AuthProvider):
             app.state.settings.auth.model_dump(exclude={"provider"}),
         )
         log.info("Using %s provider with settings:\n%s", cls.__name__, settings)
+
+        async def get_settings():
+            return settings
+
         app.dependency_overrides[AuthProvider] = cls
-        app.dependency_overrides[OAuth2GatewayProviderSettings] = lambda: settings
+        app.dependency_overrides[OAuth2GatewayProviderSettings] = get_settings
         return app
 
     async def get_current_user(
