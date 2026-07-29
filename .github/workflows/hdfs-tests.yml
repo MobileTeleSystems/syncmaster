@@ -48,6 +48,7 @@ jobs:
           retry_on: error
           max_attempts: 3
           command: |
+            rm -rf reports/*
             docker compose -f ./docker-compose.test.yml --profile hdfs exec -T worker coverage run -m pytest -vvv -s ./tests/test_integration/test_run_transfer -m hdfs --junitxml=/app/reports/junit/${RANDOM}.xml
 
       - name: Dump worker logs on failure
