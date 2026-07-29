@@ -101,12 +101,12 @@ test = [
     "pytest-lazy-fixtures~=1.4.0",
     "faker~=40.13",
     "coverage~=7.15.2",
-    "gevent~=26.5.0",
+    "gevent>=26.5,<26.8",
     "respx~=0.23.1",
     "dirty-equals~=0.11.0",
 ]
 dev = [
-    "ruff~=0.15.18",
+    "ruff>=0.15.18,<0.17.0",
     "mypy~=2.3.0",
     "prek~=0.4.5",
     "sqlalchemy[mypy]~=2.0.51",
