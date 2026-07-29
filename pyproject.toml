@@ -65,14 +65,12 @@ exclude = ["mddocs", "tests"]
 
 [project.optional-dependencies]
 server = [
-    # fastapi 0.137.0 breaks starlette-exporter
-    # https://github.com/stephenhillier/starlette_exporter/issues/107
-    "fastapi~=0.136.3",
+    "fastapi~=0.140.13",
     # starlette 1.0.0 break cookies
     "starlette<1.0",
-    "starlette-exporter~=0.23.0",
+    "starlette-exporter~=0.24.0",
     "python-multipart~=0.0.26",
-    "uvicorn~=0.51.0",
+    "uvicorn~=0.52.0",
     "alembic~=1.18.4",
     "pyjwt~=2.13.0",
     "asyncpg~=0.31.0",
