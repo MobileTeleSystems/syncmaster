@@ -18,17 +18,17 @@ auth:
 
   # Keycloak Auth
   # provider: syncmaster.server.providers.auth.keycloak_provider.KeycloakAuthProvider
-  # keycloak:
-  #   api_url: http://keycloak:8080/auth
-  #   realm_name: manually_created
-  #   client_id: manually_created
-  #   client_secret: generated_by_keycloak
-  #   ui_auth_callback_url: http://localhost:3000/auth/callback
-  #   scope: email
-  #   verify_ssl: False
-  # cookie:
-  #   secret_key: generate_some_random_string
-  #   max_age: 86400
+  keycloak:
+    api_url: http://keycloak:8080/auth
+    realm_name: manually_created
+    client_id: manually_created
+    client_secret: generated_by_keycloak
+    ui_auth_callback_url: http://localhost:3000/auth/callback
+    scope: email
+    verify_ssl: false
+  cookie:
+    secret_key: generate_some_random_string
+    max_age: 86400
 
 
 ui:

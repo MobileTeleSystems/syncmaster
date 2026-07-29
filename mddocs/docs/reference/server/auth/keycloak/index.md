@@ -69,8 +69,6 @@ end
 
 ::: syncmaster.server.settings.auth.keycloak.KeycloakCookieSettings
 
-::: syncmaster.server.settings.auth.jwt.JWTSettings
-
 ## OAuth2 Gateway Provider { #oauth2-gateway-provider }
 
 In case of using an OAuth2 Gateway, all API requests will come with an `Authorization: Bearer` header. For this scenario, Syncmaster provides an alternative authentication provider called `OAuth2GatewayProvider`. This provider works as follows:
