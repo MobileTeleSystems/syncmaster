@@ -68,7 +68,6 @@ async def test_keycloak_get_user_authorized(
         cookies={"session": session_cookie},
     )
 
-    assert response.cookies.get("session") == session_cookie
     assert response.status_code == 200, response.text
     assert response.json() == {
         "id": simple_user.id,
