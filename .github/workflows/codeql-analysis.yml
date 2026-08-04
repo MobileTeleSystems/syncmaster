@@ -65,8 +65,11 @@ jobs:
         run: |
           uv sync --frozen --extra "server" --extra "scheduler" --extra "worker" --group dev
 
-      - name: Run mypy
-        run: uv run mypy syncmaster
+      - name: Run linters
+        run: |
+          uv run ruff format --check
+          uv run ruff check
+          uv run -m mypy syncmaster
 
   codeql:
     name: CodeQL
