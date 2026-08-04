@@ -20,7 +20,7 @@ class RunRepository(Repository[Run]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(model=Run, session=session)
 
-    async def paginate(
+    async def paginate(  # noqa: PLR0917
         self,
         transfer_id: int,
         page: int,

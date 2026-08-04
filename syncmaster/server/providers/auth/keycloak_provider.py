@@ -59,7 +59,7 @@ class KeycloakAuthProvider(AuthProvider):
         )
         return app
 
-    async def get_token_password_grant(  # noqa: PLR0913
+    async def get_token_password_grant(  # noqa: PLR0913, PLR0917
         self,
         grant_type: str | None = None,
         login: str | None = None,

@@ -28,7 +28,7 @@ router = APIRouter(tags=["Runs"], responses=get_error_responses())
 
 
 @router.get("/runs")
-async def read_runs(  # noqa: PLR0913
+async def read_runs(  # noqa: PLR0913, PLR0917
     transfer_id: int,
     unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
     current_user: Annotated[User, Depends(get_user())],

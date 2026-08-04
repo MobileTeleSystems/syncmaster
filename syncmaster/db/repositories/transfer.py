@@ -28,7 +28,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
     def __init__(self, session: AsyncSession):
         super().__init__(model=Transfer, session=session)
 
-    async def paginate(
+    async def paginate(  # noqa: PLR0917
         self,
         page: int,
         page_size: int,
@@ -105,7 +105,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         except NoResultFound as e:
             raise TransferNotFoundError from e
 
-    async def create(
+    async def create(  # noqa: PLR0917
         self,
         group_id: int,
         source_connection_id: int,
@@ -148,7 +148,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
             await self._session.flush()
             return result.one()
 
-    async def update(
+    async def update(  # noqa: PLR0917
         self,
         transfer_id: int,
         name: str,
@@ -192,7 +192,7 @@ class TransferRepository(RepositoryWithOwner[Transfer]):
         except (NoResultFound, EntityNotFoundError) as e:
             raise TransferNotFoundError from e
 
-    async def copy(
+    async def copy(  # noqa: PLR0917
         self,
         transfer_id: int,
         new_queue_id: int,

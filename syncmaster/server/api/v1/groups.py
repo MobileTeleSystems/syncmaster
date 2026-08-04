@@ -27,7 +27,7 @@ router = APIRouter(tags=["Groups"], responses=get_error_responses())
 
 
 @router.get("/groups")
-async def read_groups(  # noqa: PLR0913
+async def read_groups(  # noqa: PLR0913, PLR0917
     current_user: Annotated[User, Depends(get_user())],
     unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
     page: Annotated[int, Query(gt=0)] = 1,

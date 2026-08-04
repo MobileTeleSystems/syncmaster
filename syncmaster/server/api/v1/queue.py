@@ -24,7 +24,7 @@ router = APIRouter(tags=["Queues"], responses=get_error_responses())
 
 
 @router.get("/queues", description="Queues in page format")
-async def read_queues(  # noqa: PLR0913
+async def read_queues(  # noqa: PLR0913, PLR0917
     group_id: int,
     current_user: Annotated[User, Depends(get_user())],
     unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],

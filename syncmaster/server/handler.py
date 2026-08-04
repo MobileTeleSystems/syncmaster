@@ -67,7 +67,7 @@ def http_exception_handler(request: Request, exc: HTTPException) -> Response:
 
 
 def unknown_exception_handler(request: Request, exc: Exception) -> Response:
-    logger.exception("Got unhandled error: %s", exc, exc_info=exc)
+    logger.exception("Got unhandled error: %s", exc, exc_info=exc)  # noqa: LOG004
 
     details = None
     if request.app.debug:
@@ -330,7 +330,7 @@ async def syncmsater_exception_handler(  # noqa: C901, PLR0911, PLR0912, PLR0915
             content=content,
         )
 
-    logger.exception("Got unhandled error")
+    logger.exception("Got unhandled error")  # noqa: LOG004
     content.code = "unknown"
     content.message = "Got unhandled exception. See logs"
     return exception_json_response(

@@ -174,7 +174,7 @@ class TransferController:
     source_handler: Handler
     target_handler: Handler
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913, PLR0917
         self,
         settings: WorkerAppSettings,
         run: Run,
@@ -239,7 +239,7 @@ class TransferController:
         finally:
             self.temp_dir.cleanup()
 
-    def get_handler(  # noqa: PLR0913
+    def get_handler(  # noqa: PLR0913, PLR0917
         self,
         connection_data: dict[str, Any],
         connection_auth_data: dict,

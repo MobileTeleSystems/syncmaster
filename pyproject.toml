@@ -106,9 +106,9 @@ test = [
     "dirty-equals~=0.11.0",
 ]
 dev = [
-    "ruff>=0.15.18,<0.17.0",
     "mypy~=2.3.0",
-    "prek~=0.4.5",
+    "prek~=0.4.12",
+    "ruff~=0.16.1",
     "sqlalchemy[mypy]~=2.0.51",
     "types-jwcrypto~=1.5.0",
 ]
@@ -136,7 +136,7 @@ extend-exclude = ["mddocs/", "Makefile"]
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ["ARG", "ANN", "A002", "COM812", "D", "TD", "FIX002"]
+ignore = ["ARG", "ANN", "A002", "COM812", "D", "TD", "FIX002", "CPY001"]
 
 [tool.ruff.lint.per-file-ignores]
 "syncmaster/db/migrations/versions/2025-08-10_0012_update_ts.py" = ["E501"]
@@ -153,6 +153,7 @@ ignore = ["ARG", "ANN", "A002", "COM812", "D", "TD", "FIX002"]
     "FBT002",
     "PLR2004",
     "PLR0913",
+    "PLR0917",
     "SLF001",
     "FIX002",
     "PERF401",

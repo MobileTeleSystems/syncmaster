@@ -49,7 +49,7 @@ class DummyAuthProvider(AuthProvider):
         user_id = self._get_user_id_from_token(access_token)
         return await self._uow.user.read_by_id(user_id)
 
-    async def get_token_password_grant(  # noqa: PLR0913
+    async def get_token_password_grant(  # noqa: PLR0913, PLR0917
         self,
         grant_type: str | None = None,
         login: str | None = None,

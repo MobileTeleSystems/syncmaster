@@ -37,7 +37,7 @@ router = APIRouter(tags=["Connections"], responses=get_error_responses())
 
 
 @router.get("/connections")
-async def read_connections(  # noqa: PLR0913
+async def read_connections(  # noqa: PLR0913, PLR0917
     group_id: int,
     current_user: Annotated[User, Depends(get_user())],
     unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],

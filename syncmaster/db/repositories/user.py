@@ -55,7 +55,7 @@ class UserRepository(Repository[User]):
         except IntegrityError as e:
             self._raise_error(e)
 
-    async def create(
+    async def create(  # noqa: PLR0917
         self,
         username: str,
         email: str | None = None,
