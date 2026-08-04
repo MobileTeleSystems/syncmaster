@@ -23,7 +23,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Libraries",
@@ -31,7 +30,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 keywords = ["Syncmaster", "REST", "API", "Worker", "Spark", "Transfer", "ETL"]
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "pydantic~=2.13.4",
     "pydantic-settings~=2.14.2",
@@ -65,7 +64,7 @@ exclude = ["mddocs", "tests"]
 
 [project.optional-dependencies]
 server = [
-    "fastapi>=0.140.13,<0.142.0",
+    "fastapi~=0.141.0",
     "starlette-exporter~=0.24.0",
     "python-multipart~=0.0.26",
     "uvicorn~=0.52.0",
@@ -101,7 +100,7 @@ test = [
     "pytest-lazy-fixtures~=1.4.0",
     "faker~=40.13",
     "coverage~=7.15.2",
-    "gevent>=26.5,<26.8",
+    "gevent~=26.7",
     "respx~=0.23.1",
     "dirty-equals~=0.11.0",
 ]
