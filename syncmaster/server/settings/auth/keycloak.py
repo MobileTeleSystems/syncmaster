@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import textwrap
+from datetime import timedelta
 from typing import Literal
 
 from pydantic import (
@@ -20,6 +21,7 @@ class KeycloakSettings(BaseModel):
     ui_callback_url: str = Field(description="SyncMaster UI auth callback endpoint")
     verify_ssl: bool = Field(default=True, description="Verify SSL certificates")
     scope: str = Field(default="openid", description="Keycloak scope")
+    cert_cache_ttl: timedelta = Field(default=timedelta(hours=1), description="Keycloak certs cache TTL")
 
 
 class KeycloakCookieSettings(BaseModel):
@@ -48,6 +50,7 @@ class KeycloakCookieSettings(BaseModel):
             same_site: lax
             https_only: false
             domain: localhost
+            cert_cache_ttl: 1D
     ```
     For production environment:
 
@@ -62,6 +65,7 @@ class KeycloakCookieSettings(BaseModel):
             same_site: strict
             https_only: true
             domain: example.com
+            cert_cache_ttl: 1H
     ```
     """
 
