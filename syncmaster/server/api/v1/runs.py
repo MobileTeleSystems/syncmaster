@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Annotated
 
 from celery import Celery
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from kombu.exceptions import KombuError
 
 from syncmaster.db.models import RunType, Status, User
@@ -20,11 +20,14 @@ from syncmaster.schemas.v1.transfers.run import (
     ReadRunSchema,
     RunPageSchema,
 )
-from syncmaster.server.dependencies import Stub
 from syncmaster.server.services.get_user import get_user
 from syncmaster.server.services.unit_of_work import UnitOfWork
 
 router = APIRouter(tags=["Runs"], responses=get_error_responses())
+
+
+async def get_celery(request: Request) -> Celery:
+    return request.app.state.celery
 
 
 @router.get("/runs")
@@ -81,7 +84,7 @@ async def read_run(
 @router.post("/runs")
 async def start_run(
     create_run_data: CreateRunSchema,
-    celery: Annotated[Celery, Depends(Stub(Celery))],
+    celery: Annotated[Celery, Depends(get_celery)],
     unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)],
     current_user: Annotated[User, Depends(get_user())],
 ) -> ReadRunSchema:

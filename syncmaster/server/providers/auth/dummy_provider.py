@@ -4,14 +4,13 @@
 import logging
 from pprint import pformat
 from time import time
-from typing import Annotated, Any
+from typing import Any
 
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI, Request
 
 from syncmaster.db.models import User
 from syncmaster.exceptions import EntityNotFoundError
 from syncmaster.exceptions.auth import AuthorizationError
-from syncmaster.server.dependencies import Stub
 from syncmaster.server.providers.auth.base_provider import AuthProvider
 from syncmaster.server.services.unit_of_work import UnitOfWork
 from syncmaster.server.settings.auth.dummy import DummyAuthProviderSettings
@@ -21,36 +20,30 @@ log = logging.getLogger(__name__)
 
 
 class DummyAuthProvider(AuthProvider):
-    def __init__(
-        self,
-        settings: Annotated[DummyAuthProviderSettings, Depends(Stub(DummyAuthProviderSettings))],
-        unit_of_work: Annotated[UnitOfWork, Depends()],
-    ) -> None:
+    def __init__(self, settings: DummyAuthProviderSettings) -> None:
         self._settings = settings
-        self._uow = unit_of_work
 
     @classmethod
     def setup(cls, app: FastAPI) -> FastAPI:
         settings = DummyAuthProviderSettings.model_validate(app.state.settings.auth.model_dump(exclude={"provider"}))
         log.info("Using %s provider with settings:\n%s", cls.__name__, pformat(settings))
 
-        async def get_settings():
-            return settings
-
-        app.dependency_overrides[AuthProvider] = cls
-        app.dependency_overrides[DummyAuthProviderSettings] = get_settings
+        app.state.auth_provider = cls(settings=settings)
         return app
 
-    async def get_current_user(self, access_token: str | None, *args, **kwargs) -> User:
+    async def get_current_user(
+        self, access_token: str | None, request: Request, uow: UnitOfWork, *args, **kwargs
+    ) -> User:
         if not access_token:
             msg = "Missing auth credentials"
             raise AuthorizationError(msg)
 
         user_id = self._get_user_id_from_token(access_token)
-        return await self._uow.user.read_by_id(user_id)
+        return await uow.user.read_by_id(user_id)
 
     async def get_token_password_grant(  # noqa: PLR0913, PLR0917
         self,
+        uow: UnitOfWork,
         grant_type: str | None = None,
         login: str | None = None,
         password: str | None = None,
@@ -63,11 +56,11 @@ class DummyAuthProvider(AuthProvider):
             raise AuthorizationError(msg)
 
         log.info("Get/create user %r in database", login)
-        async with self._uow:
+        async with uow:
             try:
-                user = await self._uow.user.read_by_username(login)
+                user = await uow.user.read_by_username(login)
             except EntityNotFoundError:
-                user = await self._uow.user.create(username=login)
+                user = await uow.user.create(username=login)
 
         log.info("User with id %r found", user.id)
         if not user.is_active:
@@ -110,6 +103,7 @@ class DummyAuthProvider(AuthProvider):
     async def get_token_authorization_code_grant(
         self,
         code: str,
+        request: Request,
         scopes: list[str] | None = None,
         client_id: str | None = None,
         client_secret: str | None = None,

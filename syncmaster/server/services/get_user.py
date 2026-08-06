@@ -12,8 +12,9 @@ from fastapi.security import (
 
 from syncmaster.db.models import User
 from syncmaster.exceptions import ActionNotAllowedError, EntityNotFoundError
-from syncmaster.server.dependencies import Stub
 from syncmaster.server.providers.auth import AuthProvider
+from syncmaster.server.services.auth import get_auth_provider
+from syncmaster.server.services.unit_of_work import UnitOfWork
 
 bearer_token = HTTPBearer(
     description="Perform authentication using Bearer token",
@@ -29,14 +30,15 @@ oauth_schema = OAuth2PasswordBearer(
 def get_user(
     is_superuser: bool = False,  # noqa: FBT001, FBT002
 ) -> Callable[
-    [Request, AuthProvider, str | None, HTTPAuthorizationCredentials | None],
+    [Request, AuthProvider, str | None, HTTPAuthorizationCredentials | None, UnitOfWork],
     Coroutine[Any, Any, User],
 ]:
     async def wrapper(
         request: Request,
-        auth_provider: Annotated[AuthProvider, Depends(Stub(AuthProvider))],
+        auth_provider: Annotated[AuthProvider, Depends(get_auth_provider)],
         oauth_token: Annotated[str | None, Depends(oauth_schema)],
         bearer_token: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_token)],
+        uow: Annotated[UnitOfWork, Depends()],
     ) -> User:
         access_token: str | None = None
         if bearer_token:
@@ -52,6 +54,7 @@ def get_user(
         user = await auth_provider.get_current_user(
             access_token=access_token,
             request=request,
+            uow=uow,
         )
         if user is None:
             msg = "User not found"

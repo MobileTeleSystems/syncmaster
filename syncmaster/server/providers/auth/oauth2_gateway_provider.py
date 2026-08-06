@@ -1,15 +1,14 @@
 # SPDX-FileCopyrightText: 2025-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import logging
-from typing import Annotated, Any
+from typing import Any
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import FastAPI, Request
 from keycloak import KeycloakOpenID, KeycloakOperationError
 
 from syncmaster.db.models import User
 from syncmaster.exceptions import EntityNotFoundError
 from syncmaster.exceptions.auth import AuthorizationError
-from syncmaster.server.dependencies import Stub
 from syncmaster.server.providers.auth.base_provider import AuthProvider
 from syncmaster.server.services.unit_of_work import UnitOfWork
 from syncmaster.server.settings.auth.oauth2_gateway import OAuth2GatewayProviderSettings
@@ -18,13 +17,8 @@ log = logging.getLogger(__name__)
 
 
 class OAuth2GatewayProvider(AuthProvider):
-    def __init__(
-        self,
-        settings: Annotated[OAuth2GatewayProviderSettings, Depends(Stub(OAuth2GatewayProviderSettings))],
-        unit_of_work: Annotated[UnitOfWork, Depends()],
-    ) -> None:
+    def __init__(self, settings: OAuth2GatewayProviderSettings) -> None:
         self.settings = settings
-        self._uow = unit_of_work
         self.keycloak_openid = KeycloakOpenID(
             server_url=str(self.settings.keycloak.api_url).rstrip("/") + "/",
             client_id=self.settings.keycloak.client_id,
@@ -40,17 +34,14 @@ class OAuth2GatewayProvider(AuthProvider):
         )
         log.info("Using %s provider with settings:\n%s", cls.__name__, settings)
 
-        async def get_settings():
-            return settings
-
-        app.dependency_overrides[AuthProvider] = cls
-        app.dependency_overrides[OAuth2GatewayProviderSettings] = get_settings
+        app.state.auth_provider = cls(settings=settings)
         return app
 
     async def get_current_user(
         self,
         access_token: str | None,
         request: Request,
+        uow: UnitOfWork,
     ) -> User:
         if not access_token:
             log.debug("No access token found in request")
@@ -81,11 +72,11 @@ class OAuth2GatewayProvider(AuthProvider):
         middle_name = token_info.get("middle_name")
         last_name = token_info.get("family_name")
 
-        async with self._uow:
+        async with uow:
             try:
-                user = await self._uow.user.read_by_username(login)
+                user = await uow.user.read_by_username(login)
             except EntityNotFoundError:
-                user = await self._uow.user.create(
+                user = await uow.user.create(
                     username=login,
                     email=email,
                     first_name=first_name,
@@ -94,8 +85,9 @@ class OAuth2GatewayProvider(AuthProvider):
                 )
         return user
 
-    async def get_token_password_grant(  # noqa: PLR0913, PLR0917
+    async def get_token_password_grant(  # noqa: PLR0913 PLR0917
         self,
+        uow: UnitOfWork,
         grant_type: str | None = None,
         login: str | None = None,
         password: str | None = None,
@@ -111,6 +103,7 @@ class OAuth2GatewayProvider(AuthProvider):
     async def get_token_authorization_code_grant(
         self,
         code: str,
+        request: Request,
         scopes: list[str] | None = None,
         client_id: str | None = None,
         client_secret: str | None = None,

@@ -7,6 +7,7 @@ from typing import Any
 from fastapi import FastAPI, Request
 
 from syncmaster.db.models import User
+from syncmaster.server.services.unit_of_work import UnitOfWork
 
 
 class AuthProvider(ABC):
@@ -22,7 +23,7 @@ class AuthProvider(ABC):
         """
         This method is called by `application_factory`.
 
-        Here you should add dependency overrides for auth provider,
+        Here you should configure your auth provider, set `app.state.auth_provider`
         and return new `app` object.
 
         Examples
@@ -31,28 +32,25 @@ class AuthProvider(ABC):
         ```python
         from fastapi import FastAPI
         from my_awesome_auth_provider.settings import MyAwesomeAuthProviderSettings
-        from syncmaster.server.dependencies import Stub
 
         class MyAwesomeAuthProvider(AuthProvider):
             def setup(app):
-                app.dependency_overrides[AuthProvider] = MyAwesomeAuthProvider
-
-                # `settings_object_factory` returns MyAwesomeAuthProviderSettings object
-                app.dependency_overrides[MyAwesomeAuthProviderSettings] = settings_object_factory
+                settings_dict = app.state.settings.auth.model_dump(exclude={"provider})
+                settings = MyAwesomeAuthProviderSettings.model_validate(settings_dict)
+                app.state.auth_provider = MyAwesomeAuthProvider(settings)
                 return app
 
             def __init__(
                 self,
-                settings: Annotated[MyAwesomeAuthProviderSettings, Depends(Stub(MyAwesomeAuthProviderSettings))],
+                settings: MyAwesomeAuthProviderSettings,
             ):
-                # settings object is set automatically by FastAPI's dependency_overrides
                 self.settings = settings
         ```
         """
         ...
 
     @abstractmethod
-    async def get_current_user(self, access_token: str | None, request: Request) -> User:
+    async def get_current_user(self, access_token: str | None, request: Request, uow: UnitOfWork) -> User:
         """
         This method should return currently logged in user.
 
@@ -71,6 +69,7 @@ class AuthProvider(ABC):
     @abstractmethod
     async def get_token_password_grant(  # noqa: PLR0913, PLR0917
         self,
+        uow: UnitOfWork,
         grant_type: str | None = None,
         login: str | None = None,
         password: str | None = None,
@@ -103,6 +102,7 @@ class AuthProvider(ABC):
     async def get_token_authorization_code_grant(
         self,
         code: str,
+        request: Request,
         scopes: list[str] | None = None,
         client_id: str | None = None,
         client_secret: str | None = None,
