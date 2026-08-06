@@ -11,13 +11,10 @@ from syncmaster.errors.registration import get_error_responses
 from syncmaster.errors.schemas.invalid_request import InvalidRequestSchema
 from syncmaster.errors.schemas.not_authorized import NotAuthorizedSchema
 from syncmaster.schemas.v1.auth import AuthTokenSchema
-from syncmaster.server.dependencies import Stub
-from syncmaster.server.providers.auth import (
-    AuthProvider,
-    DummyAuthProvider,
-    KeycloakAuthProvider,
-)
+from syncmaster.server.providers.auth import AuthProvider
+from syncmaster.server.services.auth import get_auth_provider
 from syncmaster.server.services.get_user import get_user
+from syncmaster.server.services.unit_of_work import UnitOfWork
 
 router = APIRouter(
     prefix="/auth",
@@ -28,10 +25,12 @@ router = APIRouter(
 
 @router.post("/token")
 async def token(
-    auth_provider: Annotated[DummyAuthProvider, Depends(Stub(AuthProvider))],
+    uow: Annotated[UnitOfWork, Depends()],
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    auth_provider: Annotated[AuthProvider, Depends(get_auth_provider)],
 ) -> AuthTokenSchema:
     token = await auth_provider.get_token_password_grant(
+        uow=uow,
         grant_type=form_data.grant_type,
         login=form_data.username,
         password=form_data.password,
@@ -46,10 +45,11 @@ async def token(
 async def auth_callback(
     request: Request,
     code: str,
-    auth_provider: Annotated[KeycloakAuthProvider, Depends(Stub(AuthProvider))],
+    auth_provider: Annotated[AuthProvider, Depends(get_auth_provider)],
 ):
     token = await auth_provider.get_token_authorization_code_grant(
         code=code,
+        request=request,
     )
     request.session["access_token"] = token["access_token"]
     request.session["refresh_token"] = token["refresh_token"]
@@ -64,7 +64,7 @@ async def auth_callback(
 async def logout(
     request: Request,
     current_user: Annotated[User, Depends(get_user())],
-    auth_provider: Annotated[KeycloakAuthProvider, Depends(Stub(AuthProvider))],
+    auth_provider: Annotated[AuthProvider, Depends(get_auth_provider)],
 ):
     refresh_token = request.session.get("refresh_token", None)
     request.session.clear()

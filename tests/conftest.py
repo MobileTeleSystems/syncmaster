@@ -131,7 +131,7 @@ def mocked_celery() -> Celery:
 @pytest_asyncio.fixture(scope="session")
 async def app(settings: Settings, mocked_celery: Celery) -> FastAPI:
     app = application_factory(settings=settings)
-    app.dependency_overrides[Celery] = lambda: mocked_celery
+    app.state.celery = mocked_celery
     return app
 
 

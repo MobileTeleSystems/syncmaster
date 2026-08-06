@@ -6,10 +6,9 @@ from celery import Celery
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
-from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from syncmaster import _raw_version as syncmaster_version
-from syncmaster.db.factory import create_session_factory, get_uow
+from syncmaster.db.factory import create_session_factory
 from syncmaster.exceptions import SyncmasterError
 from syncmaster.server.api.router import api_router
 from syncmaster.server.handler import (
@@ -19,7 +18,6 @@ from syncmaster.server.handler import (
     validation_exception_handler,
 )
 from syncmaster.server.middlewares import apply_middlewares
-from syncmaster.server.services.unit_of_work import UnitOfWork
 from syncmaster.server.settings import ServerAppSettings as Settings
 from syncmaster.settings.logging import setup_logging
 
@@ -49,29 +47,14 @@ def application_factory(settings: Settings) -> FastAPI:
     )
     application.state.settings = settings
     application.state.celery = celery_factory(settings)
+    application.state.session_factory = create_session_factory(settings.database)
+
     application.include_router(api_router)
     application.exception_handler(RequestValidationError)(validation_exception_handler)
     application.exception_handler(ValidationError)(validation_exception_handler)
     application.exception_handler(SyncmasterError)(syncmsater_exception_handler)
     application.exception_handler(HTTPException)(http_exception_handler)
     application.exception_handler(Exception)(unknown_exception_handler)
-
-    engine = async_engine_from_config(settings.database.model_dump(), prefix="")
-    session_factory = create_session_factory(engine=engine)
-
-    async def get_settings():
-        return settings
-
-    async def get_celery():
-        return application.state.celery
-
-    application.dependency_overrides.update(
-        {
-            Settings: get_settings,
-            UnitOfWork: get_uow(session_factory, settings=settings),
-            Celery: get_celery,
-        },
-    )
 
     auth_class: type[AuthProvider] = settings.auth.provider  # type: ignore[assignment]
     auth_class.setup(application)
