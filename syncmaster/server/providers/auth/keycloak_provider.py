@@ -1,9 +1,11 @@
 # SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import logging
+import time
 from typing import Any, NoReturn
 
 from fastapi import FastAPI, Request
+from jwcrypto import jwk
 from jwcrypto.common import JWException
 from keycloak import KeycloakOpenID, KeycloakOperationError
 from starlette.middleware.sessions import SessionMiddleware
@@ -29,6 +31,8 @@ class KeycloakAuthProvider(AuthProvider):
             client_secret_key=self.settings.keycloak.client_secret.get_secret_value(),
             verify=self.settings.keycloak.verify_ssl,
         )
+        self._key: jwk.JWKSet | None = None
+        self._key_expiration: float = time.monotonic()
 
     @classmethod
     def setup(cls, app: FastAPI) -> FastAPI:
@@ -88,7 +92,8 @@ class KeycloakAuthProvider(AuthProvider):
         try:
             # if user is disabled or blocked in Keycloak after the token is issued, he will
             # remain authorized until the token expires (not more than 15 minutes in MTS SSO)
-            token_info = await self.keycloak_openid.a_decode_token(access_token)
+            key = await self._get_key()
+            token_info = await self.keycloak_openid.a_decode_token(access_token, key=key)
         except (KeycloakOperationError, JWException) as e:
             log.info("Access token is invalid or expired: %s", e)
             token_info = None
@@ -104,8 +109,10 @@ class KeycloakAuthProvider(AuthProvider):
                 request.session["access_token"] = new_access_token
                 request.session["refresh_token"] = new_refresh_token
 
+                key = await self._get_key()
                 token_info = await self.keycloak_openid.a_decode_token(
                     token=new_access_token,
+                    key=key,
                 )
                 log.debug("Access token refreshed and decoded successfully.")
             except (KeycloakOperationError, JWException) as e:
@@ -160,3 +167,17 @@ class KeycloakAuthProvider(AuthProvider):
             msg = f"Can't logout user: {user.username}"
             log.debug("%s. Error: %s", msg, err)
             raise LogoutError(msg) from err
+
+    async def _get_key(self) -> jwk.JWKSet:
+        # avoid sending requests to Keycloak for every received token
+        if self._key is not None and self._key_expiration > time.monotonic():
+            return self._key
+
+        key = jwk.JWKSet()
+        certs = await self.keycloak_openid.a_certs()
+        for cert in certs["keys"]:
+            key.add(jwk.JWK(**cert))
+
+        self._key = key
+        self._key_expiration = time.monotonic() + self.settings.keycloak.cert_cache_ttl.total_seconds()
+        return self._key
