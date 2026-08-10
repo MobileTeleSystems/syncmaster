@@ -19,6 +19,7 @@ updates:
       interval: weekly
     labels:
       - type:dependency
+    versioning-strategy: increase-if-necessary
     ignore:
       # https://github.com/MTSWebServices/onetl/pull/297
       - dependency-name: pyspark
