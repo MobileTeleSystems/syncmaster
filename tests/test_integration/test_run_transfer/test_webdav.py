@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 from onetl.connection import SparkLocalFS, WebDAV
 from onetl.db import DBReader
 from onetl.file import FileDFReader, FileDownloader

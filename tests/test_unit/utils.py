@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
     from datetime import datetime
 
-    from httpx import AsyncClient
+    from httpx2 import AsyncClient
     from onetl.connection import FileConnection
     from onetl.impl import RemotePath
     from sqlalchemy.ext.asyncio import AsyncSession

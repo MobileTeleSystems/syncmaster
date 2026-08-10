@@ -1,5 +1,5 @@
 import pytest
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 
 from tests.mocks import MockGroup, MockTransfer, MockUser, UserTestRoles
 from tests.test_unit.utils import build_transfer_json

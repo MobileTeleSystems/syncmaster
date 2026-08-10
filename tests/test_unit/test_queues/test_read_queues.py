@@ -2,7 +2,7 @@ import random
 import string
 
 import pytest
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from syncmaster.db.models import Queue

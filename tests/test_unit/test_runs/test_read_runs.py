@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any
 
 import pytest
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 
 from syncmaster.db.models import RunType, Status
 from tests.mocks import MockGroup, MockRun, MockTransfer, MockUser, UserTestRoles

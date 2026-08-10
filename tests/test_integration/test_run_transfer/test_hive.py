@@ -2,7 +2,7 @@ import secrets
 
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 from onetl.db import DBReader
 from pyspark.sql import DataFrame, SparkSession
 from pytest_lazy_fixtures import lf

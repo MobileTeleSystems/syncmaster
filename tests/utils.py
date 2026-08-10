@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from alembic.config import Config
-    from httpx import AsyncClient
+    from httpx2 import AsyncClient
     from onetl.connection import FileConnection
     from pyspark.sql import DataFrame
 

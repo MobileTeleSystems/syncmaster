@@ -2,7 +2,7 @@ import secrets
 
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 from onetl.connection import Oracle
 from onetl.db import DBReader
 from pyspark.sql import DataFrame

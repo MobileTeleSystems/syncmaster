@@ -1,5 +1,5 @@
 import pytest
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 
 from syncmaster.db.models import Queue
 from tests.mocks import MockConnection, MockGroup, UserTestRoles

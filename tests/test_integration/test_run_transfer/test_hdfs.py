@@ -3,7 +3,7 @@ import secrets
 
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 from onetl.connection import HDFS, SparkHDFS
 from onetl.db import DBReader
 from onetl.file import FileDFReader

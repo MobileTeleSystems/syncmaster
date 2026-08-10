@@ -3,7 +3,7 @@ import string
 from collections.abc import Callable
 
 import pytest
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 
 from tests.mocks import MockGroup, MockUser, UserTestRoles
 

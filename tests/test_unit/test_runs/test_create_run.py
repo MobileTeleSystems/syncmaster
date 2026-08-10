@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 from celery import Celery
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 from pytest_mock import MockerFixture
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession

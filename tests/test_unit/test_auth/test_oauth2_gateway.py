@@ -1,5 +1,5 @@
 import pytest
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 
 from syncmaster.server.settings import ServerAppSettings as Settings
 from tests.mocks import MockUser

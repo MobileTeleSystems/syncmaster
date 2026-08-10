@@ -12,7 +12,7 @@ import pytest_asyncio
 from alembic.config import Config as AlembicConfig
 from celery import Celery
 from fastapi import FastAPI
-from httpx import ASGITransport, AsyncClient
+from httpx2 import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,

@@ -1,5 +1,5 @@
 import pytest
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 
 from syncmaster.schemas.v1.connection_types import CONNECTION_TYPES
 from tests.mocks import MockUser

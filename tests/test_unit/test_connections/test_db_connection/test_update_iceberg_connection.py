@@ -1,5 +1,5 @@
 import pytest
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 
 from tests.mocks import MockConnection, UserTestRoles
 from tests.test_unit.utils import fetch_connection_json
