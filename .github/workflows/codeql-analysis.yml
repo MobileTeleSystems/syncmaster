@@ -64,7 +64,6 @@ jobs:
       - name: Install dependencies
         run: |
           uv sync --frozen --extra "server" --extra "scheduler" --extra "worker" --group dev
-          uv cache prune --ci
 
       - name: Run linters
         run: |
