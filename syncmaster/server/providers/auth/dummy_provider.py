@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
-from pprint import pformat
 from time import time
 from typing import Any
 
+from devtools import pformat
 from fastapi import FastAPI, Request
 
 from syncmaster.db.models import User

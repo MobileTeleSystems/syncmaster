@@ -119,7 +119,7 @@ if __name__ == "__main__":
     settings = SuperuserAppSettings()
     setup_logging(settings.logging)
 
-    engine = create_async_engine(settings.database.url)
+    engine = create_async_engine(*settings.database.model_dump(mode="json"))
     SessionLocal = async_sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
     parser = create_parser()
     args = parser.parse_args()

@@ -87,7 +87,7 @@ def test_settings():
 def alembic_config(settings: Settings) -> AlembicConfig:
     alembic_cfg = AlembicConfig(PROJECT_PATH / "syncmaster" / "db" / "alembic.ini")
     alembic_cfg.set_main_option("script_location", os.fspath(PROJECT_PATH / "syncmaster/db/migrations"))
-    alembic_cfg.set_main_option("sqlalchemy.url", settings.database.url)
+    alembic_cfg.set_main_option("sqlalchemy.url", str(settings.database.url))
     return alembic_cfg
 
 
@@ -98,7 +98,7 @@ async def async_engine(settings: Settings, alembic_config: AlembicConfig):
         await run_async_migrations(alembic_config, Base.metadata, "-1", "down")
 
     await run_async_migrations(alembic_config, Base.metadata, "head")
-    engine = create_async_engine(settings.database.url)
+    engine = create_async_engine(url=str(settings.database.url), **settings.database.model_dump(exclude={"url"}))
     yield engine
     await engine.dispose()
 

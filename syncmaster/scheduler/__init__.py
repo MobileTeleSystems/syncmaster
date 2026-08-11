@@ -8,6 +8,6 @@ from syncmaster.scheduler.settings import SchedulerAppSettings
 def celery_factory(settings: SchedulerAppSettings) -> Celery:
     return Celery(
         __name__,
-        broker=settings.broker.url,
+        broker=str(settings.broker.url),
         backend="db+" + settings.database.sync_url,
     )

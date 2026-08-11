@@ -30,7 +30,7 @@ __all__ = ["application_factory", "get_application"]
 def celery_factory(settings: Settings) -> Celery:
     return Celery(
         __name__,
-        broker=settings.broker.url,
+        broker=str(settings.broker.url),
         backend="db+" + settings.database.sync_url,
     )
 

@@ -1,9 +1,31 @@
 # SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 import textwrap
-from urllib.parse import urlparse, urlunparse
+from typing import Annotated
+from urllib.parse import urlparse, urlsplit
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, PostgresDsn, UrlConstraints
+from sqlalchemy import make_url
+
+
+def validate_url(value: PostgresDsn):
+    if not value.path or len(value.path) <= 1:
+        msg = "Database URL must contain database name"
+        raise ValueError(msg)
+
+    split = urlsplit(str(value))
+    if not split.username or not split.password:
+        msg = "Database URL must contain username and password"
+        raise ValueError(msg)
+
+    return value
+
+
+PostgresURL = Annotated[
+    PostgresDsn,
+    UrlConstraints(allowed_schemes=["postgresql+asyncpg"], host_required=True),
+    AfterValidator(validate_url),
+]
 
 
 class DatabaseSettings(BaseModel):
@@ -27,7 +49,7 @@ class DatabaseSettings(BaseModel):
     ```
     """
 
-    url: str = Field(
+    url: PostgresDsn = Field(
         description=textwrap.dedent(
             """
             Database connection URL.
@@ -43,10 +65,17 @@ class DatabaseSettings(BaseModel):
 
     @property
     def sync_url(self) -> str:
-        parsed_url = urlparse(self.url)
-        # replace '+asyncpg' with '+psycopg2' in the scheme - used by celery
-        scheme = parsed_url.scheme.replace("+asyncpg", "+psycopg2")
-        sync_parsed_url = parsed_url._replace(scheme=scheme)
-        return urlunparse(sync_parsed_url)
+        schema = urlparse(str(self.url)).scheme
+        return str(self.url).replace(schema, "postgresql+psycopg2")
 
     model_config = ConfigDict(extra="allow")
+
+    def __repr_args__(self):
+        safe_url = make_url(str(self.url)).render_as_string(
+            hide_password=True,
+        )
+        extra = super().__repr_args__()
+        return [
+            ("url", safe_url),
+            *[item for item in extra if item[0] != "url"],
+        ]

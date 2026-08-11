@@ -9,7 +9,7 @@ from syncmaster.worker.settings import WorkerAppSettings
 def celery_factory(settings: WorkerAppSettings) -> Celery:
     return Celery(
         __name__,
-        broker=settings.broker.url,
+        broker=str(settings.broker.url),
         backend="db+" + settings.database.sync_url,
         task_cls=WorkerTask,
         imports=[
