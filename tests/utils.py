@@ -36,9 +36,7 @@ logger = logging.getLogger(__name__)
 
 async def prepare_new_database(settings: Settings) -> None:
     """Using default postgres db for creating new test db"""
-    connection_url = settings.database.url
-    engine = create_async_engine(connection_url, echo=True)
-
+    engine = create_async_engine(url=str(settings.database.url), **settings.database.model_dump(exclude={"url"}))
     async with engine.begin() as conn:
         if not await database_exists(conn, "postgres"):
             await create_database(conn, "postgres")

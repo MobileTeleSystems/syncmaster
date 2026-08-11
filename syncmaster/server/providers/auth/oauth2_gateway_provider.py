@@ -3,6 +3,7 @@
 import logging
 from typing import Any
 
+from devtools import pformat
 from fastapi import FastAPI, Request
 from keycloak import KeycloakOpenID, KeycloakOperationError
 
@@ -32,7 +33,7 @@ class OAuth2GatewayProvider(AuthProvider):
         settings = OAuth2GatewayProviderSettings.model_validate(
             app.state.settings.auth.model_dump(exclude={"provider"}),
         )
-        log.info("Using %s provider with settings:\n%s", cls.__name__, settings)
+        log.info("Using %s provider with settings:\n%s", cls.__name__, pformat(settings))
 
         app.state.auth_provider = cls(settings=settings)
         return app

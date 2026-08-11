@@ -1,7 +1,12 @@
 # SPDX-FileCopyrightText: 2023-present MTS PJSC
 # SPDX-License-Identifier: Apache-2.0
 
-from pydantic import BaseModel, ConfigDict, Field, ImportString
+from typing import TYPE_CHECKING
+
+from pydantic import BaseModel, ConfigDict, Field, ImportString, field_validator
+
+if TYPE_CHECKING:
+    from syncmaster.server.providers.auth.base_provider import AuthProvider
 
 
 class AuthSettings(BaseModel):
@@ -28,3 +33,17 @@ class AuthSettings(BaseModel):
     )
 
     model_config = ConfigDict(extra="allow")
+
+    @field_validator("provider", mode="after")
+    @classmethod
+    def _validate_provider(cls, value: type) -> "type[AuthProvider]":
+        from syncmaster.server.providers.auth.base_provider import AuthProvider  # noqa: PLC0415
+
+        if not issubclass(value, AuthProvider):
+            msg = f"Class {value} is not a subclass of {AuthProvider}"
+            raise TypeError(msg)
+        return value
+
+    # prevent leaking provider secrets
+    def __repr_args__(self):
+        return [("provider", self.provider)]

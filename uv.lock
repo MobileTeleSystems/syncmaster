@@ -182,6 +182,18 @@ wheels = [
 ]
 
 [[package]]
+name = "asttokens"
+version = "2.4.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/45/1d/f03bcb60c4a3212e15f99a56085d93093a497718adf828d050b9d675da81/asttokens-2.4.1.tar.gz", hash = "sha256:b03869718ba9a6eb027e134bfdf69f38a236d681c83c160d510768af11254ba0", size = 62284, upload-time = "2023-10-26T10:03:05.06Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/45/86/4736ac618d82a20d87d2f92ae19441ebc7ac9e7a581d7e58bbe79233b24a/asttokens-2.4.1-py2.py3-none-any.whl", hash = "sha256:051ed49c3dcae8913ea7cd08e46a606dba30b79993209636c4875bc1d637bc24", size = 27764, upload-time = "2023-10-26T10:03:01.789Z" },
+]
+
+[[package]]
 name = "asyncpg"
 version = "0.31.0"
 source = { registry = "https://pypi.org/simple" }
@@ -762,6 +774,7 @@ dependencies = [
     { name = "asgi-correlation-id" },
     { name = "celery" },
     { name = "coloredlogs" },
+    { name = "devtools" },
     { name = "psycopg2-binary" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
@@ -844,6 +857,7 @@ requires-dist = [
     { name = "asyncpg", marker = "extra == 'server'", specifier = "~=0.31.0" },
     { name = "celery", specifier = "~=5.6.0" },
     { name = "coloredlogs", specifier = "~=15.0.1" },
+    { name = "devtools", specifier = "~=0.12.2" },
     { name = "fastapi", marker = "extra == 'server'", specifier = "~=0.141.0" },
     { name = "horizon-hwm-store", marker = "extra == 'worker'", specifier = "~=1.1.4" },
     { name = "itsdangerous", marker = "extra == 'server'", specifier = "~=2.2.0" },
@@ -926,6 +940,20 @@ wheels = [
 ]
 
 [[package]]
+name = "devtools"
+version = "0.12.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "asttokens" },
+    { name = "executing" },
+    { name = "pygments" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/84/75/b78198620640d394bc435c17bb49db18419afdd6cfa3ed8bcfe14034ec80/devtools-0.12.2.tar.gz", hash = "sha256:efceab184cb35e3a11fa8e602cc4fadacaa2e859e920fc6f87bf130b69885507", size = 75005, upload-time = "2023-09-03T16:57:00.679Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d1/ae/afb1487556e2dc827a17097aac8158a25b433a345386f0e249f6d2694ccb/devtools-0.12.2-py3-none-any.whl", hash = "sha256:c366e3de1df4cdd635f1ad8cbcd3af01a384d7abda71900e68d43b04eb6aaca7", size = 19411, upload-time = "2023-09-03T16:56:59.049Z" },
+]
+
+[[package]]
 name = "dirty-equals"
 version = "0.11"
 source = { registry = "https://pypi.org/simple" }
@@ -964,6 +992,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/fd/07/2f7a10e806c275952e80008285c4e0e432008b031de9b6a90e2db6f65743/evacuator-1.0.4.tar.gz", hash = "sha256:4fac38ee4241e826fced8115ab7cdc8ca2fd18e2e200083405c4a802e836e926", size = 9564, upload-time = "2024-03-20T08:29:39.843Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/37/52/0e4caa5d4cfadbbb86a17df30f79c3fb9cd1d46f4dbeb1aa323e4af78acd/evacuator-1.0.4-py3-none-any.whl", hash = "sha256:0c3a5fafa2c41fba1272e18bead116954cd3ac7bf97c3050fa77f516def88c1b", size = 9096, upload-time = "2024-03-20T08:29:37.485Z" },
+]
+
+[[package]]
+name = "executing"
+version = "2.2.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/cc/28/c14e053b6762b1044f34a13aab6859bbf40456d37d23aa286ac24cfd9a5d/executing-2.2.1.tar.gz", hash = "sha256:3632cc370565f6648cc328b32435bd120a1e4ebb20c77e3fdde9a13cd1e533c4", size = 1129488, upload-time = "2025-09-01T09:48:10.866Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c1/ea/53f2148663b321f21b5a606bd5f191517cf40b7072c0497d3c92c4a13b1e/executing-2.2.1-py2.py3-none-any.whl", hash = "sha256:760643d3452b4d777d295bb167ccc74c64a81df23fb5e08eff250c425a4b2017", size = 28317, upload-time = "2025-09-01T09:48:08.5Z" },
 ]
 
 [[package]]
