@@ -80,13 +80,13 @@ scheduler = [
   "apscheduler~=3.11.1",
 ]
 worker = [
-  "onetl[files]~=0.16.1",
+  "onetl[files]~=0.17.0",
   "pyspark<4.0.0",
-  "horizon-hwm-store~=1.1.4",
+  "horizon-hwm-store~=1.2.0",
   "jinja2~=3.1.6",
 ]
 kerberos = [
-  "onetl[kerberos]~=0.16.1",
+  "onetl[kerberos]~=0.17.0",
 ]
 
 [dependency-groups]
