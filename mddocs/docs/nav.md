@@ -49,6 +49,7 @@
     * [Security](security.md)
 * [Changelog](changelog/index.md)
     * [Next release](changelog/NEXT_RELEASE.md)
+    * [0.3.6](changelog/0.3.6.md)
     * [0.3.5](changelog/0.3.5.md)
     * [0.3.4](changelog/0.3.4.md)
     * [0.3.3](changelog/0.3.3.md)
