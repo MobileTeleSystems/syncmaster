@@ -48,7 +48,6 @@ def hdfs_file_df_connection(spark, hdfs_server):
     from onetl.connection import SparkHDFS
 
     return SparkHDFS(
-        cluster="test-hive",
         host=hdfs_server.host,
         ipc_port=hdfs_server.ipc_port,
         spark=spark,
@@ -60,7 +59,6 @@ def hdfs_file_connection(hdfs_server):
     from onetl.connection import HDFS
 
     return HDFS(
-        cluster="test-hive",
         host=hdfs_server.host,
         webhdfs_port=hdfs_server.webhdfs_port,
     )
