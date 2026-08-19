@@ -14,6 +14,9 @@ DOCKER_BUILDKIT = 1
 # Fix docker build on M1/M2
 DOCKER_DEFAULT_PLATFORM = linux/amd64
 
+VERSION := $(shell cat syncmaster/VERSION)
+DATE := $(shell date --rfc-3339=date)
+
 HELP_FUN = \
 	%help; while(<>){push@{$$help{$$2//'options'}},[$$1,$$3] \
 	if/^([\w-_]+)\s*:.*\#\#(?:@(\w+))?\s(.*)$$/}; \
@@ -188,13 +191,18 @@ docs-serve: ##@Docs Run docs server
 	PYTHONPATH=. DISABLE_MKDOCS_2_WARNING=true ${VIRTUAL_ENV}/bin/mkdocs serve --config-file mddocs/mkdocs.yml
 
 docs-generate-changelog: ##@Docs Generate changelog
+	echo "Building changelog for ${VERSION}"
 	cp "mddocs/docs/changelog/RELEASE_TEMPLATE.md" "mddocs/docs/changelog/temp_RELEASE_TEMPLATE.md"
-	${UV} run towncrier build "--version=$(shell cat syncmaster/VERSION)" --yes
-	mv "mddocs/docs/changelog/RELEASE_TEMPLATE.md" "mddocs/docs/changelog/$(shell cat syncmaster/VERSION).md"
+	${UV} run towncrier build "--version=${VERSION}" --yes
+	mv "mddocs/docs/changelog/RELEASE_TEMPLATE.md" "mddocs/docs/changelog/${VERSION}.md"
 	mv "mddocs/docs/changelog/temp_RELEASE_TEMPLATE.md" "mddocs/docs/changelog/RELEASE_TEMPLATE.md"
-	awk '/##/,0' "mddocs/docs/changelog/$(shell cat syncmaster/VERSION).md" > temp && mv temp "mddocs/docs/changelog/$(shell cat syncmaster/VERSION).md"
-	sed "s#\(.*NEXT_RELEASE.*\)#\1\n- [$(shell cat syncmaster/VERSION) ($(shell date --rfc-3339=date))][$(shell cat syncmaster/VERSION | tr '.' '-')]#" "mddocs/docs/changelog/index.md" > temp && mv temp "mddocs/docs/changelog/index.md"
-	sed "s#\(.*NEXT_RELEASE.*\)#\1\n    * [$(shell cat syncmaster/VERSION)](changelog/$(shell cat syncmaster/VERSION).md)#" "mddocs/docs/nav.md" > temp && mv temp "mddocs/docs/nav.md"
+
+	# Remove content above the version number heading in the `${VERSION}.md` file
+	awk '!/towncrier release notes start/' "mddocs/docs/changelog/${VERSION}.md" | sed '/./,$$!d' > temp && mv temp "mddocs/docs/changelog/${VERSION}.md"
+
+	# Update Changelog Index and Navigation
+	sed "s#\(.*NEXT_RELEASE.*\)#\1\n- [${VERSION} (${DATE})][${VERSION}]#" "mddocs/docs/changelog/index.md" > temp && mv temp "mddocs/docs/changelog/index.md"
+	sed "s#\(.*NEXT_RELEASE.*\)#\1\n    * [${VERSION}](changelog/${VERSION}.md)#" "mddocs/docs/nav.md" > temp && mv temp "mddocs/docs/nav.md"
 
 docs-openapi: ##@Docs Generate OpenAPI schema
 	${PYTHON} -m syncmaster.server.scripts.export_openapi_schema mddocs/docs/_static/openapi.json
